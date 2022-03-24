@@ -105,7 +105,8 @@ void main() {
       );
 
       expect(
-        tester.getTopLeft(find.text('initial')) - tester.getTopLeft(find.byType(CupertinoSearchTextField)),
+        tester.getTopLeft(find.text('initial')) -
+            tester.getTopLeft(find.byType(CupertinoSearchTextField)),
         const Offset(29.8, 8.0),
       );
     },
@@ -248,38 +249,41 @@ void main() {
       expect(
         tester.getTopRight(find.byType(EditableText)).dx,
         tester.getTopRight(find.byType(CupertinoSearchTextField)).dx -
-            tester.getSize(find.byIcon(CupertinoIcons.xmark_circle_fill)).width -
+            tester
+                .getSize(find.byIcon(CupertinoIcons.xmark_circle_fill))
+                .width -
             10.0,
       );
     },
   );
 
   testWidgets('prefix widget visibility', (WidgetTester tester) async {
-    const Key prefixIcon = Key('prefix');
+      const Key prefixIcon = Key('prefix');
 
-    await tester.pumpWidget(
-      const CupertinoApp(
-        home: Center(
-          child: CupertinoSearchTextField(
-            prefixIcon: SizedBox(
-              key: prefixIcon,
-              width: 50,
-              height: 50,
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoSearchTextField(
+              prefixIcon: SizedBox(
+                key: prefixIcon,
+                width: 50,
+                height: 50,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.byIcon(CupertinoIcons.search), findsNothing);
-    expect(find.byKey(prefixIcon), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.search), findsNothing);
+      expect(find.byKey(prefixIcon), findsOneWidget);
 
-    await tester.enterText(find.byType(CupertinoSearchTextField), 'text input');
-    await tester.pump();
+      await tester.enterText(
+          find.byType(CupertinoSearchTextField), 'text input');
+      await tester.pump();
 
-    expect(find.text('text input'), findsOneWidget);
-    expect(find.byIcon(CupertinoIcons.search), findsNothing);
-    expect(find.byKey(prefixIcon), findsOneWidget);
+      expect(find.text('text input'), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.search), findsNothing);
+      expect(find.byKey(prefixIcon), findsOneWidget);
   });
 
   testWidgets(

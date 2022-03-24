@@ -57,8 +57,7 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
     final Future<dynamic> futureValue = inputValue.then<dynamic>((dynamic value) {
       return completedValue = value;
     });
-    if (completedValue != null) {
-      // inputValue was a SynchronousFuture
+    if (completedValue != null) { // inputValue was a SynchronousFuture
       final Type type = delegate.type;
       assert(!output.containsKey(type));
       output[type] = completedValue;
@@ -69,19 +68,20 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
   }
 
   // All of the delegate.load() values were synchronous futures, we're done.
-  if (pendingList == null) return SynchronousFuture<Map<Type, dynamic>>(output);
+  if (pendingList == null)
+    return SynchronousFuture<Map<Type, dynamic>>(output);
 
   // Some of delegate.load() values were asynchronous futures. Wait for them.
   return Future.wait<dynamic>(pendingList.map<Future<dynamic>>((_Pending p) => p.futureValue))
-      .then<Map<Type, dynamic>>((List<dynamic> values) {
-    assert(values.length == pendingList!.length);
-    for (int i = 0; i < values.length; i += 1) {
-      final Type type = pendingList![i].delegate.type;
-      assert(!output.containsKey(type));
-      output[type] = values[i];
-    }
-    return output;
-  });
+    .then<Map<Type, dynamic>>((List<dynamic> values) {
+      assert(values.length == pendingList!.length);
+      for (int i = 0; i < values.length; i += 1) {
+        final Type type = pendingList![i].delegate.type;
+        assert(!output.containsKey(type));
+        output[type] = values[i];
+      }
+      return output;
+    });
 }
 
 /// A factory for a set of localized resources of type `T`, to be loaded by a
@@ -228,9 +228,9 @@ class _LocalizationsScope extends InheritedWidget {
     required this.localizationsState,
     required this.typeToResources,
     required Widget child,
-  })  : assert(localizationsState != null),
-        assert(typeToResources != null),
-        super(key: key, child: child);
+  }) : assert(localizationsState != null),
+       assert(typeToResources != null),
+       super(key: key, child: child);
 
   final Locale locale;
   final _LocalizationsState localizationsState;
@@ -343,11 +343,10 @@ class Localizations extends StatefulWidget {
     required this.locale,
     required this.delegates,
     this.child,
-  })  : assert(locale != null),
-        assert(delegates != null),
-        assert(delegates
-            .any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>)),
-        super(key: key);
+  }) : assert(locale != null),
+       assert(delegates != null),
+       assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>)),
+       super(key: key);
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
@@ -384,7 +383,8 @@ class Localizations extends StatefulWidget {
     Widget? child,
   }) {
     final List<LocalizationsDelegate<dynamic>> mergedDelegates = Localizations._delegatesOf(context);
-    if (delegates != null) mergedDelegates.insertAll(0, delegates);
+    if (delegates != null)
+      mergedDelegates.insertAll(0, delegates);
     return Localizations(
       key: key,
       locale: locale ?? Localizations.localeOf(context),
@@ -498,13 +498,15 @@ class _LocalizationsState extends State<Localizations> {
   }
 
   bool _anyDelegatesShouldReload(Localizations old) {
-    if (widget.delegates.length != old.delegates.length) return true;
+    if (widget.delegates.length != old.delegates.length)
+      return true;
     final List<LocalizationsDelegate<dynamic>> delegates = widget.delegates.toList();
     final List<LocalizationsDelegate<dynamic>> oldDelegates = old.delegates.toList();
     for (int i = 0; i < delegates.length; i += 1) {
       final LocalizationsDelegate<dynamic> delegate = delegates[i];
       final LocalizationsDelegate<dynamic> oldDelegate = oldDelegates[i];
-      if (delegate.runtimeType != oldDelegate.runtimeType || delegate.shouldReload(oldDelegate)) return true;
+      if (delegate.runtimeType != oldDelegate.runtimeType || delegate.shouldReload(oldDelegate))
+        return true;
     }
     return false;
   }
@@ -512,10 +514,11 @@ class _LocalizationsState extends State<Localizations> {
   @override
   void didUpdateWidget(Localizations old) {
     super.didUpdateWidget(old);
-    if (widget.locale != old.locale ||
-        (widget.delegates == null) ||
-        (widget.delegates != null && old.delegates == null) ||
-        (widget.delegates != null && _anyDelegatesShouldReload(old))) load(widget.locale);
+    if (widget.locale != old.locale
+        || (widget.delegates == null)
+        || (widget.delegates != null && old.delegates == null)
+        || (widget.delegates != null && _anyDelegatesShouldReload(old)))
+      load(widget.locale);
   }
 
   void load(Locale locale) {
@@ -526,10 +529,10 @@ class _LocalizationsState extends State<Localizations> {
     }
 
     Map<Type, dynamic>? typeToResources;
-    final Future<Map<Type, dynamic>> typeToResourcesFuture =
-        _loadAll(locale, delegates).then<Map<Type, dynamic>>((Map<Type, dynamic> value) {
-      return typeToResources = value;
-    });
+    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(locale, delegates)
+      .then<Map<Type, dynamic>>((Map<Type, dynamic> value) {
+        return typeToResources = value;
+      });
 
     if (typeToResources != null) {
       // All of the delegates' resources loaded synchronously.
@@ -567,7 +570,8 @@ class _LocalizationsState extends State<Localizations> {
 
   @override
   Widget build(BuildContext context) {
-    if (_locale == null) return Container();
+    if (_locale == null)
+      return Container();
     return Semantics(
       textDirection: _textDirection,
       child: _LocalizationsScope(

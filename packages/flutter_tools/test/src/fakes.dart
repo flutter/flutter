@@ -21,7 +21,9 @@ import 'package:test/fake.dart';
 class FakeDyldEnvironmentArtifact extends ArtifactSet {
   FakeDyldEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
   @override
-  Map<String, String> get environment => <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'};
+  Map<String, String> get environment => <String, String>{
+    'DYLD_LIBRARY_PATH': '/path/to/libraries'
+  };
 
   @override
   Future<bool> isUpToDate(FileSystem fileSystem) => Future<bool>.value(true);
@@ -30,8 +32,8 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
   String get name => 'fake';
 
   @override
-  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem,
-      OperatingSystemUtils operatingSystemUtils) async {}
+  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async {
+  }
 }
 
 /// A fake process implementation which can be provided all necessary values.
@@ -42,8 +44,8 @@ class FakeProcess implements Process {
     IOSink? stdin,
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
-  })  : exitCode = exitCode ?? Future<int>.value(0),
-        stdin = stdin ?? MemoryIOSink();
+  }) : exitCode = exitCode ?? Future<int>.value(0),
+       stdin = stdin ?? MemoryIOSink();
 
   @override
   final int pid;
@@ -157,9 +159,8 @@ class MemoryIOSink implements IOSink {
       (List<int> data) {
         try {
           add(data);
-          // Catches all exceptions to propagate them to the completer.
-        } catch (err, stack) {
-          // ignore: avoid_catches_without_on_clauses
+        // Catches all exceptions to propagate them to the completer.
+        } catch (err, stack) { // ignore: avoid_catches_without_on_clauses
           sub.cancel();
           completer.completeError(err, stack);
         }
@@ -182,12 +183,12 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void writeln([Object? obj = '']) {
+  void writeln([ Object? obj = '' ]) {
     add(encoding.encode('$obj\n'));
   }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
+  void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
     bool addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
@@ -199,7 +200,7 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void addError(dynamic error, [StackTrace? stackTrace]) {
+  void addError(dynamic error, [ StackTrace? stackTrace ]) {
     throw UnimplementedError();
   }
 
@@ -207,10 +208,10 @@ class MemoryIOSink implements IOSink {
   Future<void> get done => close();
 
   @override
-  Future<void> close() async {}
+  Future<void> close() async { }
 
   @override
-  Future<void> flush() async {}
+  Future<void> flush() async { }
 
   void clear() {
     writes.clear();
@@ -230,7 +231,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
     assert(value != null);
     _hasTerminal = value;
   }
-
   bool _hasTerminal = true;
 
   @override
@@ -242,7 +242,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
     assert(value != null);
     _supportsAnsiEscapes = value;
   }
-
   bool _supportsAnsiEscapes = true;
 
   @override
@@ -252,7 +251,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
     }
     throw const io.StdoutException('unspecified mock value');
   }
-
   set terminalColumns(int value) => _terminalColumns = value;
   int? _terminalColumns;
 
@@ -263,7 +261,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
     }
     throw const io.StdoutException('unspecified mock value');
   }
-
   set terminalLines(int value) => _terminalLines = value;
   int? _terminalLines;
 }
@@ -292,7 +289,8 @@ class FakeStdio extends Stdio {
 }
 
 class FakePlistParser implements PlistParser {
-  FakePlistParser([Map<String, Object>? underlyingValues]) : _underlyingValues = underlyingValues ?? <String, Object>{};
+  FakePlistParser([Map<String, Object>? underlyingValues]):
+    _underlyingValues = underlyingValues ?? <String, Object>{};
 
   final Map<String, Object> _underlyingValues;
 
@@ -315,7 +313,8 @@ class FakePlistParser implements PlistParser {
 }
 
 class FakeBotDetector implements BotDetector {
-  const FakeBotDetector(bool isRunningOnBot) : _isRunningOnBot = isRunningOnBot;
+  const FakeBotDetector(bool isRunningOnBot)
+      : _isRunningOnBot = isRunningOnBot;
 
   @override
   Future<bool> get isRunningOnBot async => _isRunningOnBot;
@@ -395,7 +394,7 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  Future<void> ensureVersionFile() async {}
+  Future<void> ensureVersionFile() async { }
 
   @override
   String getBranchName({bool redactUnknownBranches = false}) {
@@ -493,13 +492,11 @@ class FakeStatusLogger extends DelegatingLogger {
   late Status status;
 
   @override
-  Status startProgress(
-    String message, {
+  Status startProgress(String message, {
     String? progressId,
     bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
-  }) =>
-      status;
+  }) => status;
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
@@ -508,7 +505,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   final List<List<String>> chmods = <List<String>>[];
 
   @override
-  void makeExecutable(File file) {}
+  void makeExecutable(File file) { }
 
   @override
   HostPlatform hostPlatform = HostPlatform.linux_x64;
@@ -525,10 +522,10 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   List<File> whichAll(String execName) => <File>[];
 
   @override
-  void unzip(File file, Directory targetDirectory) {}
+  void unzip(File file, Directory targetDirectory) { }
 
   @override
-  void unpack(File gzippedTarFile, Directory targetDirectory) {}
+  void unpack(File gzippedTarFile, Directory targetDirectory) { }
 
   @override
   Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) => stream;
@@ -580,11 +577,13 @@ class FakeStopwatch implements Stopwatch {
 }
 
 class FakeStopwatchFactory implements StopwatchFactory {
-  FakeStopwatchFactory({Stopwatch? stopwatch, Map<String, Stopwatch>? stopwatches})
-      : stopwatches = <String, Stopwatch>{
-          if (stopwatches != null) ...stopwatches,
-          if (stopwatch != null) '': stopwatch,
-        };
+  FakeStopwatchFactory({
+    Stopwatch? stopwatch,
+    Map<String, Stopwatch>? stopwatches
+  }) : stopwatches = <String, Stopwatch>{
+         if (stopwatches != null) ...stopwatches,
+         if (stopwatch != null) '': stopwatch,
+       };
 
   Map<String, Stopwatch> stopwatches;
 

@@ -19,7 +19,8 @@ Future<void> main() async {
   // Each test below must return back to the home page after finishing.
 
   test('MotionEvent recomposition', () async {
-    final SerializableFinder motionEventsListTile = find.byValueKey('MotionEventsListTile');
+    final SerializableFinder motionEventsListTile =
+    find.byValueKey('MotionEventsListTile');
     await driver.tap(motionEventsListTile);
     await driver.runUnsynchronized(() async {
       driver.waitFor(find.byValueKey('PlatformView'));
@@ -30,9 +31,11 @@ Future<void> main() async {
     await driver.tap(backButton);
   }, timeout: Timeout.none);
 
-  group('WindowManager', () {
+  group('WindowManager', ()
+  {
     setUpAll(() async {
-      final SerializableFinder wmListTile = find.byValueKey('WmIntegrationsListTile');
+      final SerializableFinder wmListTile =
+      find.byValueKey('WmIntegrationsListTile');
       await driver.tap(wmListTile);
     });
 
@@ -42,7 +45,8 @@ Future<void> main() async {
     });
 
     test('AlertDialog from platform view context', () async {
-      final SerializableFinder showAlertDialog = find.byValueKey('ShowAlertDialog');
+      final SerializableFinder showAlertDialog = find.byValueKey(
+          'ShowAlertDialog');
       await driver.waitFor(showAlertDialog);
       await driver.tap(showAlertDialog);
       final String status = await driver.getText(find.byValueKey('Status'));

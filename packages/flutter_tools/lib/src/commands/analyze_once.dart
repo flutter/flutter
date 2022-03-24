@@ -29,27 +29,28 @@ class AnalyzeOnce extends AnalyzeBase {
     required Artifacts artifacts,
     this.workingDirectory,
   }) : super(
-          argResults,
-          repoRoots: repoRoots,
-          repoPackages: repoPackages,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-          terminal: terminal,
-          artifacts: artifacts,
-        );
+        argResults,
+        repoRoots: repoRoots,
+        repoPackages: repoPackages,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        terminal: terminal,
+        artifacts: artifacts,
+      );
 
   /// The working directory for testing analysis using dartanalyzer.
   final Directory? workingDirectory;
 
   @override
   Future<void> analyze() async {
-    final String currentDirectory = (workingDirectory ?? fileSystem.currentDirectory).path;
+    final String currentDirectory =
+        (workingDirectory ?? fileSystem.currentDirectory).path;
 
     // find directories or files from argResults.rest
-    final Set<String> items =
-        Set<String>.of(argResults.rest.map<String>((String path) => fileSystem.path.canonicalize(path)));
+    final Set<String> items = Set<String>.of(argResults.rest
+        .map<String>((String path) => fileSystem.path.canonicalize(path)));
     if (items.isNotEmpty) {
       for (final String item in items) {
         final FileSystemEntityType type = fileSystem.typeSync(item);
@@ -135,8 +136,8 @@ class AnalyzeOnce extends AnalyzeBase {
           : fileSystem.path.basename(items.first);
       progress = argResults['preamble'] == true
           ? logger.startProgress(
-              'Analyzing $message...',
-            )
+            'Analyzing $message...',
+          )
           : null;
 
       await analysisCompleter.future;
@@ -191,7 +192,7 @@ class AnalyzeOnce extends AnalyzeBase {
         return true;
       }
       if (severityLevel == AnalysisSeverity.warning &&
-          (argResults['fatal-warnings'] as bool || argResults['fatal-infos'] as bool)) {
+        (argResults['fatal-warnings'] as bool || argResults['fatal-infos'] as bool)) {
         return true;
       }
       if (severityLevel == AnalysisSeverity.info && argResults['fatal-infos'] as bool) {

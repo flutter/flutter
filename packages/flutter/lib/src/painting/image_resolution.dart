@@ -336,11 +336,12 @@ class AssetImage extends AssetBundleImageProvider {
   }
 
   static Future<Map<String, List<String>>?> _manifestParser(String? jsonData) {
-    if (jsonData == null) return SynchronousFuture<Map<String, List<String>>?>(null);
+    if (jsonData == null)
+      return SynchronousFuture<Map<String, List<String>>?>(null);
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
     final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
-    final Map<String, List<String>> parsedManifest = <String, List<String>>{
+    final Map<String, List<String>> parsedManifest = <String, List<String>> {
       for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
     };
     // TODO(ianh): convert that data structure to the right types.
@@ -348,10 +349,12 @@ class AssetImage extends AssetBundleImageProvider {
   }
 
   String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates) {
-    if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty) return main;
+    if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty)
+      return main;
     // TODO(ianh): Consider moving this parsing logic into _manifestParser.
     final SplayTreeMap<double, String> mapping = SplayTreeMap<double, String>();
-    for (final String candidate in candidates) mapping[_parseScale(candidate)] = candidate;
+    for (final String candidate in candidates)
+      mapping[_parseScale(candidate)] = candidate;
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
@@ -371,11 +374,14 @@ class AssetImage extends AssetBundleImageProvider {
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.
   String? _findBestVariant(SplayTreeMap<double, String> candidates, double value) {
-    if (candidates.containsKey(value)) return candidates[value]!;
+    if (candidates.containsKey(value))
+      return candidates[value]!;
     final double? lower = candidates.lastKeyBefore(value);
     final double? upper = candidates.firstKeyAfter(value);
-    if (lower == null) return candidates[upper];
-    if (upper == null) return candidates[lower];
+    if (lower == null)
+      return candidates[upper];
+    if (upper == null)
+      return candidates[lower];
 
     // On screens with low device-pixel ratios the artifacts from upscaling
     // images are more visible than on screens with a higher device-pixel
@@ -401,14 +407,18 @@ class AssetImage extends AssetBundleImageProvider {
     }
 
     final Match? match = _extractRatioRegExp.firstMatch(directoryPath);
-    if (match != null && match.groupCount > 0) return double.parse(match.group(1)!);
+    if (match != null && match.groupCount > 0)
+      return double.parse(match.group(1)!);
     return _naturalResolution; // i.e. default to 1.0x
   }
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is AssetImage && other.keyName == keyName && other.bundle == bundle;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is AssetImage
+        && other.keyName == keyName
+        && other.bundle == bundle;
   }
 
   @override

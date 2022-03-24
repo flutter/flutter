@@ -155,12 +155,14 @@ void main() {
         ),
       );
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'fuchsia'));
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'fuchsia'));
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
     testWithoutContext('Windows', () async {
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.hostPlatform, HostPlatform.windows_x64);
     });
 
@@ -175,7 +177,8 @@ void main() {
         ),
       );
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform());
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
@@ -190,7 +193,8 @@ void main() {
         ),
       );
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform());
       expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
@@ -213,7 +217,8 @@ void main() {
         ],
       );
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(utils.hostPlatform, HostPlatform.darwin_arm);
     });
 
@@ -236,7 +241,8 @@ void main() {
         ],
       );
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
@@ -253,7 +259,8 @@ void main() {
         ],
       );
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(() => utils.hostPlatform, throwsToolExit(message: 'sysctl'));
     });
 
@@ -276,7 +283,8 @@ void main() {
         ],
       );
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
@@ -318,7 +326,8 @@ void main() {
         ),
       ]);
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      final OperatingSystemUtils utils =
+          createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(utils.name, 'product version build darwin-arm');
     });
 
@@ -360,7 +369,8 @@ void main() {
         ),
       ]);
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      final OperatingSystemUtils utils =
+          createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(utils.name, 'product version build darwin-x64');
     });
 
@@ -374,7 +384,8 @@ void main() {
         ),
       ]);
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      final OperatingSystemUtils utils =
+          createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.name, 'version');
     });
 
@@ -496,11 +507,10 @@ void main() {
       final File fakeZipFile = fs.file('archive.zip');
       final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
       const String content = 'hello, world!';
-      final Archive archive = Archive()
-        ..addFile(
-          // This file would be extracted outside of the target extraction dir
-          ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
-        );
+      final Archive archive = Archive()..addFile(
+        // This file would be extracted outside of the target extraction dir
+        ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
+      );
       final List<int> zipData = ZipEncoder().encode(archive)!;
       fakeZipFile.writeAsBytesSync(zipData);
       expect(
@@ -532,8 +542,10 @@ void main() {
       ], exitCode: 1, stderr: exceptionMessage),
     );
 
-    final Directory foo = fileSystem.directory('foo')..createSync();
-    final File bar = fileSystem.file('bar.zip')..createSync();
+    final Directory foo = fileSystem.directory('foo')
+      ..createSync();
+    final File bar = fileSystem.file('bar.zip')
+      ..createSync();
     handler.addError(bar, FileSystemOp.read, const FileSystemException(exceptionMessage));
 
     final OperatingSystemUtils osUtils = OperatingSystemUtils(
@@ -639,8 +651,8 @@ void main() {
       expect(
         () => linuxOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
         throwsToolExit(
-            message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
-                'Consider running "sudo apt-get install unzip".'),
+          message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+          'Consider running "sudo apt-get install unzip".'),
       );
     });
 
@@ -657,9 +669,9 @@ void main() {
 
       expect(
         () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
-        throwsToolExit(
-            message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
-                'Consider running "brew install unzip".'),
+        throwsToolExit
+          (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+            'Consider running "brew install unzip".'),
       );
     });
 
@@ -675,10 +687,10 @@ void main() {
       );
 
       expect(
-        () => unknownOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
-        throwsToolExit(
-            message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
-                'Please install unzip.'),
+            () => unknownOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+        throwsToolExit
+          (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
+            'Please install unzip.'),
       );
     });
   });

@@ -83,7 +83,7 @@ abstract class BoxBorder extends ShapeBorder {
   // We override this to tighten the return value, so that callers can assume
   // that we'll return a [BoxBorder].
   @override
-  BoxBorder? add(ShapeBorder other, {bool reversed = false}) => null;
+  BoxBorder? add(ShapeBorder other, { bool reversed = false }) => null;
 
   /// Linearly interpolate between two borders.
   ///
@@ -104,8 +104,10 @@ abstract class BoxBorder extends ShapeBorder {
   /// {@macro dart.ui.shadow.lerp}
   static BoxBorder? lerp(BoxBorder? a, BoxBorder? b, double t) {
     assert(t != null);
-    if ((a is Border?) && (b is Border?)) return Border.lerp(a, b, t);
-    if ((a is BorderDirectional?) && (b is BorderDirectional?)) return BorderDirectional.lerp(a, b, t);
+    if ((a is Border?) && (b is Border?))
+      return Border.lerp(a, b, t);
+    if ((a is BorderDirectional?) && (b is BorderDirectional?))
+      return BorderDirectional.lerp(a, b, t);
     if (b is Border && a is BorderDirectional) {
       final BoxBorder c = b;
       b = a;
@@ -163,15 +165,17 @@ abstract class BoxBorder extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     assert(textDirection != null, 'The textDirection argument to $runtimeType.getInnerPath must not be null.');
-    return Path()..addRect(dimensions.resolve(textDirection).deflateRect(rect));
+    return Path()
+      ..addRect(dimensions.resolve(textDirection).deflateRect(rect));
   }
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     assert(textDirection != null, 'The textDirection argument to $runtimeType.getOuterPath must not be null.');
-    return Path()..addRect(rect);
+    return Path()
+      ..addRect(rect);
   }
 
   /// Paints the border within the given [Rect] on the given [Canvas].
@@ -204,7 +208,8 @@ abstract class BoxBorder extends ShapeBorder {
 
   static void _paintUniformBorderWithRadius(Canvas canvas, Rect rect, BorderSide side, BorderRadius borderRadius) {
     assert(side.style != BorderStyle.none);
-    final Paint paint = Paint()..color = side.color;
+    final Paint paint = Paint()
+      ..color = side.color;
     final RRect outer = borderRadius.toRRect(rect);
     final double width = side.width;
     if (width == 0.0) {
@@ -306,10 +311,10 @@ class Border extends BoxBorder {
     this.right = BorderSide.none,
     this.bottom = BorderSide.none,
     this.left = BorderSide.none,
-  })  : assert(top != null),
-        assert(right != null),
-        assert(bottom != null),
-        assert(left != null);
+  }) : assert(top != null),
+       assert(right != null),
+       assert(bottom != null),
+       assert(left != null);
 
   /// Creates a border whose sides are all the same.
   ///
@@ -330,12 +335,12 @@ class Border extends BoxBorder {
   const Border.symmetric({
     BorderSide vertical = BorderSide.none,
     BorderSide horizontal = BorderSide.none,
-  })  : assert(vertical != null),
-        assert(horizontal != null),
-        left = vertical,
-        top = horizontal,
-        right = vertical,
-        bottom = horizontal;
+  }) : assert(vertical != null),
+       assert(horizontal != null),
+       left = vertical,
+       top = horizontal,
+       right = vertical,
+       bottom = horizontal;
 
   /// A uniform border with all sides the same color and width.
   ///
@@ -407,7 +412,7 @@ class Border extends BoxBorder {
   }
 
   @override
-  Border? add(ShapeBorder other, {bool reversed = false}) {
+  Border? add(ShapeBorder other, { bool reversed = false }) {
     if (other is Border &&
         BorderSide.canMerge(top, other.top) &&
         BorderSide.canMerge(right, other.right) &&
@@ -430,13 +435,15 @@ class Border extends BoxBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a is Border) return Border.lerp(a, this, t);
+    if (a is Border)
+      return Border.lerp(a, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    if (b is Border) return Border.lerp(this, b, t);
+    if (b is Border)
+      return Border.lerp(this, b, t);
     return super.lerpTo(b, t);
   }
 
@@ -448,9 +455,12 @@ class Border extends BoxBorder {
   /// {@macro dart.ui.shadow.lerp}
   static Border? lerp(Border? a, Border? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return b!.scale(t);
-    if (b == null) return a.scale(1.0 - t);
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b!.scale(t);
+    if (b == null)
+      return a.scale(1.0 - t);
     return Border(
       top: BorderSide.lerp(a.top, b.top, t),
       right: BorderSide.lerp(a.right, b.right, t),
@@ -538,9 +548,15 @@ class Border extends BoxBorder {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is Border && other.top == top && other.right == right && other.bottom == bottom && other.left == left;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is Border
+        && other.top == top
+        && other.right == right
+        && other.bottom == bottom
+        && other.left == left;
   }
 
   @override
@@ -548,7 +564,8 @@ class Border extends BoxBorder {
 
   @override
   String toString() {
-    if (isUniform) return '${objectRuntimeType(this, 'Border')}.all($top)';
+    if (isUniform)
+      return '${objectRuntimeType(this, 'Border')}.all($top)';
     final List<String> arguments = <String>[
       if (top != BorderSide.none) 'top: $top',
       if (right != BorderSide.none) 'right: $right',
@@ -593,10 +610,10 @@ class BorderDirectional extends BoxBorder {
     this.start = BorderSide.none,
     this.end = BorderSide.none,
     this.bottom = BorderSide.none,
-  })  : assert(top != null),
-        assert(start != null),
-        assert(end != null),
-        assert(bottom != null);
+  }) : assert(top != null),
+       assert(start != null),
+       assert(end != null),
+       assert(bottom != null);
 
   /// Creates a [BorderDirectional] that represents the addition of the two
   /// given [BorderDirectional]s.
@@ -654,19 +671,28 @@ class BorderDirectional extends BoxBorder {
   @override
   bool get isUniform {
     final Color topColor = top.color;
-    if (start.color != topColor || end.color != topColor || bottom.color != topColor) return false;
+    if (start.color != topColor ||
+        end.color != topColor ||
+        bottom.color != topColor)
+      return false;
 
     final double topWidth = top.width;
-    if (start.width != topWidth || end.width != topWidth || bottom.width != topWidth) return false;
+    if (start.width != topWidth ||
+        end.width != topWidth ||
+        bottom.width != topWidth)
+      return false;
 
     final BorderStyle topStyle = top.style;
-    if (start.style != topStyle || end.style != topStyle || bottom.style != topStyle) return false;
+    if (start.style != topStyle ||
+        end.style != topStyle ||
+        bottom.style != topStyle)
+      return false;
 
     return true;
   }
 
   @override
-  BoxBorder? add(ShapeBorder other, {bool reversed = false}) {
+  BoxBorder? add(ShapeBorder other, { bool reversed = false }) {
     if (other is BorderDirectional) {
       final BorderDirectional typedOther = other;
       if (BorderSide.canMerge(top, typedOther.top) &&
@@ -679,9 +705,14 @@ class BorderDirectional extends BoxBorder {
     }
     if (other is Border) {
       final Border typedOther = other;
-      if (!BorderSide.canMerge(typedOther.top, top) || !BorderSide.canMerge(typedOther.bottom, bottom)) return null;
-      if (start != BorderSide.none || end != BorderSide.none) {
-        if (typedOther.left != BorderSide.none || typedOther.right != BorderSide.none) return null;
+      if (!BorderSide.canMerge(typedOther.top, top) ||
+          !BorderSide.canMerge(typedOther.bottom, bottom))
+        return null;
+      if (start != BorderSide.none ||
+          end != BorderSide.none) {
+        if (typedOther.left != BorderSide.none ||
+            typedOther.right != BorderSide.none)
+          return null;
         assert(typedOther.left == BorderSide.none);
         assert(typedOther.right == BorderSide.none);
         return BorderDirectional(
@@ -715,13 +746,15 @@ class BorderDirectional extends BoxBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a is BorderDirectional) return BorderDirectional.lerp(a, this, t);
+    if (a is BorderDirectional)
+      return BorderDirectional.lerp(a, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    if (b is BorderDirectional) return BorderDirectional.lerp(this, b, t);
+    if (b is BorderDirectional)
+      return BorderDirectional.lerp(this, b, t);
     return super.lerpTo(b, t);
   }
 
@@ -733,9 +766,12 @@ class BorderDirectional extends BoxBorder {
   /// {@macro dart.ui.shadow.lerp}
   static BorderDirectional? lerp(BorderDirectional? a, BorderDirectional? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return b!.scale(t);
-    if (b == null) return a.scale(1.0 - t);
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b!.scale(t);
+    if (b == null)
+      return a.scale(1.0 - t);
     return BorderDirectional(
       top: BorderSide.lerp(a.top, b.top, t),
       end: BorderSide.lerp(a.end, b.end, t),
@@ -816,13 +852,15 @@ class BorderDirectional extends BoxBorder {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is BorderDirectional &&
-        other.top == top &&
-        other.start == start &&
-        other.end == end &&
-        other.bottom == bottom;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is BorderDirectional
+        && other.top == top
+        && other.start == start
+        && other.end == end
+        && other.bottom == bottom;
   }
 
   @override

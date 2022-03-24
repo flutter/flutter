@@ -50,21 +50,19 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                label: 'test',
-                textDirection: TextDirection.ltr,
-              ),
-            ],
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            label: 'test',
+            textDirection: TextDirection.ltr,
           ),
-          ignoreId: true,
-          ignoreRect: true,
-          ignoreTransform: true,
-        ));
+        ],
+      ),
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
     semantics.dispose();
   });
 }

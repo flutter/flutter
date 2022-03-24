@@ -32,7 +32,10 @@ class SpinModel extends InheritedNotifier<AnimationController> {
   }) : super(key: key, notifier: notifier, child: child);
 
   static double of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<SpinModel>()!.notifier!.value;
+    return context
+        .dependOnInheritedWidgetOfExactType<SpinModel>()!
+        .notifier!
+        .value;
   }
 }
 
@@ -63,7 +66,8 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 /// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget> with TickerProviderStateMixin {
+class _MyStatefulWidgetState extends State<MyStatefulWidget>
+    with TickerProviderStateMixin {
   late AnimationController _controller;
 
   @override

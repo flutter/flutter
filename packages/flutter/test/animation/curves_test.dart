@@ -173,11 +173,9 @@ void main() {
 
   test('ThreePointCubic interpolates midpoint', () {
     const ThreePointCubic test = ThreePointCubic(
-      Offset(0.05, 0),
-      Offset(0.133333, 0.06),
+      Offset(0.05, 0), Offset(0.133333, 0.06),
       Offset(0.166666, 0.4),
-      Offset(0.208333, 0.82),
-      Offset(0.25, 1),
+      Offset(0.208333, 0.82), Offset(0.25, 1),
     );
     expect(test.transform(0.166666), equals(0.4));
   });

@@ -20,7 +20,7 @@ void main() {
         theme: ThemeData.from(colorScheme: colorScheme),
         home: Center(
           child: TextButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const Text('button'),
           ),
         ),
@@ -54,8 +54,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start the splash animation
     await tester.pump(const Duration(milliseconds: 100)); // splash is underway
-    final RenderObject inkFeatures = tester.allRenderObjects
-        .firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..circle(color: colorScheme.primary.withAlpha(0x1f))); // splash color is primary(0.12)
 
     await gesture.up();
@@ -84,7 +83,7 @@ void main() {
         home: Center(
           child: TextButton.icon(
             key: iconButtonKey,
-            onPressed: () {},
+            onPressed: () { },
             icon: const Icon(Icons.add),
             label: const Text('label'),
           ),
@@ -141,122 +140,118 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets(
-    'Default TextButton meets a11y contrast guidelines',
-    (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
+  testWidgets('Default TextButton meets a11y contrast guidelines', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData.from(colorScheme: const ColorScheme.light()),
-          home: Scaffold(
-            body: Center(
-              child: TextButton(
-                onPressed: () {},
-                focusNode: focusNode,
-                child: const Text('TextButton'),
-              ),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        home: Scaffold(
+          body: Center(
+            child: TextButton(
+              onPressed: () { },
+              focusNode: focusNode,
+              child: const Text('TextButton'),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      // Default, not disabled.
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    // Default, not disabled.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-      // Focused.
-      focusNode.requestFocus();
-      await tester.pumpAndSettle();
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-      // Hovered.
-      final Offset center = tester.getCenter(find.byType(TextButton));
-      final TestGesture gesture = await tester.createGesture(
-        kind: PointerDeviceKind.mouse,
-      );
-      await gesture.addPointer();
-      await gesture.moveTo(center);
-      await tester.pumpAndSettle();
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(TextButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-      // Highlighted (pressed).
-      await gesture.down(center);
-      await tester.pump(); // Start the splash and highlight animations.
-      await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-      await gesture.removePointer();
-    },
+    await gesture.removePointer();
+  },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgets(
-    'TextButton with colored theme meets a11y contrast guidelines',
-    (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
+  testWidgets('TextButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
 
-      Color getTextColor(Set<MaterialState> states) {
-        final Set<MaterialState> interactiveStates = <MaterialState>{
-          MaterialState.pressed,
-          MaterialState.hovered,
-          MaterialState.focused,
-        };
-        if (states.any(interactiveStates.contains)) {
-          return Colors.blue[900]!;
-        }
-        return Colors.blue[800]!;
+    Color getTextColor(Set<MaterialState> states) {
+      final Set<MaterialState> interactiveStates = <MaterialState>{
+        MaterialState.pressed,
+        MaterialState.hovered,
+        MaterialState.focused,
+      };
+      if (states.any(interactiveStates.contains)) {
+        return Colors.blue[900]!;
       }
+      return Colors.blue[800]!;
+    }
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: TextButtonTheme(
-                data: TextButtonThemeData(
-                  style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
-                  ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: TextButtonTheme(
+              data: TextButtonThemeData(
+                style: ButtonStyle(
+                  foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
                 ),
-                child: Builder(
-                  builder: (BuildContext context) {
-                    return TextButton(
-                      onPressed: () {},
-                      focusNode: focusNode,
-                      child: const Text('TextButton'),
-                    );
-                  },
-                ),
+              ),
+              child: Builder(
+                builder: (BuildContext context) {
+                  return TextButton(
+                    onPressed: () {},
+                    focusNode: focusNode,
+                    child: const Text('TextButton'),
+                  );
+                },
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      // Default, not disabled.
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    // Default, not disabled.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-      // Focused.
-      focusNode.requestFocus();
-      await tester.pumpAndSettle();
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-      // Hovered.
-      final Offset center = tester.getCenter(find.byType(TextButton));
-      final TestGesture gesture = await tester.createGesture(
-        kind: PointerDeviceKind.mouse,
-      );
-      await gesture.addPointer();
-      addTearDown(gesture.removePointer);
-      await gesture.moveTo(center);
-      await tester.pumpAndSettle();
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(TextButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-      // Highlighted (pressed).
-      await gesture.down(center);
-      await tester.pump(); // Start the splash and highlight animations.
-      await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-    },
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+  },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
@@ -402,14 +397,14 @@ void main() {
         textDirection: TextDirection.ltr,
         child: TextButton(
           child: Container(),
-          onPressed: () {/* to make sure the button is enabled */},
+          onPressed: () { /* to make sure the button is enabled */ },
         ),
       ),
     );
 
     expect(
-      tester.renderObject(find.byType(TextButton)),
-      paintsExactlyCountTimes(#clipPath, 0),
+        tester.renderObject(find.byType(TextButton)),
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 
@@ -428,10 +423,11 @@ void main() {
             overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           child: Container(),
-          onPressed: () {/* to make sure the button is enabled */},
+          onPressed: () { /* to make sure the button is enabled */ },
         ),
       ),
     );
+
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -439,8 +435,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(TextButton)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects
-        .firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: hoverColor));
   });
 
@@ -460,7 +455,7 @@ void main() {
             overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           focusNode: focusNode,
-          onPressed: () {},
+          onPressed: () { },
           child: const Text('button'),
         ),
       ),
@@ -470,8 +465,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects
-        .firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
   });
 
@@ -488,36 +482,34 @@ void main() {
               // match the original version of this test.
               minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
             ),
-            onPressed: () {},
+            onPressed: () { },
             child: const Text('ABC'),
           ),
         ),
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-                label: 'ABC',
-                rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                transform: Matrix4.translationValues(356.0, 276.0, 0.0),
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isEnabled,
-                  SemanticsFlag.isFocusable,
-                ],
-              ),
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ],
+            label: 'ABC',
+            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            transform: Matrix4.translationValues(356.0, 276.0, 0.0),
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton,
+              SemanticsFlag.isEnabled,
+              SemanticsFlag.isFocusable,
             ],
           ),
-          ignoreId: true,
-        ));
+        ],
+      ),
+      ignoreId: true,
+    ));
 
     semantics.dispose();
   });
@@ -530,7 +522,7 @@ void main() {
           data: const MediaQueryData(),
           child: Center(
             child: TextButton(
-              onPressed: () {},
+              onPressed: () { },
               child: const Text('ABC'),
             ),
           ),
@@ -549,7 +541,7 @@ void main() {
           data: const MediaQueryData(textScaleFactor: 1.3),
           child: Center(
             child: TextButton(
-              onPressed: () {},
+              onPressed: () { },
               child: const Text('ABC'),
             ),
           ),
@@ -572,7 +564,7 @@ void main() {
           data: const MediaQueryData(textScaleFactor: 3.0),
           child: Center(
             child: TextButton(
-              onPressed: () {},
+              onPressed: () { },
               child: const Text('ABC'),
             ),
           ),
@@ -588,6 +580,7 @@ void main() {
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
   });
 
+
   testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
       return Theme(
@@ -598,7 +591,7 @@ void main() {
             child: TextButton(
               key: key,
               child: const SizedBox(width: 50.0, height: 8.0),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ),
         ),
@@ -614,12 +607,11 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(66.0, 36.0));
   });
 
-  testWidgets('TextButton onPressed and onLongPress callbacks are correctly called when non-null',
-      (WidgetTester tester) async {
+  testWidgets('TextButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
     bool wasPressed;
     Finder textButton;
 
-    Widget buildFrame({VoidCallback? onPressed, VoidCallback? onLongPress}) {
+    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: TextButton(
@@ -633,9 +625,7 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () {
-        wasPressed = true;
-      }),
+      buildFrame(onPressed: () { wasPressed = true; }),
     );
     textButton = find.byType(TextButton);
     expect(tester.widget<TextButton>(textButton).enabled, true);
@@ -645,9 +635,7 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onLongPress: () {
-        wasPressed = true;
-      }),
+      buildFrame(onLongPress: () { wasPressed = true; }),
     );
     textButton = find.byType(TextButton);
     expect(tester.widget<TextButton>(textButton).enabled, true);
@@ -708,9 +696,7 @@ void main() {
             autofocus: true,
             onPressed: () {},
             onLongPress: () {},
-            onHover: (bool value) {
-              hovering = value;
-            },
+            onHover: (bool value) { hovering = value; },
             focusNode: focusNode,
             child: SizedBox(key: childKey),
           ),
@@ -734,9 +720,7 @@ void main() {
           height: 100,
           child: TextButton(
             focusNode: focusNode,
-            onHover: (bool value) {
-              hovering = value;
-            },
+            onHover: (bool value) { hovering = value; },
             onPressed: null,
             child: SizedBox(key: childKey),
           ),
@@ -752,7 +736,7 @@ void main() {
     int onHoverCount = 0;
     late bool hover;
 
-    Widget buildFrame({required bool enabled}) {
+    Widget buildFrame({ required bool enabled }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -760,7 +744,7 @@ void main() {
             width: 100,
             height: 100,
             child: TextButton(
-              onPressed: enabled ? () {} : null,
+              onPressed: enabled ? () { } : null,
               onHover: (bool value) {
                 onHoverCount += 1;
                 hover = value;
@@ -820,7 +804,7 @@ void main() {
         child: TextButton(
           focusNode: node,
           onFocusChange: (bool focused) => gotFocus = focused,
-          onPressed: () {},
+          onPressed: () {  },
           child: const SizedBox(),
         ),
       ),
@@ -867,7 +851,7 @@ void main() {
     const Key key = Key('test');
     const Key childKey = Key('test child');
 
-    Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
+    Future<void> buildTest(VisualDensity visualDensity, { bool useText = false }) async {
       return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
@@ -880,8 +864,8 @@ void main() {
                 key: key,
                 onPressed: () {},
                 child: useText
-                    ? const Text('Text', key: childKey)
-                    : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
+                  ? const Text('Text', key: childKey)
+                  : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
               ),
             ),
           ),
@@ -984,8 +968,8 @@ void main() {
     }
 
     /// Computes the padding between two [Rect]s, one inside the other.
-    EdgeInsets paddingBetween({required Rect parent, required Rect child}) {
-      assert(parent.intersect(child) == child);
+    EdgeInsets paddingBetween({ required Rect parent, required Rect child }) {
+      assert (parent.intersect(child) == child);
       return EdgeInsets.fromLTRB(
         child.left - parent.left,
         child.top - parent.top,
@@ -999,8 +983,10 @@ void main() {
         for (final Widget? icon in iconOptions) {
           final String testName = <String>[
             'TextButton, text scale $textScaleFactor',
-            if (icon != null) 'with icon',
-            if (textDirection == TextDirection.rtl) 'RTL',
+            if (icon != null)
+              'with icon',
+            if (textDirection == TextDirection.rtl)
+              'RTL',
           ].join(', ');
 
           testWidgets(testName, (WidgetTester tester) async {
@@ -1018,17 +1004,17 @@ void main() {
                         child: Scaffold(
                           body: Center(
                             child: icon == null
-                                ? TextButton(
-                                    key: buttonKey,
-                                    onPressed: () {},
-                                    child: const Text('button', key: labelKey),
-                                  )
-                                : TextButton.icon(
-                                    key: buttonKey,
-                                    onPressed: () {},
-                                    icon: icon,
-                                    label: const Text('button', key: labelKey),
-                                  ),
+                              ? TextButton(
+                                  key: buttonKey,
+                                  onPressed: () {},
+                                  child: const Text('button', key: labelKey),
+                                )
+                              : TextButton.icon(
+                                  key: buttonKey,
+                                  onPressed: () {},
+                                  icon: icon,
+                                  label: const Text('button', key: labelKey),
+                                ),
                           ),
                         ),
                       ),
@@ -1053,8 +1039,8 @@ void main() {
             final double expectedPaddingBottom = paddingVertical[textScaleFactor]!;
 
             final double expectedPaddingStart = icon != null
-                ? textPaddingWithIconHorizontal[textScaleFactor]!
-                : textPaddingWithoutIconHorizontal[textScaleFactor]!;
+              ? textPaddingWithIconHorizontal[textScaleFactor]!
+              : textPaddingWithoutIconHorizontal[textScaleFactor]!;
             final double expectedPaddingEnd = expectedPaddingStart;
 
             final EdgeInsets expectedPadding = EdgeInsetsDirectional.fromSTEB(
@@ -1122,8 +1108,8 @@ void main() {
             // Check the gap between the icon and the label
             if (icon != null) {
               final double gapWidth = textDirection == TextDirection.ltr
-                  ? labelBounds.left - iconBounds!.right
-                  : iconBounds!.left - labelBounds.right;
+                ? labelBounds.left - iconBounds!.right
+                : iconBounds!.left - labelBounds.right;
               expect(gapWidth, paddingWithIconGap[textScaleFactor]);
             }
 
@@ -1213,7 +1199,7 @@ void main() {
   });
 
   testWidgets('TextButton with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
-    Widget buildFrame({InteractiveInkFeatureFactory? splashFactory}) {
+    Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
       return MaterialApp(
         home: Scaffold(
           body: Center(
@@ -1221,7 +1207,7 @@ void main() {
               style: TextButton.styleFrom(
                 splashFactory: splashFactory,
               ),
-              onPressed: () {},
+              onPressed: () { },
               child: const Text('test'),
             ),
           ),
@@ -1262,8 +1248,7 @@ void main() {
             child: TextButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.add),
-              label: const Text(
-                // Much wider than 200
+              label: const Text( // Much wider than 200
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut a euismod nibh. Morbi laoreet purus.',
               ),
             ),
@@ -1328,7 +1313,7 @@ void main() {
                     minimumSize: const Size(24, 36),
                     maximumSize: const Size.fromWidth(64),
                   ),
-                  onPressed: () {},
+                  onPressed: () { },
                   child: const Text('A B C D E F G H I J K L M N O P'),
                 ),
                 TextButton.icon(
@@ -1361,7 +1346,7 @@ void main() {
             children: <Widget>[
               TextButton(
                 style: TextButton.styleFrom(fixedSize: const Size(200, 200)),
-                onPressed: () {},
+                onPressed: () { },
                 child: const Text('200x200'),
               ),
               TextButton(
@@ -1369,7 +1354,7 @@ void main() {
                   minimumSize: const Size(200, 200),
                   maximumSize: const Size(200, 200),
                 ),
-                onPressed: () {},
+                onPressed: () { },
                 child: const Text('200,200'),
               ),
             ],

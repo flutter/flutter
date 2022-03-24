@@ -27,7 +27,7 @@ mixin ViewportNotificationMixin on Notification {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('depth: $depth (${depth == 0 ? "local" : "remote"})');
+    description.add('depth: $depth (${ depth == 0 ? "local" : "remote"})');
   }
 }
 
@@ -37,7 +37,7 @@ mixin ViewportNotificationMixin on Notification {
 /// See also:
 ///   * [Viewport], which creates a custom [MultiChildRenderObjectElement] that mixes
 ///     this in.
-mixin ViewportElementMixin on NotifiableElementMixin {
+mixin ViewportElementMixin  on NotifiableElementMixin {
   @override
   bool onNotification(Notification notification) {
     if (notification is ViewportNotificationMixin) {
@@ -132,7 +132,8 @@ class ScrollStartNotification extends ScrollNotification {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (dragDetails != null) description.add('$dragDetails');
+    if (dragDetails != null)
+      description.add('$dragDetails');
   }
 }
 
@@ -172,7 +173,8 @@ class ScrollUpdateNotification extends ScrollNotification {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('scrollDelta: $scrollDelta');
-    if (dragDetails != null) description.add('$dragDetails');
+    if (dragDetails != null)
+      description.add('$dragDetails');
   }
 }
 
@@ -194,11 +196,11 @@ class OverscrollNotification extends ScrollNotification {
     this.dragDetails,
     required this.overscroll,
     this.velocity = 0.0,
-  })  : assert(overscroll != null),
-        assert(overscroll.isFinite),
-        assert(overscroll != 0.0),
-        assert(velocity != null),
-        super(metrics: metrics, context: context);
+  }) : assert(overscroll != null),
+       assert(overscroll.isFinite),
+       assert(overscroll != 0.0),
+       assert(velocity != null),
+       super(metrics: metrics, context: context);
 
   /// If the [Scrollable] overscrolled because of a drag, the details about that
   /// drag update.
@@ -225,7 +227,8 @@ class OverscrollNotification extends ScrollNotification {
     super.debugFillDescription(description);
     description.add('overscroll: ${overscroll.toStringAsFixed(1)}');
     description.add('velocity: ${velocity.toStringAsFixed(1)}');
-    if (dragDetails != null) description.add('$dragDetails');
+    if (dragDetails != null)
+      description.add('$dragDetails');
   }
 }
 
@@ -259,7 +262,8 @@ class ScrollEndNotification extends ScrollNotification {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (dragDetails != null) description.add('$dragDetails');
+    if (dragDetails != null)
+      description.add('$dragDetails');
   }
 }
 

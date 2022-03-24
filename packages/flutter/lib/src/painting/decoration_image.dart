@@ -56,11 +56,11 @@ class DecorationImage {
     this.filterQuality = FilterQuality.low,
     this.invertColors = false,
     this.isAntiAlias = false,
-  })  : assert(image != null),
-        assert(alignment != null),
-        assert(repeat != null),
-        assert(matchTextDirection != null),
-        assert(scale != null);
+  }) : assert(image != null),
+       assert(alignment != null),
+       assert(repeat != null),
+       assert(matchTextDirection != null),
+       assert(scale != null);
 
   /// The image to be painted into the decoration.
   ///
@@ -187,57 +187,65 @@ class DecorationImage {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is DecorationImage &&
-        other.image == image &&
-        other.colorFilter == colorFilter &&
-        other.fit == fit &&
-        other.alignment == alignment &&
-        other.centerSlice == centerSlice &&
-        other.repeat == repeat &&
-        other.matchTextDirection == matchTextDirection &&
-        other.scale == scale &&
-        other.opacity == opacity &&
-        other.filterQuality == filterQuality &&
-        other.invertColors == invertColors &&
-        other.isAntiAlias == isAntiAlias;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is DecorationImage
+        && other.image == image
+        && other.colorFilter == colorFilter
+        && other.fit == fit
+        && other.alignment == alignment
+        && other.centerSlice == centerSlice
+        && other.repeat == repeat
+        && other.matchTextDirection == matchTextDirection
+        && other.scale == scale
+        && other.opacity == opacity
+        && other.filterQuality == filterQuality
+        && other.invertColors == invertColors
+        && other.isAntiAlias == isAntiAlias;
   }
 
   @override
   int get hashCode => Object.hash(
-        image,
-        colorFilter,
-        fit,
-        alignment,
-        centerSlice,
-        repeat,
-        matchTextDirection,
-        scale,
-        opacity,
-        filterQuality,
-        invertColors,
-        isAntiAlias,
-      );
+    image,
+    colorFilter,
+    fit,
+    alignment,
+    centerSlice,
+    repeat,
+    matchTextDirection,
+    scale,
+    opacity,
+    filterQuality,
+    invertColors,
+    isAntiAlias,
+  );
 
   @override
   String toString() {
     final List<String> properties = <String>[
       '$image',
-      if (colorFilter != null) '$colorFilter',
+      if (colorFilter != null)
+        '$colorFilter',
       if (fit != null &&
           !(fit == BoxFit.fill && centerSlice != null) &&
           !(fit == BoxFit.scaleDown && centerSlice == null))
         '$fit',
       '$alignment',
-      if (centerSlice != null) 'centerSlice: $centerSlice',
-      if (repeat != ImageRepeat.noRepeat) '$repeat',
-      if (matchTextDirection) 'match text direction',
+      if (centerSlice != null)
+        'centerSlice: $centerSlice',
+      if (repeat != ImageRepeat.noRepeat)
+        '$repeat',
+      if (matchTextDirection)
+        'match text direction',
       'scale $scale',
       'opacity $opacity',
       '$filterQuality',
-      if (invertColors) 'invert colors',
-      if (isAntiAlias) 'use anti-aliasing',
+      if (invertColors)
+        'invert colors',
+      if (isAntiAlias)
+        'use anti-aliasing',
     ];
     return '${objectRuntimeType(this, 'DecorationImage')}(${properties.join(", ")})';
   }
@@ -294,15 +302,14 @@ class DecorationImagePainter {
               'When DecorationImagePainter.paint() was called, there was no text direction provided '
               'in the ImageConfiguration object to match.',
             ),
-            DiagnosticsProperty<DecorationImage>('The DecorationImage was', _details,
-                style: DiagnosticsTreeStyle.errorProperty),
-            DiagnosticsProperty<ImageConfiguration>('The ImageConfiguration was', configuration,
-                style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<DecorationImage>('The DecorationImage was', _details, style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<ImageConfiguration>('The ImageConfiguration was', configuration, style: DiagnosticsTreeStyle.errorProperty),
           ]);
         }
         return true;
       }());
-      if (configuration.textDirection == TextDirection.rtl) flipHorizontally = true;
+      if (configuration.textDirection == TextDirection.rtl)
+        flipHorizontally = true;
     }
 
     final ImageStream newImageStream = _details.image.resolve(configuration);
@@ -315,7 +322,8 @@ class DecorationImagePainter {
       _imageStream = newImageStream;
       _imageStream!.addListener(listener);
     }
-    if (_image == null) return;
+    if (_image == null)
+      return;
 
     if (clipPath != null) {
       canvas.save();
@@ -340,11 +348,13 @@ class DecorationImagePainter {
       isAntiAlias: _details.isAntiAlias,
     );
 
-    if (clipPath != null) canvas.restore();
+    if (clipPath != null)
+      canvas.restore();
   }
 
   void _handleImage(ImageInfo value, bool synchronousCall) {
-    if (_image == value) return;
+    if (_image == value)
+      return;
     if (_image != null && _image!.isCloneOf(value)) {
       value.dispose();
       return;
@@ -352,7 +362,8 @@ class DecorationImagePainter {
     _image?.dispose();
     _image = value;
     assert(_onChanged != null);
-    if (!synchronousCall) _onChanged();
+    if (!synchronousCall)
+      _onChanged();
   }
 
   /// Releases the resources used by this painter.
@@ -494,7 +505,8 @@ void paintImage({
     'The caller of paintImage is expected to wait to dispose the image until '
     'after painting has completed.',
   );
-  if (rect.isEmpty) return;
+  if (rect.isEmpty)
+    return;
   Size outputSize = rect.size;
   Size inputSize = Size(image.width.toDouble(), image.height.toDouble());
   Offset? sliceBorder;
@@ -513,8 +525,7 @@ void paintImage({
     destinationSize += sliceBorder;
     // We don't have the ability to draw a subset of the image at the same time
     // as we apply a nine-patch stretch.
-    assert(sourceSize == inputSize,
-        'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.');
+    assert(sourceSize == inputSize, 'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.');
   }
 
   if (repeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
@@ -523,7 +534,8 @@ void paintImage({
     repeat = ImageRepeat.noRepeat;
   }
   final Paint paint = Paint()..isAntiAlias = isAntiAlias;
-  if (colorFilter != null) paint.colorFilter = colorFilter;
+  if (colorFilter != null)
+    paint.colorFilter = colorFilter;
   paint.color = Color.fromRGBO(0, 0, 0, opacity);
   paint.filterQuality = filterQuality;
   paint.invertColors = invertColors;
@@ -554,41 +566,24 @@ void paintImage({
         final int outputHeight = sizeInfo.displaySize.height.toInt();
         FlutterError.reportError(FlutterErrorDetails(
           exception: 'Image $debugImageLabel has a display size of '
-              '$outputWidth×$outputHeight but a decode size of '
-              '${image.width}×${image.height}, which uses an additional '
-              '${overheadInKilobytes}KB.\n\n'
-              'Consider resizing the asset ahead of time, supplying a cacheWidth '
-              'parameter of $outputWidth, a cacheHeight parameter of '
-              '$outputHeight, or using a ResizeImage.',
+            '$outputWidth×$outputHeight but a decode size of '
+            '${image.width}×${image.height}, which uses an additional '
+            '${overheadInKilobytes}KB.\n\n'
+            'Consider resizing the asset ahead of time, supplying a cacheWidth '
+            'parameter of $outputWidth, a cacheHeight parameter of '
+            '$outputHeight, or using a ResizeImage.',
           library: 'painting library',
           context: ErrorDescription('while painting an image'),
         ));
         // Invert the colors of the canvas.
         canvas.saveLayer(
           destinationRect,
-          Paint()
-            ..colorFilter = const ColorFilter.matrix(<double>[
-              -1,
-              0,
-              0,
-              0,
-              255,
-              0,
-              -1,
-              0,
-              0,
-              255,
-              0,
-              0,
-              -1,
-              0,
-              255,
-              0,
-              0,
-              0,
-              1,
-              0,
-            ]),
+          Paint()..colorFilter = const ColorFilter.matrix(<double>[
+            -1,  0,  0, 0, 255,
+             0, -1,  0, 0, 255,
+             0,  0, -1, 0, 255,
+             0,  0,  0, 1,   0,
+          ]),
         );
         // Flip the canvas vertically.
         final double dy = -(rect.top + rect.height / 2.0);
@@ -624,8 +619,10 @@ void paintImage({
   }
 
   final bool needSave = centerSlice != null || repeat != ImageRepeat.noRepeat || flipHorizontally;
-  if (needSave) canvas.save();
-  if (repeat != ImageRepeat.noRepeat) canvas.clipRect(rect);
+  if (needSave)
+    canvas.save();
+  if (repeat != ImageRepeat.noRepeat)
+    canvas.clipRect(rect);
   if (flipHorizontally) {
     final double dx = -(rect.left + rect.width / 2.0);
     canvas.translate(-dx, 0.0);
@@ -634,8 +631,7 @@ void paintImage({
   }
   if (centerSlice == null) {
     final Rect sourceRect = alignment.inscribe(
-      sourceSize,
-      Offset.zero & inputSize,
+      sourceSize, Offset.zero & inputSize,
     );
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
@@ -652,7 +648,8 @@ void paintImage({
         canvas.drawImageNine(image, _scaleRect(centerSlice, scale), _scaleRect(tileRect, scale), paint);
     }
   }
-  if (needSave) canvas.restore();
+  if (needSave)
+    canvas.restore();
 
   if (invertedCanvas) {
     canvas.restore();
@@ -679,9 +676,9 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
 
   return <Rect>[
     for (int i = startX; i <= stopX; ++i)
-      for (int j = startY; j <= stopY; ++j) fundamentalRect.shift(Offset(i * strideX, j * strideY)),
+      for (int j = startY; j <= stopY; ++j)
+        fundamentalRect.shift(Offset(i * strideX, j * strideY)),
   ];
 }
 
-Rect _scaleRect(Rect rect, double scale) =>
-    Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale, rect.bottom * scale);
+Rect _scaleRect(Rect rect, double scale) => Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale, rect.bottom * scale);

@@ -26,16 +26,19 @@ Future<void> main() async {
     await binding.runTest(() async {
       final Completer<String> completer = Completer<String>();
 
-      completer.future.then((String value) {}, onError: (Object error, StackTrace stack) {
-        assert(stack is stack_trace.Chain);
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: error,
-          stack: stack,
-        ));
-      });
+      completer.future.then(
+        (String value) {},
+        onError: (Object error, StackTrace stack) {
+          assert(stack is stack_trace.Chain);
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: error,
+            stack: stack,
+          ));
+        }
+      );
 
       completer.completeError(const CustomException());
-    }, () {});
+    }, () { });
 
     final FlutterErrorDetails details = await errorCompleter.future;
     expect(details, isNotNull);

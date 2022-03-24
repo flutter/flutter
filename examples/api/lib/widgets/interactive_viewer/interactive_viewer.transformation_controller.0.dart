@@ -30,8 +30,10 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 /// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget> with TickerProviderStateMixin {
-  final TransformationController _transformationController = TransformationController();
+class _MyStatefulWidgetState extends State<MyStatefulWidget>
+    with TickerProviderStateMixin {
+  final TransformationController _transformationController =
+      TransformationController();
   Animation<Matrix4>? _animationReset;
   late final AnimationController _controllerReset;
 

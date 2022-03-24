@@ -183,12 +183,10 @@ void main() {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('14').first);
       await tester.tap(find.text('SAVE'));
-      expect(
-          await range,
-          DateTimeRange(
-            start: DateTime(2016, DateTime.january, 12),
-            end: DateTime(2016, DateTime.january, 14),
-          ));
+      expect(await range, DateTimeRange(
+        start: DateTime(2016, DateTime.january, 12),
+        end: DateTime(2016, DateTime.january, 14),
+      ));
     });
   });
 
@@ -198,12 +196,10 @@ void main() {
       await tester.tap(find.text('11').first);
       await tester.tap(find.text('15').first);
       await tester.tap(find.text('SAVE'));
-      expect(
-          await range,
-          DateTimeRange(
-            start: DateTime(2016, DateTime.january, 11),
-            end: DateTime(2016, DateTime.january, 15),
-          ));
+      expect(await range, DateTimeRange(
+        start: DateTime(2016, DateTime.january, 11),
+        end: DateTime(2016, DateTime.january, 15),
+      ));
     });
   });
 
@@ -212,12 +208,10 @@ void main() {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('SAVE'));
-      expect(
-          await range,
-          DateTimeRange(
-            start: DateTime(2016, DateTime.january, 12),
-            end: DateTime(2016, DateTime.january, 12),
-          ));
+      expect(await range, DateTimeRange(
+        start: DateTime(2016, DateTime.january, 12),
+        end: DateTime(2016, DateTime.january, 12),
+      ));
     });
   });
 
@@ -295,12 +289,10 @@ void main() {
       await tester.tap(find.byIcon(Icons.edit));
       await tester.pumpAndSettle();
       await tester.tap(find.text('OK'));
-      expect(
-          await range,
-          DateTimeRange(
-            start: DateTime(2016, DateTime.january, 12),
-            end: DateTime(2016, DateTime.january, 14),
-          ));
+      expect(await range, DateTimeRange(
+        start: DateTime(2016, DateTime.january, 12),
+        end: DateTime(2016, DateTime.january, 14),
+      ));
     });
   });
 
@@ -351,34 +343,34 @@ void main() {
   });
 
   testWidgets('OK Cancel button layout', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection) {
-      return MaterialApp(
-        home: Material(
-          child: Center(
-            child: Builder(
-              builder: (BuildContext context) {
-                return ElevatedButton(
-                  child: const Text('X'),
-                  onPressed: () {
-                    showDateRangePicker(
-                      context: context,
-                      firstDate: DateTime(2001),
-                      lastDate: DateTime(2031, DateTime.december, 31),
-                      builder: (BuildContext context, Widget? child) {
-                        return Directionality(
-                          textDirection: textDirection,
-                          child: child ?? const SizedBox(),
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ),
-      );
-    }
+     Widget buildFrame(TextDirection textDirection) {
+       return MaterialApp(
+         home: Material(
+           child: Center(
+             child: Builder(
+               builder: (BuildContext context) {
+                 return ElevatedButton(
+                   child: const Text('X'),
+                   onPressed: () {
+                     showDateRangePicker(
+                       context: context,
+                       firstDate:DateTime(2001),
+                       lastDate: DateTime(2031, DateTime.december, 31),
+                       builder: (BuildContext context, Widget? child) {
+                         return Directionality(
+                           textDirection: textDirection,
+                           child: child ?? const SizedBox(),
+                         );
+                       },
+                     );
+                   },
+                 );
+               },
+             ),
+           ),
+         ),
+       );
+     }
 
     Future<void> showOkCancelDialog(TextDirection textDirection) async {
       await tester.pumpWidget(buildFrame(textDirection));
@@ -506,12 +498,10 @@ void main() {
         await tester.pumpAndSettle();
 
         // Should have selected Jan 18 - Jan 29
-        expect(
-            await range,
-            DateTimeRange(
-              start: DateTime(2016, DateTime.january, 18),
-              end: DateTime(2016, DateTime.january, 29),
-            ));
+        expect(await range, DateTimeRange(
+          start: DateTime(2016, DateTime.january, 18),
+          end: DateTime(2016, DateTime.january, 29),
+        ));
       });
     });
 
@@ -573,12 +563,10 @@ void main() {
         await tester.pumpAndSettle();
 
         // Should have selected Jan 18 - Mar 17
-        expect(
-            await range,
-            DateTimeRange(
-              start: DateTime(2016, DateTime.january, 18),
-              end: DateTime(2016, DateTime.march, 17),
-            ));
+        expect(await range, DateTimeRange(
+          start: DateTime(2016, DateTime.january, 18),
+          end: DateTime(2016, DateTime.march, 17),
+        ));
       });
     });
 
@@ -622,12 +610,10 @@ void main() {
         await tester.pumpAndSettle();
 
         // Should have selected Jan 19 - Mar 21
-        expect(
-            await range,
-            DateTimeRange(
-              start: DateTime(2016, DateTime.january, 19),
-              end: DateTime(2016, DateTime.january, 21),
-            ));
+        expect(await range, DateTimeRange(
+          start: DateTime(2016, DateTime.january, 19),
+          end: DateTime(2016, DateTime.january, 21),
+        ));
       }, textDirection: TextDirection.rtl);
     });
   });
@@ -672,12 +658,10 @@ void main() {
     testWidgets('Initial date is the default', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         await tester.tap(find.text('OK'));
-        expect(
-            await range,
-            DateTimeRange(
-              start: DateTime(2017, DateTime.january, 15),
-              end: DateTime(2017, DateTime.january, 17),
-            ));
+        expect(await range, DateTimeRange(
+          start: DateTime(2017, DateTime.january, 15),
+          end: DateTime(2017, DateTime.january, 17),
+        ));
       });
     });
 
@@ -699,12 +683,10 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('SAVE'));
 
-        expect(
-            await range,
-            DateTimeRange(
-              start: DateTime(2016, DateTime.december, 25),
-              end: DateTime(2016, DateTime.december, 27),
-            ));
+        expect(await range, DateTimeRange(
+          start: DateTime(2016, DateTime.december, 25),
+          end: DateTime(2016, DateTime.december, 27),
+        ));
       });
     });
 
@@ -715,12 +697,10 @@ void main() {
         await tester.enterText(find.byType(TextField).at(1), '12/27/2016');
         await tester.tap(find.text('OK'));
 
-        expect(
-            await range,
-            DateTimeRange(
-              start: DateTime(2016, DateTime.december, 25),
-              end: DateTime(2016, DateTime.december, 27),
-            ));
+        expect(await range, DateTimeRange(
+          start: DateTime(2016, DateTime.december, 25),
+          end: DateTime(2016, DateTime.december, 27),
+        ));
       });
     });
 
@@ -813,12 +793,13 @@ void main() {
     });
 
     testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
+
       // Given a custom paint for an input decoration, extract the border and
       // fill color and test them against the expected values.
       void _testInputDecorator(CustomPaint decoratorPaint, InputBorder expectedBorder, Color expectedContainerColor) {
-        final dynamic /*_InputBorderPainter*/ inputBorderPainter = decoratorPaint.foregroundPainter;
+        final dynamic/*_InputBorderPainter*/ inputBorderPainter = decoratorPaint.foregroundPainter;
         // ignore: avoid_dynamic_calls
-        final dynamic /*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+        final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
         // ignore: avoid_dynamic_calls
         final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
         // ignore: avoid_dynamic_calls
@@ -1109,15 +1090,13 @@ class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {
   _RestorableDateRangePickerDialogTestWidgetState createState() => _RestorableDateRangePickerDialogTestWidgetState();
 }
 
-class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableDateRangePickerDialogTestWidget>
-    with RestorationMixin {
+class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableDateRangePickerDialogTestWidget> with RestorationMixin {
   @override
   String? get restorationId => 'scaffold_state';
 
   final RestorableDateTimeN _startDate = RestorableDateTimeN(DateTime(2021));
   final RestorableDateTimeN _endDate = RestorableDateTimeN(DateTime(2021, 1, 5));
-  late final RestorableRouteFuture<DateTimeRange?> _restorableDateRangePickerRouteFuture =
-      RestorableRouteFuture<DateTimeRange?>(
+  late final RestorableRouteFuture<DateTimeRange?> _restorableDateRangePickerRouteFuture = RestorableRouteFuture<DateTimeRange?>(
     onComplete: _selectDateRange,
     onPresent: (NavigatorState navigator, Object? arguments) {
       return navigator.restorablePush(

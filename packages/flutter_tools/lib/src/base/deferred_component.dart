@@ -200,11 +200,10 @@ class LoadingUnit {
         if (loadingUnitMap['id'] == 1) {
           continue; // Skip base unit
         }
-        loadingUnits.add(
-          LoadingUnit(
-              id: loadingUnitMap['id'] as int,
-              path: loadingUnitMap['path'] as String,
-              libraries: List<String>.from(loadingUnitMap['libraries'] as List<dynamic>)),
+        loadingUnits.add(LoadingUnit(
+          id: loadingUnitMap['id'] as int,
+          path: loadingUnitMap['path'] as String,
+          libraries: List<String>.from(loadingUnitMap['libraries'] as List<dynamic>)),
         );
       }
     }

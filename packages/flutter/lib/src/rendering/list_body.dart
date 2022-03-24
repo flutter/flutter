@@ -8,7 +8,7 @@ import 'box.dart';
 import 'object.dart';
 
 /// Parent data for use with [RenderListBody].
-class ListBodyParentData extends ContainerBoxParentData<RenderBox> {}
+class ListBodyParentData extends ContainerBoxParentData<RenderBox> { }
 
 typedef _ChildSizingFunction = double Function(RenderBox child);
 
@@ -23,9 +23,8 @@ typedef _ChildSizingFunction = double Function(RenderBox child);
 /// must be given unlimited space in the main axis, typically by being contained
 /// in a viewport with a scrolling direction that matches the box's main axis.
 class RenderListBody extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, ListBodyParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, ListBodyParentData> {
+    with ContainerRenderObjectMixin<RenderBox, ListBodyParentData>,
+         RenderBoxContainerDefaultsMixin<RenderBox, ListBodyParentData> {
   /// Creates a render object that arranges its children sequentially along a
   /// given axis.
   ///
@@ -33,14 +32,15 @@ class RenderListBody extends RenderBox
   RenderListBody({
     List<RenderBox>? children,
     AxisDirection axisDirection = AxisDirection.down,
-  })  : assert(axisDirection != null),
-        _axisDirection = axisDirection {
+  }) : assert(axisDirection != null),
+       _axisDirection = axisDirection {
     addAll(children);
   }
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! ListBodyParentData) child.parentData = ListBodyParentData();
+    if (child.parentData is! ListBodyParentData)
+      child.parentData = ListBodyParentData();
   }
 
   /// The direction in which the children are laid out.
@@ -51,7 +51,8 @@ class RenderListBody extends RenderBox
   AxisDirection _axisDirection;
   set axisDirection(AxisDirection value) {
     assert(value != null);
-    if (_axisDirection == value) return;
+    if (_axisDirection == value)
+      return;
     _axisDirection = value;
     markNeedsLayout();
   }
@@ -91,10 +92,12 @@ class RenderListBody extends RenderBox
     assert(() {
       switch (mainAxis) {
         case Axis.horizontal:
-          if (!constraints.hasBoundedWidth) return true;
+          if (!constraints.hasBoundedWidth)
+            return true;
           break;
         case Axis.vertical:
-          if (!constraints.hasBoundedHeight) return true;
+          if (!constraints.hasBoundedHeight)
+            return true;
           break;
       }
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -113,10 +116,12 @@ class RenderListBody extends RenderBox
     assert(() {
       switch (mainAxis) {
         case Axis.horizontal:
-          if (constraints.hasBoundedHeight) return true;
+          if (constraints.hasBoundedHeight)
+            return true;
           break;
         case Axis.vertical:
-          if (constraints.hasBoundedWidth) return true;
+          if (constraints.hasBoundedWidth)
+            return true;
           break;
       }
       // TODO(ianh): Detect if we're actually nested blocks and say something
@@ -301,7 +306,8 @@ class RenderListBody extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
+
 }

@@ -57,7 +57,8 @@ class ObserverList<T> extends Iterable<T> {
 
   @override
   bool contains(Object? element) {
-    if (_list.length < 3) return _list.contains(element);
+    if (_list.length < 3)
+      return _list.contains(element);
 
     if (_isDirty) {
       _set.addAll(_list);

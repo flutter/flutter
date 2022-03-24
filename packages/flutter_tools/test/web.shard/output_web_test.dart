@@ -32,21 +32,28 @@ void main() {
   });
 
   Future<void> start({bool verbose = false}) async {
-    // The non-test project has a loop around its breakpoints.
-    // No need to start paused as all breakpoint would be eventually reached.
-    await flutter.run(withDebugger: true, chrome: true, expressionEvaluation: true, additionalCommandArgs: <String>[
-      if (verbose) '--verbose',
-      '--web-renderer=html',
-    ]);
+      // The non-test project has a loop around its breakpoints.
+      // No need to start paused as all breakpoint would be eventually reached.
+      await flutter.run(
+        withDebugger: true,
+        chrome: true,
+        expressionEvaluation: true,
+        additionalCommandArgs: <String>[
+          if (verbose) '--verbose',
+          '--web-renderer=html',
+        ]);
   }
 
   Future<void> evaluate() async {
-    final ObjRef res = await flutter.evaluate('package:characters/characters.dart', 'true');
-    expect(res, isA<InstanceRef>().having((InstanceRef o) => o.kind, 'kind', 'Bool'));
+    final ObjRef res =
+      await flutter.evaluate('package:characters/characters.dart', 'true');
+    expect(res, isA<InstanceRef>()
+      .having((InstanceRef o) => o.kind, 'kind', 'Bool'));
   }
 
   Future<void> sendEvent(Map<String, Object> event) async {
-    final VmService client = await vmServiceConnectUri('${flutter.vmServiceWsUri}');
+    final VmService client = await vmServiceConnectUri(
+      '${flutter.vmServiceWsUri}');
     final Response result = await client.callServiceExtension(
       'ext.dwds.sendEvent',
       args: event,
@@ -56,7 +63,8 @@ void main() {
   }
 
   testWithoutContext('flutter run outputs info messages from dwds in verbose mode', () async {
-    final Future<dynamic> info = expectLater(flutter.stdout, emitsThrough(contains('Loaded debug metadata')));
+    final Future<dynamic> info = expectLater(
+      flutter.stdout, emitsThrough(contains('Loaded debug metadata')));
     await start(verbose: true);
     await evaluate();
     await flutter.stop();
@@ -64,7 +72,8 @@ void main() {
   });
 
   testWithoutContext('flutter run outputs warning messages from dwds in non-verbose mode', () async {
-    final Future<dynamic> warning = expectLater(flutter.stderr, emitsThrough(contains('Ignoring unknown event')));
+    final Future<dynamic> warning = expectLater(
+      flutter.stderr, emitsThrough(contains('Ignoring unknown event')));
     await start();
     await sendEvent(<String, Object>{'type': 'DevtoolsEvent'});
     await warning;

@@ -24,7 +24,8 @@ class PageStorageKey<T> extends ValueKey<T> {
 
 @immutable
 class _StorageEntryIdentifier {
-  const _StorageEntryIdentifier(this.keys) : assert(keys != null);
+  const _StorageEntryIdentifier(this.keys)
+    : assert(keys != null);
 
   final List<PageStorageKey<dynamic>> keys;
 
@@ -32,8 +33,10 @@ class _StorageEntryIdentifier {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is _StorageEntryIdentifier && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _StorageEntryIdentifier
+        && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
   }
 
   @override
@@ -53,7 +56,8 @@ class PageStorageBucket {
   static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
     final Widget widget = context.widget;
     final Key? key = widget.key;
-    if (key is PageStorageKey) keys.add(key);
+    if (key is PageStorageKey)
+      keys.add(key);
     return widget is! PageStorage;
   }
 
@@ -81,13 +85,14 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then the `data` is not saved.
-  void writeState(BuildContext context, dynamic data, {Object? identifier}) {
+  void writeState(BuildContext context, dynamic data, { Object? identifier }) {
     _storage ??= <Object, dynamic>{};
     if (identifier != null) {
       _storage![identifier] = data;
     } else {
       final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
-      if (contextIdentifier.isNotEmpty) _storage![contextIdentifier] = data;
+      if (contextIdentifier.isNotEmpty)
+        _storage![contextIdentifier] = data;
     }
   }
 
@@ -99,9 +104,11 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
-  dynamic readState(BuildContext context, {Object? identifier}) {
-    if (_storage == null) return null;
-    if (identifier != null) return _storage![identifier];
+  dynamic readState(BuildContext context, { Object? identifier }) {
+    if (_storage == null)
+      return null;
+    if (identifier != null)
+      return _storage![identifier];
     final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
     return contextIdentifier.isNotEmpty ? _storage![contextIdentifier] : null;
   }
@@ -149,8 +156,8 @@ class PageStorage extends StatelessWidget {
     Key? key,
     required this.bucket,
     required this.child,
-  })  : assert(bucket != null),
-        super(key: key);
+  }) : assert(bucket != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///

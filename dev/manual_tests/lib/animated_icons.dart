@@ -39,16 +39,13 @@ class IconSampleRow extends StatefulWidget {
 }
 
 class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderStateMixin {
-  late final AnimationController progress =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+  late final AnimationController progress = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: InkWell(
-        onTap: () {
-          progress.forward(from: 0.0);
-        },
+        onTap: () { progress.forward(from: 0.0); },
         child: AnimatedIcon(
           icon: widget.sample.icon,
           progress: progress,
@@ -58,9 +55,7 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
       title: Text(widget.sample.description),
       subtitle: Slider(
         value: progress.value,
-        onChanged: (double v) {
-          progress.animateTo(v, duration: Duration.zero);
-        },
+        onChanged: (double v) { progress.animateTo(v, duration: Duration.zero); },
       ),
     );
   }
@@ -82,19 +77,25 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
   }
 }
 
-const List<IconSample> samples = <IconSample>[
+const List<IconSample> samples = <IconSample> [
   IconSample(AnimatedIcons.arrow_menu, 'arrow_menu'),
   IconSample(AnimatedIcons.menu_arrow, 'menu_arrow'),
+
   IconSample(AnimatedIcons.close_menu, 'close_menu'),
   IconSample(AnimatedIcons.menu_close, 'menu_close'),
+
   IconSample(AnimatedIcons.home_menu, 'home_menu'),
   IconSample(AnimatedIcons.menu_home, 'menu_home'),
+
   IconSample(AnimatedIcons.play_pause, 'play_pause'),
   IconSample(AnimatedIcons.pause_play, 'pause_play'),
+
   IconSample(AnimatedIcons.list_view, 'list_view'),
   IconSample(AnimatedIcons.view_list, 'view_list'),
+
   IconSample(AnimatedIcons.add_event, 'add_event'),
   IconSample(AnimatedIcons.event_add, 'event_add'),
+
   IconSample(AnimatedIcons.ellipsis_search, 'ellipsis_search'),
   IconSample(AnimatedIcons.search_ellipsis, 'search_ellipsis'),
 ];

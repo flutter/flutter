@@ -121,38 +121,37 @@ class RadioThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        mouseCursor,
-        fillColor,
-        overlayColor,
-        splashRadius,
-        materialTapTargetSize,
-        visualDensity,
-      );
+    mouseCursor,
+    fillColor,
+    overlayColor,
+    splashRadius,
+    materialTapTargetSize,
+    visualDensity,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is RadioThemeData &&
-        other.mouseCursor == mouseCursor &&
-        other.fillColor == fillColor &&
-        other.overlayColor == overlayColor &&
-        other.splashRadius == splashRadius &&
-        other.materialTapTargetSize == materialTapTargetSize &&
-        other.visualDensity == visualDensity;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RadioThemeData
+      && other.mouseCursor == mouseCursor
+      && other.fillColor == fillColor
+      && other.overlayColor == overlayColor
+      && other.splashRadius == splashRadius
+      && other.materialTapTargetSize == materialTapTargetSize
+      && other.visualDensity == visualDensity;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
-    properties
-        .add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
   }
 
@@ -163,7 +162,8 @@ class RadioThemeData with Diagnosticable {
     T Function(T?, T?, double) lerpFunction,
   ) {
     // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
 }

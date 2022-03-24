@@ -12,6 +12,7 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 import 'common.dart';
 
 void main() {
+
   late Directory testDirectory;
   late File testTarget;
   late Device device;
@@ -59,13 +60,10 @@ void main() {
     };
     const String resultFileName = 'fake_result';
     void driveCallback(List<String> arguments) {
-      final File resultFile = File('${testDirectory.absolute.path}/build/$resultFileName.json')
-        ..createSync(recursive: true);
+      final File resultFile = File('${testDirectory.absolute.path}/build/$resultFileName.json')..createSync(recursive: true);
       resultFile.writeAsStringSync(json.encode(fakeData));
     }
-
-    final PerfTest perfTest = PerfTest(testDirectory.absolute.path, testTarget.absolute.path, 'test_file',
-        resultFilename: resultFileName, device: device, flutterDriveCallback: driveCallback);
+    final PerfTest perfTest = PerfTest(testDirectory.absolute.path, testTarget.absolute.path, 'test_file', resultFilename: resultFileName, device: device, flutterDriveCallback: driveCallback);
     final TaskResult result = await perfTest.run();
     expect(result.data!['frame_count'], 5);
   });
@@ -111,13 +109,10 @@ void main() {
     };
     const String resultFileName = 'fake_result';
     void driveCallback(List<String> arguments) {
-      final File resultFile = File('${testDirectory.absolute.path}/build/$resultFileName.json')
-        ..createSync(recursive: true);
+      final File resultFile = File('${testDirectory.absolute.path}/build/$resultFileName.json')..createSync(recursive: true);
       resultFile.writeAsStringSync(json.encode(fakeData));
     }
-
-    final PerfTest perfTest = PerfTest(testDirectory.absolute.path, testTarget.absolute.path, 'test_file',
-        resultFilename: resultFileName, device: device, flutterDriveCallback: driveCallback);
+    final PerfTest perfTest = PerfTest(testDirectory.absolute.path, testTarget.absolute.path, 'test_file', resultFilename: resultFileName, device: device, flutterDriveCallback: driveCallback);
     final TaskResult result = await perfTest.run();
     expect(result.data!['30hz_frame_percentage'], 0.1);
     expect(result.data!['60hz_frame_percentage'], 0.2);

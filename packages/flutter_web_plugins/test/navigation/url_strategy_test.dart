@@ -121,6 +121,7 @@ void main() {
       location.pathname = '/foo/bar';
       final PathUrlStrategy strategy = PathUrlStrategy(location);
 
+
       location.search = '?q=1';
       expect(strategy.getPath(), '/bar?q=1');
 

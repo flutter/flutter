@@ -142,9 +142,9 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
       'name': name,
       if (package != null) 'package': package,
       if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
+      if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
       if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage,
+      if (defaultPackage != null) kDefaultPackage : defaultPackage,
       // Mustache doesn't support complex types.
       'supportsEmbeddingV1': _supportedEmbeddings.contains('1'),
       'supportsEmbeddingV2': _supportedEmbeddings.contains('2'),
@@ -197,19 +197,23 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     }
     if (mainPluginClass == null || !mainClassFound) {
       assert(mainClassCandidates.length <= 2);
-      throwToolExit("The plugin `$name` doesn't have a main class defined in ${mainClassCandidates.join(' or ')}. "
-          "This is likely to due to an incorrect `androidPackage: $package` or `mainClass` entry in the plugin's pubspec.yaml.\n"
-          'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
-          'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile. ');
+      throwToolExit(
+        "The plugin `$name` doesn't have a main class defined in ${mainClassCandidates.join(' or ')}. "
+        "This is likely to due to an incorrect `androidPackage: $package` or `mainClass` entry in the plugin's pubspec.yaml.\n"
+        'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
+        'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile. '
+      );
     }
 
     final String mainClassContent = mainPluginClass.readAsStringSync();
-    if (mainClassContent.contains('io.flutter.embedding.engine.plugins.FlutterPlugin')) {
+    if (mainClassContent
+        .contains('io.flutter.embedding.engine.plugins.FlutterPlugin')) {
       supportedEmbeddings.add('2');
     } else {
       supportedEmbeddings.add('1');
     }
-    if (mainClassContent.contains('PluginRegistry') && mainClassContent.contains('registerWith')) {
+    if (mainClassContent.contains('PluginRegistry')
+        && mainClassContent.contains('registerWith')) {
       supportedEmbeddings.add('1');
     }
     return supportedEmbeddings;
@@ -285,9 +289,9 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
       'name': name,
       'prefix': classPrefix,
       if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
+      if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
       if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage,
+      if (defaultPackage != null) kDefaultPackage : defaultPackage,
     };
   }
 }
@@ -365,7 +369,8 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
 ///
 /// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
 /// [pluginClass] will be the entry point to the plugin's native code.
-class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, VariantPlatformPlugin {
+class WindowsPlugin extends PluginPlatform
+    implements NativeOrDartPlugin, VariantPlatformPlugin {
   const WindowsPlugin({
     required this.name,
     this.pluginClass,
@@ -580,6 +585,8 @@ class WebPlugin extends PluginPlatform {
 
 final RegExp _internalCapitalLetterRegex = RegExp(r'(?=(?!^)[A-Z])');
 String _filenameForCppClass(String className) {
-  return className.splitMapJoin(_internalCapitalLetterRegex,
-      onMatch: (_) => '_', onNonMatch: (String n) => n.toLowerCase());
+  return className.splitMapJoin(
+    _internalCapitalLetterRegex,
+    onMatch: (_) => '_',
+    onNonMatch: (String n) => n.toLowerCase());
 }

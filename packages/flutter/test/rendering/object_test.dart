@@ -17,12 +17,11 @@ void main() {
     final TestRenderObject renderObject = TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
     final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () {
-      onNeedVisualUpdateCallCount += 1;
+      onNeedVisualUpdateCallCount +=1;
     });
     owner.ensureSemantics();
     renderObject.attach(owner);
-    renderObject.layout(
-        const BoxConstraints.tightForFinite()); // semantics are only calculated if layout information is up to date.
+    renderObject.layout(const BoxConstraints.tightForFinite());  // semantics are only calculated if layout information is up to date.
     owner.flushSemantics();
 
     expect(onNeedVisualUpdateCallCount, 1);
@@ -57,7 +56,7 @@ void main() {
     expect(errorDetails, isNotNull);
     expect(errorDetails.stack, isNotNull);
     // Check the ErrorDetails without the stack trace
-    final List<String> lines = errorDetails.toString().split('\n');
+    final List<String> lines =  errorDetails.toString().split('\n');
     // The lines in the middle of the error message contain the stack trace
     // which will change depending on where the test is run.
     expect(lines.length, greaterThan(8));
@@ -92,10 +91,12 @@ void main() {
       ..previousSibling = RenderOpacity();
     expect(() => data1.detach(), throwsAssertionError);
 
-    final TestParentData data2 = TestParentData()..previousSibling = RenderOpacity();
+    final TestParentData data2 = TestParentData()
+      ..previousSibling = RenderOpacity();
     expect(() => data2.detach(), throwsAssertionError);
 
-    final TestParentData data3 = TestParentData()..nextSibling = RenderOpacity();
+    final TestParentData data3 = TestParentData()
+      ..nextSibling = RenderOpacity();
     expect(() => data3.detach(), throwsAssertionError);
   });
 
@@ -109,47 +110,37 @@ void main() {
   });
 
   test('PaintingContext.pushClipRect reuses the layer', () {
-    _testPaintingContextLayerReuse<ClipRectLayer>(
-        (PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+    _testPaintingContextLayerReuse<ClipRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
       return context.pushClipRect(true, offset, Rect.zero, painter, oldLayer: oldLayer as ClipRectLayer?);
     });
   });
 
   test('PaintingContext.pushClipRRect reuses the layer', () {
-    _testPaintingContextLayerReuse<ClipRRectLayer>(
-        (PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
-      return context.pushClipRRect(
-          true, offset, Rect.zero, RRect.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)), painter,
-          oldLayer: oldLayer as ClipRRectLayer?);
+    _testPaintingContextLayerReuse<ClipRRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+      return context.pushClipRRect(true, offset, Rect.zero, RRect.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)), painter, oldLayer: oldLayer as ClipRRectLayer?);
     });
   });
 
   test('PaintingContext.pushClipPath reuses the layer', () {
-    _testPaintingContextLayerReuse<ClipPathLayer>(
-        (PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+    _testPaintingContextLayerReuse<ClipPathLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
       return context.pushClipPath(true, offset, Rect.zero, Path(), painter, oldLayer: oldLayer as ClipPathLayer?);
     });
   });
 
   test('PaintingContext.pushColorFilter reuses the layer', () {
-    _testPaintingContextLayerReuse<ColorFilterLayer>(
-        (PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
-      return context.pushColorFilter(
-          offset, const ColorFilter.mode(Color.fromRGBO(0, 0, 0, 1.0), BlendMode.clear), painter,
-          oldLayer: oldLayer as ColorFilterLayer?);
+    _testPaintingContextLayerReuse<ColorFilterLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+      return context.pushColorFilter(offset, const ColorFilter.mode(Color.fromRGBO(0, 0, 0, 1.0), BlendMode.clear), painter, oldLayer: oldLayer as ColorFilterLayer?);
     });
   });
 
   test('PaintingContext.pushTransform reuses the layer', () {
-    _testPaintingContextLayerReuse<TransformLayer>(
-        (PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+    _testPaintingContextLayerReuse<TransformLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
       return context.pushTransform(true, offset, Matrix4.identity(), painter, oldLayer: oldLayer as TransformLayer?);
     });
   });
 
   test('PaintingContext.pushOpacity reuses the layer', () {
-    _testPaintingContextLayerReuse<OpacityLayer>(
-        (PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+    _testPaintingContextLayerReuse<OpacityLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
       return context.pushOpacity(offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
     });
   });
@@ -272,8 +263,7 @@ void _testPaintingContextLayerReuse<L extends Layer>(_LayerTestPaintCallback pai
   expect(box.paintedLayers[0], same(box.paintedLayers[1]));
 }
 
-typedef _LayerTestPaintCallback = Layer? Function(
-    PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer);
+typedef _LayerTestPaintCallback = Layer? Function(PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer);
 
 class _TestCustomLayerBox extends RenderBox {
   _TestCustomLayerBox(this.painter);
@@ -297,7 +287,7 @@ class _TestCustomLayerBox extends RenderBox {
   }
 }
 
-class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> {}
+class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> { }
 
 class TestRenderObject extends RenderObject {
   TestRenderObject({this.allowPaintBounds = false});
@@ -308,7 +298,7 @@ class TestRenderObject extends RenderObject {
   bool isRepaintBoundary = false;
 
   @override
-  void debugAssertDoesMeetConstraints() {}
+  void debugAssertDoesMeetConstraints() { }
 
   @override
   Rect get paintBounds {
@@ -317,10 +307,10 @@ class TestRenderObject extends RenderObject {
   }
 
   @override
-  void performLayout() {}
+  void performLayout() { }
 
   @override
-  void performResize() {}
+  void performResize() { }
 
   @override
   Rect get semanticBounds => const Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
@@ -344,7 +334,7 @@ class LeaderLayerRenderObject extends RenderObject {
   bool isRepaintBoundary = true;
 
   @override
-  void debugAssertDoesMeetConstraints() {}
+  void debugAssertDoesMeetConstraints() { }
 
   @override
   Rect get paintBounds {
@@ -359,10 +349,10 @@ class LeaderLayerRenderObject extends RenderObject {
   }
 
   @override
-  void performLayout() {}
+  void performLayout() { }
 
   @override
-  void performResize() {}
+  void performResize() { }
 
   @override
   Rect get semanticBounds => const Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
@@ -375,7 +365,7 @@ class TestThrowingRenderObject extends RenderObject {
   }
 
   @override
-  void debugAssertDoesMeetConstraints() {}
+  void debugAssertDoesMeetConstraints() { }
 
   @override
   Rect get paintBounds {
@@ -384,7 +374,7 @@ class TestThrowingRenderObject extends RenderObject {
   }
 
   @override
-  void performResize() {}
+  void performResize() { }
 
   @override
   Rect get semanticBounds {

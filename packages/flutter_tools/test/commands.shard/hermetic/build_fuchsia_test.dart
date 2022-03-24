@@ -39,7 +39,9 @@ void main() {
   );
   final Platform windowsPlatform = FakePlatform(
     operatingSystem: 'windows',
-    environment: const <String, String>{'FLUTTER_ROOT': '/'},
+    environment: const <String, String>{
+      'FLUTTER_ROOT': '/'
+    },
   );
   FakeFuchsiaSdk fuchsiaSdk;
 
@@ -100,7 +102,8 @@ void main() {
     testUsingContext('on Windows platform', () async {
       final BuildCommand command = BuildCommand();
       const String appName = 'app_name';
-      fileSystem.file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
+      fileSystem
+        .file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
         ..createSync(recursive: true)
         ..writeAsStringSync('{}');
       fileSystem.file('.packages').createSync();
@@ -122,7 +125,8 @@ void main() {
     testUsingContext('there is no Fuchsia kernel compiler', () async {
       final BuildCommand command = BuildCommand();
       const String appName = 'app_name';
-      fileSystem.file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
+      fileSystem
+        .file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
         ..createSync(recursive: true)
         ..writeAsStringSync('{}');
       fileSystem.file('.packages').createSync();
@@ -145,19 +149,19 @@ void main() {
   testUsingContext('Fuchsia build parts fit together right', () async {
     final BuildCommand command = BuildCommand();
     const String appName = 'app_name';
-    fileSystem.file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
-      ..createSync(recursive: true)
-      ..writeAsStringSync('{}');
+    fileSystem
+        .file(fileSystem.path.join('fuchsia', 'meta', '$appName.cmx'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{}');
     fileSystem.file('.packages').createSync();
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     pubspecFile.writeAsStringSync('name: $appName');
 
-    await createTestCommandRunner(command).run(const <String>['build', 'fuchsia']);
+    await createTestCommandRunner(command)
+      .run(const <String>['build', 'fuchsia']);
     final String farPath = fileSystem.path.join(
-      getFuchsiaBuildDirectory(),
-      'pkg',
-      'app_name-0.far',
+      getFuchsiaBuildDirectory(), 'pkg', 'app_name-0.far',
     );
 
     expect(fileSystem.file(farPath), exists);
@@ -178,7 +182,9 @@ class FakeFuchsiaPM extends Fake implements FuchsiaPM {
     if (!fileSystem.directory(buildPath).existsSync()) {
       return false;
     }
-    fileSystem.file(fileSystem.path.join(buildPath, 'meta', 'package')).createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path.join(buildPath, 'meta', 'package'))
+        .createSync(recursive: true);
     _appName = appName;
     return true;
   }
@@ -202,7 +208,9 @@ class FakeFuchsiaPM extends Fake implements FuchsiaPM {
     if (_appName == null) {
       return false;
     }
-    fileSystem.file(fileSystem.path.join(buildPath, '$_appName-0.far')).createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path.join(buildPath, '$_appName-0.far'))
+        .createSync(recursive: true);
     return true;
   }
 }
@@ -226,5 +234,6 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   final FuchsiaPM fuchsiaPM = FakeFuchsiaPM();
 
   @override
-  final FuchsiaKernelCompiler fuchsiaKernelCompiler = FakeFuchsiaKernelCompiler();
+  final FuchsiaKernelCompiler fuchsiaKernelCompiler =
+      FakeFuchsiaKernelCompiler();
 }

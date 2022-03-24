@@ -68,7 +68,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 
   late TestScenario currentValue;
   bool get resample {
-    switch (currentValue) {
+    switch(currentValue) {
       case TestScenario.resampleOn90Hz:
       case TestScenario.resampleOn59Hz:
         return true;
@@ -77,9 +77,8 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
         return false;
     }
   }
-
   double get frequency {
-    switch (currentValue) {
+    switch(currentValue) {
       case TestScenario.resampleOn90Hz:
       case TestScenario.resampleOff90Hz:
         return 90.0;
@@ -93,7 +92,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 
   @override
   String describeValue(TestScenario value) {
-    switch (value) {
+    switch(value) {
       case TestScenario.resampleOn90Hz:
         return 'resample on with 90Hz input';
       case TestScenario.resampleOn59Hz:
@@ -230,17 +229,18 @@ Map<String, dynamic> scrollSummary(
   double jankyCount = 0;
   double absJerkAvg = 0;
   int lostFrame = 0;
-  for (int i = 1; i < scrollOffset.length - 1; i += 1) {
-    if (frameTimestamp[i + 1] - frameTimestamp[i - 1] > 40E3 ||
+  for (int i = 1; i < scrollOffset.length-1; i += 1) {
+    if (frameTimestamp[i+1] - frameTimestamp[i-1] > 40E3 ||
         (i >= delays.length || delays[i] > const Duration(milliseconds: 16))) {
       // filter data points from slow frame building or input simulation artifact
       lostFrame += 1;
       continue;
     }
     //
-    final double absJerk = (scrollOffset[i - 1] + scrollOffset[i + 1] - 2 * scrollOffset[i]).abs();
+    final double absJerk = (scrollOffset[i-1] + scrollOffset[i+1] - 2*scrollOffset[i]).abs();
     absJerkAvg += absJerk;
-    if (absJerk > 0.5) jankyCount += 1;
+    if (absJerk > 0.5)
+      jankyCount += 1;
   }
   // expect(lostFrame < 0.1 * frameTimestamp.length, true);
   absJerkAvg /= frameTimestamp.length - lostFrame;

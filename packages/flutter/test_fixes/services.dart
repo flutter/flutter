@@ -7,9 +7,9 @@ import 'package:flutter/services.dart';
 void main() {
   // Changes made in https://github.com/flutter/flutter/pull/60320
   final SurfaceAndroidViewController surfaceController = SurfaceAndroidViewController(
-    viewId: 10,
-    viewType: 'FixTester',
-    layoutDirection: TextDirection.ltr,
+      viewId: 10,
+      viewType: 'FixTester',
+      layoutDirection: TextDirection.ltr,
   );
   int viewId = surfaceController.id;
   final SurfaceAndroidViewController surfaceController = SurfaceAndroidViewController(

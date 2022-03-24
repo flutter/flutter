@@ -17,7 +17,7 @@ import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
-  BuildAarCommand({required bool verboseHelp}) : super(verboseHelp: verboseHelp) {
+  BuildAarCommand({ required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag(
         'debug',
@@ -56,7 +56,7 @@ class BuildAarCommand extends BuildSubCommand {
       ..addOption(
         'output-dir',
         help: 'The absolute path to the directory where the repository is generated. '
-            'By default, this is "<current-directory>android/build".',
+              'By default, this is "<current-directory>android/build".',
       );
   }
 
@@ -68,8 +68,8 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-        DevelopmentArtifact.androidGenSnapshot,
-      };
+    DevelopmentArtifact.androidGenSnapshot,
+  };
 
   @override
   Future<CustomDimensions> get usageValues async {
@@ -113,21 +113,24 @@ class BuildAarCommand extends BuildSubCommand {
         stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName);
 
     final String? buildNumberArg = stringArg('build-number');
-    final String buildNumber =
-        argParser.options.containsKey('build-number') && buildNumberArg != null && buildNumberArg.isNotEmpty
-            ? buildNumberArg
-            : '1.0';
+    final String buildNumber = argParser.options.containsKey('build-number')
+      && buildNumberArg != null
+      && buildNumberArg.isNotEmpty
+      ? buildNumberArg
+      : '1.0';
 
     final File targetFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'));
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
-        androidBuildInfo.add(AndroidBuildInfo(
-          await getBuildInfo(
-            forcedBuildMode: BuildMode.fromName(buildMode),
-            forcedTargetFile: targetFile,
-          ),
-          targetArchs: targetArchitectures,
-        ));
+        androidBuildInfo.add(
+          AndroidBuildInfo(
+            await getBuildInfo(
+              forcedBuildMode: BuildMode.fromName(buildMode),
+              forcedTargetFile: targetFile,
+            ),
+            targetArchs: targetArchitectures,
+          )
+        );
       }
     }
     if (androidBuildInfo.isEmpty) {

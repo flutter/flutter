@@ -82,7 +82,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           },
           body: ListTile(
               title: Text(item.expandedValue),
-              subtitle: const Text('To delete this panel, tap the trash can icon'),
+              subtitle:
+                  const Text('To delete this panel, tap the trash can icon'),
               trailing: const Icon(Icons.delete),
               onTap: () {
                 setState(() {

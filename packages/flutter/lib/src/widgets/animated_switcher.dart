@@ -19,9 +19,9 @@ class _ChildEntry {
     required this.animation,
     required this.transition,
     required this.widgetChild,
-  })  : assert(animation != null),
-        assert(transition != null),
-        assert(controller != null);
+  }) : assert(animation != null),
+       assert(transition != null),
+       assert(controller != null);
 
   // The animation controller for the child's transition.
   final AnimationController controller;
@@ -117,12 +117,12 @@ class AnimatedSwitcher extends StatefulWidget {
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
     this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
-  })  : assert(duration != null),
-        assert(switchInCurve != null),
-        assert(switchOutCurve != null),
-        assert(transitionBuilder != null),
-        assert(layoutBuilder != null),
-        super(key: key);
+  }) : assert(duration != null),
+       assert(switchInCurve != null),
+       assert(switchOutCurve != null),
+       assert(transitionBuilder != null),
+       assert(layoutBuilder != null),
+       super(key: key);
 
   /// The current child widget to display. If there was a previous child, then
   /// that child will be faded out using the [switchOutCurve], while the new
@@ -273,13 +273,15 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     // transitions.
     if (widget.transitionBuilder != oldWidget.transitionBuilder) {
       _outgoingEntries.forEach(_updateTransitionForEntry);
-      if (_currentEntry != null) _updateTransitionForEntry(_currentEntry!);
+      if (_currentEntry != null)
+        _updateTransitionForEntry(_currentEntry!);
       _markChildWidgetCacheAsDirty();
     }
 
     final bool hasNewChild = widget.child != null;
     final bool hasOldChild = _currentEntry != null;
-    if (hasNewChild != hasOldChild || hasNewChild && !Widget.canUpdate(widget.child!, _currentEntry!.widgetChild)) {
+    if (hasNewChild != hasOldChild ||
+        hasNewChild && !Widget.canUpdate(widget.child!, _currentEntry!.widgetChild)) {
       // Child has changed, fade current entry out and add new entry.
       _childNumber += 1;
       _addEntryForNewChild(animate: true);
@@ -296,7 +298,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     }
   }
 
-  void _addEntryForNewChild({required bool animate}) {
+  void _addEntryForNewChild({ required bool animate }) {
     assert(animate || _currentEntry == null);
     if (_currentEntry != null) {
       assert(animate);
@@ -306,7 +308,8 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       _markChildWidgetCacheAsDirty();
       _currentEntry = null;
     }
-    if (widget.child == null) return;
+    if (widget.child == null)
+      return;
     final AnimationController controller = AnimationController(
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
@@ -378,8 +381,10 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
 
   @override
   void dispose() {
-    if (_currentEntry != null) _currentEntry!.controller.dispose();
-    for (final _ChildEntry entry in _outgoingEntries) entry.controller.dispose();
+    if (_currentEntry != null)
+      _currentEntry!.controller.dispose();
+    for (final _ChildEntry entry in _outgoingEntries)
+      entry.controller.dispose();
     super.dispose();
   }
 

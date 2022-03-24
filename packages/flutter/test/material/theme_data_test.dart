@@ -125,9 +125,7 @@ void main() {
     expect(darkTheme.primaryTextTheme.headline6!.color, typography.white.headline6!.color);
   });
 
-  testWidgets(
-      'Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop',
-      (WidgetTester tester) async {
+  testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(platform: defaultTargetPlatform);
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -326,8 +324,7 @@ void main() {
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
-  testWidgets('splashFactory is InkSparkle only for Android non-web when useMaterial3 is true',
-      (WidgetTester tester) async {
+  testWidgets('splashFactory is InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     // Basic check that this theme is in fact using material 3.
@@ -347,12 +344,10 @@ void main() {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(theme.splashFactory, equals(InkSplash.splashFactory));
-    }
+     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-      'splashFactory is InkSplash for every platform scenario, including Android non-web, when useMaterial3 is false',
-      (WidgetTester tester) async {
+  testWidgets('splashFactory is InkSplash for every platform scenario, including Android non-web, when useMaterial3 is false', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
 
     switch (debugDefaultTargetPlatformOverride!) {
@@ -380,8 +375,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('VisualDensity in ThemeData defaults to "compact" on desktop and "standard" on mobile',
-      (WidgetTester tester) async {
+  testWidgets('VisualDensity in ThemeData defaults to "compact" on desktop and "standard" on mobile', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
@@ -432,8 +426,7 @@ void main() {
     expect(expanded.maxWidth, equals(double.infinity));
     expect(expanded.maxHeight, equals(double.infinity));
 
-    final BoxConstraints contracted =
-        const VisualDensity(horizontal: -4.0, vertical: -4.0).effectiveConstraints(square);
+    final BoxConstraints contracted = const VisualDensity(horizontal: -4.0, vertical: -4.0).effectiveConstraints(square);
     expect(contracted.minWidth, equals(0));
     expect(contracted.minHeight, equals(0));
     expect(expanded.maxWidth, equals(double.infinity));
@@ -593,8 +586,7 @@ void main() {
     expect(hoverColorBlack.hashCode != hoverColorWhite.hashCode, true);
   });
 
-  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments',
-      (WidgetTester tester) async {
+  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
@@ -915,8 +907,7 @@ void main() {
     expect(themeDataCopy.textSelectionTheme.cursorColor, equals(otherTheme.textSelectionTheme.cursorColor));
     expect(themeDataCopy.textSelectionTheme.selectionColor, equals(otherTheme.textSelectionTheme.selectionColor));
     expect(themeDataCopy.textSelectionTheme.cursorColor, equals(otherTheme.textSelectionTheme.cursorColor));
-    expect(themeDataCopy.textSelectionTheme.selectionHandleColor,
-        equals(otherTheme.textSelectionTheme.selectionHandleColor));
+    expect(themeDataCopy.textSelectionTheme.selectionHandleColor, equals(otherTheme.textSelectionTheme.selectionHandleColor));
     expect(themeDataCopy.backgroundColor, equals(otherTheme.backgroundColor));
     expect(themeDataCopy.dialogBackgroundColor, equals(otherTheme.dialogBackgroundColor));
     expect(themeDataCopy.indicatorColor, equals(otherTheme.indicatorColor));
@@ -1101,8 +1092,10 @@ void main() {
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
     ThemeData.light().debugFillProperties(properties);
-    final List<String> propertyNameList =
-        properties.properties.map((final DiagnosticsNode node) => node.name).whereType<String>().toList();
+    final List<String> propertyNameList = properties.properties
+      .map((final DiagnosticsNode node) => node.name)
+      .whereType<String>()
+      .toList();
     final Set<String> propertyNames = propertyNameList.toSet();
 
     // Ensure there are no duplicates.

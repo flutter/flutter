@@ -31,7 +31,7 @@ void main() {
 
     // The purpose of the test is to ensure that this change does not throw.
     await tester.pumpWidget(buildWidget(
-      blockedText: 'two',
+        blockedText: 'two',
     ));
 
     expect(semantics, hasSemantics(expectedSemantics));
@@ -47,29 +47,29 @@ void main() {
   });
 }
 
-Widget buildWidget({required String blockedText, bool blocking = true}) {
+Widget buildWidget({ required String blockedText, bool blocking = true }) {
   assert(blockedText != null);
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Stack(
-      fit: StackFit.expand,
-      children: <Widget>[
-        Semantics(
-          container: true,
-          child: ListView(
-            children: <Widget>[
-              Text(blockedText),
-            ],
-          ),
-        ),
-        BlockSemantics(
-          blocking: blocking,
-          child: Semantics(
-            label: 'hello',
+        fit: StackFit.expand,
+        children: <Widget>[
+          Semantics(
             container: true,
+            child: ListView(
+              children: <Widget>[
+                Text(blockedText),
+              ],
+            ),
           ),
-        ),
-      ],
+          BlockSemantics(
+            blocking: blocking,
+            child: Semantics(
+              label: 'hello',
+              container: true,
+            ),
+          ),
+        ],
     ),
   );
 }

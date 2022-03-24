@@ -37,8 +37,8 @@ Future<List<TimelineEvent>> fetchTimelineEvents() async {
 
 Future<List<TimelineEvent>> fetchInterestingEvents(Set<String> interestingLabels) async {
   return (await fetchTimelineEvents()).where((TimelineEvent event) {
-    return interestingLabels.contains(event.json!['name']) &&
-        event.json!['ph'] == 'B'; // "Begin" mark of events, vs E which is for the "End" mark of events.
+    return interestingLabels.contains(event.json!['name'])
+        && event.json!['ph'] == 'B'; // "Begin" mark of events, vs E which is for the "End" mark of events.
   }).toList();
 }
 

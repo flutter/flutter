@@ -31,7 +31,8 @@ class Response {
         _failureDetails = null;
 
   /// Constructor for failure response.
-  Response.someTestsFailed(this._failureDetails, {this.data}) : _allTestsPassed = false;
+  Response.someTestsFailed(this._failureDetails, {this.data})
+      : _allTestsPassed = false;
 
   /// Constructor for failure response.
   Response.toolException({String? ex})
@@ -54,7 +55,8 @@ class Response {
   bool get allTestsPassed => _allTestsPassed;
 
   /// If the result are failures get the formatted details.
-  String get formattedFailureDetails => _allTestsPassed ? '' : formatFailures(_failureDetails!);
+  String get formattedFailureDetails =>
+      _allTestsPassed ? '' : formatFailures(_failureDetails!);
 
   /// Failure details as a list.
   List<Failure>? get failureDetails => _failureDetails;
@@ -265,8 +267,8 @@ class WebDriverCommand {
   ///
   /// Used for converting messages to json format.
   static Map<String, dynamic> typeToMap(WebDriverCommandType type) => <String, dynamic>{
-        'web_driver_command': '$type',
-      };
+    'web_driver_command': '$type',
+  };
 }
 
 /// Template methods each class that responses the driver side inputs must
@@ -279,11 +281,12 @@ class WebDriverCommand {
 /// For the io implementation [IOCallbackManager].
 abstract class CallbackManager {
   /// The callback function to response the driver side input.
-  Future<Map<String, dynamic>> callback(Map<String, String> params, IntegrationTestResults testRunner);
+  Future<Map<String, dynamic>> callback(
+      Map<String, String> params, IntegrationTestResults testRunner);
 
   /// Takes a screenshot of the application.
   /// Returns the data that is sent back to the host.
-  Future<Map<String, dynamic>> takeScreenshot(String screenshot);
+   Future<Map<String, dynamic>> takeScreenshot(String screenshot);
 
   /// Android only. Converts the Flutter surface to an image view.
   Future<void> convertFlutterSurfaceToImage();

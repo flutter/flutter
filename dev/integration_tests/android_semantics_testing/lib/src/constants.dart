@@ -81,16 +81,13 @@ class AndroidSemanticsAction {
   static const AndroidSemanticsAction accessibilityFocus = AndroidSemanticsAction._(_kAccessibilityFocusIndex);
 
   /// Matches `AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS`.
-  static const AndroidSemanticsAction clearAccessibilityFocus =
-      AndroidSemanticsAction._(_kClearAccessibilityFocusIndex);
+  static const AndroidSemanticsAction clearAccessibilityFocus = AndroidSemanticsAction._(_kClearAccessibilityFocusIndex);
 
   /// Matches `AccessibilityAction.ACTION_NEXT_AT_MOVEMENT_GRANULARITY`.
-  static const AndroidSemanticsAction nextAtMovementGranularity =
-      AndroidSemanticsAction._(_kNextAtMovementGranularityIndex);
+  static const AndroidSemanticsAction nextAtMovementGranularity = AndroidSemanticsAction._(_kNextAtMovementGranularityIndex);
 
   /// Matches `AccessibilityAction.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY`.
-  static const AndroidSemanticsAction previousAtMovementGranularity =
-      AndroidSemanticsAction._(_kPreviousAtMovementGranularityIndex);
+  static const AndroidSemanticsAction previousAtMovementGranularity = AndroidSemanticsAction._(_kPreviousAtMovementGranularityIndex);
 
   /// Matches `AccessibilityAction.ACTION_NEXT_HTML_ELEMENT`.
   static const AndroidSemanticsAction nextHtmlElement = AndroidSemanticsAction._(_kNextHtmlElementIndex);
@@ -204,8 +201,10 @@ class AndroidSemanticsAction {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is AndroidSemanticsAction && other.id == id;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is AndroidSemanticsAction
+        && other.id == id;
   }
 
   /// Creates a new [AndroidSemanticsAction] from an integer `value`.

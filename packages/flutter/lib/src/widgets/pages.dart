@@ -38,8 +38,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => previousRoute is PageRoute;
 }
 
-Widget _defaultTransitionsBuilder(
-    BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
   return child;
 }
 
@@ -64,13 +63,13 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.barrierLabel,
     this.maintainState = true,
     bool fullscreenDialog = false,
-  })  : assert(pageBuilder != null),
-        assert(transitionsBuilder != null),
-        assert(opaque != null),
-        assert(barrierDismissible != null),
-        assert(maintainState != null),
-        assert(fullscreenDialog != null),
-        super(settings: settings, fullscreenDialog: fullscreenDialog);
+  }) : assert(pageBuilder != null),
+       assert(transitionsBuilder != null),
+       assert(opaque != null),
+       assert(barrierDismissible != null),
+       assert(maintainState != null),
+       assert(fullscreenDialog != null),
+       super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   /// {@template flutter.widgets.pageRouteBuilder.pageBuilder}
   /// Used build the route's primary contents.
@@ -113,8 +112,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   }
 
   @override
-  Widget buildTransitions(
-      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return transitionsBuilder(context, animation, secondaryAnimation, child);
   }
 }

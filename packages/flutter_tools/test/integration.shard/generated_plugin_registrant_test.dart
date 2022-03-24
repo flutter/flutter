@@ -30,7 +30,8 @@ void main() {
   });
 
   setUp(() {
-    tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_generated_plugin_registrant_test.');
+    tempDir = globals.fs.systemTempDirectory
+        .createTempSync('flutter_tools_generated_plugin_registrant_test.');
     projectDir = tempDir.childDirectory('flutter_project');
   });
 
@@ -46,7 +47,8 @@ void main() {
     await _createProject(projectDir, <String>[]);
     // We need to add a dependency with web support to trigger
     // the generated_plugin_registrant generation.
-    await _addDependency(projectDir, 'shared_preferences', version: '^2.0.0');
+    await _addDependency(projectDir, 'shared_preferences',
+        version: '^2.0.0');
     await _analyzeProject(projectDir);
 
     expect(
@@ -64,9 +66,12 @@ void main() {
         ),
   });
 
-  testUsingContext('generated plugin registrant ignores lines longer than 80 chars', () async {
+  testUsingContext(
+      'generated plugin registrant ignores lines longer than 80 chars',
+      () async {
     await _createProject(projectDir, <String>[]);
-    await _addAnalysisOptions(projectDir, <String>['lines_longer_than_80_chars']);
+    await _addAnalysisOptions(
+        projectDir, <String>['lines_longer_than_80_chars']);
     await _createProject(tempDir.childDirectory('test_plugin'), <String>[
       '--template=plugin',
       '--platforms=web',
@@ -150,7 +155,8 @@ Future<void> _restoreFlutterToolsSnapshot() async {
     ),
   );
 
-  final File snapshotBackup = globals.fs.file('$flutterToolsSnapshotPath.bak');
+  final File snapshotBackup =
+      globals.fs.file('$flutterToolsSnapshotPath.bak');
   if (!snapshotBackup.existsSync()) {
     // No backup to restore.
     return;
@@ -176,8 +182,10 @@ Future<void> _addDependency(
   String version,
   String path,
 }) async {
-  assert(version != null || path != null, 'Need to define a source for the package.');
-  assert(version == null || path == null, 'Cannot only load a package from path or from Pub, not both.');
+  assert(version != null || path != null,
+      'Need to define a source for the package.');
+  assert(version == null || path == null,
+      'Cannot only load a package from path or from Pub, not both.');
 
   final File pubspecYaml = projectDir.childFile('pubspec.yaml');
   expect(pubspecYaml, exists);
@@ -196,7 +204,8 @@ Future<void> _addDependency(
   await pubspecYaml.writeAsString(lines.join('\n'));
 }
 
-Future<void> _addAnalysisOptions(Directory projectDir, List<String> linterRules) async {
+Future<void> _addAnalysisOptions(
+    Directory projectDir, List<String> linterRules) async {
   assert(linterRules.isNotEmpty);
 
   await projectDir.childFile('analysis_options.yaml').writeAsString('''

@@ -9,18 +9,15 @@ import '../../common.dart';
 void main() {
   group('WaitForCondition', () {
     test('WaitForCondition serialize', () {
-      expect(const WaitForCondition(NoTransientCallbacks()).serialize(),
+      expect(
+          const WaitForCondition(NoTransientCallbacks()).serialize(),
           <String, String>{'command': 'waitForCondition', 'conditionName': 'NoTransientCallbacksCondition'});
     });
 
     test('WaitForCondition serialize with timeout', () {
       expect(
           const WaitForCondition(NoTransientCallbacks(), timeout: Duration(milliseconds: 10)).serialize(),
-          <String, String>{
-            'command': 'waitForCondition',
-            'timeout': '10',
-            'conditionName': 'NoTransientCallbacksCondition'
-          });
+          <String, String>{'command': 'waitForCondition', 'timeout': '10', 'conditionName': 'NoTransientCallbacksCondition'});
     });
 
     test('WaitForCondition deserialize', () {
@@ -46,15 +43,22 @@ void main() {
     });
 
     test('WaitForCondition requiresRootWidget', () {
-      expect(const WaitForCondition(NoTransientCallbacks()).requiresRootWidgetAttached, isTrue);
-      expect(const WaitForCondition(FirstFrameRasterized()).requiresRootWidgetAttached, isFalse);
-    });
+        expect(
+            const WaitForCondition(NoTransientCallbacks())
+                .requiresRootWidgetAttached,
+            isTrue);
+        expect(
+            const WaitForCondition(FirstFrameRasterized())
+                .requiresRootWidgetAttached,
+            isFalse);
+      });
   });
 
   group('NoTransientCallbacksCondition', () {
     test('NoTransientCallbacksCondition serialize', () {
       expect(
-          const NoTransientCallbacks().serialize(), <String, String>{'conditionName': 'NoTransientCallbacksCondition'});
+          const NoTransientCallbacks().serialize(),
+          <String, String>{'conditionName': 'NoTransientCallbacksCondition'});
     });
 
     test('NoTransientCallbacksCondition deserialize', () {
@@ -70,8 +74,7 @@ void main() {
       expect(
           () => NoTransientCallbacks.deserialize(<String, String>{'conditionName': 'Unknown'}),
           throwsA(predicate<SerializationException>((SerializationException e) =>
-              e.message ==
-              'Error occurred during deserializing the NoTransientCallbacksCondition JSON string: {conditionName: Unknown}')));
+              e.message == 'Error occurred during deserializing the NoTransientCallbacksCondition JSON string: {conditionName: Unknown}')));
     });
   });
 
@@ -95,15 +98,15 @@ void main() {
       expect(
           () => NoPendingFrame.deserialize(<String, String>{'conditionName': 'Unknown'}),
           throwsA(predicate<SerializationException>((SerializationException e) =>
-              e.message ==
-              'Error occurred during deserializing the NoPendingFrameCondition JSON string: {conditionName: Unknown}')));
+              e.message == 'Error occurred during deserializing the NoPendingFrameCondition JSON string: {conditionName: Unknown}')));
     });
   });
 
   group('FirstFrameRasterizedCondition', () {
     test('FirstFrameRasterizedCondition serialize', () {
       expect(
-          const FirstFrameRasterized().serialize(), <String, String>{'conditionName': 'FirstFrameRasterizedCondition'});
+          const FirstFrameRasterized().serialize(),
+          <String, String>{'conditionName': 'FirstFrameRasterizedCondition'});
     });
 
     test('FirstFrameRasterizedCondition deserialize', () {
@@ -119,8 +122,7 @@ void main() {
       expect(
           () => FirstFrameRasterized.deserialize(<String, String>{'conditionName': 'Unknown'}),
           throwsA(predicate<SerializationException>((SerializationException e) =>
-              e.message ==
-              'Error occurred during deserializing the FirstFrameRasterizedCondition JSON string: {conditionName: Unknown}')));
+              e.message == 'Error occurred during deserializing the FirstFrameRasterizedCondition JSON string: {conditionName: Unknown}')));
     });
 
     test('FirstFrameRasterizedCondition requiresRootWidget', () {
@@ -131,11 +133,15 @@ void main() {
   group('CombinedCondition', () {
     test('CombinedCondition serialize', () {
       const CombinedCondition combinedCondition =
-          CombinedCondition(<SerializableWaitCondition>[NoTransientCallbacks(), NoPendingFrame()]);
+          CombinedCondition(<SerializableWaitCondition>[
+        NoTransientCallbacks(),
+        NoPendingFrame()
+      ]);
 
       expect(combinedCondition.serialize(), <String, String>{
         'conditionName': 'CombinedCondition',
-        'conditions': '[{"conditionName":"NoTransientCallbacksCondition"},{"conditionName":"NoPendingFrameCondition"}]',
+        'conditions':
+            '[{"conditionName":"NoTransientCallbacksCondition"},{"conditionName":"NoPendingFrameCondition"}]',
       });
     });
 
@@ -161,9 +167,11 @@ void main() {
     test('CombinedCondition deserialize', () {
       final Map<String, String> jsonMap = <String, String>{
         'conditionName': 'CombinedCondition',
-        'conditions': '[{"conditionName":"NoPendingFrameCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
+        'conditions':
+            '[{"conditionName":"NoPendingFrameCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
       };
-      final CombinedCondition condition = CombinedCondition.deserialize(jsonMap);
+      final CombinedCondition condition =
+          CombinedCondition.deserialize(jsonMap);
       expect(
           condition.conditions,
           equals(<SerializableWaitCondition>[
@@ -174,9 +182,8 @@ void main() {
     });
 
     test('CombinedCondition deserialize - no condition list', () {
-      final CombinedCondition condition = CombinedCondition.deserialize(<String, String>{
-        'conditionName': 'CombinedCondition',
-      });
+      final CombinedCondition condition =
+          CombinedCondition.deserialize(<String, String>{'conditionName': 'CombinedCondition',});
       expect(condition.conditions, equals(<SerializableWaitCondition>[]));
       expect(condition.serialize(), <String, String>{
         'conditionName': 'CombinedCondition',
@@ -188,20 +195,20 @@ void main() {
       expect(
           () => CombinedCondition.deserialize(<String, String>{'conditionName': 'Unknown'}),
           throwsA(predicate<SerializationException>((SerializationException e) =>
-              e.message ==
-              'Error occurred during deserializing the CombinedCondition JSON string: {conditionName: Unknown}')));
+              e.message == 'Error occurred during deserializing the CombinedCondition JSON string: {conditionName: Unknown}')));
     });
 
     test('CombinedCondition deserialize error - Unknown condition type', () {
-      expect(() {
-        return CombinedCondition.deserialize(<String, String>{
-          'conditionName': 'CombinedCondition',
-          'conditions': '[{"conditionName":"UnknownCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
-        });
-      },
+      expect(
+          () {
+            return CombinedCondition.deserialize(<String, String>{
+                'conditionName': 'CombinedCondition',
+                'conditions':
+                    '[{"conditionName":"UnknownCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
+            });
+          },
           throwsA(predicate<SerializationException>((SerializationException e) =>
-              e.message ==
-              'Unsupported wait condition UnknownCondition in the JSON string {conditionName: UnknownCondition}')));
+              e.message == 'Unsupported wait condition UnknownCondition in the JSON string {conditionName: UnknownCondition}')));
     });
   });
 }

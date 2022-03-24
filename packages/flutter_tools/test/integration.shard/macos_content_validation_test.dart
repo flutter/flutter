@@ -71,7 +71,8 @@ void main() {
       ));
       expect(podfile.lastModifiedSync().isBefore(podfileLock.lastModifiedSync()), isTrue);
 
-      final Directory outputAppFramework = fileSystem.directory(fileSystem.path.join(
+      final Directory outputAppFramework =
+          fileSystem.directory(fileSystem.path.join(
         outputApp.path,
         'Contents',
         'Frameworks',
@@ -122,8 +123,10 @@ void main() {
       // Archiving should contain a bitcode blob, but not building.
       // This mimics Xcode behavior and prevents a developer from having to install a
       // 300+MB app.
-      final File outputFlutterFrameworkBinary =
-          outputFlutterFramework.childDirectory('Versions').childDirectory('A').childFile('FlutterMacOS');
+      final File outputFlutterFrameworkBinary = outputFlutterFramework
+          .childDirectory('Versions')
+          .childDirectory('A')
+          .childFile('FlutterMacOS');
       expect(
         containsBitcode(outputFlutterFrameworkBinary.path, processManager),
         isFalse,

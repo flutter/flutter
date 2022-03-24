@@ -17,15 +17,13 @@ void main() {
     final FileExceptionHandler handler = FileExceptionHandler();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
-    expect(
-        () => Template(
-              fileSystem.directory('doesNotExist'),
-              fileSystem.currentDirectory,
-              fileSystem: fileSystem,
-              logger: BufferLogger.test(),
-              templateRenderer: FakeTemplateRenderer(),
-            ),
-        throwsToolExit());
+    expect(() => Template(
+      fileSystem.directory('doesNotExist'),
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      templateRenderer: FakeTemplateRenderer(),
+    ), throwsToolExit());
   });
 
   testWithoutContext('Template.render throws ToolExit when FileSystem exception is raised', () {
@@ -41,7 +39,8 @@ void main() {
     final Directory directory = fileSystem.directory('foo');
     handler.addError(directory, FileSystemOp.create, const FileSystemException());
 
-    expect(() => template.render(directory, <String, Object>{}), throwsToolExit());
+    expect(() => template.render(directory, <String, Object>{}),
+      throwsToolExit());
   });
 
   group('renders template', () {

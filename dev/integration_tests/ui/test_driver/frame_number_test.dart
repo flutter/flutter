@@ -23,7 +23,8 @@ void main() {
     });
 
     test('minFrameNumber is numeric', () async {
-      final SerializableFinder minFrameNumberFinder = find.byValueKey('minFrameNumber');
+      final SerializableFinder minFrameNumberFinder =
+          find.byValueKey('minFrameNumber');
       await driver.waitFor(
         minFrameNumberFinder,
         timeout: const Duration(seconds: 5),

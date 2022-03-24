@@ -133,6 +133,7 @@ void main() {
       matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
 }
 
 // An animation of a yellow pixel moving from left to right, in a container of

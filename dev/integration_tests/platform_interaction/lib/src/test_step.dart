@@ -53,7 +53,8 @@ class TestStepResult {
         const Text(' '),
         Text(
           status.toString().substring('TestStatus.'.length),
-          key: ValueKey<String>(status == TestStatus.pending ? 'nostatus' : 'status'),
+          key: ValueKey<String>(
+              status == TestStatus.pending ? 'nostatus' : 'status'),
           style: bold,
         ),
       ],

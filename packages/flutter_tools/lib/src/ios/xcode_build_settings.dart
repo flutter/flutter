@@ -10,13 +10,15 @@ import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 
-String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem, Artifacts artifacts) {
+String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
+    Artifacts artifacts) {
   final String flutterMacOSFramework = artifacts.getArtifactPath(
     Artifact.flutterMacOSFramework,
     platform: TargetPlatform.darwin,
     mode: mode,
   );
-  return fileSystem.path.normalize(fileSystem.path.dirname(flutterMacOSFramework));
+  return fileSystem.path
+      .normalize(fileSystem.path.dirname(flutterMacOSFramework));
 }
 
 /// Writes or rewrites Xcode property files with the specified information.
@@ -66,8 +68,9 @@ void _updateGeneratedXcodePropertiesFile({
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
   xcodeBuildSettings.forEach(localsBuffer.writeln);
-  final File generatedXcodePropertiesFile =
-      useMacOSConfig ? project.macos.generatedXcodePropertiesFile : project.ios.generatedXcodePropertiesFile;
+  final File generatedXcodePropertiesFile = useMacOSConfig
+    ? project.macos.generatedXcodePropertiesFile
+    : project.ios.generatedXcodePropertiesFile;
 
   generatedXcodePropertiesFile.createSync(recursive: true);
   generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
@@ -86,15 +89,14 @@ void _updateGeneratedEnvironmentVariablesScript({
   localsBuffer.writeln('#!/bin/sh');
   localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
   for (final String line in xcodeBuildSettings) {
-    if (!line.contains('[')) {
-      // Exported conditional Xcode build settings do not work.
+    if (!line.contains('[')) { // Exported conditional Xcode build settings do not work.
       localsBuffer.writeln('export "$line"');
     }
   }
 
   final File generatedModuleBuildPhaseScript = useMacOSConfig
-      ? project.macos.generatedEnvironmentVariableExportScript
-      : project.ios.generatedEnvironmentVariableExportScript;
+    ? project.macos.generatedEnvironmentVariableExportScript
+    : project.ios.generatedEnvironmentVariableExportScript;
   generatedModuleBuildPhaseScript.createSync(recursive: true);
   generatedModuleBuildPhaseScript.writeAsStringSync(localsBuffer.toString());
   globals.os.chmod(generatedModuleBuildPhaseScript, '755');

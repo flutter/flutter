@@ -29,7 +29,8 @@ class InertialMotion {
 
   // The acceleration opposing the initial velocity in x and y components.
   Vector2 get _acceleration {
-    final double velocityTotal = _initialVelocity.pixelsPerSecond.dx.abs() + _initialVelocity.pixelsPerSecond.dy.abs();
+    final double velocityTotal = _initialVelocity.pixelsPerSecond.dx.abs()
+      + _initialVelocity.pixelsPerSecond.dy.abs();
     final double vRatioX = _initialVelocity.pixelsPerSecond.dx / velocityTotal;
     final double vRatioY = _initialVelocity.pixelsPerSecond.dy / velocityTotal;
     return Vector2(

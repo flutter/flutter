@@ -15,7 +15,8 @@ void main() {
     late List<Uri> uriConnections;
 
     setUp(() {
-      final List<Map<String, dynamic>> flutterViewCannedResponses = <Map<String, dynamic>>[
+      final List<Map<String, dynamic>> flutterViewCannedResponses =
+          <Map<String, dynamic>>[
         <String, dynamic>{
           'views': <Map<String, dynamic>>[
             <String, dynamic>{
@@ -107,7 +108,8 @@ void main() {
       fakeRunner.address = 'fe80::8eae:4cff:fef4:9247';
       fakeRunner.interface = 'eno1';
 
-      final FuchsiaRemoteConnection connection = await FuchsiaRemoteConnection.connectWithSshCommandRunner(fakeRunner);
+      final FuchsiaRemoteConnection connection =
+          await FuchsiaRemoteConnection.connectWithSshCommandRunner(fakeRunner);
 
       // [fakePortForwardingFunction] will have returned three different
       // forwarded ports, incrementing the port each time by one. (Just a sanity
@@ -122,9 +124,12 @@ void main() {
 
       // VMs should be accessed via localhost ports given by
       // [fakePortForwardingFunction].
-      expect(uriConnections[0], Uri(scheme: 'ws', host: '[::1]', port: 0, path: '/ws'));
-      expect(uriConnections[1], Uri(scheme: 'ws', host: '[::1]', port: 1, path: '/ws'));
-      expect(uriConnections[2], Uri(scheme: 'ws', host: '[::1]', port: 2, path: '/ws'));
+      expect(uriConnections[0],
+        Uri(scheme:'ws', host:'[::1]', port:0, path:'/ws'));
+      expect(uriConnections[1],
+        Uri(scheme:'ws', host:'[::1]', port:1, path:'/ws'));
+      expect(uriConnections[2],
+        Uri(scheme:'ws', host:'[::1]', port:2, path:'/ws'));
 
       final List<FlutterView> views = await connection.getFlutterViews();
       expect(views, isNot(null));
@@ -170,7 +175,8 @@ void main() {
       fakeRunner.lsResponse = <String>['123\n\n\n', '456  ', '789'];
       fakeRunner.address = 'fe80::8eae:4cff:fef4:9247';
       fakeRunner.interface = 'eno1';
-      final FuchsiaRemoteConnection connection = await FuchsiaRemoteConnection.connectWithSshCommandRunner(fakeRunner);
+      final FuchsiaRemoteConnection connection =
+          await FuchsiaRemoteConnection.connectWithSshCommandRunner(fakeRunner);
 
       // [fakePortForwardingFunction] will have returned three different
       // forwarded ports, incrementing the port each time by one. (Just a sanity
@@ -185,9 +191,12 @@ void main() {
 
       // VMs should be accessed via the alternate address given by
       // [fakePortForwardingFunction].
-      expect(uriConnections[0], Uri(scheme: 'ws', host: '[fe80::1:2%25eno2]', port: 0, path: '/ws'));
-      expect(uriConnections[1], Uri(scheme: 'ws', host: '[fe80::1:2%25eno2]', port: 1, path: '/ws'));
-      expect(uriConnections[2], Uri(scheme: 'ws', host: '[fe80::1:2%25eno2]', port: 2, path: '/ws'));
+      expect(uriConnections[0],
+        Uri(scheme:'ws', host:'[fe80::1:2%25eno2]', port:0, path:'/ws'));
+      expect(uriConnections[1],
+        Uri(scheme:'ws', host:'[fe80::1:2%25eno2]', port:1, path:'/ws'));
+      expect(uriConnections[2],
+        Uri(scheme:'ws', host:'[fe80::1:2%25eno2]', port:2, path:'/ws'));
 
       final List<FlutterView> views = await connection.getFlutterViews();
       expect(views, isNot(null));
@@ -232,7 +241,8 @@ void main() {
       fakeRunner.lsResponse = <String>['123\n\n\n', '456  ', '789'];
       fakeRunner.address = '196.168.1.4';
 
-      final FuchsiaRemoteConnection connection = await FuchsiaRemoteConnection.connectWithSshCommandRunner(fakeRunner);
+      final FuchsiaRemoteConnection connection =
+          await FuchsiaRemoteConnection.connectWithSshCommandRunner(fakeRunner);
 
       // [fakePortForwardingFunction] will have returned three different
       // forwarded ports, incrementing the port each time by one. (Just a sanity
@@ -246,9 +256,12 @@ void main() {
       expect(forwardedPorts[2].port, 2);
 
       // VMs should be accessed via the ipv4 loopback.
-      expect(uriConnections[0], Uri(scheme: 'ws', host: '127.0.0.1', port: 0, path: '/ws'));
-      expect(uriConnections[1], Uri(scheme: 'ws', host: '127.0.0.1', port: 1, path: '/ws'));
-      expect(uriConnections[2], Uri(scheme: 'ws', host: '127.0.0.1', port: 2, path: '/ws'));
+      expect(uriConnections[0],
+        Uri(scheme:'ws', host:'127.0.0.1', port:0, path:'/ws'));
+      expect(uriConnections[1],
+        Uri(scheme:'ws', host:'127.0.0.1', port:1, path:'/ws'));
+      expect(uriConnections[2],
+        Uri(scheme:'ws', host:'127.0.0.1', port:2, path:'/ws'));
 
       final List<FlutterView> views = await connection.getFlutterViews();
       expect(views, isNot(null));
@@ -275,7 +288,8 @@ void main() {
       }
 
       // Should fail as no env variable has been passed.
-      expect(failingFunction, throwsA(isA<FuchsiaRemoteConnectionError>()));
+      expect(failingFunction,
+          throwsA(isA<FuchsiaRemoteConnectionError>()));
     });
   });
 }

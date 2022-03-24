@@ -41,12 +41,12 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   Process? _process;
 
   @override
-  final FlutterLaunchRequestArguments Function(Map<String, Object?> obj) parseLaunchArgs =
-      FlutterLaunchRequestArguments.fromJson;
+  final FlutterLaunchRequestArguments Function(Map<String, Object?> obj)
+      parseLaunchArgs = FlutterLaunchRequestArguments.fromJson;
 
   @override
-  final FlutterAttachRequestArguments Function(Map<String, Object?> obj) parseAttachArgs =
-      FlutterAttachRequestArguments.fromJson;
+  final FlutterAttachRequestArguments Function(Map<String, Object?> obj)
+      parseAttachArgs = FlutterAttachRequestArguments.fromJson;
 
   /// A completer that completes when the app.started event has been received.
   @visibleForTesting
@@ -142,7 +142,8 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     final List<String> toolArgs = <String>[
       'attach',
       '--machine',
-      if (vmServiceUri != null) ...<String>['--debug-uri', vmServiceUri],
+      if (vmServiceUri != null)
+      ...<String>['--debug-uri', vmServiceUri],
     ];
 
     await _startProcess(
@@ -232,12 +233,11 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       return;
     }
 
-    final String errorText = (errorData['renderedErrorText'] as String?) ??
-        (errorData['description'] as String?)
+    final String errorText = (errorData['renderedErrorText'] as String?)
+        ?? (errorData['description'] as String?)
         // We should never not error text, but if we do at least send something
         // so it's not just completely silent.
-        ??
-        'Unknown error in Flutter.Error event';
+        ?? 'Unknown error in Flutter.Error event';
     sendOutput('stderr', '$errorText\n');
   }
 
@@ -257,7 +257,8 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       // the VM Service for noDebug, we need to disable them so that error text
       // is sent to stderr. Otherwise the user will not see any exception text
       // (because nobody is listening for Flutter.Error events).
-      if (!enableDebugger) '--dart-define=flutter.inspector.structuredErrors=false',
+      if (!enableDebugger)
+        '--dart-define=flutter.inspector.structuredErrors=false',
     ];
 
     await _startProcess(
@@ -280,8 +281,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     List<String>? userArgs,
   }) async {
     // Handle customTool and deletion of any arguments for it.
-    final String executable =
-        customTool ?? fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String executable = customTool ?? fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
     final int? removeArgs = customToolReplacesArgs;
     if (customTool != null && removeArgs != null) {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
@@ -517,10 +517,11 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       return;
     }
 
-    final Map<String, Object?>? payload =
-        jsonData is List && jsonData.length == 1 && jsonData.first is Map<String, Object?>
-            ? jsonData.first as Map<String, Object?>
-            : null;
+    final Map<String, Object?>? payload = jsonData is List &&
+            jsonData.length == 1 &&
+            jsonData.first is Map<String, Object?>
+        ? jsonData.first as Map<String, Object?>
+        : null;
 
     if (payload == null) {
       // JSON didn't match expected format for Flutter responses, so treat as

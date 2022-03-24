@@ -21,24 +21,30 @@ void main() {
   testWithoutContext('--analyze-size flag produces expected output on hello_world for Android', () async {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await processManager.run(
-        <String>[flutterBin, 'build', 'apk', '--analyze-size', '--target-platform=android-arm64'],
-        workingDirectory: workingDirectory);
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--analyze-size',
+      '--target-platform=android-arm64'
+    ], workingDirectory: workingDirectory);
 
     printOnFailure('Output of flutter build apk:');
     printOnFailure(result.stdout.toString());
     printOnFailure(result.stderr.toString());
     expect(result.stdout.toString(), contains('app-release.apk (total compressed)'));
 
-    final String line =
-        result.stdout.toString().split('\n').firstWhere((String line) => line.contains(apkDebugMessage));
+    final String line = result.stdout.toString()
+      .split('\n')
+      .firstWhere((String line) => line.contains(apkDebugMessage));
 
     final String outputFilePath = line.split(apkDebugMessage).last.trim();
     expect(fileSystem.file(fileSystem.path.join(workingDirectory, outputFilePath)), exists);
     expect(outputFilePath, contains('.flutter-devtools'));
 
-    final String devToolsCommand =
-        result.stdout.toString().split('\n').firstWhere((String line) => line.contains(runDevToolsMessage));
+    final String devToolsCommand = result.stdout.toString()
+        .split('\n')
+        .firstWhere((String line) => line.contains(runDevToolsMessage));
     final String commandArguments = devToolsCommand.split(runDevToolsMessage).last.trim();
     final String relativeAppSizePath = outputFilePath.split('.flutter-devtools/').last.trim();
     expect(commandArguments.contains('--appSizeBase=$relativeAppSizePath'), isTrue);
@@ -65,14 +71,16 @@ void main() {
     printOnFailure(result.stderr.toString());
     expect(result.stdout.toString(), contains('Dart AOT symbols accounted decompressed size'));
 
-    final String line =
-        result.stdout.toString().split('\n').firstWhere((String line) => line.contains(iosDebugMessage));
+    final String line = result.stdout.toString()
+      .split('\n')
+      .firstWhere((String line) => line.contains(iosDebugMessage));
 
     final String outputFilePath = line.split(iosDebugMessage).last.trim();
     expect(fileSystem.file(fileSystem.path.join(workingDirectory, outputFilePath)), exists);
 
-    final String devToolsCommand =
-        result.stdout.toString().split('\n').firstWhere((String line) => line.contains(runDevToolsMessage));
+    final String devToolsCommand = result.stdout.toString()
+        .split('\n')
+        .firstWhere((String line) => line.contains(runDevToolsMessage));
     final String commandArguments = devToolsCommand.split(runDevToolsMessage).last.trim();
     final String relativeAppSizePath = outputFilePath.split('.flutter-devtools/').last.trim();
 
@@ -111,14 +119,16 @@ void main() {
     printOnFailure(result.stderr.toString());
     expect(result.stdout.toString(), contains('Dart AOT symbols accounted decompressed size'));
 
-    final String line =
-        result.stdout.toString().split('\n').firstWhere((String line) => line.contains(macOSDebugMessage));
+    final String line = result.stdout.toString()
+      .split('\n')
+      .firstWhere((String line) => line.contains(macOSDebugMessage));
 
     final String outputFilePath = line.split(macOSDebugMessage).last.trim();
     expect(fileSystem.file(fileSystem.path.join(workingDirectory, outputFilePath)), exists);
 
-    final String devToolsCommand =
-        result.stdout.toString().split('\n').firstWhere((String line) => line.contains(runDevToolsMessage));
+    final String devToolsCommand = result.stdout.toString()
+        .split('\n')
+        .firstWhere((String line) => line.contains(runDevToolsMessage));
     final String commandArguments = devToolsCommand.split(runDevToolsMessage).last.trim();
     final String relativeAppSizePath = outputFilePath.split('.flutter-devtools/').last.trim();
 

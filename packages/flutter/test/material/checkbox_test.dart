@@ -28,7 +28,7 @@ void main() {
             child: Center(
               child: Checkbox(
                 value: true,
-                onChanged: (bool? newValue) {},
+                onChanged: (bool? newValue) { },
               ),
             ),
           ),
@@ -47,7 +47,7 @@ void main() {
             child: Center(
               child: Checkbox(
                 value: true,
-                onChanged: (bool? newValue) {},
+                onChanged: (bool? newValue) { },
               ),
             ),
           ),
@@ -64,37 +64,33 @@ void main() {
     await tester.pumpWidget(Material(
       child: Checkbox(
         value: false,
-        onChanged: (bool? b) {},
+        onChanged: (bool? b) { },
       ),
     ));
 
-    expect(
-        tester.getSemantics(find.byType(Focus)),
-        matchesSemantics(
-          hasCheckedState: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          hasTapAction: true,
-          isFocusable: true,
-        ));
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      isFocusable: true,
+    ));
 
     await tester.pumpWidget(Material(
       child: Checkbox(
         value: true,
-        onChanged: (bool? b) {},
+        onChanged: (bool? b) { },
       ),
     ));
 
-    expect(
-        tester.getSemantics(find.byType(Focus)),
-        matchesSemantics(
-          hasCheckedState: true,
-          hasEnabledState: true,
-          isChecked: true,
-          isEnabled: true,
-          hasTapAction: true,
-          isFocusable: true,
-        ));
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isChecked: true,
+      isEnabled: true,
+      hasTapAction: true,
+      isFocusable: true,
+    ));
 
     await tester.pumpWidget(const Material(
       child: Checkbox(
@@ -103,23 +99,19 @@ void main() {
       ),
     ));
 
-    expect(
-        tester.getSemantics(find.byType(Checkbox)),
-        matchesSemantics(
-          hasCheckedState: true,
-          hasEnabledState: true,
-          // isFocusable is delayed by 1 frame.
-          isFocusable: true,
-        ));
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      // isFocusable is delayed by 1 frame.
+      isFocusable: true,
+    ));
 
     await tester.pump();
     // isFocusable should be false now after the 1 frame delay.
-    expect(
-        tester.getSemantics(find.byType(Checkbox)),
-        matchesSemantics(
-          hasCheckedState: true,
-          hasEnabledState: true,
-        ));
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+    ));
 
     await tester.pumpWidget(const Material(
       child: Checkbox(
@@ -128,13 +120,11 @@ void main() {
       ),
     ));
 
-    expect(
-        tester.getSemantics(find.byType(Checkbox)),
-        matchesSemantics(
-          hasCheckedState: true,
-          hasEnabledState: true,
-          isChecked: true,
-        ));
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isChecked: true,
+    ));
     handle.dispose();
   });
 
@@ -147,22 +137,20 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Checkbox(
           value: false,
-          onChanged: (bool? b) {},
+          onChanged: (bool? b) { },
         ),
       ),
     ));
 
-    expect(
-        tester.getSemantics(find.byType(Focus).last),
-        matchesSemantics(
-          label: 'foo',
-          textDirection: TextDirection.ltr,
-          hasCheckedState: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          hasTapAction: true,
-          isFocusable: true,
-        ));
+    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      isFocusable: true,
+    ));
     handle.dispose();
   });
 
@@ -217,67 +205,61 @@ void main() {
         child: Checkbox(
           tristate: true,
           value: null,
-          onChanged: (bool? newValue) {},
+          onChanged: (bool? newValue) { },
         ),
       ),
     );
 
-    expect(
-        semantics.nodesWith(
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
-            SemanticsFlag.isFocusable,
-          ],
-          actions: <SemanticsAction>[SemanticsAction.tap],
-        ),
-        hasLength(1));
+    expect(semantics.nodesWith(
+      flags: <SemanticsFlag>[
+        SemanticsFlag.hasCheckedState,
+        SemanticsFlag.hasEnabledState,
+        SemanticsFlag.isEnabled,
+        SemanticsFlag.isFocusable,
+      ],
+      actions: <SemanticsAction>[SemanticsAction.tap],
+    ), hasLength(1));
 
     await tester.pumpWidget(
       Material(
         child: Checkbox(
           tristate: true,
           value: true,
-          onChanged: (bool? newValue) {},
+          onChanged: (bool? newValue) { },
         ),
       ),
     );
 
-    expect(
-        semantics.nodesWith(
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
-            SemanticsFlag.isChecked,
-            SemanticsFlag.isFocusable,
-          ],
-          actions: <SemanticsAction>[SemanticsAction.tap],
-        ),
-        hasLength(1));
+    expect(semantics.nodesWith(
+      flags: <SemanticsFlag>[
+        SemanticsFlag.hasCheckedState,
+        SemanticsFlag.hasEnabledState,
+        SemanticsFlag.isEnabled,
+        SemanticsFlag.isChecked,
+        SemanticsFlag.isFocusable,
+      ],
+      actions: <SemanticsAction>[SemanticsAction.tap],
+    ), hasLength(1));
 
     await tester.pumpWidget(
       Material(
         child: Checkbox(
           tristate: true,
           value: false,
-          onChanged: (bool? newValue) {},
+          onChanged: (bool? newValue) { },
         ),
       ),
     );
 
-    expect(
-        semantics.nodesWith(
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
-            SemanticsFlag.isFocusable,
-          ],
-          actions: <SemanticsAction>[SemanticsAction.tap],
-        ),
-        hasLength(1));
+    expect(semantics.nodesWith(
+      flags: <SemanticsFlag>[
+        SemanticsFlag.hasCheckedState,
+        SemanticsFlag.hasEnabledState,
+        SemanticsFlag.isEnabled,
+        SemanticsFlag.isFocusable,
+      ],
+      actions: <SemanticsAction>[SemanticsAction.tap],
+    ), hasLength(1));
 
     semantics.dispose();
   });
@@ -285,8 +267,7 @@ void main() {
   testWidgets('has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool? checkboxValue = false;
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility,
-        (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -331,7 +312,7 @@ void main() {
             return Checkbox(
               tristate: true,
               value: checkboxValue,
-              onChanged: (bool? value) {},
+              onChanged: (bool? value) { },
             );
           },
         ),
@@ -386,7 +367,7 @@ void main() {
                 value: true,
                 activeColor: activeColor,
                 checkColor: checkColor,
-                onChanged: (bool? value) {},
+                onChanged: (bool? value) { },
               );
             },
           ),
@@ -400,21 +381,13 @@ void main() {
 
     await tester.pumpWidget(buildFrame(checkColor: checkColor));
     await tester.pumpAndSettle();
-    expect(
-        getCheckboxRenderer(),
-        paints
-          ..path(color: borderColor)
-          ..path(color: checkColor)); // paints's color is 0xFFFFFFFF (default color)
+    expect(getCheckboxRenderer(), paints..path(color: borderColor)..path(color: checkColor)); // paints's color is 0xFFFFFFFF (default color)
 
     checkColor = const Color(0xFF000000);
 
     await tester.pumpWidget(buildFrame(checkColor: checkColor));
     await tester.pumpAndSettle();
-    expect(
-        getCheckboxRenderer(),
-        paints
-          ..path(color: borderColor)
-          ..path(color: checkColor)); // paints's color is 0xFF000000 (params)
+    expect(getCheckboxRenderer(), paints..path(color: borderColor)..path(color: checkColor)); // paints's color is 0xFF000000 (params)
 
     activeColor = const Color(0xFF00FF00);
 
@@ -440,13 +413,11 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Checkbox(
                 value: value,
-                onChanged: enabled
-                    ? (bool? newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      }
-                    : null,
+                onChanged: enabled ? (bool? newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
                 focusColor: Colors.orange[500],
                 autofocus: true,
                 focusNode: focusNode,
@@ -456,7 +427,6 @@ void main() {
         ),
       );
     }
-
     await tester.pumpWidget(buildApp());
 
     await tester.pumpAndSettle();
@@ -521,7 +491,6 @@ void main() {
         ),
       );
     }
-
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(
@@ -540,13 +509,11 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Checkbox(
                 value: value,
-                onChanged: enabled
-                    ? (bool? newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      }
-                    : null,
+                onChanged: enabled ? (bool? newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
                 hoverColor: Colors.orange[500],
               );
             }),
@@ -554,14 +521,13 @@ void main() {
         ),
       );
     }
-
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..path(color: const Color(0xff1e88e5))
-        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
+        ..path(color: const Color(0xffffffff),style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
     // Start hovering
@@ -599,13 +565,11 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Checkbox(
                 value: value,
-                onChanged: enabled
-                    ? (bool? newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      }
-                    : null,
+                onChanged: enabled ? (bool? newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
                 focusColor: Colors.orange[500],
                 autofocus: true,
               );
@@ -614,7 +578,6 @@ void main() {
         ),
       );
     }
-
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
@@ -684,9 +647,7 @@ void main() {
                 builder: (_, StateSetter setState) => Checkbox(
                   key: checkboxKey,
                   value: checkboxVal,
-                  onChanged: (bool? newValue) => setState(() {
-                    checkboxVal = newValue;
-                  }),
+                  onChanged: (bool? newValue) => setState(() {checkboxVal = newValue;}),
                 ),
               ),
             ),
@@ -723,6 +684,7 @@ void main() {
 
     await testGesture.removePointer();
   });
+
 
   testWidgets('Checkbox changes mouse cursor when hovered', (WidgetTester tester) async {
     // Test Checkbox() constructor
@@ -825,6 +787,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+
   testWidgets('Checkbox fill color resolves in enabled/disabled states', (WidgetTester tester) async {
     const Color activeEnabledFillColor = Color(0xFF000001);
     const Color activeDisabledFillColor = Color(0xFF000002);
@@ -836,7 +799,8 @@ void main() {
       return activeEnabledFillColor;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final MaterialStateProperty<Color> fillColor =
+      MaterialStateColor.resolveWith(getFillColor);
 
     Widget buildFrame({required bool enabled}) {
       return Material(
@@ -847,7 +811,7 @@ void main() {
               return Checkbox(
                 value: true,
                 fillColor: fillColor,
-                onChanged: enabled ? (bool? value) {} : null,
+                onChanged: enabled ? (bool? value) { } : null,
               );
             },
           ),
@@ -884,7 +848,8 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final MaterialStateProperty<Color> fillColor =
+      MaterialStateColor.resolveWith(getFillColor);
 
     Widget buildFrame() {
       return Material(
@@ -897,7 +862,7 @@ void main() {
                 autofocus: true,
                 value: true,
                 fillColor: fillColor,
-                onChanged: (bool? value) {},
+                onChanged: (bool? value) { },
               );
             },
           ),
@@ -993,7 +958,6 @@ void main() {
       }
       return null;
     }
-
     const double splashRadius = 24.0;
 
     Widget buildCheckbox({bool active = false, bool focused = false, bool useOverlay = true}) {
@@ -1003,7 +967,7 @@ void main() {
             focusNode: focusNode,
             autofocus: focused,
             value: active,
-            onChanged: (_) {},
+            onChanged: (_) { },
             fillColor: MaterialStateProperty.all(fillColor),
             overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
@@ -1102,8 +1066,7 @@ void main() {
     );
   });
 
-  testWidgets('Tristate Checkbox overlay color resolves in pressed active/inactive states',
-      (WidgetTester tester) async {
+  testWidgets('Tristate Checkbox overlay color resolves in pressed active/inactive states', (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
@@ -1116,7 +1079,6 @@ void main() {
       }
       return null;
     }
-
     const double splashRadius = 24.0;
     TestGesture gesture;
     bool? value = false;
@@ -1215,7 +1177,7 @@ void main() {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: show ? Checkbox(value: true, onChanged: (_) {}) : Container(),
+            child: show ? Checkbox(value: true, onChanged: (_) { }) : Container(),
           ),
         ),
       );
@@ -1241,7 +1203,7 @@ void main() {
       color: borderColor,
     );
 
-    Widget buildApp({bool? value, bool enabled = true}) {
+    Widget buildApp({ bool? value, bool enabled = true }) {
       return MaterialApp(
         home: Material(
           child: Center(
@@ -1249,7 +1211,7 @@ void main() {
               value: value,
               tristate: value == null,
               activeColor: activeColor,
-              onChanged: enabled ? (bool? newValue) {} : null,
+              onChanged: enabled ? (bool? newValue) { } : null,
               side: side,
             ),
           ),
@@ -1265,11 +1227,11 @@ void main() {
       expect(
         getCheckboxRenderer(),
         paints
-          ..drrect(
-            color: borderColor,
-            outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
-            inner: RRect.fromLTRBR(19, 19, 29, 29, const Radius.circular(-3)),
-          ),
+        ..drrect(
+          color: borderColor,
+          outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
+          inner: RRect.fromLTRBR(19, 19, 29, 29, const Radius.circular(-3)),
+        ),
       );
     }
 
@@ -1304,14 +1266,14 @@ void main() {
       color: borderColor,
     );
 
-    Widget buildApp({bool? value, bool enabled = true}) {
+    Widget buildApp({ bool? value, bool enabled = true }) {
       return MaterialApp(
         home: Material(
           child: Center(
             child: Checkbox(
               value: value,
               tristate: value == null,
-              onChanged: enabled ? (bool? newValue) {} : null,
+              onChanged: enabled ? (bool? newValue) { } : null,
               side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) => side),
             ),
           ),
@@ -1323,17 +1285,18 @@ void main() {
       expect(
         tester.renderObject<RenderBox>(find.byType(Checkbox)),
         paints
-          ..drrect(
-            color: borderColor,
-            outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
-            inner: RRect.fromLTRBR(19, 19, 29, 29, const Radius.circular(-3)),
-          ),
+        ..drrect(
+          color: borderColor,
+          outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
+          inner: RRect.fromLTRBR(19, 19, 29, 29, const Radius.circular(-3)),
+        ),
       );
     }
 
     await tester.pumpWidget(buildApp(value: false));
     await tester.pumpAndSettle();
     expectBorder();
+
 
     await tester.pumpWidget(buildApp(value: false, enabled: false));
     await tester.pumpAndSettle();

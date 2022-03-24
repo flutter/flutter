@@ -41,12 +41,12 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
   Process? _process;
 
   @override
-  final FlutterLaunchRequestArguments Function(Map<String, Object?> obj) parseLaunchArgs =
-      FlutterLaunchRequestArguments.fromJson;
+  final FlutterLaunchRequestArguments Function(Map<String, Object?> obj)
+      parseLaunchArgs = FlutterLaunchRequestArguments.fromJson;
 
   @override
-  final FlutterAttachRequestArguments Function(Map<String, Object?> obj) parseAttachArgs =
-      FlutterAttachRequestArguments.fromJson;
+  final FlutterAttachRequestArguments Function(Map<String, Object?> obj)
+      parseAttachArgs = FlutterAttachRequestArguments.fromJson;
 
   /// Whether the VM Service closing should be used as a signal to terminate the debug session.
   ///
@@ -102,8 +102,7 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
     ];
 
     // Handle customTool and deletion of any arguments for it.
-    final String executable = args.customTool ??
-        fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String executable = args.customTool ?? fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
     final int? removeArgs = args.customToolReplacesArgs;
     if (args.customTool != null && removeArgs != null) {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
@@ -192,10 +191,11 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
     }
 
     // Check for valid flutter_tools JSON output (1) first.
-    final Map<String, Object?>? flutterPayload =
-        jsonData is List && jsonData.length == 1 && jsonData.first is Map<String, Object?>
-            ? jsonData.first as Map<String, Object?>
-            : null;
+    final Map<String, Object?>? flutterPayload = jsonData is List &&
+            jsonData.length == 1 &&
+            jsonData.first is Map<String, Object?>
+        ? jsonData.first as Map<String, Object?>
+        : null;
     final Object? event = flutterPayload?['event'];
     final Object? params = flutterPayload?['params'];
 

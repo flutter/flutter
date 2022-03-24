@@ -19,9 +19,7 @@ void main() {
     int hitCount = 0;
     await tester.pumpWidget(
       _HitTestCounter(
-        onHitTestCallback: () {
-          hitCount += 1;
-        },
+        onHitTestCallback: () { hitCount += 1; },
         child: Container(),
       ),
     );
@@ -38,20 +36,20 @@ void main() {
     int hitCount = 0;
     await tester.pumpWidget(
       _HitTestCounter(
-        onHitTestCallback: () {
-          hitCount += 1;
-        },
+        onHitTestCallback: () { hitCount += 1; },
         child: Container(),
       ),
     );
 
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(_HitTestCounter)));
+    final TestGesture gesture =
+        await tester.startGesture(tester.getCenter(find.byType(_HitTestCounter)));
     await gesture.moveBy(const Offset(1, 1));
     await gesture.up();
 
     expect(hitCount, 1);
   });
 }
+
 
 // The [_HitTestCounter] invokes [onHitTestCallback] every time
 // [hitTestChildren] is called.
@@ -66,7 +64,8 @@ class _HitTestCounter extends SingleChildRenderObjectWidget {
 
   @override
   _RenderHitTestCounter createRenderObject(BuildContext context) {
-    return _RenderHitTestCounter().._onHitTestCallback = onHitTestCallback;
+    return _RenderHitTestCounter()
+      .._onHitTestCallback = onHitTestCallback;
   }
 
   @override

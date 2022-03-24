@@ -26,7 +26,8 @@ const String kEdgeEnvironment = 'EDGE_ENVIRONMENT';
 const String kLinuxExecutable = 'google-chrome';
 
 /// The expected executable name on macOS.
-const String kMacOSExecutable = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const String kMacOSExecutable =
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 /// The expected Chrome executable name on Windows.
 const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
@@ -64,9 +65,12 @@ String findChromeExecutable(Platform platform, FileSystem fileSystem) {
   if (platform.isWindows) {
     /// The possible locations where the chrome executable can be located on windows.
     final List<String> kWindowsPrefixes = <String>[
-      if (platform.environment.containsKey('LOCALAPPDATA')) platform.environment['LOCALAPPDATA']!,
-      if (platform.environment.containsKey('PROGRAMFILES')) platform.environment['PROGRAMFILES']!,
-      if (platform.environment.containsKey('PROGRAMFILES(X86)')) platform.environment['PROGRAMFILES(X86)']!,
+      if (platform.environment.containsKey('LOCALAPPDATA'))
+        platform.environment['LOCALAPPDATA']!,
+      if (platform.environment.containsKey('PROGRAMFILES'))
+        platform.environment['PROGRAMFILES']!,
+      if (platform.environment.containsKey('PROGRAMFILES(X86)'))
+        platform.environment['PROGRAMFILES(X86)']!,
     ];
     final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
       if (prefix == null) {
@@ -90,9 +94,12 @@ String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
   if (platform.isWindows) {
     /// The possible locations where the Edge executable can be located on windows.
     final List<String> kWindowsPrefixes = <String>[
-      if (platform.environment.containsKey('LOCALAPPDATA')) platform.environment['LOCALAPPDATA']!,
-      if (platform.environment.containsKey('PROGRAMFILES')) platform.environment['PROGRAMFILES']!,
-      if (platform.environment.containsKey('PROGRAMFILES(X86)')) platform.environment['PROGRAMFILES(X86)']!,
+      if (platform.environment.containsKey('LOCALAPPDATA'))
+        platform.environment['LOCALAPPDATA']!,
+      if (platform.environment.containsKey('PROGRAMFILES'))
+        platform.environment['PROGRAMFILES']!,
+      if (platform.environment.containsKey('PROGRAMFILES(X86)'))
+        platform.environment['PROGRAMFILES(X86)']!,
     ];
     final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
       if (prefix == null) {
@@ -116,12 +123,12 @@ class ChromiumLauncher {
     required OperatingSystemUtils operatingSystemUtils,
     required BrowserFinder browserFinder,
     required Logger logger,
-  })  : _fileSystem = fileSystem,
-        _platform = platform,
-        _processManager = processManager,
-        _operatingSystemUtils = operatingSystemUtils,
-        _browserFinder = browserFinder,
-        _logger = logger;
+  }) : _fileSystem = fileSystem,
+       _platform = platform,
+       _processManager = processManager,
+       _operatingSystemUtils = operatingSystemUtils,
+       _browserFinder = browserFinder,
+       _logger = logger;
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -146,7 +153,7 @@ class ChromiumLauncher {
   }
 
   /// The executable this launcher will use.
-  String findExecutable() => _browserFinder(_platform, _fileSystem);
+  String findExecutable() =>  _browserFinder(_platform, _fileSystem);
 
   /// Launch a Chromium browser to a particular `host` page.
   ///
@@ -157,8 +164,7 @@ class ChromiumLauncher {
   /// port is picked automatically.
   ///
   /// [skipCheck] does not attempt to make a devtools connection before returning.
-  Future<Chromium> launch(
-    String url, {
+  Future<Chromium> launch(String url, {
     bool headless = false,
     int? debugPort,
     bool skipCheck = false,
@@ -176,7 +182,8 @@ class ChromiumLauncher {
       _logger.printTrace('Using ${versionResult.stdout}');
     }
 
-    final Directory userDataDir = _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
+    final Directory userDataDir = _fileSystem.systemTempDirectory
+      .createTempSync('flutter_tools_chrome_device.');
 
     if (cacheDir != null) {
       // Seed data dir with previous state.
@@ -201,12 +208,13 @@ class ChromiumLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      if (headless) ...<String>[
-        '--headless',
-        '--disable-gpu',
-        '--no-sandbox',
-        '--window-size=2400,1800',
-      ],
+      if (headless)
+        ...<String>[
+          '--headless',
+          '--disable-gpu',
+          '--no-sandbox',
+          '--window-size=2400,1800',
+        ],
       url,
     ];
 
@@ -218,15 +226,13 @@ class ChromiumLauncher {
         _cacheUserSessionInformation(userDataDir, cacheDir);
       }));
     }
-    return _connect(
-        Chromium(
-          port,
-          ChromeConnection('localhost', port),
-          url: url,
-          process: process,
-          chromiumLauncher: this,
-        ),
-        skipCheck);
+    return _connect(Chromium(
+      port,
+      ChromeConnection('localhost', port),
+      url: url,
+      process: process,
+      chromiumLauncher: this,
+    ), skipCheck);
   }
 
   Future<Process?> _spawnChromiumProcess(List<String> args, String chromeExecutable) async {
@@ -249,45 +255,51 @@ class ChromiumLauncher {
     while (true) {
       final Process process = await _processManager.start(args);
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-        _logger.printTrace('[CHROME]: $line');
-      });
+      process.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
+          _logger.printTrace('[CHROME]: $line');
+        });
 
       // Wait until the DevTools are listening before trying to connect. This is
       // only required for flutter_test --platform=chrome and not flutter run.
       bool hitGlibcBug = false;
       bool shouldRetry = false;
       final List<String> errors = <String>[];
-      await process.stderr.transform(utf8.decoder).transform(const LineSplitter()).map((String line) {
-        _logger.printTrace('[CHROME]: $line');
-        errors.add('[CHROME]:$line');
-        if (line.contains(_kGlibcError)) {
-          hitGlibcBug = true;
+      await process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .map((String line) {
+          _logger.printTrace('[CHROME]: $line');
+          errors.add('[CHROME]:$line');
+          if (line.contains(_kGlibcError)) {
+            hitGlibcBug = true;
+            shouldRetry = true;
+          }
+          return line;
+        })
+        .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
+          if (hitGlibcBug) {
+            _logger.printTrace(
+              'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
+              'Will try launching browser again.',
+            );
+            // Return value unused.
+            return '';
+          }
+          if (retry >= kMaxRetries) {
+            errors.forEach(_logger.printError);
+            _logger.printError('Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}');
+            throw ToolExit(
+              'Failed to launch browser. Make sure you are using an up-to-date '
+              'Chrome or Edge. Otherwise, consider using -d web-server instead '
+              'and filing an issue at https://github.com/flutter/flutter/issues.',
+            );
+          }
           shouldRetry = true;
-        }
-        return line;
-      }).firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
-        if (hitGlibcBug) {
-          _logger.printTrace(
-            'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
-            'Will try launching browser again.',
-          );
-          // Return value unused.
           return '';
-        }
-        if (retry >= kMaxRetries) {
-          errors.forEach(_logger.printError);
-          _logger.printError(
-              'Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}');
-          throw ToolExit(
-            'Failed to launch browser. Make sure you are using an up-to-date '
-            'Chrome or Edge. Otherwise, consider using -d web-server instead '
-            'and filing an issue at https://github.com/flutter/flutter/issues.',
-          );
-        }
-        shouldRetry = true;
-        return '';
-      });
+        });
 
       if (!hitGlibcBug && !shouldRetry) {
         return process;
@@ -326,14 +338,16 @@ class ChromiumLauncher {
   /// dart debug extension with a user controlled browser profile will lead to a
   /// better experience.
   void _cacheUserSessionInformation(Directory userDataDir, Directory cacheDir) {
-    final Directory targetChromeDefault =
-        _fileSystem.directory(_fileSystem.path.join(cacheDir.path, _chromeDefaultPath));
-    final Directory sourceChromeDefault =
-        _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
+    final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path, _chromeDefaultPath));
+    final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
     if (sourceChromeDefault.existsSync()) {
       targetChromeDefault.createSync(recursive: true);
       try {
-        copyDirectory(sourceChromeDefault, targetChromeDefault, shouldCopyDirectory: _isNotCacheDirectory);
+        copyDirectory(
+          sourceChromeDefault,
+          targetChromeDefault,
+          shouldCopyDirectory: _isNotCacheDirectory
+        );
       } on FileSystemException catch (err) {
         // This is a best-effort update. Display the message in case the failure is relevant.
         // one possible example is a file lock due to multiple running chrome instances.
@@ -345,20 +359,19 @@ class ChromiumLauncher {
     final File sourcePreferencesFile = _fileSystem.file(_fileSystem.path.join(userDataDir.path, _preferencesPath));
 
     if (sourcePreferencesFile.existsSync()) {
-      targetPreferencesFile.parent.createSync(recursive: true);
-      // If the file contains a crash string, remove it to hide the popup on next run.
-      final String contents = sourcePreferencesFile.readAsStringSync();
-      targetPreferencesFile.writeAsStringSync(contents.replaceFirst('"exit_type":"Crashed"', '"exit_type":"Normal"'));
+       targetPreferencesFile.parent.createSync(recursive: true);
+       // If the file contains a crash string, remove it to hide the popup on next run.
+       final String contents = sourcePreferencesFile.readAsStringSync();
+       targetPreferencesFile.writeAsStringSync(contents
+           .replaceFirst('"exit_type":"Crashed"', '"exit_type":"Normal"'));
     }
   }
 
   /// Restore Chrome user information from a per-project cache into Chrome's
   /// user data directory.
   void _restoreUserSessionInformation(Directory cacheDir, Directory userDataDir) {
-    final Directory sourceChromeDefault =
-        _fileSystem.directory(_fileSystem.path.join(cacheDir.path, _chromeDefaultPath));
-    final Directory targetChromeDefault =
-        _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
+    final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path, _chromeDefaultPath));
+    final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
     try {
       if (sourceChromeDefault.existsSync()) {
         targetChromeDefault.createSync(recursive: true);
@@ -376,8 +389,8 @@ class ChromiumLauncher {
   // Cache, Code Cache, and GPUCache are nearly 1GB of data
   bool _isNotCacheDirectory(Directory directory) {
     return !directory.path.endsWith('Cache') &&
-        !directory.path.endsWith('Code Cache') &&
-        !directory.path.endsWith('GPUCache');
+           !directory.path.endsWith('Code Cache') &&
+           !directory.path.endsWith('GPUCache');
   }
 
   Future<Chromium> _connect(Chromium chrome, bool skipCheck) async {
@@ -385,11 +398,13 @@ class ChromiumLauncher {
     // connection is valid.
     if (!skipCheck) {
       try {
-        await chrome.chromeConnection.getTab((ChromeTab tab) => true, retryFor: const Duration(seconds: 2));
+        await chrome.chromeConnection.getTab(
+          (ChromeTab tab) => true, retryFor: const Duration(seconds: 2));
       } on Exception catch (error, stackTrace) {
         _logger.printError('$error', stackTrace: stackTrace);
         await chrome.close();
-        throwToolExit('Unable to connect to Chrome debug port: ${chrome.debugPort}\n $error');
+        throwToolExit(
+            'Unable to connect to Chrome debug port: ${chrome.debugPort}\n $error');
       }
     }
     currentCompleter.complete(chrome);

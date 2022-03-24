@@ -20,9 +20,9 @@ class FuchsiaWorkflow implements Workflow {
     required Platform platform,
     required FeatureFlags featureFlags,
     required FuchsiaArtifacts fuchsiaArtifacts,
-  })  : _platform = platform,
-        _featureFlags = featureFlags,
-        _fuchsiaArtifacts = fuchsiaArtifacts;
+  }) : _platform = platform,
+       _featureFlags = featureFlags,
+       _fuchsiaArtifacts = fuchsiaArtifacts;
 
   final Platform _platform;
   final FeatureFlags _featureFlags;

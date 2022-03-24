@@ -26,22 +26,21 @@ class _TextFieldPageState extends State<TextFieldPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(leading: BackButton(key: backButtonKey)),
-        body: Material(
-          child: Column(
-            children: <Widget>[
-              TextField(
-                key: normalTextFieldKey,
-                controller: _normalController,
-              ),
-              const Spacer(),
-              TextField(
-                key: passwordTextFieldKey,
-                controller: _passwordController,
-                obscureText: true,
-              ),
-            ],
+      appBar: AppBar(leading: BackButton(key: backButtonKey)),
+      body: Material(
+        child: Column(children: <Widget>[
+          TextField(
+            key: normalTextFieldKey,
+            controller: _normalController,
           ),
-        ));
+          const Spacer(),
+          TextField(
+            key: passwordTextFieldKey,
+            controller: _passwordController,
+            obscureText: true,
+          ),
+        ],
+      ),
+    ));
   }
 }

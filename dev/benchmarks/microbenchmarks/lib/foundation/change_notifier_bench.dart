@@ -117,7 +117,8 @@ void main() {
     }
   }
 
-  void runRemoveListenerWhileNotifyingBenchmark(int iteration, {bool addResult = true}) {
+  void runRemoveListenerWhileNotifyingBenchmark(int iteration,
+      {bool addResult = true}) {
     const String name = 'removeWhileNotify';
 
     final List<VoidCallback> listeners = <VoidCallback>[

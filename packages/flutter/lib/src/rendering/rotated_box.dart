@@ -24,8 +24,8 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   RenderRotatedBox({
     required int quarterTurns,
     RenderBox? child,
-  })  : assert(quarterTurns != null),
-        _quarterTurns = quarterTurns {
+  }) : assert(quarterTurns != null),
+       _quarterTurns = quarterTurns {
     this.child = child;
   }
 
@@ -34,7 +34,8 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   int _quarterTurns;
   set quarterTurns(int value) {
     assert(value != null);
-    if (_quarterTurns == value) return;
+    if (_quarterTurns == value)
+      return;
     _quarterTurns = value;
     markNeedsLayout();
   }
@@ -43,25 +44,29 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child == null) return 0.0;
+    if (child == null)
+      return 0.0;
     return _isVertical ? child!.getMinIntrinsicHeight(height) : child!.getMinIntrinsicWidth(height);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child == null) return 0.0;
+    if (child == null)
+      return 0.0;
     return _isVertical ? child!.getMaxIntrinsicHeight(height) : child!.getMaxIntrinsicWidth(height);
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child == null) return 0.0;
+    if (child == null)
+      return 0.0;
     return _isVertical ? child!.getMinIntrinsicWidth(width) : child!.getMinIntrinsicHeight(width);
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child == null) return 0.0;
+    if (child == null)
+      return 0.0;
     return _isVertical ? child!.getMaxIntrinsicWidth(width) : child!.getMaxIntrinsicHeight(width);
   }
 
@@ -92,9 +97,10 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(_paintTransform != null || debugNeedsLayout || child == null);
-    if (child == null || _paintTransform == null) return false;
+    if (child == null || _paintTransform == null)
+      return false;
     return result.addWithPaintTransform(
       transform: _paintTransform,
       position: position,
@@ -133,7 +139,8 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (_paintTransform != null) transform.multiply(_paintTransform!);
+    if (_paintTransform != null)
+      transform.multiply(_paintTransform!);
     super.applyPaintTransform(child, transform);
   }
 }

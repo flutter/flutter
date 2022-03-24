@@ -85,7 +85,7 @@ enum ListTileControlAffinity {
 @immutable
 class ListTileThemeData with Diagnosticable {
   /// Creates a [ListTileThemeData].
-  const ListTileThemeData({
+  const ListTileThemeData ({
     this.dense,
     this.shape,
     this.style,
@@ -182,8 +182,9 @@ class ListTileThemeData with Diagnosticable {
 
   /// Linearly interpolate between ListTileThemeData objects.
   static ListTileThemeData? lerp(ListTileThemeData? a, ListTileThemeData? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) return null;
+    assert (t != null);
+    if (a == null && b == null)
+      return null;
     return ListTileThemeData(
       dense: t < 0.5 ? a?.dense : b?.dense,
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -204,41 +205,43 @@ class ListTileThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        dense,
-        shape,
-        style,
-        selectedColor,
-        iconColor,
-        textColor,
-        contentPadding,
-        tileColor,
-        selectedTileColor,
-        horizontalTitleGap,
-        minVerticalPadding,
-        minLeadingWidth,
-        enableFeedback,
-        mouseCursor,
-      );
+    dense,
+    shape,
+    style,
+    selectedColor,
+    iconColor,
+    textColor,
+    contentPadding,
+    tileColor,
+    selectedTileColor,
+    horizontalTitleGap,
+    minVerticalPadding,
+    minLeadingWidth,
+    enableFeedback,
+    mouseCursor,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is ListTileThemeData &&
-        other.dense == dense &&
-        other.shape == shape &&
-        other.style == style &&
-        other.selectedColor == selectedColor &&
-        other.iconColor == iconColor &&
-        other.textColor == textColor &&
-        other.contentPadding == contentPadding &&
-        other.tileColor == tileColor &&
-        other.selectedTileColor == selectedTileColor &&
-        other.horizontalTitleGap == horizontalTitleGap &&
-        other.minVerticalPadding == minVerticalPadding &&
-        other.minLeadingWidth == minLeadingWidth &&
-        other.enableFeedback == enableFeedback &&
-        other.mouseCursor == mouseCursor;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is ListTileThemeData
+      && other.dense == dense
+      && other.shape == shape
+      && other.style == style
+      && other.selectedColor == selectedColor
+      && other.iconColor == iconColor
+      && other.textColor == textColor
+      && other.contentPadding == contentPadding
+      && other.tileColor == tileColor
+      && other.selectedTileColor == selectedTileColor
+      && other.horizontalTitleGap == horizontalTitleGap
+      && other.minVerticalPadding == minVerticalPadding
+      && other.minLeadingWidth == minLeadingWidth
+      && other.enableFeedback == enableFeedback
+      && other.mouseCursor == mouseCursor;
   }
 
   @override
@@ -257,8 +260,7 @@ class ListTileThemeData with Diagnosticable {
     properties.add(DoubleProperty('minVerticalPadding', minVerticalPadding, defaultValue: null));
     properties.add(DoubleProperty('minLeadingWidth', minLeadingWidth, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
-    properties
-        .add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
   }
 }
 
@@ -294,36 +296,36 @@ class ListTileTheme extends InheritedTheme {
     double? minVerticalPadding,
     double? minLeadingWidth,
     required Widget child,
-  })  : assert(data == null ||
-            (shape ??
-                    selectedColor ??
-                    iconColor ??
-                    textColor ??
-                    contentPadding ??
-                    tileColor ??
-                    selectedTileColor ??
-                    enableFeedback ??
-                    mouseCursor ??
-                    horizontalTitleGap ??
-                    minVerticalPadding ??
-                    minLeadingWidth) ==
-                null),
-        _data = data,
-        _dense = dense,
-        _shape = shape,
-        _style = style,
-        _selectedColor = selectedColor,
-        _iconColor = iconColor,
-        _textColor = textColor,
-        _contentPadding = contentPadding,
-        _tileColor = tileColor,
-        _selectedTileColor = selectedTileColor,
-        _enableFeedback = enableFeedback,
-        _mouseCursor = mouseCursor,
-        _horizontalTitleGap = horizontalTitleGap,
-        _minVerticalPadding = minVerticalPadding,
-        _minLeadingWidth = minLeadingWidth,
-        super(key: key, child: child);
+  }) : assert(
+         data == null ||
+         (shape ??
+          selectedColor ??
+          iconColor ??
+          textColor ??
+          contentPadding ??
+          tileColor ??
+          selectedTileColor ??
+          enableFeedback ??
+          mouseCursor ??
+          horizontalTitleGap ??
+          minVerticalPadding ??
+          minLeadingWidth) == null),
+       _data = data,
+       _dense = dense,
+       _shape = shape,
+       _style = style,
+       _selectedColor = selectedColor,
+       _iconColor = iconColor,
+       _textColor = textColor,
+       _contentPadding = contentPadding,
+       _tileColor = tileColor,
+       _selectedTileColor = selectedTileColor,
+       _enableFeedback = enableFeedback,
+       _mouseCursor = mouseCursor,
+       _horizontalTitleGap = horizontalTitleGap,
+       _minVerticalPadding = minVerticalPadding,
+       _minLeadingWidth = minLeadingWidth,
+       super(key: key, child: child);
 
   final ListTileThemeData? _data;
   final bool? _dense;
@@ -343,23 +345,22 @@ class ListTileTheme extends InheritedTheme {
 
   /// The configuration of this theme.
   ListTileThemeData get data {
-    return _data ??
-        ListTileThemeData(
-          dense: _dense,
-          shape: _shape,
-          style: _style,
-          selectedColor: _selectedColor,
-          iconColor: _iconColor,
-          textColor: _textColor,
-          contentPadding: _contentPadding,
-          tileColor: _tileColor,
-          selectedTileColor: _selectedTileColor,
-          enableFeedback: _enableFeedback,
-          mouseCursor: _mouseCursor,
-          horizontalTitleGap: _horizontalTitleGap,
-          minVerticalPadding: _minVerticalPadding,
-          minLeadingWidth: _minLeadingWidth,
-        );
+    return _data ?? ListTileThemeData(
+      dense: _dense,
+      shape: _shape,
+      style: _style,
+      selectedColor: _selectedColor,
+      iconColor: _iconColor,
+      textColor: _textColor,
+      contentPadding: _contentPadding,
+      tileColor: _tileColor,
+      selectedTileColor: _selectedTileColor,
+      enableFeedback: _enableFeedback,
+      mouseCursor: _mouseCursor,
+      horizontalTitleGap: _horizontalTitleGap,
+      minVerticalPadding: _minVerticalPadding,
+      minLeadingWidth: _minLeadingWidth,
+    );
   }
 
   /// Overrides the default value of [ListTile.dense].
@@ -801,12 +802,12 @@ class ListTile extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.minLeadingWidth,
-  })  : assert(isThreeLine != null),
-        assert(enabled != null),
-        assert(selected != null),
-        assert(autofocus != null),
-        assert(!isThreeLine || subtitle != null),
-        super(key: key);
+  }) : assert(isThreeLine != null),
+       assert(enabled != null),
+       assert(selected != null),
+       assert(autofocus != null),
+       assert(!isThreeLine || subtitle != null),
+       super(key: key);
 
   /// A widget to display before the title.
   ///
@@ -1061,7 +1062,7 @@ class ListTile extends StatelessWidget {
   /// See also:
   ///
   ///  * [Divider], which you can use to obtain this effect manually.
-  static Iterable<Widget> divideTiles({BuildContext? context, required Iterable<Widget> tiles, Color? color}) {
+  static Iterable<Widget> divideTiles({ BuildContext? context, required Iterable<Widget> tiles, Color? color }) {
     assert(tiles != null);
     assert(color != null || context != null);
     tiles = tiles.toList();
@@ -1089,14 +1090,16 @@ class ListTile extends StatelessWidget {
   }
 
   Color? _iconColor(ThemeData theme, ListTileThemeData tileTheme) {
-    if (!enabled) return theme.disabledColor;
+    if (!enabled)
+      return theme.disabledColor;
 
     if (selected) {
       return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
     }
 
     final Color? color = iconColor ?? tileTheme.iconColor ?? theme.listTileTheme.iconColor;
-    if (color != null) return color;
+    if (color != null)
+      return color;
 
     switch (theme.brightness) {
       case Brightness.light:
@@ -1109,7 +1112,8 @@ class ListTile extends StatelessWidget {
   }
 
   Color? _textColor(ThemeData theme, ListTileThemeData tileTheme, Color? defaultColor) {
-    if (!enabled) return theme.disabledColor;
+    if (!enabled)
+      return theme.disabledColor;
 
     if (selected) {
       return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
@@ -1124,7 +1128,7 @@ class ListTile extends StatelessWidget {
 
   TextStyle _titleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
     final TextStyle textStyle;
-    switch (style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list) {
+    switch(style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list) {
       case ListTileStyle.drawer:
         textStyle = theme.textTheme.bodyText1!;
         break;
@@ -1134,16 +1138,16 @@ class ListTile extends StatelessWidget {
     }
     final Color? color = _textColor(theme, tileTheme, textStyle.color);
     return _isDenseLayout(theme, tileTheme)
-        ? textStyle.copyWith(fontSize: 13.0, color: color)
-        : textStyle.copyWith(color: color);
+      ? textStyle.copyWith(fontSize: 13.0, color: color)
+      : textStyle.copyWith(color: color);
   }
 
   TextStyle _subtitleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
     final TextStyle textStyle = theme.textTheme.bodyText2!;
     final Color? color = _textColor(theme, tileTheme, theme.textTheme.caption!.color);
     return _isDenseLayout(theme, tileTheme)
-        ? textStyle.copyWith(color: color, fontSize: 12.0)
-        : textStyle.copyWith(color: color);
+      ? textStyle.copyWith(color: color, fontSize: 12.0)
+      : textStyle.copyWith(color: color);
   }
 
   TextStyle _trailingAndLeadingTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
@@ -1154,8 +1158,8 @@ class ListTile extends StatelessWidget {
 
   Color _tileBackgroundColor(ThemeData theme, ListTileThemeData tileTheme) {
     final Color? color = selected
-        ? selectedTileColor ?? tileTheme.selectedTileColor ?? theme.listTileTheme.selectedTileColor
-        : tileColor ?? tileTheme.tileColor ?? theme.listTileTheme.tileColor;
+      ? selectedTileColor ?? tileTheme.selectedTileColor ?? theme.listTileTheme.selectedTileColor
+      : tileColor ?? tileTheme.tileColor ?? theme.listTileTheme.tileColor;
     return color ?? Colors.transparent;
   }
 
@@ -1216,18 +1220,18 @@ class ListTile extends StatelessWidget {
 
     const EdgeInsets defaultContentPadding = EdgeInsets.symmetric(horizontal: 16.0);
     final TextDirection textDirection = Directionality.of(context);
-    final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection) ??
-        tileTheme.contentPadding?.resolve(textDirection) ??
-        defaultContentPadding;
+    final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection)
+      ?? tileTheme.contentPadding?.resolve(textDirection)
+      ?? defaultContentPadding;
 
     final Set<MaterialState> states = <MaterialState>{
       if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
       if (selected) MaterialState.selected,
     };
 
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states) ??
-        tileTheme.mouseCursor?.resolve(states) ??
-        MaterialStateMouseCursor.clickable.resolve(states);
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states)
+      ?? tileTheme.mouseCursor?.resolve(states)
+      ?? MaterialStateMouseCursor.clickable.resolve(states);
 
     return InkWell(
       customBorder: shape ?? tileTheme.shape,
@@ -1298,15 +1302,15 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
     required this.minVerticalPadding,
     required this.minLeadingWidth,
     this.subtitleBaselineType,
-  })  : assert(isThreeLine != null),
-        assert(isDense != null),
-        assert(visualDensity != null),
-        assert(textDirection != null),
-        assert(titleBaselineType != null),
-        assert(horizontalTitleGap != null),
-        assert(minVerticalPadding != null),
-        assert(minLeadingWidth != null),
-        super(key: key);
+  }) : assert(isThreeLine != null),
+       assert(isDense != null),
+       assert(visualDensity != null),
+       assert(textDirection != null),
+       assert(titleBaselineType != null),
+       assert(horizontalTitleGap != null),
+       assert(minVerticalPadding != null),
+       assert(minLeadingWidth != null),
+       super(key: key);
 
   final Widget? leading;
   final Widget title;
@@ -1380,23 +1384,23 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     required double horizontalTitleGap,
     required double minVerticalPadding,
     required double minLeadingWidth,
-  })  : assert(isDense != null),
-        assert(visualDensity != null),
-        assert(isThreeLine != null),
-        assert(textDirection != null),
-        assert(titleBaselineType != null),
-        assert(horizontalTitleGap != null),
-        assert(minVerticalPadding != null),
-        assert(minLeadingWidth != null),
-        _isDense = isDense,
-        _visualDensity = visualDensity,
-        _isThreeLine = isThreeLine,
-        _textDirection = textDirection,
-        _titleBaselineType = titleBaselineType,
-        _subtitleBaselineType = subtitleBaselineType,
-        _horizontalTitleGap = horizontalTitleGap,
-        _minVerticalPadding = minVerticalPadding,
-        _minLeadingWidth = minLeadingWidth;
+  }) : assert(isDense != null),
+       assert(visualDensity != null),
+       assert(isThreeLine != null),
+       assert(textDirection != null),
+       assert(titleBaselineType != null),
+       assert(horizontalTitleGap != null),
+       assert(minVerticalPadding != null),
+       assert(minLeadingWidth != null),
+       _isDense = isDense,
+       _visualDensity = visualDensity,
+       _isThreeLine = isThreeLine,
+       _textDirection = textDirection,
+       _titleBaselineType = titleBaselineType,
+       _subtitleBaselineType = subtitleBaselineType,
+       _horizontalTitleGap = horizontalTitleGap,
+       _minVerticalPadding = minVerticalPadding,
+       _minLeadingWidth = minLeadingWidth;
 
   RenderBox? get leading => childForSlot(_ListTileSlot.leading);
   RenderBox? get title => childForSlot(_ListTileSlot.title);
@@ -1407,10 +1411,14 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   @override
   Iterable<RenderBox> get children {
     return <RenderBox>[
-      if (leading != null) leading!,
-      if (title != null) title!,
-      if (subtitle != null) subtitle!,
-      if (trailing != null) trailing!,
+      if (leading != null)
+        leading!,
+      if (title != null)
+        title!,
+      if (subtitle != null)
+        subtitle!,
+      if (trailing != null)
+        trailing!,
     ];
   }
 
@@ -1418,7 +1426,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   bool _isDense;
   set isDense(bool value) {
     assert(value != null);
-    if (_isDense == value) return;
+    if (_isDense == value)
+      return;
     _isDense = value;
     markNeedsLayout();
   }
@@ -1427,7 +1436,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   VisualDensity _visualDensity;
   set visualDensity(VisualDensity value) {
     assert(value != null);
-    if (_visualDensity == value) return;
+    if (_visualDensity == value)
+      return;
     _visualDensity = value;
     markNeedsLayout();
   }
@@ -1436,7 +1446,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   bool _isThreeLine;
   set isThreeLine(bool value) {
     assert(value != null);
-    if (_isThreeLine == value) return;
+    if (_isThreeLine == value)
+      return;
     _isThreeLine = value;
     markNeedsLayout();
   }
@@ -1445,7 +1456,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value) return;
+    if (_textDirection == value)
+      return;
     _textDirection = value;
     markNeedsLayout();
   }
@@ -1454,7 +1466,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   TextBaseline _titleBaselineType;
   set titleBaselineType(TextBaseline value) {
     assert(value != null);
-    if (_titleBaselineType == value) return;
+    if (_titleBaselineType == value)
+      return;
     _titleBaselineType = value;
     markNeedsLayout();
   }
@@ -1462,7 +1475,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   TextBaseline? get subtitleBaselineType => _subtitleBaselineType;
   TextBaseline? _subtitleBaselineType;
   set subtitleBaselineType(TextBaseline? value) {
-    if (_subtitleBaselineType == value) return;
+    if (_subtitleBaselineType == value)
+      return;
     _subtitleBaselineType = value;
     markNeedsLayout();
   }
@@ -1473,7 +1487,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   set horizontalTitleGap(double value) {
     assert(value != null);
-    if (_horizontalTitleGap == value) return;
+    if (_horizontalTitleGap == value)
+      return;
     _horizontalTitleGap = value;
     markNeedsLayout();
   }
@@ -1483,7 +1498,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   set minVerticalPadding(double value) {
     assert(value != null);
-    if (_minVerticalPadding == value) return;
+    if (_minVerticalPadding == value)
+      return;
     _minVerticalPadding = value;
     markNeedsLayout();
   }
@@ -1493,7 +1509,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   set minLeadingWidth(double value) {
     assert(value != null);
-    if (_minLeadingWidth == value) return;
+    if (_minLeadingWidth == value)
+      return;
     _minLeadingWidth = value;
     markNeedsLayout();
   }
@@ -1512,17 +1529,21 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   @override
   double computeMinIntrinsicWidth(double height) {
     final double leadingWidth = leading != null
-        ? math.max(leading!.getMinIntrinsicWidth(height), _minLeadingWidth) + _effectiveHorizontalTitleGap
-        : 0.0;
-    return leadingWidth + math.max(_minWidth(title, height), _minWidth(subtitle, height)) + _maxWidth(trailing, height);
+      ? math.max(leading!.getMinIntrinsicWidth(height), _minLeadingWidth) + _effectiveHorizontalTitleGap
+      : 0.0;
+    return leadingWidth
+      + math.max(_minWidth(title, height), _minWidth(subtitle, height))
+      + _maxWidth(trailing, height);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     final double leadingWidth = leading != null
-        ? math.max(leading!.getMaxIntrinsicWidth(height), _minLeadingWidth) + _effectiveHorizontalTitleGap
-        : 0.0;
-    return leadingWidth + math.max(_maxWidth(title, height), _maxWidth(subtitle, height)) + _maxWidth(trailing, height);
+      ? math.max(leading!.getMaxIntrinsicWidth(height), _minLeadingWidth) + _effectiveHorizontalTitleGap
+      : 0.0;
+    return leadingWidth
+      + math.max(_maxWidth(title, height), _maxWidth(subtitle, height))
+      + _maxWidth(trailing, height);
   }
 
   double get _defaultTileHeight {
@@ -1531,8 +1552,10 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     final bool isOneLine = !isThreeLine && !hasSubtitle;
 
     final Offset baseDensity = visualDensity.baseSizeAdjustment;
-    if (isOneLine) return (isDense ? 48.0 : 56.0) + baseDensity.dy;
-    if (isTwoLine) return (isDense ? 64.0 : 72.0) + baseDensity.dy;
+    if (isOneLine)
+      return (isDense ? 48.0 : 56.0) + baseDensity.dy;
+    if (isTwoLine)
+      return (isDense ? 64.0 : 72.0) + baseDensity.dy;
     return (isDense ? 76.0 : 88.0) + baseDensity.dy;
   }
 
@@ -1561,7 +1584,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   static Size _layoutBox(RenderBox? box, BoxConstraints constraints) {
-    if (box == null) return Size.zero;
+    if (box == null)
+      return Size.zero;
     box.layout(constraints, parentUsesSize: true);
     return box.size;
   }
@@ -1618,10 +1642,12 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
     );
 
-    final double titleStart =
-        hasLeading ? math.max(_minLeadingWidth, leadingSize.width) + _effectiveHorizontalTitleGap : 0.0;
-    final double adjustedTrailingWidth =
-        hasTrailing ? math.max(trailingSize.width + _effectiveHorizontalTitleGap, 32.0) : 0.0;
+    final double titleStart = hasLeading
+      ? math.max(_minLeadingWidth, leadingSize.width) + _effectiveHorizontalTitleGap
+      : 0.0;
+    final double adjustedTrailingWidth = hasTrailing
+        ? math.max(trailingSize.width + _effectiveHorizontalTitleGap, 32.0)
+        : 0.0;
     final BoxConstraints textConstraints = looseConstraints.tighten(
       width: tileWidth - titleStart - adjustedTrailingWidth,
     );
@@ -1666,7 +1692,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       // If the title or subtitle overflow tileHeight then punt: title
       // and subtitle are arranged in a column, tileHeight = column height plus
       // _minVerticalPadding on top and bottom.
-      if (titleY < _minVerticalPadding || (subtitleY + subtitleSize.height + _minVerticalPadding) > tileHeight) {
+      if (titleY < _minVerticalPadding ||
+          (subtitleY + subtitleSize.height + _minVerticalPadding) > tileHeight) {
         tileHeight = titleSize.height + subtitleSize.height + 2.0 * _minVerticalPadding;
         titleY = _minVerticalPadding;
         subtitleY = titleSize.height + _minVerticalPadding;
@@ -1693,22 +1720,26 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     }
 
     switch (textDirection) {
-      case TextDirection.rtl:
-        {
-          if (hasLeading) _positionBox(leading!, Offset(tileWidth - leadingSize.width, leadingY));
-          _positionBox(title!, Offset(adjustedTrailingWidth, titleY));
-          if (hasSubtitle) _positionBox(subtitle!, Offset(adjustedTrailingWidth, subtitleY!));
-          if (hasTrailing) _positionBox(trailing!, Offset(0.0, trailingY));
-          break;
-        }
-      case TextDirection.ltr:
-        {
-          if (hasLeading) _positionBox(leading!, Offset(0.0, leadingY));
-          _positionBox(title!, Offset(titleStart, titleY));
-          if (hasSubtitle) _positionBox(subtitle!, Offset(titleStart, subtitleY!));
-          if (hasTrailing) _positionBox(trailing!, Offset(tileWidth - trailingSize.width, trailingY));
-          break;
-        }
+      case TextDirection.rtl: {
+        if (hasLeading)
+          _positionBox(leading!, Offset(tileWidth - leadingSize.width, leadingY));
+        _positionBox(title!, Offset(adjustedTrailingWidth, titleY));
+        if (hasSubtitle)
+          _positionBox(subtitle!, Offset(adjustedTrailingWidth, subtitleY!));
+        if (hasTrailing)
+          _positionBox(trailing!, Offset(0.0, trailingY));
+        break;
+      }
+      case TextDirection.ltr: {
+        if (hasLeading)
+          _positionBox(leading!, Offset(0.0, leadingY));
+        _positionBox(title!, Offset(titleStart, titleY));
+        if (hasSubtitle)
+          _positionBox(subtitle!, Offset(titleStart, subtitleY!));
+        if (hasTrailing)
+          _positionBox(trailing!, Offset(tileWidth - trailingSize.width, trailingY));
+        break;
+      }
     }
 
     size = constraints.constrain(Size(tileWidth, tileHeight));
@@ -1724,7 +1755,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
         context.paintChild(child, parentData.offset + offset);
       }
     }
-
     doPaint(leading);
     doPaint(title);
     doPaint(subtitle);
@@ -1735,7 +1765,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   bool hitTestSelf(Offset position) => true;
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     assert(position != null);
     for (final RenderBox child in children) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
@@ -1747,7 +1777,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
           return child.hitTest(result, position: transformed);
         },
       );
-      if (isHit) return true;
+      if (isHit)
+        return true;
     }
     return false;
   }

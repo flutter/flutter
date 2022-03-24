@@ -234,7 +234,8 @@ void main() {
         ], environment: const <String, String>{
           'PATH': '/usr/bin:null',
           ...kDyLdLibEntry,
-        }, stderr: stderr, exitCode: 253)
+        }, stderr: stderr,
+          exitCode: 253)
       ]);
       final BufferLogger logger = BufferLogger.test();
       final IOSDevice device = setUpIOSDevice(processManager: processManager, logger: logger, artifacts: artifacts);

@@ -27,16 +27,16 @@ class AnalyzeContinuously extends AnalyzeBase {
     required ProcessManager processManager,
     required Artifacts artifacts,
   }) : super(
-          argResults,
-          repoPackages: repoPackages,
-          repoRoots: repoRoots,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          terminal: terminal,
-          processManager: processManager,
-          artifacts: artifacts,
-        );
+        argResults,
+        repoPackages: repoPackages,
+        repoRoots: repoRoots,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        processManager: processManager,
+        artifacts: artifacts,
+      );
 
   String? analysisTarget;
   bool firstAnalysis = true;
@@ -147,9 +147,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount);
-        server.dispose().whenComplete(() {
-          exit(issueCount > 0 ? 1 : 0);
-        });
+        server.dispose().whenComplete(() { exit(issueCount > 0 ? 1 : 0); });
       }
 
       firstAnalysis = false;

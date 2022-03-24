@@ -41,7 +41,8 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
     for (final AndroidAotDeferredComponentsBundle target in deferredComponentsDependencies) {
       if (deferredComponentsTargets.contains(target.name)) {
         abis.add(
-            getNameForAndroidArch(getAndroidArchForName(getNameForTargetPlatform(target.dependency.targetPlatform))));
+          getNameForAndroidArch(getAndroidArchForName(getNameForTargetPlatform(target.dependency.targetPlatform)))
+        );
       }
     }
     return abis;
@@ -58,8 +59,8 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
   @override
   List<String> get depfiles => <String>[
-        'flutter_$name.d',
-      ];
+    'flutter_$name.d',
+  ];
 
   @override
   List<Target> get dependencies {
@@ -83,13 +84,16 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
       exitOnFail: exitOnFail,
     );
 
-    final List<LoadingUnit> generatedLoadingUnits =
-        LoadingUnit.parseGeneratedLoadingUnits(environment.outputDir, environment.logger, abis: _abis);
+    final List<LoadingUnit> generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
+        environment.outputDir,
+        environment.logger,
+        abis: _abis
+    );
 
     validator!
       ..checkAppAndroidManifestComponentLoadingUnitMapping(
-        FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[],
-        generatedLoadingUnits,
+          FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[],
+          generatedLoadingUnits,
       )
       ..checkAgainstLoadingUnitsCache(generatedLoadingUnits)
       ..writeLoadingUnitsCache(generatedLoadingUnits);

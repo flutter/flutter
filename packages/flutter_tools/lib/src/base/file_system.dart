@@ -31,8 +31,8 @@ class FileSystemUtils {
   FileSystemUtils({
     required FileSystem fileSystem,
     required Platform platform,
-  })  : _fileSystem = fileSystem,
-        _platform = platform;
+  }) : _fileSystem = fileSystem,
+       _platform = platform;
 
   final FileSystem _fileSystem;
 
@@ -79,12 +79,15 @@ class FileSystemUtils {
     if (!entity.existsSync()) {
       return true;
     }
-    return referenceFile.existsSync() && referenceFile.statSync().modified.isAfter(entity.statSync().modified);
+    return referenceFile.existsSync()
+        && referenceFile.statSync().modified.isAfter(entity.statSync().modified);
   }
 
   /// Return the absolute path of the user's home directory.
   String? get homeDirPath {
-    String? path = _platform.isWindows ? _platform.environment['USERPROFILE'] : _platform.environment['HOME'];
+    String? path = _platform.isWindows
+      ? _platform.environment['USERPROFILE']
+      : _platform.environment['HOME'];
     if (path != null) {
       path = _fileSystem.path.absolute(path);
     }
@@ -215,7 +218,8 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   @override
   Directory get systemTempDirectory {
     if (_systemTemp == null) {
-      _systemTemp = super.systemTempDirectory.createTempSync('flutter_tools.')..createSync(recursive: true);
+      _systemTemp = super.systemTempDirectory.createTempSync('flutter_tools.')
+        ..createSync(recursive: true);
       // Make sure that the temporary directory is cleaned up if the tool is
       // killed by a signal.
       for (final ProcessSignal signal in _fatalSignals) {

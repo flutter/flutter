@@ -21,7 +21,8 @@ class _StockSymbolView extends StatelessWidget {
     assert(stock != null);
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
-    if (stock.percentChange > 0) changeInPrice = '+$changeInPrice';
+    if (stock.percentChange > 0)
+      changeInPrice = '+$changeInPrice';
 
     final TextStyle headings = Theme.of(context).textTheme.bodyText1!;
     return Container(
@@ -42,10 +43,14 @@ class _StockSymbolView extends StatelessWidget {
           ),
           Text('Last Sale', style: headings),
           Text('$lastSale ($changeInPrice)'),
-          Container(height: 8.0),
+          Container(
+            height: 8.0
+          ),
           Text('Market Cap', style: headings),
           Text(stock.marketCap),
-          Container(height: 8.0),
+          Container(
+            height: 8.0
+          ),
           RichText(
             text: TextSpan(
               style: DefaultTextStyle.of(context).style.merge(const TextStyle(fontSize: 8.0)),
@@ -93,19 +98,17 @@ class StockSymbolPage extends StatelessWidget {
                     child: Center(child: CircularProgressIndicator()),
                   ),
                   secondChild: stock != null
-                      ? _StockSymbolView(
-                          stock: stock,
-                          arrow: Hero(
-                            tag: stock,
-                            child: StockArrow(percentChange: stock.percentChange),
-                          ),
-                        )
-                      : Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Center(child: Text('$symbol not found')),
-                        ),
-                  crossFadeState:
-                      stock == null && stocks.loading ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                    ? _StockSymbolView(
+                      stock: stock,
+                      arrow: Hero(
+                        tag: stock,
+                        child: StockArrow(percentChange: stock.percentChange),
+                      ),
+                    ) : Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Center(child: Text('$symbol not found')),
+                    ),
+                  crossFadeState: stock == null && stocks.loading ? CrossFadeState.showFirst : CrossFadeState.showSecond,
                 ),
               ),
             ),
@@ -128,11 +131,13 @@ class StockSymbolBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(10.0),
-      decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.black26))),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Colors.black26))
+      ),
       child: _StockSymbolView(
         stock: stock,
         arrow: StockArrow(percentChange: stock.percentChange),
       ),
-    );
+   );
   }
 }

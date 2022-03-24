@@ -47,7 +47,8 @@ class FlutterTesterTestDevice extends TestDevice {
     @required this.fontConfigManager,
   })  : assert(shellPath != null), // Please provide the path to the shell in the SKY_SHELL environment variable.
         assert(!debuggingOptions.startPaused || enableObservatory),
-        _gotProcessObservatoryUri = enableObservatory ? Completer<Uri>() : (Completer<Uri>()..complete(null)),
+        _gotProcessObservatoryUri = enableObservatory
+            ? Completer<Uri>() : (Completer<Uri>()..complete(null)),
         _operatingSystemUtils = OperatingSystemUtils(
           fileSystem: fileSystem,
           logger: logger,
@@ -113,10 +114,11 @@ class FlutterTesterTestDevice extends TestDevice {
         //
         // I mention this only so that you won't be tempted, as I was, to apply
         // the obvious simplification to this code and remove this entire feature.
-        '--observatory-port=${debuggingOptions.enableDds ? 0 : debuggingOptions.hostVmServicePort}',
+        '--observatory-port=${debuggingOptions.enableDds ? 0 : debuggingOptions.hostVmServicePort }',
         if (debuggingOptions.startPaused) '--start-paused',
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
-      ] else
+      ]
+      else
         '--disable-observatory',
       if (host.type == InternetAddressType.IPv6) '--ipv6',
       if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
@@ -128,7 +130,8 @@ class FlutterTesterTestDevice extends TestDevice {
       '--non-interactive',
       '--use-test-fonts',
       '--packages=${debuggingOptions.buildInfo.packagesPath}',
-      if (debuggingOptions.nullAssertions) '--dart-flags=--null_assertions',
+      if (debuggingOptions.nullAssertions)
+        '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
       entrypointPath,
     ];
@@ -138,8 +141,9 @@ class FlutterTesterTestDevice extends TestDevice {
     //
     // If FLUTTER_TEST has not been set, assume from this context that this
     // call was invoked by the command 'flutter test'.
-    final String flutterTest =
-        platform.environment.containsKey('FLUTTER_TEST') ? platform.environment['FLUTTER_TEST'] : 'true';
+    final String flutterTest = platform.environment.containsKey('FLUTTER_TEST')
+        ? platform.environment['FLUTTER_TEST']
+        : 'true';
     final Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': fontConfigManager.fontConfigFile.path,
@@ -166,15 +170,15 @@ class FlutterTesterTestDevice extends TestDevice {
       process: _process,
       reportObservatoryUri: (Uri detectedUri) async {
         assert(!_gotProcessObservatoryUri.isCompleted);
-        assert(debuggingOptions.hostVmServicePort == null || debuggingOptions.hostVmServicePort == detectedUri.port);
+        assert(debuggingOptions.hostVmServicePort == null ||
+            debuggingOptions.hostVmServicePort == detectedUri.port);
 
         Uri forwardingUri;
         if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
           final DartDevelopmentService dds = await startDds(detectedUri);
           forwardingUri = dds.uri;
-          logger.printTrace(
-              'test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
+          logger.printTrace('test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
         } else {
           forwardingUri = detectedUri;
         }
@@ -191,8 +195,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
         if (debuggingOptions.startPaused && !machine) {
           logger.printStatus('The test process has been started.');
-          logger.printStatus(
-              'You can now connect to it using observatory. To connect, load the following Web site in your browser:');
+          logger.printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
           logger.printStatus('  $forwardingUri');
           logger.printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
         }
@@ -240,7 +243,10 @@ class FlutterTesterTestDevice extends TestDevice {
   Uri get _ddsServiceUri {
     return Uri(
       scheme: 'http',
-      host: (host.type == InternetAddressType.IPv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4).host,
+      host: (host.type == InternetAddressType.IPv6 ?
+        InternetAddress.loopbackIPv6 :
+        InternetAddress.loopbackIPv4
+      ).host,
       port: debuggingOptions.hostVmServicePort ?? 0,
     );
   }
@@ -279,8 +285,9 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   String toString() {
-    final String status =
-        _process != null ? 'pid: ${_process.pid}, ${_exitCode.isCompleted ? 'exited' : 'running'}' : 'not started';
+    final String status = _process != null
+        ? 'pid: ${_process.pid}, ${_exitCode.isCompleted ? 'exited' : 'running'}'
+        : 'not started';
     return 'Flutter Tester ($status) for test $id';
   }
 
@@ -292,8 +299,11 @@ class FlutterTesterTestDevice extends TestDevice {
       process.stderr,
       process.stdout,
     ]) {
-      stream.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(
-        (String line) async {
+      stream
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen(
+            (String line) async {
           logger.printTrace('test $id: Shell: $line');
 
           final Match match = globals.kVMServiceMessageRegExp.firstMatch(line);
@@ -311,8 +321,7 @@ class FlutterTesterTestDevice extends TestDevice {
           }
         },
         onError: (dynamic error) {
-          logger.printError(
-              'shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
+          logger.printError('shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
         },
         cancelOnError: true,
       );
@@ -342,7 +351,9 @@ String _getExitCodeMessage(int exitCode) {
 StreamChannel<String> _webSocketToStreamChannel(WebSocket webSocket) {
   final StreamChannelController<String> controller = StreamChannelController<String>();
 
-  controller.local.stream.map<dynamic>((String message) => message as dynamic).pipe(webSocket);
+  controller.local.stream
+      .map<dynamic>((String message) => message as dynamic)
+      .pipe(webSocket);
   webSocket
       // We're only communicating with string encoded JSON.
       .map<String>((dynamic message) => message as String)

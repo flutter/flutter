@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -28,12 +29,13 @@ abstract class SemanticsEvent {
   ///
   /// [nodeId] is the unique identifier of the semantics node associated with
   /// the event, or null if the event is not associated with a semantics node.
-  Map<String, dynamic> toMap({int? nodeId}) {
+  Map<String, dynamic> toMap({ int? nodeId }) {
     final Map<String, dynamic> event = <String, dynamic>{
       'type': type,
       'data': getDataMap(),
     };
-    if (nodeId != null) event['nodeId'] = nodeId;
+    if (nodeId != null)
+      event['nodeId'] = nodeId;
 
     return event;
   }
@@ -46,7 +48,8 @@ abstract class SemanticsEvent {
     final List<String> pairs = <String>[];
     final Map<String, dynamic> dataMap = getDataMap();
     final List<String> sortedKeys = dataMap.keys.toList()..sort();
-    for (final String key in sortedKeys) pairs.add('$key: ${dataMap[key]}');
+    for (final String key in sortedKeys)
+      pairs.add('$key: ${dataMap[key]}');
     return '${objectRuntimeType(this, 'SemanticsEvent')}(${pairs.join(', ')})';
   }
 }
@@ -62,11 +65,12 @@ abstract class SemanticsEvent {
 /// When possible, prefer using mechanisms like [Semantics] to implicitly
 /// trigger announcements over using this event.
 class AnnounceSemanticsEvent extends SemanticsEvent {
+
   /// Constructs an event that triggers an announcement by the platform.
   const AnnounceSemanticsEvent(this.message, this.textDirection)
-      : assert(message != null),
-        assert(textDirection != null),
-        super('announce');
+    : assert(message != null),
+      assert(textDirection != null),
+      super('announce');
 
   /// The message to announce.
   ///

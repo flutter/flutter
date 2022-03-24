@@ -5,7 +5,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-enum _DragTarget { start, end }
+enum _DragTarget {
+  start,
+  end
+}
 
 // How close a drag's start position must be to the target point. This is
 // a distance squared.
@@ -37,14 +40,14 @@ class _DragHandler extends Drag {
   }
 }
 
-class _IgnoreDrag extends Drag {}
+class _IgnoreDrag extends Drag {
+}
 
 class _PointDemoPainter extends CustomPainter {
   _PointDemoPainter({
     Animation<double>? repaint,
     required this.arc,
-  })  : _repaint = repaint,
-        super(repaint: repaint);
+  }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialPointArcTween arc;
   final Animation<double>? _repaint;
@@ -65,7 +68,8 @@ class _PointDemoPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint();
 
-    if (arc.center != null) drawPoint(canvas, arc.center!, Colors.grey.shade400);
+    if (arc.center != null)
+      drawPoint(canvas, arc.center!, Colors.grey.shade400);
 
     paint
       ..isAntiAlias = false // Work-around for github.com/flutter/flutter/issues/5720
@@ -88,8 +92,8 @@ class _PointDemoPainter extends CustomPainter {
 
   @override
   bool hitTest(Offset position) {
-    return (arc.begin! - position).distanceSquared < _kTargetSlop ||
-        (arc.end! - position).distanceSquared < _kTargetSlop;
+    return (arc.begin! - position).distanceSquared < _kTargetSlop
+        || (arc.end! - position).distanceSquared < _kTargetSlop;
   }
 
   @override
@@ -97,7 +101,7 @@ class _PointDemoPainter extends CustomPainter {
 }
 
 class _PointDemo extends StatefulWidget {
-  const _PointDemo({Key? key, required this.controller}) : super(key: key);
+  const _PointDemo({ Key? key, required this.controller }) : super(key: key);
 
   final AnimationController controller;
 
@@ -128,7 +132,8 @@ class _PointDemoState extends State<_PointDemo> {
 
   Drag _handleOnStart(Offset position) {
     // TODO(hansmuller): allow the user to drag both points at the same time.
-    if (_dragTarget != null) return _IgnoreDrag();
+    if (_dragTarget != null)
+      return _IgnoreDrag();
 
     final RenderBox? box = _painterKey.currentContext!.findRenderObject() as RenderBox?;
     final double startOffset = (box!.localToGlobal(_begin!) - position).distanceSquared;
@@ -219,8 +224,7 @@ class _RectangleDemoPainter extends CustomPainter {
   _RectangleDemoPainter({
     required Animation<double> repaint,
     required this.arc,
-  })  : _repaint = repaint,
-        super(repaint: repaint);
+  }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialRectArcTween arc;
   final Animation<double> _repaint;
@@ -255,8 +259,8 @@ class _RectangleDemoPainter extends CustomPainter {
 
   @override
   bool hitTest(Offset position) {
-    return (arc.begin!.center - position).distanceSquared < _kTargetSlop ||
-        (arc.end!.center - position).distanceSquared < _kTargetSlop;
+    return (arc.begin!.center - position).distanceSquared < _kTargetSlop
+        || (arc.end!.center - position).distanceSquared < _kTargetSlop;
   }
 
   @override
@@ -264,7 +268,7 @@ class _RectangleDemoPainter extends CustomPainter {
 }
 
 class _RectangleDemo extends StatefulWidget {
-  const _RectangleDemo({Key? key, required this.controller}) : super(key: key);
+  const _RectangleDemo({ Key? key, required this.controller }) : super(key: key);
 
   final AnimationController controller;
 
@@ -289,7 +293,8 @@ class _RectangleDemoState extends State<_RectangleDemo> {
 
   Drag _handleOnStart(Offset position) {
     // TODO(hansmuller): allow the user to drag both points at the same time.
-    if (_dragTarget != null) return _IgnoreDrag();
+    if (_dragTarget != null)
+      return _IgnoreDrag();
 
     final RenderBox? box = _painterKey.currentContext?.findRenderObject() as RenderBox?;
     final double startOffset = (box!.localToGlobal(_begin!.center) - position).distanceSquared;
@@ -335,16 +340,12 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     if (_screenSize == null || _screenSize != screenSize) {
       _screenSize = screenSize;
       _begin = Rect.fromLTWH(
-        screenSize.width * 0.5,
-        screenSize.height * 0.2,
-        screenSize.width * 0.4,
-        screenSize.height * 0.2,
+        screenSize.width * 0.5, screenSize.height * 0.2,
+        screenSize.width * 0.4, screenSize.height * 0.2,
       );
       _end = Rect.fromLTWH(
-        screenSize.width * 0.1,
-        screenSize.height * 0.4,
-        screenSize.width * 0.3,
-        screenSize.height * 0.3,
+        screenSize.width * 0.1, screenSize.height * 0.4,
+        screenSize.width * 0.3, screenSize.height * 0.3,
       );
     }
 
@@ -389,8 +390,8 @@ typedef _DemoBuilder = Widget Function(_ArcDemo demo);
 
 class _ArcDemo {
   _ArcDemo(this.title, this.builder, TickerProvider vsync)
-      : controller = AnimationController(duration: const Duration(milliseconds: 500), vsync: vsync),
-        key = GlobalKey(debugLabel: title);
+    : controller = AnimationController(duration: const Duration(milliseconds: 500), vsync: vsync),
+      key = GlobalKey(debugLabel: title);
 
   final String title;
   final _DemoBuilder builder;
@@ -399,7 +400,7 @@ class _ArcDemo {
 }
 
 class AnimationDemo extends StatefulWidget {
-  const AnimationDemo({Key? key}) : super(key: key);
+  const AnimationDemo({ Key? key }) : super(key: key);
 
   @override
   State<AnimationDemo> createState() => _AnimationDemoState();
@@ -423,7 +424,8 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
 
   Future<void> _play(_ArcDemo demo) async {
     await demo.controller.forward();
-    if (demo.key.currentState != null && demo.key.currentState!.mounted) demo.controller.reverse();
+    if (demo.key.currentState != null && demo.key.currentState!.mounted)
+      demo.controller.reverse();
   }
 
   @override

@@ -440,6 +440,7 @@ void main() {
     expect(state.objectValue.didUpdateValueCallCount, 1);
   });
 
+
   testWidgets('RestorableN types are properly defined', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',

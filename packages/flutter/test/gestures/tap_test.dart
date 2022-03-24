@@ -10,10 +10,10 @@ import 'gesture_tester.dart';
 
 class TestGestureArenaMember extends GestureArenaMember {
   @override
-  void acceptGesture(int key) {}
+  void acceptGesture(int key) { }
 
   @override
-  void rejectGesture(int key) {}
+  void rejectGesture(int key) { }
 }
 
 void main() {
@@ -121,7 +121,7 @@ void main() {
 
   testGesture('Should recognize tap for supported devices only', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer(
-      supportedDevices: <PointerDeviceKind>{PointerDeviceKind.mouse, PointerDeviceKind.stylus},
+      supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse, PointerDeviceKind.stylus },
     );
 
     bool tapRecognized = false;
@@ -210,8 +210,10 @@ void main() {
       lastUpDetails = details;
     };
 
-    const PointerDownEvent mouseDown = PointerDownEvent(pointer: 1, kind: PointerDeviceKind.mouse);
-    const PointerUpEvent mouseUp = PointerUpEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+    const PointerDownEvent mouseDown =
+        PointerDownEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+    const PointerUpEvent mouseUp =
+        PointerUpEvent(pointer: 1, kind: PointerDeviceKind.mouse);
 
     tap.addPointer(mouseDown);
     tester.closeArena(1);
@@ -277,6 +279,7 @@ void main() {
     tester.route(down1);
     expect(tapsRecognized, 0);
 
+
     tester.route(up1);
     expect(tapsRecognized, 1);
     GestureBinding.instance.gestureArena.sweep(1);
@@ -309,6 +312,7 @@ void main() {
     expect(tapsRecognized, 0);
     tester.route(down1);
     expect(tapsRecognized, 0);
+
 
     tester.route(up2);
     expect(tapsRecognized, 0);
@@ -505,7 +509,7 @@ void main() {
     final FlutterExceptionHandler? previousErrorHandler = FlutterError.onError;
     bool gotError = false;
     FlutterError.onError = (FlutterErrorDetails details) {
-      expect(details.toString().contains('"spontaneous onTapCancel"'), isTrue);
+      expect(details.toString().contains('"spontaneous onTapCancel"') , isTrue);
       gotError = true;
     };
 
@@ -526,30 +530,14 @@ void main() {
     final TapGestureRecognizer tapB = TapGestureRecognizer();
 
     final List<String> log = <String>[];
-    tapA.onTapDown = (TapDownDetails details) {
-      log.add('tapA onTapDown');
-    };
-    tapA.onTapUp = (TapUpDetails details) {
-      log.add('tapA onTapUp');
-    };
-    tapA.onTap = () {
-      log.add('tapA onTap');
-    };
-    tapA.onTapCancel = () {
-      log.add('tapA onTapCancel');
-    };
-    tapB.onTapDown = (TapDownDetails details) {
-      log.add('tapB onTapDown');
-    };
-    tapB.onTapUp = (TapUpDetails details) {
-      log.add('tapB onTapUp');
-    };
-    tapB.onTap = () {
-      log.add('tapB onTap');
-    };
-    tapB.onTapCancel = () {
-      log.add('tapB onTapCancel');
-    };
+    tapA.onTapDown = (TapDownDetails details) { log.add('tapA onTapDown'); };
+    tapA.onTapUp = (TapUpDetails details) { log.add('tapA onTapUp'); };
+    tapA.onTap = () { log.add('tapA onTap'); };
+    tapA.onTapCancel = () { log.add('tapA onTapCancel'); };
+    tapB.onTapDown = (TapDownDetails details) { log.add('tapB onTapDown'); };
+    tapB.onTapUp = (TapUpDetails details) { log.add('tapB onTapUp'); };
+    tapB.onTap = () { log.add('tapB onTap'); };
+    tapB.onTapCancel = () { log.add('tapB onTapCancel'); };
 
     log.add('start');
     tapA.addPointer(down1);
@@ -608,12 +596,12 @@ void main() {
 
   testGesture('PointerCancelEvent cancels tap', (GestureTester tester) {
     const PointerDownEvent down = PointerDownEvent(
-      pointer: 5,
-      position: Offset(10.0, 10.0),
+        pointer: 5,
+        position: Offset(10.0, 10.0),
     );
     const PointerCancelEvent cancel = PointerCancelEvent(
-      pointer: 5,
-      position: Offset(10.0, 10.0),
+        pointer: 5,
+        position: Offset(10.0, 10.0),
     );
 
     final TapGestureRecognizer tap = TapGestureRecognizer();
@@ -644,12 +632,12 @@ void main() {
 
   testGesture('PointerCancelEvent after exceeding deadline cancels tap', (GestureTester tester) {
     const PointerDownEvent down = PointerDownEvent(
-      pointer: 5,
-      position: Offset(10.0, 10.0),
+        pointer: 5,
+        position: Offset(10.0, 10.0),
     );
     const PointerCancelEvent cancel = PointerCancelEvent(
-      pointer: 5,
-      position: Offset(10.0, 10.0),
+        pointer: 5,
+        position: Offset(10.0, 10.0),
     );
 
     final TapGestureRecognizer tap = TapGestureRecognizer();
@@ -929,8 +917,7 @@ void main() {
       recognized.clear();
     });
 
-    testGesture('A primary tap recognizer does not form competition with a secondary tap recognizer',
-        (GestureTester tester) {
+    testGesture('A primary tap recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
       primary.addPointer(down1);
       secondary.addPointer(down1);
       tester.closeArena(1);
@@ -943,8 +930,7 @@ void main() {
       expect(recognized, <String>['primaryUp']);
     });
 
-    testGesture('A primary tap recognizer does not form competition with a tertiary tap recognizer',
-        (GestureTester tester) {
+    testGesture('A primary tap recognizer does not form competition with a tertiary tap recognizer', (GestureTester tester) {
       primary.addPointer(down1);
       tertiary.addPointer(down1);
       tester.closeArena(1);
@@ -957,8 +943,7 @@ void main() {
       expect(recognized, <String>['primaryUp']);
     });
 
-    testGesture('A primary tap recognizer forms competition with another primary tap recognizer',
-        (GestureTester tester) {
+    testGesture('A primary tap recognizer forms competition with another primary tap recognizer', (GestureTester tester) {
       primary.addPointer(down1);
       primary2.addPointer(down1);
       tester.closeArena(1);
@@ -1110,7 +1095,8 @@ void main() {
         didTap = true;
       };
     // Add drag recognizer for competition
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()..onStart = (_) {};
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..onStart = (_) {};
 
     final TestPointer pointer1 = TestPointer();
 

@@ -20,7 +20,6 @@ void main() {
         ),
       );
     }
-
     await tester.pumpWidget(buildFrame(1200.0));
     expect(events.length, 1);
 

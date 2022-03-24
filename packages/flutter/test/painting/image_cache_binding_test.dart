@@ -20,11 +20,9 @@ void main() {
     // initInstances (and before the imageCache was initialized, which
     // was a problem), but now it happens asynchronously just after.
 
-    ui.channelBuffers.push(
-        SystemChannels.system.name,
-        SystemChannels.system.codec.encodeMessage(<String, dynamic>{
-          'type': 'memoryPressure',
-        }), (ByteData? responseData) {
+    ui.channelBuffers.push(SystemChannels.system.name, SystemChannels.system.codec.encodeMessage(<String, dynamic>{
+      'type': 'memoryPressure',
+    }), (ByteData? responseData) {
       // The result is: SystemChannels.system.codec.decodeMessage(responseData)
       // ...but we ignore it for the purposes of this test.
     });

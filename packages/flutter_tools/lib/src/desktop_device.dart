@@ -22,19 +22,18 @@ import 'protocol_discovery.dart';
 /// A partial implementation of Device for desktop-class devices to inherit
 /// from, containing implementations that are common to all desktop devices.
 abstract class DesktopDevice extends Device {
-  DesktopDevice(
-    String identifier, {
-    required PlatformType platformType,
-    required bool ephemeral,
-    required Logger logger,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-  })  : _logger = logger,
-        _processManager = processManager,
-        _fileSystem = fileSystem,
-        _operatingSystemUtils = operatingSystemUtils,
-        super(
+  DesktopDevice(String identifier, {
+      required PlatformType platformType,
+      required bool ephemeral,
+      required Logger logger,
+      required ProcessManager processManager,
+      required FileSystem fileSystem,
+      required OperatingSystemUtils operatingSystemUtils,
+    }) : _logger = logger,
+         _processManager = processManager,
+         _fileSystem = fileSystem,
+         _operatingSystemUtils = operatingSystemUtils,
+         super(
           identifier,
           category: Category.desktop,
           platformType: platformType,
@@ -59,8 +58,7 @@ abstract class DesktopDevice extends Device {
   Future<bool> isAppInstalled(
     ApplicationPackage app, {
     String? userIdentifier,
-  }) async =>
-      true;
+  }) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -73,8 +71,7 @@ abstract class DesktopDevice extends Device {
   Future<bool> installApp(
     ApplicationPackage app, {
     String? userIdentifier,
-  }) async =>
-      true;
+  }) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
   // to uninstall the application.
@@ -82,8 +79,7 @@ abstract class DesktopDevice extends Device {
   Future<bool> uninstallApp(
     ApplicationPackage app, {
     String? userIdentifier,
-  }) async =>
-      true;
+  }) async => true;
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -161,8 +157,7 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.buildInfo.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(
-      _deviceLogReader,
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
       ipv6: ipv6,
@@ -235,7 +230,6 @@ abstract class DesktopDevice extends Device {
       flags += 1;
       environment['FLUTTER_ENGINE_SWITCH_$flags'] = value;
     }
-
     void finish() {
       environment['FLUTTER_ENGINE_SWITCHES'] = flags.toString();
     }
@@ -340,7 +334,9 @@ class DesktopLogReader extends DeviceLogReader {
 
   @override
   Stream<String> get logLines {
-    return _inputController.stream.transform(utf8.decoder).transform(const LineSplitter());
+    return _inputController.stream
+      .transform(utf8.decoder)
+      .transform(const LineSplitter());
   }
 
   @override

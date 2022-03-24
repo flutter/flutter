@@ -30,7 +30,7 @@ const String testManifest = '''
 ''';
 
 class TestAssetBundle extends CachingAssetBundle {
-  TestAssetBundle({this.manifest = testManifest});
+  TestAssetBundle({ this.manifest = testManifest });
 
   final String manifest;
 
@@ -61,8 +61,9 @@ class TestAssetBundle extends CachingAssetBundle {
   }
 
   @override
-  Future<String> loadString(String key, {bool cache = true}) {
-    if (key == 'AssetManifest.json') return SynchronousFuture<String>(manifest);
+  Future<String> loadString(String key, { bool cache = true }) {
+    if (key == 'AssetManifest.json')
+      return SynchronousFuture<String>(manifest);
     return SynchronousFuture<String>('');
   }
 
@@ -95,8 +96,7 @@ class TestAssetImage extends AssetImage {
   }
 }
 
-Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize, Map<double, ui.Image> images,
-    [AssetBundle? bundle]) {
+Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize, Map<double, ui.Image> images, [ AssetBundle? bundle ]) {
   const double windowSize = 500.0; // 500 logical pixels
   const double imageSize = 200.0; // 200 logical pixels
 
@@ -108,20 +108,20 @@ Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize
     child: DefaultAssetBundle(
       bundle: bundle ?? TestAssetBundle(),
       child: Center(
-        child: inferSize
-            ? Image(
-                key: key,
-                excludeFromSemantics: true,
-                image: TestAssetImage(imageName, images),
-              )
-            : Image(
-                key: key,
-                excludeFromSemantics: true,
-                image: TestAssetImage(imageName, images),
-                height: imageSize,
-                width: imageSize,
-                fit: BoxFit.fill,
-              ),
+        child: inferSize ?
+          Image(
+            key: key,
+            excludeFromSemantics: true,
+            image: TestAssetImage(imageName, images),
+          ) :
+          Image(
+            key: key,
+            excludeFromSemantics: true,
+            image: TestAssetImage(imageName, images),
+            height: imageSize,
+            width: imageSize,
+            fit: BoxFit.fill,
+          ),
       ),
     ),
   );

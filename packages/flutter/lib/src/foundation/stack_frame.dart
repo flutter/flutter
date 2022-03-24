@@ -105,8 +105,9 @@ class StackFrame {
     // This RegExp is only partially correct for flutter run/test differences.
     // https://github.com/flutter/flutter/issues/52685
     final bool hasPackage = line.startsWith('package');
-    final RegExp parser =
-        hasPackage ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$') : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
+    final RegExp parser = hasPackage
+        ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
+        : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
     Match? match = parser.firstMatch(line);
     assert(match != null, 'Expected $line to match $parser.');
     match = match!;
@@ -161,7 +162,9 @@ class StackFrame {
 
     final List<String> classAndMethod = match.group(1)!.split('.');
     final String className = classAndMethod.length > 1 ? classAndMethod.first : '<unknown>';
-    final String method = classAndMethod.length > 1 ? classAndMethod.skip(1).join('.') : classAndMethod.single;
+    final String method = classAndMethod.length > 1
+      ? classAndMethod.skip(1).join('.')
+      : classAndMethod.single;
 
     return StackFrame(
       number: -1,
@@ -211,7 +214,7 @@ class StackFrame {
       className = methodParts.length > 1 ? method.split(' ')[1] : '<unknown>';
       method = '';
       if (className.contains('.')) {
-        final List<String> parts = className.split('.');
+        final List<String> parts  = className.split('.');
         className = parts[0];
         method = parts[1];
       }
@@ -295,18 +298,18 @@ class StackFrame {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is StackFrame &&
-        other.number == number &&
-        other.package == package &&
-        other.line == line &&
-        other.column == column &&
-        other.className == className &&
-        other.method == method &&
-        other.source == source;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is StackFrame
+        && other.number == number
+        && other.package == package
+        && other.line == line
+        && other.column == column
+        && other.className == className
+        && other.method == method
+        && other.source == source;
   }
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'StackFrame')}(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
+  String toString() => '${objectRuntimeType(this, 'StackFrame')}(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
 }

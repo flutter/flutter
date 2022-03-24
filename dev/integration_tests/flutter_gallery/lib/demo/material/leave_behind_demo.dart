@@ -18,13 +18,10 @@ enum LeaveBehindDemoAction {
 }
 
 class LeaveBehindItem implements Comparable<LeaveBehindItem> {
-  LeaveBehindItem({this.index, this.name, this.subject, this.body});
+  LeaveBehindItem({ this.index, this.name, this.subject, this.body });
 
   LeaveBehindItem.from(LeaveBehindItem item)
-      : index = item.index,
-        name = item.name,
-        subject = item.subject,
-        body = item.body;
+    : index = item.index, name = item.name, subject = item.subject, body = item.body;
 
   final int? index;
   final String? name;
@@ -36,7 +33,7 @@ class LeaveBehindItem implements Comparable<LeaveBehindItem> {
 }
 
 class LeaveBehindDemo extends StatefulWidget {
-  const LeaveBehindDemo({Key? key}) : super(key: key);
+  const LeaveBehindDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/material/leave-behind';
 
@@ -103,9 +100,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       content: Text('You archived item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
-        onPressed: () {
-          handleUndo(item);
-        },
+        onPressed: () { handleUndo(item); },
       ),
     ));
   }
@@ -118,9 +113,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       content: Text('You deleted item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
-        onPressed: () {
-          handleUndo(item);
-        },
+        onPressed: () { handleUndo(item); },
       ),
     ));
   }
@@ -147,7 +140,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
               dismissDirection: _dismissDirection,
             );
           }).toList(),
-        ),
+          ),
       );
     }
 
@@ -234,23 +227,21 @@ class _LeaveBehindListItem extends StatelessWidget {
           else
             _handleDelete();
         },
-        confirmDismiss: !confirmDismiss
-            ? null
-            : (DismissDirection dismissDirection) async {
-                switch (dismissDirection) {
-                  case DismissDirection.endToStart:
-                    return await _showConfirmationDialog(context, 'archive') ?? false;
-                  case DismissDirection.startToEnd:
-                    return await _showConfirmationDialog(context, 'delete') ?? false;
-                  case DismissDirection.horizontal:
-                  case DismissDirection.vertical:
-                  case DismissDirection.up:
-                  case DismissDirection.down:
-                  case DismissDirection.none:
-                    assert(false);
-                }
-                return false;
-              },
+        confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
+          switch(dismissDirection) {
+            case DismissDirection.endToStart:
+              return await _showConfirmationDialog(context, 'archive') ?? false;
+            case DismissDirection.startToEnd:
+              return await _showConfirmationDialog(context, 'delete') ?? false;
+            case DismissDirection.horizontal:
+            case DismissDirection.vertical:
+            case DismissDirection.up:
+            case DismissDirection.down:
+            case DismissDirection.none:
+              assert(false);
+          }
+          return false;
+        },
         background: Container(
           color: theme.primaryColor,
           child: const Center(

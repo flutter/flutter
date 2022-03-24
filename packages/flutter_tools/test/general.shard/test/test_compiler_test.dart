@@ -23,11 +23,14 @@ final Platform linuxPlatform = FakePlatform(
   environment: <String, String>{},
 );
 
-final BuildInfo debugBuild = BuildInfo(BuildMode.debug, '',
-    treeShakeIcons: false,
-    packageConfig: PackageConfig(<Package>[
-      Package('test_api', Uri.parse('file:///test_api/')),
-    ]));
+final BuildInfo debugBuild = BuildInfo(
+  BuildMode.debug,
+  '',
+  treeShakeIcons: false,
+  packageConfig: PackageConfig(<Package>[
+    Package('test_api', Uri.parse('file:///test_api/')),
+  ])
+);
 
 void main() {
   FakeResidentCompiler residentCompiler;
@@ -114,17 +117,17 @@ void main() {
 
   testUsingContext('TestCompiler updates generated_main.dart', () async {
     final Directory fakeDartPlugin = fileSystem.directory('a_plugin');
-    fileSystem.file('pubspec.yaml').writeAsStringSync('''
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: foo
 dependencies:
   flutter:
     sdk: flutter
   a_plugin: 1.0.0
 ''');
-    fileSystem.file('.packages').writeAsStringSync('a_plugin:/a_plugin/lib/');
-    fakeDartPlugin.childFile('pubspec.yaml')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('''
+      fileSystem.file('.packages').writeAsStringSync('a_plugin:/a_plugin/lib/');
+      fakeDartPlugin.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: a_plugin
 flutter:
   plugin:
@@ -146,11 +149,16 @@ environment:
 
     await testCompiler.compile(Uri.parse('test/foo.dart'));
 
-    final File generatedMain =
-        fileSystem.directory('.dart_tool').childDirectory('flutter_build').childFile('generated_main.dart');
+    final File generatedMain = fileSystem
+      .directory('.dart_tool')
+      .childDirectory('flutter_build')
+      .childFile('generated_main.dart');
 
     expect(generatedMain, exists);
-    expect(generatedMain.readAsLinesSync(), contains("import 'test/foo.dart' as entrypoint;"));
+    expect(
+      generatedMain.readAsLinesSync(),
+      contains("import 'test/foo.dart' as entrypoint;")
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Platform: () => linuxPlatform,
@@ -165,8 +173,9 @@ class FakeTestCompiler extends TestCompiler {
     BuildInfo buildInfo,
     FlutterProject flutterProject,
     this.residentCompiler, {
-    String precompiledDillPath,
-  }) : super(buildInfo, flutterProject, precompiledDillPath: precompiledDillPath);
+      String precompiledDillPath,
+    }
+  ) : super(buildInfo, flutterProject, precompiledDillPath: precompiledDillPath);
 
   final FakeResidentCompiler residentCompiler;
 
@@ -202,10 +211,10 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   }
 
   @override
-  void accept() {}
+  void accept() { }
 
   @override
-  void reset() {}
+  void reset() { }
 
   @override
   Future<void> shutdown() async {

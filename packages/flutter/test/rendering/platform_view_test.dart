@@ -48,9 +48,9 @@ void main() {
       );
       int semanticsUpdateCount = 0;
       final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
-        listener: () {
-          ++semanticsUpdateCount;
-        },
+          listener: () {
+            ++semanticsUpdateCount;
+          },
       );
       layout(tree, phase: EnginePhase.flushSemantics);
       // Initial semantics update
@@ -99,6 +99,7 @@ void main() {
 
       expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
     });
+
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/69431
@@ -106,7 +107,7 @@ void main() {
     final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
     viewsController.registerViewType('webview');
     final AndroidViewController viewController =
-        PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
+      PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
     final PlatformViewRenderBox platformViewRenderBox = PlatformViewRenderBox(
       controller: viewController,
       hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -185,7 +186,7 @@ void main() {
   test('render object changed its visual appearance after texture is created', () {
     FakeAsync().run((FakeAsync async) {
       final AndroidViewController viewController =
-          PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
+        PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
       final RenderAndroidView renderBox = RenderAndroidView(
         viewController: viewController,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,

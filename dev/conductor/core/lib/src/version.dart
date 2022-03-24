@@ -84,7 +84,10 @@ class Version {
     Match? match = versionPatterns[VersionType.stable]!.firstMatch(versionString);
     if (match != null) {
       // parse stable
-      final List<int> parts = match.groups(<int>[1, 2, 3]).map((String? s) => int.parse(s!)).toList();
+      final List<int> parts = match
+          .groups(<int>[1, 2, 3])
+          .map((String? s) => int.parse(s!))
+          .toList();
       return Version(
         x: parts[0],
         y: parts[1],
@@ -96,7 +99,8 @@ class Version {
     match = versionPatterns[VersionType.development]!.firstMatch(versionString);
     if (match != null) {
       // parse development
-      final List<int> parts = match.groups(<int>[1, 2, 3, 4, 5]).map((String? s) => int.parse(s!)).toList();
+      final List<int> parts =
+          match.groups(<int>[1, 2, 3, 4, 5]).map((String? s) => int.parse(s!)).toList();
       return Version(
         x: parts[0],
         y: parts[1],
@@ -110,14 +114,11 @@ class Version {
     match = versionPatterns[VersionType.latest]!.firstMatch(versionString);
     if (match != null) {
       // parse latest
-      final List<int> parts = match
-          .groups(
-            <int>[1, 2, 3, 4, 5, 6],
-          )
-          .map(
-            (String? s) => int.parse(s!),
-          )
-          .toList();
+      final List<int> parts = match.groups(
+        <int>[1, 2, 3, 4, 5, 6],
+      ).map(
+        (String? s) => int.parse(s!),
+      ).toList();
       return Version(
         x: parts[0],
         y: parts[1],
@@ -290,9 +291,7 @@ class Version {
     }
 
     // stable type versions don't have an m field set
-    if (type != VersionType.stable &&
-        releaseType != ReleaseType.STABLE_HOTFIX &&
-        releaseType != ReleaseType.STABLE_INITIAL) {
+    if (type != VersionType.stable && releaseType != ReleaseType.STABLE_HOTFIX && releaseType != ReleaseType.STABLE_INITIAL) {
       final String branchM = branchMatch.group(3)!;
       if (m != int.tryParse(branchM)) {
         throw ConductorException(

@@ -81,8 +81,7 @@ void main() {
     expect(tipInGlobal.dy, 20.0);
   });
 
-  testWidgets('Does tooltip end up in the right place - center with padding outside overlay',
-      (WidgetTester tester) async {
+  testWidgets('Does tooltip end up in the right place - center with padding outside overlay', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
@@ -675,16 +674,12 @@ void main() {
     tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester
-        .widget<DefaultTextStyle>(
-          find
-              .ancestor(
-                of: find.text(tooltipText),
-                matching: find.byType(DefaultTextStyle),
-              )
-              .first,
-        )
-        .style;
+    final TextStyle textStyle = tester.widget<DefaultTextStyle>(
+      find.ancestor(
+        of: find.text(tooltipText),
+        matching: find.byType(DefaultTextStyle),
+      ).first,
+    ).style;
 
     // The default fallback text style results in a text with a
     // double underline of Color(0xffffff00).
@@ -724,13 +719,10 @@ void main() {
     );
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
-    expect(
-        tip,
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
-            color: const Color(0xe6616161),
-          ));
+    expect(tip, paints..rrect(
+      rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
+      color: const Color(0xe6616161),
+    ));
   });
 
   testWidgets('Tooltip default size, shape, and color test for Desktop', (WidgetTester tester) async {
@@ -759,16 +751,11 @@ void main() {
     );
     expect(tip.size.height, equals(24.0));
     expect(tip.size.width, equals(46.0));
-    expect(
-        tip,
-        paints
-          ..rrect(
-            rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
-            color: const Color(0xe6616161),
-          ));
-  },
-      variant: const TargetPlatformVariant(
-          <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));
+    expect(tip, paints..rrect(
+      rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
+      color: const Color(0xe6616161),
+    ));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));
 
   testWidgets('Can tooltip decoration be customized', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
@@ -806,12 +793,9 @@ void main() {
     );
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
-    expect(
-        tip,
-        paints
-          ..path(
-            color: const Color(0x80800000),
-          ));
+    expect(tip, paints..path(
+      color: const Color(0x80800000),
+    ));
   });
 
   testWidgets('Tooltip stays after long press', (WidgetTester tester) async {
@@ -866,7 +850,8 @@ void main() {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) return gesture.removePointer();
+      if (gesture != null)
+        return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -920,7 +905,8 @@ void main() {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) return gesture.removePointer();
+      if (gesture != null)
+        return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1050,9 +1036,7 @@ void main() {
     );
 
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(() async {
-      gesture?.removePointer();
-    });
+    addTearDown(() async { gesture?.removePointer(); });
 
     // Both the inner and outer containers have tooltips associated with them, but only
     // the currently hovered one should appear, even though the pointer is inside both.
@@ -1091,7 +1075,8 @@ void main() {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) return gesture.removePointer();
+      if (gesture != null)
+        return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1134,7 +1119,8 @@ void main() {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) return gesture.removePointer();
+      if (gesture != null)
+        return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1200,7 +1186,8 @@ void main() {
     const Duration waitDuration = Duration(seconds: 1);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) return gesture.removePointer();
+      if (gesture != null)
+        return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1230,9 +1217,9 @@ void main() {
 
     // Pump another random widget to unmount the Tooltip widget.
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Center(
-          child: SizedBox(),
+        const MaterialApp(
+          home: Center(
+            child: SizedBox(),
         ),
       ),
     );
@@ -1324,7 +1311,7 @@ void main() {
   });
 
   testWidgets('Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
-    Widget buildApp(String text, {required double textScaleFactor}) {
+    Widget buildApp(String text, { required double textScaleFactor }) {
       return MediaQuery(
         data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Directionality(
@@ -1401,8 +1388,7 @@ void main() {
     expect(richText.text.toPlainText(), equals('$textSpan1Text$textSpan2Text'));
   });
 
-  testWidgets('Tooltip throws assertion error when both message and richMessage are specified',
-      (WidgetTester tester) async {
+  testWidgets('Tooltip throws assertion error when both message and richMessage are specified', (WidgetTester tester) async {
     expect(
       () {
         MaterialApp(
@@ -1466,33 +1452,27 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-            TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
               children: <TestSemantics>[
-                TestSemantics.rootChild(
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              label: 'Foo\nBar',
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
-                        ),
-                      ],
+                      label: 'Foo\nBar',
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
               ],
             ),
-            ignoreRect: true,
-            ignoreId: true,
-            ignoreTransform: true));
+          ],
+        ),
+      ],
+    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();
   });
@@ -1512,41 +1492,34 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-            TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
               children: <TestSemantics>[
-                TestSemantics.rootChild(
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              label: 'Bar',
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
-                        ),
-                      ],
+                      label: 'Bar',
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
               ],
             ),
-            ignoreRect: true,
-            ignoreId: true,
-            ignoreTransform: true));
+          ],
+        ),
+      ],
+    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();
   });
 
   testWidgets('has semantic events', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility,
-        (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvents.add(message);
     });
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1569,21 +1542,19 @@ void main() {
     await tester.longPress(find.byType(Tooltip));
     final RenderObject object = tester.firstRenderObject(find.byType(Tooltip));
 
-    expect(
-        semanticEvents,
-        unorderedEquals(<dynamic>[
-          <String, dynamic>{
-            'type': 'longPress',
-            'nodeId': findDebugSemantics(object).id,
-            'data': <String, dynamic>{},
-          },
-          <String, dynamic>{
-            'type': 'tooltip',
-            'data': <String, dynamic>{
-              'message': 'Foo',
-            },
-          },
-        ]));
+    expect(semanticEvents, unorderedEquals(<dynamic>[
+      <String, dynamic>{
+        'type': 'longPress',
+        'nodeId': findDebugSemantics(object).id,
+        'data': <String, dynamic>{},
+      },
+      <String, dynamic>{
+        'type': 'tooltip',
+        'data': <String, dynamic>{
+          'message': 'Foo',
+        },
+      },
+    ]));
     semantics.dispose();
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
@@ -1593,9 +1564,8 @@ void main() {
     const Tooltip(message: 'message').debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
 
     expect(description, <String>[
       '"message"',
@@ -1617,8 +1587,7 @@ void main() {
 
     final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+        .map((DiagnosticsNode node) => node.toString()).toList();
 
     expect(description, <String>[
       '"This is a richMessage"',
@@ -1645,9 +1614,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
 
     expect(description, <String>[
       '"message"',
@@ -1763,6 +1731,7 @@ Future<void> testGestureTap(WidgetTester tester, Finder tooltip) async {
 }
 
 SemanticsNode findDebugSemantics(RenderObject object) {
-  if (object.debugSemantics != null) return object.debugSemantics!;
+  if (object.debugSemantics != null)
+    return object.debugSemantics!;
   return findDebugSemantics(object.parent! as RenderObject);
 }

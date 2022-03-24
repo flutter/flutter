@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-class TestDrag extends Drag {}
+class TestDrag extends Drag { }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -63,7 +63,8 @@ void main() {
   });
 
   testGesture('MultiDrag: can filter based on device kind', (GestureTester tester) {
-    final DelayedMultiDragGestureRecognizer drag = DelayedMultiDragGestureRecognizer(kind: PointerDeviceKind.touch);
+    final DelayedMultiDragGestureRecognizer drag =
+        DelayedMultiDragGestureRecognizer(kind: PointerDeviceKind.touch);
 
     bool didStartDrag = false;
     drag.onStart = (Offset position) {
@@ -89,63 +90,59 @@ void main() {
     drag.dispose();
   });
 
-  testWidgets('ImmediateMultiGestureRecognizer asserts when kind and supportedDevices are both set',
-      (WidgetTester tester) async {
+  testWidgets('ImmediateMultiGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
     try {
       ImmediateMultiDragGestureRecognizer(
         kind: PointerDeviceKind.touch,
-        supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
+        supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
       );
-    } catch (error) {
+    } catch(error) {
       expect(error, isAssertionError);
       expect(error.toString(), contains('kind == null || supportedDevices == null'));
     }
   });
 
-  testWidgets('HorizontalMultiDragGestureRecognizer asserts when kind and supportedDevices are both set',
-      (WidgetTester tester) async {
+  testWidgets('HorizontalMultiDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
     expect(
       () {
         HorizontalMultiDragGestureRecognizer(
-          kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
         );
       },
       throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(), 'description',
-            contains('kind == null || supportedDevices == null')),
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
       ),
     );
   });
 
-  testWidgets('VerticalMultiDragGestureRecognizer asserts when kind and supportedDevices are both set',
-      (WidgetTester tester) async {
+  testWidgets('VerticalMultiDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
     expect(
       () {
         VerticalMultiDragGestureRecognizer(
-          kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
         );
       },
       throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(), 'description',
-            contains('kind == null || supportedDevices == null')),
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
       ),
     );
   });
 
-  testWidgets('DelayedMultiDragGestureRecognizer asserts when kind and supportedDevices are both set',
-      (WidgetTester tester) async {
+  testWidgets('DelayedMultiDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
     expect(
       () {
         DelayedMultiDragGestureRecognizer(
-          kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
         );
       },
       throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(), 'description',
-            contains('kind == null || supportedDevices == null')),
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
       ),
     );
   });

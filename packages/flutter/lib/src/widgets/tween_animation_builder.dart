@@ -108,10 +108,10 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
     required this.builder,
     VoidCallback? onEnd,
     this.child,
-  })  : assert(tween != null),
-        assert(curve != null),
-        assert(builder != null),
-        super(key: key, duration: duration, curve: curve, onEnd: onEnd);
+  }) : assert(tween != null),
+       assert(curve != null),
+       assert(builder != null),
+       super(key: key, duration: duration, curve: curve, onEnd: onEnd);
 
   /// Defines the target value for the animation.
   ///

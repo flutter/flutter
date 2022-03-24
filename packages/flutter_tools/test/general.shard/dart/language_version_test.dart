@@ -29,7 +29,8 @@ void main() {
   testWithoutContext('detects language version in comment', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 // @dart = 2.9
@@ -41,19 +42,21 @@ void main() {
   testWithoutContext('detects language version in comment without spacing', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 // @dart=2.9
 ''');
 
-    expect(determineLanguageVersion(file, null, flutterRoot), LanguageVersion(2, 9));
+    expect(determineLanguageVersion(file, null, flutterRoot),  LanguageVersion(2, 9));
   });
 
   testWithoutContext('detects language version in comment with more numbers', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 // @dart=2.12
@@ -65,7 +68,8 @@ void main() {
   testWithoutContext('does not detect invalid language version', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 // @dart
@@ -76,7 +80,8 @@ void main() {
 
   testWithoutContext('detects language version with leading whitespace', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
     // @dart = 2.9
@@ -87,7 +92,8 @@ void main() {
 
   testWithoutContext('detects language version with tabs', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 //\t@dart = 2.9
@@ -98,7 +104,8 @@ void main() {
 
   testWithoutContext('detects language version with tons of whitespace', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 //        @dart       = 2.23
@@ -110,7 +117,8 @@ void main() {
   testWithoutContext('does not detect language version in dartdoc', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 /// @dart = 2.9
@@ -122,7 +130,8 @@ void main() {
   testWithoutContext('does not detect language version in block comment', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 /*
@@ -136,7 +145,8 @@ void main() {
   testWithoutContext('does not detect language version in nested block comment', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 /*
@@ -151,7 +161,8 @@ void main() {
 
   testWithoutContext('detects language version after nested block comment', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 /* /*
@@ -166,7 +177,8 @@ void main() {
   testWithoutContext('does not crash with unbalanced opening block comments', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 /*
@@ -181,7 +193,8 @@ void main() {
   testWithoutContext('does not crash with unbalanced closing block comments', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 /*
@@ -196,7 +209,8 @@ void main() {
   testWithoutContext('does not detect language version in single line block comment', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 /* // @dart = 2.9 */
@@ -208,7 +222,8 @@ void main() {
   testWithoutContext('does not detect language version after import declaration', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 import 'dart:ui' as ui;
@@ -222,7 +237,8 @@ import 'dart:ui' as ui;
   testWithoutContext('does not detect language version after part declaration', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpLanguageVersion(fileSystem);
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 part of 'foo.dart';
@@ -235,7 +251,8 @@ part of 'foo.dart';
 
   testWithoutContext('does not detect language version after library declaration', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 
 library funstuff;
@@ -248,7 +265,8 @@ library funstuff;
 
   testWithoutContext('looks up language version from package if not found in file', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 ''');
     final Package package = Package(
@@ -262,7 +280,8 @@ library funstuff;
 
   testWithoutContext('defaults to current version if package lookup returns null', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File file = fileSystem.file('example.dart')..writeAsStringSync('''
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
 // Some license
 ''');
     final Package package = Package(

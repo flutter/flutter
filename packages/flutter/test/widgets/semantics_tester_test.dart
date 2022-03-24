@@ -17,7 +17,7 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello'),
-            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () {}),
+            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
           ],
           style: textStyle,
         ),

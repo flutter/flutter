@@ -31,8 +31,10 @@ void main() {
     // that AssetBundle with fonts also works on Windows.
     testUsingContext('app font uses local font file', () async {
       final AssetBundle asset = AssetBundleFactory.instance.createBundle();
-      final String manifestPath = globals.fs.path.join(dataPath, 'main', 'pubspec.yaml');
-      final String packagesPath = globals.fs.path.join(dataPath, 'main', '.packages');
+      final String manifestPath =
+          globals.fs.path.join(dataPath, 'main', 'pubspec.yaml');
+      final String packagesPath =
+          globals.fs.path.join(dataPath, 'main', '.packages');
       await asset.build(
         manifestPath: manifestPath,
         packagesPath: packagesPath,
@@ -68,7 +70,8 @@ void main() {
       );
       final AssetBundle asset = AssetBundleFactory.instance.createBundle();
       await asset.build(
-        manifestPath: globals.fs.path.join(dataPath, 'main', 'pubspec.yaml'), // file doesn't exist
+        manifestPath: globals.fs.path
+            .join(dataPath, 'main', 'pubspec.yaml'), // file doesn't exist
         packagesPath: globals.fs.path.join(dataPath, 'main', '.packages'),
       );
       expect(asset.wasBuiltOnce(), true);

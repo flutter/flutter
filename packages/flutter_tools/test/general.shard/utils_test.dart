@@ -99,8 +99,7 @@ baz=qux
     final String longLineWithNewlines = 'This is a long line with newlines that\n'
         'needs to be wrapped.\n\n'
         '${'0123456789' * 5}';
-    final String longAnsiLineWithNewlines =
-        '${AnsiTerminal.red}This${AnsiTerminal.resetAll} is a long line with newlines that\n'
+    final String longAnsiLineWithNewlines = '${AnsiTerminal.red}This${AnsiTerminal.resetAll} is a long line with newlines that\n'
         'needs to be wrapped.\n\n'
         '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}'
         '${'0123456789' * 3}'
@@ -248,8 +247,7 @@ Short line.
     });
 
     testWithoutContext('honors hangingIndent and indent parameters at the same time.', () {
-      expect(
-          wrapText(indentedLongLine, columnWidth: lineLength, indent: 6, hangingIndent: 6, shouldWrap: true), equals('''
+      expect(wrapText(indentedLongLine, columnWidth: lineLength, indent: 6, hangingIndent: 6, shouldWrap: true), equals('''
           This is an indented long line
                 that needs to be wrapped
                 and indentation
@@ -264,8 +262,7 @@ Short line.
     });
 
     testWithoutContext('honors hangingIndent parameter on already indented line.', () {
-      expect(wrapText(indentedLongLineWithNewlines, columnWidth: lineLength, hangingIndent: 6, shouldWrap: true),
-          equals('''
+      expect(wrapText(indentedLongLineWithNewlines, columnWidth: lineLength, hangingIndent: 6, shouldWrap: true), equals('''
     This is an indented long line with
           newlines that
 needs to be wrapped.
@@ -276,55 +273,75 @@ needs to be wrapped.
     });
 
     testWithoutContext('', () {
-      expect(
-        wrapText('${' ' * 7}abc def ghi', columnWidth: 20, hangingIndent: 5, indent: 3, shouldWrap: true),
-        equals('          abc def\n'
-            '          ghi'),
+      expect(wrapText(
+        '${' ' * 7}abc def ghi', columnWidth: 20, hangingIndent: 5, indent: 3, shouldWrap: true),
+        equals(
+          '          abc def\n'
+          '          ghi'
+        ),
       );
-      expect(
-        wrapText('abc def ghi', columnWidth: 0, hangingIndent: 5, shouldWrap: true),
-        equals('abc def\n'
-            'ghi'),
+      expect(wrapText(
+        'abc def ghi', columnWidth: 0, hangingIndent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
       );
-      expect(
-        wrapText('abc def ghi', columnWidth: 0, indent: 5, shouldWrap: true),
-        equals('abc def\n'
-            'ghi'),
+      expect(wrapText(
+        'abc def ghi', columnWidth: 0, indent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
       );
-      expect(
-        wrapText('     abc def ghi', columnWidth: 0, shouldWrap: true),
-        equals('abc def\n'
-            'ghi'),
+      expect(wrapText(
+        '     abc def ghi', columnWidth: 0, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
       );
-      expect(
-        wrapText('abc def ghi', columnWidth: kMinColumnWidth - 2, hangingIndent: 5, shouldWrap: true),
-        equals('abc def\n'
-            'ghi'),
+      expect(wrapText(
+        'abc def ghi', columnWidth: kMinColumnWidth - 2, hangingIndent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
       );
-      expect(
-        wrapText('abc def ghi', columnWidth: kMinColumnWidth - 2, indent: 5, shouldWrap: true),
-        equals('abc def\n'
-            'ghi'),
+      expect(wrapText(
+        'abc def ghi', columnWidth: kMinColumnWidth - 2, indent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
       );
-      expect(
-        wrapText('     abc def ghi', columnWidth: kMinColumnWidth - 2, shouldWrap: true),
-        equals('abc def\n'
-            'ghi'),
+      expect(wrapText(
+        '     abc def ghi', columnWidth: kMinColumnWidth - 2, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
       );
-      expect(
-        wrapText('abc def ghi jkl', columnWidth: kMinColumnWidth + 2, hangingIndent: 5, shouldWrap: true),
-        equals('abc def ghi\n'
-            '  jkl'),
+      expect(wrapText(
+        'abc def ghi jkl', columnWidth: kMinColumnWidth + 2, hangingIndent: 5, shouldWrap: true),
+        equals(
+          'abc def ghi\n'
+          '  jkl'
+        ),
       );
-      expect(
-        wrapText('abc def ghi', columnWidth: kMinColumnWidth + 2, indent: 5, shouldWrap: true),
-        equals('  abc def\n'
-            '  ghi'),
+      expect(wrapText(
+        'abc def ghi', columnWidth: kMinColumnWidth + 2, indent: 5, shouldWrap: true),
+        equals(
+          '  abc def\n'
+          '  ghi'
+        ),
       );
-      expect(
-        wrapText('     abc def ghi', columnWidth: kMinColumnWidth + 2, shouldWrap: true),
-        equals('  abc def\n'
-            '  ghi'),
+      expect(wrapText(
+        '     abc def ghi', columnWidth: kMinColumnWidth + 2, shouldWrap: true),
+        equals(
+          '  abc def\n'
+          '  ghi'
+        ),
       );
     });
   });

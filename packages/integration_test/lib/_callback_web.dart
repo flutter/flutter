@@ -14,7 +14,8 @@ import 'common.dart';
 CallbackManager get callbackManager => _singletonWebDriverCommandManager;
 
 /// WebDriverCommandManager singleton.
-final WebCallbackManager _singletonWebDriverCommandManager = WebCallbackManager();
+final WebCallbackManager _singletonWebDriverCommandManager =
+    WebCallbackManager();
 
 /// Manages communication between `integration_tests` and the `driver_tests`.
 ///
@@ -27,7 +28,8 @@ final WebCallbackManager _singletonWebDriverCommandManager = WebCallbackManager(
 /// See: https://www.w3.org/TR/webdriver/
 class WebCallbackManager implements CallbackManager {
   /// App side tests will put the command requests from WebDriver to this pipe.
-  Completer<WebDriverCommand> _webDriverCommandPipe = Completer<WebDriverCommand>();
+  Completer<WebDriverCommand> _webDriverCommandPipe =
+      Completer<WebDriverCommand>();
 
   /// Updated when WebDriver completes the request by the test method.
   ///
@@ -58,7 +60,8 @@ class WebCallbackManager implements CallbackManager {
       _webDriverCommandPipe.complete(command);
       final bool awaitCommand = await _driverCommandComplete.future;
       if (!awaitCommand) {
-        throw Exception('Web Driver Command ${command.type} failed while waiting for '
+        throw Exception(
+            'Web Driver Command ${command.type} failed while waiting for '
             'driver side');
       }
     } catch (exception) {
@@ -74,7 +77,8 @@ class WebCallbackManager implements CallbackManager {
   /// Provides a handshake mechanism for executing [WebDriverCommand]s on the
   /// driver side.
   @override
-  Future<Map<String, dynamic>> callback(Map<String, String> params, IntegrationTestResults testRunner) async {
+  Future<Map<String, dynamic>> callback(
+      Map<String, String> params, IntegrationTestResults testRunner) async {
     final String command = params['command']!;
     Map<String, String> response;
     switch (command) {
@@ -94,10 +98,12 @@ class WebCallbackManager implements CallbackManager {
     };
   }
 
-  Future<Map<String, dynamic>> _requestDataWithMessage(String extraMessage, IntegrationTestResults testRunner) async {
+  Future<Map<String, dynamic>> _requestDataWithMessage(
+      String extraMessage, IntegrationTestResults testRunner) async {
     Map<String, String> response;
     // Driver side tests' status is added as an extra message.
-    final DriverTestMessage message = DriverTestMessage.fromString(extraMessage);
+    final DriverTestMessage message =
+        DriverTestMessage.fromString(extraMessage);
     // If driver side tests are pending send the first command in the
     // `commandPipe` to the tests.
     if (message.isPending) {
@@ -105,7 +111,8 @@ class WebCallbackManager implements CallbackManager {
       switch (command.type) {
         case WebDriverCommandType.screenshot:
           final Map<String, dynamic> data = Map<String, dynamic>.from(command.values);
-          data.addAll(WebDriverCommand.typeToMap(WebDriverCommandType.screenshot));
+          data.addAll(
+              WebDriverCommand.typeToMap(WebDriverCommandType.screenshot));
           response = <String, String>{
             'message': Response.webDriverCommand(data: data).toJson(),
           };
@@ -154,7 +161,8 @@ class WebCallbackManager implements CallbackManager {
   @override
   void cleanup() {
     if (!_webDriverCommandPipe.isCompleted) {
-      _webDriverCommandPipe.complete(Future<WebDriverCommand>.value(WebDriverCommand.noop()));
+      _webDriverCommandPipe
+          .complete(Future<WebDriverCommand>.value(WebDriverCommand.noop()));
     }
 
     if (!_driverCommandComplete.isCompleted) {

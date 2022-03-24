@@ -29,11 +29,9 @@ abstract class Usage {
       );
 
   /// Uses the global [Usage] instance to send a 'command' to analytics.
-  static void command(
-    String command, {
+  static void command(String command, {
     CustomDimensions? parameters,
-  }) =>
-      globals.flutterUsage.sendCommand(command, parameters: parameters);
+  }) => globals.flutterUsage.sendCommand(command, parameters: parameters);
 
   /// Whether analytics reporting should be suppressed.
   bool get suppressAnalytics;
@@ -151,18 +149,18 @@ class _DefaultUsage implements Usage {
     bool suppressAnalytics = false;
     bool skipAnalyticsSessionSetup = false;
     Analytics? setupAnalytics;
-    if ( // To support testing, only allow other signals to suppress analytics
+    if (// To support testing, only allow other signals to suppress analytics
         // when analytics are not being shunted to a file.
-        !usingLogFile &&
-            (
-                // Ignore local user branches.
-                version.startsWith('[user-branch]') ||
-                    // Many CI systems don't do a full git checkout.
-                    version.endsWith('/unknown') ||
-                    // Ignore bots.
-                    runningOnBot ||
-                    // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
-                    suppressEnvFlag)) {
+        !usingLogFile && (
+        // Ignore local user branches.
+        version.startsWith('[user-branch]') ||
+        // Many CI systems don't do a full git checkout.
+        version.endsWith('/unknown') ||
+        // Ignore bots.
+        runningOnBot ||
+        // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
+        suppressEnvFlag
+    )) {
       // If we think we're running on a CI system, suppress sending analytics.
       suppressAnalytics = true;
       setupAnalytics = AnalyticsMock();
@@ -177,7 +175,9 @@ class _DefaultUsage implements Usage {
             _kFlutterUA,
             settingsName,
             version,
-            documentDirectory: configDirOverride != null ? globals.fs.directory(configDirOverride) : null,
+            documentDirectory: configDirOverride != null
+                ? globals.fs.directory(configDirOverride)
+                : null,
           );
         });
       } on Exception catch (e) {
@@ -204,9 +204,9 @@ class _DefaultUsage implements Usage {
       // separated list.
       final String enabledFeatures = allFeatures
           .where((Feature feature) {
-            final String? configSetting = feature.configSetting;
-            return configSetting != null && globals.config.getValue(configSetting) == true;
-          })
+        final String? configSetting = feature.configSetting;
+        return configSetting != null && globals.config.getValue(configSetting) == true;
+      })
           .map((Feature feature) => feature.configSetting)
           .join(',');
       analytics.setSessionValue(
@@ -256,14 +256,16 @@ class _DefaultUsage implements Usage {
   String get clientId => _analytics.clientId;
 
   @override
-  void sendCommand(String command, {CustomDimensions? parameters}) {
+  void sendCommand(String command, { CustomDimensions? parameters }) {
     if (suppressAnalytics) {
       return;
     }
 
     _analytics.sendScreenView(
       command,
-      parameters: CustomDimensions(localTime: formatDateTime(_clock.now())).merge(parameters).toMap(),
+      parameters: CustomDimensions(localTime: formatDateTime(_clock.now()))
+          .merge(parameters)
+          .toMap(),
     );
   }
 
@@ -284,7 +286,9 @@ class _DefaultUsage implements Usage {
       parameter,
       label: label,
       value: value,
-      parameters: CustomDimensions(localTime: formatDateTime(_clock.now())).merge(parameters).toMap(),
+      parameters: CustomDimensions(localTime: formatDateTime(_clock.now()))
+          .merge(parameters)
+          .toMap(),
     );
   }
 
@@ -347,22 +351,21 @@ class _DefaultUsage implements Usage {
 // But stdout can't be used for testing since wrapper scripts like
 // xcode_backend.sh etc manipulates them.
 class LogToFileAnalytics extends AnalyticsMock {
-  LogToFileAnalytics(String logFilePath)
-      : logFile = globals.fs.file(logFilePath)..createSync(recursive: true),
-        super(true);
+  LogToFileAnalytics(String logFilePath) :
+    logFile = globals.fs.file(logFilePath)..createSync(recursive: true),
+    super(true);
 
   final File logFile;
   final Map<String, String> _sessionValues = <String, String>{};
 
   final StreamController<Map<String, dynamic>> _sendController =
-      StreamController<Map<String, dynamic>>.broadcast(sync: true);
+        StreamController<Map<String, dynamic>>.broadcast(sync: true);
 
   @override
   Stream<Map<String, dynamic>> get onSend => _sendController.stream;
 
   @override
-  Future<void> sendScreenView(
-    String viewName, {
+  Future<void> sendScreenView(String viewName, {
     Map<String, String>? parameters,
   }) {
     if (!enabled) {
@@ -377,7 +380,8 @@ class LogToFileAnalytics extends AnalyticsMock {
   }
 
   @override
-  Future<void> sendEvent(String category, String action, {String? label, int? value, Map<String, String>? parameters}) {
+  Future<void> sendEvent(String category, String action,
+      {String? label, int? value, Map<String, String>? parameters}) {
     if (!enabled) {
       return Future<void>.value();
     }
@@ -390,7 +394,8 @@ class LogToFileAnalytics extends AnalyticsMock {
   }
 
   @override
-  Future<void> sendTiming(String variableName, int time, {String? category, String? label}) {
+  Future<void> sendTiming(String variableName, int time,
+      {String? category, String? label}) {
     if (!enabled) {
       return Future<void>.value();
     }
@@ -410,6 +415,7 @@ class LogToFileAnalytics extends AnalyticsMock {
     _sessionValues[param] = value.toString();
   }
 }
+
 
 /// Create a testing Usage instance.
 ///
@@ -441,7 +447,7 @@ class TestUsage implements Usage {
   Stream<Map<String, dynamic>> get onSend => throw UnimplementedError();
 
   @override
-  void printWelcome() {}
+  void printWelcome() { }
 
   @override
   void sendCommand(String command, {CustomDimensions? parameters}) {
@@ -474,7 +480,9 @@ class TestUsageCommand {
 
   @override
   bool operator ==(Object other) {
-    return other is TestUsageCommand && other.command == command && other.parameters == parameters;
+    return other is TestUsageCommand &&
+      other.command == command &&
+      other.parameters == parameters;
   }
 
   @override
@@ -498,11 +506,11 @@ class TestUsageEvent {
   @override
   bool operator ==(Object other) {
     return other is TestUsageEvent &&
-        other.category == category &&
-        other.parameter == parameter &&
-        other.label == label &&
-        other.value == value &&
-        other.parameters == parameters;
+      other.category == category &&
+      other.parameter == parameter &&
+      other.label == label &&
+      other.value == value &&
+      other.parameters == parameters;
   }
 
   @override
@@ -525,10 +533,10 @@ class TestTimingEvent {
   @override
   bool operator ==(Object other) {
     return other is TestTimingEvent &&
-        other.category == category &&
-        other.variableName == variableName &&
-        other.duration == duration &&
-        other.label == label;
+      other.category == category &&
+      other.variableName == variableName &&
+      other.duration == duration &&
+      other.label == label;
   }
 
   @override

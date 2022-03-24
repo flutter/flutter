@@ -68,7 +68,9 @@ void main() {
 
   testWithoutContext('KernelSnapshot throws error if missing build mode', () async {
     androidEnvironment.defines.remove(kBuildMode);
-    expect(const KernelSnapshot().build(androidEnvironment), throwsA(isA<MissingDefineException>()));
+    expect(
+      const KernelSnapshot().build(androidEnvironment),
+      throwsA(isA<MissingDefineException>()));
   });
 
   testWithoutContext('KernelSnapshot handles null result from kernel compilation', () async {
@@ -176,7 +178,8 @@ void main() {
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
     ]);
 
-    await const KernelSnapshot().build(androidEnvironment..defines[kExtraFrontEndOptions] = '');
+    await const KernelSnapshot()
+      .build(androidEnvironment..defines[kExtraFrontEndOptions] = '');
 
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -215,7 +218,8 @@ void main() {
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
     ]);
 
-    await const KernelSnapshot().build(androidEnvironment..defines[kExtraFrontEndOptions] = 'foo,bar');
+    await const KernelSnapshot()
+      .build(androidEnvironment..defines[kExtraFrontEndOptions] = 'foo,bar');
 
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -289,9 +293,10 @@ void main() {
     ]);
 
     await const KernelSnapshot().build(androidEnvironment
-      ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.darwin)
+      ..defines[kTargetPlatform]  = getNameForTargetPlatform(TargetPlatform.darwin)
       ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
-      ..defines[kTrackWidgetCreation] = 'false');
+      ..defines[kTrackWidgetCreation] = 'false'
+    );
 
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -318,28 +323,25 @@ void main() {
       mode: BuildMode.debug,
     );
     processManager.addCommands(<FakeCommand>[
-      FakeCommand(
-          command: <String>[
-            artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
-            '--disable-dart-dev',
-            artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
-            '--sdk-root',
-            '$flutterPatchedSdkPath/',
-            '--target=flutter',
-            '--no-print-incremental-dependencies',
-            ...buildModeOptions(BuildMode.debug, <String>[]),
-            '--track-widget-creation',
-            '--no-link-platform',
-            '--packages',
-            '/.dart_tool/package_config.json',
-            '--output-dill',
-            '$build/app.dill',
-            '--depfile',
-            '$build/kernel_snapshot.d',
-            'file:///lib/main.dart',
-          ],
-          stdout:
-              'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey /build/653e11a8e6908714056a57cd6b4f602a/app.dill 0\n'),
+      FakeCommand(command: <String>[
+        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        '--disable-dart-dev',
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+        '--sdk-root',
+        '$flutterPatchedSdkPath/',
+        '--target=flutter',
+        '--no-print-incremental-dependencies',
+        ...buildModeOptions(BuildMode.debug, <String>[]),
+        '--track-widget-creation',
+        '--no-link-platform',
+        '--packages',
+        '/.dart_tool/package_config.json',
+        '--output-dill',
+        '$build/app.dill',
+        '--depfile',
+        '$build/kernel_snapshot.d',
+        'file:///lib/main.dart',
+      ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey /build/653e11a8e6908714056a57cd6b4f602a/app.dill 0\n'),
     ]);
 
     await const KernelSnapshot().build(testEnvironment);
@@ -404,30 +406,33 @@ void main() {
     androidEnvironment.defines.remove(kBuildMode);
 
     expect(const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
-        throwsA(isA<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   });
 
   testUsingContext('AotElfProfile throws error if missing target platform', () async {
     androidEnvironment.defines.remove(kTargetPlatform);
 
     expect(const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
-        throwsA(isA<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   });
 
   testUsingContext('AotAssemblyProfile throws error if missing build mode', () async {
     iosEnvironment.defines.remove(kBuildMode);
 
-    expect(const AotAssemblyProfile().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+    expect(const AotAssemblyProfile().build(iosEnvironment),
+      throwsA(isA<MissingDefineException>()));
   }, overrides: <Type, Generator>{
     Platform: () => macPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
 
+
   testUsingContext('AotAssemblyProfile throws error if missing target platform', () async {
     iosEnvironment.defines.remove(kTargetPlatform);
 
-    expect(const AotAssemblyProfile().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+    expect(const AotAssemblyProfile().build(iosEnvironment),
+      throwsA(isA<MissingDefineException>()));
   }, overrides: <Type, Generator>{
     Platform: () => macPlatform,
     FileSystem: () => fileSystem,
@@ -546,7 +551,7 @@ void main() {
         '$build/App.framework/App',
       ]),
     ]);
-    iosEnvironment.defines[kIosArchs] = 'armv7 arm64';
+    iosEnvironment.defines[kIosArchs] ='armv7 arm64';
     iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
 
     await const AotAssemblyProfile().build(iosEnvironment);

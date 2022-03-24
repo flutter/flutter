@@ -48,13 +48,15 @@ Future<void> writeFile(libfs.File outputFile, DevFSContent content) async {
 Future<void> run(List<String> args) async {
   final ArgParser parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
-    ..addOption(_kOptionAsset, help: 'The directory where to put temporary files')
+    ..addOption(_kOptionAsset,
+        help: 'The directory where to put temporary files')
     ..addOption(_kOptionManifest, help: 'The manifest file')
     ..addOption(_kOptionAssetManifestOut)
     ..addOption(_kOptionComponentName)
     ..addOption(_kOptionDepfile);
   final ArgResults argResults = parser.parse(args);
-  if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
+  if (_kRequiredOptions
+      .any((String option) => !argResults.options.contains(option))) {
     globals.printError('Missing option! All options must be specified.');
     exit(1);
   }
@@ -62,11 +64,11 @@ Future<void> run(List<String> args) async {
 
   final String assetDir = argResults[_kOptionAsset] as String;
   final AssetBundle assets = await buildAssets(
-      manifestPath: argResults[_kOptionManifest] as String ?? defaultManifestPath,
-      assetDirPath: assetDir,
-      packagesPath: argResults[_kOptionPackages] as String,
-      targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
-      );
+    manifestPath: argResults[_kOptionManifest] as String ?? defaultManifestPath,
+    assetDirPath: assetDir,
+    packagesPath: argResults[_kOptionPackages] as String,
+    targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
+  );
 
   if (assets == null) {
     throwToolExit('Unable to find assets.', exitCode: 1);
@@ -80,8 +82,7 @@ Future<void> run(List<String> args) async {
   await Future.wait<void>(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut] as String;
-  await writeFuchsiaManifest(
-      assets, argResults[_kOptionAsset] as String, outputMan, argResults[_kOptionComponentName] as String);
+  await writeFuchsiaManifest(assets, argResults[_kOptionAsset] as String, outputMan, argResults[_kOptionComponentName] as String);
 
   if (argResults.options.contains(_kOptionDepfile)) {
     await writeDepfile(assets, outputMan, argResults[_kOptionDepfile] as String);
@@ -104,6 +105,7 @@ Future<void> writeDepfile(AssetBundle assets, String outputManifest, String depf
 }
 
 Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {
+
   final libfs.File destFile = globals.fs.file(fileDest);
   await destFile.create(recursive: true);
   final libfs.IOSink outFile = destFile.openWrite();

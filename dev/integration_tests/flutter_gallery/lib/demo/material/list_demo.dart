@@ -21,7 +21,7 @@ enum _MaterialListType {
 }
 
 class ListDemo extends StatefulWidget {
-  const ListDemo({Key? key}) : super(key: key);
+  const ListDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/material/list';
 
@@ -40,32 +40,18 @@ class _ListDemoState extends State<ListDemo> {
   bool? _showDividers = false;
   bool _reverseSort = false;
   List<String> items = <String>[
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ];
 
   void changeItemType(_MaterialListType? type) {
     setState(() {
       _itemType = type;
     });
-    _bottomSheet?.setState!(() {});
+    _bottomSheet?.setState!(() { });
   }
 
   void _showConfigurationSheet() {
-    final PersistentBottomSheetController<void> bottomSheet =
-        scaffoldKey.currentState!.showBottomSheet<void>((BuildContext bottomSheetContext) {
+    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((BuildContext bottomSheetContext) {
       return Container(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: Colors.black26)),
@@ -119,7 +105,7 @@ class _ListDemoState extends State<ListDemo> {
                     });
                     final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
                     if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() {});
+                      bottomSheetSetState(() { });
                     }
                   },
                 ),
@@ -137,7 +123,7 @@ class _ListDemoState extends State<ListDemo> {
                     });
                     final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
                     if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() {});
+                      bottomSheetSetState(() { });
                     }
                   },
                 ),
@@ -155,7 +141,7 @@ class _ListDemoState extends State<ListDemo> {
                     });
                     final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
                     if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() {});
+                      bottomSheetSetState(() { });
                     }
                   },
                 ),
@@ -173,7 +159,7 @@ class _ListDemoState extends State<ListDemo> {
                     });
                     final StateSetter? bottomSheetSetState = _bottomSheet?.setState;
                     if (bottomSheetSetState != null) {
-                      bottomSheetSetState(() {});
+                      bottomSheetSetState(() { });
                     }
                   },
                 ),
@@ -238,7 +224,8 @@ class _ListDemoState extends State<ListDemo> {
     }
 
     Iterable<Widget> listTiles = items.map<Widget>((String item) => buildListTile(context, item));
-    if (_showDividers != null) listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
+    if (_showDividers != null)
+      listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
 
     return Scaffold(
       key: scaffoldKey,
@@ -258,7 +245,9 @@ class _ListDemoState extends State<ListDemo> {
           ),
           IconButton(
             icon: Icon(
-              Theme.of(context).platform == TargetPlatform.iOS ? Icons.more_horiz : Icons.more_vert,
+              Theme.of(context).platform == TargetPlatform.iOS
+                  ? Icons.more_horiz
+                  : Icons.more_vert,
             ),
             tooltip: 'Show menu',
             onPressed: _bottomSheet == null ? _showConfigurationSheet : null,

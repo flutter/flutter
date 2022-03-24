@@ -11,8 +11,7 @@ void main() {
   test('installDeferredComponent test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.deferredComponent, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.deferredComponent, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -20,19 +19,16 @@ void main() {
     await DeferredComponent.installDeferredComponent(componentName: 'testComponentName');
 
     expect(log, hasLength(1));
-    expect(
-        log.single,
-        isMethodCall(
-          'installDeferredComponent',
-          arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
-        ));
+    expect(log.single, isMethodCall(
+      'installDeferredComponent',
+      arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
+    ));
   });
 
   test('uninstallDeferredComponent test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.deferredComponent, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.deferredComponent, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -40,11 +36,9 @@ void main() {
     await DeferredComponent.uninstallDeferredComponent(componentName: 'testComponentName');
 
     expect(log, hasLength(1));
-    expect(
-        log.single,
-        isMethodCall(
-          'uninstallDeferredComponent',
-          arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
-        ));
+    expect(log.single, isMethodCall(
+      'uninstallDeferredComponent',
+      arguments: <String, dynamic>{'loadingUnitId': -1, 'componentName': 'testComponentName'},
+    ));
   });
 }

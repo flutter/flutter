@@ -73,8 +73,9 @@ void main() {
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       expect(testLogger.errorText, hasLength(0));
       // format the status text for a simpler assertion.
-      final Iterable<String> rows =
-          testLogger.statusText.split('\n').map((String line) => line.substring(2)); // remove '* ' or '  ' from output
+      final Iterable<String> rows = testLogger.statusText
+        .split('\n')
+        .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
       expect(rows, containsAllInOrder(kOfficialChannels));
 
       // clear buffer for next process
@@ -97,8 +98,9 @@ void main() {
       expect(rows, containsAllInOrder(kOfficialChannels));
       expect(testLogger.errorText, hasLength(0));
       // format the status text for a simpler assertion.
-      final Iterable<String> rows2 =
-          testLogger.statusText.split('\n').map((String line) => line.substring(2)); // remove '* ' or '  ' from output
+      final Iterable<String> rows2 = testLogger.statusText
+        .split('\n')
+        .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
       expect(rows2, containsAllInOrder(kOfficialChannels));
 
       // clear buffer for next process
@@ -128,6 +130,7 @@ void main() {
           prev = next;
         }
       }
+
     }, overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       FileSystem: () => MemoryFileSystem.test(),
@@ -153,10 +156,10 @@ void main() {
 
       // format the status text for a simpler assertion.
       final Iterable<String> rows = testLogger.statusText
-          .split('\n')
-          .map((String line) => line.trim())
-          .where((String line) => line?.isNotEmpty == true)
-          .skip(1); // remove `Flutter channels:` line
+        .split('\n')
+        .map((String line) => line.trim())
+        .where((String line) => line?.isNotEmpty == true)
+        .skip(1); // remove `Flutter channels:` line
 
       expect(rows, <String>['beta', 'stable', 'Currently not on an official channel.']);
     }, overrides: <Type, Generator>{
@@ -172,7 +175,9 @@ void main() {
         const FakeCommand(
           command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
         ),
-        const FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
+        const FakeCommand(
+            command: <String>['git', 'checkout', 'beta', '--']
+        ),
       ]);
 
       final ChannelCommand command = ChannelCommand();
@@ -193,7 +198,9 @@ void main() {
         const FakeCommand(
           command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/stable'],
         ),
-        const FakeCommand(command: <String>['git', 'checkout', 'stable', '--']),
+        const FakeCommand(
+            command: <String>['git', 'checkout', 'stable', '--']
+        ),
       ]);
 
       await runner.run(<String>['channel', 'stable']);
@@ -212,7 +219,9 @@ void main() {
         const FakeCommand(
           command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
         ),
-        const FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
+        const FakeCommand(
+            command: <String>['git', 'checkout', 'beta', '--']
+        ),
       ]);
 
       final ChannelCommand command = ChannelCommand();
@@ -225,8 +234,9 @@ void main() {
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace("To ensure that you're on the latest build "
-            "from this channel, run 'flutter upgrade'"),
+        containsIgnoringWhitespace(
+          "To ensure that you're on the latest build "
+          "from this channel, run 'flutter upgrade'"),
       );
       expect(testLogger.errorText, hasLength(0));
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -245,7 +255,9 @@ void main() {
         const FakeCommand(
           command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
         ),
-        const FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
+        const FakeCommand(
+          command: <String>['git', 'checkout', 'beta', '--']
+        ),
       ]);
 
       final File versionCheckFile = globals.cache.getStampFileFor(

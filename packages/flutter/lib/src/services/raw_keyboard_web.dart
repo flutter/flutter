@@ -98,7 +98,8 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     // Look to see if the keyCode is a key based on location. Typically they are
     // numpad keys (versus main area keys) and left/right modifiers.
     final LogicalKeyboardKey? maybeLocationKey = kWebLocationMap[key]?[location];
-    if (maybeLocationKey != null) return maybeLocationKey;
+    if (maybeLocationKey != null)
+      return maybeLocationKey;
 
     // Look to see if the [code] is one we know about and have a mapping for.
     final LogicalKeyboardKey? newKey = kWebToLogicalKey[code];
@@ -107,7 +108,8 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     }
 
     final bool isPrintable = key.length == 1;
-    if (isPrintable) return LogicalKeyboardKey(key.toLowerCase().codeUnitAt(0));
+    if (isPrintable)
+      return LogicalKeyboardKey(key.toLowerCase().codeUnitAt(0));
 
     // This is a non-printable key that we don't know about, so we mint a new
     // key from `code`. Don't mint with `key`, because the `key` will always be
@@ -155,33 +157,35 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('code', code));
-    properties.add(DiagnosticsProperty<String>('key', key));
-    properties.add(DiagnosticsProperty<int>('location', location));
-    properties.add(DiagnosticsProperty<int>('metaState', metaState));
-    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+        properties.add(DiagnosticsProperty<String>('code', code));
+        properties.add(DiagnosticsProperty<String>('key', key));
+        properties.add(DiagnosticsProperty<int>('location', location));
+        properties.add(DiagnosticsProperty<int>('metaState', metaState));
+        properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is RawKeyEventDataWeb &&
-        other.code == code &&
-        other.key == key &&
-        other.location == location &&
-        other.metaState == metaState &&
-        other.keyCode == keyCode;
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataWeb
+        && other.code == code
+        && other.key == key
+        && other.location == location
+        && other.metaState == metaState
+        && other.keyCode == keyCode;
   }
 
   @override
   int get hashCode => Object.hash(
-        code,
-        key,
-        location,
-        metaState,
-        keyCode,
-      );
+    code,
+    key,
+    location,
+    metaState,
+    keyCode,
+  );
 
   // Modifier key masks.
 

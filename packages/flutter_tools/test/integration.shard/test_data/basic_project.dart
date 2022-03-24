@@ -5,6 +5,7 @@
 import 'project.dart';
 
 class BasicProject extends Project {
+
   @override
   final String pubspec = '''
   name: test
@@ -57,6 +58,7 @@ class BasicProject extends Project {
 /// A repro for the issue at https://github.com/Dart-Code/Dart-Code/issues/3448
 /// where Hot Restart could become stuck on exceptions and never complete.
 class BasicProjectThatThrows extends Project {
+
   @override
   final String pubspec = '''
   name: test
@@ -189,6 +191,7 @@ class BasicProjectWithFlutterGen extends Project {
 }
 
 class BasicProjectWithUnaryMain extends Project {
+
   @override
   final String pubspec = '''
   name: test

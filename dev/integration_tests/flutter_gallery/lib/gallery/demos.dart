@@ -19,9 +19,13 @@ class GalleryDemoCategory {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is GalleryDemoCategory && other.name == name && other.icon == icon;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is GalleryDemoCategory
+        && other.name == name
+        && other.icon == icon;
   }
 
   @override
@@ -564,15 +568,15 @@ List<GalleryDemo> _buildGalleryDemos() {
 final List<GalleryDemo> kAllGalleryDemos = _buildGalleryDemos();
 
 final Set<GalleryDemoCategory> kAllGalleryDemoCategories =
-    kAllGalleryDemos.map<GalleryDemoCategory>((GalleryDemo demo) => demo.category).toSet();
+  kAllGalleryDemos.map<GalleryDemoCategory>((GalleryDemo demo) => demo.category).toSet();
 
 final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
-    Map<GalleryDemoCategory, List<GalleryDemo>>.fromIterable(
-  kAllGalleryDemoCategories,
-  value: (dynamic category) {
-    return kAllGalleryDemos.where((GalleryDemo demo) => demo.category == category).toList();
-  },
-);
+  Map<GalleryDemoCategory, List<GalleryDemo>>.fromIterable(
+    kAllGalleryDemoCategories,
+    value: (dynamic category) {
+      return kAllGalleryDemos.where((GalleryDemo demo) => demo.category == category).toList();
+    },
+  );
 
 final Map<String, String?> kDemoDocumentationUrl = <String, String?>{
   for (final GalleryDemo demo in kAllGalleryDemos)

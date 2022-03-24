@@ -7,7 +7,7 @@ import 'package:file/file.dart';
 import '../test_utils.dart';
 import 'deferred_components_config.dart';
 
-const String _kDefaultHtml = '''
+const String _kDefaultHtml  = '''
 <html>
     <head>
         <title>Hello, World</title>

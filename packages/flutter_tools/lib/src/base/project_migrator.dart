@@ -35,7 +35,6 @@ abstract class ProjectMigrator {
   bool _migrationRequired = false;
 
   @protected
-
   /// Calls [migrateLine] per line, then [migrateFileContents]
   /// including the line migrations.
   void processFileLines(File file) {

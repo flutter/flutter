@@ -27,12 +27,12 @@ class AnalysisServer {
     required Platform platform,
     required Terminal terminal,
     String? protocolTrafficLog,
-  })  : _fileSystem = fileSystem,
-        _processManager = processManager,
-        _logger = logger,
-        _platform = platform,
-        _terminal = terminal,
-        _protocolTrafficLog = protocolTrafficLog;
+  }) : _fileSystem = fileSystem,
+       _processManager = processManager,
+       _logger = logger,
+       _platform = platform,
+       _terminal = terminal,
+       _protocolTrafficLog = protocolTrafficLog;
 
   final String sdkPath;
   final List<String> directories;
@@ -44,8 +44,10 @@ class AnalysisServer {
   final String? _protocolTrafficLog;
 
   Process? _process;
-  final StreamController<bool> _analyzingController = StreamController<bool>.broadcast();
-  final StreamController<FileAnalysisErrors> _errorsController = StreamController<FileAnalysisErrors>.broadcast();
+  final StreamController<bool> _analyzingController =
+      StreamController<bool>.broadcast();
+  final StreamController<FileAnalysisErrors> _errorsController =
+      StreamController<FileAnalysisErrors>.broadcast();
   bool _didServerErrorOccur = false;
 
   int _id = 0;
@@ -65,7 +67,8 @@ class AnalysisServer {
       '--disable-server-feature-search',
       '--sdk',
       sdkPath,
-      if (_protocolTrafficLog != null) '--protocol-traffic-log=$_protocolTrafficLog',
+      if (_protocolTrafficLog != null)
+        '--protocol-traffic-log=$_protocolTrafficLog',
     ];
 
     _logger.printTrace('dart ${command.skip(1).join(' ')}');
@@ -73,19 +76,22 @@ class AnalysisServer {
     // This callback hookup can't throw.
     unawaited(_process!.exitCode.whenComplete(() => _process = null));
 
-    final Stream<String> errorStream =
-        _process!.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+    final Stream<String> errorStream = _process!.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter());
     errorStream.listen(_handleError);
 
-    final Stream<String> inStream =
-        _process!.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+    final Stream<String> inStream = _process!.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
     _sendCommand('server.setSubscriptions', <String, dynamic>{
       'subscriptions': <String>['STATUS'],
     });
 
-    _sendCommand('analysis.setAnalysisRoots', <String, dynamic>{'included': directories, 'excluded': <String>[]});
+    _sendCommand('analysis.setAnalysisRoots',
+        <String, dynamic>{'included': directories, 'excluded': <String>[]});
   }
 
   final List<String> _logs = <String>[];
@@ -155,7 +161,8 @@ class AnalysisServer {
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
         final Map<String, dynamic> error = castStringKeyedMap(response['error'])!;
-        _logger.printError('Error response from the server: ${error['code']} ${error['message']}');
+        _logger.printError(
+            'Error response from the server: ${error['code']} ${error['message']}');
         if (error['stackTrace'] != null) {
           _logger.printError(error['stackTrace'] as String);
         }
@@ -187,13 +194,13 @@ class AnalysisServer {
     final List<AnalysisError> errors = errorsList
         .map<Map<String, dynamic>>((dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
         .map<AnalysisError>((Map<String, dynamic> json) {
-      return AnalysisError(
-        WrittenError.fromJson(json),
-        fileSystem: _fileSystem,
-        platform: _platform,
-        terminal: _terminal,
-      );
-    }).toList();
+          return AnalysisError(WrittenError.fromJson(json),
+            fileSystem: _fileSystem,
+            platform: _platform,
+            terminal: _terminal,
+          );
+        })
+        .toList();
     if (!_errorsController.isClosed) {
       _errorsController.add(FileAnalysisErrors(file, errors));
     }
@@ -220,9 +227,9 @@ class AnalysisError implements Comparable<AnalysisError> {
     required Platform platform,
     required Terminal terminal,
     required FileSystem fileSystem,
-  })  : _platform = platform,
-        _terminal = terminal,
-        _fileSystem = fileSystem;
+  }) : _platform = platform,
+       _terminal = terminal,
+       _fileSystem = fileSystem;
 
   final WrittenError writtenError;
   final Platform _platform;
@@ -257,7 +264,8 @@ class AnalysisError implements Comparable<AnalysisError> {
       return writtenError.offset - other.writtenError.offset;
     }
 
-    final int diff = other.writtenError.severityLevel.index - writtenError.severityLevel.index;
+    final int diff = other.writtenError.severityLevel.index -
+        writtenError.severityLevel.index;
     if (diff != 0) {
       return diff;
     }
@@ -337,7 +345,8 @@ class WrittenError {
     'ERROR': AnalysisSeverity.error,
   };
 
-  AnalysisSeverity get severityLevel => _severityMap[severity] ?? AnalysisSeverity.none;
+  AnalysisSeverity get severityLevel =>
+      _severityMap[severity] ?? AnalysisSeverity.none;
 
   String get messageSentenceFragment {
     if (message.endsWith('.')) {

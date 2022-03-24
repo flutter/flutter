@@ -31,7 +31,9 @@ Version get xcodeRecommendedVersion => xcodeRequiredVersion;
 /// ...
 /// --sdk <sdk name>            find the tool for the given SDK name.
 String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
-  return (environmentType == EnvironmentType.simulator) ? 'iphonesimulator' : 'iphoneos';
+  return (environmentType == EnvironmentType.simulator)
+      ? 'iphonesimulator'
+      : 'iphoneos';
 }
 
 /// A utility class for interacting with Xcode command line tools.
@@ -45,7 +47,8 @@ class Xcode {
   })  : _platform = platform,
         _fileSystem = fileSystem,
         _xcodeProjectInterpreter = xcodeProjectInterpreter,
-        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+        _processUtils =
+            ProcessUtils(logger: logger, processManager: processManager);
 
   /// Create an [Xcode] for testing.
   ///
@@ -82,12 +85,9 @@ class Xcode {
   String? get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath = _processUtils
-            .runSync(
-              <String>['/usr/bin/xcode-select', '--print-path'],
-            )
-            .stdout
-            .trim();
+        _xcodeSelectPath = _processUtils.runSync(
+          <String>['/usr/bin/xcode-select', '--print-path'],
+        ).stdout.trim();
       } on ProcessException {
         // Ignored, return null below.
       } on ArgumentError {
@@ -104,7 +104,6 @@ class Xcode {
   String? get versionText => _xcodeProjectInterpreter.versionText;
 
   bool? _eulaSigned;
-
   /// Has the EULA been signed?
   bool get eulaSigned {
     if (_eulaSigned == null) {

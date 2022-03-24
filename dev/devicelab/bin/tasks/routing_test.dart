@@ -42,64 +42,60 @@ void main() {
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         // --fast-start does not support routes.
-        <String>[
-          'run',
-          '--verbose',
-          '--disable-service-auth-codes',
-          '--no-fast-start',
-          '--no-publish-port',
-          '-d',
-          device.deviceId,
-          '--route',
-          '/smuggle-it',
-          'lib/route.dart'
-        ],
+        <String>['run', '--verbose', '--disable-service-auth-codes', '--no-fast-start', '--no-publish-port', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
       );
-      run.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
-        print('run:stdout: $line');
-        if (vmServicePort == null) {
-          vmServicePort = parseServicePort(line);
-          if (vmServicePort != null) {
-            print('service protocol connection available at port $vmServicePort');
-            print('run: ready!');
-            ready.complete();
-            ok = true;
+      run.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          print('run:stdout: $line');
+          if (vmServicePort == null) {
+            vmServicePort = parseServicePort(line);
+            if (vmServicePort != null) {
+              print('service protocol connection available at port $vmServicePort');
+              print('run: ready!');
+              ready.complete();
+              ok = true;
+            }
           }
-        }
-      });
-      run.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
-        stderr.writeln('run:stderr: $line');
-      });
-      unawaited(run.exitCode.then<void>((int exitCode) {
-        ok = false;
-      }));
-      await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);
-      if (!ok) throw 'Failed to run test app.';
+        });
+      run.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          stderr.writeln('run:stderr: $line');
+        });
+      unawaited(run.exitCode.then<void>((int exitCode) { ok = false; }));
+      await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
+      if (!ok)
+        throw 'Failed to run test app.';
       print('drive: starting...');
       final Process drive = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>[
-          'drive',
-          '--use-existing-app',
-          'http://127.0.0.1:$vmServicePort/',
-          '--no-keep-app-running',
-          'lib/route.dart'
-        ],
+        <String>['drive', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--no-keep-app-running', 'lib/route.dart'],
       );
-      drive.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
-        print('drive:stdout: $line');
-      });
-      drive.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
-        stderr.writeln('drive:stderr: $line');
-      });
+      drive.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          print('drive:stdout: $line');
+        });
+      drive.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          stderr.writeln('drive:stderr: $line');
+        });
       int result;
       result = await drive.exitCode;
       await flutter('install', options: <String>[
         '--uninstall-only',
       ]);
-      if (result != 0) throw 'Failed to drive test app (exit code $result).';
+      if (result != 0)
+        throw 'Failed to drive test app (exit code $result).';
       result = await run.exitCode;
-      if (result != 0) throw 'Received unexpected exit code $result from run process.';
+      if (result != 0)
+        throw 'Received unexpected exit code $result from run process.';
     });
     return TaskResult.success(null);
   });

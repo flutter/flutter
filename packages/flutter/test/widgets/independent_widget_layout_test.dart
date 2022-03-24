@@ -35,11 +35,10 @@ class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding 
 }
 
 class OffscreenRenderView extends RenderView {
-  OffscreenRenderView()
-      : super(
-          configuration: const ViewConfiguration(size: _kTestViewSize),
-          window: WidgetsBinding.instance.window,
-        );
+  OffscreenRenderView() : super(
+    configuration: const ViewConfiguration(size: _kTestViewSize),
+    window: WidgetsBinding.instance.window,
+  );
 
   @override
   void compositeFrame() {
@@ -77,6 +76,7 @@ class OffscreenWidgetTree {
     pipelineOwner.flushSemantics();
     buildOwner.finalizeTree();
   }
+
 }
 
 class Counter {

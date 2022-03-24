@@ -80,81 +80,71 @@ void main() {
     });
 
     testWithoutContext('parses major version', () {
-      expect(
-          IOSDevice(
-            'device-123',
-            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: macPlatform,
-            iosDeploy: iosDeploy,
-            iMobileDevice: iMobileDevice,
-            name: 'iPhone 1',
-            cpuArchitecture: DarwinArch.arm64,
-            sdkVersion: '1.0.0',
-            interfaceType: IOSDeviceConnectionInterface.usb,
-          ).majorSdkVersion,
-          1);
-      expect(
-          IOSDevice(
-            'device-123',
-            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: macPlatform,
-            iosDeploy: iosDeploy,
-            iMobileDevice: iMobileDevice,
-            name: 'iPhone 1',
-            cpuArchitecture: DarwinArch.arm64,
-            sdkVersion: '13.1.1',
-            interfaceType: IOSDeviceConnectionInterface.usb,
-          ).majorSdkVersion,
-          13);
-      expect(
-          IOSDevice(
-            'device-123',
-            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: macPlatform,
-            iosDeploy: iosDeploy,
-            iMobileDevice: iMobileDevice,
-            name: 'iPhone 1',
-            cpuArchitecture: DarwinArch.arm64,
-            sdkVersion: '10',
-            interfaceType: IOSDeviceConnectionInterface.usb,
-          ).majorSdkVersion,
-          10);
-      expect(
-          IOSDevice(
-            'device-123',
-            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: macPlatform,
-            iosDeploy: iosDeploy,
-            iMobileDevice: iMobileDevice,
-            name: 'iPhone 1',
-            cpuArchitecture: DarwinArch.arm64,
-            sdkVersion: '0',
-            interfaceType: IOSDeviceConnectionInterface.usb,
-          ).majorSdkVersion,
-          0);
-      expect(
-          IOSDevice(
-            'device-123',
-            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: macPlatform,
-            iosDeploy: iosDeploy,
-            iMobileDevice: iMobileDevice,
-            name: 'iPhone 1',
-            cpuArchitecture: DarwinArch.arm64,
-            sdkVersion: 'bogus',
-            interfaceType: IOSDeviceConnectionInterface.usb,
-          ).majorSdkVersion,
-          0);
+      expect(IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.arm64,
+        sdkVersion: '1.0.0',
+        interfaceType: IOSDeviceConnectionInterface.usb,
+      ).majorSdkVersion, 1);
+      expect(IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.arm64,
+        sdkVersion: '13.1.1',
+        interfaceType: IOSDeviceConnectionInterface.usb,
+      ).majorSdkVersion, 13);
+      expect(IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.arm64,
+        sdkVersion: '10',
+        interfaceType: IOSDeviceConnectionInterface.usb,
+      ).majorSdkVersion, 10);
+      expect(IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.arm64,
+        sdkVersion: '0',
+        interfaceType: IOSDeviceConnectionInterface.usb,
+      ).majorSdkVersion, 0);
+      expect(IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.arm64,
+        sdkVersion: 'bogus',
+        interfaceType: IOSDeviceConnectionInterface.usb,
+      ).majorSdkVersion, 0);
     });
 
     testWithoutContext('has build number in sdkNameAndVersion', () async {
@@ -172,7 +162,7 @@ void main() {
         interfaceType: IOSDeviceConnectionInterface.usb,
       );
 
-      expect(await device.sdkNameAndVersion, 'iOS 13.3 17C54');
+      expect(await device.sdkNameAndVersion,'iOS 13.3 17C54');
     });
 
     testWithoutContext('Supports debug, profile, and release modes', () {
@@ -236,7 +226,9 @@ void main() {
       late FileSystem fileSystem;
       late IProxy iproxy;
 
-      IOSDevicePortForwarder createPortForwarder(ForwardedPort forwardedPort, IOSDevice device) {
+      IOSDevicePortForwarder createPortForwarder(
+          ForwardedPort forwardedPort,
+          IOSDevice device) {
         iproxy = IProxy.test(logger: logger, processManager: FakeProcessManager.any());
         final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(
           id: device.id,
@@ -253,7 +245,10 @@ void main() {
         return portForwarder;
       }
 
-      IOSDeviceLogReader createLogReader(IOSDevice device, IOSApp appPackage, Process process) {
+      IOSDeviceLogReader createLogReader(
+          IOSDevice device,
+          IOSApp appPackage,
+          Process process) {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.create(
           device: device,
           app: appPackage,
@@ -423,21 +418,25 @@ void main() {
       expect(iosDevices.deviceNotifier!.items, isEmpty);
       expect(xcdevice.deviceEventController.hasListener, isTrue);
 
-      xcdevice.deviceEventController
-          .add(<XCDeviceEvent, String>{XCDeviceEvent.attach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'});
+      xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
+        XCDeviceEvent.attach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+      });
       await added.future;
       expect(iosDevices.deviceNotifier!.items.length, 2);
       expect(iosDevices.deviceNotifier!.items, contains(device1));
       expect(iosDevices.deviceNotifier!.items, contains(device2));
 
-      xcdevice.deviceEventController
-          .add(<XCDeviceEvent, String>{XCDeviceEvent.detach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'});
+      xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
+        XCDeviceEvent.detach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+      });
       await removed.future;
       expect(iosDevices.deviceNotifier!.items, <Device>[device2]);
 
       // Remove stream will throw over-completion if called more than once
       // which proves this is ignored.
-      xcdevice.deviceEventController.add(<XCDeviceEvent, String>{XCDeviceEvent.detach: 'bogus'});
+      xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
+        XCDeviceEvent.detach: 'bogus'
+      });
 
       expect(addedCount, 2);
 
@@ -457,8 +456,7 @@ void main() {
       xcdevice.devices.add(<IOSDevice>[]);
       xcdevice.devices.add(<IOSDevice>[]);
 
-      final StreamController<Map<XCDeviceEvent, String>> rescheduledStream =
-          StreamController<Map<XCDeviceEvent, String>>();
+      final StreamController<Map<XCDeviceEvent, String>> rescheduledStream = StreamController<Map<XCDeviceEvent, String>>();
 
       unawaited(xcdevice.deviceEventController.done.whenComplete(() {
         xcdevice.deviceEventController = rescheduledStream;
@@ -501,9 +499,7 @@ void main() {
 
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (final Platform unsupportedPlatform in unsupportedPlatforms) {
-      testWithoutContext(
-          'pollingGetDevices throws Unsupported Operation exception on ${unsupportedPlatform.operatingSystem}',
-          () async {
+      testWithoutContext('pollingGetDevices throws Unsupported Operation exception on ${unsupportedPlatform.operatingSystem}', () async {
         final IOSDevices iosDevices = IOSDevices(
           platform: unsupportedPlatform,
           xcdevice: xcdevice,
@@ -512,9 +508,7 @@ void main() {
         );
         xcdevice.isInstalled = false;
         expect(
-          () async {
-            await iosDevices.pollingGetDevices();
-          },
+          () async { await iosDevices.pollingGetDevices(); },
           throwsUnsupportedError,
         );
       });
@@ -550,8 +544,7 @@ void main() {
 
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (final Platform unsupportedPlatform in unsupportedPlatforms) {
-      testWithoutContext('throws returns platform diagnostic exception on ${unsupportedPlatform.operatingSystem}',
-          () async {
+      testWithoutContext('throws returns platform diagnostic exception on ${unsupportedPlatform.operatingSystem}', () async {
         final IOSDevices iosDevices = IOSDevices(
           platform: unsupportedPlatform,
           xcdevice: xcdevice,
@@ -559,8 +552,7 @@ void main() {
           logger: logger,
         );
         xcdevice.isInstalled = false;
-        expect(
-            (await iosDevices.getDiagnostics()).first, 'Control of iOS devices or simulators only supported on macOS.');
+        expect((await iosDevices.getDiagnostics()).first, 'Control of iOS devices or simulators only supported on macOS.');
       });
     }
 
@@ -588,7 +580,7 @@ class FakeIOSApp extends Fake implements IOSApp {
   final String name;
 }
 
-class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
+class FakeIOSWorkflow extends Fake implements IOSWorkflow { }
 
 class FakeXcdevice extends Fake implements XCDevice {
   int getAvailableIOSDevicesCount = 0;

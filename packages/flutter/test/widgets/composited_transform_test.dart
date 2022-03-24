@@ -10,7 +10,7 @@ void main() {
 
   testWidgets('Change link during layout', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    Widget build({LayerLink? linkToUse}) {
+    Widget build({ LayerLink? linkToUse }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         // The LayoutBuilder forces the CompositedTransformTarget widget to
@@ -19,27 +19,27 @@ void main() {
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return Stack(
-              children: <Widget>[
-                Positioned(
-                  left: 123.0,
-                  top: 456.0,
-                  child: CompositedTransformTarget(
-                    link: linkToUse ?? link,
-                    child: const SizedBox(height: 10.0, width: 10.0),
-                  ),
+            children: <Widget>[
+              Positioned(
+                left: 123.0,
+                top: 456.0,
+                child: CompositedTransformTarget(
+                  link: linkToUse ?? link,
+                  child: const SizedBox(height: 10.0, width: 10.0),
                 ),
-                Positioned(
-                  left: 787.0,
-                  top: 343.0,
-                  child: CompositedTransformFollower(
-                    link: linkToUse ?? link,
-                    targetAnchor: Alignment.center,
-                    followerAnchor: Alignment.center,
-                    child: SizedBox(key: key, height: 20.0, width: 20.0),
-                  ),
+              ),
+              Positioned(
+                left: 787.0,
+                top: 343.0,
+                child: CompositedTransformFollower(
+                  link: linkToUse ?? link,
+                  targetAnchor: Alignment.center,
+                  followerAnchor: Alignment.center,
+                  child: SizedBox(key: key, height: 20.0, width: 20.0),
                 ),
-              ],
-            );
+              ),
+            ],
+          );
           },
         ),
       );
@@ -56,7 +56,7 @@ void main() {
   group('Composited transforms - only offsets', () {
     final GlobalKey key = GlobalKey();
 
-    Widget build({required Alignment targetAlignment, required Alignment followerAlignment}) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -107,7 +107,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    Widget build({required Alignment targetAlignment, required Alignment followerAlignment}) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -140,7 +140,6 @@ void main() {
         ),
       );
     }
-
     testWidgets('topLeft', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
       final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
@@ -173,7 +172,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    Widget build({required Alignment targetAlignment, required Alignment followerAlignment}) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -218,7 +217,6 @@ void main() {
         ),
       );
     }
-
     testWidgets('topLeft', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
       final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
@@ -254,7 +252,7 @@ void main() {
 
     bool tapped = false;
 
-    Widget build({required Alignment targetAlignment, required Alignment followerAlignment}) {
+    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -272,9 +270,7 @@ void main() {
               child: GestureDetector(
                 key: key2,
                 behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  tapped = true;
-                },
+                onTap: () { tapped = true; },
                 child: SizedBox(key: key3, height: 2.0, width: 2.0),
               ),
             ),
@@ -284,20 +280,16 @@ void main() {
     }
 
     const List<Alignment> alignments = <Alignment>[
-      Alignment.topLeft,
-      Alignment.topRight,
+      Alignment.topLeft, Alignment.topRight,
       Alignment.center,
-      Alignment.bottomLeft,
-      Alignment.bottomRight,
+      Alignment.bottomLeft, Alignment.bottomRight,
     ];
 
-    setUp(() {
-      tapped = false;
-    });
+    setUp(() { tapped = false; });
 
     for (final Alignment targetAlignment in alignments) {
       for (final Alignment followerAlignment in alignments) {
-        testWidgets('$targetAlignment - $followerAlignment', (WidgetTester tester) async {
+        testWidgets('$targetAlignment - $followerAlignment', (WidgetTester tester) async{
           await tester.pumpWidget(build(targetAlignment: targetAlignment, followerAlignment: followerAlignment));
           final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
           expect(box2.size, const Size(2.0, 2.0));

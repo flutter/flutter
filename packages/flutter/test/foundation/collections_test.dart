@@ -37,11 +37,11 @@ void main() {
     expect(setEquals(setA, setD), isTrue);
   });
   test('mapEquals', () {
-    final Map<int, int> mapA = <int, int>{1: 1, 2: 2, 3: 3};
-    final Map<int, int> mapB = <int, int>{1: 1, 2: 2, 3: 3};
-    final Map<int, int> mapC = <int, int>{1: 1, 2: 2};
-    final Map<int, int> mapD = <int, int>{3: 3, 2: 2, 1: 1};
-    final Map<int, int> mapE = <int, int>{3: 1, 2: 2, 1: 3};
+    final Map<int, int> mapA = <int, int>{1:1, 2:2, 3:3};
+    final Map<int, int> mapB = <int, int>{1:1, 2:2, 3:3};
+    final Map<int, int> mapC = <int, int>{1:1, 2:2};
+    final Map<int, int> mapD = <int, int>{3:3, 2:2, 1:1};
+    final Map<int, int> mapE = <int, int>{3:1, 2:2, 1:3};
 
     expect(mapEquals<void, void>(null, null), isTrue);
     expect(mapEquals(mapA, null), isFalse);

@@ -42,11 +42,11 @@ class GradleUtils {
     required FileSystem fileSystem,
     required Cache cache,
     required OperatingSystemUtils operatingSystemUtils,
-  })  : _platform = platform,
-        _logger = logger,
-        _cache = cache,
-        _fileSystem = fileSystem,
-        _operatingSystemUtils = operatingSystemUtils;
+  }) : _platform = platform,
+       _logger = logger,
+       _cache = cache,
+       _fileSystem = fileSystem,
+       _operatingSystemUtils = operatingSystemUtils;
 
   final Cache _cache;
   final FileSystem _fileSystem;
@@ -70,22 +70,30 @@ class GradleUtils {
       _operatingSystemUtils.makeExecutable(gradle);
       return gradle.absolute.path;
     }
-    throwToolExit('Unable to locate gradlew script. Please check that ${gradle.path} '
-        'exists or that ${gradle.dirname} can be read.');
+    throwToolExit(
+      'Unable to locate gradlew script. Please check that ${gradle.path} '
+      'exists or that ${gradle.dirname} can be read.'
+    );
   }
 
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
   void injectGradleWrapperIfNeeded(Directory directory) {
-    copyDirectory(_cache.getArtifactDirectory('gradle_wrapper'), directory,
-        shouldCopyFile: (File sourceFile, File destinationFile) {
-      // Don't override the existing files in the project.
-      return !destinationFile.existsSync();
-    }, onFileCopied: (File source, File dest) {
-      _operatingSystemUtils.makeExecutable(dest);
-    });
+    copyDirectory(
+      _cache.getArtifactDirectory('gradle_wrapper'),
+      directory,
+      shouldCopyFile: (File sourceFile, File destinationFile) {
+        // Don't override the existing files in the project.
+        return !destinationFile.existsSync();
+      },
+      onFileCopied: (File source, File dest) {
+        _operatingSystemUtils.makeExecutable(dest);
+      }
+    );
     // Add the `gradle-wrapper.properties` file if it doesn't exist.
-    final Directory propertiesDirectory = directory.childDirectory(_fileSystem.path.join('gradle', 'wrapper'));
-    final File propertiesFile = propertiesDirectory.childFile('gradle-wrapper.properties');
+    final Directory propertiesDirectory = directory
+      .childDirectory(_fileSystem.path.join('gradle', 'wrapper'));
+    final File propertiesFile = propertiesDirectory
+      .childFile('gradle-wrapper.properties');
 
     if (propertiesFile.existsSync()) {
       return;
@@ -117,8 +125,7 @@ String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
   final String buildFileContent = buildFile.readAsStringSync();
   final Iterable<Match> pluginMatches = _androidPluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
-    logger.printTrace(
-        "$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
+    logger.printTrace("$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String? androidPluginVersion = pluginMatches.first.group(1);
@@ -264,9 +271,9 @@ void writeLocalProperties(File properties) {
 }
 
 void exitWithNoSdkMessage() {
-  BuildEvent('unsupported-project',
-          type: 'gradle', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage)
-      .send();
-  throwToolExit('${globals.logger.terminal.warningMark} No Android SDK found. '
-      'Try setting the ANDROID_SDK_ROOT environment variable.');
+  BuildEvent('unsupported-project', type: 'gradle', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage).send();
+  throwToolExit(
+    '${globals.logger.terminal.warningMark} No Android SDK found. '
+    'Try setting the ANDROID_SDK_ROOT environment variable.'
+  );
 }

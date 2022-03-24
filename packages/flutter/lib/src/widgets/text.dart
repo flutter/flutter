@@ -46,13 +46,13 @@ class DefaultTextStyle extends InheritedTheme {
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
     required Widget child,
-  })  : assert(style != null),
-        assert(softWrap != null),
-        assert(overflow != null),
-        assert(maxLines == null || maxLines > 0),
-        assert(child != null),
-        assert(textWidthBasis != null),
-        super(key: key, child: child);
+  }) : assert(style != null),
+       assert(softWrap != null),
+       assert(overflow != null),
+       assert(maxLines == null || maxLines > 0),
+       assert(child != null),
+       assert(textWidthBasis != null),
+       super(key: key, child: child);
 
   /// A const-constructable default text style that provides fallback values.
   ///
@@ -60,15 +60,15 @@ class DefaultTextStyle extends InheritedTheme {
   ///
   /// This constructor creates a [DefaultTextStyle] with an invalid [child], which
   /// means the constructed value cannot be incorporated into the tree.
-  const DefaultTextStyle.fallback({Key? key})
-      : style = const TextStyle(),
-        textAlign = null,
-        softWrap = true,
-        maxLines = null,
-        overflow = TextOverflow.clip,
-        textWidthBasis = TextWidthBasis.parent,
-        textHeightBehavior = null,
-        super(key: key, child: const _NullWidget());
+  const DefaultTextStyle.fallback({ Key? key })
+    : style = const TextStyle(),
+      textAlign = null,
+      softWrap = true,
+      maxLines = null,
+      overflow = TextOverflow.clip,
+      textWidthBasis = TextWidthBasis.parent,
+      textHeightBehavior = null,
+      super(key: key, child: const _NullWidget());
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -197,16 +197,11 @@ class DefaultTextStyle extends InheritedTheme {
     super.debugFillProperties(properties);
     style.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    properties.add(FlagProperty('softWrap',
-        value: softWrap,
-        ifTrue: 'wrapping at box width',
-        ifFalse: 'no wrapping except at line break characters',
-        showName: true));
+    properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
-    properties
-        .add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
 
@@ -242,7 +237,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
     Key? key,
     required this.textHeightBehavior,
     required Widget child,
-  })  : assert(textHeightBehavior != null),
+  }) :  assert(textHeightBehavior != null),
         assert(child != null),
         super(key: key, child: child);
 
@@ -278,8 +273,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
 
@@ -380,12 +374,12 @@ class Text extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
-  })  : assert(
-          data != null,
-          'A non-null String must be provided to a Text widget.',
-        ),
-        textSpan = null,
-        super(key: key);
+  }) : assert(
+         data != null,
+         'A non-null String must be provided to a Text widget.',
+       ),
+       textSpan = null,
+       super(key: key);
 
   /// Creates a text widget with a [InlineSpan].
   ///
@@ -412,12 +406,12 @@ class Text extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
-  })  : assert(
-          textSpan != null,
-          'A non-null TextSpan must be provided to a Text.rich widget.',
-        ),
-        data = null,
-        super(key: key);
+  }) : assert(
+         textSpan != null,
+         'A non-null TextSpan must be provided to a Text.rich widget.',
+       ),
+       data = null,
+       super(key: key);
 
   /// The text to display.
   ///
@@ -526,7 +520,8 @@ class Text extends StatelessWidget {
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle? effectiveTextStyle = style;
-    if (style == null || style!.inherit) effectiveTextStyle = defaultTextStyle.style.merge(style);
+    if (style == null || style!.inherit)
+      effectiveTextStyle = defaultTextStyle.style.merge(style);
     if (MediaQuery.boldTextOverride(context))
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     Widget result = RichText(
@@ -539,8 +534,7 @@ class Text extends StatelessWidget {
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      textHeightBehavior:
-          textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
@@ -570,17 +564,12 @@ class Text extends StatelessWidget {
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
-    properties.add(FlagProperty('softWrap',
-        value: softWrap,
-        ifTrue: 'wrapping at box width',
-        ifFalse: 'no wrapping except at line break characters',
-        showName: true));
+    properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: null));
-    properties
-        .add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }

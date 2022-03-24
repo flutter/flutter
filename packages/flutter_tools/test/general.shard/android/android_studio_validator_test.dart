@@ -19,7 +19,9 @@ import '../../src/context.dart';
 
 const String home = '/home/me';
 
-final Platform linuxPlatform = FakePlatform(environment: <String, String>{'HOME': home});
+final Platform linuxPlatform = FakePlatform(
+  environment: <String, String>{'HOME': home}
+);
 
 void main() {
   FileSystem fileSystem;
@@ -59,14 +61,11 @@ void main() {
     // This checks that running the validator doesn't throw an unhandled
     // exception and that the ProcessException makes it into the error
     // message list.
-    for (final DoctorValidator validator
-        in AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages)) {
+    for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages)) {
       final ValidationResult result = await validator.validate();
-      expect(
-          result.messages.where((ValidationMessage message) {
-            return message.isError && message.message.contains('ProcessException');
-          }).isNotEmpty,
-          true);
+      expect(result.messages.where((ValidationMessage message) {
+        return message.isError && message.message.contains('ProcessException');
+      }).isNotEmpty, true);
     }
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
@@ -74,8 +73,8 @@ void main() {
     ProcessManager: () => fakeProcessManager,
     Platform: () => linuxPlatform,
     FileSystemUtils: () => FileSystemUtils(
-          fileSystem: fileSystem,
-          platform: linuxPlatform,
-        ),
+      fileSystem: fileSystem,
+      platform: linuxPlatform,
+    ),
   });
 }

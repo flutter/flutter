@@ -133,11 +133,10 @@ void main() {
     expect(device.isSupported(), isTrue);
     expect(device.getLogReader(), isA<DesktopLogReader>());
 
-    expect(await device.stopApp(null), isFalse);
+     expect(await device.stopApp(null), isFalse);
 
     await expectLater(() => device.startApp(null, debuggingOptions: null), throwsA(isA<UnimplementedError>()));
-    await expectLater(
-        () => device.buildForDevice(null, buildInfo: BuildInfo.debug), throwsA(isA<UnimplementedError>()));
+    await expectLater(() => device.buildForDevice(null, buildInfo: BuildInfo.debug), throwsA(isA<UnimplementedError>()));
     expect(device.executablePathForDevice(null, null), null);
   });
 }

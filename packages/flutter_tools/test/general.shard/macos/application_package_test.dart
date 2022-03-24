@@ -22,7 +22,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  group('PrebuiltMacOSApp', () {
+group('PrebuiltMacOSApp', () {
     FakeOperatingSystemUtils os;
     FileSystem fileSystem;
     BufferLogger logger;
@@ -42,8 +42,7 @@ void main() {
     });
 
     testUsingContext('Error on non-existing file', () {
-      final PrebuiltMacOSApp macosApp =
-          MacOSApp.fromPrebuiltApp(fileSystem.file('not_existing.app')) as PrebuiltMacOSApp;
+      final PrebuiltMacOSApp macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('not_existing.app')) as PrebuiltMacOSApp;
 
       expect(macosApp, isNull);
       expect(logger.errorText, contains('File "not_existing.app" does not exist.'));
@@ -68,7 +67,9 @@ void main() {
     testUsingContext('Error on info.plist missing bundle identifier', () {
       final String contentsDirectory = fileSystem.path.join('bundle.app', 'Contents');
       fileSystem.directory(contentsDirectory).createSync(recursive: true);
-      fileSystem.file(fileSystem.path.join('bundle.app', 'Contents', 'Info.plist')).writeAsStringSync(badPlistData);
+      fileSystem
+        .file(fileSystem.path.join('bundle.app', 'Contents', 'Info.plist'))
+        .writeAsStringSync(badPlistData);
       final PrebuiltMacOSApp macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app')) as PrebuiltMacOSApp;
 
       expect(macosApp, isNull);
@@ -79,8 +80,8 @@ void main() {
       final String contentsDirectory = fileSystem.path.join('bundle.app', 'Contents');
       fileSystem.directory(contentsDirectory).createSync(recursive: true);
       fileSystem
-          .file(fileSystem.path.join('bundle.app', 'Contents', 'Info.plist'))
-          .writeAsStringSync(badPlistDataNoExecutable);
+        .file(fileSystem.path.join('bundle.app', 'Contents', 'Info.plist'))
+        .writeAsStringSync(badPlistDataNoExecutable);
       final PrebuiltMacOSApp macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app')) as PrebuiltMacOSApp;
 
       expect(macosApp, isNull);
@@ -90,8 +91,12 @@ void main() {
     testUsingContext('Success with app bundle', () {
       final String appDirectory = fileSystem.path.join('bundle.app', 'Contents', 'MacOS');
       fileSystem.directory(appDirectory).createSync(recursive: true);
-      fileSystem.file(fileSystem.path.join('bundle.app', 'Contents', 'Info.plist')).writeAsStringSync(plistData);
-      fileSystem.file(fileSystem.path.join(appDirectory, executableName)).createSync();
+      fileSystem
+        .file(fileSystem.path.join('bundle.app', 'Contents', 'Info.plist'))
+        .writeAsStringSync(plistData);
+      fileSystem
+        .file(fileSystem.path.join(appDirectory, executableName))
+        .createSync();
       final PrebuiltMacOSApp macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app')) as PrebuiltMacOSApp;
 
       expect(logger.errorText, isEmpty);
@@ -131,12 +136,18 @@ void main() {
         if (zipFile.path != 'app.zip') {
           return;
         }
-        final Directory bundleAppContentsDir =
-            fileSystem.directory(fileSystem.path.join(targetDirectory.path, 'bundle.app', 'Contents'));
+        final Directory bundleAppContentsDir = fileSystem.directory(fileSystem.path.join(targetDirectory.path, 'bundle.app', 'Contents'));
         bundleAppContentsDir.createSync(recursive: true);
-        fileSystem.file(fileSystem.path.join(bundleAppContentsDir.path, 'Info.plist')).writeAsStringSync(plistData);
-        fileSystem.directory(fileSystem.path.join(bundleAppContentsDir.path, 'MacOS')).createSync();
-        fileSystem.file(fileSystem.path.join(bundleAppContentsDir.path, 'MacOS', executableName)).createSync();
+        fileSystem
+          .file(fileSystem.path.join(bundleAppContentsDir.path, 'Info.plist'))
+          .writeAsStringSync(plistData);
+        fileSystem
+          .directory(fileSystem.path.join(bundleAppContentsDir.path, 'MacOS'))
+          .createSync();
+        fileSystem
+          .file(fileSystem.path
+          .join(bundleAppContentsDir.path, 'MacOS', executableName))
+          .createSync();
       };
       final PrebuiltMacOSApp macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('app.zip')) as PrebuiltMacOSApp;
 
@@ -147,8 +158,7 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('Success with project', () {
-      final MacOSApp macosApp =
-          MacOSApp.fromMacOSProject(FlutterProject.fromDirectory(globals.fs.currentDirectory).macos);
+      final MacOSApp macosApp = MacOSApp.fromMacOSProject(FlutterProject.fromDirectory(globals.fs.currentDirectory).macos);
 
       expect(logger.errorText, isEmpty);
       expect(macosApp.id, 'com.example.placeholder');

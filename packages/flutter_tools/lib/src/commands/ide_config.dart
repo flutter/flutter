@@ -19,18 +19,18 @@ class IdeConfigCommand extends FlutterCommand {
       'update-templates',
       negatable: false,
       help: 'Update the templates in the template directory from the current '
-          'configuration files. This is the opposite of what $name usually does. '
-          'Will search the flutter tree for *.iml files and copy any missing ones '
-          'into the template directory. If "--overwrite" is also specified, it will '
-          'update any out-of-date files, and remove any deleted files from the '
-          'template directory.',
+            'configuration files. This is the opposite of what $name usually does. '
+            'Will search the flutter tree for *.iml files and copy any missing ones '
+            'into the template directory. If "--overwrite" is also specified, it will '
+            'update any out-of-date files, and remove any deleted files from the '
+            'template directory.',
     );
     argParser.addFlag(
       'with-root-module',
       defaultsTo: true,
       help: 'Also create module that corresponds to the root of Flutter tree. '
-          'This makes the entire Flutter tree browsable and searchable in IDE. '
-          'Without this flag, only the child modules will be visible in IDE.',
+            'This makes the entire Flutter tree browsable and searchable in IDE. '
+            'Without this flag, only the child modules will be visible in IDE.',
     );
   }
 
@@ -126,7 +126,8 @@ class IdeConfigCommand extends FlutterCommand {
 
       // Skip template files in both the ide_templates and templates
       // directories to avoid copying onto themselves.
-      if (_isChildDirectoryOf(_templateDirectory, srcFile) || _isChildDirectoryOf(_createTemplatesDirectory, srcFile)) {
+      if (_isChildDirectoryOf(_templateDirectory, srcFile) ||
+          _isChildDirectoryOf(_createTemplatesDirectory, srcFile)) {
         continue;
       }
 
@@ -135,14 +136,15 @@ class IdeConfigCommand extends FlutterCommand {
         r'(\.name|modules.xml|vcs.xml)$',
       );
       final bool isATrackedIdeaFile = _hasDirectoryInPath(srcFile, '.idea') &&
-          (trackedIdeaFileRegExp.hasMatch(relativePath) || _hasDirectoryInPath(srcFile, 'runConfigurations'));
+          (trackedIdeaFileRegExp.hasMatch(relativePath) ||
+              _hasDirectoryInPath(srcFile, 'runConfigurations'));
       final bool isAnImlOutsideIdea = !isATrackedIdeaFile && srcFile.path.endsWith('.iml');
       if (!isATrackedIdeaFile && !isAnImlOutsideIdea) {
         continue;
       }
 
-      final File finalDestinationFile = globals.fs.file(
-          globals.fs.path.absolute(_templateDirectory.absolute.path, '$relativePath${Template.copyTemplateExtension}'));
+      final File finalDestinationFile = globals.fs.file(globals.fs.path.absolute(
+          _templateDirectory.absolute.path, '$relativePath${Template.copyTemplateExtension}'));
       final String relativeDestination =
           globals.fs.path.relative(finalDestinationFile.path, from: _flutterRoot.absolute.path);
       if (finalDestinationFile.existsSync()) {
@@ -259,11 +261,10 @@ class IdeConfigCommand extends FlutterCommand {
 
 /// Return null if the flutter root directory is a valid destination. Return a
 /// validation message if we should disallow the directory.
-String? _validateFlutterDir(String dirPath, {String? flutterRoot}) {
+String? _validateFlutterDir(String dirPath, { String? flutterRoot }) {
   final FileSystemEntityType type = globals.fs.typeSync(dirPath);
 
-  switch (type) {
-    // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
+  switch (type) { // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
     case FileSystemEntityType.link:
       // Do not overwrite links.
       return "Invalid project root dir: '$dirPath' - refers to a link.";

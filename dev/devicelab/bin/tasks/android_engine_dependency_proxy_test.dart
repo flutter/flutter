@@ -19,14 +19,16 @@ Future<void> main() async {
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
-    if (javaHome == null) return TaskResult.failure('Could not find Java');
+    if (javaHome == null)
+      return TaskResult.failure('Could not find Java');
     print('\nUsing JAVA_HOME=$javaHome');
 
     section('Create project');
     await runProjectTest((FlutterProject flutterProject) async {
       await inDirectory(path.join(flutterProject.rootPath, 'android'), () async {
         section('Insert gradle testing script');
-        final File build = File(path.join(flutterProject.rootPath, 'android', 'app', 'build.gradle'));
+        final File build = File(path.join(
+            flutterProject.rootPath, 'android', 'app', 'build.gradle'));
         build.writeAsStringSync(
           '''
 task printEngineMavenUrl() {
@@ -47,23 +49,24 @@ task printEngineMavenUrl() {
 
         if (mavenUrl != 'https://storage.googleapis.com/download.flutter.io') {
           throw TaskResult.failure('Expected Android engine maven dependency URL to '
-              'resolve to https://storage.googleapis.com/download.flutter.io. Got '
-              '$mavenUrl instead');
+          'resolve to https://storage.googleapis.com/download.flutter.io. Got '
+          '$mavenUrl instead');
         }
 
         section('Checking overridden maven URL');
-        mavenUrl = await eval(gradlewExecutable, <String>[
-          'printEngineMavenUrl',
-          '-q'
-        ], environment: <String, String>{
-          'FLUTTER_STORAGE_BASE_URL': 'https://my.special.proxy',
-        });
+        mavenUrl = await eval(
+          gradlewExecutable,
+          <String>['printEngineMavenUrl', '-q'],
+          environment: <String, String>{
+            'FLUTTER_STORAGE_BASE_URL': 'https://my.special.proxy',
+          }
+        );
 
         if (mavenUrl != 'https://my.special.proxy/download.flutter.io') {
           throw TaskResult.failure('Expected overridden Android engine maven '
-              'dependency URL to resolve to proxy location '
-              'https://my.special.proxy/download.flutter.io. Got '
-              '$mavenUrl instead');
+          'dependency URL to resolve to proxy location '
+          'https://my.special.proxy/download.flutter.io. Got '
+          '$mavenUrl instead');
         }
       });
     });

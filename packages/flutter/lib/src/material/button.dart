@@ -76,19 +76,19 @@ class RawMaterialButton extends StatefulWidget {
     MaterialTapTargetSize? materialTapTargetSize,
     this.child,
     this.enableFeedback = true,
-  })  : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
-        assert(shape != null),
-        assert(elevation != null && elevation >= 0.0),
-        assert(focusElevation != null && focusElevation >= 0.0),
-        assert(hoverElevation != null && hoverElevation >= 0.0),
-        assert(highlightElevation != null && highlightElevation >= 0.0),
-        assert(disabledElevation != null && disabledElevation >= 0.0),
-        assert(padding != null),
-        assert(constraints != null),
-        assert(animationDuration != null),
-        assert(clipBehavior != null),
-        assert(autofocus != null),
-        super(key: key);
+  }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
+       assert(shape != null),
+       assert(elevation != null && elevation >= 0.0),
+       assert(focusElevation != null && focusElevation >= 0.0),
+       assert(hoverElevation != null && hoverElevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation != null && disabledElevation >= 0.0),
+       assert(padding != null),
+       assert(constraints != null),
+       assert(animationDuration != null),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
+       super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -316,6 +316,7 @@ class RawMaterialButton extends StatefulWidget {
 }
 
 class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStateMixin {
+
   @override
   void initState() {
     super.initState();
@@ -356,23 +357,22 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
   @override
   Widget build(BuildContext context) {
     final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(widget.textStyle?.color, materialStates);
-    final ShapeBorder? effectiveShape = MaterialStateProperty.resolveAs<ShapeBorder?>(widget.shape, materialStates);
+    final ShapeBorder? effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder?>(widget.shape, materialStates);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
     final MouseCursor? effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       materialStates,
     );
-    final EdgeInsetsGeometry padding = widget.padding
-        .add(
-          EdgeInsets.only(
-            left: densityAdjustment.dx,
-            top: densityAdjustment.dy,
-            right: densityAdjustment.dx,
-            bottom: densityAdjustment.dy,
-          ),
-        )
-        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+    final EdgeInsetsGeometry padding = widget.padding.add(
+      EdgeInsets.only(
+        left: densityAdjustment.dx,
+        top: densityAdjustment.dy,
+        right: densityAdjustment.dx,
+        bottom: densityAdjustment.dy,
+      ),
+    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+
 
     final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,
@@ -474,32 +474,37 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size get minSize => _minSize;
   Size _minSize;
   set minSize(Size value) {
-    if (_minSize == value) return;
+    if (_minSize == value)
+      return;
     _minSize = value;
     markNeedsLayout();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child != null) return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    if (child != null)
+      return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child != null) return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    if (child != null)
+      return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child != null) return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    if (child != null)
+      return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child != null) return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    if (child != null)
+      return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
@@ -534,7 +539,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
     if (super.hitTest(result, position: position)) {
       return true;
     }

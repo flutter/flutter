@@ -9,12 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void verify(WidgetTester tester, List<Offset> answerKey) {
-  final List<Offset> testAnswers = tester
-      .renderObjectList<RenderBox>(find.byType(SizedBox))
-      .map<Offset>(
-        (RenderBox target) => target.localToGlobal(Offset.zero),
-      )
-      .toList();
+  final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
+    (RenderBox target) => target.localToGlobal(Offset.zero),
+  ).toList();
   expect(testAnswers, equals(answerKey));
 }
 
@@ -131,6 +128,7 @@ void main() {
       const Offset(0.0, 100.0),
       const Offset(300.0, 150.0),
     ]);
+
   });
 
   testWidgets('Basic Wrap test (RTL)', (WidgetTester tester) async {
@@ -248,6 +246,7 @@ void main() {
       const Offset(0.0, 400.0),
       const Offset(300.0, 400.0),
     ]);
+
   });
 
   testWidgets('Empty wrap', (WidgetTester tester) async {
@@ -479,6 +478,7 @@ void main() {
       const Offset(0.0, 265.0),
       const Offset(0.0, 425.0),
     ]);
+
   });
 
   testWidgets('Wrap runAlignment (UP)', (WidgetTester tester) async {
@@ -569,6 +569,7 @@ void main() {
       const Offset(0.0, 295.0),
       const Offset(0.0, 115.0),
     ]);
+
   });
 
   testWidgets('Shrink-wrapping Wrap test', (WidgetTester tester) async {
@@ -744,9 +745,7 @@ void main() {
           height: 300.0,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () {
-              log.add('hit');
-            },
+            onTap: () { log.add('hit'); },
           ),
         ),
       ],

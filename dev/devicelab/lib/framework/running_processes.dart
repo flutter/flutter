@@ -19,10 +19,10 @@ class RunningProcessInfo {
 
   @override
   bool operator ==(Object other) {
-    return other is RunningProcessInfo &&
-        other.pid == pid &&
-        other.commandLine == commandLine &&
-        other.creationDate == creationDate;
+    return other is RunningProcessInfo
+        && other.pid == pid
+        && other.commandLine == commandLine
+        && other.creationDate == creationDate;
   }
 
   Future<bool> terminate({required ProcessManager processManager}) async {
@@ -32,7 +32,7 @@ class RunningProcessInfo {
       // TODO(ianh): Move Windows to killPid once we can.
       //  - killPid on Windows has not-useful return code: https://github.com/dart-lang/sdk/issues/47675
       final ProcessResult result = await processManager.run(<String>[
-        'taskkill.exe',
+          'taskkill.exe',
         '/pid',
         '$pid',
         '/f',
@@ -121,12 +121,10 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
 
     // 3/11/2019 11:01:54 AM
     // 12/11/2019 11:01:54 AM
-    String rawTime = line
-        .substring(
-          creationDateHeaderStart,
-          creationDateHeaderEnd,
-        )
-        .trim();
+    String rawTime = line.substring(
+      creationDateHeaderStart,
+      creationDateHeaderEnd,
+    ).trim();
 
     if (rawTime[1] == '/') {
       rawTime = '0$rawTime';

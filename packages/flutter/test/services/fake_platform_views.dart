@@ -125,8 +125,7 @@ class FakeAndroidViewController implements AndroidViewController {
 
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeAndroidPlatformView> get views => _views.values;
@@ -158,7 +157,7 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch (call.method) {
+    switch(call.method) {
       case 'create':
         return _create(call);
       case 'dispose':
@@ -203,13 +202,11 @@ class FakeAndroidPlatformViewsController {
       await createCompleter!.future;
     }
 
-    _views[id] = FakeAndroidPlatformView(
-      id,
-      viewType,
-      width != null && height != null ? Size(width, height) : null,
-      layoutDirection,
-      hybrid,
-      creationParams,
+    _views[id] = FakeAndroidPlatformView(id, viewType,
+        width != null && height != null ? Size(width, height) : null,
+        layoutDirection,
+        hybrid,
+        creationParams,
     );
     final int textureId = _textureCounter++;
     return Future<int>.sync(() => textureId);
@@ -273,8 +270,8 @@ class FakeAndroidPlatformViewsController {
     final int action = args[3] as int;
     final List<List<dynamic>> pointerProperties = (args[5] as List<dynamic>).cast<List<dynamic>>();
     final List<List<dynamic>> pointerCoords = (args[6] as List<dynamic>).cast<List<dynamic>>();
-    final List<Offset> pointerOffsets = <Offset>[];
-    final List<int> pointerIds = <int>[];
+    final List<Offset> pointerOffsets = <Offset> [];
+    final List<int> pointerIds = <int> [];
     for (int i = 0; i < pointerCoords.length; i++) {
       pointerIds.add(pointerProperties[i][0] as int);
       final double x = pointerCoords[i][7] as double;
@@ -282,7 +279,8 @@ class FakeAndroidPlatformViewsController {
       pointerOffsets.add(Offset(x, y));
     }
 
-    if (!motionEvents.containsKey(id)) motionEvents[id] = <FakeAndroidMotionEvent>[];
+    if (!motionEvents.containsKey(id))
+      motionEvents[id] = <FakeAndroidMotionEvent> [];
 
     motionEvents[id]!.add(FakeAndroidMotionEvent(action, pointerIds, pointerOffsets));
     return Future<dynamic>.sync(() => null);
@@ -320,8 +318,7 @@ class FakeAndroidPlatformViewsController {
 
 class FakeIosPlatformViewsController {
   FakeIosPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeUiKitView> get views => _views.values;
@@ -344,7 +341,7 @@ class FakeIosPlatformViewsController {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch (call.method) {
+    switch(call.method) {
       case 'create':
         return _create(call);
       case 'dispose':
@@ -358,7 +355,8 @@ class FakeIosPlatformViewsController {
   }
 
   Future<dynamic> _create(MethodCall call) async {
-    if (creationDelay != null) await creationDelay!.future;
+    if (creationDelay != null)
+      await creationDelay!.future;
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
@@ -415,8 +413,7 @@ class FakeIosPlatformViewsController {
 
 class FakeHtmlPlatformViewsController {
   FakeHtmlPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeHtmlPlatformView> get views => _views.values;
@@ -433,7 +430,7 @@ class FakeHtmlPlatformViewsController {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch (call.method) {
+    switch(call.method) {
       case 'create':
         return _create(call);
       case 'dispose':
@@ -483,8 +480,7 @@ class FakeHtmlPlatformViewsController {
 
 @immutable
 class FakeAndroidPlatformView {
-  const FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection, this.hybrid,
-      [this.creationParams]);
+  const FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection, this.hybrid, [this.creationParams]);
 
   final int id;
   final String type;
@@ -494,35 +490,36 @@ class FakeAndroidPlatformView {
   final bool? hybrid;
 
   FakeAndroidPlatformView copyWith({Size? size, int? layoutDirection}) => FakeAndroidPlatformView(
-        id,
-        type,
-        size ?? this.size,
-        layoutDirection ?? this.layoutDirection,
-        hybrid,
-        creationParams,
-      );
+    id,
+    type,
+    size ?? this.size,
+    layoutDirection ?? this.layoutDirection,
+    hybrid,
+    creationParams,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is FakeAndroidPlatformView &&
-        other.id == id &&
-        other.type == type &&
-        listEquals<int>(other.creationParams, creationParams) &&
-        other.size == size &&
-        other.hybrid == hybrid &&
-        other.layoutDirection == layoutDirection;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is FakeAndroidPlatformView
+        && other.id == id
+        && other.type == type
+        && listEquals<int>(other.creationParams, creationParams)
+        && other.size == size
+        && other.hybrid == hybrid
+        && other.layoutDirection == layoutDirection;
   }
 
   @override
   int get hashCode => Object.hash(
-        id,
-        type,
-        creationParams == null ? null : Object.hashAll(creationParams!),
-        size,
-        layoutDirection,
-        hybrid,
-      );
+    id,
+    type,
+    creationParams == null ? null : Object.hashAll(creationParams!),
+    size,
+    layoutDirection,
+    hybrid,
+  );
 
   @override
   String toString() {
@@ -538,12 +535,13 @@ class FakeAndroidMotionEvent {
   final List<Offset> pointers;
   final List<int> pointerIds;
 
+
   @override
   bool operator ==(Object other) {
-    return other is FakeAndroidMotionEvent &&
-        listEquals<int>(other.pointerIds, pointerIds) &&
-        other.action == action &&
-        listEquals<Offset>(other.pointers, pointers);
+    return other is FakeAndroidMotionEvent
+        && listEquals<int>(other.pointerIds, pointerIds)
+        && other.action == action
+        && listEquals<Offset>(other.pointers, pointers);
   }
 
   @override
@@ -565,8 +563,12 @@ class FakeUiKitView {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is FakeUiKitView && other.id == id && other.type == type && other.creationParams == creationParams;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is FakeUiKitView
+        && other.id == id
+        && other.type == type
+        && other.creationParams == creationParams;
   }
 
   @override
@@ -587,8 +589,11 @@ class FakeHtmlPlatformView {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is FakeHtmlPlatformView && other.id == id && other.type == type;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is FakeHtmlPlatformView
+        && other.id == id
+        && other.type == type;
   }
 
   @override

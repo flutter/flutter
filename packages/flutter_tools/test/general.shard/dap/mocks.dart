@@ -18,8 +18,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   }) {
     final StreamController<List<int>> stdinController = StreamController<List<int>>();
     final StreamController<List<int>> stdoutController = StreamController<List<int>>();
-    final ByteStreamServerChannel channel =
-        ByteStreamServerChannel(stdinController.stream, stdoutController.sink, null);
+    final ByteStreamServerChannel channel = ByteStreamServerChannel(stdinController.stream, stdoutController.sink, null);
 
     return MockFlutterDebugAdapter._(
       stdinController.sink,
@@ -71,8 +70,7 @@ class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
   }) {
     final StreamController<List<int>> stdinController = StreamController<List<int>>();
     final StreamController<List<int>> stdoutController = StreamController<List<int>>();
-    final ByteStreamServerChannel channel =
-        ByteStreamServerChannel(stdinController.stream, stdoutController.sink, null);
+    final ByteStreamServerChannel channel = ByteStreamServerChannel(stdinController.stream, stdoutController.sink, null);
 
     return MockFlutterTestDebugAdapter._(
       stdinController.sink,
@@ -98,10 +96,7 @@ class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
   late List<String> processArgs;
 
   @override
-  Future<void> launchAsProcess(
-    String executable,
-    List<String> processArgs,
-  ) async {
+  Future<void> launchAsProcess(String executable, List<String> processArgs,) async {
     this.executable = executable;
     this.processArgs = processArgs;
   }

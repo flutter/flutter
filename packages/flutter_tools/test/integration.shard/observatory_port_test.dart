@@ -24,17 +24,21 @@ Future<int> getFreePort() async {
 
 Future<void> waitForObservatoryMessage(Process process, int port) async {
   final Completer<void> completer = Completer<void>();
-  process.stdout.transform(utf8.decoder).listen((String line) {
-    printOnFailure(line);
-    if (line.contains('An Observatory debugger and profiler on Flutter test device is available at')) {
-      if (line.contains('http://127.0.0.1:$port')) {
-        completer.complete();
-      } else {
-        completer.completeError(Exception('Did not forward to provided port $port, instead found $line'));
+  process.stdout
+    .transform(utf8.decoder)
+    .listen((String line) {
+      printOnFailure(line);
+      if (line.contains('An Observatory debugger and profiler on Flutter test device is available at')) {
+        if (line.contains('http://127.0.0.1:$port')) {
+          completer.complete();
+        } else {
+          completer.completeError(Exception('Did not forward to provided port $port, instead found $line'));
+        }
       }
-    }
-  });
-  process.stderr.transform(utf8.decoder).listen(printOnFailure);
+    });
+  process.stderr
+    .transform(utf8.decoder)
+    .listen(printOnFailure);
   return completer.future;
 }
 
@@ -73,7 +77,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final int observatoryPort = await getFreePort();
     int ddsPort = await getFreePort();
-    while (ddsPort == observatoryPort) {
+    while(ddsPort == observatoryPort) {
       ddsPort = await getFreePort();
     }
     // If both --dds-port and --observatory-port are provided, --dds-port will be used by
@@ -109,4 +113,5 @@ void main() {
     process.kill();
     await process.exitCode;
   });
+
 }

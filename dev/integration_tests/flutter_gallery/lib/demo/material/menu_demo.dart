@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class MenuDemo extends StatefulWidget {
-  const MenuDemo({Key? key}) : super(key: key);
+  const MenuDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/material/menu';
 
@@ -16,6 +16,7 @@ class MenuDemo extends StatefulWidget {
 }
 
 class MenuDemoState extends State<MenuDemo> {
+
   final String _simpleValue1 = 'Menu item value one';
   final String _simpleValue2 = 'Menu item value two';
   final String _simpleValue3 = 'Menu item value three';
@@ -36,12 +37,13 @@ class MenuDemoState extends State<MenuDemo> {
 
   void showInSnackBar(String value) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(value),
+     content: Text(value),
     ));
   }
 
   void showMenuSelection(String value) {
-    if (<String>[_simpleValue1, _simpleValue2, _simpleValue3].contains(value)) setState(() => _simpleValue = value);
+    if (<String>[_simpleValue1, _simpleValue2, _simpleValue3].contains(value))
+      setState(() => _simpleValue = value);
     showInSnackBar('You selected: $value');
   }
 
@@ -83,7 +85,9 @@ class MenuDemoState extends State<MenuDemo> {
         ],
       ),
       body: ListTileTheme(
-        iconColor: Theme.of(context).brightness == Brightness.light ? Colors.grey[600] : Colors.grey[500],
+        iconColor: Theme.of(context).brightness == Brightness.light
+            ? Colors.grey[600]
+            : Colors.grey[500],
         child: ListView(
           padding: kMaterialListPadding,
           children: <Widget>[

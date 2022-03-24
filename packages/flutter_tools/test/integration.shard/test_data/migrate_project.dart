@@ -15,8 +15,7 @@ class MigrateProject extends Project {
   MigrateProject(this.version, {this.vanilla = true});
 
   @override
-  Future<void> setUpIn(
-    Directory dir, {
+  Future<void> setUpIn(Directory dir, {
     bool useDeferredLoading = false,
     bool useSyntheticPackage = false,
   }) async {

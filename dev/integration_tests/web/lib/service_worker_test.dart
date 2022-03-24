@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
-
 Future<void> main() async {
   await html.window.navigator.serviceWorker?.ready;
   const String response = 'CLOSE?version=1';

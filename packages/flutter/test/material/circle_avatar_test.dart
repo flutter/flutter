@@ -100,10 +100,10 @@ void main() {
       wrap(
         child: RepaintBoundary(
           child: CircleAvatar(
-            foregroundImage: errorImage,
-            backgroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
-            radius: 50.0,
-            onForegroundImageError: (_, __) => caughtForegroundImageError = true,
+          foregroundImage: errorImage,
+          backgroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
+          radius: 50.0,
+          onForegroundImageError: (_,__) => caughtForegroundImageError = true,
           ),
         ),
       ),
@@ -308,7 +308,7 @@ void main() {
   });
 }
 
-Widget wrap({required Widget child}) {
+Widget wrap({ required Widget child }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: MediaQuery(

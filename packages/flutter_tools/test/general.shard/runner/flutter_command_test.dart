@@ -72,7 +72,8 @@ void main() {
       expect(cache.artifacts, isEmpty);
       expect(flutterCommand.deprecated, isFalse);
       expect(flutterCommand.hidden, isFalse);
-    }, overrides: <Type, Generator>{
+    },
+    overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Cache: () => cache,
@@ -89,7 +90,8 @@ void main() {
           <DevelopmentArtifact>{},
         ],
       );
-    }, overrides: <Type, Generator>{
+    },
+    overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Cache: () => cache,
@@ -101,7 +103,8 @@ void main() {
         flutterCommand.run(),
         contains('Flutter SDK installation appears corrupted'),
       );
-    }, overrides: <Type, Generator>{
+    },
+    overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => fileSystem,
       PreRunValidator: () => preRunValidator,
@@ -113,14 +116,12 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
       await runner.run(<String>['deprecated']);
 
-      expect(
-          testLogger.warningText,
-          contains('The "deprecated" command is deprecated and will be removed in '
-              'a future version of Flutter.'));
-      expect(
-          flutterCommand.usage,
-          contains('Deprecated. This command will be removed in a future version '
-              'of Flutter.'));
+      expect(testLogger.warningText,
+        contains('The "deprecated" command is deprecated and will be removed in '
+            'a future version of Flutter.'));
+      expect(flutterCommand.usage,
+        contains('Deprecated. This command will be removed in a future version '
+            'of Flutter.'));
       expect(flutterCommand.deprecated, isTrue);
       expect(flutterCommand.hidden, isTrue);
     }, overrides: <Type, Generator>{
@@ -129,10 +130,12 @@ void main() {
     });
 
     testUsingContext('uses the error handling file system', () async {
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(commandFunction: () async {
-        expect(globals.fs, isA<ErrorHandlingFileSystem>());
-        return const FlutterCommandResult(ExitStatus.success);
-      });
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          expect(globals.fs, isA<ErrorHandlingFileSystem>());
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+      );
       await flutterCommand.run();
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -187,9 +190,11 @@ void main() {
       // Crash if called a third time which is unexpected.
       clock.times = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(commandFunction: () async {
-        return const FlutterCommandResult(ExitStatus.success);
-      });
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+      );
       await flutterCommand.run();
 
       expect(usage.events, <TestUsageEvent>[
@@ -211,9 +216,11 @@ void main() {
       // Crash if called a third time which is unexpected.
       clock.times = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(commandFunction: () async {
-        return const FlutterCommandResult(ExitStatus.warning);
-      });
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.warning);
+        }
+      );
       await flutterCommand.run();
 
       expect(usage.events, <TestUsageEvent>[
@@ -235,9 +242,11 @@ void main() {
       // Crash if called a third time which is unexpected.
       clock.times = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(commandFunction: () async {
-        throwToolExit('fail');
-      });
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          throwToolExit('fail');
+        }
+      );
       await expectLater(
         () => flutterCommand.run(),
         throwsToolExit(),
@@ -336,11 +345,13 @@ void main() {
           completer.complete();
         });
 
-        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(commandFunction: () async {
-          final Completer<void> c = Completer<void>();
-          await c.future;
-          return null; // unreachable
-        });
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+          commandFunction: () async {
+            final Completer<void> c = Completer<void>();
+            await c.future;
+            return null; // unreachable
+          }
+        );
 
         unawaited(flutterCommand.run());
         signalController.add(mockSignal);
@@ -364,9 +375,9 @@ void main() {
         ProcessManager: () => processManager,
         ProcessInfo: () => processInfo,
         Signals: () => FakeSignals(
-              subForSigTerm: signalUnderTest,
-              exitSignals: <ProcessSignal>[signalUnderTest],
-            ),
+          subForSigTerm: signalUnderTest,
+          exitSignals: <ProcessSignal>[signalUnderTest],
+        ),
         SystemClock: () => clock,
         Usage: () => usage,
       });
@@ -380,7 +391,8 @@ void main() {
           completer.complete();
         });
         final Completer<void> checkLockCompleter = Completer<void>();
-        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(commandFunction: () async {
+        final DummyFlutterCommand flutterCommand =
+            DummyFlutterCommand(commandFunction: () async {
           await globals.cache.lock();
           checkLockCompleter.complete();
           final Completer<void> c = Completer<void>();
@@ -414,21 +426,21 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
 
-      expect(
-          usage.timings,
-          contains(const TestTimingEvent(
-            'flutter',
-            'dummy',
-            Duration(milliseconds: 1000),
-            label: 'fail',
-          )));
+      expect(usage.timings, contains(
+        const TestTimingEvent(
+          'flutter',
+          'dummy',
+          Duration(milliseconds: 1000),
+          label: 'fail',
+        )));
     });
 
     testUsingCommandContext('no timing report without usagePath', () async {
       // Crash if called a third time which is unexpected.
       clock.times = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(noUsagePath: true);
+      final DummyFlutterCommand flutterCommand =
+          DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
 
       expect(usage.timings, isEmpty);
@@ -441,21 +453,22 @@ void main() {
       final FlutterCommandResult commandResult = FlutterCommandResult(
         ExitStatus.success,
         // nulls should be cleaned up.
-        timingLabelParts: <String>['blah1', 'blah2', null, 'blah3'],
+        timingLabelParts: <String> ['blah1', 'blah2', null, 'blah3'],
         endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500),
       );
 
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(commandFunction: () async => commandResult);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async => commandResult
+      );
       await flutterCommand.run();
 
-      expect(
-          usage.timings,
-          contains(const TestTimingEvent(
-            'flutter',
-            'dummy',
-            Duration(milliseconds: 500),
-            label: 'success-blah1-blah2-blah3',
-          )));
+      expect(usage.timings, contains(
+        const TestTimingEvent(
+          'flutter',
+          'dummy',
+          Duration(milliseconds: 500),
+          label: 'success-blah1-blah2-blah3',
+        )));
     });
 
     testUsingCommandContext('report failed execution timing too', () async {
@@ -472,23 +485,22 @@ void main() {
         () => flutterCommand.run(),
         throwsToolExit(),
       );
-      expect(
-          usage.timings,
-          contains(
-            const TestTimingEvent(
-              'flutter',
-              'dummy',
-              Duration(milliseconds: 1000),
-              label: 'fail',
-            ),
-          ));
+      expect(usage.timings, contains(
+        const TestTimingEvent(
+          'flutter',
+          'dummy',
+          Duration(milliseconds: 1000),
+          label: 'fail',
+        ),
+      ));
     });
 
     testUsingContext('reports null safety analytics when reportNullSafety is true', () async {
       globals.fs.file('lib/main.dart')
         ..createSync(recursive: true)
         ..writeAsStringSync('// @dart=2.12');
-      globals.fs.file('pubspec.yaml').writeAsStringSync('name: example\n');
+      globals.fs.file('pubspec.yaml')
+        .writeAsStringSync('name: example\n');
       globals.fs.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'''
@@ -512,28 +524,25 @@ void main() {
 
       await runner.run(<String>['test']);
 
-      expect(
-          usage.events,
-          containsAll(<TestUsageEvent>[
-            const TestUsageEvent(
-              NullSafetyAnalysisEvent.kNullSafetyCategory,
-              'runtime-mode',
-              label: 'NullSafetyMode.sound',
-            ),
-            TestUsageEvent(
-              NullSafetyAnalysisEvent.kNullSafetyCategory,
-              'stats',
-              parameters: CustomDimensions.fromMap(<String, String>{
-                'cd49': '1',
-                'cd50': '1',
-              }),
-            ),
-            const TestUsageEvent(
-              NullSafetyAnalysisEvent.kNullSafetyCategory,
-              'language-version',
-              label: '2.12',
-            ),
-          ]));
+      expect(usage.events, containsAll(<TestUsageEvent>[
+        const TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'runtime-mode',
+          label: 'NullSafetyMode.sound',
+        ),
+        TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'stats',
+          parameters: CustomDimensions.fromMap(<String, String>{
+            'cd49': '1', 'cd50': '1',
+          }),
+        ),
+        const TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'language-version',
+          label: '2.12',
+        ),
+      ]));
     }, overrides: <Type, Generator>{
       Pub: () => FakePub(),
       Usage: () => usage,
@@ -764,7 +773,7 @@ class FakeCache extends Fake implements Cache {
   }
 
   @override
-  void releaseLock() {}
+  void releaseLock() { }
 }
 
 class FakeSignals implements Signals {
@@ -785,7 +794,8 @@ class FakeSignals implements Signals {
   }
 
   @override
-  Future<bool> removeHandler(ProcessSignal signal, Object token) => delegate.removeHandler(signal, token);
+  Future<bool> removeHandler(ProcessSignal signal, Object token) =>
+    delegate.removeHandler(signal, token);
 
   @override
   Stream<Object> get errors => delegate.errors;
@@ -813,5 +823,5 @@ class FakePub extends Fake implements Pub {
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
-  }) async {}
+  }) async { }
 }

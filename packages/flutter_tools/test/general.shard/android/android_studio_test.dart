@@ -21,8 +21,7 @@ const String homeLinux = '/home/me';
 const String homeMac = '/Users/me';
 
 const Map<String, dynamic> macStudioInfoPlist = <String, dynamic>{
-  'CFBundleGetInfoString':
-      'Android Studio 3.3, build AI-182.5107.16.33.5199772. Copyright JetBrains s.r.o., (c) 2000-2018',
+  'CFBundleGetInfoString': 'Android Studio 3.3, build AI-182.5107.16.33.5199772. Copyright JetBrains s.r.o., (c) 2000-2018',
   'CFBundleShortVersionString': '3.3',
   'CFBundleVersion': 'AI-182.5107.16.33.5199772',
   'JVMOptions': <String, dynamic>{
@@ -34,13 +33,12 @@ const Map<String, dynamic> macStudioInfoPlist = <String, dynamic>{
 };
 
 const Map<String, dynamic> macStudioInfoPlist4_1 = <String, dynamic>{
-  'CFBundleGetInfoString':
-      'Android Studio 4.1, build AI-201.8743.12.41.6858069. Copyright JetBrains s.r.o., (c) 2000-2020',
+  'CFBundleGetInfoString': 'Android Studio 4.1, build AI-201.8743.12.41.6858069. Copyright JetBrains s.r.o., (c) 2000-2020',
   'CFBundleShortVersionString': '4.1',
   'CFBundleVersion': 'AI-201.8743.12.41.6858069',
   'JVMOptions': <String, dynamic>{
     'Properties': <String, dynamic>{
-      'idea.vendor.name': 'Google',
+      'idea.vendor.name' : 'Google',
       'idea.paths.selector': 'AndroidStudio4.1',
       'idea.platform.prefix': 'AndroidStudio',
     },
@@ -48,13 +46,12 @@ const Map<String, dynamic> macStudioInfoPlist4_1 = <String, dynamic>{
 };
 
 const Map<String, dynamic> macStudioInfoPlist2020_3 = <String, dynamic>{
-  'CFBundleGetInfoString':
-      'Android Studio 2020.3, build AI-203.7717.56.2031.7583922. Copyright JetBrains s.r.o., (c) 2000-2021',
+  'CFBundleGetInfoString': 'Android Studio 2020.3, build AI-203.7717.56.2031.7583922. Copyright JetBrains s.r.o., (c) 2000-2021',
   'CFBundleShortVersionString': '2020.3',
   'CFBundleVersion': 'AI-203.7717.56.2031.7583922',
   'JVMOptions': <String, dynamic>{
     'Properties': <String, dynamic>{
-      'idea.vendor.name': 'Google',
+      'idea.vendor.name' : 'Google',
       'idea.paths.selector': 'AndroidStudio2020.3',
       'idea.platform.prefix': 'AndroidStudio',
     },
@@ -65,9 +62,12 @@ final Platform linuxPlatform = FakePlatform(
   environment: <String, String>{'HOME': homeLinux},
 );
 
-final Platform windowsPlatform = FakePlatform(operatingSystem: 'windows', environment: <String, String>{
-  'LOCALAPPDATA': r'C:\Users\Dash\AppData\Local',
-});
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{
+    'LOCALAPPDATA': r'C:\Users\Dash\AppData\Local',
+  }
+);
 
 Platform macPlatform() {
   return FakePlatform(
@@ -91,9 +91,11 @@ void main() {
     globals.fs.file(homeFile).createSync(recursive: true);
     globals.fs.file(homeFile).writeAsStringSync(installPath);
 
-    final AndroidStudio studio = AndroidStudio.fromHomeDot(globals.fs.directory(studioHome));
+    final AndroidStudio studio =
+      AndroidStudio.fromHomeDot(globals.fs.directory(studioHome));
     expect(studio, isNotNull);
-    expect(studio.pluginsPath, equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
+    expect(studio.pluginsPath,
+        equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -101,9 +103,9 @@ void main() {
     // so we force the platform to fake Linux here.
     Platform: () => linuxPlatform,
     FileSystemUtils: () => FileSystemUtils(
-          fileSystem: fileSystem,
-          platform: linuxPlatform,
-        ),
+      fileSystem: fileSystem,
+      platform: linuxPlatform,
+    ),
   });
 
   group('pluginsPath on Mac', () {
@@ -138,15 +140,13 @@ void main() {
       );
 
       expect(studio, isNotNull);
-      expect(
-          studio.pluginsPath,
-          equals(globals.fs.path.join(
-            homeMac,
-            'Library',
-            'Application Support',
-            'Google',
-            'AndroidStudio4.1',
-          )));
+      expect(studio.pluginsPath, equals(globals.fs.path.join(
+        homeMac,
+        'Library',
+        'Application Support',
+        'Google',
+        'AndroidStudio4.1',
+      )));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -173,15 +173,13 @@ void main() {
       );
 
       expect(studio, isNotNull);
-      expect(
-          studio.pluginsPath,
-          equals(globals.fs.path.join(
-            homeMac,
-            'Library',
-            'Application Support',
-            'Google',
-            'AndroidStudio2020.3',
-          )));
+      expect(studio.pluginsPath, equals(globals.fs.path.join(
+        homeMac,
+        'Library',
+        'Application Support',
+        'Google',
+        'AndroidStudio2020.3',
+      )));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -208,14 +206,12 @@ void main() {
       );
 
       expect(studio, isNotNull);
-      expect(
-          studio.pluginsPath,
-          equals(globals.fs.path.join(
-            homeMac,
-            'Library',
-            'Application Support',
-            'AndroidStudio3.3',
-          )));
+      expect(studio.pluginsPath, equals(globals.fs.path.join(
+        homeMac,
+        'Library',
+        'Application Support',
+        'AndroidStudio3.3',
+      )));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -396,14 +392,12 @@ void main() {
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
       expect(studio, isNotNull);
-      expect(
-          studio.pluginsPath,
-          equals(globals.fs.path.join(
-            homeMac,
-            'Library',
-            'Application Support',
-            'AndroidStudio3.3',
-          )));
+      expect(studio.pluginsPath, equals(globals.fs.path.join(
+        homeMac,
+        'Library',
+        'Application Support',
+        'AndroidStudio3.3',
+      )));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -425,7 +419,9 @@ void main() {
     windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    windowsFileSystem
+      .directory(r'C:\Program Files\AndroidStudio')
+      .createSync(recursive: true);
 
     final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
@@ -441,7 +437,9 @@ void main() {
     windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    windowsFileSystem
+      .directory(r'C:\Program Files\AndroidStudio')
+      .createSync(recursive: true);
 
     final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
@@ -457,7 +455,9 @@ void main() {
     windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    windowsFileSystem
+      .directory(r'C:\Program Files\AndroidStudio')
+      .createSync(recursive: true);
 
     final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
@@ -473,14 +473,16 @@ void main() {
     windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    windowsFileSystem
+      .directory(r'C:\Program Files\AndroidStudio')
+      .createSync(recursive: true);
 
     expect(AndroidStudio.allInstalled(), isEmpty);
   }, overrides: <Type, Generator>{
     Platform: () => FakePlatform(
-          operatingSystem: 'windows',
-          environment: <String, String>{}, // Does not include LOCALAPPDATA
-        ),
+      operatingSystem: 'windows',
+      environment: <String, String>{}, // Does not include LOCALAPPDATA
+    ),
     FileSystem: () => windowsFileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -489,14 +491,16 @@ void main() {
     windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.2\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    windowsFileSystem
+      .directory(r'C:\Program Files\AndroidStudio')
+      .createSync(recursive: true);
 
     expect(AndroidStudio.allInstalled(), isEmpty);
   }, overrides: <Type, Generator>{
     Platform: () => FakePlatform(
-          operatingSystem: 'windows',
-          environment: <String, String>{}, // Does not include LOCALAPPDATA
-        ),
+      operatingSystem: 'windows',
+      environment: <String, String>{}, // Does not include LOCALAPPDATA
+    ),
     FileSystem: () => windowsFileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -505,14 +509,16 @@ void main() {
     windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2020.3\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-    windowsFileSystem.directory(r'C:\Program Files\AndroidStudio').createSync(recursive: true);
+    windowsFileSystem
+      .directory(r'C:\Program Files\AndroidStudio')
+      .createSync(recursive: true);
 
     expect(AndroidStudio.allInstalled(), isEmpty);
   }, overrides: <Type, Generator>{
     Platform: () => FakePlatform(
-          operatingSystem: 'windows',
-          environment: <String, String>{}, // Does not include LOCALAPPDATA
-        ),
+      operatingSystem: 'windows',
+      environment: <String, String>{}, // Does not include LOCALAPPDATA
+    ),
     FileSystem: () => windowsFileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -528,7 +534,8 @@ void main() {
     });
 
     testUsingContext('Discover Android Studio <4.1', () {
-      const String studioHomeFilePath = '$homeLinux/.AndroidStudio4.0/system/.home';
+      const String studioHomeFilePath =
+          '$homeLinux/.AndroidStudio4.0/system/.home';
       const String studioInstallPath = '$homeLinux/AndroidStudio';
 
       globals.fs.file(studioHomeFilePath)
@@ -553,7 +560,8 @@ void main() {
     });
 
     testUsingContext('Discover Android Studio >=4.1', () {
-      const String studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
+      const String studioHomeFilePath =
+          '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
       const String studioInstallPath = '$homeLinux/AndroidStudio';
 
       globals.fs.file(studioHomeFilePath)
@@ -578,8 +586,10 @@ void main() {
     });
 
     testUsingContext('Discover when installed with Toolbox', () {
-      const String studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
-      const String studioInstallPath = '$homeLinux/.local/share/JetBrains/Toolbox/apps/AndroidStudio/ch-0/201.7042882';
+      const String studioHomeFilePath =
+          '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
+      const String studioInstallPath =
+          '$homeLinux/.local/share/JetBrains/Toolbox/apps/AndroidStudio/ch-0/201.7042882';
       const String pluginsInstallPath = '$studioInstallPath.plugins';
 
       globals.fs.file(studioHomeFilePath)

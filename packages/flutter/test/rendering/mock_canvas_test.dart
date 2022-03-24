@@ -67,11 +67,10 @@ void main() {
 
       expect(
         tester.renderObject(find.byType(CustomPaint)),
-        paints
-          ..something((Symbol method, List<dynamic> arguments) {
-            methodsAndArguments.add(MethodAndArguments(method, arguments));
-            return method == #drawColor;
-          }),
+        paints..something((Symbol method, List<dynamic> arguments) {
+          methodsAndArguments.add(MethodAndArguments(method, arguments));
+          return method == #drawColor;
+        }),
       );
 
       expect(
@@ -97,11 +96,10 @@ void main() {
       expect(
         tester.renderObject(find.byType(CustomPaint)),
         isNot(
-          paints
-            ..something((Symbol method, List<dynamic> arguments) {
-              methodsAndArguments.add(MethodAndArguments(method, arguments));
-              return false;
-            }),
+          paints..something((Symbol method, List<dynamic> arguments) {
+            methodsAndArguments.add(MethodAndArguments(method, arguments));
+            return false;
+          }),
         ),
       );
 
@@ -128,17 +126,16 @@ void main() {
       expect(
         tester.renderObject(find.byType(CustomPaint)),
         isNot(
-          paints
-            ..something((Symbol method, List<dynamic> arguments) {
-              methodsAndArguments.add(MethodAndArguments(method, arguments));
-              if (method == #save) {
-                return false;
-              }
-              if (method == #drawColor) {
-                throw 'fail';
-              }
-              return true;
-            }),
+          paints..something((Symbol method, List<dynamic> arguments) {
+            methodsAndArguments.add(MethodAndArguments(method, arguments));
+            if (method == #save) {
+              return false;
+            }
+            if (method == #drawColor) {
+              throw 'fail';
+            }
+            return true;
+          }),
         ),
       );
 
@@ -166,11 +163,10 @@ void main() {
 
       expect(
         tester.renderObject(find.byType(CustomPaint)),
-        paints
-          ..everything((Symbol method, List<dynamic> arguments) {
-            methodsAndArguments.add(MethodAndArguments(method, arguments));
-            return true;
-          }),
+        paints..everything((Symbol method, List<dynamic> arguments) {
+          methodsAndArguments.add(MethodAndArguments(method, arguments));
+          return true;
+        }),
       );
 
       expect(
@@ -196,12 +192,11 @@ void main() {
       expect(
         tester.renderObject(find.byType(CustomPaint)),
         isNot(
-          paints
-            ..everything((Symbol method, List<dynamic> arguments) {
-              methodsAndArguments.add(MethodAndArguments(method, arguments));
-              // returns false on #drawColor
-              return method == #restore || method == #save;
-            }),
+          paints..everything((Symbol method, List<dynamic> arguments) {
+            methodsAndArguments.add(MethodAndArguments(method, arguments));
+            // returns false on #drawColor
+            return method == #restore || method == #save;
+          }),
         ),
       );
 
@@ -228,14 +223,13 @@ void main() {
       expect(
         tester.renderObject(find.byType(CustomPaint)),
         isNot(
-          paints
-            ..everything((Symbol method, List<dynamic> arguments) {
-              methodsAndArguments.add(MethodAndArguments(method, arguments));
-              if (method == #drawColor) {
-                throw 'failed ';
-              }
-              return true;
-            }),
+          paints..everything((Symbol method, List<dynamic> arguments) {
+            methodsAndArguments.add(MethodAndArguments(method, arguments));
+            if (method == #drawColor) {
+              throw 'failed ';
+            }
+            return true;
+          }),
         ),
       );
 

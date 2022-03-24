@@ -52,7 +52,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   void _addChild() {
     // Calling requestFocus here creates a deferred request for focus, since the
     // node is not yet part of the focus tree.
-    childFocusNodes.add(FocusNode(debugLabel: 'Child ${children.length}')..requestFocus());
+    childFocusNodes
+        .add(FocusNode(debugLabel: 'Child ${children.length}')..requestFocus());
 
     children.add(Padding(
       padding: const EdgeInsets.all(2.0),

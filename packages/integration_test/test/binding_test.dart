@@ -76,7 +76,9 @@ Future<void> main() async {
     testWidgets('setSurfaceSize works', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
-      final Size windowCenter = tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio / 2;
+      final Size windowCenter = tester.binding.window.physicalSize /
+          tester.binding.window.devicePixelRatio /
+          2;
       final double windowCenterX = windowCenter.width;
       final double windowCenterY = windowCenter.height;
 
@@ -133,7 +135,8 @@ Future<void> main() async {
     // This part is outside the group so that `request` has been completed as
     // part of the `tearDownAll` registered in the group during
     // `IntegrationTestWidgetsFlutterBinding` initialization.
-    final Map<String, dynamic> response = (await request)!['response'] as Map<String, dynamic>;
+    final Map<String, dynamic> response =
+        (await request)!['response'] as Map<String, dynamic>;
     final String message = response['message'] as String;
     final Response result = Response.fromJson(message);
     assert(result.data!['answer'] == 42);

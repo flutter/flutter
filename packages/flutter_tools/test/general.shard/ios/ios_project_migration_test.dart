@@ -18,7 +18,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
-void main() {
+void main () {
   group('iOS migration', () {
     late TestUsage testUsage;
 
@@ -53,15 +53,17 @@ void main() {
       });
 
       testWithoutContext('skipped if files are missing', () {
-        final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration =
-            RemoveFrameworkLinkAndEmbeddingMigration(project, testLogger, testUsage);
+        final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
+          project,
+          testLogger,
+          testUsage
+        );
         expect(iosProjectMigration.migrate(), isTrue);
         expect(testUsage.events, isEmpty);
 
         expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
-        expect(
-            testLogger.traceText, contains('Xcode project not found, skipping framework link and embedding migration'));
+        expect(testLogger.traceText, contains('Xcode project not found, skipping framework link and embedding migration'));
         expect(testLogger.statusText, isEmpty);
       });
 
@@ -145,11 +147,9 @@ keep this 2
         );
 
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        expect(
-            testUsage.events,
-            contains(
-              const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
-            ));
+        expect(testUsage.events, contains(
+          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
       });
 
       testWithoutContext('migration fails with leftover Flutter.framework reference', () {
@@ -163,11 +163,9 @@ keep this 2
           testUsage,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        expect(
-            testUsage.events,
-            contains(
-              const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
-            ));
+        expect(testUsage.events, contains(
+          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
       });
 
       testWithoutContext('migration fails without Xcode installed', () {
@@ -181,11 +179,9 @@ keep this 2
           testUsage,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        expect(
-            testUsage.events,
-            contains(
-              const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
-            ));
+        expect(testUsage.events, contains(
+          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
       });
     });
 
@@ -283,8 +279,7 @@ keep this 2
         expect(iosProjectMigration.migrate(), isTrue);
         expect(xcodeProjectWorkspaceData.existsSync(), isFalse);
 
-        expect(testLogger.traceText,
-            contains('Xcode project workspace data not found, skipping build location migration.'));
+        expect(testLogger.traceText, contains('Xcode project workspace data not found, skipping build location migration.'));
         expect(testLogger.statusText, isEmpty);
       });
 
@@ -363,8 +358,7 @@ keep this 2
         expect(iosProjectMigration.migrate(), isTrue);
         expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
-        expect(testLogger.traceText,
-            contains('Xcode project not found, skipping Runner project build settings and configuration migration'));
+        expect(testLogger.traceText, contains('Xcode project not found, skipping Runner project build settings and configuration migration'));
         expect(testLogger.statusText, isEmpty);
       });
 
@@ -523,10 +517,8 @@ keep this 3
         expect(xcodeProjectInfoFile.existsSync(), isFalse);
         expect(appFrameworkInfoPlist.existsSync(), isFalse);
 
-        expect(testLogger.traceText,
-            contains('Xcode project not found, skipping iOS deployment target version migration'));
-        expect(
-            testLogger.traceText, contains('AppFrameworkInfo.plist not found, skipping minimum OS version migration'));
+        expect(testLogger.traceText, contains('Xcode project not found, skipping iOS deployment target version migration'));
+        expect(testLogger.traceText, contains('AppFrameworkInfo.plist not found, skipping minimum OS version migration'));
         expect(testLogger.statusText, isEmpty);
       });
 
@@ -737,7 +729,8 @@ class FakeIosProject extends Fake implements IosProject {
 }
 
 class FakeIOSMigrator extends ProjectMigrator {
-  FakeIOSMigrator({required this.succeeds}) : super(BufferLogger.test());
+  FakeIOSMigrator({required this.succeeds})
+    : super(BufferLogger.test());
 
   final bool succeeds;
 

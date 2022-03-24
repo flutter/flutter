@@ -35,7 +35,7 @@ Future<void> main(List<String> args) async {
   final CommandRunner<void> runner = CommandRunner<void>(
     'conductor',
     'A tool for coordinating Flutter releases. For more documentation on '
-        'usage, please see $readmeUrl.',
+    'usage, please see $readmeUrl.',
     usageLineLength: 80,
   );
 
@@ -43,8 +43,7 @@ Future<void> main(List<String> args) async {
     <String>['rev-parse'],
     'Get the revision of the current Flutter SDK',
     workingDirectory: _localFlutterRoot.path,
-  ))
-      .trim();
+  )).trim();
 
   <Command<void>>[
     CodesignCommand(

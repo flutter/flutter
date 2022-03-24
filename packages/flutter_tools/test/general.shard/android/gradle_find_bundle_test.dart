@@ -58,8 +58,7 @@ void main() {
     expect(bundle.path, '/build/app/outputs/bundle/fooRelease/app.aab');
   });
 
-  testWithoutContext(
-      "Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in release mode", () {
+  testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in release mode", () {
     final FlutterProject project = generateFakeAppBundle('fooaRelease', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
@@ -124,8 +123,7 @@ void main() {
     expect(bundle.path, '/build/app/outputs/bundle/fooDebug/app.aab');
   });
 
-  testWithoutContext(
-      "Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in debug mode", () {
+  testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in debug mode", () {
     final FlutterProject project = generateFakeAppBundle('fooaDebug', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
@@ -190,8 +188,7 @@ void main() {
     expect(bundle.path, '/build/app/outputs/bundle/fooProfile/app.aab');
   });
 
-  testWithoutContext(
-      "Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in profile mode", () {
+  testWithoutContext("Finds app bundle when flavor doesn't contain underscores but contains uppercase letters in profile mode", () {
     final FlutterProject project = generateFakeAppBundle('fooaProfile', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
@@ -269,8 +266,7 @@ void main() {
     expect(bundle.path, '/build/app/outputs/bundle/foo_barRelease/app-foo_bar-release.aab');
   });
 
-  testWithoutContext(
-      'Finds app bundle when flavor contains underscores and uppercase letters in release mode - Gradle 3.5', () {
+  testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in release mode - Gradle 3.5', () {
     final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app-foo_bar-release.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
@@ -289,15 +285,14 @@ void main() {
       project,
       const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
+    TestUsage(),
     );
 
     expect(bundle, isNotNull);
     expect(bundle.path, '/build/app/outputs/bundle/foo_barProfile/app-foo_bar-profile.aab');
   });
 
-  testWithoutContext(
-      'Finds app bundle when flavor contains underscores and uppercase letters in debug mode - Gradle 3.5', () {
+  testWithoutContext('Finds app bundle when flavor contains underscores and uppercase letters in debug mode - Gradle 3.5', () {
     final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app-foo_bar-debug.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
@@ -341,29 +336,31 @@ void main() {
   testWithoutContext('AAB not found', () {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final TestUsage testUsage = TestUsage();
-    expect(() {
-      findBundleFile(
-        project,
-        const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false),
-        BufferLogger.test(),
-        testUsage,
-      );
-    },
-        throwsToolExit(
-            message: "Gradle build failed to produce an .aab file. It's likely that this file "
-                "was generated under ${project.android.buildDirectory.path}, but the tool couldn't find it."));
     expect(
-        testUsage.events,
-        contains(
-          TestUsageEvent(
-            'build',
-            'gradle',
-            label: 'gradle-expected-file-not-found',
-            parameters: CustomDimensions.fromMap(<String, String>{
-              'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',
-            }),
-          ),
-        ));
+      () {
+        findBundleFile(
+          project,
+          const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false),
+          BufferLogger.test(),
+          testUsage,
+        );
+      },
+      throwsToolExit(
+        message:
+          "Gradle build failed to produce an .aab file. It's likely that this file "
+          "was generated under ${project.android.buildDirectory.path}, but the tool couldn't find it."
+      )
+    );
+    expect(testUsage.events, contains(
+      TestUsageEvent(
+        'build',
+        'gradle',
+        label: 'gradle-expected-file-not-found',
+        parameters: CustomDimensions.fromMap(<String, String> {
+          'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',
+        }),
+      ),
+    ));
   });
 }
 
@@ -372,8 +369,13 @@ FlutterProject generateFakeAppBundle(String directoryName, String fileName, File
   final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
   final Directory bundleDirectory = getBundleDirectory(project);
-  bundleDirectory.childDirectory(directoryName).createSync(recursive: true);
+  bundleDirectory
+    .childDirectory(directoryName)
+    .createSync(recursive: true);
 
-  bundleDirectory.childDirectory(directoryName).childFile(fileName).createSync();
+  bundleDirectory
+    .childDirectory(directoryName)
+    .childFile(fileName)
+    .createSync();
   return project;
 }

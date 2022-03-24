@@ -271,38 +271,36 @@ void main() {
     expect(scheme.brightness, baseScheme.brightness);
   });
 
-  testWidgets(
-    'generated scheme "on" colors meet a11y contrast guidelines',
-    (WidgetTester tester) async {
-      final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
+  testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
+    final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
 
-      Widget label(String text, Color textColor, Color background) {
-        return Container(
-          color: background,
-          padding: const EdgeInsets.all(8),
-          child: Text(text, style: TextStyle(color: textColor)),
-        );
-      }
+    Widget label(String text, Color textColor, Color background) {
+      return Container(
+        color: background,
+        padding: const EdgeInsets.all(8),
+        child: Text(text, style: TextStyle(color: textColor)),
+      );
+    }
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData.from(colorScheme: colors),
-          home: Scaffold(
-            body: Column(
-              children: <Widget>[
-                label('primary', colors.onPrimary, colors.primary),
-                label('secondary', colors.onSecondary, colors.secondary),
-                label('tertiary', colors.onTertiary, colors.tertiary),
-                label('error', colors.onError, colors.error),
-                label('background', colors.onBackground, colors.background),
-                label('surface', colors.onSurface, colors.surface),
-              ],
-            ),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: colors),
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              label('primary', colors.onPrimary, colors.primary),
+              label('secondary', colors.onSecondary, colors.secondary),
+              label('tertiary', colors.onTertiary, colors.tertiary),
+              label('error', colors.onError, colors.error),
+              label('background', colors.onBackground, colors.background),
+              label('surface', colors.onSurface, colors.surface),
+            ],
           ),
         ),
-      );
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-    },
+      ),
+    );
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+  },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 }

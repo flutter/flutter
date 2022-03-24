@@ -20,14 +20,12 @@ void main() {
     expect(Typography.material2018().black.titleLarge!.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.fuchsia).black.titleLarge!.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamilyFallback,
-        <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
+    expect(Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamilyFallback, <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
     expect(Typography.material2018(platform: TargetPlatform.windows).black.titleLarge!.fontFamily, 'Segoe UI');
     expect(Typography.material2018().white.titleLarge!.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.fuchsia).white.titleLarge!.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamilyFallback,
-        <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
+    expect(Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamilyFallback, <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
     expect(Typography.material2018(platform: TargetPlatform.windows).white.titleLarge!.fontFamily, 'Segoe UI');
   });
 
@@ -97,9 +95,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> nonDefaultPropertyNames = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.name!)
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.name!).toList();
 
     expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });

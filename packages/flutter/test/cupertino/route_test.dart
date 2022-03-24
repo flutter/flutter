@@ -29,16 +29,16 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-          CupertinoPageRoute<void>(
-            title: 'An iPod',
-            builder: (BuildContext context) {
-              return const CupertinoPageScaffold(
-                navigationBar: CupertinoNavigationBar(),
-                child: Placeholder(),
-              );
-            },
-          ),
-        );
+      CupertinoPageRoute<void>(
+        title: 'An iPod',
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(),
+            child: Placeholder(),
+          );
+        },
+      ),
+    );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -59,19 +59,19 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-          CupertinoPageRoute<void>(
-            title: 'An iPod',
-            builder: (BuildContext context) {
-              return const CupertinoPageScaffold(
-                child: CustomScrollView(
-                  slivers: <Widget>[
-                    CupertinoSliverNavigationBar(),
-                  ],
-                ),
-              );
-            },
-          ),
-        );
+      CupertinoPageRoute<void>(
+        title: 'An iPod',
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                CupertinoSliverNavigationBar(),
+              ],
+            ),
+          );
+        },
+      ),
+    );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -84,21 +84,23 @@ void main() {
       findsNWidgets(2),
     );
 
-    final List<Element> titles = tester.elementList(find.text('An iPod')).toList()
-      ..sort((Element a, Element b) {
-        final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
-        final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
-        return aParagraph.text.style!.fontSize!.compareTo(
-          bParagraph.text.style!.fontSize!,
-        );
-      });
+    final List<Element> titles = tester.elementList(find.text('An iPod'))
+        .toList()
+        ..sort((Element a, Element b) {
+          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+          return aParagraph.text.style!.fontSize!.compareTo(
+            bParagraph.text.style!.fontSize!,
+          );
+        });
 
     final Iterable<double> opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      final RenderAnimatedOpacity renderOpacity =
+          element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       return renderOpacity.opacity.value;
     });
 
-    expect(opacities, <double>[
+    expect(opacities, <double> [
       0.0, // Initially the smaller font title is invisible.
       1.0, // The larger font title is visible.
     ]);
@@ -122,31 +124,31 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-          CupertinoPageRoute<void>(
-            title: 'An iPod',
-            builder: (BuildContext context) {
-              return const CupertinoPageScaffold(
-                navigationBar: CupertinoNavigationBar(),
-                child: Placeholder(),
-              );
-            },
-          ),
-        );
+      CupertinoPageRoute<void>(
+        title: 'An iPod',
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(),
+            child: Placeholder(),
+          );
+        },
+      ),
+    );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-          CupertinoPageRoute<void>(
-            title: 'A Phone',
-            builder: (BuildContext context) {
-              return const CupertinoPageScaffold(
-                navigationBar: CupertinoNavigationBar(),
-                child: Placeholder(),
-              );
-            },
-          ),
-        );
+      CupertinoPageRoute<void>(
+        title: 'A Phone',
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(),
+            child: Placeholder(),
+          );
+        },
+      ),
+    );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -168,31 +170,31 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-          CupertinoPageRoute<void>(
-            title: 'An iPod',
-            builder: (BuildContext context) {
-              return const CupertinoPageScaffold(
-                navigationBar: CupertinoNavigationBar(),
-                child: Placeholder(),
-              );
-            },
-          ),
-        );
+      CupertinoPageRoute<void>(
+        title: 'An iPod',
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(),
+            child: Placeholder(),
+          );
+        },
+      ),
+    );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-          CupertinoPageRoute<void>(
-            title: 'A Phone',
-            builder: (BuildContext context) {
-              return const CupertinoPageScaffold(
-                navigationBar: CupertinoNavigationBar(),
-                child: Placeholder(),
-              );
-            },
-          ),
-        );
+      CupertinoPageRoute<void>(
+        title: 'A Phone',
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(),
+            child: Placeholder(),
+          );
+        },
+      ),
+    );
 
     // Trigger the route push
     await tester.pump();
@@ -241,17 +243,17 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     tester.state<NavigatorState>(find.byType(Navigator)).replace(
-          oldRoute: route2,
-          newRoute: CupertinoPageRoute<void>(
-            title: 'An Internet communicator',
-            builder: (BuildContext context) {
-              return const CupertinoPageScaffold(
-                navigationBar: CupertinoNavigationBar(),
-                child: Placeholder(),
-              );
-            },
-          ),
-        );
+      oldRoute: route2,
+      newRoute: CupertinoPageRoute<void>(
+        title: 'An Internet communicator',
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(),
+            child: Placeholder(),
+          );
+        },
+      ),
+    );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -304,13 +306,11 @@ void main() {
     await gesture.moveBy(const Offset(400, 0));
     await gesture.up();
     await tester.pump();
-    expect(
-      // The 'route' route has been dragged to the right, halfway across the screen
+    expect( // The 'route' route has been dragged to the right, halfway across the screen
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))),
       const Offset(400, 0),
     );
-    expect(
-      // The 'push' route is sliding in from the left.
+    expect( // The 'push' route is sliding in from the left.
       tester.getTopLeft(find.ancestor(of: find.text('push'), matching: find.byType(CupertinoPageScaffold))).dx,
       lessThan(0),
     );
@@ -321,6 +321,7 @@ void main() {
       Offset.zero,
     );
     expect(find.text('route'), findsNothing);
+
 
     // Run the dismiss animation 60%, which exposes the route "push" button,
     // and then press the button.
@@ -381,24 +382,22 @@ void main() {
             return CupertinoButton(
               child: const Text('Button'),
               onPressed: () {
-                Navigator.push<void>(
-                    context,
-                    CupertinoPageRoute<void>(
-                      fullscreenDialog: true,
-                      builder: (BuildContext context) {
-                        return Column(
-                          children: <Widget>[
-                            const Placeholder(),
-                            CupertinoButton(
-                              child: const Text('Close'),
-                              onPressed: () {
-                                Navigator.pop<void>(context);
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    ));
+                Navigator.push<void>(context, CupertinoPageRoute<void>(
+                  fullscreenDialog: true,
+                  builder: (BuildContext context) {
+                    return Column(
+                      children: <Widget>[
+                        const Placeholder(),
+                        CupertinoButton(
+                          child: const Text('Close'),
+                          onPressed: () {
+                            Navigator.pop<void>(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ));
               },
             );
           },
@@ -559,17 +558,15 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-0.0, epsilon: 1.0));
   }
 
-  testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top',
-      (WidgetTester tester) async {
+  testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: false);
   });
 
-  testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top',
-      (WidgetTester tester) async {
+  testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: true);
   });
 
-  Future<void> testNoParallax(WidgetTester tester, {required bool fromFullscreenDialog}) async {
+  Future<void> testNoParallax(WidgetTester tester, {required bool fromFullscreenDialog}) async{
     await tester.pumpWidget(
       CupertinoApp(
         onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute<void>(
@@ -581,19 +578,17 @@ void main() {
                 CupertinoButton(
                   child: const Text('Button'),
                   onPressed: () {
-                    Navigator.push<void>(
-                        context,
-                        CupertinoPageRoute<void>(
-                          fullscreenDialog: true,
-                          builder: (BuildContext context) {
-                            return CupertinoButton(
-                              child: const Text('Close'),
-                              onPressed: () {
-                                Navigator.pop<void>(context);
-                              },
-                            );
+                    Navigator.push<void>(context, CupertinoPageRoute<void>(
+                      fullscreenDialog: true,
+                      builder: (BuildContext context) {
+                        return CupertinoButton(
+                          child: const Text('Close'),
+                          onPressed: () {
+                            Navigator.pop<void>(context);
                           },
-                        ));
+                        );
+                      },
+                    ));
                   },
                 ),
               ],
@@ -652,13 +647,11 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
   }
 
-  testWidgets('CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top',
-      (WidgetTester tester) async {
+  testWidgets('CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testNoParallax(tester, fromFullscreenDialog: false);
   });
 
-  testWidgets('FullscreenDialog CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top',
-      (WidgetTester tester) async {
+  testWidgets('FullscreenDialog CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testNoParallax(tester, fromFullscreenDialog: true);
   });
 
@@ -807,8 +800,7 @@ void main() {
     );
   });
 
-  testWidgets('Snapped drags forwards and backwards should signal didStart/StopUserGesture',
-      (WidgetTester tester) async {
+  testWidgets('Snapped drags forwards and backwards should signal didStart/StopUserGesture', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
@@ -964,8 +956,8 @@ void main() {
       );
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-            buildRoute(fullscreenDialog: false),
-          );
+        buildRoute(fullscreenDialog: false),
+      );
       await tester.pumpAndSettle();
 
       expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, const Color(0x18000000));
@@ -979,36 +971,36 @@ void main() {
       );
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-            buildRoute(fullscreenDialog: true),
-          );
+        buildRoute(fullscreenDialog: true),
+      );
       await tester.pumpAndSettle();
 
       expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, isNull);
     });
 
-    testWidgets('when route is not fullscreenDialog, it has a _CupertinoEdgeShadowDecoration',
-        (WidgetTester tester) async {
+    testWidgets('when route is not fullscreenDialog, it has a _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsShadowRect({required double dx, required Color color}) {
-        return paints
-          ..everything((Symbol methodName, List<dynamic> arguments) {
-            if (methodName != #drawRect) return true;
-            final Rect rect = arguments[0] as Rect;
-            final Color paintColor = (arguments[1] as Paint).color;
-            if (rect.top != 0 || rect.width != 1.0 || rect.height != 600)
-              // _CupertinoEdgeShadowDecoration draws the shadows with a series of
-              // differently colored 1px-wide rects. Skip rects that aren't being
-              // drawn by the _CupertinoEdgeShadowDecoration.
-              return true;
-            if ((rect.left - dx).abs() >= 1)
-              // Skip calls for rects until the one with the given position offset
-              return true;
-            if (paintColor.value == color.value) return true;
-            throw '''
+        return paints..everything((Symbol methodName, List<dynamic> arguments) {
+          if (methodName != #drawRect)
+            return true;
+          final Rect rect = arguments[0] as Rect;
+          final Color paintColor = (arguments[1] as Paint).color;
+          if (rect.top != 0 || rect.width != 1.0 || rect.height != 600)
+            // _CupertinoEdgeShadowDecoration draws the shadows with a series of
+            // differently colored 1px-wide rects. Skip rects that aren't being
+            // drawn by the _CupertinoEdgeShadowDecoration.
+            return true;
+          if ((rect.left - dx).abs() >= 1)
+            // Skip calls for rects until the one with the given position offset
+            return true;
+          if (paintColor.value == color.value)
+            return true;
+          throw '''
   For a rect with an expected left-side position: $dx (drawn at ${rect.left}):
               Expected a rect with color: $color,
               And drew a rect with color: $paintColor.
           ''';
-          });
+        });
       }
 
       await tester.pumpWidget(
@@ -1018,8 +1010,8 @@ void main() {
       );
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-            buildRoute(fullscreenDialog: false),
-          );
+        buildRoute(fullscreenDialog: false),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1));
 
@@ -1072,22 +1064,22 @@ void main() {
       expect(box, paintsShadowRect(dx: 754, color: const Color(0x00000000)));
     });
 
-    testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration',
-        (WidgetTester tester) async {
+    testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsNoShadows() {
-        return paints
-          ..everything((Symbol methodName, List<dynamic> arguments) {
-            if (methodName != #drawRect) return true;
-            final Rect rect = arguments[0] as Rect;
-            // _CupertinoEdgeShadowDecoration draws the shadows with a series of
-            // differently colored 1px rects. Skip all rects not drawn by a
-            // _CupertinoEdgeShadowDecoration.
-            if (rect.width != 1.0) return true;
-            throw '''
+        return paints..everything((Symbol methodName, List<dynamic> arguments) {
+          if (methodName != #drawRect)
+            return true;
+          final Rect rect = arguments[0] as Rect;
+          // _CupertinoEdgeShadowDecoration draws the shadows with a series of
+          // differently colored 1px rects. Skip all rects not drawn by a
+          // _CupertinoEdgeShadowDecoration.
+          if (rect.width != 1.0)
+            return true;
+          throw '''
     Expected: no rects with a width of 1px.
           Found: $rect.
           ''';
-          });
+        });
       }
 
       await tester.pumpWidget(
@@ -1099,8 +1091,8 @@ void main() {
       final RenderBox box = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-            buildRoute(fullscreenDialog: true),
-          );
+        buildRoute(fullscreenDialog: true),
+      );
 
       await tester.pumpAndSettle();
       expect(box, paintsNoShadows());
@@ -1148,9 +1140,7 @@ void main() {
       0x33000000,
     );
 
-    stateSetter(() {
-      brightness = Brightness.dark;
-    });
+    stateSetter(() { brightness = Brightness.dark; });
     await tester.pump();
 
     // TODO(LongCatIsLooong): The background overlay SHOULD switch to dark color.
@@ -1353,8 +1343,7 @@ void main() {
     expect(firstPosition, greaterThan(thirdPosition));
   });
 
-  testWidgets('showCupertinoModalPopup uses nested navigator if useRootNavigator is false',
-      (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
     final PopupObserver rootObserver = PopupObserver();
     final PopupObserver nestedObserver = PopupObserver();
 
@@ -1482,12 +1471,10 @@ void main() {
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
 
-    expect(
-        semantics,
-        isNot(includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.tap],
-          label: 'Dismiss',
-        )));
+    expect(semantics, isNot(includesNodeWith(
+      actions: <SemanticsAction>[SemanticsAction.tap],
+      label: 'Dismiss',
+    )));
     debugDefaultTargetPlatformOverride = null;
   });
 
@@ -1519,12 +1506,10 @@ void main() {
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
 
-    expect(
-        semantics,
-        includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
-          label: 'Dismiss',
-        ));
+    expect(semantics, includesNodeWith(
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+      label: 'Dismiss',
+    ));
     debugDefaultTargetPlatformOverride = null;
   });
 
@@ -1585,8 +1570,7 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, null);
   });
 
-  testWidgets('showCupertinoModalPopup null barrier color must be default gray barrier color',
-      (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup null barrier color must be default gray barrier color', (WidgetTester tester) async {
     // Barrier color for a Cupertino modal barrier.
     // Extracted from https://developer.apple.com/design/resources/.
     const Color kModalBarrierColor = CupertinoDynamicColor.withBrightness(
@@ -1662,8 +1646,7 @@ void main() {
 
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
-    await tester
-        .tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
+    await tester.tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
     await tester.pumpAndSettle();
 
     expect(find.text('Visible'), findsNothing);
@@ -1689,8 +1672,7 @@ void main() {
 
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
-    await tester
-        .tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
+    await tester.tapAt(tester.getTopLeft(find.ancestor(of: find.text('tap'), matching: find.byType(CupertinoPageScaffold))));
     await tester.pumpAndSettle();
 
     expect(find.text('Visible'), findsOneWidget);
@@ -2248,6 +2230,7 @@ Widget buildNavigator({
   );
 }
 
+
 // A test target for post-route cancel events.
 //
 // It contains 2 routes:
@@ -2266,6 +2249,7 @@ class _TestPostRouteCancel extends StatefulWidget {
 }
 
 class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
+
   int counter = 0;
 
   Widget _buildHome(BuildContext context) {
@@ -2350,8 +2334,7 @@ class _RestorableModalTestWidget extends StatelessWidget {
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Home'),
       ),
-      child: Center(
-          child: CupertinoButton(
+      child: Center(child: CupertinoButton(
         onPressed: () {
           Navigator.of(context).restorablePush(_modalBuilder);
         },

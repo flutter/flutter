@@ -106,8 +106,8 @@ void main() {
 
   test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
     final RenderSemanticsGestureHandler renderObj = RenderSemanticsGestureHandler(
-      onTap: () {},
-      onHorizontalDragUpdate: (DragUpdateDetails details) {},
+      onTap: () { },
+      onHorizontalDragUpdate: (DragUpdateDetails details) { },
     );
 
     SemanticsConfiguration config = SemanticsConfiguration();
@@ -233,7 +233,7 @@ void main() {
     expect(data.lengthInBytes, equals(20 * 20 * 4));
     expect(data.elementSizeInBytes, equals(1));
     expect(getPixel(0, 0), equals(0x00000080));
-    expect(getPixel(image.width - 1, 0), equals(0xffffffff));
+    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
     final OffsetLayer layer = boundary.debugLayer! as OffsetLayer;
 
@@ -242,7 +242,7 @@ void main() {
     expect(image.height, equals(20));
     data = (await image.toByteData())!;
     expect(getPixel(0, 0), equals(0x00000080));
-    expect(getPixel(image.width - 1, 0), equals(0xffffffff));
+    expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
     // non-zero offsets.
     image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
@@ -286,7 +286,7 @@ void main() {
 
   test('RenderOpacity reuses its layer', () {
     _testLayerReuse<OpacityLayer>(RenderOpacity(
-      opacity: 0.5, // must not be 0 or 1.0. Otherwise, it won't create a layer
+      opacity: 0.5,  // must not be 0 or 1.0. Otherwise, it won't create a layer
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     ));
   });
@@ -322,7 +322,7 @@ void main() {
   test('RenderAnimatedOpacity reuses its layer', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
-    )..value = 0.5; // must not be 0 or 1.0. Otherwise, it won't create a layer
+    )..value = 0.5;  // must not be 0 or 1.0. Otherwise, it won't create a layer
 
     _testLayerReuse<OpacityLayer>(RenderAnimatedOpacity(
       opacity: opacityAnimation,
@@ -611,9 +611,9 @@ void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
 class _TestPathClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    return Path()..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+    return Path()
+      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
-
   @override
   bool shouldReclip(_TestPathClipper oldClipper) => false;
 }

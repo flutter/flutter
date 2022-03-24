@@ -16,7 +16,7 @@ void main() {
         body: Center(
           child: ElevatedButton(
             child: const Text('Test'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),
@@ -28,14 +28,14 @@ void main() {
   });
 
   testWidgets('InkWell with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
-    Widget buildFrame({InteractiveInkFeatureFactory? splashFactory}) {
+    Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
       return MaterialApp(
         home: Scaffold(
           body: Center(
             child: Material(
               child: InkWell(
                 splashFactory: splashFactory,
-                onTap: () {},
+                onTap: () { },
                 child: const Text('test'),
               ),
             ),

@@ -27,21 +27,24 @@ void main() {
 
     test('Converts an HttpClientResponse with contentLength to bytes', () async {
       response.contentLength = chunkOne.length + chunkTwo.length;
-      final List<int> bytes = await consolidateHttpClientResponseBytes(response);
+      final List<int> bytes =
+          await consolidateHttpClientResponseBytes(response);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
 
     test('Converts a compressed HttpClientResponse with contentLength to bytes', () async {
       response.contentLength = chunkOne.length;
-      final List<int> bytes = await consolidateHttpClientResponseBytes(response);
+      final List<int> bytes =
+          await consolidateHttpClientResponseBytes(response);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
 
     test('Converts an HttpClientResponse without contentLength to bytes', () async {
       response.contentLength = -1;
-      final List<int> bytes = await consolidateHttpClientResponseBytes(response);
+      final List<int> bytes =
+          await consolidateHttpClientResponseBytes(response);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -124,8 +127,7 @@ void main() {
         ]);
       });
 
-      test('Notifies onBytesReceived with expectedContentLength of -1 if response.compressionState is decompressed',
-          () async {
+      test('Notifies onBytesReceived with expectedContentLength of -1 if response.compressionState is decompressed', () async {
         final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
         response.compressionState = HttpClientResponseCompressionState.decompressed;
         response.contentLength = syntheticTotal;
@@ -162,15 +164,14 @@ class MockHttpClientResponse extends Fake implements HttpClientResponse {
   HttpClientResponseCompressionState compressionState = HttpClientResponseCompressionState.notCompressed;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData,
-      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     if (error != null) {
       return Stream<List<int>>.fromFuture(Future<List<int>>.error(error as Object)).listen(
-        onData,
-        onDone: onDone,
-        onError: onError,
-        cancelOnError: cancelOnError,
-      );
+          onData,
+          onDone: onDone,
+          onError: onError,
+          cancelOnError: cancelOnError,
+        );
     }
     return Stream<List<int>>.fromIterable(<List<int>>[chunkOne, chunkTwo]).listen(
       onData,

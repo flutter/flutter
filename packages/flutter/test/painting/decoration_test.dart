@@ -240,7 +240,7 @@ void main() {
   // A reference test would be better.
   test('BoxDecoration backgroundImage clip', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
-    void testDecoration({BoxShape shape = BoxShape.rectangle, BorderRadius? borderRadius, required bool expectClip}) {
+    void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius? borderRadius, required bool expectClip }) {
       assert(shape != null);
       FakeAsync().run((FakeAsync async) async {
         final DelayedImageProvider imageProvider = DelayedImageProvider(image);
@@ -276,8 +276,7 @@ void main() {
         final List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
           return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
         }).toList();
-        if (expectClip) {
-          // We expect a clip to precede the drawImageRect call.
+        if (expectClip) { // We expect a clip to precede the drawImageRect call.
           expect(commands.length, 2);
           expect(commands[0].memberName, equals(#clipPath));
           expect(commands[1].memberName, equals(#drawImageRect));
@@ -310,9 +309,7 @@ void main() {
     );
 
     final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
-    final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
-      assert(false);
-    });
+    final BoxPainter boxPainter = boxDecoration.createBoxPainter(() { assert(false); });
     final TestCanvas canvas = TestCanvas();
     boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
 
@@ -354,12 +351,9 @@ void main() {
     final TestCanvas canvas = TestCanvas();
     late FlutterError error;
     try {
-      boxPainter.paint(
-          canvas,
-          Offset.zero,
-          const ImageConfiguration(
-            size: Size(100.0, 100.0),
-          ));
+      boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(
+        size: Size(100.0, 100.0),
+      ));
     } on FlutterError catch (e) {
       error = e;
     }
@@ -367,8 +361,7 @@ void main() {
     expect(error.diagnostics.length, 4);
     expect(error.diagnostics[2], isA<DiagnosticsProperty<DecorationImage>>());
     expect(error.diagnostics[3], isA<DiagnosticsProperty<ImageConfiguration>>());
-    expect(
-      error.toStringDeep(),
+    expect(error.toStringDeep(),
       'FlutterError\n'
       '   DecorationImage.matchTextDirection can only be used when a\n'
       '   TextDirection is available.\n'
@@ -395,12 +388,12 @@ void main() {
       },
     );
 
-    backgroundImage.createPainter(() {}).paint(
-          TestCanvas(),
-          Rect.largest,
-          Path(),
-          ImageConfiguration.empty,
-        );
+    backgroundImage.createPainter(() { }).paint(
+      TestCanvas(),
+      Rect.largest,
+      Path(),
+      ImageConfiguration.empty,
+    );
     // Yield so that the exception callback gets called before we check it.
     await null;
     expect(exception, 'threw');
@@ -460,14 +453,14 @@ void main() {
   });
 
   test('BoxDecoration.lerp - gradients', () {
-    const Gradient gradient = LinearGradient(colors: <Color>[Color(0x00000000), Color(0xFFFFFFFF)]);
+    const Gradient gradient = LinearGradient(colors: <Color>[ Color(0x00000000), Color(0xFFFFFFFF) ]);
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
         const BoxDecoration(gradient: gradient),
         -1.0,
       ),
-      const BoxDecoration(gradient: LinearGradient(colors: <Color>[Color(0x00000000), Color(0x00FFFFFF)])),
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x00FFFFFF) ])),
     );
     expect(
       BoxDecoration.lerp(
@@ -483,7 +476,7 @@ void main() {
         const BoxDecoration(gradient: gradient),
         0.25,
       ),
-      const BoxDecoration(gradient: LinearGradient(colors: <Color>[Color(0x00000000), Color(0x40FFFFFF)])),
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x40FFFFFF) ])),
     );
     expect(
       BoxDecoration.lerp(
@@ -491,7 +484,7 @@ void main() {
         const BoxDecoration(gradient: gradient),
         0.75,
       ),
-      const BoxDecoration(gradient: LinearGradient(colors: <Color>[Color(0x00000000), Color(0xBFFFFFFF)])),
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0xBFFFFFFF) ])),
     );
     expect(
       BoxDecoration.lerp(
@@ -686,9 +679,7 @@ void main() {
     );
 
     final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
-    final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
-      assert(false);
-    });
+    final BoxPainter boxPainter = boxDecoration.createBoxPainter(() { assert(false); });
     final TestCanvas canvas = TestCanvas();
     boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
 
@@ -700,7 +691,7 @@ void main() {
     expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 25.0, 25.0));
   });
 
-  test('DecorationImagePainter disposes of image when disposed', () async {
+  test('DecorationImagePainter disposes of image when disposed',  () async {
     final ImageProvider provider = MemoryImage(Uint8List.fromList(kTransparentImage));
 
     final ImageStream stream = provider.resolve(ImageConfiguration.empty);
@@ -710,7 +701,6 @@ void main() {
       assert(!infoCompleter.isCompleted);
       infoCompleter.complete(image);
     }
-
     stream.addListener(ImageStreamListener(_listener));
 
     final ImageInfo info = await infoCompleter.future;

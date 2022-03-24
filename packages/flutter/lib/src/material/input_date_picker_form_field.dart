@@ -58,13 +58,13 @@ class InputDatePickerFormField extends StatefulWidget {
     this.fieldLabelText,
     this.keyboardType,
     this.autofocus = false,
-  })  : assert(firstDate != null),
-        assert(lastDate != null),
-        assert(autofocus != null),
-        initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
-        firstDate = DateUtils.dateOnly(firstDate),
-        lastDate = DateUtils.dateOnly(lastDate),
-        super(key: key) {
+  }) : assert(firstDate != null),
+       assert(lastDate != null),
+       assert(autofocus != null),
+       initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
+       firstDate = DateUtils.dateOnly(firstDate),
+       lastDate = DateUtils.dateOnly(lastDate),
+       super(key: key) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -183,8 +183,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       TextEditingValue textEditingValue = _controller.value.copyWith(text: _inputText);
       // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
-        textEditingValue = textEditingValue.copyWith(
-            selection: TextSelection(
+        textEditingValue = textEditingValue.copyWith(selection: TextSelection(
           baseOffset: 0,
           extentOffset: _inputText!.length,
         ));
@@ -203,10 +202,11 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   }
 
   bool _isValidAcceptableDate(DateTime? date) {
-    return date != null &&
-        !date.isBefore(widget.firstDate) &&
-        !date.isAfter(widget.lastDate) &&
-        (widget.selectableDayPredicate == null || widget.selectableDayPredicate!(date));
+    return
+      date != null &&
+      !date.isBefore(widget.firstDate) &&
+      !date.isAfter(widget.lastDate) &&
+      (widget.selectableDayPredicate == null || widget.selectableDayPredicate!(date));
   }
 
   String? _validateDate(String? text) {

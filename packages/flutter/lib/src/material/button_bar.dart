@@ -66,10 +66,10 @@ class ButtonBar extends StatelessWidget {
     this.overflowDirection,
     this.overflowButtonSpacing,
     this.children = const <Widget>[],
-  })  : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
-        assert(buttonHeight == null || buttonHeight >= 0.0),
-        assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0.0),
-        super(key: key);
+  }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
+       assert(buttonHeight == null || buttonHeight >= 0.0),
+       assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0.0),
+       super(key: key);
 
   /// How the children should be placed along the horizontal axis.
   ///
@@ -245,15 +245,15 @@ class _ButtonBarRow extends Flex {
     TextBaseline? textBaseline,
     this.overflowButtonSpacing,
   }) : super(
-          children: children,
-          direction: direction,
-          mainAxisSize: mainAxisSize,
-          mainAxisAlignment: mainAxisAlignment,
-          crossAxisAlignment: crossAxisAlignment,
-          textDirection: textDirection,
-          verticalDirection: overflowDirection,
-          textBaseline: textBaseline,
-        );
+    children: children,
+    direction: direction,
+    mainAxisSize: mainAxisSize,
+    mainAxisAlignment: mainAxisAlignment,
+    crossAxisAlignment: crossAxisAlignment,
+    textDirection: textDirection,
+    verticalDirection: overflowDirection,
+    textBaseline: textBaseline,
+  );
 
   final double? overflowButtonSpacing;
 
@@ -312,25 +312,26 @@ class _RenderButtonBarRow extends RenderFlex {
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline? textBaseline,
     this.overflowButtonSpacing,
-  })  : assert(textDirection != null),
-        assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0),
-        super(
-          children: children,
-          direction: direction,
-          mainAxisSize: mainAxisSize,
-          mainAxisAlignment: mainAxisAlignment,
-          crossAxisAlignment: crossAxisAlignment,
-          textDirection: textDirection,
-          verticalDirection: verticalDirection,
-          textBaseline: textBaseline,
-        );
+  }) : assert(textDirection != null),
+       assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0),
+       super(
+         children: children,
+         direction: direction,
+         mainAxisSize: mainAxisSize,
+         mainAxisAlignment: mainAxisAlignment,
+         crossAxisAlignment: crossAxisAlignment,
+         textDirection: textDirection,
+         verticalDirection: verticalDirection,
+         textBaseline: textBaseline,
+       );
 
   bool _hasCheckedLayoutWidth = false;
   double? overflowButtonSpacing;
 
   @override
   BoxConstraints get constraints {
-    if (_hasCheckedLayoutWidth) return super.constraints;
+    if (_hasCheckedLayoutWidth)
+      return super.constraints;
     return super.constraints.copyWith(maxWidth: double.infinity);
   }
 
@@ -347,7 +348,8 @@ class _RenderButtonBarRow extends RenderFlex {
       final Size childSize = child.getDryLayout(childConstraints);
       currentHeight += childSize.height;
       child = childAfter(child);
-      if (overflowButtonSpacing != null && child != null) currentHeight += overflowButtonSpacing!;
+      if (overflowButtonSpacing != null && child != null)
+        currentHeight += overflowButtonSpacing!;
     }
     return constraints.constrain(Size(constraints.maxWidth, currentHeight));
   }
@@ -440,7 +442,8 @@ class _RenderButtonBarRow extends RenderFlex {
             break;
         }
 
-        if (overflowButtonSpacing != null && child != null) currentHeight += overflowButtonSpacing!;
+        if (overflowButtonSpacing != null && child != null)
+          currentHeight += overflowButtonSpacing!;
       }
       size = constraints.constrain(Size(constraints.maxWidth, currentHeight));
     }

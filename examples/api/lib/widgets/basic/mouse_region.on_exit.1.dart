@@ -29,7 +29,9 @@ class MyApp extends StatelessWidget {
 
 // A region that hides its content one second after being hovered.
 class MyTimedButton extends StatefulWidget {
-  const MyTimedButton({Key? key, required this.onEnterButton, required this.onExitButton}) : super(key: key);
+  const MyTimedButton(
+      {Key? key, required this.onEnterButton, required this.onExitButton})
+      : super(key: key);
 
   final VoidCallback onEnterButton;
   final VoidCallback onExitButton;

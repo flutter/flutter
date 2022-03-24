@@ -9,7 +9,8 @@ import '../common.dart';
 const int _kNumIterations = 10000;
 
 void main() {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false,
+      "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 
   final Stopwatch watch = Stopwatch();

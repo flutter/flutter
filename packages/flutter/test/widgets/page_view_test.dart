@@ -26,7 +26,7 @@ void main() {
             size: size,
             child: PageView(
               controller: controller,
-              onPageChanged: (int page) {},
+              onPageChanged: (int page) { },
               children: kStates.map<Widget>((String state) => Text(state)).toList(),
             ),
           ),
@@ -71,7 +71,7 @@ void main() {
             size: size,
             child: PageView(
               controller: controller,
-              onPageChanged: (int page) {},
+              onPageChanged: (int page) { },
               children: kStates.map<Widget>((String state) => Text(state)).toList(),
             ),
           ),
@@ -97,7 +97,8 @@ void main() {
     expect(find.text('Illinois'), findsOneWidget);
   });
 
-  testWidgets('PageController cannot return page while unattached', (WidgetTester tester) async {
+  testWidgets('PageController cannot return page while unattached',
+      (WidgetTester tester) async {
     final PageController controller = PageController();
     expect(() => controller.page, throwsAssertionError);
   });
@@ -200,7 +201,7 @@ void main() {
 
     expect(leftOf(0), lessThan(0.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('PageController control test', (WidgetTester tester) async {
     final PageController controller = PageController(initialPage: 4);
@@ -303,16 +304,15 @@ void main() {
   testWidgets('PageController nextPage and previousPage return Futures that resolve', (WidgetTester tester) async {
     final PageController controller = PageController();
     await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: PageView(
-        controller: controller,
-        children: kStates.map<Widget>((String state) => Text(state)).toList(),
-      ),
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          children: kStates.map<Widget>((String state) => Text(state)).toList(),
+        ),
     ));
 
     bool nextPageCompleted = false;
-    controller
-        .nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
+    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
         .then((_) => nextPageCompleted = true);
 
     expect(nextPageCompleted, false);
@@ -321,9 +321,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(nextPageCompleted, true);
 
+
     bool previousPageCompleted = false;
-    controller
-        .previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
+    controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
         .then((_) => previousPageCompleted = true);
 
     expect(previousPageCompleted, false);
@@ -377,7 +377,8 @@ void main() {
 
     expect(log, isEmpty);
 
-    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(100.0, 100.0));
     // The page view is 800.0 wide, so this move is just short of halfway.
     await gesture.moveBy(const Offset(-380.0, 0.0));
 
@@ -418,7 +419,7 @@ void main() {
     final List<int> log = <int>[];
     final PageController controller = PageController(viewportFraction: 0.9);
 
-    Widget build(PageController controller, {Size? size}) {
+    Widget build(PageController controller, { Size? size }) {
       final Widget pageView = Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
@@ -469,7 +470,7 @@ void main() {
   });
 
   testWidgets('PageView viewportFraction', (WidgetTester tester) async {
-    PageController controller = PageController(viewportFraction: 7 / 8);
+    PageController controller = PageController(viewportFraction: 7/8);
 
     Widget build(PageController controller) {
       return Directionality(
@@ -480,7 +481,9 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
               child: Text(kStates[index]),
             );
           },
@@ -500,7 +503,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Hawaii')), const Offset(50.0, 0.0));
     expect(tester.getTopLeft(find.text('Idaho')), const Offset(750.0, 0.0));
 
-    controller = PageController(viewportFraction: 39 / 40);
+    controller = PageController(viewportFraction: 39/40);
 
     await tester.pumpWidget(build(controller));
 
@@ -512,13 +515,14 @@ void main() {
   testWidgets('Page snapping disable and reenable', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
-    Widget build({required bool pageSnapping}) {
+    Widget build({ required bool pageSnapping }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
           pageSnapping: pageSnapping,
           onPageChanged: log.add,
-          children: kStates.map<Widget>((String state) => Text(state)).toList(),
+          children:
+              kStates.map<Widget>((String state) => Text(state)).toList(),
         ),
       );
     }
@@ -572,7 +576,7 @@ void main() {
   });
 
   testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
-    final PageController controller = PageController(viewportFraction: 1 / 8);
+    final PageController controller = PageController(viewportFraction: 1/8);
 
     Widget build(PageController controller) {
       return Directionality(
@@ -583,7 +587,9 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
               child: Text(kStates[index]),
             );
           },
@@ -614,7 +620,7 @@ void main() {
   });
 
   testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
-    final PageController controller = PageController(viewportFraction: 5 / 4);
+    final PageController controller = PageController(viewportFraction: 5/4);
 
     Widget build(PageController controller) {
       return Directionality(
@@ -625,7 +631,9 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
               child: Text(kStates[index]),
             );
           },
@@ -656,7 +664,9 @@ void main() {
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 height: 200.0,
-                color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+                color: index.isEven
+                  ? const Color(0xFF0000FF)
+                  : const Color(0xFF00FF00),
                 child: Text(kStates[index]),
               );
             },
@@ -664,7 +674,7 @@ void main() {
         );
       }
 
-      final PageController oldController = PageController(viewportFraction: 5 / 4);
+      final PageController oldController = PageController(viewportFraction: 5/4);
       await tester.pumpWidget(build(oldController));
 
       expect(tester.getTopLeft(find.text('Alabama')), const Offset(-100, 0));
@@ -683,7 +693,7 @@ void main() {
     'PageView large viewportFraction can scroll to the last page and snap',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/45096.
-      final PageController controller = PageController(viewportFraction: 5 / 4);
+      final PageController controller = PageController(viewportFraction: 5/4);
 
       Widget build(PageController controller) {
         return Directionality(
@@ -694,8 +704,10 @@ void main() {
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 height: 200.0,
-                color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
-                child: Text(index.toString()),
+                color: index.isEven
+                  ? const Color(0xFF0000FF)
+                  : const Color(0xFF00FF00),
+                  child: Text(index.toString()),
               );
             },
           ),
@@ -718,7 +730,7 @@ void main() {
     'All visible pages are able to receive touch events',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/23873.
-      final PageController controller = PageController(viewportFraction: 1 / 4);
+      final PageController controller = PageController(viewportFraction: 1/4);
       late int tappedIndex;
 
       Widget build() {
@@ -737,7 +749,7 @@ void main() {
         );
       }
 
-      Iterable<int> visiblePages = const <int>[0, 1, 2];
+      Iterable<int> visiblePages = const <int> [0, 1, 2];
       await tester.pumpWidget(build());
 
       // The first 3 items should be visible and tappable.
@@ -753,7 +765,7 @@ void main() {
       controller.jumpToPage(19);
       await tester.pump();
       // The last 3 items should be visible and tappable.
-      visiblePages = const <int>[17, 18, 19];
+      visiblePages = const <int> [17, 18, 19];
       for (final int index in visiblePages) {
         expect(find.text('$index'), findsOneWidget);
         await tester.tap(find.text('$index'));
@@ -778,7 +790,7 @@ void main() {
             child: PageView(
               controller: controller,
               children: kStates.map<Widget>((String state) => Text(state)).toList(),
-              onPageChanged: (int page) {},
+              onPageChanged: (int page) { },
             ),
           ),
         ),
@@ -917,14 +929,14 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(
-        controller: controller,
-        children: List<Widget>.generate(3, (int i) {
-          return Semantics(
-            container: true,
-            child: Text('Page #$i'),
-          );
-        }),
-      ),
+          controller: controller,
+          children: List<Widget>.generate(3, (int i) {
+            return Semantics(
+              container: true,
+              child: Text('Page #$i'),
+            );
+          }),
+        ),
     ));
     expect(controller.page, 0);
 
@@ -992,15 +1004,15 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(
-        controller: controller,
-        allowImplicitScrolling: true,
-        children: List<Widget>.generate(4, (int i) {
-          return Semantics(
-            container: true,
-            child: Text('Page #$i'),
-          );
-        }),
-      ),
+          controller: controller,
+          allowImplicitScrolling: true,
+          children: List<Widget>.generate(4, (int i) {
+            return Semantics(
+              container: true,
+              child: Text('Page #$i'),
+            );
+          }),
+        ),
     ));
     expect(controller.page, 0);
 

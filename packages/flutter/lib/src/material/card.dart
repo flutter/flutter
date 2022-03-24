@@ -70,9 +70,9 @@ class Card extends StatelessWidget {
     this.clipBehavior,
     this.child,
     this.semanticContainer = true,
-  })  : assert(elevation == null || elevation >= 0.0),
-        assert(borderOnForeground != null),
-        super(key: key);
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(borderOnForeground != null),
+       super(key: key);
 
   /// The card's background color.
   ///
@@ -188,13 +188,14 @@ class Card extends StatelessWidget {
 
 class _DefaultsM2 extends CardTheme {
   const _DefaultsM2(this.context)
-      : super(
-            clipBehavior: Clip.none,
-            elevation: 1.0,
-            margin: const EdgeInsets.all(4.0),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-            ));
+    : super(
+        clipBehavior: Clip.none,
+        elevation: 1.0,
+        margin: const EdgeInsets.all(4.0),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+        )
+    );
 
   final BuildContext context;
 
@@ -214,17 +215,12 @@ class _DefaultsM2 extends CardTheme {
 // Generated version v0_90
 class _TokenDefaultsM3 extends CardTheme {
   const _TokenDefaultsM3(this.context)
-      : super(
-          clipBehavior: Clip.none,
-          elevation: 1.0,
-          margin: const EdgeInsets.all(4.0),
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12.0),
-                  topRight: Radius.circular(12.0),
-                  bottomLeft: Radius.circular(12.0),
-                  bottomRight: Radius.circular(12.0))),
-        );
+    : super(
+        clipBehavior: Clip.none,
+        elevation: 1.0,
+        margin: const EdgeInsets.all(4.0),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0))),
+      );
 
   final BuildContext context;
 

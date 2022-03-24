@@ -42,14 +42,12 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(
-        box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(
-        box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pumpWidget(
       Stack(
@@ -128,14 +126,12 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(
-        box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(
-        box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pumpWidget(
       Directionality(
@@ -216,14 +212,12 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)),
-        equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)),
-        equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pumpWidget(
       Directionality(
@@ -725,4 +719,5 @@ void main() {
     box = key.currentContext!.findRenderObject()! as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(450.0, 150.0)));
   });
+
 }

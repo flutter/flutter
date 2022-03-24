@@ -64,7 +64,7 @@ abstract class FlutterTestDriver {
   Uri? get vmServiceWsUri => _vmServiceWsUri;
 
   String lastTime = '';
-  void _debugPrint(String message, {String topic = ''}) {
+  void _debugPrint(String message, { String topic = '' }) {
     const int maxLength = 2500;
     final String truncatedMessage = message.length > maxLength ? '${message.substring(0, maxLength)}...' : message;
     final String line = '${topic.padRight(10)} $truncatedMessage';
@@ -105,13 +105,16 @@ abstract class FlutterTestDriver {
 
     const ProcessManager processManager = LocalProcessManager();
     _process = await processManager.start(
-      <String>[flutterBin].followedBy(arguments).toList(),
+      <String>[flutterBin]
+        .followedBy(arguments)
+        .toList(),
       workingDirectory: _projectFolder.path,
       // The web environment variable has the same effect as `flutter config --enable-web`.
       environment: <String, String>{
         'FLUTTER_TEST': 'true',
         'FLUTTER_WEB': 'true',
-        if (singleWidgetReloads) 'FLUTTER_SINGLE_WIDGET_RELOAD': 'true',
+        if (singleWidgetReloads)
+          'FLUTTER_SINGLE_WIDGET_RELOAD': 'true',
       },
     );
 
@@ -134,7 +137,7 @@ abstract class FlutterTestDriver {
 
   Future<void> get done async => _process?.exitCode;
 
-  Future<void> connectToVmService({bool pauseOnExceptions = false}) async {
+  Future<void> connectToVmService({ bool pauseOnExceptions = false }) async {
     _vmService = await vmServiceConnectUri('$_vmServiceWsUri');
     _vmService!.onSend.listen((String s) => _debugPrint(s, topic: '=vm=>'));
     _vmService!.onReceive.listen((String s) => _debugPrint(s, topic: '<=vm='));
@@ -191,10 +194,11 @@ abstract class FlutterTestDriver {
     // If we try to kill the process while it's paused, we'll end up terminating
     // it forcefully and it won't terminate child processes, so we need to ensure
     // it's running before terminating.
-    await resume().timeout(defaultTimeout).catchError((Object e) {
-      _debugPrint('Ignoring failure to resume during shutdown');
-      return null;
-    });
+    await resume().timeout(defaultTimeout)
+        .catchError((Object e) {
+          _debugPrint('Ignoring failure to resume during shutdown');
+          return null;
+        });
 
     _debugPrint('Sending SIGTERM to $_processPid..');
     io.Process.killPid(_processPid!);
@@ -259,6 +263,7 @@ abstract class FlutterTestDriver {
   Future<Isolate> waitForPause() async => subscribeAndWaitForDebugEvent('Pause', await _getFlutterIsolateId());
   Future<Isolate> waitForResume() async => subscribeAndWaitForDebugEvent('Resume', await _getFlutterIsolateId());
 
+
   Future<Isolate> subscribeAndWaitForDebugEvent(String kind, String isolateId) {
     final Future<Event> event = subscribeToDebugEvent(kind, isolateId);
     return waitForDebugEvent(kind, isolateId, event);
@@ -279,9 +284,11 @@ abstract class FlutterTestDriver {
   Future<Event> subscribeToDebugEvent(String kind, String isolateId) {
     _debugPrint('Start listening for $kind events');
 
-    return _vmService!.onDebugEvent.where((Event event) {
-      return event.isolate?.id == isolateId && (event.kind?.startsWith(kind) ?? false);
-    }).first;
+    return _vmService!.onDebugEvent
+      .where((Event event) {
+        return event.isolate?.id == isolateId
+            && (event.kind?.startsWith(kind) ?? false);
+      }).first;
   }
 
   /// Wait for the [event] if needed.
@@ -309,19 +316,18 @@ abstract class FlutterTestDriver {
     );
   }
 
-  Future<Isolate?> resume({bool waitForNextPause = false}) => _resume(null, waitForNextPause);
-  Future<Isolate?> stepOver({bool waitForNextPause = true}) => _resume(StepOption.kOver, waitForNextPause);
-  Future<Isolate?> stepOverAsync({bool waitForNextPause = true}) =>
-      _resume(StepOption.kOverAsyncSuspension, waitForNextPause);
-  Future<Isolate?> stepInto({bool waitForNextPause = true}) => _resume(StepOption.kInto, waitForNextPause);
-  Future<Isolate?> stepOut({bool waitForNextPause = true}) => _resume(StepOption.kOut, waitForNextPause);
+  Future<Isolate?> resume({ bool waitForNextPause = false }) => _resume(null, waitForNextPause);
+  Future<Isolate?> stepOver({ bool waitForNextPause = true }) => _resume(StepOption.kOver, waitForNextPause);
+  Future<Isolate?> stepOverAsync({ bool waitForNextPause = true }) => _resume(StepOption.kOverAsyncSuspension, waitForNextPause);
+  Future<Isolate?> stepInto({ bool waitForNextPause = true }) => _resume(StepOption.kInto, waitForNextPause);
+  Future<Isolate?> stepOut({ bool waitForNextPause = true }) => _resume(StepOption.kOut, waitForNextPause);
 
   Future<bool> isAtAsyncSuspension() async {
     final Isolate isolate = await getFlutterIsolate();
     return isolate.pauseEvent?.atAsyncSuspension ?? false;
   }
 
-  Future<Isolate?> stepOverOrOverAsyncSuspension({bool waitForNextPause = true}) async {
+  Future<Isolate?> stepOverOrOverAsyncSuspension({ bool waitForNextPause = true }) async {
     if (await isAtAsyncSuspension()) {
       return stepOverAsync(waitForNextPause: waitForNextPause);
     }
@@ -407,7 +413,8 @@ abstract class FlutterTestDriver {
       if (json == null) {
         return;
       }
-      if ((event != null && json['event'] == event) || (id != null && json['id'] == id)) {
+      if ((event != null && json['event'] == event) ||
+          (id != null && json['id'] == id)) {
         await subscription?.cancel();
         _debugPrint('OK ($interestingOccurrence)');
         response.complete(json);
@@ -461,7 +468,6 @@ abstract class FlutterTestDriver {
       final String formattedLine = '[+ ${ms.toString().padLeft(5)}] $logLine';
       messages.writeln(formattedLine);
     }
-
     final StreamSubscription<String> subscription = _allMessages.stream.listen(logMessage);
 
     final Timer longWarning = Timer(timeout, () {
@@ -504,18 +510,22 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     await _setupProcess(
       <String>[
         'run',
-        if (!chrome) '--disable-service-auth-codes',
+        if (!chrome)
+          '--disable-service-auth-codes',
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
         ...getLocalEngineArguments(),
         '-d',
-        if (chrome) ...<String>[
-          'chrome',
-          '--web-run-headless',
-          if (!expressionEvaluation) '--no-web-enable-expression-evaluation'
-        ] else
+        if (chrome)
+          ...<String>[
+            'chrome',
+            '--web-run-headless',
+            if (!expressionEvaluation) '--no-web-enable-expression-evaluation'
+          ]
+        else
           'flutter-tester',
-        if (structuredErrors) '--dart-define=flutter.inspector.structuredErrors=true',
+        if (structuredErrors)
+          '--dart-define=flutter.inspector.structuredErrors=true',
         ...?additionalCommandArgs,
       ],
       withDebugger: withDebugger,
@@ -540,7 +550,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         'attach',
         ...getLocalEngineArguments(),
         '--machine',
-        if (!spawnDdsInstance) '--no-dds',
+        if (!spawnDdsInstance)
+          '--no-dds',
         '-d',
         'flutter-tester',
         '--debug-port',
@@ -626,8 +637,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     return prematureExitGuard.future;
   }
 
-  Future<void> hotRestart({bool pause = false, bool debounce = false}) => _restart(fullRestart: true, pause: pause);
-  Future<void> hotReload({bool debounce = false, int? debounceDurationOverrideMs}) =>
+  Future<void> hotRestart({ bool pause = false, bool debounce = false}) => _restart(fullRestart: true, pause: pause);
+  Future<void> hotReload({ bool debounce = false, int? debounceDurationOverrideMs }) =>
       _restart(debounce: debounce, debounceDurationOverrideMs: debounceDurationOverrideMs);
 
   Future<void> scheduleFrame() async {
@@ -640,22 +651,15 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     );
   }
 
-  Future<void> _restart(
-      {bool fullRestart = false, bool pause = false, bool debounce = false, int? debounceDurationOverrideMs}) async {
+  Future<void> _restart({ bool fullRestart = false, bool pause = false, bool debounce = false, int? debounceDurationOverrideMs }) async {
     if (_currentRunningAppId == null) {
       throw Exception('App has not started yet');
     }
 
-    _debugPrint('Performing ${pause ? "paused " : ""}${fullRestart ? "hot restart" : "hot reload"}...');
+    _debugPrint('Performing ${ pause ? "paused " : "" }${ fullRestart ? "hot restart" : "hot reload" }...');
     final Map<String, Object?>? hotReloadResponse = await _sendRequest(
       'app.restart',
-      <String, Object?>{
-        'appId': _currentRunningAppId,
-        'fullRestart': fullRestart,
-        'pause': pause,
-        'debounce': debounce,
-        'debounceDurationOverrideMs': debounceDurationOverrideMs
-      },
+      <String, Object?>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause, 'debounce': debounce, 'debounceDurationOverrideMs': debounceDurationOverrideMs},
     ) as Map<String, Object?>?;
     _debugPrint('${fullRestart ? "Hot restart" : "Hot reload"} complete.');
 
@@ -684,9 +688,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         ),
       ]).timeout(
         quitTimeout,
-        onTimeout: () {
-          _debugPrint('app.detach did not return within $quitTimeout');
-        },
+        onTimeout: () { _debugPrint('app.detach did not return within $quitTimeout'); },
       );
       _currentRunningAppId = null;
     }
@@ -711,9 +713,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         ),
       ]).timeout(
         quitTimeout,
-        onTimeout: () {
-          _debugPrint('app.stop did not return within $quitTimeout');
-        },
+        onTimeout: () { _debugPrint('app.stop did not return within $quitTimeout'); },
       );
       _currentRunningAppId = null;
     }
@@ -760,7 +760,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 }
 
 class FlutterTestTestDriver extends FlutterTestDriver {
-  FlutterTestTestDriver(Directory projectFolder, {String? logPrefix}) : super(projectFolder, logPrefix: logPrefix);
+  FlutterTestTestDriver(Directory projectFolder, {String? logPrefix})
+    : super(projectFolder, logPrefix: logPrefix);
 
   Future<void> test({
     String testFile = 'test/test.dart',
@@ -774,7 +775,8 @@ class FlutterTestTestDriver extends FlutterTestDriver {
       ...getLocalEngineArguments(),
       '--disable-service-auth-codes',
       '--machine',
-      if (coverage) '--coverage',
+      if (coverage)
+        '--coverage',
     ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, beforeStart: beforeStart);
   }
 
@@ -819,8 +821,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }) async {
     assert(timeout != null);
     return _timeoutWithMessages<Map<String, Object?>?>(
-      () => _stdout.stream
-          .map<Map<String, Object?>?>(_parseJsonResponse)
+      () => _stdout.stream.map<Map<String, Object?>?>(_parseJsonResponse)
           .firstWhere((Map<String, Object?>? output) => output != null),
       timeout: timeout,
       task: 'Waiting for JSON',
@@ -840,16 +841,18 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     final Completer<bool> done = Completer<bool>();
     // Waiting for `{"success":true,"type":"done",...}` line indicating
     // end of test run.
-    final StreamSubscription<String> subscription = _stdout.stream.listen((String line) async {
-      final Map<String, Object?>? json = _parseJsonResponse(line);
-      if (json != null && json['type'] != null && json['success'] != null) {
-        done.complete(json['type'] == 'done' && json['success'] == true);
-      }
-    });
+    final StreamSubscription<String> subscription = _stdout.stream.listen(
+        (String line) async {
+          final Map<String, Object?>? json = _parseJsonResponse(line);
+          if (json != null && json['type'] != null && json['success'] != null) {
+            done.complete(json['type'] == 'done' && json['success'] == true);
+          }
+        });
 
     await resume();
 
-    final Future<Object> timeoutFuture = Future<Object>.delayed(defaultTimeout);
+    final Future<Object> timeoutFuture =
+        Future<Object>.delayed(defaultTimeout);
     await Future.any<Object>(<Future<Object>>[done.future, timeoutFuture]);
     await subscription.cancel();
     if (!done.isCompleted) {

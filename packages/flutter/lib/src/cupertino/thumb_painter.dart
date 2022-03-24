@@ -8,7 +8,7 @@ import 'colors.dart';
 
 const Color _kThumbBorderColor = Color(0x0A000000);
 
-const List<BoxShadow> _kSwitchBoxShadows = <BoxShadow>[
+const List<BoxShadow> _kSwitchBoxShadows = <BoxShadow> [
   BoxShadow(
     color: Color(0x26000000),
     offset: Offset(0, 3),
@@ -21,7 +21,7 @@ const List<BoxShadow> _kSwitchBoxShadows = <BoxShadow>[
   ),
 ];
 
-const List<BoxShadow> _kSliderBoxShadows = <BoxShadow>[
+const List<BoxShadow> _kSliderBoxShadows = <BoxShadow> [
   BoxShadow(
     color: Color(0x26000000),
     offset: Offset(0, 3),
@@ -79,7 +79,8 @@ class CupertinoThumbPainter {
       Radius.circular(rect.shortestSide / 2.0),
     );
 
-    for (final BoxShadow shadow in shadows) canvas.drawRRect(rrect.shift(shadow.offset), shadow.toPaint());
+    for (final BoxShadow shadow in shadows)
+      canvas.drawRRect(rrect.shift(shadow.offset), shadow.toPaint());
 
     canvas.drawRRect(
       rrect.inflate(0.5),

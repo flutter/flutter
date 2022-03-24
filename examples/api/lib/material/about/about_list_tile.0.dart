@@ -39,7 +39,9 @@ class MyStatelessWidget extends StatelessWidget {
                 text: "Flutter is Google's UI toolkit for building beautiful, "
                     'natively compiled applications for mobile, web, and desktop '
                     'from a single codebase. Learn more about Flutter at '),
-            TextSpan(style: textStyle.copyWith(color: theme.colorScheme.primary), text: 'https://flutter.dev'),
+            TextSpan(
+                style: textStyle.copyWith(color: theme.colorScheme.primary),
+                text: 'https://flutter.dev'),
             TextSpan(style: textStyle, text: '.'),
           ],
         ),

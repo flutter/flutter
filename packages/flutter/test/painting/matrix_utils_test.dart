@@ -86,22 +86,10 @@ void main() {
     );
 
     expect(actual.storage, <dynamic>[
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      moreOrLessEquals(0.5),
-      moreOrLessEquals(0.8660254037844386),
-      moreOrLessEquals(-0.0008660254037844386),
-      0.0,
-      moreOrLessEquals(-0.8660254037844386),
-      moreOrLessEquals(0.5),
-      moreOrLessEquals(-0.0005),
-      0.0,
-      moreOrLessEquals(-86.60254037844386),
-      moreOrLessEquals(-50.0),
-      1.05,
+      1.0, 0.0, 0.0, 0.0,
+      0.0, moreOrLessEquals(0.5), moreOrLessEquals(0.8660254037844386), moreOrLessEquals(-0.0008660254037844386),
+      0.0, moreOrLessEquals(-0.8660254037844386), moreOrLessEquals(0.5), moreOrLessEquals(-0.0005),
+      0.0, moreOrLessEquals(-86.60254037844386), moreOrLessEquals(-50.0), 1.05,
     ]);
   });
 

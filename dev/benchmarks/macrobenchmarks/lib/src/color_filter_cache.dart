@@ -12,7 +12,8 @@ class ColorFilterCachePage extends StatefulWidget {
   State<ColorFilterCachePage> createState() => _ColorFilterCachePageState();
 }
 
-class _ColorFilterCachePageState extends State<ColorFilterCachePage> with TickerProviderStateMixin {
+class _ColorFilterCachePageState extends State<ColorFilterCachePage>
+    with TickerProviderStateMixin {
   final ScrollController _controller = ScrollController();
   @override
   void initState() {

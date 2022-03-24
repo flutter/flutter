@@ -30,11 +30,11 @@ class FlutterDriverFactory {
     @required ProcessUtils processUtils,
     @required String dartSdkPath,
     @required DevtoolsLauncher devtoolsLauncher,
-  })  : _applicationPackageFactory = applicationPackageFactory,
-        _logger = logger,
-        _processUtils = processUtils,
-        _dartSdkPath = dartSdkPath,
-        _devtoolsLauncher = devtoolsLauncher;
+  }) : _applicationPackageFactory = applicationPackageFactory,
+       _logger = logger,
+       _processUtils = processUtils,
+       _dartSdkPath = dartSdkPath,
+       _devtoolsLauncher = devtoolsLauncher;
 
   final ApplicationPackageFactory _applicationPackageFactory;
   final Logger _logger;
@@ -124,12 +124,12 @@ class FlutterDriverService extends DriverService {
     @required String dartSdkPath,
     @required DevtoolsLauncher devtoolsLauncher,
     @visibleForTesting VMServiceConnector vmServiceConnector = connectToVmService,
-  })  : _applicationPackageFactory = applicationPackageFactory,
-        _logger = logger,
-        _processUtils = processUtils,
-        _dartSdkPath = dartSdkPath,
-        _vmServiceConnector = vmServiceConnector,
-        _devtoolsLauncher = devtoolsLauncher;
+  }) : _applicationPackageFactory = applicationPackageFactory,
+       _logger = logger,
+       _processUtils = processUtils,
+       _dartSdkPath = dartSdkPath,
+       _vmServiceConnector = vmServiceConnector,
+       _devtoolsLauncher = devtoolsLauncher;
 
   static const int _kLaunchAttempts = 3;
 
@@ -158,10 +158,12 @@ class FlutterDriverService extends DriverService {
     String mainPath,
   }) async {
     if (buildInfo.isRelease) {
-      throwToolExit('Flutter Driver (non-web) does not support running in release mode.\n'
-          '\n'
-          'Use --profile mode for testing application performance.\n'
-          'Use --debug (default) mode for testing correctness (with assertions).');
+      throwToolExit(
+        'Flutter Driver (non-web) does not support running in release mode.\n'
+        '\n'
+        'Use --profile mode for testing application performance.\n'
+        'Use --debug (default) mode for testing correctness (with assertions).'
+      );
     }
     _device = device;
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -288,7 +290,9 @@ class FlutterDriverService extends DriverService {
   }) async {
     if (writeSkslOnExit != null) {
       final FlutterView flutterView = (await _vmService.getFlutterViews()).first;
-      final Map<String, Object> result = await _vmService.getSkSLs(viewId: flutterView.id);
+      final Map<String, Object> result = await _vmService.getSkSLs(
+        viewId: flutterView.id
+      );
       await sharedSkSlWriter(_device, result, outputFile: writeSkslOnExit, logger: _logger);
     }
     // If the application package is available, stop and uninstall.
@@ -302,9 +306,10 @@ class FlutterDriverService extends DriverService {
     } else if (_device.supportsFlutterExit) {
       // Otherwise use the VM Service URI to stop the app as a best effort approach.
       final vm_service.VM vm = await _vmService.service.getVM();
-      final vm_service.IsolateRef isolateRef = vm.isolates.firstWhere((vm_service.IsolateRef element) {
-        return !element.isSystemIsolate;
-      }, orElse: () => null);
+      final vm_service.IsolateRef isolateRef = vm.isolates
+        .firstWhere((vm_service.IsolateRef element) {
+          return !element.isSystemIsolate;
+        }, orElse: () => null);
       unawaited(_vmService.flutterExit(isolateId: isolateRef.id));
     } else {
       _logger.printTrace('No application package for $_device, leaving app running');

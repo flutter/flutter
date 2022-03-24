@@ -42,7 +42,8 @@ import 'common.dart';
 /// and it returns `true` if both images are equal.
 ///
 /// As a result, returning `false` from `onScreenshot` will make the test fail.
-Future<void> integrationDriver({FlutterDriver? driver, ScreenshotCallback? onScreenshot}) async {
+Future<void> integrationDriver(
+    {FlutterDriver? driver, ScreenshotCallback? onScreenshot}) async {
   driver ??= await FlutterDriver.connect();
   // Test states that it's waiting on web driver commands.
   // [DriverTestMessage] is converted to string since json format causes an
@@ -67,13 +68,15 @@ Future<void> integrationDriver({FlutterDriver? driver, ScreenshotCallback? onScr
       if (screenshotSuccess) {
         jsonResponse = await driver.requestData(DriverTestMessage.complete().toString());
       } else {
-        jsonResponse = await driver.requestData(DriverTestMessage.error().toString());
+        jsonResponse =
+            await driver.requestData(DriverTestMessage.error().toString());
       }
 
       response = Response.fromJson(jsonResponse);
     } else if (webDriverCommand == '${WebDriverCommandType.ack}') {
       // Previous command completed ask for a new one.
-      jsonResponse = await driver.requestData(DriverTestMessage.pending().toString());
+      jsonResponse =
+          await driver.requestData(DriverTestMessage.pending().toString());
 
       response = Response.fromJson(jsonResponse);
     } else {
@@ -113,7 +116,7 @@ Future<void> integrationDriver({FlutterDriver? driver, ScreenshotCallback? onScr
       }
     }
     if (failures.isNotEmpty) {
-      throw StateError('The following screenshot tests failed: ${failures.join(', ')}');
+     throw StateError('The following screenshot tests failed: ${failures.join(', ')}');
     }
   }
 

@@ -15,10 +15,10 @@ class _MockRenderSliver extends RenderSliver {
       maxPaintExtent: 10,
     );
   }
+
 }
 
-Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding, AxisDirection axisDirection,
-    TextDirection textDirection) {
+Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding, AxisDirection axisDirection, TextDirection textDirection) {
   return tester.pumpWidget(
     Directionality(
       textDirection: textDirection,
@@ -39,8 +39,7 @@ Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding
 }
 
 void verify(WidgetTester tester, List<Rect> answerKey) {
-  final List<Rect> testAnswers =
-      tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Rect>(
+  final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Rect>(
     (RenderBox target) {
       final Offset topLeft = target.localToGlobal(Offset.zero);
       final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
@@ -195,20 +194,20 @@ void main() {
     await test(tester, 350.0, padding, AxisDirection.up, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      const Rect.fromLTWH(0.0, 600.0 + 350.0 - 400.0, 800.0, 400.0),
-      const Rect.fromLTWH(30.0, 600.0 - 80.0 - 400.0, 740.0, 400.0),
-      const Rect.fromLTWH(0.0, 600.0 - 510.0 - 400.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, 600.0+350.0-400.0, 800.0, 400.0),
+      const Rect.fromLTWH(30.0, 600.0-80.0-400.0, 740.0, 400.0),
+      const Rect.fromLTWH(0.0, 600.0-510.0-400.0, 800.0, 400.0),
     ]);
     HitTestResult result;
-    result = tester.hitTestOnBinding(const Offset(10.0, 600.0 - 10.0));
+    result = tester.hitTestOnBinding(const Offset(10.0, 600.0-10.0));
     expectIsTextSpan(result.path.first.target, 'before');
-    result = tester.hitTestOnBinding(const Offset(10.0, 600.0 - 60.0));
+    result = tester.hitTestOnBinding(const Offset(10.0, 600.0-60.0));
     expect(result.path.first.target, isA<RenderView>());
-    result = tester.hitTestOnBinding(const Offset(100.0, 600.0 - 100.0));
+    result = tester.hitTestOnBinding(const Offset(100.0, 600.0-100.0));
     expectIsTextSpan(result.path.first.target, 'padded');
-    result = tester.hitTestOnBinding(const Offset(100.0, 600.0 - 490.0));
+    result = tester.hitTestOnBinding(const Offset(100.0, 600.0-490.0));
     expect(result.path.first.target, isA<RenderView>());
-    result = tester.hitTestOnBinding(const Offset(10.0, 600.0 - 520.0));
+    result = tester.hitTestOnBinding(const Offset(10.0, 600.0-520.0));
     expectIsTextSpan(result.path.first.target, 'after');
   });
 
@@ -217,20 +216,20 @@ void main() {
     await test(tester, 350.0, padding, AxisDirection.left, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      const Rect.fromLTWH(800.0 + 350.0 - 400.0, 0.0, 400.0, 600.0),
-      const Rect.fromLTWH(800.0 - 80.0 - 400.0, 30.0, 400.0, 540.0),
-      const Rect.fromLTWH(800.0 - 510.0 - 400.0, 0.0, 400.0, 600.0),
+      const Rect.fromLTWH(800.0+350.0-400.0, 0.0, 400.0, 600.0),
+      const Rect.fromLTWH(800.0-80.0-400.0, 30.0, 400.0, 540.0),
+      const Rect.fromLTWH(800.0-510.0-400.0, 0.0, 400.0, 600.0),
     ]);
     HitTestResult result;
-    result = tester.hitTestOnBinding(const Offset(800.0 - 10.0, 10.0));
+    result = tester.hitTestOnBinding(const Offset(800.0-10.0, 10.0));
     expectIsTextSpan(result.path.first.target, 'before');
-    result = tester.hitTestOnBinding(const Offset(800.0 - 60.0, 10.0));
+    result = tester.hitTestOnBinding(const Offset(800.0-60.0, 10.0));
     expect(result.path.first.target, isA<RenderView>());
-    result = tester.hitTestOnBinding(const Offset(800.0 - 100.0, 100.0));
+    result = tester.hitTestOnBinding(const Offset(800.0-100.0, 100.0));
     expectIsTextSpan(result.path.first.target, 'padded');
-    result = tester.hitTestOnBinding(const Offset(800.0 - 490.0, 100.0));
+    result = tester.hitTestOnBinding(const Offset(800.0-490.0, 100.0));
     expect(result.path.first.target, isA<RenderView>());
-    result = tester.hitTestOnBinding(const Offset(800.0 - 520.0, 10.0));
+    result = tester.hitTestOnBinding(const Offset(800.0-520.0, 10.0));
     expectIsTextSpan(result.path.first.target, 'after');
   });
 
@@ -436,8 +435,7 @@ void main() {
     );
   });
 
-  testWidgets('SliverPadding includes preceding padding in the precedingScrollExtent provided to child',
-      (WidgetTester tester) async {
+  testWidgets('SliverPadding includes preceding padding in the precedingScrollExtent provided to child', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/49195
     final UniqueKey key = UniqueKey();
     await tester.pumpWidget(Directionality(
@@ -470,15 +468,13 @@ void main() {
     );
   });
 
-  testWidgets("SliverPadding consumes only its padding from the overlap of its parent's constraints",
-      (WidgetTester tester) async {
+  testWidgets("SliverPadding consumes only its padding from the overlap of its parent's constraints", (WidgetTester tester) async {
     final _MockRenderSliver mock = _MockRenderSliver();
     final RenderSliverPadding renderObject = RenderSliverPadding(
       padding: const EdgeInsets.only(top: 20),
     );
     renderObject.child = mock;
-    renderObject.layout(
-      const SliverConstraints(
+    renderObject.layout(const SliverConstraints(
         viewportMainAxisExtent: 100.0,
         overlap: 100.0,
         cacheOrigin: 0.0,
@@ -503,8 +499,7 @@ void main() {
       padding: const EdgeInsets.only(top: 20),
     );
     renderObject.child = mock;
-    renderObject.layout(
-      const SliverConstraints(
+    renderObject.layout(const SliverConstraints(
         viewportMainAxisExtent: 100.0,
         overlap: -100.0,
         cacheOrigin: 0.0,
@@ -529,8 +524,7 @@ void main() {
       padding: const EdgeInsets.only(top: 20),
     );
     renderObject.child = mock;
-    renderObject.layout(
-      const SliverConstraints(
+    renderObject.layout(const SliverConstraints(
         viewportMainAxisExtent: 100.0,
         overlap: 100.0,
         cacheOrigin: 0.0,

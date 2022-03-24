@@ -38,7 +38,8 @@ class MyStatelessWidget extends StatelessWidget {
       color: Colors.red,
       child: FittedBox(
         fit: BoxFit.fill,
-        child: Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+        child: Image.network(
+            'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
       ),
     );
   }

@@ -40,7 +40,8 @@ void main() {
 
   group('syslog stream', () {
     testWithoutContext('decodeSyslog decodes a syslog-encoded line', () {
-      final String decoded = decodeSyslog(r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog '
+      final String decoded = decodeSyslog(
+          r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog '
           r'\M-B\M-/\134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
 
       expect(decoded, r'I ❤️ syslog ¯\_(ツ)_/¯ 솠!');
@@ -54,17 +55,18 @@ void main() {
 
     testWithoutContext('IOSDeviceLogReader suppresses non-Flutter lines from output with syslog', () async {
       processManager.addCommand(
-        FakeCommand(command: <String>[
-          ideviceSyslogPath,
-          '-u',
-          '1234',
-        ], stdout: '''
+        FakeCommand(
+            command: <String>[
+              ideviceSyslogPath, '-u', '1234',
+            ],
+            stdout: '''
 Runner(Flutter)[297] <Notice>: A is for ari
 Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
 Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
 Runner(Flutter)[297] <Notice>: I is for ichigo
 Runner(UIKit)[297] <Notice>: E is for enpitsu"
-'''),
+'''
+        ),
       );
       final DeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
@@ -81,17 +83,18 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
 
     testWithoutContext('IOSDeviceLogReader includes multi-line Flutter logs in the output with syslog', () async {
       processManager.addCommand(
-        FakeCommand(command: <String>[
-          ideviceSyslogPath,
-          '-u',
-          '1234',
-        ], stdout: '''
+        FakeCommand(
+            command: <String>[
+              ideviceSyslogPath, '-u', '1234',
+            ],
+            stdout: '''
 Runner(Flutter)[297] <Notice>: This is a multi-line message,
   with another Flutter message following it.
 Runner(Flutter)[297] <Notice>: This is a multi-line message,
   with a non-Flutter log message following it.
 Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
-'''),
+'''
+        ),
       );
       final DeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
@@ -115,9 +118,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ideviceSyslogPath,
-            '-u',
-            '1234',
+            ideviceSyslogPath, '-u', '1234',
           ],
           stdout: '''
 Runner(Flutter)[297] <Notice>: This is a multi-line message,
@@ -185,12 +186,10 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       logReader.connectedVMService = vmService;
 
       // Wait for stream listeners to fire.
-      await expectLater(
-          logReader.logLines,
-          emitsInAnyOrder(<Matcher>[
-            equals('  This is a message '),
-            equals('  And this is an error '),
-          ]));
+      await expectLater(logReader.logLines, emitsInAnyOrder(<Matcher>[
+        equals('  This is a message '),
+        equals('  And this is an error '),
+      ]));
     });
 
     testWithoutContext('IOSDeviceLogReader ignores VM Service logs when attached to debugger', () async {
@@ -231,16 +230,16 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.debuggerAttached = true;
 
-      final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>['Message from debugger']);
+      final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        'Message from debugger'
+      ]);
       iosDeployDebugger.logLines = debuggingLogs;
       logReader.debuggerStream = iosDeployDebugger;
 
       // Wait for stream listeners to fire.
-      await expectLater(
-          logReader.logLines,
-          emitsInAnyOrder(<Matcher>[
-            equals('Message from debugger'),
-          ]));
+      await expectLater(logReader.logLines, emitsInAnyOrder(<Matcher>[
+        equals('Message from debugger'),
+      ]));
     });
   });
 
@@ -331,16 +330,19 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       );
       Object exception;
       StackTrace trace;
-      await asyncGuard(() async {
-        await logReader.linesController.close();
-        final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
-        iosDeployDebugger.logLines = debuggingLogs;
-        logReader.debuggerStream = iosDeployDebugger;
-        await logReader.logLines.drain<void>();
-      }, onError: (Object err, StackTrace stackTrace) {
-        exception = err;
-        trace = stackTrace;
-      });
+      await asyncGuard(
+          () async {
+            await logReader.linesController.close();
+            final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+            iosDeployDebugger.logLines = debuggingLogs;
+            logReader.debuggerStream = iosDeployDebugger;
+            await logReader.logLines.drain<void>();
+          },
+          onError: (Object err, StackTrace stackTrace) {
+            exception = err;
+            trace = stackTrace;
+          }
+      );
       expect(
         exception,
         isNull,

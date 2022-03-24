@@ -142,6 +142,7 @@ void main() {
       path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_no.arb'),
     );
 
+
     if (noCupertinoArbFile.existsSync() && !nbCupertinoArbFile.existsSync()) {
       Locale locale = const Locale.fromSubtags(languageCode: 'no');
       expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);

@@ -17,16 +17,14 @@ const String _kInitialVersion = 'v1.9.1';
 const String _kBranch = 'beta';
 
 final Stdio stdio = Stdio();
-final ProcessUtils processUtils = ProcessUtils(
-    processManager: processManager,
-    logger: StdoutLogger(
-      terminal: AnsiTerminal(
-        platform: platform,
-        stdio: stdio,
-      ),
-      stdio: stdio,
-      outputPreferences: OutputPreferences.test(wrapText: true),
-    ));
+final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(
+  terminal: AnsiTerminal(
+    platform: platform,
+    stdio: stdio,
+  ),
+  stdio: stdio,
+  outputPreferences: OutputPreferences.test(wrapText: true),
+));
 final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
 
 /// A test for flutter upgrade & downgrade that checks out a parallel flutter repo.
@@ -34,7 +32,8 @@ void main() {
   Directory parentDirectory;
 
   setUp(() {
-    parentDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_tools.');
+    parentDirectory = fileSystem.systemTempDirectory
+      .createTempSync('flutter_tools.');
     parentDirectory.createSync(recursive: true);
   });
 
@@ -50,11 +49,7 @@ void main() {
 
     // Enable longpaths for windows integration test.
     await processManager.run(<String>[
-      'git',
-      'config',
-      '--system',
-      'core.longpaths',
-      'true',
+      'git', 'config', '--system', 'core.longpaths', 'true',
     ]);
 
     printOnFailure('Step 1 - clone the $_kBranch of flutter into the test directory');
@@ -87,9 +82,12 @@ void main() {
 
     printOnFailure('Step 4 - upgrade to the newest $_kBranch');
     // This should update the persistent tool state with the sha for HEAD
-    exitCode = await processUtils.stream(
-        <String>[flutterBin, 'upgrade', '--verbose', '--working-directory=${testDirectory.path}'],
-        workingDirectory: testDirectory.path, trace: true);
+    exitCode = await processUtils.stream(<String>[
+      flutterBin,
+      'upgrade',
+      '--verbose',
+      '--working-directory=${testDirectory.path}'
+    ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
     printOnFailure('Step 5 - verify that the version is different');
@@ -105,9 +103,12 @@ void main() {
     printOnFailure('current version is ${versionResult.stdout.trim()}\ninitial was $_kInitialVersion');
 
     printOnFailure('Step 6 - downgrade back to the initial version');
-    exitCode = await processUtils.stream(
-        <String>[flutterBin, 'downgrade', '--no-prompt', '--working-directory=${testDirectory.path}'],
-        workingDirectory: testDirectory.path, trace: true);
+    exitCode = await processUtils.stream(<String>[
+       flutterBin,
+      'downgrade',
+      '--no-prompt',
+      '--working-directory=${testDirectory.path}'
+    ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
     printOnFailure('Step 7 - verify downgraded version matches original version');

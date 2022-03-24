@@ -36,7 +36,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const MethodChannel _methodChannel = MethodChannel('samples.flutter.io/platform_view');
+  static const MethodChannel _methodChannel =
+      MethodChannel('samples.flutter.io/platform_view');
 
   int _counter = 0;
 
@@ -47,7 +48,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _launchPlatformCount() async {
-    final int? platformCounter = await _methodChannel.invokeMethod('switchView', _counter);
+    final int? platformCounter =
+        await _methodChannel.invokeMethod('switchView', _counter);
     setState(() {
       _counter = platformCounter!;
     });
@@ -67,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      'Button tapped $_counter time${_counter == 1 ? '' : 's'}.',
+                      'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
                       style: const TextStyle(fontSize: 17.0),
                     ),
                     Padding(
@@ -75,8 +77,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: ElevatedButton(
                         onPressed: _launchPlatformCount,
                         child: Platform.isIOS
-                            ? const Text('Continue in iOS view')
-                            : const Text('Continue in Android view'),
+                          ? const Text('Continue in iOS view')
+                          : const Text('Continue in Android view'),
                       ),
                     ),
                   ],

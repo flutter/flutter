@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+
   // Helpers
   final Widget sliverBox = SliverToBoxAdapter(
     child: Container(
@@ -18,11 +19,11 @@ void main() {
   );
   Widget boilerplate(
     List<Widget> slivers, {
-    ScrollController? controller,
-    Axis scrollDirection = Axis.vertical,
-  }) {
+      ScrollController? controller,
+      Axis scrollDirection = Axis.vertical,
+    }) {
     return MaterialApp(
-      theme: ThemeData(
+      theme:  ThemeData(
         materialTapTargetSize: MaterialTapTargetSize.padded,
       ),
       home: Scaffold(
@@ -242,14 +243,13 @@ void main() {
         expect(box.size.width, equals(1000));
       });
 
-      testWidgets('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent',
-          (WidgetTester tester) async {
+      testWidgets('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
         final GlobalKey key = GlobalKey();
         final List<Widget> slivers = <Widget>[
           SliverFixedExtentList(
             itemExtent: 150,
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) => Container(color: Colors.amber),
+                (BuildContext context, int index) => Container(color: Colors.amber),
               childCount: 5,
             ),
           ),
@@ -350,7 +350,7 @@ void main() {
         );
         expect(tester.getBottomLeft(button).dy, lessThan(600.0));
         expect(tester.getCenter(button).dx, equals(400.0));
-      }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+      }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
       group('fillOverscroll: true, relevant platforms', () {
         testWidgets('child without size is sized by extent and overscroll', (WidgetTester tester) async {
@@ -378,10 +378,9 @@ void main() {
           await tester.pumpAndSettle();
           final RenderBox box3 = tester.renderObject<RenderBox>(find.byType(Container).last);
           expect(box3.size.height, equals(450));
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-        testWidgets('child with smaller size is overridden and sized by extent and overscroll',
-            (WidgetTester tester) async {
+        testWidgets('child with smaller size is overridden and sized by extent and overscroll', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final List<Widget> slivers = <Widget>[
             sliverBox,
@@ -426,18 +425,17 @@ void main() {
             tester.renderObject<RenderBox>(find.byKey(key)).size.height,
             equals(450),
           );
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-        testWidgets(
-            'extent is overridden by child size and overscroll if precedingScrollExtent > viewportMainAxisExtent',
-            (WidgetTester tester) async {
+        testWidgets('extent is overridden by child size and overscroll if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           final List<Widget> slivers = <Widget>[
             SliverFixedExtentList(
               itemExtent: 150,
               delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => Container(color: Colors.amber),
+                  (BuildContext context, int index) =>
+                  Container(color: Colors.amber),
                 childCount: 5,
               ),
             ),
@@ -491,10 +489,9 @@ void main() {
             tester.renderObject<RenderBox>(find.byKey(key)).size.height,
             equals(148.0 + VisualDensity.adaptivePlatformDensity.vertical * 4.0),
           );
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-        testWidgets('fillOverscroll works when child has no size and precedingScrollExtent > viewportMainAxisExtent',
-            (WidgetTester tester) async {
+        testWidgets('fillOverscroll works when child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           final List<Widget> slivers = <Widget>[
@@ -554,7 +551,7 @@ void main() {
             find.bySemanticsLabel('4'),
             findsOneWidget,
           );
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
         testWidgets('alignment with a flexible works with fillOverscroll', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
@@ -645,7 +642,7 @@ void main() {
           );
           expect(tester.getBottomLeft(button).dy, equals(600.0));
           expect(tester.getCenter(button).dx, equals(400.0));
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
       });
 
       group('fillOverscroll: true, is ignored on irrelevant platforms', () {
@@ -708,15 +705,15 @@ void main() {
           expect(tester.getCenter(button).dx, equals(400.0));
         });
 
-        testWidgets('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent',
-            (WidgetTester tester) async {
+        testWidgets('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           final List<Widget> slivers = <Widget>[
             SliverFixedExtentList(
               itemExtent: 150,
               delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => Container(color: Colors.amber),
+                  (BuildContext context, int index) =>
+                  Container(color: Colors.amber),
                 childCount: 5,
               ),
             ),
@@ -765,8 +762,7 @@ void main() {
           expect(tester.getCenter(button).dx, equals(400.0));
         });
 
-        testWidgets('child has no size and precedingScrollExtent > viewportMainAxisExtent',
-            (WidgetTester tester) async {
+        testWidgets('child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           final List<Widget> slivers = <Widget>[

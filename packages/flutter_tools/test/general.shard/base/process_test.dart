@@ -154,8 +154,7 @@ void main() {
           <String>['kaboom'],
           throwOnError: true,
           allowedFailures: (int c) => c == 1,
-        ))
-            .exitCode,
+        )).exitCode,
         1,
       );
     });
@@ -263,12 +262,12 @@ void main() {
         exitCode: 1,
       ));
       expect(
-          processUtils.runSync(
-            <String>['kaboom'],
-            throwOnError: true,
-            allowedFailures: (int c) => c == 1,
-          ).exitCode,
-          1);
+        processUtils.runSync(
+          <String>['kaboom'],
+          throwOnError: true,
+          allowedFailures: (int c) => c == 1,
+        ).exitCode,
+        1);
     });
 
     testWithoutContext(' throws on disallowed failure', () async {
@@ -399,7 +398,9 @@ void main() {
     });
 
     testWithoutContext('succeeds on success', () async {
-      processManager.addCommand(const FakeCommand(command: <String>['whoohoo']));
+      processManager.addCommand(const FakeCommand(
+        command: <String>['whoohoo']
+      ));
 
       expect(await processUtils.exitsHappy(<String>['whoohoo']), isTrue);
     });
@@ -414,8 +415,10 @@ void main() {
     });
 
     testWithoutContext('catches Exception and returns false', () async {
-      processManager.addCommand(
-          const FakeCommand(command: <String>['boohoo'], exception: ProcessException('Process failed', <String>[])));
+      processManager.addCommand(const FakeCommand(
+        command: <String>['boohoo'],
+        exception: ProcessException('Process failed', <String>[])
+      ));
 
       expect(await processUtils.exitsHappy(<String>['boohoo']), isFalse);
     });
@@ -427,7 +430,10 @@ void main() {
     });
 
     testWithoutContext('does not catch ArgumentError', () async {
-      processManager.addCommand(FakeCommand(command: const <String>['invalid'], exception: ArgumentError('Bad input')));
+      processManager.addCommand(FakeCommand(
+        command: const <String>['invalid'],
+        exception: ArgumentError('Bad input')
+      ));
 
       expect(
         () async => processUtils.exitsHappy(<String>['invalid']),

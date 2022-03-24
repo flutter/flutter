@@ -27,16 +27,15 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     argParser.addOption(
       'runner-source',
       help: 'The package source to use for the flutter_runner. '
-          '"${FuchsiaPackageServer.deviceHost}" implies using a runner already on the device. '
-          '"${FuchsiaPackageServer.toolHost}" implies using a runner distributed with Flutter.',
+            '"${FuchsiaPackageServer.deviceHost}" implies using a runner already on the device. '
+            '"${FuchsiaPackageServer.toolHost}" implies using a runner distributed with Flutter.',
       allowed: <String>[
         FuchsiaPackageServer.deviceHost,
         FuchsiaPackageServer.toolHost,
       ],
       defaultsTo: FuchsiaPackageServer.toolHost,
     );
-    argParser.addOption(
-      'target-platform',
+    argParser.addOption('target-platform',
       defaultsTo: 'fuchsia-x64',
       allowed: <String>['fuchsia-arm64', 'fuchsia-x64'],
       help: 'The target platform for which the app is compiled.',
@@ -51,8 +50,8 @@ class BuildFuchsiaCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-        DevelopmentArtifact.fuchsia,
-      };
+    DevelopmentArtifact.fuchsia,
+  };
 
   @override
   String get description => 'Build the Fuchsia target (Experimental).';
@@ -63,8 +62,10 @@ class BuildFuchsiaCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (!featureFlags.isFuchsiaEnabled) {
-      throwToolExit('"build fuchsia" is currently disabled. See "flutter config" for more '
-          'information.');
+      throwToolExit(
+        '"build fuchsia" is currently disabled. See "flutter config" for more '
+        'information.'
+      );
     }
     final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();

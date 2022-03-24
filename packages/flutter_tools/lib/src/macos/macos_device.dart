@@ -24,18 +24,18 @@ class MacOSDevice extends DesktopDevice {
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
-  })  : _processManager = processManager,
-        _logger = logger,
-        _operatingSystemUtils = operatingSystemUtils,
-        super(
-          'macos',
-          platformType: PlatformType.macos,
-          ephemeral: false,
-          processManager: processManager,
-          logger: logger,
-          fileSystem: fileSystem,
-          operatingSystemUtils: operatingSystemUtils,
-        );
+  }) : _processManager = processManager,
+       _logger = logger,
+       _operatingSystemUtils = operatingSystemUtils,
+       super(
+        'macos',
+        platformType: PlatformType.macos,
+        ephemeral: false,
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        operatingSystemUtils: operatingSystemUtils,
+      );
 
   final ProcessManager _processManager;
   final Logger _logger;
@@ -95,8 +95,7 @@ class MacOSDevice extends DesktopDevice {
       return;
     }
     _processManager.run(<String>[
-      'open',
-      applicationBundle,
+      'open', applicationBundle,
     ]).then((ProcessResult result) {
       if (result.exitCode != 0) {
         _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
@@ -113,13 +112,13 @@ class MacOSDevices extends PollingDeviceDiscovery {
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
-  })  : _logger = logger,
-        _platform = platform,
-        _macOSWorkflow = macOSWorkflow,
-        _processManager = processManager,
-        _fileSystem = fileSystem,
-        _operatingSystemUtils = operatingSystemUtils,
-        super('macOS devices');
+  }) : _logger = logger,
+       _platform = platform,
+       _macOSWorkflow = macOSWorkflow,
+       _processManager = processManager,
+       _fileSystem = fileSystem,
+       _operatingSystemUtils = operatingSystemUtils,
+       super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
   final Platform _platform;
@@ -135,7 +134,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _macOSWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

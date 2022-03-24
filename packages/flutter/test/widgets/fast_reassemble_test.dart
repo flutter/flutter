@@ -7,9 +7,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('reassemble with a className only marks subtrees from the first matching element as dirty',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(const Foo(Bar(Fizz(SizedBox()))));
+  testWidgets('reassemble with a className only marks subtrees from the first matching element as dirty', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Foo(Bar(Fizz(SizedBox())))
+    );
 
     expect(Foo.count, 0);
     expect(Bar.count, 0);
@@ -73,6 +74,7 @@ class _FooState extends State<Foo> {
     return widget.child;
   }
 }
+
 
 class Bar extends StatefulWidget {
   const Bar(this.child, {Key? key}) : super(key: key);

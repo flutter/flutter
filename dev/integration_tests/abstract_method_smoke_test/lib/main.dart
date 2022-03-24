@@ -43,7 +43,8 @@ class _HomePage extends State<HomePage> {
     // Trigger the second route.
     // https://github.com/flutter/flutter/issues/40126
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const SecondPage()));
+      Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const SecondPage()));
     });
   }
 
@@ -61,7 +62,9 @@ class SecondPage extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: const <Widget>[
-          Expanded(child: AndroidView(viewType: 'simple')),
+          Expanded(
+            child: AndroidView(viewType: 'simple')
+          ),
         ],
       ),
     );

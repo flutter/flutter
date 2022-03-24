@@ -16,9 +16,9 @@ class PlistParser {
     required FileSystem fileSystem,
     required Logger logger,
     required ProcessManager processManager,
-  })  : _fileSystem = fileSystem,
-        _logger = logger,
-        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -41,21 +41,13 @@ class PlistParser {
       throw const FileNotFoundException(executable);
     }
     final List<String> args = <String>[
-      executable,
-      '-convert',
-      'xml1',
-      '-o',
-      '-',
-      plistFilePath,
+      executable, '-convert', 'xml1', '-o', '-', plistFilePath,
     ];
     try {
-      final String xmlContent = _processUtils
-          .runSync(
-            args,
-            throwOnError: true,
-          )
-          .stdout
-          .trim();
+      final String xmlContent = _processUtils.runSync(
+        args,
+        throwOnError: true,
+      ).stdout.trim();
       return xmlContent;
     } on ProcessException catch (error) {
       _logger.printTrace('$error');
@@ -114,7 +106,7 @@ class PlistParser {
   static final RegExp _nonBase64Pattern = RegExp('[^a-zA-Z0-9+/=]+');
 
   Object? _parseXmlNode(XmlElement node) {
-    switch (node.name.local) {
+    switch (node.name.local){
       case 'string':
         return node.text;
       case 'real':

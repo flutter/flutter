@@ -23,38 +23,19 @@ const List<Color> coolColors = <Color>[
 ];
 
 const List<String> coolColorNames = <String>[
-  'Sarcoline',
-  'Coquelicot',
-  'Smaragdine',
-  'Mikado',
-  'Glaucous',
-  'Wenge',
-  'Fulvous',
-  'Xanadu',
-  'Falu',
-  'Eburnean',
-  'Amaranth',
-  'Australien',
-  'Banan',
-  'Falu',
-  'Gingerline',
-  'Incarnadine',
-  'Labrador',
-  'Nattier',
-  'Pervenche',
-  'Sinoper',
-  'Verditer',
-  'Watchet',
-  'Zaffre',
+  'Sarcoline', 'Coquelicot', 'Smaragdine', 'Mikado', 'Glaucous', 'Wenge',
+  'Fulvous', 'Xanadu', 'Falu', 'Eburnean', 'Amaranth', 'Australien',
+  'Banan', 'Falu', 'Gingerline', 'Incarnadine', 'Labrador', 'Nattier',
+  'Pervenche', 'Sinoper', 'Verditer', 'Watchet', 'Zaffre',
 ];
 
 const int _kChildCount = 50;
 
 class CupertinoNavigationDemo extends StatelessWidget {
-  CupertinoNavigationDemo({Key? key, this.randomSeed})
+  CupertinoNavigationDemo({ Key? key, this.randomSeed })
       : colorItems = List<Color>.generate(_kChildCount, (int index) {
           return coolColors[math.Random(randomSeed).nextInt(coolColors.length)];
-        }),
+        }) ,
         colorNameItems = List<String>.generate(_kChildCount, (int index) {
           return coolColorNames[math.Random(randomSeed).nextInt(coolColorNames.length)];
         }),
@@ -177,13 +158,11 @@ class CupertinoDemoTab1 extends StatelessWidget {
           SliverPadding(
             // Top media padding consumed by CupertinoSliverNavigationBar.
             // Left/Right media padding consumed by Tab1RowItem.
-            padding: MediaQuery.of(context)
-                .removePadding(
-                  removeTop: true,
-                  removeLeft: true,
-                  removeRight: true,
-                )
-                .padding,
+            padding: MediaQuery.of(context).removePadding(
+              removeTop: true,
+              removeLeft: true,
+              removeRight: true,
+            ).padding,
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
@@ -275,19 +254,17 @@ class Tab1RowItem extends StatelessWidget {
                 ),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
-                  child: const Icon(
-                    CupertinoIcons.plus_circled,
+                  child: const Icon(CupertinoIcons.plus_circled,
                     semanticLabel: 'Add',
                   ),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
-                  child: const Icon(
-                    CupertinoIcons.share,
+                  child: const Icon(CupertinoIcons.share,
                     semanticLabel: 'Share',
                   ),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
               ],
             ),
@@ -394,14 +371,14 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                                   letterSpacing: -0.28,
                                 ),
                               ),
-                              onPressed: () {},
+                              onPressed: () { },
                             ),
                             CupertinoButton.filled(
                               minSize: 30.0,
                               padding: EdgeInsets.zero,
                               borderRadius: BorderRadius.circular(32.0),
                               child: const Icon(CupertinoIcons.ellipsis),
-                              onPressed: () {},
+                              onPressed: () { },
                             ),
                           ],
                         ),
@@ -444,7 +421,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                             color: CupertinoColors.white,
                             size: 36.0,
                           ),
-                          onPressed: () {},
+                          onPressed: () { },
                         ),
                       ),
                     ),
@@ -666,15 +643,19 @@ class Tab2ConversationAvatar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(begin: FractionalOffset.topCenter, end: FractionalOffset.bottomCenter, colors: <Color>[
-          color!,
-          Color.fromARGB(
-            color!.alpha,
-            (color!.red - 60).clamp(0, 255),
-            (color!.green - 60).clamp(0, 255),
-            (color!.blue - 60).clamp(0, 255),
-          ),
-        ]),
+        gradient: LinearGradient(
+          begin: FractionalOffset.topCenter,
+          end: FractionalOffset.bottomCenter,
+          colors: <Color>[
+            color!,
+            Color.fromARGB(
+              color!.alpha,
+              (color!.red - 60).clamp(0, 255),
+              (color!.green - 60).clamp(0, 255),
+              (color!.blue - 60).clamp(0, 255),
+            ),
+          ]
+        ),
       ),
       margin: const EdgeInsets.only(left: 8.0, bottom: 8.0),
       padding: const EdgeInsets.all(12.0),
@@ -705,12 +686,15 @@ class Tab2ConversationRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: isSelf ? CrossAxisAlignment.center : CrossAxisAlignment.end,
         children: <Widget>[
-          if (avatar != null) avatar!,
+          if (avatar != null)
+            avatar!,
           CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Tab2ConversationBubble(
               text: text,
-              color: isSelf ? Tab2ConversationBubbleColor.blue : Tab2ConversationBubbleColor.gray,
+              color: isSelf
+              ? Tab2ConversationBubbleColor.blue
+              : Tab2ConversationBubbleColor.gray,
             ),
           ),
         ],
@@ -763,8 +747,8 @@ class CupertinoDemoTab3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(trailing: trailingButtons),
-      backgroundColor: CupertinoColors.systemBackground,
+    navigationBar: CupertinoNavigationBar(trailing: trailingButtons),
+    backgroundColor: CupertinoColors.systemBackground,
       child: ListView(
         children: <Widget>[
           const Padding(padding: EdgeInsets.only(top: 32.0)),

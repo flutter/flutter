@@ -33,17 +33,16 @@ void main() {
     expect(find.text('topLeft'), findsOneWidget);
     expect(find.text('bottomRight'), findsOneWidget);
     expect(tester.getSize(find.byType(_Diagonal)), const Size(80 + 110, 100 + 120));
-    expect(
-        find.byType(_Diagonal),
-        paints
-          ..rect(
-            rect: const Rect.fromLTWH(0, 0, 80, 100),
-            color: yellow,
-          )
-          ..rect(
-            rect: const Rect.fromLTWH(80, 100, 110, 120),
-            color: green,
-          ));
+    expect(find.byType(_Diagonal), paints
+      ..rect(
+        rect: const Rect.fromLTWH(0, 0, 80, 100),
+        color: yellow,
+      )
+      ..rect(
+        rect: const Rect.fromLTWH(80, 100, 110, 120),
+        color: green,
+      )
+    );
 
     await tester.pumpWidget(buildWidget(
       topLeft: Container(
@@ -63,17 +62,16 @@ void main() {
     expect(find.text('topLeft'), findsOneWidget);
     expect(find.text('bottomRight'), findsOneWidget);
     expect(tester.getSize(find.byType(_Diagonal)), const Size(100 + 210, 200 + 220));
-    expect(
-        find.byType(_Diagonal),
-        paints
-          ..rect(
-            rect: const Rect.fromLTWH(0, 0, 100, 200),
-            color: yellow,
-          )
-          ..rect(
-            rect: const Rect.fromLTWH(100, 200, 210, 220),
-            color: green,
-          ));
+    expect(find.byType(_Diagonal), paints
+      ..rect(
+        rect: const Rect.fromLTWH(0, 0, 100, 200),
+        color: yellow,
+      )
+      ..rect(
+        rect: const Rect.fromLTWH(100, 200, 210, 220),
+        color: green,
+      )
+    );
 
     await tester.pumpWidget(buildWidget(
       topLeft: Container(
@@ -94,17 +92,16 @@ void main() {
     expect(find.text('topLeft'), findsOneWidget);
     expect(find.text('bottomRight'), findsOneWidget);
     expect(tester.getSize(find.byType(_Diagonal)), const Size(100 + 220, 200 + 230));
-    expect(
-        find.byType(_Diagonal),
-        paints
-          ..rect(
-            rect: const Rect.fromLTWH(0, 0, 100, 200),
-            color: yellow,
-          )
-          ..rect(
-            rect: const Rect.fromLTWH(100, 200, 220, 230),
-            color: green,
-          ));
+    expect(find.byType(_Diagonal), paints
+      ..rect(
+        rect: const Rect.fromLTWH(0, 0, 100, 200),
+        color: yellow,
+      )
+      ..rect(
+        rect: const Rect.fromLTWH(100, 200, 220, 230),
+        color: green,
+      )
+    );
 
     await tester.pumpWidget(buildWidget(
       topLeft: Container(
@@ -118,13 +115,12 @@ void main() {
     expect(find.text('topLeft'), findsOneWidget);
     expect(find.text('bottomRight'), findsNothing);
     expect(tester.getSize(find.byType(_Diagonal)), const Size(100, 200));
-    expect(
-        find.byType(_Diagonal),
-        paints
-          ..rect(
-            rect: const Rect.fromLTWH(0, 0, 100, 200),
-            color: yellow,
-          ));
+    expect(find.byType(_Diagonal), paints
+      ..rect(
+        rect: const Rect.fromLTWH(0, 0, 100, 200),
+        color: yellow,
+      )
+    );
 
     await tester.pumpWidget(buildWidget());
     expect(find.text('topLeft'), findsNothing);
@@ -155,7 +151,9 @@ void main() {
       ),
     ));
 
-    expect(tester.renderObject(find.byType(_Diagonal)).toStringDeep(), equalsIgnoringHashCodes(r'''
+    expect(
+      tester.renderObject(find.byType(_Diagonal)).toStringDeep(),
+      equalsIgnoringHashCodes(r'''
 _RenderDiagonal#00000 relayoutBoundary=up1
  │ creator: _Diagonal ← Align ← Directionality ← [root]
  │ parentData: offset=Offset(0.0, 0.0) (can use size)
@@ -175,7 +173,8 @@ _RenderDiagonal#00000 relayoutBoundary=up1
      constraints: BoxConstraints(unconstrained)
      size: Size(110.0, 120.0)
      additionalConstraints: BoxConstraints(w=110.0, h=120.0)
-'''));
+''')
+    );
   });
 }
 

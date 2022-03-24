@@ -62,7 +62,8 @@ class _DepthFirstChildIterator implements Iterator<Element> {
 
   @override
   bool moveNext() {
-    if (_stack.isEmpty) return false;
+    if (_stack.isEmpty)
+      return false;
 
     _current = _stack.removeLast();
     _fillChildren(_current);

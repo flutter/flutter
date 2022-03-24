@@ -16,16 +16,15 @@ import '../../src/context.dart';
 void main() {
   testUsingContext('ensureMultidexUtilsExists returns when exists', () async {
     final Directory directory = globals.fs.currentDirectory;
-    final File applicationFile = directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childDirectory('java')
-        .childDirectory('io')
-        .childDirectory('flutter')
-        .childDirectory('app')
-        .childFile('FlutterMultiDexApplication.java');
+    final File applicationFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childDirectory('java')
+      .childDirectory('io')
+      .childDirectory('flutter')
+      .childDirectory('app')
+      .childFile('FlutterMultiDexApplication.java');
     applicationFile.createSync(recursive: true);
     applicationFile.writeAsStringSync('hello', flush: true);
     expect(applicationFile.readAsStringSync(), 'hello');
@@ -41,16 +40,15 @@ void main() {
 
   testUsingContext('ensureMultiDexApplicationExists generates when does not exist', () async {
     final Directory directory = globals.fs.currentDirectory;
-    final File applicationFile = directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childDirectory('java')
-        .childDirectory('io')
-        .childDirectory('flutter')
-        .childDirectory('app')
-        .childFile('FlutterMultiDexApplication.java');
+    final File applicationFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childDirectory('java')
+      .childDirectory('io')
+      .childDirectory('flutter')
+      .childDirectory('app')
+      .childFile('FlutterMultiDexApplication.java');
 
     ensureMultiDexApplicationExists(directory);
 
@@ -72,16 +70,15 @@ void main() {
 
   testUsingContext('multiDexApplicationExists true when does exist', () async {
     final Directory directory = globals.fs.currentDirectory;
-    final File utilsFile = directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childDirectory('java')
-        .childDirectory('io')
-        .childDirectory('flutter')
-        .childDirectory('app')
-        .childFile('FlutterMultiDexApplication.java');
+    final File utilsFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childDirectory('java')
+      .childDirectory('io')
+      .childDirectory('flutter')
+      .childDirectory('app')
+      .childFile('FlutterMultiDexApplication.java');
     utilsFile.createSync(recursive: true);
 
     expect(multiDexApplicationExists(directory), true);
@@ -92,12 +89,11 @@ void main() {
 
   testUsingContext('androidManifestHasNameVariable true with valid manifest', () async {
     final Directory directory = globals.fs.currentDirectory;
-    final File applicationFile = directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+    final File applicationFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
     applicationFile.createSync(recursive: true);
     applicationFile.writeAsStringSync(r'''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -117,12 +113,11 @@ void main() {
 
   testUsingContext('androidManifestHasNameVariable false with no android:name attribute', () async {
     final Directory directory = globals.fs.currentDirectory;
-    final File applicationFile = directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+    final File applicationFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
     applicationFile.createSync(recursive: true);
     applicationFile.writeAsStringSync(r'''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -140,12 +135,11 @@ void main() {
 
   testUsingContext('androidManifestHasNameVariable false with incorrect android:name attribute', () async {
     final Directory directory = globals.fs.currentDirectory;
-    final File applicationFile = directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+    final File applicationFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
     applicationFile.createSync(recursive: true);
     applicationFile.writeAsStringSync(r'''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -164,12 +158,11 @@ void main() {
 
   testUsingContext('androidManifestHasNameVariable false with invalid xml manifest', () async {
     final Directory directory = globals.fs.currentDirectory;
-    final File applicationFile = directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childFile('AndroidManifest.xml');
+    final File applicationFile = directory.childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
     applicationFile.createSync(recursive: true);
     applicationFile.writeAsStringSync(r'''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"

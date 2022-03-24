@@ -12,7 +12,8 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   Size getSize(BoxConstraints constraints) {
-    if (!RenderObject.debugCheckingIntrinsics) getSizeConstraints = constraints;
+    if (!RenderObject.debugCheckingIntrinsics)
+      getSizeConstraints = constraints;
     return const Size(200.0, 300.0);
   }
 
@@ -57,7 +58,7 @@ Widget buildFrame(MultiChildLayoutDelegate delegate) {
 }
 
 class PreferredSizeDelegate extends MultiChildLayoutDelegate {
-  PreferredSizeDelegate({required this.preferredSize});
+  PreferredSizeDelegate({ required this.preferredSize });
 
   final Size preferredSize;
 
@@ -65,7 +66,7 @@ class PreferredSizeDelegate extends MultiChildLayoutDelegate {
   Size getSize(BoxConstraints constraints) => preferredSize;
 
   @override
-  void performLayout(Size size) {}
+  void performLayout(Size size) { }
 
   @override
   bool shouldRelayout(PreferredSizeDelegate oldDelegate) {
@@ -82,7 +83,7 @@ class NotifierLayoutDelegate extends MultiChildLayoutDelegate {
   Size getSize(BoxConstraints constraints) => size.value;
 
   @override
-  void performLayout(Size size) {}
+  void performLayout(Size size) { }
 
   @override
   bool shouldRelayout(NotifierLayoutDelegate oldDelegate) {
@@ -118,7 +119,6 @@ class DuplicateLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
 }
-
 // Used in the 'performLayout error control test' test case
 //  to trigger an error when positioning non existent child
 class NonExistentPositionDelegate extends MultiChildLayoutDelegate {
@@ -152,8 +152,8 @@ class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
   const LayoutWithMissingId({
     Key? key,
     required Widget child,
-  })  : assert(child != null),
-        super(key: key, child: child);
+  }) : assert(child != null),
+       super(key: key, child: child);
 
   @override
   void applyParentData(RenderObject renderObject) {}
@@ -224,6 +224,7 @@ void main() {
         ],
       ),
     ));
+
   });
 
   testWidgets('Loose constraints', (WidgetTester tester) async {
@@ -305,10 +306,11 @@ void main() {
       await expectFlutterErrorMessage(
         tester: tester,
         delegate: ZeroAndOneIdLayoutDelegate(),
-        message: 'FlutterError\n'
-            '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate\n'
-            '   tried to lay out a non-existent child.\n'
-            '   There is no child with the id "1".\n',
+        message:
+          'FlutterError\n'
+          '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate\n'
+          '   tried to lay out a non-existent child.\n'
+          '   There is no child with the id "1".\n',
       );
     });
 
@@ -316,10 +318,11 @@ void main() {
       await expectFlutterErrorMessage(
         tester: tester,
         delegate: DuplicateLayoutDelegate(),
-        message: 'FlutterError\n'
-            '   The DuplicateLayoutDelegate custom multichild layout delegate\n'
-            '   tried to lay out the child with id "0" more than once.\n'
-            '   Each child must be laid out exactly once.\n',
+        message:
+          'FlutterError\n'
+          '   The DuplicateLayoutDelegate custom multichild layout delegate\n'
+          '   tried to lay out the child with id "0" more than once.\n'
+          '   Each child must be laid out exactly once.\n',
       );
     });
 
@@ -327,17 +330,18 @@ void main() {
       await expectFlutterErrorMessage(
         tester: tester,
         delegate: InvalidConstraintsChildLayoutDelegate(),
-        message: 'FlutterError\n'
-            '   The InvalidConstraintsChildLayoutDelegate custom multichild\n'
-            '   layout delegate provided invalid box constraints for the child\n'
-            '   with id "0".\n'
-            '   FlutterError\n'
-            '   The minimum width and height must be greater than or equal to\n'
-            '   zero.\n'
-            '   The maximum width must be greater than or equal to the minimum\n'
-            '   width.\n'
-            '   The maximum height must be greater than or equal to the minimum\n'
-            '   height.\n',
+        message:
+          'FlutterError\n'
+          '   The InvalidConstraintsChildLayoutDelegate custom multichild\n'
+          '   layout delegate provided invalid box constraints for the child\n'
+          '   with id "0".\n'
+          '   FlutterError\n'
+          '   The minimum width and height must be greater than or equal to\n'
+          '   zero.\n'
+          '   The maximum width must be greater than or equal to the minimum\n'
+          '   width.\n'
+          '   The maximum height must be greater than or equal to the minimum\n'
+          '   height.\n',
       );
     });
 
@@ -345,10 +349,11 @@ void main() {
       await expectFlutterErrorMessage(
         tester: tester,
         delegate: NonExistentPositionDelegate(),
-        message: 'FlutterError\n'
-            '   The NonExistentPositionDelegate custom multichild layout delegate\n'
-            '   tried to position out a non-existent child:\n'
-            '   There is no child with the id "1".\n',
+        message:
+          'FlutterError\n'
+          '   The NonExistentPositionDelegate custom multichild layout delegate\n'
+          '   tried to position out a non-existent child:\n'
+          '   There is no child with the id "1".\n',
       );
     });
 
@@ -361,16 +366,17 @@ void main() {
           ),
         ),
         tester: tester,
-        message: 'FlutterError\n'
-            '   Every child of a RenderCustomMultiChildLayoutBox must have an ID\n'
-            '   in its parent data.\n'
-            '   The following child has no ID: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT:\n'
-            '     creator: ConstrainedBox ← Container ← LayoutWithMissingId ←\n'
-            '       CustomMultiChildLayout ← Center ← [root]\n'
-            '     parentData: offset=Offset(0.0, 0.0); id=null\n'
-            '     constraints: MISSING\n'
-            '     size: MISSING\n'
-            '     additionalConstraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n',
+        message:
+          'FlutterError\n'
+          '   Every child of a RenderCustomMultiChildLayoutBox must have an ID\n'
+          '   in its parent data.\n'
+          '   The following child has no ID: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT:\n'
+          '     creator: ConstrainedBox ← Container ← LayoutWithMissingId ←\n'
+          '       CustomMultiChildLayout ← Center ← [root]\n'
+          '     parentData: offset=Offset(0.0, 0.0); id=null\n'
+          '     constraints: MISSING\n'
+          '     size: MISSING\n'
+          '     additionalConstraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n',
       );
     });
 
@@ -387,11 +393,12 @@ void main() {
           ),
         ),
         tester: tester,
-        message: 'FlutterError\n'
-            '   Each child must be laid out exactly once.\n'
-            '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate'
-            ' forgot to lay out the following child:\n'
-            '     2: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n',
+        message:
+          'FlutterError\n'
+          '   Each child must be laid out exactly once.\n'
+          '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate'
+          ' forgot to lay out the following child:\n'
+          '     2: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n',
       );
     });
 
@@ -409,12 +416,13 @@ void main() {
           ),
         ),
         tester: tester,
-        message: 'FlutterError\n'
-            '   Each child must be laid out exactly once.\n'
-            '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate'
-            ' forgot to lay out the following children:\n'
-            '     2: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n'
-            '     3: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n',
+        message:
+          'FlutterError\n'
+          '   Each child must be laid out exactly once.\n'
+          '   The ZeroAndOneIdLayoutDelegate custom multichild layout delegate'
+          ' forgot to lay out the following children:\n'
+          '     2: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n'
+          '     3: RenderConstrainedBox#62a34 NEEDS-LAYOUT NEEDS-PAINT\n',
       );
     });
   });

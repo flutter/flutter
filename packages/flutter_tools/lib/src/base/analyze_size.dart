@@ -21,10 +21,10 @@ class SizeAnalyzer {
     required Logger logger,
     required Usage flutterUsage,
     Pattern appFilenamePattern = 'libapp.so',
-  })  : _flutterUsage = flutterUsage,
-        _fileSystem = fileSystem,
-        _logger = logger,
-        _appFilenamePattern = appFilenamePattern;
+  }) : _flutterUsage = flutterUsage,
+       _fileSystem = fileSystem,
+       _logger = logger,
+       _appFilenamePattern = appFilenamePattern;
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -83,8 +83,7 @@ class SizeAnalyzer {
       apkAnalysisJson: apkAnalysisJson,
       path: _locatedAotFilePath,
       aotSnapshotJson: processedAotSnapshotJson,
-      precompilerTrace:
-          json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object?>? ?? <String, Object?>{},
+      precompilerTrace: json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object?>? ?? <String, Object?>{},
     );
 
     assert(_appFilename != null);
@@ -139,8 +138,7 @@ class SizeAnalyzer {
       apkAnalysisJson: apkAnalysisJson,
       path: _locatedAotFilePath,
       aotSnapshotJson: processedAotSnapshotJson,
-      precompilerTrace:
-          json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object?>? ?? <String, Object?>{},
+      precompilerTrace: json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object?>? ?? <String, Object?>{},
     );
     CodeSizeEvent(kind, flutterUsage: _flutterUsage).send();
     return apkAnalysisJson;
@@ -165,7 +163,8 @@ class SizeAnalyzer {
       if (excludePath != null && file.uri.pathSegments.contains(excludePath)) {
         continue;
       }
-      final List<String> path = _fileSystem.path.split(_fileSystem.path.relative(file.path, from: relativeTo));
+      final List<String> path = _fileSystem.path.split(
+        _fileSystem.path.relative(file.path, from: relativeTo));
       pathsToSize[path] = file.lengthSync();
     }
     return _buildSymbolTree(pathsToSize);
@@ -183,7 +182,7 @@ class SizeAnalyzer {
   }
 
   _SymbolNode _buildSymbolTree(Map<List<String>, int> pathsToSize) {
-    final _SymbolNode rootNode = _SymbolNode('Root');
+     final _SymbolNode rootNode = _SymbolNode('Root');
     _SymbolNode currentNode = rootNode;
 
     for (final List<String> paths in pathsToSize.keys) {
@@ -222,25 +221,26 @@ class SizeAnalyzer {
     totalPath += currentNode.name;
 
     assert(_appFilename != null);
-    if (currentNode.children.isNotEmpty &&
-        currentNode.name != '$_appFilename (Dart AOT)' &&
-        currentDepth < maxDepth &&
-        currentNode.byteSize >= 1000) {
+    if (currentNode.children.isNotEmpty
+      && currentNode.name != '$_appFilename (Dart AOT)'
+      && currentDepth < maxDepth
+      && currentNode.byteSize >= 1000) {
       for (final _SymbolNode child in currentNode.children) {
         _printLibChildrenPaths(child, '$totalPath/', aotSnapshotJsonRoot, maxDepth, currentDepth + 1);
       }
-      _leadingPaths = totalPath.split('/')..removeLast();
+      _leadingPaths = totalPath.split('/')
+        ..removeLast();
     } else {
       // Print total path and size if currentNode does not have any children and is
       // larger than 1KB
       final bool isAotSnapshotPath = _locatedAotFilePath.join('/').contains(totalPath);
       if (currentNode.byteSize >= 1000 || isAotSnapshotPath) {
-        _printEntitySize(totalPath,
-            byteSize: currentNode.byteSize, level: 1, emphasis: currentNode.children.isNotEmpty);
+        _printEntitySize(totalPath, byteSize: currentNode.byteSize, level: 1, emphasis: currentNode.children.isNotEmpty);
         if (isAotSnapshotPath) {
           _printAotSnapshotSummary(aotSnapshotJsonRoot, level: totalPath.split('/').length);
         }
-        _leadingPaths = totalPath.split('/')..removeLast();
+        _leadingPaths = totalPath.split('/')
+          ..removeLast();
       }
     }
   }
@@ -291,9 +291,8 @@ class SizeAnalyzer {
     while (path.isNotEmpty) {
       final List<Map<String, Object?>>? children = currentLevel['children'] as List<Map<String, Object?>>?;
       final Map<String, Object?> childWithPathAsName = children?.firstWhere(
-            (Map<String, Object?> child) => (child['n'] as String?) == path.first,
-          ) ??
-          <String, Object?>{};
+        (Map<String, Object?> child) => (child['n'] as String?) == path.first,
+      ) ?? <String, Object?>{};
       path.removeAt(0);
       currentLevel = childWithPathAsName;
     }
@@ -324,7 +323,8 @@ class SizeAnalyzer {
     // directories (in _leadingPaths) for the last entity that was printed. The
     // similarly determines whether or not leading directory information needs to
     // be printed.
-    final List<String> localSegments = entityName.split('/')..removeLast();
+    final List<String> localSegments = entityName.split('/')
+        ..removeLast();
     int i = 0;
     while (i < _leadingPaths.length && i < localSegments.length && _leadingPaths[i] == localSegments[i]) {
       i += 1;
@@ -452,7 +452,8 @@ class _SymbolNode {
 
   _SymbolNode addChild(_SymbolNode child) {
     assert(child.parent == null);
-    assert(!_children.containsKey(child.name), 'Cannot add duplicate child key ${child.name}');
+    assert(!_children.containsKey(child.name),
+        'Cannot add duplicate child key ${child.name}');
 
     child._parent = this;
     _children[child.name] = child;
@@ -464,7 +465,10 @@ class _SymbolNode {
   }
 
   Map<String, Object?> toJson() {
-    final Map<String, Object?> json = <String, Object?>{'n': name, 'value': byteSize};
+    final Map<String, Object?> json = <String, Object?>{
+      'n': name,
+      'value': byteSize
+    };
     final List<Map<String, Object?>> childrenAsJson = <Map<String, Object?>>[];
     for (final _SymbolNode child in children) {
       childrenAsJson.add(child.toJson());

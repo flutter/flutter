@@ -53,19 +53,19 @@ Future<void> buildFuchsia({
     outDir.createSync(recursive: true);
   }
 
-  await _timedBuildStep(
-      'fuchsia-kernel-compile',
-      () => globals.fuchsiaSdk!.fuchsiaKernelCompiler
-          .build(fuchsiaProject: fuchsiaProject, target: targetPath, buildInfo: buildInfo));
+  await _timedBuildStep('fuchsia-kernel-compile',
+    () => globals.fuchsiaSdk!.fuchsiaKernelCompiler.build(
+      fuchsiaProject: fuchsiaProject, target: targetPath, buildInfo: buildInfo));
 
   if (buildInfo.usesAot) {
-    await _timedBuildStep(
-        'fuchsia-gen-snapshot', () => _genSnapshot(fuchsiaProject, targetPath, buildInfo, targetPlatform));
+    await _timedBuildStep('fuchsia-gen-snapshot',
+      () => _genSnapshot(fuchsiaProject, targetPath, buildInfo, targetPlatform));
   }
 
-  await _timedBuildStep('fuchsia-build-assets', () => _buildAssets(fuchsiaProject, targetPath, buildInfo));
-  await _timedBuildStep(
-      'fuchsia-build-package', () => _buildPackage(fuchsiaProject, targetPath, buildInfo, runnerPackageSource));
+  await _timedBuildStep('fuchsia-build-assets',
+    () => _buildAssets(fuchsiaProject, targetPath, buildInfo));
+  await _timedBuildStep('fuchsia-build-package',
+    () => _buildPackage(fuchsiaProject, targetPath, buildInfo, runnerPackageSource));
 }
 
 Future<void> _genSnapshot(
@@ -124,7 +124,8 @@ Future<void> _buildAssets(
     throwToolExit('Unable to find assets.', exitCode: 1);
   }
 
-  final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.of(assets.entries);
+  final Map<String, DevFSContent> assetEntries =
+      Map<String, DevFSContent>.of(assets.entries);
   await writeBundle(globals.fs.directory(assetDir), assetEntries);
 
   final String appName = fuchsiaProject.project.manifest.appName;
@@ -189,7 +190,8 @@ Future<void> _buildPackage(
     pkg.createSync(recursive: true);
   }
 
-  final File srcCmx = globals.fs.file(globals.fs.path.join(fuchsiaProject.meta.path, '$appName.cmx'));
+  final File srcCmx =
+      globals.fs.file(globals.fs.path.join(fuchsiaProject.meta.path, '$appName.cmx'));
   final File dstCmx = globals.fs.file(globals.fs.path.join(outDir, '$appName.cmx'));
   _rewriteCmx(buildInfo.mode, runnerPackageSource, srcCmx, dstCmx);
 
@@ -197,15 +199,19 @@ Future<void> _buildPackage(
 
   if (buildInfo.usesAot) {
     final String elf = globals.fs.path.join(outDir, 'elf.aotsnapshot');
-    manifestFile.writeAsStringSync('data/$appName/app_aot_snapshot.so=$elf\n');
+    manifestFile.writeAsStringSync(
+      'data/$appName/app_aot_snapshot.so=$elf\n');
   } else {
     final String dilpmanifest = globals.fs.path.join(outDir, '$appName.dilpmanifest');
     manifestFile.writeAsStringSync(globals.fs.file(dilpmanifest).readAsStringSync());
   }
 
-  manifestFile.writeAsStringSync(globals.fs.file(pkgassets).readAsStringSync(), mode: FileMode.append);
-  manifestFile.writeAsStringSync('meta/$appName.cmx=${dstCmx.path}\n', mode: FileMode.append);
-  manifestFile.writeAsStringSync('meta/package=$pkgDir/meta/package\n', mode: FileMode.append);
+  manifestFile.writeAsStringSync(globals.fs.file(pkgassets).readAsStringSync(),
+      mode: FileMode.append);
+  manifestFile.writeAsStringSync('meta/$appName.cmx=${dstCmx.path}\n',
+      mode: FileMode.append);
+  manifestFile.writeAsStringSync('meta/package=$pkgDir/meta/package\n',
+      mode: FileMode.append);
 
   final FuchsiaPM? fuchsiaPM = globals.fuchsiaSdk?.fuchsiaPM;
   if (fuchsiaPM == null) {

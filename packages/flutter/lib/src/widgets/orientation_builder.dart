@@ -31,8 +31,8 @@ class OrientationBuilder extends StatelessWidget {
   const OrientationBuilder({
     Key? key,
     required this.builder,
-  })  : assert(builder != null),
-        super(key: key);
+  }) : assert(builder != null),
+       super(key: key);
 
   /// Builds the widgets below this widget given this widget's orientation.
   ///
@@ -46,8 +46,7 @@ class OrientationBuilder extends StatelessWidget {
     // If the constraints are fully unbounded (i.e., maxWidth and maxHeight are
     // both infinite), we prefer Orientation.portrait because its more common to
     // scroll vertically then horizontally.
-    final Orientation orientation =
-        constraints.maxWidth > constraints.maxHeight ? Orientation.landscape : Orientation.portrait;
+    final Orientation orientation = constraints.maxWidth > constraints.maxHeight ? Orientation.landscape : Orientation.portrait;
     return builder(context, orientation);
   }
 

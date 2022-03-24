@@ -111,7 +111,8 @@ class NavigationBarThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static NavigationBarThemeData? lerp(NavigationBarThemeData? a, NavigationBarThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return NavigationBarThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
@@ -126,29 +127,31 @@ class NavigationBarThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        height,
-        backgroundColor,
-        elevation,
-        indicatorColor,
-        indicatorShape,
-        labelTextStyle,
-        iconTheme,
-        labelBehavior,
-      );
+    height,
+    backgroundColor,
+    elevation,
+    indicatorColor,
+    indicatorShape,
+    labelTextStyle,
+    iconTheme,
+    labelBehavior,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is NavigationBarThemeData &&
-        other.height == height &&
-        other.backgroundColor == backgroundColor &&
-        other.elevation == elevation &&
-        other.indicatorColor == indicatorColor &&
-        other.indicatorShape == indicatorShape &&
-        other.labelTextStyle == labelTextStyle &&
-        other.iconTheme == iconTheme &&
-        other.labelBehavior == labelBehavior;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is NavigationBarThemeData
+        && other.height == height
+        && other.backgroundColor == backgroundColor
+        && other.elevation == elevation
+        && other.indicatorColor == indicatorColor
+        && other.indicatorShape == indicatorShape
+        && other.labelTextStyle == labelTextStyle
+        && other.iconTheme == iconTheme
+        && other.labelBehavior == labelBehavior;
   }
 
   @override
@@ -159,12 +162,9 @@ class NavigationBarThemeData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('indicatorShape', indicatorShape, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
-    properties
-        .add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>('iconTheme', iconTheme, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<NavigationDestinationLabelBehavior>('labelBehavior', labelBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>('iconTheme', iconTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<NavigationDestinationLabelBehavior>('labelBehavior', labelBehavior, defaultValue: null));
   }
 
   static MaterialStateProperty<T>? _lerpProperties<T>(
@@ -174,7 +174,8 @@ class NavigationBarThemeData with Diagnosticable {
     T Function(T?, T?, double) lerpFunction,
   ) {
     // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
 }
@@ -214,8 +215,7 @@ class NavigationBarTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(data != null),
-        super(key: key, child: child);
+  }) : assert(data != null), super(key: key, child: child);
 
   /// Specifies the background color, label text style, icon theme, and label
   /// type values for descendant [NavigationBar] widgets.

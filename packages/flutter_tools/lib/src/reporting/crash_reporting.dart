@@ -59,9 +59,9 @@ class CrashReporter {
     required FileSystem fileSystem,
     required Logger logger,
     required FlutterProjectFactory flutterProjectFactory,
-  })  : _fileSystem = fileSystem,
-        _logger = logger,
-        _flutterProjectFactory = flutterProjectFactory;
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _flutterProjectFactory = flutterProjectFactory;
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -74,13 +74,10 @@ class CrashReporter {
 
     final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL(details.error.toString());
     _logger.printStatus('$similarIssuesURL\n', wrap: false);
-    _logger.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.',
-        emphasis: true);
+    _logger.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
     _logger.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
 
-    _logger.printStatus(
-        'Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!',
-        emphasis: true);
+    _logger.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
 
     final GitHubTemplateCreator gitHubTemplateCreator = GitHubTemplateCreator(
       fileSystem: _fileSystem,
@@ -112,11 +109,11 @@ class CrashReportSender {
     required Platform platform,
     required Logger logger,
     required OperatingSystemUtils operatingSystemUtils,
-  })  : _client = client ?? http.Client(),
-        _usage = usage,
-        _platform = platform,
-        _logger = logger,
-        _operatingSystemUtils = operatingSystemUtils;
+  }) : _client = client ?? http.Client(),
+      _usage = usage,
+      _platform = platform,
+      _logger = logger,
+      _operatingSystemUtils = operatingSystemUtils;
 
   final http.Client _client;
   final Usage _usage;
@@ -190,17 +187,17 @@ class CrashReportSender {
       final http.StreamedResponse resp = await _client.send(req);
 
       if (resp.statusCode == HttpStatus.ok) {
-        final String reportId = await http.ByteStream(resp.stream).bytesToString();
+        final String reportId = await http.ByteStream(resp.stream)
+          .bytesToString();
         _logger.printTrace('Crash report sent (report ID: $reportId)');
         _crashReportSent = true;
       } else {
         _logger.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
       }
 
-      // Catch all exceptions to print the message that makes clear that the
-      // crash logger crashed.
-    } catch (sendError, sendStackTrace) {
-      // ignore: avoid_catches_without_on_clauses
+    // Catch all exceptions to print the message that makes clear that the
+    // crash logger crashed.
+    } catch (sendError, sendStackTrace) { // ignore: avoid_catches_without_on_clauses
       if (sendError is SocketException || sendError is HttpException || sendError is http.ClientException) {
         _logger.printError('Failed to send crash report due to a network error: $sendError');
       } else {

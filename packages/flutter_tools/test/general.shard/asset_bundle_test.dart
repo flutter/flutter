@@ -24,7 +24,9 @@ void main() {
 
     setUp(() async {
       testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+        style: globals.platform.isWindows
+          ? FileSystemStyle.windows
+          : FileSystemStyle.posix,
       );
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     });
@@ -127,7 +129,8 @@ name: example''')
         ..setLastModifiedSync(modifiedTime);
 
       // touch .packages to make sure its change time is after pubspec.yaml's
-      globals.fs.file('.packages').setLastModifiedSync(modifiedTime);
+      globals.fs.file('.packages')
+        .setLastModifiedSync(modifiedTime);
 
       // Even though the previous file was removed, it is left in the
       // asset manifest and not updated. This is due to the devfs not
@@ -302,7 +305,8 @@ flutter:
     final FileExceptionHandler handler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
-    final Directory directory = fileSystem.directory('foo')..createSync();
+    final Directory directory = fileSystem.directory('foo')
+      ..createSync();
     handler.addError(directory, FileSystemOp.delete, const FileSystemException('Expected Error Text'));
 
     await writeBundle(directory, <String, DevFSContent>{}, loggerOverride: testLogger);
@@ -324,9 +328,12 @@ assets:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
 
-    final DevFSStringContent assetManifest = bundle.entries['AssetManifest.json'] as DevFSStringContent;
-    final DevFSStringContent fontManifest = bundle.entries['FontManifest.json'] as DevFSStringContent;
-    final DevFSStringContent license = bundle.entries['NOTICES'] as DevFSStringContent;
+    final DevFSStringContent assetManifest = bundle.entries['AssetManifest.json']
+      as DevFSStringContent;
+    final DevFSStringContent fontManifest = bundle.entries['FontManifest.json']
+      as DevFSStringContent;
+    final DevFSStringContent license = bundle.entries['NOTICES']
+      as DevFSStringContent;
 
     await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
 
@@ -338,9 +345,8 @@ assets:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext(
-      'inserts dummy file into additionalDependencies when '
-      'wildcards are used', () async {
+  testUsingContext('inserts dummy file into additionalDependencies when '
+    'wildcards are used', () async {
     globals.fs.file('.packages').createSync();
     globals.fs.file(globals.fs.path.join('assets', 'bar.txt')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
@@ -360,9 +366,8 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext(
-      'Does not insert dummy file into additionalDependencies '
-      'when wildcards are not used', () async {
+  testUsingContext('Does not insert dummy file into additionalDependencies '
+    'when wildcards are not used', () async {
     globals.fs.file('.packages').createSync();
     globals.fs.file(globals.fs.path.join('assets', 'bar.txt')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
@@ -382,14 +387,14 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext(
-      'Does not insert dummy file into additionalDependencies '
-      'when wildcards are used by dependencies', () async {
+  testUsingContext('Does not insert dummy file into additionalDependencies '
+    'when wildcards are used by dependencies', () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/
 foo:foo/lib/
 ''');
-    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -422,7 +427,8 @@ flutter:
 example:lib/
 foo:foo/lib/
 ''');
-    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -448,7 +454,8 @@ flutter:
     expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
 
     // Does not track dependency's wildcard directories.
-    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).deleteSync();
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .deleteSync();
 
     expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
   }, overrides: <Type, Generator>{
@@ -457,14 +464,14 @@ flutter:
     Platform: () => FakePlatform(),
   });
 
-  testUsingContext(
-      'reports package that causes asset bundle error when it is '
-      'a dependency', () async {
+  testUsingContext('reports package that causes asset bundle error when it is '
+    'a dependency', () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/
 foo:foo/lib/
 ''');
-    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -491,9 +498,8 @@ flutter:
     Platform: () => FakePlatform(),
   });
 
-  testUsingContext(
-      'does not report package that causes asset bundle error '
-      'when it is from own pubspec', () async {
+  testUsingContext('does not report package that causes asset bundle error '
+    'when it is from own pubspec', () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/
 ''');
@@ -515,9 +521,8 @@ flutter:
     Platform: () => FakePlatform(),
   });
 
-  testUsingContext(
-      'does not include material design assets if uses-material-design: true is '
-      'specified only by a dependency', () async {
+  testUsingContext('does not include material design assets if uses-material-design: true is '
+    'specified only by a dependency', () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/
 foo:foo/lib/
@@ -545,7 +550,9 @@ flutter:
     expect(await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages'), 0);
     expect((bundle.entries['FontManifest.json'] as DevFSStringContent).string, '[]');
     expect((bundle.entries['AssetManifest.json'] as DevFSStringContent).string, '{}');
-    expect(testLogger.errorText, contains('package:foo has `uses-material-design: true` set'));
+    expect(testLogger.errorText, contains(
+      'package:foo has `uses-material-design: true` set'
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
@@ -615,8 +622,7 @@ flutter:
     expect((bundle.entries['FontManifest.json'] as DevFSStringContent).string, '[]');
     // The assets from deferred components and regular assets
     // are both included in alphabetical order
-    expect((bundle.entries['AssetManifest.json'] as DevFSStringContent).string,
-        '{"assets/apple.jpg":["assets/apple.jpg"],"assets/bar.jpg":["assets/bar.jpg"],"assets/foo.jpg":["assets/foo.jpg"],"assets/zebra.jpg":["assets/zebra.jpg"]}');
+    expect((bundle.entries['AssetManifest.json'] as DevFSStringContent).string, '{"assets/apple.jpg":["assets/apple.jpg"],"assets/bar.jpg":["assets/bar.jpg"],"assets/foo.jpg":["assets/foo.jpg"],"assets/zebra.jpg":["assets/zebra.jpg"]}');
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),

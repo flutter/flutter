@@ -132,12 +132,12 @@ class ReorderableList extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(itemCount >= 0),
-        assert(
-          itemExtent == null || prototypeItem == null,
-          'You can only pass itemExtent or prototypeItem, not both',
-        ),
-        super(key: key);
+  }) : assert(itemCount >= 0),
+       assert(
+         itemExtent == null || prototypeItem == null,
+         'You can only pass itemExtent or prototypeItem, not both',
+       ),
+       super(key: key);
 
   /// {@template flutter.widgets.reorderable_list.itemBuilder}
   /// Called, as needed, to build list item widgets.
@@ -437,12 +437,12 @@ class SliverReorderableList extends StatefulWidget {
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
-  })  : assert(itemCount >= 0),
-        assert(
-          itemExtent == null || prototypeItem == null,
-          'You can only pass itemExtent or prototypeItem, not both',
-        ),
-        super(key: key);
+  }) : assert(itemCount >= 0),
+       assert(
+         itemExtent == null || prototypeItem == null,
+         'You can only pass itemExtent or prototypeItem, not both',
+       ),
+       super(key: key);
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
@@ -576,7 +576,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
   late ScrollableState _scrollable;
   Axis get _scrollDirection => axisDirectionToAxis(_scrollable.axisDirection);
-  bool get _reverse => _scrollable.axisDirection == AxisDirection.up || _scrollable.axisDirection == AxisDirection.left;
+  bool get _reverse =>
+    _scrollable.axisDirection == AxisDirection.up ||
+    _scrollable.axisDirection == AxisDirection.left;
 
   @override
   void didChangeDependencies() {
@@ -584,7 +586,10 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     _scrollable = Scrollable.of(context)!;
     if (_autoScroller?.scrollable != _scrollable) {
       _autoScroller?.stopAutoScroll();
-      _autoScroller = _EdgeDraggingAutoScroller(_scrollable, onScrollViewScrolled: _handleScrollableAutoScrolled);
+      _autoScroller = _EdgeDraggingAutoScroller(
+        _scrollable,
+        onScrollViewScrolled: _handleScrollableAutoScrolled
+      );
     }
   }
 
@@ -702,7 +707,8 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     overlay.insert(_overlayEntry!);
 
     for (final _ReorderableItemState childItem in _items.values) {
-      if (childItem == item || !childItem.mounted) continue;
+      if (childItem == item || !childItem.mounted)
+        continue;
       childItem.updateForGap(_insertIndex!, _dragInfo!.itemExtent, false, _reverse);
     }
     return _dragInfo;
@@ -778,7 +784,8 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   void _handleScrollableAutoScrolled() {
-    if (_dragInfo == null) return;
+    if (_dragInfo == null)
+      return;
     _dragUpdateItems();
     // Continue scrolling if the drag is still in progress.
     _autoScroller?.startAutoScrollIfNecessary(_dragTargetRect);
@@ -793,7 +800,8 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     // Find the new index for inserting the item being dragged.
     int newIndex = _insertIndex!;
     for (final _ReorderableItemState item in _items.values) {
-      if (item.index == _dragIndex! || !item.mounted) continue;
+      if (item.index == _dragIndex! || !item.mounted)
+        continue;
 
       Rect geometry = item.targetGeometry();
       if (!_dragStartTransitionComplete && _dragIndex! <= item.index) {
@@ -815,12 +823,14 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
           // the new index.
           newIndex = item.index;
           break;
+
         } else if (itemMiddle >= proxyItemStart && proxyItemStart >= itemStart) {
           // The end of the proxy is in the ending half of the item, so
           // we should swap the item with the gap and we are done looking for
           // the new index.
           newIndex = item.index + 1;
           break;
+
         } else if (itemStart > proxyItemEnd && newIndex < (item.index + 1)) {
           newIndex = item.index + 1;
         } else if (proxyItemStart > itemEnd && newIndex > item.index) {
@@ -833,12 +843,14 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
           // the new index.
           newIndex = item.index;
           break;
+
         } else if (itemMiddle <= proxyItemEnd && proxyItemEnd <= itemEnd) {
           // The end of the proxy is in the ending half of the item, so
           // we should swap the item with the gap and we are done looking for
           // the new index.
           newIndex = item.index + 1;
           break;
+
         } else if (itemEnd < proxyItemStart && newIndex < (item.index + 1)) {
           newIndex = item.index + 1;
         } else if (proxyItemEnd < itemStart && newIndex > item.index) {
@@ -850,7 +862,8 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     if (newIndex != _insertIndex) {
       _insertIndex = newIndex;
       for (final _ReorderableItemState item in _items.values) {
-        if (item.index == _dragIndex! || !item.mounted) continue;
+        if (item.index == _dragIndex! || !item.mounted)
+          continue;
         item.updateForGap(newIndex, gapExtent, true, _reverse);
       }
     }
@@ -862,7 +875,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   Offset _itemOffsetAt(int index) {
-    final RenderBox itemRenderBox = _items[index]!.context.findRenderObject()! as RenderBox;
+    final RenderBox itemRenderBox =  _items[index]!.context.findRenderObject()! as RenderBox;
     return itemRenderBox.localToGlobal(Offset.zero);
   }
 
@@ -975,7 +988,8 @@ class _EdgeDraggingAutoScroller {
       // The change will be picked up in the next scroll.
       return;
     }
-    if (!_scrolling) _scroll();
+    if (!_scrolling)
+      _scroll();
   }
 
   /// Stop any ongoing auto scrolling.
@@ -985,8 +999,10 @@ class _EdgeDraggingAutoScroller {
 
   Future<void> _scroll() async {
     final RenderBox scrollRenderBox = scrollable.context.findRenderObject()! as RenderBox;
-    final Rect globalRect = MatrixUtils.transformRect(scrollRenderBox.getTransformTo(null),
-        Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height));
+    final Rect globalRect = MatrixUtils.transformRect(
+        scrollRenderBox.getTransformTo(null),
+        Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height)
+    );
     _scrolling = true;
     double? newOffset;
     const double overDragMax = 20.0;
@@ -1010,7 +1026,7 @@ class _EdgeDraggingAutoScroller {
     } else {
       if (proxyStart < viewportStart && scrollable.position.pixels > scrollable.position.minScrollExtent) {
         overDrag = math.max(viewportStart - proxyStart, overDragMax);
-        newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels - overDrag);
+        newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels -  overDrag);
       } else if (proxyEnd > viewportEnd && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
         overDrag = math.max(proxyEnd - viewportEnd, overDragMax);
         newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
@@ -1028,8 +1044,10 @@ class _EdgeDraggingAutoScroller {
       duration: duration,
       curve: Curves.linear,
     );
-    if (onScrollViewScrolled != null) onScrollViewScrolled!();
-    if (_scrolling) await _scroll();
+    if (onScrollViewScrolled != null)
+      onScrollViewScrolled!();
+    if (_scrolling)
+      await _scroll();
   }
 }
 
@@ -1080,7 +1098,6 @@ class _ReorderableItemState extends State<_ReorderableItem> {
       });
     }
   }
-
   bool _dragging = false;
 
   @override
@@ -1347,12 +1364,12 @@ class _DragInfo extends Drag {
       vsync: tickerProvider,
       duration: const Duration(milliseconds: 250),
     )
-      ..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.dismissed) {
-          _dropCompleted();
-        }
-      })
-      ..forward();
+    ..addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.dismissed) {
+        _dropCompleted();
+      }
+    })
+    ..forward();
   }
 
   @override
@@ -1437,8 +1454,7 @@ class _DragItemProxy extends StatelessWidget {
           Offset effectivePosition = position;
           final Offset? dropPosition = listState._finalDropPosition;
           if (dropPosition != null) {
-            effectivePosition = Offset.lerp(
-                dropPosition - overlayOrigin, effectivePosition, Curves.easeOut.transform(animation.value))!;
+            effectivePosition = Offset.lerp(dropPosition - overlayOrigin, effectivePosition, Curves.easeOut.transform(animation.value))!;
           }
           return Positioned(
             left: effectivePosition.dx,
@@ -1499,6 +1515,7 @@ Offset _restrictAxis(Offset offset, Axis scrollDirection) {
 // of the objects used to generate widgets.
 @optionalTypeArgs
 class _ReorderableItemGlobalKey extends GlobalObjectKey {
+
   const _ReorderableItemGlobalKey(this.subKey, this.index, this.state) : super(subKey);
 
   final Key subKey;
@@ -1507,8 +1524,12 @@ class _ReorderableItemGlobalKey extends GlobalObjectKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is _ReorderableItemGlobalKey && other.subKey == subKey && other.index == index && other.state == state;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _ReorderableItemGlobalKey
+        && other.subKey == subKey
+        && other.index == index
+        && other.state == state;
   }
 
   @override

@@ -12,8 +12,8 @@ class ProjectBuildLocationMigration extends ProjectMigrator {
   ProjectBuildLocationMigration(
     IosProject project,
     Logger logger,
-  )   : _xcodeProjectWorkspaceData = project.xcodeProjectWorkspaceData,
-        super(logger);
+  ) : _xcodeProjectWorkspaceData = project.xcodeProjectWorkspaceData,
+      super(logger);
 
   final File _xcodeProjectWorkspaceData;
 

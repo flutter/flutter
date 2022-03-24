@@ -27,6 +27,7 @@ void main() {
     expect(description, <String>[]);
   });
 
+
   testWidgets('SliderThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SliderThemeData(
@@ -239,13 +240,8 @@ void main() {
     expect(
       material,
       paints
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0,
-                topLeft: activatedRadius, bottomLeft: activatedRadius),
-            color: sliderTheme.activeTrackColor)
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius),
-            color: sliderTheme.inactiveTrackColor),
+        ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.activeTrackColor)
+        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
@@ -255,13 +251,8 @@ void main() {
     expect(
       material,
       paints
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0,
-                topLeft: activatedRadius, bottomLeft: activatedRadius),
-            color: sliderTheme.disabledActiveTrackColor)
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius),
-            color: sliderTheme.disabledInactiveTrackColor),
+        ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.disabledActiveTrackColor)
+        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledInactiveTrackColor),
     );
   });
 
@@ -380,7 +371,7 @@ void main() {
       showValueIndicator: ShowValueIndicator.always,
       valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
     );
-    Widget buildApp(String value, {double sliderValue = 0.5, double textScale = 1.0}) {
+    Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -396,7 +387,7 @@ void main() {
                         value: sliderValue,
                         label: value,
                         divisions: 3,
-                        onChanged: (double d) {},
+                        onChanged: (double d) { },
                       ),
                     ),
                   ),
@@ -512,8 +503,8 @@ void main() {
             const Offset(-24.0, -49.0),
           ],
           excludes: <Offset>[
-            const Offset(98.0, -32.0), // inside full size, outside small
-            const Offset(-40.0, -32.0), // inside full size, outside small
+            const Offset(98.0, -32.0),  // inside full size, outside small
+            const Offset(-40.0, -32.0),  // inside full size, outside small
             const Offset(90.1, -49.0),
             const Offset(-40.1, -49.0),
           ],
@@ -557,7 +548,7 @@ void main() {
       showValueIndicator: ShowValueIndicator.always,
       valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
     );
-    Widget buildApp(String value, {double sliderValue = 0.5, double textScale = 1.0}) {
+    Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -573,7 +564,7 @@ void main() {
                         value: sliderValue,
                         label: value,
                         divisions: 3,
-                        onChanged: (double d) {},
+                        onChanged: (double d) { },
                       ),
                     ),
                   ),
@@ -689,8 +680,8 @@ void main() {
             const Offset(-24.0, -49.0),
           ],
           excludes: <Offset>[
-            const Offset(98.0, -32.0), // inside full size, outside small
-            const Offset(-40.0, -32.0), // inside full size, outside small
+            const Offset(98.0, -32.0),  // inside full size, outside small
+            const Offset(-40.0, -32.0),  // inside full size, outside small
             const Offset(90.1, -49.0),
             const Offset(-40.1, -49.0),
           ],
@@ -737,13 +728,8 @@ void main() {
     expect(
       material,
       paints
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(24.0, 291.0, 212.0, 309.0,
-                topLeft: activatedRadius, bottomLeft: activatedRadius),
-            color: sliderTheme.activeTrackColor)
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(212.0, 292.0, 776.0, 308.0, topRight: radius, bottomRight: radius),
-            color: sliderTheme.inactiveTrackColor),
+        ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 291.0, 212.0, 309.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.activeTrackColor)
+        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 292.0, 776.0, 308.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
@@ -754,23 +740,18 @@ void main() {
     expect(
       material,
       paints
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(24.0, 291.0, 212.0, 309.0,
-                topLeft: activatedRadius, bottomLeft: activatedRadius),
-            color: sliderTheme.disabledActiveTrackColor)
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(212.0, 292.0, 776.0, 308.0, topRight: radius, bottomRight: radius),
-            color: sliderTheme.disabledInactiveTrackColor),
+        ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 291.0, 212.0, 309.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.disabledActiveTrackColor)
+        ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 292.0, 776.0, 308.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledInactiveTrackColor),
     );
   });
 
   testWidgets('The default slider thumb shape sizes can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
-          thumbShape: const RoundSliderThumbShape(
-            enabledThumbRadius: 7,
-            disabledThumbRadius: 11,
-          ),
-        );
+      thumbShape: const RoundSliderThumbShape(
+        enabledThumbRadius: 7,
+        disabledThumbRadius: 11,
+      ),
+    );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
@@ -789,13 +770,12 @@ void main() {
     );
   });
 
-  testWidgets('The default slider thumb shape disabled size can be inferred from the enabled size',
-      (WidgetTester tester) async {
+  testWidgets('The default slider thumb shape disabled size can be inferred from the enabled size', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
-          thumbShape: const RoundSliderThumbShape(
-            enabledThumbRadius: 9,
-          ),
-        );
+      thumbShape: const RoundSliderThumbShape(
+        enabledThumbRadius: 9,
+      ),
+    );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
@@ -815,12 +795,12 @@ void main() {
 
   testWidgets('The default slider tick mark shape size can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
-          tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 5),
-          activeTickMarkColor: const Color(0xfadedead),
-          inactiveTickMarkColor: const Color(0xfadebeef),
-          disabledActiveTickMarkColor: const Color(0xfadecafe),
-          disabledInactiveTickMarkColor: const Color(0xfadeface),
-        );
+      tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 5),
+      activeTickMarkColor: const Color(0xfadedead),
+      inactiveTickMarkColor: const Color(0xfadebeef),
+      disabledActiveTickMarkColor: const Color(0xfadecafe),
+      disabledInactiveTickMarkColor: const Color(0xfadeface),
+    );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2));
 
@@ -834,7 +814,7 @@ void main() {
         ..circle(x: 774, y: 300, radius: 5, color: sliderTheme.inactiveTickMarkColor),
     );
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2, enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2,  enabled: false));
     await tester.pumpAndSettle();
 
     expect(
@@ -849,10 +829,10 @@ void main() {
   testWidgets('The default slider overlay shape size can be overridden', (WidgetTester tester) async {
     const double uniqueOverlayRadius = 23;
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
-          overlayShape: const RoundSliderOverlayShape(
-            overlayRadius: uniqueOverlayRadius,
-          ),
-        );
+      overlayShape: const RoundSliderOverlayShape(
+        overlayRadius: uniqueOverlayRadius,
+      ),
+    );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5));
     // Tap center and wait for animation.
@@ -863,22 +843,20 @@ void main() {
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
     expect(
       material,
-      paints
-        ..circle(
-          x: center.dx,
-          y: center.dy,
-          radius: uniqueOverlayRadius,
-          color: sliderTheme.overlayColor,
-        ),
+      paints..circle(
+        x: center.dx,
+        y: center.dy,
+        radius: uniqueOverlayRadius,
+        color: sliderTheme.overlayColor,
+      ),
     );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/74503
-  testWidgets('The slider track layout correctly when the overlay size is smaller than the thumb size',
-      (WidgetTester tester) async {
+  testWidgets('The slider track layout correctly when the overlay size is smaller than the thumb size', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
-          overlayShape: SliderComponentShape.noOverlay,
-        );
+      overlayShape: SliderComponentShape.noOverlay,
+    );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5));
 
@@ -893,24 +871,22 @@ void main() {
       material,
       paints
         // active track RRect. Starts 10 pixels from left of screen.
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(
-          10.0,
-          297.0,
-          400.0,
-          303.0,
-          topLeft: const Radius.circular(3.0),
-          bottomLeft: const Radius.circular(3.0),
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            297.0,
+            400.0,
+            303.0,
+            topLeft: const Radius.circular(3.0),
+            bottomLeft: const Radius.circular(3.0),
         ))
         // inactive track RRect. Ends 10 pixels from right of screen.
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(
-          400.0,
-          298.0,
-          790.0,
-          302.0,
-          topRight: const Radius.circular(2.0),
-          bottomRight: const Radius.circular(2.0),
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+            400.0,
+            298.0,
+            790.0,
+            302.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
         ))
         // The thumb.
         ..circle(x: 400.0, y: 300.0, radius: 10.0),
@@ -928,12 +904,12 @@ void main() {
     // Pump a slider with all shapes skipped.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-            trackHeight: 0,
-            overlayShape: SliderComponentShape.noOverlay,
-            thumbShape: SliderComponentShape.noThumb,
-            tickMarkShape: SliderTickMarkShape.noTickMark,
-            showValueIndicator: ShowValueIndicator.never,
-          ),
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
       value: 0.5,
       divisions: 4,
     ));
@@ -949,11 +925,11 @@ void main() {
     // Pump a slider with just a track.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-            overlayShape: SliderComponentShape.noOverlay,
-            thumbShape: SliderComponentShape.noThumb,
-            tickMarkShape: SliderTickMarkShape.noTickMark,
-            showValueIndicator: ShowValueIndicator.never,
-          ),
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
       value: 0.5,
       divisions: 4,
     ));
@@ -970,14 +946,14 @@ void main() {
     // Pump a slider with just tick marks.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-            trackHeight: 0,
-            overlayShape: SliderComponentShape.noOverlay,
-            thumbShape: SliderComponentShape.noThumb,
-            showValueIndicator: ShowValueIndicator.never,
-            // When the track is hidden to 0 height, a tick mark radius
-            // must be provided to get a non-zero radius.
-            tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 1),
-          ),
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        showValueIndicator: ShowValueIndicator.never,
+        // When the track is hidden to 0 height, a tick mark radius
+        // must be provided to get a non-zero radius.
+        tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 1),
+      ),
       value: 0.5,
       divisions: 4,
     ));
@@ -994,11 +970,11 @@ void main() {
     // Pump a slider with just a thumb.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-            trackHeight: 0,
-            overlayShape: SliderComponentShape.noOverlay,
-            tickMarkShape: SliderTickMarkShape.noTickMark,
-            showValueIndicator: ShowValueIndicator.never,
-          ),
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
       value: 0.5,
       divisions: 4,
     ));
@@ -1015,11 +991,11 @@ void main() {
     // Pump a slider with just an overlay.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-            trackHeight: 0,
-            thumbShape: SliderComponentShape.noThumb,
-            tickMarkShape: SliderTickMarkShape.noTickMark,
-            showValueIndicator: ShowValueIndicator.never,
-          ),
+        trackHeight: 0,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.never,
+      ),
       value: 0.5,
       divisions: 4,
     ));
@@ -1043,12 +1019,12 @@ void main() {
     // Pump a slider with just a value indicator.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-            trackHeight: 0,
-            overlayShape: SliderComponentShape.noOverlay,
-            thumbShape: SliderComponentShape.noThumb,
-            tickMarkShape: SliderTickMarkShape.noTickMark,
-            showValueIndicator: ShowValueIndicator.always,
-          ),
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.always,
+      ),
       value: 0.5,
       divisions: 4,
     ));
@@ -1073,13 +1049,13 @@ void main() {
     // Pump a slider with just a value indicator.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-            trackHeight: 0,
-            overlayShape: SliderComponentShape.noOverlay,
-            thumbShape: SliderComponentShape.noThumb,
-            tickMarkShape: SliderTickMarkShape.noTickMark,
-            showValueIndicator: ShowValueIndicator.always,
-            valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
-          ),
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
+      ),
       value: 0.5,
       divisions: 4,
     ));
@@ -1108,12 +1084,12 @@ void main() {
     // Pump a slider with just a value indicator.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
-            trackHeight: 0,
-            overlayShape: SliderComponentShape.noOverlay,
-            thumbShape: SliderComponentShape.noThumb,
-            tickMarkShape: SliderTickMarkShape.noTickMark,
-            showValueIndicator: ShowValueIndicator.always,
-          ),
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.always,
+      ),
       value: 0.5,
       divisions: 4,
     ));
@@ -1134,6 +1110,7 @@ void main() {
 
     await gesture.up();
   });
+
 
   testWidgets('Default paddle range slider value indicator shape draws correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
@@ -1157,22 +1134,14 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(
-          24.0,
-          298.0,
-          24.0,
-          302.0,
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          24.0, 298.0, 24.0, 302.0,
           topLeft: const Radius.circular(2.0),
           bottomLeft: const Radius.circular(2.0),
         ))
         ..rect(rect: const Rect.fromLTRB(24.0, 297.0, 24.0, 303.0))
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(
-          24.0,
-          298.0,
-          776.0,
-          302.0,
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          24.0, 298.0, 776.0, 302.0,
           topRight: const Radius.circular(2.0),
           bottomRight: const Radius.circular(2.0),
         ))
@@ -1184,15 +1153,16 @@ void main() {
     );
 
     await gesture.up();
+
   });
 
   testWidgets('PaddleRangeSliderValueIndicatorShape skips all painting at zero scale', (WidgetTester tester) async {
     // Pump a slider with just a value indicator.
     await tester.pumpWidget(_buildRangeApp(
       ThemeData().sliderTheme.copyWith(
-            trackHeight: 0,
-            rangeValueIndicatorShape: const PaddleRangeSliderValueIndicatorShape(),
-          ),
+        trackHeight: 0,
+        rangeValueIndicatorShape: const PaddleRangeSliderValueIndicatorShape(),
+      ),
       values: const RangeValues(0, 0.5),
       divisions: 4,
     ));
@@ -1219,12 +1189,12 @@ void main() {
     // Pump a slider with just a value indicator.
     await tester.pumpWidget(_buildRangeApp(
       ThemeData().sliderTheme.copyWith(
-            trackHeight: 0,
-            overlayShape: SliderComponentShape.noOverlay,
-            thumbShape: SliderComponentShape.noThumb,
-            tickMarkShape: SliderTickMarkShape.noTickMark,
-            showValueIndicator: ShowValueIndicator.always,
-          ),
+        trackHeight: 0,
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        showValueIndicator: ShowValueIndicator.always,
+      ),
       values: const RangeValues(0, 0.5),
       divisions: 4,
     ));
@@ -1246,32 +1216,27 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('activeTrackRadius is taken into account when painting the border of the active track',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(_buildApp(ThemeData().sliderTheme.copyWith(
+  testWidgets('activeTrackRadius is taken into account when painting the border of the active track', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
         trackShape: const RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight(
-            additionalActiveTrackHeight: 10.0))));
+          additionalActiveTrackHeight: 10.0
+        )
+      )
+    ));
     await tester.pumpAndSettle();
     final Offset center = tester.getCenter(find.byType(Slider));
     await tester.startGesture(center);
     expect(
       find.byType(Slider),
       paints
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(
-          24.0,
-          293.0,
-          24.0,
-          307.0,
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          24.0, 293.0, 24.0, 307.0,
           topLeft: const Radius.circular(7.0),
           bottomLeft: const Radius.circular(7.0),
         ))
-        ..rrect(
-            rrect: RRect.fromLTRBAndCorners(
-          24.0,
-          298.0,
-          776.0,
-          302.0,
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          24.0, 298.0, 776.0, 302.0,
           topRight: const Radius.circular(2.0),
           bottomRight: const Radius.circular(2.0),
         )),
@@ -1279,9 +1244,11 @@ void main() {
   });
 
   testWidgets('The mouse cursor is themeable', (WidgetTester tester) async {
-    await tester.pumpWidget(_buildApp(ThemeData().sliderTheme.copyWith(
-          mouseCursor: MaterialStateProperty.all(SystemMouseCursors.text),
-        )));
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        mouseCursor: MaterialStateProperty.all(SystemMouseCursors.text),
+      )
+    ));
 
     await tester.pumpAndSettle();
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1309,22 +1276,16 @@ class RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight extends R
     bool isEnabled = false,
     double additionalActiveTrackHeight = 2.0,
   }) {
-    super.paint(context, offset,
-        parentBox: parentBox,
-        sliderTheme: sliderTheme,
-        enableAnimation: enableAnimation,
-        textDirection: textDirection,
-        thumbCenter: thumbCenter,
-        additionalActiveTrackHeight: this.additionalActiveTrackHeight);
+    super.paint(context, offset, parentBox: parentBox, sliderTheme: sliderTheme, enableAnimation: enableAnimation, textDirection: textDirection, thumbCenter: thumbCenter, additionalActiveTrackHeight: this.additionalActiveTrackHeight);
   }
 }
 
 Widget _buildApp(
-  SliderThemeData sliderTheme, {
-  double value = 0.0,
-  bool enabled = true,
-  int? divisions,
-}) {
+    SliderThemeData sliderTheme, {
+      double value = 0.0,
+      bool enabled = true,
+      int? divisions,
+    }) {
   final ValueChanged<double>? onChanged = enabled ? (double d) => value = d : null;
   return MaterialApp(
     home: Scaffold(
@@ -1344,11 +1305,11 @@ Widget _buildApp(
 }
 
 Widget _buildRangeApp(
-  SliderThemeData sliderTheme, {
-  RangeValues values = const RangeValues(0, 0),
-  bool enabled = true,
-  int? divisions,
-}) {
+    SliderThemeData sliderTheme, {
+      RangeValues values = const RangeValues(0, 0),
+      bool enabled = true,
+      int? divisions,
+    }) {
   final ValueChanged<RangeValues>? onChanged = enabled ? (RangeValues d) => values = d : null;
   return MaterialApp(
     home: Scaffold(

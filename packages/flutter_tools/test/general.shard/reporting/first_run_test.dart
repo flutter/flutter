@@ -46,10 +46,9 @@ void main() {
   });
 }
 
-FirstRunMessenger setUpFirstRunMessenger({bool? redisplayWelcomeMessage, bool test = false}) {
+FirstRunMessenger setUpFirstRunMessenger({bool? redisplayWelcomeMessage, bool test = false }) {
   final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-  final PersistentToolState state =
-      PersistentToolState.test(directory: fileSystem.currentDirectory, logger: BufferLogger.test());
+  final PersistentToolState state = PersistentToolState.test(directory: fileSystem.currentDirectory, logger: BufferLogger.test());
   if (redisplayWelcomeMessage != null) {
     state.setShouldRedisplayWelcomeMessage(redisplayWelcomeMessage);
   }

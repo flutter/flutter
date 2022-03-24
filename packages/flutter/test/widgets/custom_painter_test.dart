@@ -31,11 +31,9 @@ void _defineTests() {
       painter: _PainterWithoutSemantics(),
     ));
 
-    expect(
-        semanticsTester,
-        hasSemantics(
-          TestSemantics.root(),
-        ));
+    expect(semanticsTester, hasSemantics(
+      TestSemantics.root(),
+    ));
 
     semanticsTester.dispose();
   });
@@ -55,25 +53,23 @@ void _defineTests() {
       ),
     ));
 
-    expect(
-        semanticsTester,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semanticsTester, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                rect: TestSemantics.fullScreen,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 2,
-                    label: 'foreground',
-                    rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-                  ),
-                ],
+              TestSemantics(
+                id: 2,
+                label: 'foreground',
+                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
               ),
             ],
           ),
-        ));
+        ],
+      ),
+    ));
 
     semanticsTester.dispose();
   });
@@ -93,25 +89,23 @@ void _defineTests() {
       ),
     ));
 
-    expect(
-        semanticsTester,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semanticsTester, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                rect: TestSemantics.fullScreen,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 2,
-                    label: 'background',
-                    rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-                  ),
-                ],
+              TestSemantics(
+                id: 2,
+                label: 'background',
+                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
               ),
             ],
           ),
-        ));
+        ],
+      ),
+    ));
 
     semanticsTester.dispose();
   });
@@ -144,35 +138,33 @@ void _defineTests() {
       ),
     ));
 
-    expect(
-        semanticsTester,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semanticsTester, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                rect: TestSemantics.fullScreen,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 3,
-                    label: 'background',
-                    rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-                  ),
-                  TestSemantics(
-                    id: 2,
-                    label: 'Hello',
-                    rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                  ),
-                  TestSemantics(
-                    id: 4,
-                    label: 'foreground',
-                    rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-                  ),
-                ],
+              TestSemantics(
+                id: 3,
+                label: 'background',
+                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+              ),
+              TestSemantics(
+                id: 2,
+                label: 'Hello',
+                rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+              ),
+              TestSemantics(
+                id: 4,
+                label: 'foreground',
+                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
               ),
             ],
           ),
-        ));
+        ],
+      ),
+    ));
 
     semanticsTester.dispose();
   });
@@ -200,31 +192,29 @@ void _defineTests() {
       ),
     ));
 
-    expect(
-        semanticsTester,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semanticsTester, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                rect: TestSemantics.fullScreen,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    rect: const Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
-                    id: 2,
-                    flags: 1,
-                    label: 'label-before',
-                    value: 'value-before',
-                    increasedValue: 'increase-before',
-                    decreasedValue: 'decrease-before',
-                    hint: 'hint-before',
-                    textDirection: TextDirection.rtl,
-                  ),
-                ],
+              TestSemantics(
+                rect: const Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
+                id: 2,
+                flags: 1,
+                label: 'label-before',
+                value: 'value-before',
+                increasedValue: 'increase-before',
+                decreasedValue: 'decrease-before',
+                hint: 'hint-before',
+                textDirection: TextDirection.rtl,
               ),
             ],
           ),
-        ));
+        ],
+      ),
+    ));
 
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
@@ -241,45 +231,43 @@ void _defineTests() {
             decreasedValue: 'decrease-after',
             hint: 'hint-after',
             textDirection: TextDirection.ltr,
-            onScrollDown: () {},
-            onLongPress: () {},
-            onDecrease: () {},
-            onIncrease: () {},
-            onScrollLeft: () {},
-            onScrollRight: () {},
-            onScrollUp: () {},
-            onTap: () {},
+            onScrollDown: () { },
+            onLongPress: () { },
+            onDecrease: () { },
+            onIncrease: () { },
+            onScrollLeft: () { },
+            onScrollRight: () { },
+            onScrollUp: () { },
+            onTap: () { },
           ),
         ),
       ),
     ));
 
-    expect(
-        semanticsTester,
-        hasSemantics(
-          TestSemantics.root(
+    expect(semanticsTester, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                rect: TestSemantics.fullScreen,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    rect: const Rect.fromLTRB(5.0, 6.0, 7.0, 8.0),
-                    actions: 255,
-                    id: 2,
-                    flags: 15,
-                    label: 'label-after',
-                    value: 'value-after',
-                    increasedValue: 'increase-after',
-                    decreasedValue: 'decrease-after',
-                    hint: 'hint-after',
-                    textDirection: TextDirection.ltr,
-                  ),
-                ],
+              TestSemantics(
+                rect: const Rect.fromLTRB(5.0, 6.0, 7.0, 8.0),
+                actions: 255,
+                id: 2,
+                flags: 15,
+                label: 'label-after',
+                value: 'value-after',
+                increasedValue: 'increase-after',
+                decreasedValue: 'decrease-after',
+                hint: 'hint-after',
+                textDirection: TextDirection.ltr,
               ),
             ],
           ),
-        ));
+        ],
+      ),
+    ));
 
     semanticsTester.dispose();
   });
@@ -348,10 +336,8 @@ void _defineTests() {
             onCopy: () => performedActions.add(SemanticsAction.copy),
             onCut: () => performedActions.add(SemanticsAction.cut),
             onPaste: () => performedActions.add(SemanticsAction.paste),
-            onMoveCursorForwardByCharacter: (bool _) =>
-                performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
-            onMoveCursorBackwardByCharacter: (bool _) =>
-                performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+            onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+            onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
             onMoveCursorForwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByWord),
             onMoveCursorBackwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByWord),
             onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
@@ -471,14 +457,14 @@ void _defineTests() {
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          id: 1,
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              id: 2,
-              rect: TestSemantics.fullScreen,
-              flags: flags,
-            ),
-          ],
+            id: 1,
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                id: 2,
+                rect: TestSemantics.fullScreen,
+                flags: flags,
+              ),
+            ],
         ),
       ],
     );
@@ -522,14 +508,14 @@ void _defineTests() {
     expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          id: 1,
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              id: 2,
-              rect: TestSemantics.fullScreen,
-              flags: flags,
-            ),
-          ],
+            id: 1,
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                id: 2,
+                rect: TestSemantics.fullScreen,
+                flags: flags,
+              ),
+            ],
         ),
       ],
     );
@@ -691,16 +677,14 @@ void _defineTests() {
       ),
     );
 
-    await tester.pumpWidget(CustomPaint(
-        painter: _PainterWithSemantics(
+    await tester.pumpWidget(CustomPaint(painter: _PainterWithSemantics(
       semantics: testSemantics,
     )));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 0);
     expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
     expect(_PainterWithSemantics.semanticsBuilderCallCount, 4);
 
-    await tester.pumpWidget(CustomPaint(
-        painter: _PainterWithSemantics(
+    await tester.pumpWidget(CustomPaint(painter: _PainterWithSemantics(
       semantics: testSemantics,
     )));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 1);
@@ -715,8 +699,7 @@ void _defineTests() {
       ),
     );
 
-    await tester.pumpWidget(CustomPaint(
-        painter: _PainterWithSemantics(
+    await tester.pumpWidget(CustomPaint(painter: _PainterWithSemantics(
       semantics: testSemantics2,
     )));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 2);
@@ -745,7 +728,7 @@ class _DiffTester {
   ///
   /// - checks that initial and final configurations are in the desired states.
   /// - checks that keyed nodes have stable IDs.
-  Future<void> diff({required List<String> from, required List<String> to}) async {
+  Future<void> diff({ required List<String> from, required List<String> to }) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     TestSemantics createExpectations(List<String> labels) {
@@ -792,11 +775,9 @@ class _DiffTester {
     root.visitChildren((SemanticsNode firstChild) {
       firstChild.visitChildren((SemanticsNode node) {
         if (node.key != null && idAssignments[node.key] != null) {
-          expect(
-            idAssignments[node.key],
-            node.id,
-            reason: 'Node with key ${node.key} was previously assigned ID ${idAssignments[node.key]}. '
-                'After diffing the child list, its ID changed to ${node.id}. IDs must be stable.',
+          expect(idAssignments[node.key], node.id, reason:
+            'Node with key ${node.key} was previously assigned ID ${idAssignments[node.key]}. '
+            'After diffing the child list, its ID changed to ${node.id}. IDs must be stable.',
           );
         }
         return true;
@@ -847,7 +828,7 @@ class _SemanticsDiffTest extends CustomPainter {
 }
 
 class _PainterWithSemantics extends CustomPainter {
-  _PainterWithSemantics({required this.semantics});
+  _PainterWithSemantics({ required this.semantics });
 
   final CustomPainterSemantics semantics;
 

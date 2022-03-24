@@ -29,7 +29,8 @@ void main() {
     });
 
     testWithoutContext('getUniqueFile creates a unique file name', () async {
-      final File fileA = fsUtils.getUniqueFile(fs.currentDirectory, 'foo', 'json')..createSync();
+      final File fileA = fsUtils.getUniqueFile(fs.currentDirectory, 'foo', 'json')
+        ..createSync();
       final File fileB = fsUtils.getUniqueFile(fs.currentDirectory, 'foo', 'json');
 
       expect(fileA.path, '/foo_01.json');
@@ -37,7 +38,8 @@ void main() {
     });
 
     testWithoutContext('getUniqueDirectory creates a unique directory name', () async {
-      final Directory directoryA = fsUtils.getUniqueDirectory(fs.currentDirectory, 'foo')..createSync();
+      final Directory directoryA = fsUtils.getUniqueDirectory(fs.currentDirectory, 'foo')
+        ..createSync();
       final Directory directoryB = fsUtils.getUniqueDirectory(fs.currentDirectory, 'foo');
 
       expect(directoryA.path, '/foo_01');
@@ -115,7 +117,7 @@ void main() {
 
       expect(destination, exists);
       expect(destination.childDirectory('nested'), isNot(exists));
-      expect(destination.childDirectory('nested').childFile('b.txt'), isNot(exists));
+      expect(destination.childDirectory('nested').childFile('b.txt'),isNot(exists));
     });
   });
 
@@ -181,5 +183,4 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;
 }
-
-class FakeFile extends Fake implements File {}
+class FakeFile extends Fake implements File { }

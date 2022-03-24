@@ -31,8 +31,8 @@ class BuildWindowsUwpCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-        DevelopmentArtifact.windowsUwp,
-      };
+    DevelopmentArtifact.windowsUwp,
+  };
 
   @override
   String get description => 'Build a Windows UWP desktop application.';

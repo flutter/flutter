@@ -62,8 +62,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: OutlinedButton(
-              onPressed: () {},
-              child: const Text('hello'),
+                onPressed: () { },
+                child: const Text('hello'),
             ),
           ),
         ),
@@ -82,8 +82,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: OutlinedButton(
-              onPressed: () {},
-              child: const Text('hello'),
+                onPressed: () { },
+                child: const Text('hello'),
             ),
           ),
         ),
@@ -373,17 +373,22 @@ void main() {
         expect(
           testResult.expectedOffsets.length,
           dragOffsets.length,
-          reason: 'There is a difference in the number of expected and actual split offsets for the drag with:\n'
-              'Touch Slop: ${testResult.slop}\n'
-              'Delta:      ${testResult.dragDistance}\n',
+          reason:
+            'There is a difference in the number of expected and actual split offsets for the drag with:\n'
+            'Touch Slop: ${testResult.slop}\n'
+            'Delta:      ${testResult.dragDistance}\n',
         );
         for (int valueIndex = 0; valueIndex < offsetResults[resultIndex].expectedOffsets.length; valueIndex += 1) {
-          expect(testResult.expectedOffsets[valueIndex], offsetMoreOrLessEquals(dragOffsets[valueIndex]),
-              reason: 'There is a difference in the expected and actual value of the '
-                  '${valueIndex == 2 ? 'first' : valueIndex == 3 ? 'second' : 'third'}'
-                  ' split offset for the drag with:\n'
-                  'Touch slop: ${testResult.slop}\n'
-                  'Delta:      ${testResult.dragDistance}\n');
+          expect(
+            testResult.expectedOffsets[valueIndex],
+            offsetMoreOrLessEquals(dragOffsets[valueIndex]),
+            reason:
+              'There is a difference in the expected and actual value of the '
+              '${valueIndex == 2 ? 'first' : valueIndex == 3 ? 'second' : 'third'}'
+              ' split offset for the drag with:\n'
+              'Touch slop: ${testResult.slop}\n'
+              'Delta:      ${testResult.dragDistance}\n'
+          );
         }
         dragOffsets.clear();
       }
@@ -410,7 +415,7 @@ void main() {
       await tester.tap(find.text('test'), buttons: kSecondaryMouseButton);
 
       const String b = '$kSecondaryMouseButton';
-      for (int i = 0; i < logs.length; i++) {
+      for(int i = 0; i < logs.length; i++) {
         if (i == 0)
           expect(logs[i], 'down $b');
         else if (i != logs.length - 1)
@@ -466,7 +471,7 @@ void main() {
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for (int i = 0; i < logs.length; i++) {
+      for(int i = 0; i < logs.length; i++) {
         if (i == 0)
           expect(logs[i], 'down $b');
         else if (i != logs.length - 1)
@@ -497,7 +502,7 @@ void main() {
       await tester.drag(find.text('test'), const Offset(-150.0, 200.0), buttons: kSecondaryMouseButton);
 
       const String b = '$kSecondaryMouseButton';
-      for (int i = 0; i < logs.length; i++) {
+      for(int i = 0; i < logs.length; i++) {
         if (i == 0)
           expect(logs[i], 'down $b');
         else if (i != logs.length - 1)
@@ -529,7 +534,7 @@ void main() {
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for (int i = 0; i < logs.length; i++) {
+      for(int i = 0; i < logs.length; i++) {
         if (i == 0)
           expect(logs[i], 'down $b');
         else if (i != logs.length - 1)
@@ -541,29 +546,30 @@ void main() {
   );
 
   testWidgets(
-      'WidgetTester.fling produces strictly monotonically increasing timestamps, '
-      'when given a large velocity', (WidgetTester tester) async {
-    // Velocity trackers may misbehave if the `PointerMoveEvent`s' have the
-    // same timestamp. This is more likely to happen when the velocity tracker
-    // has a small sample size.
-    final List<Duration> logs = <Duration>[];
+    'WidgetTester.fling produces strictly monotonically increasing timestamps, '
+    'when given a large velocity',
+    (WidgetTester tester) async {
+      // Velocity trackers may misbehave if the `PointerMoveEvent`s' have the
+      // same timestamp. This is more likely to happen when the velocity tracker
+      // has a small sample size.
+      final List<Duration> logs = <Duration>[];
 
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Listener(
-          onPointerMove: (PointerMoveEvent event) => logs.add(event.timeStamp),
-          child: const Text('test'),
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerMove: (PointerMoveEvent event) => logs.add(event.timeStamp),
+            child: const Text('test'),
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.fling(find.text('test'), const Offset(0.0, -50.0), 10000.0);
-    await tester.pumpAndSettle();
+      await tester.fling(find.text('test'), const Offset(0.0, -50.0), 10000.0);
+      await tester.pumpAndSettle();
 
-    for (int i = 0; i + 1 < logs.length; i += 1) {
-      expect(logs[i + 1], greaterThan(logs[i]));
-    }
+      for (int i = 0; i + 1 < logs.length; i += 1) {
+        expect(logs[i + 1],  greaterThan(logs[i]));
+      }
   });
 
   testWidgets(
@@ -592,7 +598,7 @@ void main() {
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for (int i = 0; i < logs.length; i++) {
+      for(int i = 0; i < logs.length; i++) {
         if (i == 0)
           expect(logs[i], 'down $b');
         else if (i != logs.length - 1)
@@ -761,17 +767,14 @@ void main() {
           home: Scaffold(
             body: Column(
               children: <Widget>[
-                SizedBox(
-                    height: 200,
-                    child: ListView.builder(
-                      key: const Key('listView-a'),
-                      itemCount: 50,
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item a-$i')),
-                    )),
+                SizedBox(height: 200, child: ListView.builder(
+                  key: const Key('listView-a'),
+                  itemCount: 50,
+                  shrinkWrap: true,
+                  itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item a-$i')),
+                )),
                 const Divider(thickness: 5),
-                Expanded(
-                    child: ListView.builder(
+                Expanded(child: ListView.builder(
                   key: const Key('listView-b'),
                   itemCount: 50,
                   shrinkWrap: true,

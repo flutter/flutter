@@ -19,9 +19,12 @@ void main() {
 
   group('build', () {
     test('exits with useful error message when build mode not set', () {
-      final Directory buildDir = fileSystem.directory('/path/to/builds')..createSync(recursive: true);
-      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')..createSync(recursive: true);
-      final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
+        ..createSync(recursive: true);
+      final File pipe = fileSystem.file('/tmp/pipe')
+        ..createSync(recursive: true);
       const String buildMode = 'Debug';
       final TestContext context = TestContext(
         <String>['build'],
@@ -59,8 +62,8 @@ void main() {
         scriptOutputStreamFile: pipe,
       );
       expect(
-        () => context.run(),
-        throwsException,
+          () => context.run(),
+          throwsException,
       );
       expect(
         context.stderr,
@@ -68,9 +71,12 @@ void main() {
       );
     });
     test('calls flutter assemble', () {
-      final Directory buildDir = fileSystem.directory('/path/to/builds')..createSync(recursive: true);
-      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')..createSync(recursive: true);
-      final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
+        ..createSync(recursive: true);
+      final File pipe = fileSystem.file('/tmp/pipe')
+        ..createSync(recursive: true);
       const String buildMode = 'Debug';
       final TestContext context = TestContext(
         <String>['build'],
@@ -120,8 +126,10 @@ void main() {
     });
 
     test('forwards all env variables to flutter assemble', () {
-      final Directory buildDir = fileSystem.directory('/path/to/builds')..createSync(recursive: true);
-      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')..createSync(recursive: true);
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
+        ..createSync(recursive: true);
       const String archs = 'arm64 armv7';
       const String buildMode = 'Release';
       const String dartObfuscation = 'false';
@@ -205,7 +213,8 @@ void main() {
       )..run();
       expect(
         context.stdout,
-        contains('Info.plist does not exist. Skipping _dartobservatory._tcp NSBonjourServices insertion.'),
+        contains(
+            'Info.plist does not exist. Skipping _dartobservatory._tcp NSBonjourServices insertion.'),
       );
     });
   });

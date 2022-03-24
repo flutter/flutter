@@ -52,11 +52,12 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.directory('drive_screenshots').createSync();
 
-    final Device screenshotDevice = ThrowingScreenshotDevice()..supportsScreenshot = false;
+    final Device screenshotDevice = ThrowingScreenshotDevice()
+      ..supportsScreenshot = false;
     fakeDeviceManager.devices = <Device>[screenshotDevice];
 
-    await expectLater(
-      () => createTestCommandRunner(command).run(<String>[
+    await expectLater(() => createTestCommandRunner(command).run(
+      <String>[
         'drive',
         '--no-pub',
         '-d',
@@ -86,8 +87,8 @@ void main() {
     final Device screenshotDevice = ThrowingScreenshotDevice();
     fakeDeviceManager.devices = <Device>[screenshotDevice];
 
-    await expectLater(
-      () => createTestCommandRunner(command).run(<String>[
+    await expectLater(() => createTestCommandRunner(command).run(
+      <String>[
         'drive',
         '--no-pub',
         '-d',
@@ -123,8 +124,8 @@ void main() {
     final Device screenshotDevice = ScreenshotDevice();
     fakeDeviceManager.devices = <Device>[screenshotDevice];
 
-    await expectLater(
-      () => createTestCommandRunner(command).run(<String>[
+    await expectLater(() => createTestCommandRunner(command).run(
+      <String>[
         'drive',
         '--no-pub',
         '-d',
@@ -139,10 +140,8 @@ void main() {
     );
 
     // Takes the screenshot before the application would be killed (if --keep-app-running not passed).
-    expect(
-        logger.statusText,
-        contains('Screenshot written to drive_screenshots/drive_01.png\n'
-            'Leaving the application running.'));
+    expect(logger.statusText, contains('Screenshot written to drive_screenshots/drive_01.png\n'
+        'Leaving the application running.'));
     expect(logger.statusText, isNot(contains('drive_02.png')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -161,8 +160,8 @@ void main() {
     final Device screenshotDevice = ThrowingScreenshotDevice();
     fakeDeviceManager.devices = <Device>[screenshotDevice];
 
-    await expectLater(
-      () => createTestCommandRunner(command).run(<String>[
+    await expectLater(() => createTestCommandRunner(command).run(
+      <String>[
         'drive',
         '--no-pub',
         '-d',
@@ -217,15 +216,15 @@ class ThrowingScreenshotDevice extends ScreenshotDevice {
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
-    bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
-    bool ipv6 = false,
-    String userIdentifier,
-  }) async {
+      String mainPath,
+      String route,
+      DebuggingOptions debuggingOptions,
+      Map<String, dynamic> platformArgs,
+      bool prebuiltApplication = false,
+      bool usesTerminalUi = true,
+      bool ipv6 = false,
+      String userIdentifier,
+    }) async {
     throwToolExit('cannot start app');
   }
 }
@@ -252,16 +251,15 @@ class ScreenshotDevice extends Fake implements Device {
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
-    bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
-    bool ipv6 = false,
-    String userIdentifier,
-  }) async =>
-      LaunchResult.succeeded();
+      String mainPath,
+      String route,
+      DebuggingOptions debuggingOptions,
+      Map<String, dynamic> platformArgs,
+      bool prebuiltApplication = false,
+      bool usesTerminalUi = true,
+      bool ipv6 = false,
+      String userIdentifier,
+    }) async => LaunchResult.succeeded();
 
   @override
   Future<void> takeScreenshot(File outputFile) async {}
@@ -280,7 +278,7 @@ class FakePub extends Fake implements Pub {
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
-  }) async {}
+  }) async { }
 }
 
 class FakeDeviceManager extends Fake implements DeviceManager {
@@ -303,7 +301,7 @@ class FailingFakeFlutterDriverFactory extends Fake implements FlutterDriverFacto
 
 class FailingFakeDriverService extends Fake implements DriverService {
   @override
-  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async {}
+  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async { }
 
   @override
   Future<int> startTest(
@@ -311,13 +309,12 @@ class FailingFakeDriverService extends Fake implements DriverService {
     List<String> arguments,
     Map<String, String> environment,
     PackageConfig packageConfig, {
-    bool headless,
-    String chromeBinary,
-    String browserName,
-    bool androidEmulator,
-    int driverPort,
-    List<String> browserDimension,
-    String profileMemory,
-  }) async =>
-      1;
+      bool headless,
+      String chromeBinary,
+      String browserName,
+      bool androidEmulator,
+      int driverPort,
+      List<String> browserDimension,
+      String profileMemory,
+    }) async => 1;
 }

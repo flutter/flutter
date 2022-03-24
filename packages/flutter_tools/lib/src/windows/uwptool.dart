@@ -21,15 +21,15 @@ class UwpTool {
     required Artifacts artifacts,
     required Logger logger,
     required ProcessManager processManager,
-  })  : _artifacts = artifacts,
-        _logger = logger,
-        _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+  }) : _artifacts = artifacts,
+       _logger = logger,
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final Artifacts _artifacts;
   final Logger _logger;
   final ProcessUtils _processUtils;
 
-  String get _binaryPath => _artifacts.getArtifactPath(Artifact.uwptool);
+  String get _binaryPath  => _artifacts.getArtifactPath(Artifact.uwptool);
 
   Future<List<String>> listApps() async {
     final List<String> launchCommand = <String>[
@@ -68,7 +68,11 @@ class UwpTool {
   ///
   /// On success, returns the process ID of the launched app, otherwise null.
   Future<int?> launchApp(String packageFamily, List<String> args) async {
-    final List<String> launchCommand = <String>[_binaryPath, 'launch', packageFamily] + args;
+    final List<String> launchCommand = <String>[
+      _binaryPath,
+      'launch',
+      packageFamily
+    ] + args;
     final RunResult result = await _processUtils.run(launchCommand);
     if (result.exitCode != 0) {
       _logger.printError('Failed to launch app $packageFamily: ${result.stderr}');
@@ -127,11 +131,10 @@ class UwpTool {
   /// Returns `true` on success.
   Future<bool> installApp(String packageUri, List<String> dependencyUris) async {
     final List<String> launchCommand = <String>[
-          _binaryPath,
-          'install',
-          packageUri,
-        ] +
-        dependencyUris;
+      _binaryPath,
+      'install',
+      packageUri,
+    ] + dependencyUris;
     final RunResult result = await _processUtils.run(launchCommand);
     if (result.exitCode != 0) {
       _logger.printError('Failed to install $packageUri');
@@ -142,7 +145,11 @@ class UwpTool {
   }
 
   Future<bool> uninstallApp(String packageFamily) async {
-    final List<String> launchCommand = <String>[_binaryPath, 'uninstall', packageFamily];
+    final List<String> launchCommand = <String>[
+      _binaryPath,
+      'uninstall',
+      packageFamily
+    ];
     final RunResult result = await _processUtils.run(launchCommand);
     if (result.exitCode != 0) {
       _logger.printError('Failed to uninstall $packageFamily');

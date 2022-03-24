@@ -23,9 +23,9 @@ Future<void> main() async {
   print('daemon process started, pid: ${daemon.pid}');
 
   daemon.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) => print('<== $line'));
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
+    .listen((String line) => print('<== $line'));
   daemon.stderr.listen(stderr.add);
 
   stdout.write('> ');
@@ -70,7 +70,11 @@ Future<void> main() async {
     } else if (words.first == 'emulator-launch') {
       _send(<String, dynamic>{
         'method': 'emulator.launch',
-        'params': <String, dynamic>{'emulatorId': words[1], if (words.contains('coldBoot')) 'coldBoot': true},
+        'params': <String, dynamic>{
+          'emulatorId': words[1],
+          if (words.contains('coldBoot'))
+            'coldBoot': true
+        },
       });
     } else if (line == 'enable') {
       _send(<String, dynamic>{'method': 'device.enable'});

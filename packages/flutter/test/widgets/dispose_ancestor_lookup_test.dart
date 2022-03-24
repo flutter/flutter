@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 typedef TestCallback = void Function(BuildContext context);
 
 class TestWidget extends StatefulWidget {
-  const TestWidget(this.callback, {Key? key}) : super(key: key);
+  const TestWidget(this.callback, { Key? key }) : super(key: key);
 
   final TestCallback callback;
 
@@ -41,8 +41,7 @@ void main() {
     expect(tester.takeException(), isFlutterError);
   });
 
-  testWidgets('getElementForInheritedWidgetOfExactType() called from dispose() throws error',
-      (WidgetTester tester) async {
+  testWidgets('getElementForInheritedWidgetOfExactType() called from dispose() throws error', (WidgetTester tester) async {
     bool disposeCalled = false;
     await tester.pumpWidget(
       TestWidget((BuildContext context) {
@@ -117,4 +116,7 @@ void main() {
     await tester.pumpWidget(Container());
     expect(disposeCalled, isTrue);
   });
+
+
+
 }

@@ -32,12 +32,14 @@ class AnimatedSize extends StatefulWidget {
     this.curve = Curves.linear,
     required this.duration,
     this.reverseDuration,
-    @Deprecated('This field is now ignored. '
-        'This feature was deprecated after v2.2.0-10.1.pre.')
-        TickerProvider? vsync,
+    @Deprecated(
+      'This field is now ignored. '
+      'This feature was deprecated after v2.2.0-10.1.pre.'
+    )
+    TickerProvider? vsync,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(clipBehavior != null),
-        super(key: key);
+  }) : assert(clipBehavior != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -88,7 +90,8 @@ class AnimatedSize extends StatefulWidget {
   State<AnimatedSize> createState() => _AnimatedSizeState();
 }
 
-class _AnimatedSizeState extends State<AnimatedSize> with SingleTickerProviderStateMixin {
+class _AnimatedSizeState
+    extends State<AnimatedSize> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return _AnimatedSize(
@@ -113,8 +116,8 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
     this.reverseDuration,
     required this.vsync,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(clipBehavior != null),
-        super(key: key, child: child);
+  }) : assert(clipBehavior != null),
+       super(key: key, child: child);
 
   final AlignmentGeometry alignment;
   final Curve curve;

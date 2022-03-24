@@ -21,7 +21,7 @@ import 'template.dart';
 /// Represents an Xcode-based sub-project.
 ///
 /// This defines interfaces common to iOS and macOS projects.
-abstract class XcodeBasedProject extends FlutterProjectPlatform {
+abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   static const String _hostAppProjectName = 'Runner';
 
   /// The parent of this project.
@@ -43,7 +43,9 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       xcodeProject.childDirectory('xcshareddata').childDirectory('xcschemes').childFile('Runner.xcscheme');
 
   File get xcodeProjectWorkspaceData =>
-      xcodeProject.childDirectory('project.xcworkspace').childFile('contents.xcworkspacedata');
+      xcodeProject
+          .childDirectory('project.xcworkspace')
+          .childFile('contents.xcworkspacedata');
 
   /// The Xcode workspace (.xcworkspace directory) of the host app.
   Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppProjectName.xcworkspace');
@@ -126,8 +128,7 @@ class IosProject extends XcodeBasedProject {
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
 
   @override
-  File get generatedEnvironmentVariableExportScript =>
-      _flutterLibRoot.childDirectory('Flutter').childFile('flutter_export_environment.sh');
+  File get generatedEnvironmentVariableExportScript => _flutterLibRoot.childDirectory('Flutter').childFile('flutter_export_environment.sh');
 
   File get appFrameworkInfoPlist => _flutterLibRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
 
@@ -141,7 +142,9 @@ class IosProject extends XcodeBasedProject {
 
   /// Do all plugins support arm64 simulators to run natively on an ARM Mac?
   Future<bool> pluginsSupportArmSimulator() async {
-    final Directory podXcodeProject = hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj');
+    final Directory podXcodeProject = hostAppRoot
+        .childDirectory('Pods')
+        .childDirectory('Pods.xcodeproj');
     if (!podXcodeProject.existsSync()) {
       // No plugins.
       return true;
@@ -162,7 +165,7 @@ class IosProject extends XcodeBasedProject {
   }
 
   @override
-  bool existsSync() {
+  bool existsSync()  {
     return parent.isModule || _editableDirectory.existsSync();
   }
 
@@ -174,7 +177,6 @@ class IosProject extends XcodeBasedProject {
     }
     return _productBundleIdentifier ??= await _parseProductBundleIdentifier(buildInfo);
   }
-
   String? _productBundleIdentifier;
 
   Future<String?> _parseProductBundleIdentifier(BuildInfo? buildInfo) async {
@@ -226,7 +228,6 @@ class IosProject extends XcodeBasedProject {
     }
     return _hostAppBundleName ??= await _parseHostAppBundleName(buildInfo);
   }
-
   String? _hostAppBundleName;
 
   Future<String> _parseHostAppBundleName(BuildInfo? buildInfo) async {
@@ -288,8 +289,7 @@ class IosProject extends XcodeBasedProject {
     return _buildSettingsByBuildContext[buildContext];
   }
 
-  final Map<XcodeProjectBuildContext, Map<String, String>> _buildSettingsByBuildContext =
-      <XcodeProjectBuildContext, Map<String, String>>{};
+  final Map<XcodeProjectBuildContext, Map<String, String>> _buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
 
   Future<XcodeProjectInfo?> projectInfo() async {
     final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
@@ -298,7 +298,6 @@ class IosProject extends XcodeBasedProject {
     }
     return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
   }
-
   XcodeProjectInfo? _projectInfo;
 
   Future<Map<String, String>?> _xcodeProjectBuildSettings(XcodeProjectBuildContext buildContext) async {
@@ -339,8 +338,7 @@ class IosProject extends XcodeBasedProject {
       // The Info.plist file of a target contains the key WKCompanionAppBundleIdentifier,
       // if it is a watchOS companion app.
       if (infoFile.existsSync()) {
-        final String? fromPlist =
-            globals.plistParser.getStringValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier');
+        final String? fromPlist = globals.plistParser.getStringValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier');
         if (bundleIdentifier == fromPlist) {
           return true;
         }
@@ -411,12 +409,14 @@ class IosProject extends XcodeBasedProject {
     // doesn't actually matter as it will be overwritten by xcode_backend.sh.
     // However, cocoapods will run before that script and requires something
     // to be in this location.
-    final Directory framework = globals.fs.directory(globals.artifacts?.getArtifactPath(
-      Artifact.flutterXcframework,
-      platform: TargetPlatform.ios,
-      mode: mode,
-      environmentType: environmentType,
-    ));
+    final Directory framework = globals.fs.directory(
+      globals.artifacts?.getArtifactPath(
+        Artifact.flutterXcframework,
+        platform: TargetPlatform.ios,
+        mode: mode,
+        environmentType: environmentType,
+      )
+    );
     if (framework.existsSync()) {
       copyDirectory(
         framework,
@@ -426,38 +426,44 @@ class IosProject extends XcodeBasedProject {
   }
 
   @override
-  File get generatedXcodePropertiesFile => _flutterLibRoot.childDirectory('Flutter').childFile('Generated.xcconfig');
+  File get generatedXcodePropertiesFile => _flutterLibRoot
+    .childDirectory('Flutter')
+    .childFile('Generated.xcconfig');
 
   /// No longer compiled to this location.
   ///
   /// Used only for "flutter clean" to remove old references.
-  Directory get deprecatedCompiledDartFramework =>
-      _flutterLibRoot.childDirectory('Flutter').childDirectory('App.framework');
+  Directory get deprecatedCompiledDartFramework => _flutterLibRoot
+      .childDirectory('Flutter')
+      .childDirectory('App.framework');
 
   /// No longer copied to this location.
   ///
   /// Used only for "flutter clean" to remove old references.
-  Directory get deprecatedProjectFlutterFramework =>
-      _flutterLibRoot.childDirectory('Flutter').childDirectory('Flutter.framework');
+  Directory get deprecatedProjectFlutterFramework => _flutterLibRoot
+      .childDirectory('Flutter')
+      .childDirectory('Flutter.framework');
 
   /// Used only for "flutter clean" to remove old references.
-  File get flutterPodspec => _flutterLibRoot.childDirectory('Flutter').childFile('Flutter.podspec');
+  File get flutterPodspec => _flutterLibRoot
+      .childDirectory('Flutter')
+      .childFile('Flutter.podspec');
 
   Directory get pluginRegistrantHost {
     return isModule
-        ? _flutterLibRoot.childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
+        ? _flutterLibRoot
+            .childDirectory('Flutter')
+            .childDirectory('FlutterPluginRegistrant')
         : hostAppRoot.childDirectory(XcodeBasedProject._hostAppProjectName);
   }
 
   File get pluginRegistrantHeader {
-    final Directory registryDirectory =
-        isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
+    final Directory registryDirectory = isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
     return registryDirectory.childFile('GeneratedPluginRegistrant.h');
   }
 
   File get pluginRegistrantImplementation {
-    final Directory registryDirectory =
-        isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
+    final Directory registryDirectory = isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
     return registryDirectory.childFile('GeneratedPluginRegistrant.m');
   }
 

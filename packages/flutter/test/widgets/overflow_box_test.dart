@@ -40,8 +40,7 @@ void main() {
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode n) => n.toString())
-        .toList();
+        .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
       'alignment: Alignment.center',
       'minWidth: 1.0',

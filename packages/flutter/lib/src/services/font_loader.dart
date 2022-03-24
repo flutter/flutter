@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -19,8 +20,8 @@ class FontLoader {
   /// The font family will not be available for use until [load] has been
   /// called.
   FontLoader(this.family)
-      : _loaded = false,
-        _fontFutures = <Future<Uint8List>>[];
+    : _loaded = false,
+      _fontFutures = <Future<Uint8List>>[];
 
   /// The font family being loaded.
   ///
@@ -33,10 +34,11 @@ class FontLoader {
   /// The [bytes] argument specifies the actual font asset bytes. Currently,
   /// only OpenType (OTF) and TrueType (TTF) fonts are supported.
   void addFont(Future<ByteData> bytes) {
-    if (_loaded) throw StateError('FontLoader is already loaded');
+    if (_loaded)
+      throw StateError('FontLoader is already loaded');
 
     _fontFutures.add(bytes.then(
-      (ByteData data) => Uint8List.view(data.buffer, data.offsetInBytes, data.lengthInBytes),
+        (ByteData data) => Uint8List.view(data.buffer, data.offsetInBytes, data.lengthInBytes),
     ));
   }
 
@@ -51,13 +53,14 @@ class FontLoader {
   /// The returned future will complete with an error if any of the font asset
   /// futures yield an error.
   Future<void> load() async {
-    if (_loaded) throw StateError('FontLoader is already loaded');
+    if (_loaded)
+      throw StateError('FontLoader is already loaded');
     _loaded = true;
 
     final Iterable<Future<void>> loadFutures = _fontFutures.map(
-      (Future<Uint8List> f) => f.then<void>(
-        (Uint8List list) => loadFont(list, family),
-      ),
+        (Future<Uint8List> f) => f.then<void>(
+            (Uint8List list) => loadFont(list, family),
+        ),
     );
     await Future.wait(loadFutures.toList());
   }

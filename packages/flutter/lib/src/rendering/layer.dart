@@ -148,7 +148,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     }());
     return disposed;
   }
-
   bool _debugDisposed = false;
 
   /// Set when this layer is appended to a [ContainerLayer], and
@@ -363,7 +362,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       }
     }
   }
-
   ui.EngineLayer? _engineLayer;
 
   /// Traverses the layer subtree starting from this layer and determines whether it needs [addToScene].
@@ -559,15 +557,13 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   Object? debugCreator;
 
   @override
-  String toStringShort() => '${super.toStringShort()}${owner == null ? " DETACHED" : ""}';
+  String toStringShort() => '${super.toStringShort()}${ owner == null ? " DETACHED" : ""}';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Object>('owner', owner,
-        level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
-    properties
-        .add(DiagnosticsProperty<Object?>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
+    properties.add(DiagnosticsProperty<Object?>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
     if (_engineLayer != null) {
       properties.add(DiagnosticsProperty<String>('engine layer', describeIdentity(_engineLayer)));
     }
@@ -730,7 +726,7 @@ class PictureLayer extends Layer {
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return false;
   }
 }
@@ -770,8 +766,8 @@ class TextureLayer extends Layer {
     required this.textureId,
     this.freeze = false,
     this.filterQuality = ui.FilterQuality.low,
-  })  : assert(rect != null),
-        assert(textureId != null);
+  }) : assert(rect != null),
+       assert(textureId != null);
 
   /// Bounding rectangle of this layer.
   final Rect rect;
@@ -804,7 +800,7 @@ class TextureLayer extends Layer {
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return false;
   }
 }
@@ -818,8 +814,8 @@ class PlatformViewLayer extends Layer {
   PlatformViewLayer({
     required this.rect,
     required this.viewId,
-  })  : assert(rect != null),
-        assert(viewId != null);
+  }) : assert(rect != null),
+       assert(viewId != null);
 
   /// Bounding rectangle of this layer in the global coordinate space.
   final Rect rect;
@@ -909,7 +905,7 @@ class PerformanceOverlayLayer extends Layer {
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return false;
   }
 }
@@ -948,7 +944,7 @@ class ContainerLayer extends Layer {
     return scene;
   }
 
-  bool _debugUltimatePreviousSiblingOf(Layer child, {Layer? equals}) {
+  bool _debugUltimatePreviousSiblingOf(Layer child, { Layer? equals }) {
     assert(child.attached == attached);
     while (child.previousSibling != null) {
       assert(child.previousSibling != child);
@@ -958,7 +954,7 @@ class ContainerLayer extends Layer {
     return child == equals;
   }
 
-  bool _debugUltimateNextSiblingOf(Layer child, {Layer? equals}) {
+  bool _debugUltimateNextSiblingOf(Layer child, { Layer? equals }) {
     assert(child.attached == attached);
     while (child._nextSibling != null) {
       assert(child._nextSibling != child);
@@ -986,11 +982,13 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     for (Layer? child = lastChild; child != null; child = child.previousSibling) {
       final bool isAbsorbed = child.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
-      if (isAbsorbed) return true;
-      if (onlyFirst && result.entries.isNotEmpty) return isAbsorbed;
+      if (isAbsorbed)
+        return true;
+      if (onlyFirst && result.entries.isNotEmpty)
+        return isAbsorbed;
     }
     return false;
   }
@@ -1027,13 +1025,15 @@ class ContainerLayer extends Layer {
     assert(child._parentHandle.layer == null);
     assert(() {
       Layer node = this;
-      while (node.parent != null) node = node.parent!;
+      while (node.parent != null)
+        node = node.parent!;
       assert(node != child); // indicates we are about to create a cycle
       return true;
     }());
     adoptChild(child);
     child._previousSibling = lastChild;
-    if (lastChild != null) lastChild!._nextSibling = child;
+    if (lastChild != null)
+      lastChild!._nextSibling = child;
     _lastChild = child;
     _firstChild ??= child;
     child._parentHandle.layer = child;
@@ -1149,10 +1149,11 @@ class ContainerLayer extends Layer {
   /// Returns the descendants of this layer in depth first order.
   @visibleForTesting
   List<Layer> depthFirstIterateChildren() {
-    if (firstChild == null) return <Layer>[];
+    if (firstChild == null)
+      return <Layer>[];
     final List<Layer> children = <Layer>[];
     Layer? child = firstChild;
-    while (child != null) {
+    while(child != null) {
       children.add(child);
       if (child is ContainerLayer) {
         children.addAll(child.depthFirstIterateChildren());
@@ -1165,12 +1166,14 @@ class ContainerLayer extends Layer {
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    if (firstChild == null) return children;
+    if (firstChild == null)
+      return children;
     Layer? child = firstChild;
     int count = 1;
     while (true) {
       children.add(child!.toDiagnosticsNode(name: 'child $count'));
-      if (child == lastChild) break;
+      if (child == lastChild)
+        break;
       count += 1;
       child = child.nextSibling;
     }
@@ -1192,7 +1195,7 @@ class OffsetLayer extends ContainerLayer {
   ///
   /// By default, [offset] is zero. It must be non-null before the compositing
   /// phase of the pipeline.
-  OffsetLayer({Offset offset = Offset.zero}) : _offset = offset;
+  OffsetLayer({ Offset offset = Offset.zero }) : _offset = offset;
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -1211,7 +1214,7 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return super.findAnnotations<S>(result, localPosition - offset, onlyFirst: onlyFirst);
   }
 
@@ -1260,12 +1263,12 @@ class OffsetLayer extends ContainerLayer {
   ///
   ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
-  Future<ui.Image> toImage(Rect bounds, {double pixelRatio = 1.0}) async {
+  Future<ui.Image> toImage(Rect bounds, { double pixelRatio = 1.0 }) async {
     assert(bounds != null);
     assert(pixelRatio != null);
     final ui.SceneBuilder builder = ui.SceneBuilder();
     final Matrix4 transform = Matrix4.translationValues(
-      (-bounds.left - offset.dx) * pixelRatio,
+      (-bounds.left  - offset.dx) * pixelRatio,
       (-bounds.top - offset.dy) * pixelRatio,
       0.0,
     );
@@ -1301,10 +1304,10 @@ class ClipRectLayer extends ContainerLayer {
   ClipRectLayer({
     Rect? clipRect,
     Clip clipBehavior = Clip.hardEdge,
-  })  : _clipRect = clipRect,
-        _clipBehavior = clipBehavior,
-        assert(clipBehavior != null),
-        assert(clipBehavior != Clip.none);
+  }) : _clipRect = clipRect,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
   ///
@@ -1338,8 +1341,9 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
-    if (!clipRect!.contains(localPosition)) return false;
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+    if (!clipRect!.contains(localPosition))
+      return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
@@ -1362,7 +1366,8 @@ class ClipRectLayer extends ContainerLayer {
       engineLayer = null;
     }
     addChildrenToScene(builder);
-    if (enabled) builder.pop();
+    if (enabled)
+      builder.pop();
   }
 
   @override
@@ -1386,10 +1391,10 @@ class ClipRRectLayer extends ContainerLayer {
   ClipRRectLayer({
     RRect? clipRRect,
     Clip clipBehavior = Clip.antiAlias,
-  })  : _clipRRect = clipRRect,
-        _clipBehavior = clipBehavior,
-        assert(clipBehavior != null),
-        assert(clipBehavior != Clip.none);
+  }) : _clipRRect = clipRRect,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
@@ -1419,8 +1424,9 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
-    if (!clipRRect!.contains(localPosition)) return false;
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+    if (!clipRRect!.contains(localPosition))
+      return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
@@ -1443,7 +1449,8 @@ class ClipRRectLayer extends ContainerLayer {
       engineLayer = null;
     }
     addChildrenToScene(builder);
-    if (enabled) builder.pop();
+    if (enabled)
+      builder.pop();
   }
 
   @override
@@ -1467,10 +1474,10 @@ class ClipPathLayer extends ContainerLayer {
   ClipPathLayer({
     Path? clipPath,
     Clip clipBehavior = Clip.antiAlias,
-  })  : _clipPath = clipPath,
-        _clipBehavior = clipBehavior,
-        assert(clipBehavior != null),
-        assert(clipBehavior != Clip.none);
+  }) : _clipPath = clipPath,
+       _clipBehavior = clipBehavior,
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
   ///
@@ -1500,8 +1507,9 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
-    if (!clipPath!.contains(localPosition)) return false;
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+    if (!clipPath!.contains(localPosition))
+      return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
@@ -1524,7 +1532,8 @@ class ClipPathLayer extends ContainerLayer {
       engineLayer = null;
     }
     addChildrenToScene(builder);
-    if (enabled) builder.pop();
+    if (enabled)
+      builder.pop();
   }
 
   @override
@@ -1628,9 +1637,9 @@ class TransformLayer extends OffsetLayer {
   ///
   /// The [transform] and [offset] properties must be non-null before the
   /// compositing phase of the pipeline.
-  TransformLayer({Matrix4? transform, Offset offset = Offset.zero})
-      : _transform = transform,
-        super(offset: offset);
+  TransformLayer({ Matrix4? transform, Offset offset = Offset.zero })
+    : _transform = transform,
+      super(offset: offset);
 
   /// The matrix to apply.
   ///
@@ -1646,7 +1655,8 @@ class TransformLayer extends OffsetLayer {
   set transform(Matrix4? value) {
     assert(value != null);
     assert(value!.storage.every((double component) => component.isFinite));
-    if (value == _transform) return;
+    if (value == _transform)
+      return;
     _transform = value;
     _inverseDirty = true;
     markNeedsAddToScene();
@@ -1679,15 +1689,17 @@ class TransformLayer extends OffsetLayer {
       );
       _inverseDirty = false;
     }
-    if (_invertedTransform == null) return null;
+    if (_invertedTransform == null)
+      return null;
 
     return MatrixUtils.transformPoint(_invertedTransform!, localPosition);
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     final Offset? transformedOffset = _transformOffset(localPosition);
-    if (transformedOffset == null) return false;
+    if (transformedOffset == null)
+      return false;
     return super.findAnnotations<S>(result, transformedOffset, onlyFirst: onlyFirst);
   }
 
@@ -1726,8 +1738,8 @@ class OpacityLayer extends OffsetLayer {
   OpacityLayer({
     int? alpha,
     Offset offset = Offset.zero,
-  })  : _alpha = alpha,
-        super(offset: offset);
+  }) : _alpha = alpha,
+       super(offset: offset);
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -1811,9 +1823,9 @@ class ShaderMaskLayer extends ContainerLayer {
     Shader? shader,
     Rect? maskRect,
     BlendMode? blendMode,
-  })  : _shader = shader,
-        _maskRect = maskRect,
-        _blendMode = blendMode;
+  }) : _shader = shader,
+       _maskRect = maskRect,
+       _blendMode = blendMode;
 
   /// The shader to apply to the children.
   ///
@@ -1872,7 +1884,7 @@ class ShaderMaskLayer extends ContainerLayer {
     assert(blendMode != null);
     engineLayer = builder.pushShaderMask(
       shader!,
-      maskRect!,
+      maskRect! ,
       blendMode!,
       oldLayer: _engineLayer as ui.ShaderMaskEngineLayer?,
     );
@@ -1900,8 +1912,8 @@ class BackdropFilterLayer extends ContainerLayer {
   BackdropFilterLayer({
     ui.ImageFilter? filter,
     BlendMode blendMode = BlendMode.srcOver,
-  })  : _filter = filter,
-        _blendMode = blendMode;
+  }) : _filter = filter,
+       _blendMode = blendMode;
 
   /// The filter to apply to the existing contents of the scene.
   ///
@@ -1967,11 +1979,11 @@ class PhysicalModelLayer extends ContainerLayer {
     double? elevation,
     Color? color,
     Color? shadowColor,
-  })  : _clipPath = clipPath,
-        _clipBehavior = clipBehavior,
-        _elevation = elevation,
-        _color = color,
-        _shadowColor = shadowColor;
+  }) : _clipPath = clipPath,
+       _clipBehavior = clipBehavior,
+       _elevation = elevation,
+       _color = color,
+       _shadowColor = shadowColor;
 
   /// The path to clip in the parent's coordinate system.
   ///
@@ -2040,8 +2052,9 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
-    if (!clipPath!.contains(localPosition)) return false;
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
+    if (!clipPath!.contains(localPosition))
+      return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
@@ -2071,7 +2084,8 @@ class PhysicalModelLayer extends ContainerLayer {
       engineLayer = null;
     }
     addChildrenToScene(builder);
-    if (enabled) builder.pop();
+    if (enabled)
+      builder.pop();
   }
 
   @override
@@ -2101,7 +2115,7 @@ class LayerLink {
 
   void _registerLeader(LeaderLayer leader) {
     assert(_leader != leader);
-    assert(() {
+    assert((){
       if (_leader != null) {
         _debugPreviousLeaders ??= <LeaderLayer>{};
         _debugScheduleLeadersCleanUpCheck();
@@ -2133,7 +2147,8 @@ class LayerLink {
   void _debugScheduleLeadersCleanUpCheck() {
     assert(_debugPreviousLeaders != null);
     assert(() {
-      if (_debugLeaderCheckScheduled) return true;
+      if (_debugLeaderCheckScheduled)
+        return true;
       _debugLeaderCheckScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _debugLeaderCheckScheduled = false;
@@ -2152,7 +2167,7 @@ class LayerLink {
   Size? leaderSize;
 
   @override
-  String toString() => '${describeIdentity(this)}(${_leader != null ? "<linked>" : "<dangling>"})';
+  String toString() => '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
 }
 
 /// A composited layer that can be followed by a [FollowerLayer].
@@ -2169,10 +2184,7 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({required LayerLink link, Offset offset = Offset.zero})
-      : assert(link != null),
-        _link = link,
-        _offset = offset;
+  LeaderLayer({ required LayerLink link, Offset offset = Offset.zero }) : assert(link != null), _link = link, _offset = offset;
 
   /// The object with which this layer should register.
   ///
@@ -2225,7 +2237,7 @@ class LeaderLayer extends ContainerLayer {
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return super.findAnnotations<S>(result, localPosition - offset, onlyFirst: onlyFirst);
   }
 
@@ -2238,7 +2250,8 @@ class LeaderLayer extends ContainerLayer {
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
     addChildrenToScene(builder);
-    if (offset != Offset.zero) builder.pop();
+    if (offset != Offset.zero)
+      builder.pop();
   }
 
   /// Applies the transform that would be applied when compositing the given
@@ -2250,7 +2263,8 @@ class LeaderLayer extends ContainerLayer {
   /// children.
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
-    if (offset != Offset.zero) transform.translate(offset.dx, offset.dy);
+    if (offset != Offset.zero)
+      transform.translate(offset.dx, offset.dy);
   }
 
   @override
@@ -2283,8 +2297,7 @@ class FollowerLayer extends ContainerLayer {
     this.showWhenUnlinked = true,
     this.unlinkedOffset = Offset.zero,
     this.linkedOffset = Offset.zero,
-  })  : assert(link != null),
-        _link = link;
+  }) : assert(link != null), _link = link;
 
   /// The link to the [LeaderLayer].
   ///
@@ -2296,7 +2309,6 @@ class FollowerLayer extends ContainerLayer {
     assert(value != null);
     _link = value;
   }
-
   LayerLink _link;
 
   /// Whether to show the layer's contents when the [link] does not point to a
@@ -2351,14 +2363,15 @@ class FollowerLayer extends ContainerLayer {
       _invertedTransform = Matrix4.tryInvert(getLastTransform()!);
       _inverseDirty = false;
     }
-    if (_invertedTransform == null) return null;
+    if (_invertedTransform == null)
+      return null;
     final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform!.transform(vector);
     return Offset(result[0] - linkedOffset!.dx, result[1] - linkedOffset!.dy);
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     if (_link.leader == null) {
       if (showWhenUnlinked!) {
         return super.findAnnotations(result, localPosition - unlinkedOffset!, onlyFirst: onlyFirst);
@@ -2379,7 +2392,8 @@ class FollowerLayer extends ContainerLayer {
   ///
   /// This method returns a new [Matrix4] instance each time it is invoked.
   Matrix4? getLastTransform() {
-    if (_lastTransform == null) return null;
+    if (_lastTransform == null)
+      return null;
     final Matrix4 result = Matrix4.translationValues(-_lastOffset!.dx, -_lastOffset!.dy, 0.0);
     result.multiply(_lastTransform!);
     return result;
@@ -2396,7 +2410,8 @@ class FollowerLayer extends ContainerLayer {
     final Matrix4 result = Matrix4.identity();
     // Apply each layer to the matrix in turn, starting from the last layer,
     // and providing the previous layer as the child.
-    for (int index = layers.length - 1; index > 0; index -= 1) layers[index]?.applyTransform(layers[index - 1], result);
+    for (int index = layers.length - 1; index > 0; index -= 1)
+      layers[index]?.applyTransform(layers[index - 1], result);
     return result;
   }
 
@@ -2413,9 +2428,11 @@ class FollowerLayer extends ContainerLayer {
     List<ContainerLayer?> ancestorsB,
   ) {
     // No common ancestor found.
-    if (a == null || b == null) return null;
+    if (a == null || b == null)
+      return null;
 
-    if (identical(a, b)) return a;
+    if (identical(a, b))
+      return a;
 
     if (a.depth < b.depth) {
       ancestorsB.add(b.parent);
@@ -2464,7 +2481,8 @@ class FollowerLayer extends ContainerLayer {
     _lastTransform = null;
     final LeaderLayer? leader = _link.leader;
     // Check to see if we are linked.
-    if (leader == null) return;
+    if (leader == null)
+      return;
     // If we're linked, check the link is valid.
     assert(
       leader.owner == owner,
@@ -2478,10 +2496,8 @@ class FollowerLayer extends ContainerLayer {
     final List<ContainerLayer> inverseLayers = <ContainerLayer>[this];
 
     final Layer? ancestor = _pathsToCommonAncestor(
-      leader,
-      this,
-      forwardLayers,
-      inverseLayers,
+      leader, this,
+      forwardLayers, inverseLayers,
     );
     assert(
       ancestor != null,
@@ -2606,9 +2622,9 @@ class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
     this.size,
     Offset? offset,
     this.opaque = false,
-  })  : assert(value != null),
-        assert(opaque != null),
-        offset = offset ?? Offset.zero;
+  }) : assert(value != null),
+       assert(opaque != null),
+       offset = offset ?? Offset.zero;
 
   /// The annotated object, which is added to the result if all restrictions are
   /// met.
@@ -2678,9 +2694,10 @@ class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
   /// For explanation of layer annotations, parameters and return value, refer
   /// to [Layer.findAnnotations].
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) {
+  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     bool isAbsorbed = super.findAnnotations(result, localPosition, onlyFirst: onlyFirst);
-    if (result.entries.isNotEmpty && onlyFirst) return isAbsorbed;
+    if (result.entries.isNotEmpty && onlyFirst)
+      return isAbsorbed;
     if (size != null && !(offset & size!).contains(localPosition)) {
       return isAbsorbed;
     }

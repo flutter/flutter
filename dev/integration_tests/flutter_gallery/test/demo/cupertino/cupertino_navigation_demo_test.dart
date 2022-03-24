@@ -12,9 +12,12 @@ void main() {
     // The point is to mainly test the cupertino icons that we don't have a
     // dependency against in the flutter/cupertino package directly.
 
-    final Future<ByteData> font = rootBundle.load('packages/cupertino_icons/assets/CupertinoIcons.ttf');
+    final Future<ByteData> font = rootBundle.load(
+      'packages/cupertino_icons/assets/CupertinoIcons.ttf'
+    );
 
-    await (FontLoader('packages/cupertino_icons/CupertinoIcons')..addFont(font)).load();
+    await (FontLoader('packages/cupertino_icons/CupertinoIcons')..addFont(font))
+      .load();
 
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoNavigationDemo(randomSeed: 123456),

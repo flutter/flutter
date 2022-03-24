@@ -51,7 +51,7 @@ void main() {
     final Key child2Key = UniqueKey();
     final Key child3Key = UniqueKey();
 
-    Widget buildFrame({required double spacing, required TextDirection textDirection}) {
+    Widget buildFrame({ required double spacing, required TextDirection textDirection }) {
       return Directionality(
         textDirection: textDirection,
         child: Align(
@@ -169,16 +169,13 @@ void main() {
 
     // Children are centered
     await tester.pumpWidget(buildFrame(overflowAlignment: OverflowBarAlignment.center));
-    expect(
-        tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(100.0 / 2.0 - 48 / 2, 0, 100.0 / 2.0 + 48 / 2, 48));
-    expect(tester.getRect(find.byKey(child2Key)),
-        const Rect.fromLTRB(100.0 / 2.0 - 64 / 2, 48, 100.0 / 2.0 + 64 / 2, 112));
-    expect(tester.getRect(find.byKey(child3Key)),
-        const Rect.fromLTRB(100.0 / 2.0 - 32 / 2, 112, 100.0 / 2.0 + 32 / 2, 144));
+    expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(100.0/2.0 - 48/2, 0, 100.0/2.0 + 48/2, 48));
+    expect(tester.getRect(find.byKey(child2Key)), const Rect.fromLTRB(100.0/2.0 - 64/2, 48, 100.0/2.0 + 64/2, 112));
+    expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(100.0/2.0 - 32/2, 112, 100.0/2.0 + 32/2, 144));
   });
 
   testWidgets('OverflowBar intrinsic width', (WidgetTester tester) async {
-    Widget buildFrame({required double width}) {
+    Widget buildFrame({ required double width }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -209,7 +206,7 @@ void main() {
   });
 
   testWidgets('OverflowBar intrinsic height', (WidgetTester tester) async {
-    Widget buildFrame({required double maxWidth}) {
+    Widget buildFrame({ required double maxWidth }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -238,6 +235,7 @@ void main() {
     await tester.pumpWidget(buildFrame(maxWidth: 150));
     expect(tester.getSize(find.byType(OverflowBar)).height, 166); // 166 = 50 + 8 + 25 + 8 + 75
   });
+
 
   testWidgets('OverflowBar is wider that its intrinsic width', (WidgetTester tester) async {
     final Key key0 = UniqueKey();

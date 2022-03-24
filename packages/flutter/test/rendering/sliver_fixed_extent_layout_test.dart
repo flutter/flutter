@@ -93,9 +93,7 @@ void main() {
       expect(actual, 5);
     });
 
-    test(
-        'should be 5 when offset is 6 times greater than a specific item extent where the division will return more than 13 zero decimals',
-        () {
+    test('should be 5 when offset is 6 times greater than a specific item extent where the division will return more than 13 zero decimals', () {
       const double itemExtentSpecificForAProblematicScreenSize = 411.42857142857144;
       final int actual = testGetMaxChildIndexForScrollOffset(
         itemExtentSpecificForAProblematicScreenSize * 6 + extraValueToHaveRoundingIssues,
@@ -138,8 +136,9 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   int? _currentlyUpdatingChildIndex;
 
   @override
-  void createChild(int index, {required RenderBox? after}) {
-    if (index < 0 || index >= children.length) return;
+  void createChild(int index, { required RenderBox? after }) {
+    if (index < 0 || index >= children.length)
+      return;
     try {
       _currentlyUpdatingChildIndex = index;
       _renderObject!.insert(children[index], after: after);
@@ -176,12 +175,12 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   }
 
   @override
-  void setDidUnderflow(bool value) {}
+  void setDidUnderflow(bool value) { }
 }
 
 class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAdaptor {
   TestRenderSliverFixedExtentBoxAdaptor()
-      : super(childManager: TestRenderSliverBoxChildManager(children: <RenderBox>[]));
+    :super(childManager: TestRenderSliverBoxChildManager(children: <RenderBox>[]));
 
   @override
   // ignore: unnecessary_overrides

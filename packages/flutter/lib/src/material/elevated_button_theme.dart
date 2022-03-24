@@ -33,7 +33,7 @@ class ElevatedButtonThemeData with Diagnosticable {
   /// Creates an [ElevatedButtonThemeData].
   ///
   /// The [style] may be null.
-  const ElevatedButtonThemeData({this.style});
+  const ElevatedButtonThemeData({ this.style });
 
   /// Overrides for [ElevatedButton]'s default style.
   ///
@@ -46,8 +46,9 @@ class ElevatedButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two elevated button themes.
   static ElevatedButtonThemeData? lerp(ElevatedButtonThemeData? a, ElevatedButtonThemeData? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) return null;
+    assert (t != null);
+    if (a == null && b == null)
+      return null;
     return ElevatedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
     );
@@ -58,8 +59,10 @@ class ElevatedButtonThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
     return other is ElevatedButtonThemeData && other.style == style;
   }
 
@@ -89,8 +92,7 @@ class ElevatedButtonTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(data != null),
-        super(key: key, child: child);
+  }) : assert(data != null), super(key: key, child: child);
 
   /// The configuration of this theme.
   final ElevatedButtonThemeData data;

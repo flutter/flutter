@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'arena.dart';
 import 'events.dart';
 import 'recognizer.dart';
@@ -20,7 +21,7 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-        PointerDeviceKind? kind,
+    PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
   }) : super(kind: kind, supportedDevices: supportedDevices);
 
@@ -35,8 +36,8 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'eager';
 
   @override
-  void didStopTrackingLastPointer(int pointer) {}
+  void didStopTrackingLastPointer(int pointer) { }
 
   @override
-  void handleEvent(PointerEvent event) {}
+  void handleEvent(PointerEvent event) { }
 }

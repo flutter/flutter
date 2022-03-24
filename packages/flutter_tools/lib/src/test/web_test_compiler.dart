@@ -29,12 +29,12 @@ class WebTestCompiler {
     required Platform platform,
     required ProcessManager processManager,
     required Config config,
-  })  : _logger = logger,
-        _fileSystem = fileSystem,
-        _artifacts = artifacts,
-        _platform = platform,
-        _processManager = processManager,
-        _config = config;
+  }) : _logger = logger,
+       _fileSystem = fileSystem,
+       _artifacts = artifacts,
+       _platform = platform,
+       _processManager = processManager,
+       _config = config;
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -66,20 +66,21 @@ class WebTestCompiler {
       }
     }
 
-    final Directory outputDirectory = _fileSystem.directory(testOutputDir)..createSync(recursive: true);
+    final Directory outputDirectory = _fileSystem.directory(testOutputDir)
+      ..createSync(recursive: true);
     final List<File> generatedFiles = <File>[];
     for (final String testFilePath in testFiles) {
-      final List<String> relativeTestSegments = _fileSystem.path
-          .split(_fileSystem.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path));
-      final File generatedFile =
-          _fileSystem.file(_fileSystem.path.join(outputDirectory.path, '${relativeTestSegments.join('_')}.test.dart'));
+      final List<String> relativeTestSegments = _fileSystem.path.split(
+        _fileSystem.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path));
+      final File generatedFile = _fileSystem.file(
+        _fileSystem.path.join(outputDirectory.path, '${relativeTestSegments.join('_')}.test.dart'));
       generatedFile
         ..createSync(recursive: true)
         ..writeAsStringSync(generateTestEntrypoint(
-          relativeTestPath: relativeTestSegments.join('/'),
-          absolutePath: testFilePath,
-          testConfigPath: findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
-          languageVersion: languageVersion,
+            relativeTestPath: relativeTestSegments.join('/'),
+            absolutePath: testFilePath,
+            testConfigPath: findTestConfigFile(_fileSystem.file(testFilePath), _logger)?.path,
+            languageVersion: languageVersion,
         ));
       generatedFiles.add(generatedFile);
     }
@@ -115,7 +116,9 @@ class WebTestCompiler {
       initializeFromDill: cachedKernelPath,
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,
-      platformDill: _artifacts.getHostArtifact(platformDillArtifact).absolute.uri.toString(),
+      platformDill: _artifacts
+        .getHostArtifact(platformDillArtifact)
+        .absolute.uri.toString(),
       dartDefines: buildInfo.dartDefines,
       librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
       packagesPath: buildInfo.packagesPath,
@@ -145,6 +148,7 @@ class WebTestCompiler {
     final File manifestFile = outputDirectory.childFile('${output.outputFilename}.json');
     final File sourcemapFile = outputDirectory.childFile('${output.outputFilename}.map');
     final File metadataFile = outputDirectory.childFile('${output.outputFilename}.metadata');
-    return WebMemoryFS()..write(codeFile, manifestFile, sourcemapFile, metadataFile);
+    return WebMemoryFS()
+      ..write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }
 }

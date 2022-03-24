@@ -27,11 +27,11 @@ void main() {
   }) {
     assert(logCursors == null || cursorHandler == null);
     methodCallHandler = logCursors != null
-        ? (MethodCall call) async {
-            logCursors.add(_CursorUpdateDetails.wrap(call));
-            return;
-          }
-        : cursorHandler;
+      ? (MethodCall call) async {
+        logCursors.add(_CursorUpdateDetails.wrap(call));
+        return;
+      }
+      : cursorHandler;
 
     binding.setHitTest((BoxHitTestResult result, Offset position) {
       for (final HitTestTarget target in annotationFinder(position)) {
@@ -248,9 +248,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     late List<TestAnnotationTarget> annotations;
     _setUpMouseTracker(
-      annotationFinder: (Offset position) sync* {
-        yield* annotations;
-      },
+      annotationFinder: (Offset position) sync* { yield* annotations; },
       logCursors: logCursors,
     );
 
@@ -278,9 +276,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     late List<TestAnnotationTarget> annotations;
     _setUpMouseTracker(
-      annotationFinder: (Offset position) sync* {
-        yield* annotations;
-      },
+      annotationFinder: (Offset position) sync* { yield* annotations; },
       logCursors: logCursors,
     );
 
@@ -453,11 +449,11 @@ ui.PointerData _pointerData(
 
 class _CursorUpdateDetails extends MethodCall {
   const _CursorUpdateDetails(String method, Map<String, dynamic> arguments)
-      : assert(arguments != null),
-        super(method, arguments);
+    : assert(arguments != null),
+      super(method, arguments);
 
   _CursorUpdateDetails.wrap(MethodCall call)
-      : super(call.method, Map<String, dynamic>.from(call.arguments as Map<dynamic, dynamic>));
+    : super(call.method, Map<String, dynamic>.from(call.arguments as Map<dynamic, dynamic>));
 
   _CursorUpdateDetails.activateSystemCursor({
     required int device,
@@ -468,13 +464,16 @@ class _CursorUpdateDetails extends MethodCall {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(other, this)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is _CursorUpdateDetails &&
-        other.method == method &&
-        other.arguments.length == arguments.length &&
-        other.arguments.entries.every(
-          (MapEntry<String, dynamic> entry) => arguments.containsKey(entry.key) && arguments[entry.key] == entry.value,
+    if (identical(other, this))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _CursorUpdateDetails
+        && other.method == method
+        && other.arguments.length == arguments.length
+        && other.arguments.entries.every(
+          (MapEntry<String, dynamic> entry) =>
+            arguments.containsKey(entry.key) && arguments[entry.key] == entry.value,
         );
   }
 

@@ -26,7 +26,8 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   final EdgeInsets? expandedHeaderPadding;
 
   /// Mirrors the default expanded header padding as its source constants are private.
-  static EdgeInsets defaultExpandedHeaderPadding() {
+  static EdgeInsets defaultExpandedHeaderPadding()
+  {
     return const ExpansionPanelList().expandedHeaderPadding;
   }
 
@@ -40,8 +41,7 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
   @override
   Widget build(BuildContext context) {
     return ExpansionPanelList(
-      expandedHeaderPadding:
-          widget.expandedHeaderPadding ?? SimpleExpansionPanelListTestWidget.defaultExpandedHeaderPadding(),
+      expandedHeaderPadding: widget.expandedHeaderPadding ?? SimpleExpansionPanelListTestWidget.defaultExpandedHeaderPadding(),
       expansionCallback: (int index, bool isExpanded) {
         setState(() {
           extendedState[index] = !extendedState[index];
@@ -72,7 +72,7 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
 }
 
 class ExpansionPanelListSemanticsTest extends StatefulWidget {
-  const ExpansionPanelListSemanticsTest({Key? key, required this.headerKey}) : super(key: key);
+  const ExpansionPanelListSemanticsTest({ Key? key, required this.headerKey }) : super(key: key);
 
   final Key headerKey;
 
@@ -96,7 +96,7 @@ class ExpansionPanelListSemanticsTestState extends State<ExpansionPanelListSeman
                     onTap: () => headerTapped = true,
                     child: const Text.rich(
                       TextSpan(
-                        text: 'head1',
+                        text:'head1',
                       ),
                     ),
                   ),
@@ -191,7 +191,8 @@ void main() {
     await tester.tap(find.text('head1'));
     await tester.pump();
 
-    final ExpansionPanelListSemanticsTestState state = tester.state(find.byType(ExpansionPanelListSemanticsTest));
+    final ExpansionPanelListSemanticsTestState state =
+      tester.state(find.byType(ExpansionPanelListSemanticsTest));
     expect(state.headerTapped, true);
 
     // Check the expansion icon semantics does not merged with header widget.
@@ -202,28 +203,24 @@ void main() {
       ),
       matching: find.byType(ExpandIcon),
     );
-    expect(
-        tester.getSemantics(expansionIcon),
-        matchesSemantics(
-          label: 'Expand',
-          isButton: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          isFocusable: true,
-          hasTapAction: true,
-        ));
+    expect(tester.getSemantics(expansionIcon), matchesSemantics(
+      label: 'Expand',
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      isFocusable: true,
+      hasTapAction: true,
+    ));
 
     // Check custom header widget semantics is preserved.
     final Finder headerWidget = find.descendant(
       of: find.byKey(headerKey),
       matching: find.byType(RichText),
     );
-    expect(
-        tester.getSemantics(headerWidget),
-        matchesSemantics(
-          label: 'head1',
-          hasTapAction: true,
-        ));
+    expect(tester.getSemantics(headerWidget), matchesSemantics(
+      label: 'head1',
+      hasTapAction: true,
+    ));
 
     handle.dispose();
   });
@@ -285,11 +282,9 @@ void main() {
                   headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
                     fallbackHeight: 12.0,
                   ),
-                  body: const SizedBox(
-                      height: 100.0,
-                      child: Placeholder(
-                        fallbackHeight: 12.0,
-                      )),
+                  body: const SizedBox(height: 100.0, child: Placeholder(
+                    fallbackHeight: 12.0,
+                  )),
                   isExpanded: a,
                 ),
                 ExpansionPanel(
@@ -333,17 +328,11 @@ void main() {
     expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
     final Rect rect1 = tester.getRect(find.byType(AnimatedSize).at(1));
     expect(rect1.left, 0.0);
-    expect(
-        rect1.top,
-        inExclusiveRange(
-            113.0, 113.0 + 16.0 + 32.0)); // 16.0 material gap, plus 16.0 top and bottom margins added to the header
+    expect(rect1.top, inExclusiveRange(113.0, 113.0 + 16.0 + 32.0)); // 16.0 material gap, plus 16.0 top and bottom margins added to the header
     expect(rect1.width, 800.0);
     expect(rect1.height, inExclusiveRange(0.0, 100.0));
     final Rect rect2 = tester.getRect(find.byType(AnimatedSize).at(2));
-    expect(
-        rect2,
-        Rect.fromLTWH(0.0, rect1.bottom + 16.0 + 56.0, 800.0,
-            0.0)); // the 16.0 comes from the MaterialGap being introduced, the 56.0 is the header height.
+    expect(rect2, Rect.fromLTWH(0.0, rect1.bottom + 16.0 + 56.0, 800.0, 0.0)); // the 16.0 comes from the MaterialGap being introduced, the 56.0 is the header height.
 
     await tester.pumpWidget(build(false, false, false));
     expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
@@ -366,11 +355,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)),
-        const Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
   });
 
-  testWidgets('Radio mode has max of one panel open at a time', (WidgetTester tester) async {
+  testWidgets('Radio mode has max of one panel open at a time',  (WidgetTester tester) async {
     final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
@@ -465,6 +453,7 @@ void main() {
     expect(find.text('D'), findsOneWidget);
     expect(find.text('E'), findsOneWidget);
     expect(find.text('F'), findsNothing);
+
 
     final List<ExpansionPanel> demoItems = <ExpansionPanel>[
       ExpansionPanel(
@@ -701,9 +690,7 @@ void main() {
 
       ExpansionPanelList buildExpansionPanelList(StateSetter setState) {
         return ExpansionPanelList(
-          expansionCallback: (int index, _) => setState(() {
-            panelExpansionState[index] = !panelExpansionState[index];
-          }),
+          expansionCallback: (int index, _) => setState(() { panelExpansionState[index] = !panelExpansionState[index]; }),
           children: <ExpansionPanel>[
             ExpansionPanel(
               isExpanded: panelExpansionState[0],
@@ -736,12 +723,12 @@ void main() {
             return MaterialApp(
               home: Scaffold(
                 body: SingleChildScrollView(
-                  child: isRadioList ? buildRadioExpansionPanelList() : buildExpansionPanelList(setState),
+                  child: isRadioList
+                    ? buildRadioExpansionPanelList()
+                    : buildExpansionPanelList(setState),
                 ),
                 floatingActionButton: FloatingActionButton(
-                  onPressed: () => setState(() {
-                    isRadioList = !isRadioList;
-                  }),
+                  onPressed: () => setState(() { isRadioList = !isRadioList; }),
                 ),
               ),
             );
@@ -956,25 +943,21 @@ void main() {
       ),
       matching: find.byType(ExpandIcon),
     );
-    expect(
-        tester.getSemantics(expandedIcon),
-        matchesSemantics(
-          label: 'Collapse',
-          isButton: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          isFocusable: true,
-          hasTapAction: true,
-          onTapHint: localizations.expandedIconTapHint,
-        ));
+    expect(tester.getSemantics(expandedIcon), matchesSemantics(
+      label: 'Collapse',
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      isFocusable: true,
+      hasTapAction: true,
+      onTapHint: localizations.expandedIconTapHint,
+    ));
 
     // Check the semantics of the header widget for expanded panel.
     final Finder expandedHeader = find.byKey(expandedKey);
-    expect(
-        tester.getSemantics(expandedHeader),
-        matchesSemantics(
-          label: 'Expanded',
-        ));
+    expect(tester.getSemantics(expandedHeader), matchesSemantics(
+      label: 'Expanded',
+    ));
 
     // Check the semantics of [ExpandIcon] for collapsed panel.
     final Finder collapsedIcon = find.descendant(
@@ -984,25 +967,21 @@ void main() {
       ),
       matching: find.byType(ExpandIcon),
     );
-    expect(
-        tester.getSemantics(collapsedIcon),
-        matchesSemantics(
-          label: 'Expand',
-          isButton: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          isFocusable: true,
-          hasTapAction: true,
-          onTapHint: localizations.collapsedIconTapHint,
-        ));
+    expect(tester.getSemantics(collapsedIcon), matchesSemantics(
+      label: 'Expand',
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      isFocusable: true,
+      hasTapAction: true,
+      onTapHint: localizations.collapsedIconTapHint,
+    ));
 
     // Check the semantics of the header widget for expanded panel.
     final Finder collapsedHeader = find.byKey(collapsedKey);
-    expect(
-        tester.getSemantics(collapsedHeader),
-        matchesSemantics(
-          label: 'Collapsed',
-        ));
+    expect(tester.getSemantics(collapsedHeader), matchesSemantics(
+      label: 'Collapsed',
+    ));
 
     handle.dispose();
   });
@@ -1041,30 +1020,26 @@ void main() {
       ),
     );
 
-    expect(
-        tester.getSemantics(find.byKey(expandedKey)),
-        matchesSemantics(
-          label: 'Expanded',
-          isButton: true,
-          isFocusable: true,
-          hasEnabledState: true,
-          hasTapAction: true,
-        ));
+    expect(tester.getSemantics(find.byKey(expandedKey)), matchesSemantics(
+      label: 'Expanded',
+      isButton: true,
+      isFocusable: true,
+      hasEnabledState: true,
+      hasTapAction: true,
+    ));
 
-    expect(
-        tester.getSemantics(find.byKey(collapsedKey)),
-        matchesSemantics(
-          label: 'Collapsed',
-          isButton: true,
-          isFocusable: true,
-          hasEnabledState: true,
-          hasTapAction: true,
-        ));
+    expect(tester.getSemantics(find.byKey(collapsedKey)), matchesSemantics(
+      label: 'Collapsed',
+      isButton: true,
+      isFocusable: true,
+      hasEnabledState: true,
+      hasTapAction: true,
+    ));
 
     handle.dispose();
   });
 
-  testWidgets('Ensure canTapOnHeader is false by default', (WidgetTester tester) async {
+  testWidgets('Ensure canTapOnHeader is false by default',  (WidgetTester tester) async {
     final ExpansionPanel expansionPanel = ExpansionPanel(
       headerBuilder: (BuildContext context, bool isExpanded) => const Text('Demo'),
       body: const SizedBox(height: 100.0),
@@ -1073,7 +1048,7 @@ void main() {
     expect(expansionPanel.canTapOnHeader, isFalse);
   });
 
-  testWidgets('Toggle ExpansionPanelRadio when tapping header and canTapOnHeader is true', (WidgetTester tester) async {
+  testWidgets('Toggle ExpansionPanelRadio when tapping header and canTapOnHeader is true',  (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
 
@@ -1133,7 +1108,7 @@ void main() {
     expect(find.text('D'), findsOneWidget);
   });
 
-  testWidgets('Toggle ExpansionPanel when tapping header and canTapOnHeader is true', (WidgetTester tester) async {
+  testWidgets('Toggle ExpansionPanel when tapping header and canTapOnHeader is true',  (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
 
@@ -1192,8 +1167,7 @@ void main() {
     expect(find.text('D'), findsNothing);
   });
 
-  testWidgets('Do not toggle ExpansionPanel when tapping header and canTapOnHeader is false',
-      (WidgetTester tester) async {
+  testWidgets('Do not toggle ExpansionPanel when tapping header and canTapOnHeader is false',  (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
 
@@ -1233,8 +1207,7 @@ void main() {
     expect(find.text('D'), findsNothing);
   });
 
-  testWidgets('Do not toggle ExpansionPanelRadio when tapping header and canTapOnHeader is false',
-      (WidgetTester tester) async {
+  testWidgets('Do not toggle ExpansionPanelRadio when tapping header and canTapOnHeader is false',  (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
 
@@ -1311,8 +1284,7 @@ void main() {
     expect(find.text('B'), findsNothing);
 
     // No padding applied to closed header
-    RenderBox box = tester
-        .renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
     expect(box.size.width, equals(736.0));
 
@@ -1325,8 +1297,7 @@ void main() {
     expect(find.text('B'), findsOneWidget);
 
     // Padding is added to expanded header
-    box = tester
-        .renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(80.0)); // _kPanelHeaderCollapsedHeight + 32.0 (double default padding)
     expect(box.size.width, equals(736.0));
   });
@@ -1351,8 +1322,7 @@ void main() {
     expect(find.text('B'), findsNothing);
 
     // No padding applied to closed header
-    RenderBox box = tester
-        .renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
     expect(box.size.width, equals(736.0));
 
@@ -1365,8 +1335,7 @@ void main() {
     expect(find.text('B'), findsOneWidget);
 
     // Padding is added to expanded header
-    box = tester
-        .renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(128.0)); // _kPanelHeaderCollapsedHeight + 80.0 (double padding)
     expect(box.size.width, equals(736.0));
   });
@@ -1464,6 +1433,7 @@ void main() {
   });
 
   testWidgets('Using a value non defined value throws assertion error', (WidgetTester tester) async {
+
     // It should throw an AssertionError since, 19 is not defined in kElevationToShadow.
     await tester.pumpWidget(const MaterialApp(
       home: SingleChildScrollView(
@@ -1475,12 +1445,10 @@ void main() {
 
     final dynamic exception = tester.takeException();
     expect(exception, isAssertionError);
-    expect(
-        (exception as AssertionError).toString(),
-        contains(
-          'Invalid value for elevation. See the kElevationToShadow constant for'
-          ' possible elevation values.',
-        ));
+    expect((exception as AssertionError).toString(), contains(
+      'Invalid value for elevation. See the kElevationToShadow constant for'
+      ' possible elevation values.',
+    ));
   });
 
   testWidgets('ExpansionPanel.panelColor test', (WidgetTester tester) async {

@@ -20,7 +20,7 @@ CommandHelp _createCommandHelp({
   return CommandHelp(
     logger: BufferLogger.test(),
     terminal: AnsiTerminal(
-      stdio: FakeStdio(),
+      stdio:  FakeStdio(),
       platform: platform,
     ),
     platform: platform,
@@ -160,8 +160,7 @@ void main() {
         );
       });
 
-      testWithoutContext('should not create a help text longer than outputPreferences.wrapColumn without ansi support',
-          () {
+      testWithoutContext('should not create a help text longer than outputPreferences.wrapColumn without ansi support', () {
         _testMessageLength(
           stdoutSupportsAnsi: false,
           wrapColumn: OutputPreferences.kDefaultTerminalColumns,
@@ -169,8 +168,7 @@ void main() {
         );
       });
 
-      testWithoutContext('should not create a help text longer than outputPreferences.wrapColumn with ansi support',
-          () {
+      testWithoutContext('should not create a help text longer than outputPreferences.wrapColumn with ansi support', () {
         _testMessageLength(
           stdoutSupportsAnsi: true,
           wrapColumn: OutputPreferences.kDefaultTerminalColumns,
@@ -184,68 +182,29 @@ void main() {
           wrapColumn: maxLineWidth,
         );
 
-        expect(
-            commandHelp.I.toString(),
-            equals(
-                '\x1B[1mI\x1B[22m Toggle oversized image inversion.                     \x1B[90m(debugInvertOversizedImages)\x1B[39m\x1B[22m'));
-        expect(
-            commandHelp.L.toString(),
-            equals(
-                '\x1B[1mL\x1B[22m Dump layer tree to the console.                               \x1B[90m(debugDumpLayerTree)\x1B[39m\x1B[22m'));
-        expect(commandHelp.M.toString(),
-            equals('\x1B[1mM\x1B[22m Write SkSL shaders to a unique file in the project directory.'));
-        expect(
-            commandHelp.P.toString(),
-            equals(
-                '\x1B[1mP\x1B[22m Toggle performance overlay.                    \x1B[90m(WidgetsApp.showPerformanceOverlay)\x1B[39m\x1B[22m'));
+        expect(commandHelp.I.toString(), equals('\x1B[1mI\x1B[22m Toggle oversized image inversion.                     \x1B[90m(debugInvertOversizedImages)\x1B[39m\x1B[22m'));
+        expect(commandHelp.L.toString(), equals('\x1B[1mL\x1B[22m Dump layer tree to the console.                               \x1B[90m(debugDumpLayerTree)\x1B[39m\x1B[22m'));
+        expect(commandHelp.M.toString(), equals('\x1B[1mM\x1B[22m Write SkSL shaders to a unique file in the project directory.'));
+        expect(commandHelp.P.toString(), equals('\x1B[1mP\x1B[22m Toggle performance overlay.                    \x1B[90m(WidgetsApp.showPerformanceOverlay)\x1B[39m\x1B[22m'));
         expect(commandHelp.R.toString(), equals('\x1B[1mR\x1B[22m Hot restart.'));
-        expect(
-            commandHelp.S.toString(),
-            equals(
-                '\x1B[1mS\x1B[22m Dump accessibility tree in traversal order.                   \x1B[90m(debugDumpSemantics)\x1B[39m\x1B[22m'));
-        expect(
-            commandHelp.U.toString(),
-            equals(
-                '\x1B[1mU\x1B[22m Dump accessibility tree in inverse hit test order.            \x1B[90m(debugDumpSemantics)\x1B[39m\x1B[22m'));
-        expect(
-            commandHelp.a.toString(),
-            equals(
-                '\x1B[1ma\x1B[22m Toggle timeline events for all widget build methods.    \x1B[90m(debugProfileWidgetBuilds)\x1B[39m\x1B[22m'));
-        expect(
-            commandHelp.b.toString(),
-            equals(
-                '\x1B[1mb\x1B[22m Toggle platform brightness (dark and light mode).        \x1B[90m(debugBrightnessOverride)\x1B[39m\x1B[22m'));
+        expect(commandHelp.S.toString(), equals('\x1B[1mS\x1B[22m Dump accessibility tree in traversal order.                   \x1B[90m(debugDumpSemantics)\x1B[39m\x1B[22m'));
+        expect(commandHelp.U.toString(), equals('\x1B[1mU\x1B[22m Dump accessibility tree in inverse hit test order.            \x1B[90m(debugDumpSemantics)\x1B[39m\x1B[22m'));
+        expect(commandHelp.a.toString(), equals('\x1B[1ma\x1B[22m Toggle timeline events for all widget build methods.    \x1B[90m(debugProfileWidgetBuilds)\x1B[39m\x1B[22m'));
+        expect(commandHelp.b.toString(), equals('\x1B[1mb\x1B[22m Toggle platform brightness (dark and light mode).        \x1B[90m(debugBrightnessOverride)\x1B[39m\x1B[22m'));
         expect(commandHelp.c.toString(), equals('\x1B[1mc\x1B[22m Clear the screen'));
-        expect(commandHelp.d.toString(),
-            equals('\x1B[1md\x1B[22m Detach (terminate "flutter run" but leave application running).'));
+        expect(commandHelp.d.toString(), equals('\x1B[1md\x1B[22m Detach (terminate "flutter run" but leave application running).'));
         expect(commandHelp.g.toString(), equals('\x1B[1mg\x1B[22m Run source code generators.'));
         expect(commandHelp.hWithDetails.toString(), equals('\x1B[1mh\x1B[22m Repeat this help message.'));
-        expect(commandHelp.hWithoutDetails.toString(),
-            equals('\x1B[1mh\x1B[22m List all available interactive commands.'));
-        expect(
-            commandHelp.i.toString(),
-            equals(
-                '\x1B[1mi\x1B[22m Toggle widget inspector.                  \x1B[90m(WidgetsApp.showWidgetInspectorOverride)\x1B[39m\x1B[22m'));
-        expect(
-            commandHelp.o.toString(),
-            equals(
-                '\x1B[1mo\x1B[22m Simulate different operating systems.                      \x1B[90m(defaultTargetPlatform)\x1B[39m\x1B[22m'));
-        expect(
-            commandHelp.p.toString(),
-            equals(
-                '\x1B[1mp\x1B[22m Toggle the display of construction lines.                  \x1B[90m(debugPaintSizeEnabled)\x1B[39m\x1B[22m'));
+        expect(commandHelp.hWithoutDetails.toString(), equals('\x1B[1mh\x1B[22m List all available interactive commands.'));
+        expect(commandHelp.i.toString(), equals('\x1B[1mi\x1B[22m Toggle widget inspector.                  \x1B[90m(WidgetsApp.showWidgetInspectorOverride)\x1B[39m\x1B[22m'));
+        expect(commandHelp.o.toString(), equals('\x1B[1mo\x1B[22m Simulate different operating systems.                      \x1B[90m(defaultTargetPlatform)\x1B[39m\x1B[22m'));
+        expect(commandHelp.p.toString(), equals('\x1B[1mp\x1B[22m Toggle the display of construction lines.                  \x1B[90m(debugPaintSizeEnabled)\x1B[39m\x1B[22m'));
         expect(commandHelp.q.toString(), equals('\x1B[1mq\x1B[22m Quit (terminate the application on the device).'));
         expect(commandHelp.r.toString(), equals('\x1B[1mr\x1B[22m Hot reload. $fire$fire$fire'));
         expect(commandHelp.s.toString(), equals('\x1B[1ms\x1B[22m Save a screenshot to flutter.png.'));
-        expect(
-            commandHelp.t.toString(),
-            equals(
-                '\x1B[1mt\x1B[22m Dump rendering tree to the console.                          \x1B[90m(debugDumpRenderTree)\x1B[39m\x1B[22m'));
+        expect(commandHelp.t.toString(), equals('\x1B[1mt\x1B[22m Dump rendering tree to the console.                          \x1B[90m(debugDumpRenderTree)\x1B[39m\x1B[22m'));
         expect(commandHelp.v.toString(), equals('\x1B[1mv\x1B[22m Open Flutter DevTools.'));
-        expect(
-            commandHelp.w.toString(),
-            equals(
-                '\x1B[1mw\x1B[22m Dump widget hierarchy to the console.                               \x1B[90m(debugDumpApp)\x1B[39m\x1B[22m'));
+        expect(commandHelp.w.toString(), equals('\x1B[1mw\x1B[22m Dump widget hierarchy to the console.                               \x1B[90m(debugDumpApp)\x1B[39m\x1B[22m'));
       });
 
       testWithoutContext('should create the correct help text without ansi support', () {
@@ -254,41 +213,29 @@ void main() {
           wrapColumn: maxLineWidth,
         );
 
-        expect(commandHelp.I.toString(),
-            equals('I Toggle oversized image inversion.                     (debugInvertOversizedImages)'));
+        expect(commandHelp.I.toString(), equals('I Toggle oversized image inversion.                     (debugInvertOversizedImages)'));
         expect(commandHelp.M.toString(), equals('M Write SkSL shaders to a unique file in the project directory.'));
-        expect(commandHelp.L.toString(),
-            equals('L Dump layer tree to the console.                               (debugDumpLayerTree)'));
-        expect(commandHelp.P.toString(),
-            equals('P Toggle performance overlay.                    (WidgetsApp.showPerformanceOverlay)'));
+        expect(commandHelp.L.toString(), equals('L Dump layer tree to the console.                               (debugDumpLayerTree)'));
+        expect(commandHelp.P.toString(), equals('P Toggle performance overlay.                    (WidgetsApp.showPerformanceOverlay)'));
         expect(commandHelp.R.toString(), equals('R Hot restart.'));
-        expect(commandHelp.S.toString(),
-            equals('S Dump accessibility tree in traversal order.                   (debugDumpSemantics)'));
-        expect(commandHelp.U.toString(),
-            equals('U Dump accessibility tree in inverse hit test order.            (debugDumpSemantics)'));
-        expect(commandHelp.a.toString(),
-            equals('a Toggle timeline events for all widget build methods.    (debugProfileWidgetBuilds)'));
-        expect(commandHelp.b.toString(),
-            equals('b Toggle platform brightness (dark and light mode).        (debugBrightnessOverride)'));
+        expect(commandHelp.S.toString(), equals('S Dump accessibility tree in traversal order.                   (debugDumpSemantics)'));
+        expect(commandHelp.U.toString(), equals('U Dump accessibility tree in inverse hit test order.            (debugDumpSemantics)'));
+        expect(commandHelp.a.toString(), equals('a Toggle timeline events for all widget build methods.    (debugProfileWidgetBuilds)'));
+        expect(commandHelp.b.toString(), equals('b Toggle platform brightness (dark and light mode).        (debugBrightnessOverride)'));
         expect(commandHelp.c.toString(), equals('c Clear the screen'));
         expect(commandHelp.d.toString(), equals('d Detach (terminate "flutter run" but leave application running).'));
         expect(commandHelp.g.toString(), equals('g Run source code generators.'));
         expect(commandHelp.hWithDetails.toString(), equals('h Repeat this help message.'));
         expect(commandHelp.hWithoutDetails.toString(), equals('h List all available interactive commands.'));
-        expect(commandHelp.i.toString(),
-            equals('i Toggle widget inspector.                  (WidgetsApp.showWidgetInspectorOverride)'));
-        expect(commandHelp.o.toString(),
-            equals('o Simulate different operating systems.                      (defaultTargetPlatform)'));
-        expect(commandHelp.p.toString(),
-            equals('p Toggle the display of construction lines.                  (debugPaintSizeEnabled)'));
+        expect(commandHelp.i.toString(), equals('i Toggle widget inspector.                  (WidgetsApp.showWidgetInspectorOverride)'));
+        expect(commandHelp.o.toString(), equals('o Simulate different operating systems.                      (defaultTargetPlatform)'));
+        expect(commandHelp.p.toString(), equals('p Toggle the display of construction lines.                  (debugPaintSizeEnabled)'));
         expect(commandHelp.q.toString(), equals('q Quit (terminate the application on the device).'));
         expect(commandHelp.r.toString(), equals('r Hot reload. $fire$fire$fire'));
         expect(commandHelp.s.toString(), equals('s Save a screenshot to flutter.png.'));
-        expect(commandHelp.t.toString(),
-            equals('t Dump rendering tree to the console.                          (debugDumpRenderTree)'));
+        expect(commandHelp.t.toString(), equals('t Dump rendering tree to the console.                          (debugDumpRenderTree)'));
         expect(commandHelp.v.toString(), equals('v Open Flutter DevTools.'));
-        expect(commandHelp.w.toString(),
-            equals('w Dump widget hierarchy to the console.                               (debugDumpApp)'));
+        expect(commandHelp.w.toString(), equals('w Dump widget hierarchy to the console.                               (debugDumpApp)'));
       });
     });
   });

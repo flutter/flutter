@@ -48,9 +48,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       child: Center(
-          child: CupertinoTextField(
-        controller: _textController,
-      )),
+        child: CupertinoTextField(
+          controller: _textController,
+        )
+      ),
     );
   }
 }

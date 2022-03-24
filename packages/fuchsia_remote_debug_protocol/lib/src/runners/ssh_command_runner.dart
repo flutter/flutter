@@ -83,15 +83,19 @@ class SshCommandRunner {
   Future<List<String>> run(String command) async {
     final List<String> args = <String>[
       'ssh',
-      if (sshConfigPath != null) ...<String>['-F', sshConfigPath!],
-      if (isIpV6Address(address)) ...<String>['-6', if (interface.isEmpty) address else '$address%$interface'] else
+      if (sshConfigPath != null)
+        ...<String>['-F', sshConfigPath!],
+      if (isIpV6Address(address))
+        ...<String>['-6', if (interface.isEmpty) address else '$address%$interface']
+      else
         address,
       command,
     ];
     _log.fine('Running command through SSH: ${args.join(' ')}');
     final ProcessResult result = await _processManager.run(args);
     if (result.exitCode != 0) {
-      throw SshCommandError('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
+      throw SshCommandError(
+          'Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
     _log.fine('SSH command stdout in brackets:[${result.stdout}]');
     return (result.stdout as String).split('\n');

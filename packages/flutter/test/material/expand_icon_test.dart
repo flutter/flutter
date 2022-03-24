@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget wrap({required Widget child, ThemeData? theme}) {
+Widget wrap({ required Widget child, ThemeData? theme }) {
   return MaterialApp(
     theme: theme,
     home: Center(
@@ -134,7 +134,7 @@ void main() {
   });
 
   testWidgets('ExpandIcon default size is 24', (WidgetTester tester) async {
-    final ExpandIcon expandIcon = ExpandIcon(
+    final ExpandIcon expandIcon =  ExpandIcon(
       onPressed: (bool isExpanded) {},
     );
 
@@ -147,7 +147,7 @@ void main() {
   });
 
   testWidgets('ExpandIcon has the correct given size', (WidgetTester tester) async {
-    ExpandIcon expandIcon = ExpandIcon(
+    ExpandIcon expandIcon =  ExpandIcon(
       size: 36,
       onPressed: (bool isExpanded) {},
     );
@@ -159,7 +159,7 @@ void main() {
     ExpandIcon icon = tester.firstWidget(find.byWidget(expandIcon));
     expect(icon.size, 36);
 
-    expandIcon = ExpandIcon(
+    expandIcon =  ExpandIcon(
       size: 48,
       onPressed: (bool isExpanded) {},
     );
@@ -178,37 +178,33 @@ void main() {
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
         isExpanded: true,
-        onPressed: (bool _) {},
+        onPressed: (bool _) { },
       ),
     ));
 
-    expect(
-        tester.getSemantics(find.byType(ExpandIcon)),
-        matchesSemantics(
-          hasTapAction: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          isFocusable: true,
-          isButton: true,
-          onTapHint: localizations.expandedIconTapHint,
-        ));
+    expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
+      hasTapAction: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      isFocusable: true,
+      isButton: true,
+      onTapHint: localizations.expandedIconTapHint,
+    ));
 
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
-        onPressed: (bool _) {},
+        onPressed: (bool _) { },
       ),
     ));
 
-    expect(
-        tester.getSemantics(find.byType(ExpandIcon)),
-        matchesSemantics(
-          hasTapAction: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          isFocusable: true,
-          isButton: true,
-          onTapHint: localizations.collapsedIconTapHint,
-        ));
+    expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
+      hasTapAction: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      isFocusable: true,
+      isButton: true,
+      onTapHint: localizations.collapsedIconTapHint,
+    ));
     handle.dispose();
   });
 

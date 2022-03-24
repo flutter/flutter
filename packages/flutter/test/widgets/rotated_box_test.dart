@@ -20,9 +20,7 @@ void main() {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               GestureDetector(
-                onTap: () {
-                  log.add('left');
-                },
+                onTap: () { log.add('left'); },
                 child: Container(
                   width: 100.0,
                   height: 40.0,
@@ -30,9 +28,7 @@ void main() {
                 ),
               ),
               GestureDetector(
-                onTap: () {
-                  log.add('right');
-                },
+                onTap: () { log.add('right'); },
                 child: Container(
                   width: 75.0,
                   height: 65.0,

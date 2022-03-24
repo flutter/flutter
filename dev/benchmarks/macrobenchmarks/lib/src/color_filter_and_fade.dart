@@ -45,18 +45,17 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
       ],
     );
 
-    final Widget column = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        row,
-        const SizedBox(height: 12),
-        row,
-        const SizedBox(height: 12),
-        row,
-        const SizedBox(height: 12),
-        row,
-        const SizedBox(height: 12),
-      ],
+    final Widget column = Column(mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          row,
+          const SizedBox(height: 12),
+          row,
+          const SizedBox(height: 12),
+          row,
+          const SizedBox(height: 12),
+          row,
+          const SizedBox(height: 12),
+        ],
     );
 
     final Widget fadeTransition = FadeTransition(
@@ -70,25 +69,25 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
     );
 
     return Scaffold(
-      backgroundColor: Colors.lightBlue,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            fadeTransition,
-            Container(height: 20),
-            const Text('Use Color Filter:'),
-            Checkbox(
-              value: _useColorFilter,
-              onChanged: (bool? value) {
-                setState(() {
-                  _useColorFilter = value ?? false;
-                });
-              },
+        backgroundColor: Colors.lightBlue,
+        body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                fadeTransition,
+                Container(height: 20),
+                const Text('Use Color Filter:'),
+                Checkbox(
+                  value: _useColorFilter,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _useColorFilter = value ?? false;
+                    });
+                  },
+                ),
+              ],
             ),
-          ],
         ),
-      ),
     );
   }
 

@@ -138,7 +138,7 @@ void main() {
       processManager,
     );
     final Completer<void> onDone = Completer<void>.sync();
-    logReader.logLines.listen((String _) {}, onDone: onDone.complete);
+    logReader.logLines.listen((String _) { }, onDone: onDone.complete);
 
     logReader.dispose();
     await onDone.future;
@@ -159,24 +159,23 @@ void main() {
         ],
         completer: Completer<void>.sync(),
         // Example stack trace from an incorrectly named application:name in the AndroidManifest.xml
-        stdout: '$kDummyLine'
-            '05-11 12:54:46.665 E/AndroidRuntime(11787): FATAL EXCEPTION: main\n'
-            '05-11 12:54:46.665 E/AndroidRuntime(11787): Process: com.example.foobar, PID: 11787\n'
-            '05-11 12:54:46.665 java.lang.RuntimeException: Unable to instantiate application '
-            'io.flutter.app.FlutterApplication2: java.lang.ClassNotFoundException:\n',
+        stdout:
+          '$kDummyLine'
+          '05-11 12:54:46.665 E/AndroidRuntime(11787): FATAL EXCEPTION: main\n'
+          '05-11 12:54:46.665 E/AndroidRuntime(11787): Process: com.example.foobar, PID: 11787\n'
+          '05-11 12:54:46.665 java.lang.RuntimeException: Unable to instantiate application '
+          'io.flutter.app.FlutterApplication2: java.lang.ClassNotFoundException:\n',
       )
     ]);
     final AdbLogReader logReader = await AdbLogReader.createLogReader(
       createFakeDevice(null),
       processManager,
     );
-    await expectLater(
-        logReader.logLines,
-        emitsInOrder(<String>[
-          'E/AndroidRuntime(11787): FATAL EXCEPTION: main',
-          'E/AndroidRuntime(11787): Process: com.example.foobar, PID: 11787',
-          'java.lang.RuntimeException: Unable to instantiate application io.flutter.app.FlutterApplication2: java.lang.ClassNotFoundException:',
-        ]));
+    await expectLater(logReader.logLines, emitsInOrder(<String>[
+      'E/AndroidRuntime(11787): FATAL EXCEPTION: main',
+      'E/AndroidRuntime(11787): Process: com.example.foobar, PID: 11787',
+      'java.lang.RuntimeException: Unable to instantiate application io.flutter.app.FlutterApplication2: java.lang.ClassNotFoundException:',
+    ]));
 
     logReader.dispose();
   });
@@ -210,10 +209,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
   List<String> adbCommandForDevice(List<String> command) {
     return <String>[
-      'adb',
-      '-s',
-      '1234',
-      ...command,
+      'adb', '-s', '1234', ...command,
     ];
   }
 }

@@ -22,17 +22,17 @@ String readDataFile(String fileName) {
   return File(path.join(dataRoot, fileName)).readAsStringSync();
 }
 
-final PhysicalKeyData physicalData =
-    PhysicalKeyData.fromJson(json.decode(readDataFile('physical_key_data.json')) as Map<String, dynamic>);
-final LogicalKeyData logicalData =
-    LogicalKeyData.fromJson(json.decode(readDataFile('logical_key_data.json')) as Map<String, dynamic>);
+final PhysicalKeyData physicalData = PhysicalKeyData.fromJson(
+    json.decode(readDataFile('physical_key_data.json')) as Map<String, dynamic>);
+final LogicalKeyData logicalData = LogicalKeyData.fromJson(
+    json.decode(readDataFile('logical_key_data.json')) as Map<String, dynamic>);
 
 void main() {
   setUp(() {
     testDataRoot = path.canonicalize(path.join(Directory.current.absolute.path, 'data'));
   });
 
-  tearDown(() {
+  tearDown((){
     testDataRoot = null;
   });
 
@@ -147,12 +147,20 @@ void main() {
 
     // Regression tests for https://github.com/flutter/flutter/pull/87098
 
-    expect(entries.indexWhere((LogicalKeyEntry entry) => entry.name == 'ShiftLeft'), isNot(-1));
-    expect(entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('ShiftLeft')), -1);
+    expect(
+      entries.indexWhere((LogicalKeyEntry entry) => entry.name == 'ShiftLeft'),
+      isNot(-1));
+    expect(
+      entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('ShiftLeft')),
+      -1);
     // 'Shift' maps to both 'ShiftLeft' and 'ShiftRight', and should be resolved
     // by other ways.
-    expect(entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('Shift')), -1);
+    expect(
+      entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('Shift')),
+      -1);
     // Printable keys must not be added with Web key of their names.
-    expect(entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('Slash')), -1);
+    expect(
+      entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('Slash')),
+      -1);
   });
 }

@@ -88,22 +88,21 @@ Rect getLabelRect(WidgetTester tester) {
 }
 
 TextStyle getLabelStyle(WidgetTester tester) {
-  return tester
-      .firstWidget<AnimatedDefaultTextStyle>(
-        find.ancestor(
-          of: find.text('label'),
-          matching: find.byType(AnimatedDefaultTextStyle),
-        ),
-      )
-      .style;
+  return tester.firstWidget<AnimatedDefaultTextStyle>(
+    find.ancestor(
+      of: find.text('label'),
+      matching: find.byType(AnimatedDefaultTextStyle),
+    ),
+  ).style;
 }
 
 InputBorder? getBorder(WidgetTester tester) {
-  if (!tester.any(findBorderPainter())) return null;
+  if (!tester.any(findBorderPainter()))
+    return null;
   final CustomPaint customPaint = tester.widget(findBorderPainter());
-  final dynamic /*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
   // ignore: avoid_dynamic_calls
-  final dynamic /*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+  final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
   // ignore: avoid_dynamic_calls
   final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
   // ignore: avoid_dynamic_calls
@@ -129,19 +128,17 @@ Color getBorderColor(WidgetTester tester) => getBorderSide(tester)!.color;
 
 Color getContainerColor(WidgetTester tester) {
   final CustomPaint customPaint = tester.widget(findBorderPainter());
-  final dynamic /*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
   // ignore: avoid_dynamic_calls
   return inputBorderPainter.blendedColor as Color;
 }
 
 double getOpacity(WidgetTester tester, String textValue) {
   final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-    find
-        .ancestor(
-          of: find.text(textValue),
-          matching: find.byType(FadeTransition),
-        )
-        .first,
+    find.ancestor(
+      of: find.text(textValue),
+      matching: find.byType(FadeTransition),
+    ).first,
   );
   return opacityWidget.opacity.value;
 }
@@ -376,9 +373,7 @@ void main() {
               children: <InlineSpan>[
                 TextSpan(text: 'label'),
                 WidgetSpan(
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red),
+                  child: Text('*', style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -416,9 +411,7 @@ void main() {
               children: <InlineSpan>[
                 TextSpan(text: 'label'),
                 WidgetSpan(
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red),
+                  child: Text('*', style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -444,9 +437,7 @@ void main() {
               children: <InlineSpan>[
                 TextSpan(text: 'label'),
                 WidgetSpan(
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red),
+                  child: Text('*', style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -472,9 +463,7 @@ void main() {
               children: <InlineSpan>[
                 TextSpan(text: 'label'),
                 WidgetSpan(
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red),
+                  child: Text('*', style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -510,9 +499,7 @@ void main() {
               children: <InlineSpan>[
                 TextSpan(text: 'label'),
                 WidgetSpan(
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red),
+                  child: Text('*', style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -541,9 +528,7 @@ void main() {
               children: <InlineSpan>[
                 TextSpan(text: 'label'),
                 WidgetSpan(
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red),
+                  child: Text('*', style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -583,9 +568,7 @@ void main() {
               children: <InlineSpan>[
                 TextSpan(text: 'label'),
                 WidgetSpan(
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red),
+                  child: Text('*', style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -598,7 +581,7 @@ void main() {
 
     // The label animates upwards from it's initial position
     // above the input text. The animation's duration is 200ms.
-    {
+        {
       await tester.pump(const Duration(milliseconds: 50));
       final double labelY50ms = tester.getTopLeft(find.byKey(key)).dy;
       expect(labelY50ms, inExclusiveRange(12.0, 28.0));
@@ -627,9 +610,7 @@ void main() {
               children: <InlineSpan>[
                 TextSpan(text: 'label'),
                 WidgetSpan(
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red),
+                  child: Text('*', style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -659,9 +640,7 @@ void main() {
               children: <InlineSpan>[
                 TextSpan(text: 'label'),
                 WidgetSpan(
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red),
+                  child: Text('*', style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -692,9 +671,7 @@ void main() {
               children: <InlineSpan>[
                 TextSpan(text: 'label'),
                 WidgetSpan(
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red),
+                  child: Text('*', style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
@@ -977,6 +954,7 @@ void main() {
     //   20 - top padding
     //   16 - label (ahem font size 16dps)
     //   20 - bottom padding (empty input text still appears here)
+
 
     // The label is not floating so it's vertically centered.
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
@@ -1788,9 +1766,9 @@ void main() {
 
     // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size
     // is 48x48 and the rest of the elements only require 40dps:
-    //   12 - top padding
-    //   16 - input text (ahem font size 16dps)
-    //   12 - bottom padding
+     //   12 - top padding
+     //   16 - input text (ahem font size 16dps)
+     //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
@@ -1801,11 +1779,11 @@ void main() {
     expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, 0.0);
     expect(tester.getTopRight(find.byIcon(Icons.satellite)).dx, 800.0);
 
+
     // layout is a row: [icon text icon]
     expect(tester.getTopLeft(find.byIcon(Icons.pages)).dx, 0.0);
     expect(tester.getTopRight(find.byIcon(Icons.pages)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
-    expect(tester.getTopRight(find.text('text')).dx,
-        lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
+    expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
   });
 
   testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (WidgetTester tester) async {
@@ -1860,10 +1838,10 @@ void main() {
     );
 
     // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size
-    // is 48x48 and the rest of the elements only require 40dps:
-    //   12 - top padding
-    //   16 - input text (ahem font size 16dps)
-    //   12 - bottom padding
+     // is 48x48 and the rest of the elements only require 40dps:
+     //   12 - top padding
+     //   16 - input text (ahem font size 16dps)
+     //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getSize(find.byKey(prefixKey)).height, 16.0);
@@ -2058,8 +2036,7 @@ void main() {
     expect(getBorderWeight(tester), 2.0);
   });
 
-  testWidgets('prefix/suffix icons increase height of decoration when larger than 48 by 48',
-      (WidgetTester tester) async {
+  testWidgets('prefix/suffix icons increase height of decoration when larger than 48 by 48', (WidgetTester tester) async {
     const Key prefixKey = Key('prefix');
     await tester.pumpWidget(
       buildInputDecorator(
@@ -2072,9 +2049,9 @@ void main() {
 
     // Overall height for this InputDecorator is 100dps because the prefix icon's  size
     // is 100x100 and the rest of the elements only require 40dps:
-    //   12 - top padding
-    //   16 - input text (ahem font size 16dps)
-    //   12 - bottom padding
+     //   12 - top padding
+     //   16 - input text (ahem font size 16dps)
+     //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 100.0));
     expect(tester.getSize(find.byKey(prefixKey)).height, 100.0);
@@ -2091,13 +2068,13 @@ void main() {
 
     testWidgets('InputDecoratorThemeData constraints', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecorator(
-          theme: ThemeData(
-            inputDecorationTheme: const InputDecorationTheme(
-              constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
+          buildInputDecorator(
+            theme: ThemeData(
+              inputDecorationTheme: const InputDecorationTheme(
+                constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
+              ),
             ),
           ),
-        ),
       );
 
       // Theme settings should make it 300x40 pixels
@@ -2630,10 +2607,8 @@ void main() {
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
-                12.0,
-                14.0,
-                8.0,
-                14.0,
+                12.0, 14.0,
+                8.0, 14.0,
               ),
             ),
           ),
@@ -2653,10 +2628,8 @@ void main() {
               labelText: 'label',
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
-                12.0,
-                14.0,
-                8.0,
-                14.0,
+                12.0, 14.0,
+                8.0, 14.0,
               ),
             ),
           ),
@@ -2675,10 +2648,8 @@ void main() {
               labelText: 'label',
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
-                12.0,
-                104.0,
-                8.0,
-                0.0,
+                12.0, 104.0,
+                8.0, 0.0,
               ),
             ),
           ),
@@ -2701,10 +2672,8 @@ void main() {
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
-                12.0,
-                24.0,
-                8.0,
-                2.0,
+                12.0, 24.0,
+                8.0, 2.0,
               ),
             ),
           ),
@@ -2726,10 +2695,8 @@ void main() {
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
-                12.0,
-                24.0,
-                8.0,
-                2.0,
+                12.0, 24.0,
+                8.0, 2.0,
               ),
             ),
           ),
@@ -2751,10 +2718,8 @@ void main() {
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
-                12.0,
-                24.0,
-                8.0,
-                2.0,
+                12.0, 24.0,
+                8.0, 2.0,
               ),
             ),
           ),
@@ -2776,10 +2741,8 @@ void main() {
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.fromLTRB(
-                12.0,
-                504.0,
-                8.0,
-                0.0,
+                12.0, 504.0,
+                8.0, 0.0,
               ),
             ),
           ),
@@ -2947,8 +2910,7 @@ void main() {
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
-    expect(tester.getSize(find.byType(InputDecorator)),
-        const Size(800.0, kMinInteractiveDimension)); // 40 bumped up to minimum.
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 40 bumped up to minimum.
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.text('p')).height, 16.0);
     expect(tester.getSize(find.text('s')).height, 16.0);
@@ -3007,26 +2969,24 @@ void main() {
   });
 
   group('floatingLabelAlignment', () {
-    Widget buildInputDecoratorWithFloatingLabel({
-      required TextDirection textDirection,
-      required bool hasIcon,
-      required FloatingLabelAlignment alignment,
-      bool borderIsOutline = false,
-    }) =>
-        buildInputDecorator(
-          // isEmpty: false (default)
-          // isFocused: false (default)
-          textDirection: textDirection,
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
-            floatingLabelAlignment: alignment,
-            icon: hasIcon ? const Icon(Icons.insert_link) : null,
-            labelText: 'label',
-            hintText: 'hint',
-            filled: true,
-            border: borderIsOutline ? const OutlineInputBorder() : null,
-          ),
-        );
+    Widget buildInputDecoratorWithFloatingLabel({required TextDirection textDirection,
+          required bool hasIcon,
+          required FloatingLabelAlignment alignment,
+          bool borderIsOutline = false,
+    }) => buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        textDirection: textDirection,
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+          floatingLabelAlignment: alignment,
+          icon: hasIcon ? const Icon(Icons.insert_link) : null,
+          labelText: 'label',
+          hintText: 'hint',
+          filled: true,
+          border: borderIsOutline ? const OutlineInputBorder() : null,
+        ),
+      );
 
     group('LTR with icon aligned', () {
       testWidgets('start', (WidgetTester tester) async {
@@ -3278,8 +3238,7 @@ void main() {
     //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
-    expect(tester.getSize(find.byType(InputDecorator)),
-        const Size(800.0, kMinInteractiveDimension)); // 40 bumped up to minimum.
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 40 bumped up to minimum.
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getTopLeft(find.text('text')).dy, 16.0);
     expect(getBorderBottom(tester), kMinInteractiveDimension); // 40 bumped up to minimum.
@@ -3431,8 +3390,7 @@ void main() {
     //      10 - label (ahem font size 10dps)
     //   17.75 - bottom padding (empty input text still appears here)
 
-    expect(tester.getSize(find.byType(InputDecorator)),
-        const Size(800.0, kMinInteractiveDimension)); // 45.5 bumped up to minimum.
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 45.5 bumped up to minimum.
     expect(tester.getSize(find.text('hint')).height, 10.0);
     expect(tester.getSize(find.text('label')).height, 10.0);
     expect(tester.getSize(find.text('text')).height, 10.0);
@@ -3507,8 +3465,7 @@ void main() {
     expect(getBorderWeight(tester), 0.0);
   });
 
-  testWidgets('InputDecoration outline shape with no border and no floating placeholder not empty',
-      (WidgetTester tester) async {
+  testWidgets('InputDecoration outline shape with no border and no floating placeholder not empty', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
         // isEmpty: false (default)
@@ -3774,22 +3731,21 @@ void main() {
     );
 
     final RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
-    final Iterable<String> nodeNames = renderer.debugDescribeChildren().map((DiagnosticsNode node) => node.name!);
-    expect(
-        nodeNames,
-        unorderedEquals(<String>[
-          'container',
-          'counter',
-          'helperError',
-          'hint',
-          'icon',
-          'input',
-          'label',
-          'prefix',
-          'prefixIcon',
-          'suffix',
-          'suffixIcon',
-        ]));
+    final Iterable<String> nodeNames = renderer.debugDescribeChildren()
+      .map((DiagnosticsNode node) => node.name!);
+    expect(nodeNames, unorderedEquals(<String>[
+      'container',
+      'counter',
+      'helperError',
+      'hint',
+      'icon',
+      'input',
+      'label',
+      'prefix',
+      'prefixIcon',
+      'suffix',
+      'suffixIcon',
+    ]));
 
     final Set<Object> nodeValues = Set<Object>.from(
       renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!),
@@ -3913,11 +3869,11 @@ void main() {
   });
 
   testWidgets('InputDecorationTheme.inputDecoration with MaterialState', (WidgetTester tester) async {
-    final MaterialStateTextStyle themeStyle = MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final MaterialStateTextStyle themeStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
       return const TextStyle(color: Colors.green);
     });
 
-    final MaterialStateTextStyle decorationStyle = MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final MaterialStateTextStyle decorationStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
       return const TextStyle(color: Colors.blue);
     });
 
@@ -3958,8 +3914,7 @@ void main() {
     expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
-    final MaterialStateOutlineInputBorder border =
-        MaterialStateOutlineInputBorder.resolveWith((Set<MaterialState> states) {
+    final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((Set<MaterialState> states) {
       return const OutlineInputBorder();
     });
     decoration = InputDecoration(
@@ -4037,30 +3992,24 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(InputDecorator));
 
     // Fill is the border's outer path, a rounded rectangle
-    expect(
-        box,
-        paints
-          ..path(
-            style: PaintingStyle.fill,
-            color: const Color(0xFF00FF00),
-            includes: <Offset>[const Offset(800.0 / 2.0, 56 / 2.0)],
-            excludes: <Offset>[
-              const Offset(1.0, 6.0), // outside the rounded corner, top left
-              const Offset(800.0 - 1.0, 6.0), // top right
-              const Offset(1.0, 56.0 - 6.0), // bottom left
-              const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
-            ],
-          ));
+    expect(box, paints..path(
+      style: PaintingStyle.fill,
+      color: const Color(0xFF00FF00),
+      includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
+      excludes: <Offset>[
+        const Offset(1.0, 6.0), // outside the rounded corner, top left
+        const Offset(800.0 - 1.0, 6.0), // top right
+        const Offset(1.0, 56.0 - 6.0), // bottom left
+        const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
+      ],
+    ));
 
     // Border outline. The rrect is the -center- of the 1.0 stroked outline.
-    expect(
-        box,
-        paints
-          ..rrect(
-            style: PaintingStyle.stroke,
-            strokeWidth: 1.0,
-            rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
-          ));
+    expect(box, paints..rrect(
+      style: PaintingStyle.stroke,
+      strokeWidth: 1.0,
+      rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
+    ));
   });
 
   testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
@@ -4084,18 +4033,15 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(InputDecorator));
 
     // Fill is the border's outer path, a rounded rectangle
-    expect(
-        box,
-        paints
-          ..path(
-            style: PaintingStyle.fill,
-            color: const Color(0xFF00FF00),
-            includes: <Offset>[const Offset(800.0 / 2.0, 56 / 2.0)],
-            excludes: <Offset>[
-              const Offset(1.0, 56.0 - 6.0), // bottom left
-              const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
-            ],
-          ));
+    expect(box, paints..path(
+      style: PaintingStyle.fill,
+      color: const Color(0xFF00FF00),
+      includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
+      excludes: <Offset>[
+        const Offset(1.0, 56.0 - 6.0), // bottom left
+        const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
+      ],
+    ));
   });
 
   testWidgets('InputDecorator constrained to 0x0', (WidgetTester tester) async {
@@ -4104,8 +4050,7 @@ void main() {
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: UnconstrainedBox(
-              child: ConstrainedBox(
+          child: UnconstrainedBox(child: ConstrainedBox(
             constraints: BoxConstraints.tight(Size.zero),
             child: const InputDecorator(
               decoration: InputDecoration(
@@ -4461,6 +4406,7 @@ void main() {
     expect(debugString, contains('focusedBorder: OutlineInputBorder()'));
   });
 
+
   testWidgets('InputDecoration default border uses colorScheme', (WidgetTester tester) async {
     final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light());
     final Color enabledColor = theme.colorScheme.onSurface.withOpacity(0.38);
@@ -4681,8 +4627,7 @@ void main() {
     expect(getBorder(tester), disabledBorder);
   });
 
-  testWidgets('OutlineInputBorder borders scale down to fit when large values are passed in',
-      (WidgetTester tester) async {
+  testWidgets('OutlineInputBorder borders scale down to fit when large values are passed in', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/34327
     const double largerBorderRadius = 200.0;
     const double smallerBorderRadius = 100.0;
@@ -4724,67 +4669,65 @@ void main() {
     const double largerBorderRadiusScaled = largerBorderRadius / denominator * inputDecoratorHeight;
     const double smallerBorderRadiusScaled = smallerBorderRadius / denominator * inputDecoratorHeight;
 
-    expect(
-      findBorderPainter(),
-      paints
-        ..save()
-        ..path(
-          style: PaintingStyle.fill,
-          color: const Color(0xFF00FF00),
-          includes: const <Offset>[
-            // The border should draw along the four edges of the
-            // InputDecorator.
+    expect(findBorderPainter(), paints
+      ..save()
+      ..path(
+        style: PaintingStyle.fill,
+        color: const Color(0xFF00FF00),
+        includes: const <Offset>[
+          // The border should draw along the four edges of the
+          // InputDecorator.
 
-            // Top center
-            Offset(inputDecoratorWidth / 2.0, 0.0),
-            // Bottom center
-            Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-            // Left center
-            Offset(0.0, inputDecoratorHeight / 2.0),
-            // Right center
-            Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
+          // Top center
+          Offset(inputDecoratorWidth / 2.0, 0.0),
+          // Bottom center
+          Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
+          // Left center
+          Offset(0.0, inputDecoratorHeight / 2.0),
+          // Right center
+          Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
 
-            // The border path should contain points where each rounded corner
-            // ends.
+          // The border path should contain points where each rounded corner
+          // ends.
 
-            // Bottom-right arc
-            Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
-            // Top-right arc
-            Offset(inputDecoratorWidth, 0.0 + largerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
-            // Bottom-left arc
-            Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
-            Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
-            // Top-left arc
-            Offset(0.0, 0.0 + smallerBorderRadiusScaled),
-            Offset(0.0 + smallerBorderRadiusScaled, 0.0),
-          ],
-          excludes: const <Offset>[
-            // The border should not contain the corner points, since the border
-            // is rounded.
+          // Bottom-right arc
+          Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
+          // Top-right arc
+          Offset(inputDecoratorWidth,0.0 + largerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
+          // Bottom-left arc
+          Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
+          Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
+          // Top-left arc
+          Offset(0.0,0.0 + smallerBorderRadiusScaled),
+          Offset(0.0 + smallerBorderRadiusScaled, 0.0),
+        ],
+        excludes: const <Offset>[
+          // The border should not contain the corner points, since the border
+          // is rounded.
 
-            // Top-left
-            Offset.zero,
-            // Top-right
-            Offset(inputDecoratorWidth, 0.0),
-            // Bottom-left
-            Offset(0.0, inputDecoratorHeight),
-            // Bottom-right
-            Offset(inputDecoratorWidth, inputDecoratorHeight),
+          // Top-left
+          Offset.zero,
+          // Top-right
+          Offset(inputDecoratorWidth, 0.0),
+          // Bottom-left
+          Offset(0.0, inputDecoratorHeight),
+          // Bottom-right
+          Offset(inputDecoratorWidth, inputDecoratorHeight),
 
-            // Corners with larger border ratio should not contain points outside
-            // of the larger radius.
+          // Corners with larger border ratio should not contain points outside
+          // of the larger radius.
 
-            // Bottom-right arc
-            Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
-            // Top-left arc
-            Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
-          ],
-        )
-        ..restore(),
+          // Bottom-right arc
+          Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
+          // Top-left arc
+          Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
+        ],
+      )
+      ..restore(),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
@@ -4822,63 +4765,61 @@ void main() {
     expect(find.text(labelText), findsOneWidget);
     final Rect labelRect = tester.getRect(find.text(labelText));
 
-    expect(
-      findBorderPainter(),
-      paints
-        ..save()
-        ..path(
-          style: PaintingStyle.fill,
-          color: const Color(0xFF00FF00),
-          includes: <Offset>[
-            // The border should draw along the four edges of the
-            // InputDecorator.
+    expect(findBorderPainter(), paints
+      ..save()
+      ..path(
+        style: PaintingStyle.fill,
+        color: const Color(0xFF00FF00),
+        includes: <Offset>[
+          // The border should draw along the four edges of the
+          // InputDecorator.
 
-            // Top center
-            const Offset(inputDecoratorWidth / 2.0, 0.0),
-            // Bottom center
-            const Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-            // Left center
-            const Offset(0.0, inputDecoratorHeight / 2.0),
-            // Right center
-            const Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
+          // Top center
+          const Offset(inputDecoratorWidth / 2.0, 0.0),
+          // Bottom center
+          const Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
+          // Left center
+          const Offset(0.0, inputDecoratorHeight / 2.0),
+          // Right center
+          const Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
 
-            // The border path should contain points where each rounded corner
-            // ends.
+          // The border path should contain points where each rounded corner
+          // ends.
 
-            // Bottom-right arc
-            const Offset(inputDecoratorWidth, inputDecoratorHeight - borderRadiusScaled),
-            const Offset(inputDecoratorWidth - borderRadiusScaled, inputDecoratorHeight),
-            // Top-right arc
-            const Offset(inputDecoratorWidth, 0.0 + borderRadiusScaled),
-            const Offset(inputDecoratorWidth - borderRadiusScaled, 0.0),
-            // Bottom-left arc
-            const Offset(0.0, inputDecoratorHeight - borderRadiusScaled),
-            const Offset(0.0 + borderRadiusScaled, inputDecoratorHeight),
-            // Top-left arc
-            const Offset(0.0, 0.0 + borderRadiusScaled),
-            const Offset(0.0 + borderRadiusScaled, 0.0),
+          // Bottom-right arc
+          const Offset(inputDecoratorWidth, inputDecoratorHeight - borderRadiusScaled),
+          const Offset(inputDecoratorWidth - borderRadiusScaled, inputDecoratorHeight),
+          // Top-right arc
+          const Offset(inputDecoratorWidth,0.0 + borderRadiusScaled),
+          const Offset(inputDecoratorWidth - borderRadiusScaled, 0.0),
+          // Bottom-left arc
+          const Offset(0.0, inputDecoratorHeight - borderRadiusScaled),
+          const Offset(0.0 + borderRadiusScaled, inputDecoratorHeight),
+          // Top-left arc
+          const Offset(0.0,0.0 + borderRadiusScaled),
+          const Offset(0.0 + borderRadiusScaled, 0.0),
 
-            // Gap edges
-            // gap start x = radius - radius * cos(arc sweep)
-            // gap start y = radius - radius * sin(arc sweep)
-            const Offset(39.49999999999999, 32.284366616798906),
-            Offset(39.49999999999999 + labelRect.width, 0.0),
-          ],
-          excludes: const <Offset>[
-            // The border should not contain the corner points, since the border
-            // is rounded.
+          // Gap edges
+          // gap start x = radius - radius * cos(arc sweep)
+          // gap start y = radius - radius * sin(arc sweep)
+          const Offset(39.49999999999999, 32.284366616798906),
+          Offset(39.49999999999999 + labelRect.width, 0.0),
+        ],
+        excludes: const <Offset>[
+          // The border should not contain the corner points, since the border
+          // is rounded.
 
-            // Top-left
-            Offset.zero,
-            // Top-right
-            Offset(inputDecoratorWidth, 0.0),
-            // Bottom-left
-            Offset(0.0, inputDecoratorHeight),
-            // Bottom-right
-            Offset(inputDecoratorWidth, inputDecoratorHeight),
-          ],
-        )
-        ..restore(),
+          // Top-left
+          Offset.zero,
+          // Top-right
+          Offset(inputDecoratorWidth, 0.0),
+          // Bottom-left
+          Offset(0.0, inputDecoratorHeight),
+          // Bottom-right
+          Offset(inputDecoratorWidth, inputDecoratorHeight),
+        ],
+      )
+      ..restore(),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
@@ -4932,19 +4873,14 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             return GestureDetector(
               onTap: () async {
-                setState(() {
-                  waitIsOver = true;
-                });
+                setState(() { waitIsOver = true; });
                 await completer.future;
-                setState(() {
-                  waitIsOver = false;
-                });
+                setState(() { waitIsOver = false;  });
               },
               child: InputDecorator(
                 decoration: InputDecoration(
                   labelText: 'Test',
-                  enabledBorder:
-                      !waitIsOver ? null : const OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
+                  enabledBorder: !waitIsOver ? null : const OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
                 ),
               ),
             );
@@ -4967,13 +4903,11 @@ void main() {
       borderSide: BorderSide(color: Colors.blue),
       gapPadding: 32.0,
     );
-    expect(
-        outlineInputBorder,
-        const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blue),
-          borderRadius: BorderRadius.all(Radius.circular(9.0)),
-          gapPadding: 32.0,
-        ));
+    expect(outlineInputBorder, const OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      gapPadding: 32.0,
+    ));
     expect(outlineInputBorder, isNot(const OutlineInputBorder()));
 
     // UnderlineInputBorder's equality is defined only by the borderSide
@@ -4982,6 +4916,7 @@ void main() {
     expect(underlineInputBorder, isNot(const UnderlineInputBorder()));
   });
 
+
   test('InputBorder hashCodes', () {
     // OutlineInputBorder's hashCode is defined by the borderRadius, borderSide, & gapPadding
     const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
@@ -4989,19 +4924,16 @@ void main() {
       borderSide: BorderSide(color: Colors.blue),
       gapPadding: 32.0,
     );
-    expect(
-        outlineInputBorder.hashCode,
-        const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(9.0)),
-          borderSide: BorderSide(color: Colors.blue),
-          gapPadding: 32.0,
-        ).hashCode);
+    expect(outlineInputBorder.hashCode, const OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      borderSide: BorderSide(color: Colors.blue),
+      gapPadding: 32.0,
+    ).hashCode);
     expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder().hashCode));
 
     // UnderlineInputBorder's hashCode is defined only by the borderSide
     const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue));
-    expect(
-        underlineInputBorder.hashCode, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)).hashCode);
+    expect(underlineInputBorder.hashCode, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)).hashCode);
     expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder().hashCode));
   });
 
@@ -5031,8 +4963,7 @@ void main() {
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode n) => n.toString())
-        .toList();
+        .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
       'labelStyle: TextStyle(<all styles inherited>)',
       'helperStyle: TextStyle(<all styles inherited>)',
@@ -5204,7 +5135,7 @@ void main() {
       // 133.3 is approximately 100 / 0.75 (_kFinalLabelScale)
       paints..clipRect(rect: const Rect.fromLTWH(0, 0, 133.0, 16.0)),
     );
-  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
 
   testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/56933
@@ -5306,29 +5237,26 @@ void main() {
   });
 
   // Related issue: https://github.com/flutter/flutter/issues/64427
-  testWidgets(
-      'OutlineInputBorder and InputDecorator long labels and in Floating, the width should ignore the icon width',
-      (WidgetTester tester) async {
-    const String labelText =
-        'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
+  testWidgets('OutlineInputBorder and InputDecorator long labels and in Floating, the width should ignore the icon width', (WidgetTester tester) async {
+    const String labelText = 'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
 
     Widget getLabeledInputDecorator(FloatingLabelBehavior floatingLabelBehavior) => MaterialApp(
-          home: Material(
-            child: SizedBox(
-              width: 300,
-              child: TextField(
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.greenAccent),
-                  ),
-                  suffixIcon: const Icon(Icons.arrow_drop_down),
-                  floatingLabelBehavior: floatingLabelBehavior,
-                  labelText: labelText,
+        home: Material(
+          child: SizedBox(
+            width: 300,
+            child: TextField(
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.greenAccent),
                 ),
+                suffixIcon: const Icon(Icons.arrow_drop_down),
+                floatingLabelBehavior: floatingLabelBehavior,
+                labelText: labelText,
               ),
             ),
           ),
-        );
+        ),
+      );
 
     await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.never));
 
@@ -5360,8 +5288,7 @@ void main() {
     expect(getLabelRect(tester).width, floatedLabelWidth);
   });
 
-  testWidgets('given enough space, constrained and unconstrained heights result in the same size widget',
-      (WidgetTester tester) async {
+  testWidgets('given enough space, constrained and unconstrained heights result in the same size widget', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/65572
     final UniqueKey keyUnconstrained = UniqueKey();
     final UniqueKey keyConstrained = UniqueKey();
@@ -5412,8 +5339,7 @@ void main() {
     expect(constrainedHeightCompact, equals(unConstrainedHeightCompact));
   });
 
-  testWidgets('A vertically constrained TextField still positions its text inside of itself',
-      (WidgetTester tester) async {
+  testWidgets('A vertically constrained TextField still positions its text inside of itself', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -5681,9 +5607,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-      'InputDecorationTheme floatingLabelStyle overrides label widget styles when the widget is a text widget (focused)',
-      (WidgetTester tester) async {
+  testWidgets('InputDecorationTheme floatingLabelStyle overrides label widget styles when the widget is a text widget (focused)', (WidgetTester tester) async {
     const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
     final TextStyle floatingLabelStyle = style16.merge(const TextStyle(color: Colors.indigo));
 
@@ -5724,8 +5648,7 @@ void main() {
     expect(getLabelStyle(tester).color, floatingLabelStyle.color);
   });
 
-  testWidgets('InputDecorationTheme labelStyle overrides label widget styles when the widget is a text widget',
-      (WidgetTester tester) async {
+  testWidgets('InputDecorationTheme labelStyle overrides label widget styles when the widget is a text widget', (WidgetTester tester) async {
     const TextStyle style16 = TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
     final TextStyle labelStyle = style16.merge(const TextStyle(color: Colors.purple));
 
@@ -5765,8 +5688,7 @@ void main() {
     expect(getLabelStyle(tester).color, labelStyle.color);
   });
 
-  testWidgets("InputDecorator's floating label origin no longer depends on ThemeData.fixTextFieldOutlineLabel",
-      (WidgetTester tester) async {
+  testWidgets("InputDecorator's floating label origin no longer depends on ThemeData.fixTextFieldOutlineLabel", (WidgetTester tester) async {
     Widget buildFrame(bool fixTextFieldOutlineLabel) {
       return buildInputDecorator(
         isEmpty: true,
@@ -5791,5 +5713,6 @@ void main() {
     await tester.pumpWidget(buildFrame(true));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('label')).dy, -5.5);
+
   });
 }

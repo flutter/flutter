@@ -45,7 +45,9 @@ class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _actualLifeCycleSequence = <AppLifecycleState?>[ServicesBinding.instance.lifecycleState];
+    _actualLifeCycleSequence =  <AppLifecycleState?>[
+      ServicesBinding.instance.lifecycleState
+    ];
   }
 
   @override

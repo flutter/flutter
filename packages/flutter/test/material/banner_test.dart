@@ -17,7 +17,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -77,7 +77,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -137,11 +137,11 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action 1'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             TextButton(
               child: const Text('Action 2'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -154,8 +154,7 @@ void main() {
     expect(contentBottomLeft.dx, lessThan(actionsTopLeft.dx));
   });
 
-  testWidgets('Actions laid out below content if more than one action when presented by ScaffoldMessenger',
-      (WidgetTester tester) async {
+  testWidgets('Actions laid out below content if more than one action when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
@@ -208,7 +207,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -221,8 +220,7 @@ void main() {
     expect(contentBottomLeft.dx, lessThan(actionsTopRight.dx));
   });
 
-  testWidgets('Actions laid out beside content if only one action when presented by ScaffoldMessenger',
-      (WidgetTester tester) async {
+  testWidgets('Actions laid out beside content if only one action when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
@@ -462,9 +460,7 @@ void main() {
     await tester.pump(); // begin animation
     expect(find.text('banner1'), findsOneWidget);
     expect(find.text('banner2'), findsNothing);
-    await tester.pump(const Duration(
-        milliseconds:
-            750)); // 3.75s // last frame of animation, material banner removed from build, new material banner put in its place
+    await tester.pump(const Duration(milliseconds: 750)); // 3.75s // last frame of animation, material banner removed from build, new material banner put in its place
     expect(find.text('banner1'), findsNothing);
     expect(find.text('banner2'), findsOneWidget);
     await tester.pump(); // begin animation
@@ -483,14 +479,12 @@ void main() {
     await tester.pump(); // begin animation
     expect(find.text('banner1'), findsNothing);
     expect(find.text('banner2'), findsOneWidget);
-    await tester.pump(
-        const Duration(milliseconds: 750)); // 7.50s // last frame of animation, material banner removed from build
+    await tester.pump(const Duration(milliseconds: 750)); // 7.50s // last frame of animation, material banner removed from build
     expect(find.text('banner1'), findsNothing);
     expect(find.text('banner2'), findsNothing);
   });
 
-  testWidgets('ScaffoldMessenger does not duplicate a MaterialBanner when presenting a SnackBar.',
-      (WidgetTester tester) async {
+  testWidgets('ScaffoldMessenger does not duplicate a MaterialBanner when presenting a SnackBar.', (WidgetTester tester) async {
     const Key materialBannerTapTarget = Key('materialbanner-tap-target');
     const Key snackBarTapTarget = Key('snackbar-tap-target');
     const String snackBarText = 'SnackBar';
@@ -556,7 +550,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -569,9 +563,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/39574
-  testWidgets(
-      'Single action laid out beside content but aligned to the trailing edge when presented by ScaffoldMessenger',
-      (WidgetTester tester) async {
+  testWidgets('Single action laid out beside content but aligned to the trailing edge when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -609,8 +601,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/39574
-  testWidgets('Single action laid out beside content but aligned to the trailing edge - RTL',
-      (WidgetTester tester) async {
+  testWidgets('Single action laid out beside content but aligned to the trailing edge - RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -620,7 +611,7 @@ void main() {
             actions: <Widget>[
               TextButton(
                 child: const Text('Action'),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ],
           ),
@@ -633,9 +624,7 @@ void main() {
     expect(actionsTopLeft.dx - 8, bannerTopLeft.dx); // actions OverflowBar is padded by 8
   });
 
-  testWidgets(
-      'Single action laid out beside content but aligned to the trailing edge when presented by ScaffoldMessenger - RTL',
-      (WidgetTester tester) async {
+  testWidgets('Single action laid out beside content but aligned to the trailing edge when presented by ScaffoldMessenger - RTL', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
@@ -686,7 +675,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -699,8 +688,7 @@ void main() {
     expect(contentBottomLeft.dx, lessThan(actionsTopLeft.dx));
   });
 
-  testWidgets('Actions laid out below content if forced override when presented by ScaffoldMessenger',
-      (WidgetTester tester) async {
+  testWidgets('Actions laid out below content if forced override when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
@@ -793,34 +781,36 @@ void main() {
         home: Directionality(
           textDirection: textDirection,
           child: Scaffold(
-            body: Builder(builder: (BuildContext context) {
-              return GestureDetector(
-                key: const ValueKey<String>('tap-target'),
-                onTap: () {
-                  ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
-                    content: const SizedBox(width: 100, height: 100),
-                    actions: List<Widget>.generate(actionCount, (int index) {
-                      if (index == 0)
-                        return SizedBox(
-                          width: 64,
-                          height: 48,
-                          key: ValueKey<int>(index),
-                          child: GestureDetector(
-                            key: const ValueKey<String>('dismiss-target'),
-                            onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
-                          ),
-                        );
+            body: Builder(
+                builder: (BuildContext context) {
+                  return GestureDetector(
+                    key: const ValueKey<String>('tap-target'),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                        content: const SizedBox(width: 100, height: 100),
+                        actions: List<Widget>.generate(actionCount, (int index) {
+                          if (index == 0)
+                            return SizedBox(
+                              width: 64,
+                              height: 48,
+                              key: ValueKey<int>(index),
+                              child: GestureDetector(
+                                key: const ValueKey<String>('dismiss-target'),
+                                onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                              ),
+                            );
 
-                      return SizedBox(
-                        width: 64,
-                        height: 48,
-                        key: ValueKey<int>(index),
-                      );
-                    }),
-                  ));
-                },
-              );
-            }),
+                          return SizedBox(
+                            width: 64,
+                            height: 48,
+                            key: ValueKey<int>(index),
+                          );
+                        }),
+                      ));
+                    },
+                  );
+                }
+            ),
           ),
         ),
       );
@@ -913,34 +903,36 @@ void main() {
         home: Directionality(
           textDirection: textDirection,
           child: Scaffold(
-            body: Builder(builder: (BuildContext context) {
-              return GestureDetector(
-                key: const ValueKey<String>('tap-target'),
-                onTap: () {
-                  ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
-                    content: const SizedBox(width: 100, height: 100),
-                    actions: List<Widget>.generate(actionCount, (int index) {
-                      if (index == 0)
-                        return SizedBox(
-                          width: 200,
-                          height: 10,
-                          key: ValueKey<int>(index),
-                          child: GestureDetector(
-                            key: const ValueKey<String>('dismiss-target'),
-                            onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
-                          ),
-                        );
+            body: Builder(
+                builder: (BuildContext context) {
+                  return GestureDetector(
+                    key: const ValueKey<String>('tap-target'),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                        content: const SizedBox(width: 100, height: 100),
+                        actions: List<Widget>.generate(actionCount, (int index) {
+                          if (index == 0)
+                            return SizedBox(
+                              width: 200,
+                              height: 10,
+                              key: ValueKey<int>(index),
+                              child: GestureDetector(
+                                key: const ValueKey<String>('dismiss-target'),
+                                onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                              ),
+                            );
 
-                      return SizedBox(
-                        width: 200,
-                        height: 10,
-                        key: ValueKey<int>(index),
-                      );
-                    }),
-                  ));
-                },
-              );
-            }),
+                          return SizedBox(
+                            width: 200,
+                            height: 10,
+                            key: ValueKey<int>(index),
+                          );
+                        }),
+                      ));
+                    },
+                  );
+                }
+            ),
           ),
         ),
       );
@@ -1015,35 +1007,37 @@ void main() {
         home: Directionality(
           textDirection: textDirection,
           child: Scaffold(
-            body: Builder(builder: (BuildContext context) {
-              return GestureDetector(
-                key: const ValueKey<String>('tap-target'),
-                onTap: () {
-                  ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
-                    overflowAlignment: overflowAlignment,
-                    content: const SizedBox(width: 100, height: 100),
-                    actions: List<Widget>.generate(actionCount, (int index) {
-                      if (index == 0)
-                        return SizedBox(
-                          width: 200,
-                          height: 10,
-                          key: ValueKey<int>(index),
-                          child: GestureDetector(
-                            key: const ValueKey<String>('dismiss-target'),
-                            onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
-                          ),
-                        );
+            body: Builder(
+                builder: (BuildContext context) {
+                  return GestureDetector(
+                    key: const ValueKey<String>('tap-target'),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
+                        overflowAlignment: overflowAlignment,
+                        content: const SizedBox(width: 100, height: 100),
+                        actions: List<Widget>.generate(actionCount, (int index) {
+                          if (index == 0)
+                            return SizedBox(
+                              width: 200,
+                              height: 10,
+                              key: ValueKey<int>(index),
+                              child: GestureDetector(
+                                key: const ValueKey<String>('dismiss-target'),
+                                onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                              ),
+                            );
 
-                      return SizedBox(
-                        width: 200,
-                        height: 10,
-                        key: ValueKey<int>(index),
-                      );
-                    }),
-                  ));
-                },
-              );
-            }),
+                          return SizedBox(
+                            width: 200,
+                            height: 10,
+                            key: ValueKey<int>(index),
+                          );
+                        }),
+                      ));
+                    },
+                  );
+                }
+            ),
           ),
         ),
       );
@@ -1082,8 +1076,7 @@ void main() {
 }
 
 Material _getMaterialFromBanner(WidgetTester tester) {
-  return tester
-      .widget<Material>(find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Material)).first);
+  return tester.widget<Material>(find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Material)).first);
 }
 
 Material _getMaterialFromText(WidgetTester tester, String text) {
@@ -1091,7 +1084,5 @@ Material _getMaterialFromText(WidgetTester tester, String text) {
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester
-      .element<StatelessElement>(find.descendant(of: find.byType(MaterialBanner), matching: find.text(text)))
-      .renderObject! as RenderParagraph;
+  return tester.element<StatelessElement>(find.descendant(of: find.byType(MaterialBanner), matching: find.text(text))).renderObject! as RenderParagraph;
 }

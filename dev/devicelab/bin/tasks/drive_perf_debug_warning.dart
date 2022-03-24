@@ -30,12 +30,16 @@ Future<TaskResult> run() async {
 
   final String debugOutput = await _runWithMode('--debug', deviceId);
   if (!debugOutput.contains(warningPiece)) {
-    return TaskResult.failure('Could not find the following warning message piece: $warningPiece');
+    return TaskResult.failure(
+        'Could not find the following warning message piece: $warningPiece'
+    );
   }
 
   final String profileOutput = await _runWithMode('--profile', deviceId);
   if (profileOutput.contains(warningPiece)) {
-    return TaskResult.failure('Unexpected warning message piece in profile mode: $warningPiece');
+    return TaskResult.failure(
+      'Unexpected warning message piece in profile mode: $warningPiece'
+    );
   }
 
   return TaskResult.success(null);

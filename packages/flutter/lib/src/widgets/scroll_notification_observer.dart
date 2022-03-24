@@ -23,14 +23,13 @@ class _ScrollNotificationObserverScope extends InheritedWidget {
     Key? key,
     required Widget child,
     required ScrollNotificationObserverState scrollNotificationObserverState,
-  })  : _scrollNotificationObserverState = scrollNotificationObserverState,
-        super(key: key, child: child);
+  }) : _scrollNotificationObserverState = scrollNotificationObserverState,
+      super(key: key, child: child);
 
-  final ScrollNotificationObserverState _scrollNotificationObserverState;
+  final ScrollNotificationObserverState  _scrollNotificationObserverState;
 
   @override
-  bool updateShouldNotify(_ScrollNotificationObserverScope old) =>
-      _scrollNotificationObserverState != old._scrollNotificationObserverState;
+  bool updateShouldNotify(_ScrollNotificationObserverScope old) => _scrollNotificationObserverState != old._scrollNotificationObserverState;
 }
 
 class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
@@ -67,8 +66,7 @@ class ScrollNotificationObserver extends StatefulWidget {
   const ScrollNotificationObserver({
     Key? key,
     required this.child,
-  })  : assert(child != null),
-        super(key: key);
+  }) : assert(child != null), super(key: key);
 
   /// The subtree below this widget.
   final Widget child;
@@ -77,9 +75,7 @@ class ScrollNotificationObserver extends StatefulWidget {
   ///
   /// If there is no enclosing [ScrollNotificationObserver] widget, then null is returned.
   static ScrollNotificationObserverState? of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()
-        ?._scrollNotificationObserverState;
+    return context.dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()?._scrollNotificationObserverState;
   }
 
   @override
@@ -129,12 +125,14 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
 
   void _notifyListeners(ScrollNotification notification) {
     assert(_debugAssertNotDisposed());
-    if (_listeners!.isEmpty) return;
+    if (_listeners!.isEmpty)
+      return;
 
     final List<_ListenerEntry> localListeners = List<_ListenerEntry>.of(_listeners!);
     for (final _ListenerEntry entry in localListeners) {
       try {
-        if (entry.list != null) entry.listener(notification);
+        if (entry.list != null)
+          entry.listener(notification);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,

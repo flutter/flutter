@@ -134,8 +134,7 @@ Future<void> _runBenchmark(String benchmarkName) async {
       handleUncaughtError: (
         Zone self,
         ZoneDelegate parent,
-        Zone zone,
-        Object error,
+        Zone zone, Object error,
         StackTrace stackTrace,
       ) async {
         if (_client.isInManualMode) {
@@ -158,13 +157,14 @@ void _fallbackToManual(String error) {
 
       <!-- Absolutely position it so it receives the clicks and not the glasspane -->
       <ul style="position: absolute">
-        ${benchmarks.keys.map((String name) => '<li><button id="$name">$name</button></li>').join('\n')}
+        ${
+          benchmarks.keys
+            .map((String name) => '<li><button id="$name">$name</button></li>')
+            .join('\n')
+        }
       </ul>
     </div>
-  ''',
-      validator: html.NodeValidatorBuilder()
-        ..allowHtml5()
-        ..allowInlineStyles());
+  ''', validator: html.NodeValidatorBuilder()..allowHtml5()..allowInlineStyles());
 
   for (final String benchmarkName in benchmarks.keys) {
     final html.Element button = html.document.querySelector('#$benchmarkName')!;
@@ -206,11 +206,10 @@ class TimeseriesVisualization {
     // The amount of vertical space available on the chart. Because some
     // outliers can be huge they can dwarf all the useful values. So we
     // limit it to 1.5 x the biggest non-outlier.
-    _maxValueChartRange = 1.5 *
-        _stats.samples
-            .where((AnnotatedSample sample) => !sample.isOutlier)
-            .map<double>((AnnotatedSample sample) => sample.magnitude)
-            .fold<double>(0, math.max);
+    _maxValueChartRange = 1.5 * _stats.samples
+      .where((AnnotatedSample sample) => !sample.isOutlier)
+      .map<double>((AnnotatedSample sample) => sample.magnitude)
+      .fold<double>(0, math.max);
   }
 
   static const double _kCanvasHeight = 200;
@@ -372,8 +371,10 @@ class LocalBenchmarkServerClient {
       sendData: json.encode(profile.toJson()),
     );
     if (request.status != 200) {
-      throw Exception('Failed to report profile data to benchmark server. '
-          'The server responded with status code ${request.status}.');
+      throw Exception(
+        'Failed to report profile data to benchmark server. '
+        'The server responded with status code ${request.status}.'
+      );
     }
   }
 

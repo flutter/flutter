@@ -19,7 +19,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-void main() {
+void main () {
   late Artifacts artifacts;
   late String iosDeployPath;
   late FileSystem fileSystem;
@@ -58,8 +58,7 @@ void main() {
             <String>[
               '--enable-dart-profiling',
             ].join(' '),
-          ],
-          environment: const <String, String>{
+          ], environment: const <String, String>{
             'PATH': '/usr/bin:/usr/local/bin:/usr/bin',
             'DYLD_LIBRARY_PATH': '/path/to/libraries',
           },
@@ -97,8 +96,7 @@ void main() {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: const <String>['ios-deploy'],
-            stdout:
-                "(lldb)     run\r\nsuccess\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process stop\r\nthread backtrace all\r\n* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP",
+            stdout: "(lldb)     run\r\nsuccess\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n\r\n\r\n\r\nPROCESS_STOPPED\r\nLog after process stop\r\nthread backtrace all\r\n* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP",
             stdin: IOSink(stdin.sink),
           ),
         ]);
@@ -107,25 +105,22 @@ void main() {
           logger: logger,
         );
         final List<String> receivedLogLines = <String>[];
-        final Stream<String> logLines = iosDeployDebugger.logLines..listen(receivedLogLines.add);
+        final Stream<String> logLines = iosDeployDebugger.logLines
+          ..listen(receivedLogLines.add);
 
-        expect(
-            iosDeployDebugger.logLines,
-            emitsInOrder(<String>[
-              'success', // ignore first "success" from lldb, but log subsequent ones from real logging.
-              'Log on attach1',
-              'Log on attach2',
-              '',
-              '',
-              'Log after process stop'
-            ]));
-        expect(
-            stdin.stream.transform<String>(const Utf8Decoder()),
-            emitsInOrder(<String>[
-              'thread backtrace all',
-              '\n',
-              'process detach',
-            ]));
+        expect(iosDeployDebugger.logLines, emitsInOrder(<String>[
+          'success', // ignore first "success" from lldb, but log subsequent ones from real logging.
+          'Log on attach1',
+          'Log on attach2',
+          '',
+          '',
+          'Log after process stop'
+        ]));
+        expect(stdin.stream.transform<String>(const Utf8Decoder()), emitsInOrder(<String>[
+          'thread backtrace all',
+          '\n',
+          'process detach',
+        ]));
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
         await logLines.drain();
 
@@ -160,20 +155,17 @@ void main() {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
-            stdout:
-                '(lldb)     run\r\nsuccess\r\nLog on attach\r\nProcess 100 exited with status = 0\r\nLog after process exit',
+            stdout: '(lldb)     run\r\nsuccess\r\nLog on attach\r\nProcess 100 exited with status = 0\r\nLog after process exit',
           ),
         ]);
         final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
           processManager: processManager,
           logger: logger,
         );
-        expect(
-            iosDeployDebugger.logLines,
-            emitsInOrder(<String>[
-              'Log on attach',
-              'Log after process exit',
-            ]));
+        expect(iosDeployDebugger.logLines, emitsInOrder(<String>[
+          'Log on attach',
+          'Log after process exit',
+        ]));
 
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
         await iosDeployDebugger.logLines.drain();
@@ -194,20 +186,16 @@ void main() {
           logger: logger,
         );
 
-        expect(
-            iosDeployDebugger.logLines,
-            emitsInOrder(<String>[
-              'Log on attach',
-              '* thread #1, stop reason = Assertion failed:',
-            ]));
+        expect(iosDeployDebugger.logLines, emitsInOrder(<String>[
+          'Log on attach',
+          '* thread #1, stop reason = Assertion failed:',
+        ]));
 
-        expect(
-            stdin.stream.transform<String>(const Utf8Decoder()),
-            emitsInOrder(<String>[
-              'thread backtrace all',
-              '\n',
-              'process detach',
-            ]));
+        expect(stdin.stream.transform<String>(const Utf8Decoder()), emitsInOrder(<String>[
+          'thread backtrace all',
+          '\n',
+          'process detach',
+        ]));
 
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
         await iosDeployDebugger.logLines.drain();
@@ -327,7 +315,7 @@ void main() {
             'ios-deploy',
           ],
           stdout:
-              '(lldb)     run\nsuccess\nLog on attach\n(lldb) Process 6156 stopped\n* thread #1, stop reason = Assertion failed:\n(lldb) Process 6156 detached',
+          '(lldb)     run\nsuccess\nLog on attach\n(lldb) Process 6156 stopped\n* thread #1, stop reason = Assertion failed:\n(lldb) Process 6156 detached',
           stdin: IOSink(stdin.sink),
         ),
       ]);
@@ -393,12 +381,15 @@ void main() {
   });
 }
 
-IOSDeploy setUpIOSDeploy(
-  ProcessManager processManager, {
-  Artifacts? artifacts,
-}) {
-  final FakePlatform macPlatform =
-      FakePlatform(operatingSystem: 'macos', environment: <String, String>{'PATH': '/usr/local/bin:/usr/bin'});
+IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
+    Artifacts? artifacts,
+  }) {
+  final FakePlatform macPlatform = FakePlatform(
+    operatingSystem: 'macos',
+    environment: <String, String>{
+      'PATH': '/usr/local/bin:/usr/bin'
+    }
+  );
   final Cache cache = Cache.test(
     platform: macPlatform,
     artifacts: <ArtifactSet>[

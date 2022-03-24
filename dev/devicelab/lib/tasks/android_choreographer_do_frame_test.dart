@@ -25,7 +25,8 @@ const List<String> kSentinelStr = <String>[
 TaskFunction androidChoreographerDoFrameTest({
   Map<String, String>? environment,
 }) {
-  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_android_surface_recreation.');
+  final Directory tempDir = Directory.systemTemp
+      .createTempSync('flutter_devicelab_android_surface_recreation.');
   return () async {
     try {
       section('Create app');
@@ -94,22 +95,26 @@ Future<void> main() async {
         });
 
         int currSentinelIdx = 0;
-        final StreamSubscription<void> stdout =
-            run.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
-          if (currSentinelIdx < sentinelCompleters.keys.length &&
-              line.contains(sentinelCompleters.keys.elementAt(currSentinelIdx))) {
-            sentinelCompleters.values.elementAt(currSentinelIdx).complete();
-            currSentinelIdx++;
-            print('stdout(MATCHED): $line');
-          } else {
-            print('stdout: $line');
-          }
-        });
+        final StreamSubscription<void> stdout = run.stdout
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+            if (currSentinelIdx < sentinelCompleters.keys.length &&
+                line.contains(sentinelCompleters.keys.elementAt(currSentinelIdx))) {
+              sentinelCompleters.values.elementAt(currSentinelIdx).complete();
+              currSentinelIdx++;
+              print('stdout(MATCHED): $line');
+            } else {
+              print('stdout: $line');
+            }
+          });
 
-        final StreamSubscription<void> stderr =
-            run.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
-          print('stderr: $line');
-        });
+        final StreamSubscription<void> stderr = run.stderr
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+            print('stderr: $line');
+          });
 
         final Completer<void> exitCompleter = Completer<void>();
 
@@ -174,7 +179,7 @@ Future<void> main() async {
       }
 
       final TaskResult releaseResult = await runTestFor('release');
-      if (releaseResult.failed) {
+       if (releaseResult.failed) {
         return releaseResult;
       }
 

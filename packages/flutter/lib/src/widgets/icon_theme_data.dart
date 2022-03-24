@@ -49,7 +49,8 @@ class IconThemeData with Diagnosticable {
   /// replaced by the non-null parameters of the given icon theme. If the given
   /// icon theme is null, simply returns this icon theme.
   IconThemeData merge(IconThemeData? other) {
-    if (other == null) return this;
+    if (other == null)
+      return this;
     return copyWith(
       color: other.color,
       opacity: other.opacity,
@@ -107,21 +108,22 @@ class IconThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is IconThemeData &&
-        other.color == color &&
-        other.opacity == opacity &&
-        other.size == size &&
-        listEquals(other.shadows, shadows);
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is IconThemeData
+        && other.color == color
+        && other.opacity == opacity
+        && other.size == size
+        && listEquals(other.shadows, shadows);
   }
 
   @override
   int get hashCode => Object.hash(
-        color,
-        opacity,
-        size,
-        shadows == null ? null : Object.hashAll(shadows!),
-      );
+    color,
+    opacity,
+    size,
+    shadows == null ? null : Object.hashAll(shadows!),
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

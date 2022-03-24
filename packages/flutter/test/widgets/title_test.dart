@@ -27,19 +27,16 @@ void main() {
   });
 
   testWidgets('should not allow non-opaque color', (WidgetTester tester) async {
-    expect(
-        () => Title(
-              color: const Color(0x00000000),
-              child: Container(),
-            ),
-        throwsAssertionError);
+    expect(() => Title(
+      color: const Color(0x00000000),
+      child: Container(),
+    ), throwsAssertionError);
   });
 
   testWidgets('should not pass "null" to setApplicationSwitcherDescription', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
 
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform,
-        (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -50,11 +47,9 @@ void main() {
     ));
 
     expect(log, hasLength(1));
-    expect(
-        log.single,
-        isMethodCall(
-          'SystemChrome.setApplicationSwitcherDescription',
-          arguments: <String, dynamic>{'label': '', 'primaryColor': 4278255360},
-        ));
+    expect(log.single, isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': '', 'primaryColor': 4278255360},
+    ));
   });
 }

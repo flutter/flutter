@@ -26,8 +26,8 @@ Future<void> buildWeb(
   bool nativeNullAssertions,
   String? baseHref,
 ) async {
-  final bool hasWebPlugins =
-      (await findPlugins(flutterProject)).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+  final bool hasWebPlugins = (await findPlugins(flutterProject))
+    .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
   outputDirectory.createSync(recursive: true);
 
@@ -35,39 +35,44 @@ Future<void> buildWeb(
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
   try {
-    final BuildResult result = await globals.buildSystem.build(
-        WebServiceWorker(globals.fs, globals.cache),
-        Environment(
-          projectDir: globals.fs.currentDirectory,
-          outputDir: outputDirectory,
-          buildDir: flutterProject.directory.childDirectory('.dart_tool').childDirectory('flutter_build'),
-          defines: <String, String>{
-            kTargetFile: target,
-            kHasWebPlugins: hasWebPlugins.toString(),
-            kCspMode: csp.toString(),
-            if (baseHref != null) kBaseHref: baseHref,
-            kSourceMapsEnabled: sourceMaps.toString(),
-            kNativeNullAssertions: nativeNullAssertions.toString(),
-            if (serviceWorkerStrategy != null) kServiceWorkerStrategy: serviceWorkerStrategy,
-            ...buildInfo.toBuildSystemEnvironment(),
-          },
-          artifacts: globals.artifacts!,
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          platform: globals.platform,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.artifacts!.isLocalEngine ? null : globals.flutterVersion.engineRevision,
-          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-          // Web uses a different Dart plugin registry.
-          // https://github.com/flutter/flutter/issues/80406
-          generateDartPluginRegistry: false,
-        ));
+    final BuildResult result = await globals.buildSystem.build(WebServiceWorker(globals.fs, globals.cache), Environment(
+      projectDir: globals.fs.currentDirectory,
+      outputDir: outputDirectory,
+      buildDir: flutterProject.directory
+        .childDirectory('.dart_tool')
+        .childDirectory('flutter_build'),
+      defines: <String, String>{
+        kTargetFile: target,
+        kHasWebPlugins: hasWebPlugins.toString(),
+        kCspMode: csp.toString(),
+        if (baseHref != null)
+          kBaseHref : baseHref,
+        kSourceMapsEnabled: sourceMaps.toString(),
+        kNativeNullAssertions: nativeNullAssertions.toString(),
+        if (serviceWorkerStrategy != null)
+         kServiceWorkerStrategy: serviceWorkerStrategy,
+        ...buildInfo.toBuildSystemEnvironment(),
+      },
+      artifacts: globals.artifacts!,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      platform: globals.platform,
+      cacheDir: globals.cache.getRoot(),
+      engineVersion: globals.artifacts!.isLocalEngine
+        ? null
+        : globals.flutterVersion.engineRevision,
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      // Web uses a different Dart plugin registry.
+      // https://github.com/flutter/flutter/issues/80406
+      generateDartPluginRegistry: false,
+    ));
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError(
-          'Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: measurement.fatal ? measurement.stackTrace : null,
+        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
         );
       }
       throwToolExit('Failed to compile application for the Web.');
@@ -84,43 +89,39 @@ Future<void> buildWeb(
 enum WebRendererMode {
   /// Auto detects which rendering backend to use.
   autoDetect,
-
   /// Always uses canvaskit.
   canvaskit,
-
   /// Always uses html.
   html,
 }
 
 /// The correct precompiled artifact to use for each build and render mode.
-const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsArtifactMap =
-    <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact>{
+const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
+  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
     NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdk,
   },
-  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact>{
+  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitSoundSdk,
     NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitSdk,
   },
-  WebRendererMode.html: <NullSafetyMode, HostArtifact>{
+  WebRendererMode.html: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledSoundSdk,
     NullSafetyMode.unsound: HostArtifact.webPrecompiledSdk,
   },
 };
 
 /// The correct source map artifact to use for each build and render mode.
-const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtifactMap =
-    <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact>{
+const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
+  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
     NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
   },
-  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact>{
+  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
     NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitSdkSourcemaps,
   },
-  WebRendererMode.html: <NullSafetyMode, HostArtifact>{
+  WebRendererMode.html: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledSoundSdkSourcemaps,
     NullSafetyMode.unsound: HostArtifact.webPrecompiledSdkSourcemaps,
   },

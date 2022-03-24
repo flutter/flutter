@@ -39,8 +39,7 @@ Future<void> main() async {
       });
 
       // Copy test dart files to new module app.
-      final Directory flutterModuleLibSource =
-          Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app', 'flutterapp', 'lib'));
+      final Directory flutterModuleLibSource = Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app', 'flutterapp', 'lib'));
       final Directory flutterModuleLibDestination = Directory(path.join(projectDir.path, 'lib'));
 
       // These test files don't have a .dart prefix so the analyzer will ignore them. They aren't in a
@@ -75,7 +74,9 @@ Future<void> main() async {
       }
 
       if (!await _isAppAotBuild(ephemeralIOSHostApp)) {
-        return TaskResult.failure('Ephemeral host app ${ephemeralIOSHostApp.path} was not a release build as expected');
+        return TaskResult.failure(
+          'Ephemeral host app ${ephemeralIOSHostApp.path} was not a release build as expected'
+        );
       }
 
       section('Build ephemeral host app when SDK is on external disk');
@@ -120,7 +121,9 @@ Future<void> main() async {
       }
 
       if (!await _isAppAotBuild(ephemeralIOSHostApp)) {
-        return TaskResult.failure('Ephemeral host app ${ephemeralIOSHostApp.path} was not a profile build as expected');
+        return TaskResult.failure(
+          'Ephemeral host app ${ephemeralIOSHostApp.path} was not a profile build as expected'
+        );
       }
 
       section('Clean build');
@@ -159,7 +162,8 @@ Future<void> main() async {
         'isolate_snapshot_data',
       )))) {
         return TaskResult.failure(
-            'Ephemeral host app ${ephemeralSimulatorHostApp.path} was not a debug build as expected');
+          'Ephemeral host app ${ephemeralSimulatorHostApp.path} was not a debug build as expected'
+        );
       }
 
       section('Clean build');
@@ -217,12 +221,12 @@ dependencies:
 
       final File podfileLockFile = File(path.join(projectDir.path, '.ios', 'Podfile.lock'));
       final String podfileLockOutput = podfileLockFile.readAsStringSync();
-      if (!podfileLockOutput.contains(':path: Flutter') ||
-          !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant') ||
-          !podfileLockOutput.contains(':path: ".symlinks/plugins/device_info/ios"') ||
-          !podfileLockOutput.contains(':path: ".symlinks/plugins/google_sign_in/ios"') ||
-          podfileLockOutput.contains('android_alarm_manager') ||
-          podfileLockOutput.contains(dartPluginName)) {
+      if (!podfileLockOutput.contains(':path: Flutter')
+        || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
+        || !podfileLockOutput.contains(':path: ".symlinks/plugins/device_info/ios"')
+        || !podfileLockOutput.contains(':path: ".symlinks/plugins/google_sign_in/ios"')
+        || podfileLockOutput.contains('android_alarm_manager')
+        || podfileLockOutput.contains(dartPluginName)) {
         print(podfileLockOutput);
         return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
@@ -276,12 +280,12 @@ dependencies:
 
         final File hostPodfileLockFile = File(path.join(objectiveCHostApp.path, 'Podfile.lock'));
         final String hostPodfileLockOutput = hostPodfileLockFile.readAsStringSync();
-        if (!hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/engine"') ||
-            !hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/FlutterPluginRegistrant"') ||
-            !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/device_info/ios"') ||
-            !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/google_sign_in/ios"') ||
-            hostPodfileLockOutput.contains('android_alarm_manager') ||
-            hostPodfileLockOutput.contains(dartPluginName)) {
+        if (!hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/engine"')
+            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/FlutterPluginRegistrant"')
+            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/device_info/ios"')
+            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/google_sign_in/ios"')
+            || hostPodfileLockOutput.contains('android_alarm_manager')
+            || hostPodfileLockOutput.contains(dartPluginName)) {
           print(hostPodfileLockOutput);
           throw TaskResult.failure('Building host app Podfile.lock does not contain expected pods');
         }
@@ -310,7 +314,7 @@ dependencies:
             'CONFIGURATION_BUILD_DIR=${objectiveCBuildDirectory.path}',
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
-          environment: <String, String>{
+          environment: <String, String> {
             'FLUTTER_ANALYTICS_LOG_FILE': objectiveCAnalyticsOutputFile.path,
           },
         );
@@ -365,12 +369,13 @@ dependencies:
       section('Check that the host build sends the correct analytics');
 
       final String objectiveCAnalyticsOutput = objectiveCAnalyticsOutputFile.readAsStringSync();
-      if (!objectiveCAnalyticsOutput.contains('cd24: ios') ||
-          !objectiveCAnalyticsOutput.contains('cd25: true') ||
-          !objectiveCAnalyticsOutput.contains('viewName: assemble')) {
+      if (!objectiveCAnalyticsOutput.contains('cd24: ios')
+          || !objectiveCAnalyticsOutput.contains('cd25: true')
+          || !objectiveCAnalyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
-            'Building outer Objective-C app produced the following analytics: "$objectiveCAnalyticsOutput" '
-            'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"');
+          'Building outer Objective-C app produced the following analytics: "$objectiveCAnalyticsOutput" '
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
+        );
       }
 
       section('Run platform unit tests');
@@ -409,8 +414,8 @@ dependencies:
           if (dumpDirectory != null) {
             // Zip the test results to the artifacts directory for upload.
             await inDirectory(resultBundleTemp, () {
-              final String zipPath = path.join(
-                  dumpDirectory.path, 'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
+              final String zipPath = path.join(dumpDirectory.path,
+                  'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
               return exec(
                 'zip',
                 <String>[
@@ -429,27 +434,27 @@ dependencies:
       });
 
       section('Fail building existing Objective-C iOS app if flutter script fails');
-      final String xcodebuildOutput = await inDirectory<String>(
-          objectiveCHostApp,
-          () => eval(
-                'xcodebuild',
-                <String>[
-                  '-workspace',
-                  'Host.xcworkspace',
-                  '-scheme',
-                  'Host',
-                  '-configuration',
-                  'Debug',
-                  'FLUTTER_ENGINE=bogus', // Force a Flutter error.
-                  'CODE_SIGNING_ALLOWED=NO',
-                  'CODE_SIGNING_REQUIRED=NO',
-                  'CODE_SIGN_IDENTITY=-',
-                  'EXPANDED_CODE_SIGN_IDENTITY=-',
-                  'CONFIGURATION_BUILD_DIR=${objectiveCBuildDirectory.path}',
-                  'COMPILER_INDEX_STORE_ENABLE=NO',
-                ],
-                canFail: true,
-              ));
+      final String xcodebuildOutput = await inDirectory<String>(objectiveCHostApp, () =>
+        eval(
+          'xcodebuild',
+          <String>[
+            '-workspace',
+            'Host.xcworkspace',
+            '-scheme',
+            'Host',
+            '-configuration',
+            'Debug',
+            'FLUTTER_ENGINE=bogus', // Force a Flutter error.
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGN_IDENTITY=-',
+            'EXPANDED_CODE_SIGN_IDENTITY=-',
+            'CONFIGURATION_BUILD_DIR=${objectiveCBuildDirectory.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+          canFail: true,
+        )
+      );
 
       if (!xcodebuildOutput.contains('flutter --verbose --local-engine-src-path=bogus assemble') || // Verbose output
           !xcodebuildOutput.contains('Unable to detect a Flutter engine build directory in bogus') ||
@@ -493,7 +498,7 @@ dependencies:
             'CONFIGURATION_BUILD_DIR=${swiftBuildDirectory.path}',
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
-          environment: <String, String>{
+          environment: <String, String> {
             'FLUTTER_ANALYTICS_LOG_FILE': swiftAnalyticsOutputFile.path,
           },
         );
@@ -509,11 +514,13 @@ dependencies:
       }
 
       final String swiftAnalyticsOutput = swiftAnalyticsOutputFile.readAsStringSync();
-      if (!swiftAnalyticsOutput.contains('cd24: ios') ||
-          !swiftAnalyticsOutput.contains('cd25: true') ||
-          !swiftAnalyticsOutput.contains('viewName: assemble')) {
-        return TaskResult.failure('Building outer Swift app produced the following analytics: "$swiftAnalyticsOutput" '
-            'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"');
+      if (!swiftAnalyticsOutput.contains('cd24: ios')
+          || !swiftAnalyticsOutput.contains('cd25: true')
+          || !swiftAnalyticsOutput.contains('viewName: assemble')) {
+        return TaskResult.failure(
+          'Building outer Swift app produced the following analytics: "$swiftAnalyticsOutput" '
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
+        );
       }
 
       return TaskResult.success(null);
@@ -536,7 +543,7 @@ Future<bool> _isAppAotBuild(Directory app) async {
 
   final String symbolTable = await eval(
     'nm',
-    <String>[
+    <String> [
       '-gU',
       binary,
     ],

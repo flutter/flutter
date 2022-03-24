@@ -17,6 +17,7 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger smoke test', (WidgetTester tester) async {
+
     // This is a smoketest to verify that adding a debugger doesn't crash.
     await tester.pumpWidget(
       Directionality(
@@ -245,26 +246,22 @@ void main() {
 
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
 
-    await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0,
-        warnIfMissed: false); // hitting the debugger);
+    await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0, warnIfMissed: false); // hitting the debugger);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
 
-    await tester.fling(find.byType(ListView), const Offset(200.0, 0.0), 200.0,
-        warnIfMissed: false); // hitting the debugger);
+    await tester.fling(find.byType(ListView), const Offset(200.0, 0.0), 200.0, warnIfMissed: false); // hitting the debugger);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
 
-    await tester.fling(find.byType(ListView), const Offset(-200.0, 0.0), 200.0,
-        warnIfMissed: false); // hitting the debugger);
+    await tester.fling(find.byType(ListView), const Offset(-200.0, 0.0), 200.0, warnIfMissed: false); // hitting the debugger);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
 
-    await tester.fling(find.byType(ListView), const Offset(0.0, 200.0), 200.0,
-        warnIfMissed: false); // hitting the debugger);
+    await tester.fling(find.byType(ListView), const Offset(0.0, 200.0), 200.0, warnIfMissed: false); // hitting the debugger);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
@@ -324,8 +321,7 @@ void main() {
     // it won't trigger. The actual distance moved doesn't matter since this is
     // interpreted as a gesture by the semantics debugger and sent to the widget
     // as a semantic action that always moves by 10% of the complete track.
-    await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0,
-        warnIfMissed: false); // hitting the debugger
+    await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0, warnIfMissed: false); // hitting the debugger
     expect(value, equals(0.70));
   });
 
@@ -390,7 +386,7 @@ void main() {
                   key: checkbox,
                   child: Checkbox(
                     value: true,
-                    onChanged: (bool? _) {},
+                    onChanged: (bool? _) { },
                   ),
                 ),
                 Semantics(
@@ -398,7 +394,7 @@ void main() {
                   key: checkboxUnchecked,
                   child: Checkbox(
                     value: false,
-                    onChanged: (bool? _) {},
+                    onChanged: (bool? _) { },
                   ),
                 ),
                 Semantics(
@@ -460,8 +456,7 @@ void main() {
     );
 
     final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester);
-    final RenderObject renderTextfield =
-        tester.renderObject(find.descendant(of: find.byKey(textField), matching: find.byType(Semantics)).first);
+    final RenderObject renderTextfield = tester.renderObject(find.descendant(of: find.byKey(textField), matching: find.byType(Semantics)).first);
 
     expect(
       // ignore: avoid_dynamic_calls
@@ -506,12 +501,10 @@ dynamic _getSemanticsDebuggerPainter({
   required Key debuggerKey,
   required WidgetTester tester,
 }) {
-  final CustomPaint customPaint = tester
-      .widgetList(find.descendant(
-        of: find.byKey(debuggerKey),
-        matching: find.byType(CustomPaint),
-      ))
-      .first as CustomPaint;
+  final CustomPaint customPaint = tester.widgetList(find.descendant(
+    of: find.byKey(debuggerKey),
+    matching: find.byType(CustomPaint),
+  )).first as CustomPaint;
   final dynamic semanticsDebuggerPainter = customPaint.foregroundPainter;
   expect(semanticsDebuggerPainter.runtimeType.toString(), '_SemanticsDebuggerPainter');
   return semanticsDebuggerPainter;

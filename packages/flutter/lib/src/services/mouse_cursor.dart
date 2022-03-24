@@ -16,7 +16,8 @@ class MouseCursorManager {
   ///
   /// The `fallbackMouseCursor` must not be [MouseCursor.defer] (typically
   /// [SystemMouseCursors.basic]).
-  MouseCursorManager(this.fallbackMouseCursor) : assert(fallbackMouseCursor != MouseCursor.defer);
+  MouseCursorManager(this.fallbackMouseCursor)
+    : assert(fallbackMouseCursor != MouseCursor.defer);
 
   /// The mouse cursor to use if all cursor candidates choose to defer.
   ///
@@ -62,9 +63,11 @@ class MouseCursorManager {
     }
 
     final MouseCursorSession? lastSession = _lastSession[device];
-    final MouseCursor nextCursor = _DeferringMouseCursor.firstNonDeferred(cursorCandidates) ?? fallbackMouseCursor;
+    final MouseCursor nextCursor = _DeferringMouseCursor.firstNonDeferred(cursorCandidates)
+      ?? fallbackMouseCursor;
     assert(nextCursor is! _DeferringMouseCursor);
-    if (lastSession?.cursor == nextCursor) return;
+    if (lastSession?.cursor == nextCursor)
+      return;
 
     final MouseCursorSession nextSession = nextCursor.createSession(device);
     _lastSession[device] = nextSession;
@@ -98,8 +101,8 @@ abstract class MouseCursorSession {
   ///
   /// All arguments must be non-null.
   MouseCursorSession(this.cursor, this.device)
-      : assert(cursor != null),
-        assert(device != null);
+    : assert(cursor != null),
+      assert(device != null);
 
   /// The cursor that created this session.
   final MouseCursor cursor;
@@ -208,7 +211,8 @@ abstract class MouseCursor with Diagnosticable {
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     final String debugDescription = this.debugDescription;
-    if (minLevel.index >= DiagnosticLevel.info.index && debugDescription != null) return debugDescription;
+    if (minLevel.index >= DiagnosticLevel.info.index && debugDescription != null)
+      return debugDescription;
     return super.toString(minLevel: minLevel);
   }
 
@@ -254,20 +258,22 @@ class _DeferringMouseCursor extends MouseCursor {
   static MouseCursor? firstNonDeferred(Iterable<MouseCursor> cursors) {
     for (final MouseCursor cursor in cursors) {
       assert(cursor != null);
-      if (cursor != MouseCursor.defer) return cursor;
+      if (cursor != MouseCursor.defer)
+        return cursor;
     }
     return null;
   }
 }
 
 class _NoopMouseCursorSession extends MouseCursorSession {
-  _NoopMouseCursorSession(_NoopMouseCursor cursor, int device) : super(cursor, device);
+  _NoopMouseCursorSession(_NoopMouseCursor cursor, int device)
+    : super(cursor, device);
 
   @override
-  Future<void> activate() async {/* Nothing */}
+  Future<void> activate() async { /* Nothing */ }
 
   @override
-  void dispose() {/* Nothing */}
+  void dispose() { /* Nothing */ }
 }
 
 /// A mouse cursor that doesn't change the cursor when activated.
@@ -293,7 +299,8 @@ class _NoopMouseCursor extends MouseCursor {
 }
 
 class _SystemMouseCursorSession extends MouseCursorSession {
-  _SystemMouseCursorSession(SystemMouseCursor cursor, int device) : super(cursor, device);
+  _SystemMouseCursorSession(SystemMouseCursor cursor, int device)
+    : super(cursor, device);
 
   @override
   SystemMouseCursor get cursor => super.cursor as SystemMouseCursor;
@@ -310,7 +317,7 @@ class _SystemMouseCursorSession extends MouseCursorSession {
   }
 
   @override
-  void dispose() {/* Nothing */}
+  void dispose() { /* Nothing */ }
 }
 
 /// A mouse cursor that is natively supported on the platform that the
@@ -363,8 +370,10 @@ class SystemMouseCursor extends MouseCursor {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is SystemMouseCursor && other.kind == kind;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is SystemMouseCursor
+        && other.kind == kind;
   }
 
   @override
@@ -405,11 +414,13 @@ class SystemMouseCursors {
   // * Linux: shell/platform/linux/fl_mouse_cursor_plugin.cc
   // * macOS: shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.mm
 
+
   /// Hide the cursor.
   ///
   /// Any cursor other than [none] or [MouseCursor.uncontrolled] unhides the
   /// cursor.
   static const SystemMouseCursor none = SystemMouseCursor._(kind: 'none');
+
 
   // STATUS
 
@@ -526,6 +537,7 @@ class SystemMouseCursors {
   ///  * Linux: help
   static const SystemMouseCursor help = SystemMouseCursor._(kind: 'help');
 
+
   // SELECTION
 
   /// A cursor indicating selectable text.
@@ -580,6 +592,7 @@ class SystemMouseCursors {
   ///  * Linux: crosshair
   ///  * macOS: crosshairCursor
   static const SystemMouseCursor precise = SystemMouseCursor._(kind: 'precise');
+
 
   // DRAG-AND-DROP
 
@@ -673,6 +686,7 @@ class SystemMouseCursors {
   ///
   ///  * macOS: disappearingItemCursor
   static const SystemMouseCursor disappearing = SystemMouseCursor._(kind: 'disappearing');
+
 
   // RESIZING AND SCROLLING
 
@@ -888,6 +902,7 @@ class SystemMouseCursors {
   ///  * Linux: row-resize
   ///  * macOS: resizeUpDownCursor
   static const SystemMouseCursor resizeRow = SystemMouseCursor._(kind: 'resizeRow');
+
 
   // OTHER OPERATIONS
 

@@ -147,8 +147,9 @@ class ToggleButtonsThemeData with Diagnosticable {
 
   /// Linearly interpolate between two toggle buttons themes.
   static ToggleButtonsThemeData? lerp(ToggleButtonsThemeData? a, ToggleButtonsThemeData? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) return null;
+    assert (t != null);
+    if (a == null && b == null)
+      return null;
     return ToggleButtonsThemeData(
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
@@ -170,43 +171,45 @@ class ToggleButtonsThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        textStyle,
-        constraints,
-        color,
-        selectedColor,
-        disabledColor,
-        fillColor,
-        focusColor,
-        highlightColor,
-        hoverColor,
-        splashColor,
-        borderColor,
-        selectedBorderColor,
-        disabledBorderColor,
-        borderRadius,
-        borderWidth,
-      );
+    textStyle,
+    constraints,
+    color,
+    selectedColor,
+    disabledColor,
+    fillColor,
+    focusColor,
+    highlightColor,
+    hoverColor,
+    splashColor,
+    borderColor,
+    selectedBorderColor,
+    disabledBorderColor,
+    borderRadius,
+    borderWidth,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is ToggleButtonsThemeData &&
-        other.textStyle == textStyle &&
-        other.constraints == constraints &&
-        other.color == color &&
-        other.selectedColor == selectedColor &&
-        other.disabledColor == disabledColor &&
-        other.fillColor == fillColor &&
-        other.focusColor == focusColor &&
-        other.highlightColor == highlightColor &&
-        other.hoverColor == hoverColor &&
-        other.splashColor == splashColor &&
-        other.borderColor == borderColor &&
-        other.selectedBorderColor == selectedBorderColor &&
-        other.disabledBorderColor == disabledBorderColor &&
-        other.borderRadius == borderRadius &&
-        other.borderWidth == borderWidth;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is ToggleButtonsThemeData
+        && other.textStyle == textStyle
+        && other.constraints == constraints
+        && other.color == color
+        && other.selectedColor == selectedColor
+        && other.disabledColor == disabledColor
+        && other.fillColor == fillColor
+        && other.focusColor == focusColor
+        && other.highlightColor == highlightColor
+        && other.hoverColor == hoverColor
+        && other.splashColor == splashColor
+        && other.borderColor == borderColor
+        && other.selectedBorderColor == selectedBorderColor
+        && other.disabledBorderColor == disabledBorderColor
+        && other.borderRadius == borderRadius
+        && other.borderWidth == borderWidth;
   }
 
   @override
@@ -244,8 +247,7 @@ class ToggleButtonsTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(data != null),
-        super(key: key, child: child);
+  }) : assert(data != null), super(key: key, child: child);
 
   /// Specifies the color and border values for descendant [ToggleButtons] widgets.
   final ToggleButtonsThemeData data;

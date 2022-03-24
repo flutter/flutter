@@ -35,7 +35,8 @@ class FuchsiaFfx {
     required ProcessManager processManager,
   })  : _fuchsiaArtifacts = fuchsiaArtifacts,
         _logger = logger,
-        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+        _processUtils =
+            ProcessUtils(logger: logger, processManager: processManager);
 
   final FuchsiaArtifacts? _fuchsiaArtifacts;
   final Logger _logger;
@@ -52,7 +53,8 @@ class FuchsiaFfx {
     }
     final List<String> command = <String>[
       ffx.path,
-      if (timeout != null) ...<String>['-T', '${timeout.inSeconds}'],
+      if (timeout != null)
+        ...<String>['-T', '${timeout.inSeconds}'],
       'target',
       'list',
       '--format',

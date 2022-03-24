@@ -5,7 +5,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class MyNotification extends Notification {}
+class MyNotification extends Notification { }
 
 void main() {
   testWidgets('Notification basics - toString', (WidgetTester tester) async {
@@ -32,9 +32,7 @@ void main() {
     ));
     expect(log, isEmpty);
     final Notification notification = MyNotification();
-    expect(() {
-      notification.dispatch(key.currentContext);
-    }, isNot(throwsException));
+    expect(() { notification.dispatch(key.currentContext); }, isNot(throwsException));
     expect(log, <dynamic>['b', notification, 'a', notification]);
   });
 
@@ -58,9 +56,7 @@ void main() {
     ));
     expect(log, isEmpty);
     final Notification notification = MyNotification();
-    expect(() {
-      notification.dispatch(key.currentContext);
-    }, isNot(throwsException));
+    expect(() { notification.dispatch(key.currentContext); }, isNot(throwsException));
     expect(log, <dynamic>['b', notification]);
   });
 
@@ -77,9 +73,7 @@ void main() {
         child: Container(key: key),
       ),
     ));
-    expect(() {
-      MyNotification().dispatch(key.currentContext);
-    }, isNot(throwsException));
+    expect(() { MyNotification().dispatch(key.currentContext); }, isNot(throwsException));
     expect(log, <Type>[MyNotification]);
   });
 }

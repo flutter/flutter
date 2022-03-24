@@ -22,9 +22,7 @@ void main() {
                 child: Form(
                   key: formKey,
                   child: TextFormField(
-                    onSaved: (String? value) {
-                      fieldValue = value;
-                    },
+                    onSaved: (String? value) { fieldValue = value; },
                   ),
                 ),
               ),
@@ -62,9 +60,7 @@ void main() {
               child: Material(
                 child: Form(
                   child: TextField(
-                    onChanged: (String value) {
-                      fieldValue = value;
-                    },
+                    onChanged: (String value) { fieldValue = value; },
                   ),
                 ),
               ),
@@ -404,7 +400,6 @@ void main() {
         ),
       );
     }
-
     await tester.pumpWidget(builder());
     await tester.showKeyboard(find.byType(TextFormField));
     final EditableTextState editableText = tester.state(find.byType(EditableText));
@@ -545,17 +540,11 @@ void main() {
               child: Material(
                 child: Form(
                   key: formKey,
-                  child: remove
-                      ? Container()
-                      : TextFormField(
-                          autofocus: true,
-                          onSaved: (String? value) {
-                            fieldValue = value;
-                          },
-                          validator: (String? value) {
-                            return (value == null || value.isEmpty) ? null : 'yes';
-                          },
-                        ),
+                  child: remove ? Container() : TextFormField(
+                    autofocus: true,
+                    onSaved: (String? value) { fieldValue = value; },
+                    validator: (String? value) { return (value == null || value.isEmpty) ? null : 'yes'; },
+                  ),
                 ),
               ),
             ),
@@ -591,8 +580,7 @@ void main() {
     expect(formKey.currentState!.validate(), isTrue);
   });
 
-  testWidgets('Does not auto-validate before value changes when autovalidateMode is set to onUserInteraction',
-      (WidgetTester tester) async {
+  testWidgets('Does not auto-validate before value changes when autovalidateMode is set to onUserInteraction', (WidgetTester tester) async {
     late FormFieldState<String> formFieldState;
 
     String? errorText(String? value) => '$value/error';
@@ -661,8 +649,7 @@ void main() {
     expect(formFieldState.hasError, isTrue);
   });
 
-  testWidgets('Form auto-validates form fields only after one of them changes if autovalidateMode is onUserInteraction',
-      (WidgetTester tester) async {
+  testWidgets('Form auto-validates form fields only after one of them changes if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
     const String initialValue = 'foo';
     String? errorText(String? value) => 'error/$value';
 
@@ -716,8 +703,7 @@ void main() {
     expect(find.text(errorText(initialValue)!), findsNWidgets(2));
   });
 
-  testWidgets('Form auto-validates form fields even before any have changed if autovalidateMode is set to always',
-      (WidgetTester tester) async {
+  testWidgets('Form auto-validates form fields even before any have changed if autovalidateMode is set to always', (WidgetTester tester) async {
     String? errorText(String? value) => 'error/$value';
 
     Widget builder() {
@@ -747,9 +733,7 @@ void main() {
     expect(find.text(errorText('')!), findsOneWidget);
   });
 
-  testWidgets(
-      'Form.reset() resets form fields, and auto validation will only happen on the next user interaction if autovalidateMode is onUserInteraction',
-      (WidgetTester tester) async {
+  testWidgets('Form.reset() resets form fields, and auto validation will only happen on the next user interaction if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
     final GlobalKey<FormState> formState = GlobalKey<FormState>();
     String? errorText(String? value) => '$value/error';
 
@@ -810,9 +794,7 @@ void main() {
                 child: TextFormField(
                   maxLength: 5,
                   maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
-                  onSaved: (String? value) {
-                    fieldValue = value;
-                  },
+                  onSaved: (String? value) { fieldValue = value; },
                   validator: (String? value) => (value != null && value.length > 5) ? 'Exceeded' : null,
                 ),
               ),

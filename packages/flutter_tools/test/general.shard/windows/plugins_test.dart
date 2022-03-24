@@ -32,31 +32,28 @@ const String kPluginDependencies = r'''
 ''';
 
 void main() {
+
   testWithoutContext('Win32 injects Win32 plugins', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpProject(fileSystem);
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
-    await writeWindowsPluginFiles(
-        flutterProject,
-        <Plugin>[
-          Plugin(
+    await writeWindowsPluginFiles(flutterProject, <Plugin>[
+      Plugin(
+        name: 'test',
+        path: 'foo',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, String>{},
+        platforms: const <String, PluginPlatform>{
+          WindowsPlugin.kConfigKey: WindowsPlugin(
             name: 'test',
-            path: 'foo',
-            defaultPackagePlatforms: const <String, String>{},
-            pluginDartClassPlatforms: const <String, String>{},
-            platforms: const <String, PluginPlatform>{
-              WindowsPlugin.kConfigKey: WindowsPlugin(
-                name: 'test',
-                pluginClass: 'Foo',
-                variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
-              )
-            },
-            dependencies: <String>[],
-            isDirectDependency: true,
-          ),
-        ],
-        renderer);
+            pluginClass: 'Foo',
+            variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
+          )},
+        dependencies: <String>[],
+        isDirectDependency: true,
+      ),
+    ], renderer);
 
     final Directory managed = flutterProject.windows.managedDirectory;
     expect(flutterProject.windows.generatedPluginCmakeFile, exists);
@@ -72,26 +69,22 @@ void main() {
     setUpProject(fileSystem);
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
-    await writeWindowsUwpPluginFiles(
-        flutterProject,
-        <Plugin>[
-          Plugin(
+    await writeWindowsUwpPluginFiles(flutterProject, <Plugin>[
+      Plugin(
+        name: 'test',
+        path: 'foo',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, String>{},
+        platforms: const <String, PluginPlatform>{
+          WindowsPlugin.kConfigKey: WindowsPlugin(
             name: 'test',
-            path: 'foo',
-            defaultPackagePlatforms: const <String, String>{},
-            pluginDartClassPlatforms: const <String, String>{},
-            platforms: const <String, PluginPlatform>{
-              WindowsPlugin.kConfigKey: WindowsPlugin(
-                name: 'test',
-                pluginClass: 'Foo',
-                variants: <PluginPlatformVariant>{PluginPlatformVariant.winuwp},
-              )
-            },
-            dependencies: <String>[],
-            isDirectDependency: true,
-          ),
-        ],
-        renderer);
+            pluginClass: 'Foo',
+            variants: <PluginPlatformVariant>{PluginPlatformVariant.winuwp},
+          )},
+        dependencies: <String>[],
+        isDirectDependency: true,
+      ),
+    ], renderer);
 
     final Directory managed = flutterProject.windowsUwp.managedDirectory;
     expect(flutterProject.windowsUwp.generatedPluginCmakeFile, exists);
@@ -107,26 +100,22 @@ void main() {
     setUpProject(fileSystem);
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
-    await writeWindowsUwpPluginFiles(
-        flutterProject,
-        <Plugin>[
-          Plugin(
+    await writeWindowsUwpPluginFiles(flutterProject, <Plugin>[
+      Plugin(
+        name: 'test',
+        path: 'foo',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, String>{},
+        platforms: const <String, PluginPlatform>{
+          WindowsPlugin.kConfigKey: WindowsPlugin(
             name: 'test',
-            path: 'foo',
-            defaultPackagePlatforms: const <String, String>{},
-            pluginDartClassPlatforms: const <String, String>{},
-            platforms: const <String, PluginPlatform>{
-              WindowsPlugin.kConfigKey: WindowsPlugin(
-                name: 'test',
-                pluginClass: 'Foo',
-                variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
-              )
-            },
-            dependencies: <String>[],
-            isDirectDependency: true,
-          ),
-        ],
-        renderer);
+            pluginClass: 'Foo',
+            variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
+          )},
+        dependencies: <String>[],
+        isDirectDependency: true,
+      ),
+    ], renderer);
 
     final Directory managed = flutterProject.windowsUwp.managedDirectory;
     expect(flutterProject.windowsUwp.generatedPluginCmakeFile, exists);
@@ -159,7 +148,8 @@ void main() {
 
 void setUpProject(FileSystem fileSystem) {
   fileSystem.file('pubspec.yaml').createSync();
-  fileSystem.file('winuwp/CMakeLists.txt').createSync(recursive: true);
+  fileSystem.file('winuwp/CMakeLists.txt')
+    .createSync(recursive: true);
   fileSystem.file('winuwp/project_version')
     ..createSync(recursive: true)
     ..writeAsStringSync('0');

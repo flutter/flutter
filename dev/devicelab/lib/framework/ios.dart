@@ -37,7 +37,9 @@ Future<String?> minPhoneOSVersion(String pathToBinary) async {
   final List<String> lines = LineSplitter.split(loadCommands).toList();
   lines.asMap().forEach((int index, String line) {
     if (line.contains('LC_VERSION_MIN_IPHONEOS') && lines.length - index - 1 > 3) {
-      final String versionLine = lines.skip(index - 1).take(4).last;
+      final String versionLine = lines
+          .skip(index - 1)
+          .take(4).last;
       final RegExp versionRegex = RegExp(r'\s*version\s*(\S*)');
       minVersion = versionRegex.firstMatch(versionLine)?.group(1);
     }
@@ -73,8 +75,10 @@ Future<bool> containsBitcode(String pathToBinary) async {
   final List<String> lines = LineSplitter.split(loadCommands).toList();
   lines.asMap().forEach((int index, String line) {
     if (line.contains('segname __LLVM') && lines.length - index - 1 > 3) {
-      emptyBitcodeMarkerFound |=
-          lines.skip(index - 1).take(4).any((String line) => line.contains(' size 0x0000000000000001'));
+      emptyBitcodeMarkerFound |= lines
+        .skip(index - 1)
+        .take(4)
+        .any((String line) => line.contains(' size 0x0000000000000001'));
     }
   });
   return !emptyBitcodeMarkerFound;
@@ -201,9 +205,12 @@ Future<bool> runXcodeTests({
       resultBundlePath,
       'test',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      if (developmentTeam != null) 'DEVELOPMENT_TEAM=$developmentTeam',
-      if (codeSignStyle != null) 'CODE_SIGN_STYLE=$codeSignStyle',
-      if (provisioningProfile != null) 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+      if (developmentTeam != null)
+        'DEVELOPMENT_TEAM=$developmentTeam',
+      if (codeSignStyle != null)
+        'CODE_SIGN_STYLE=$codeSignStyle',
+      if (provisioningProfile != null)
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
     ],
     workingDirectory: platformDirectory,
     canFail: true,
@@ -215,8 +222,8 @@ Future<bool> runXcodeTests({
     if (dumpDirectory != null) {
       if (xcresultBundle.existsSync()) {
         // Zip the test results to the artifacts directory for upload.
-        final String zipPath =
-            path.join(dumpDirectory.path, '$testName-${DateTime.now().toLocal().toIso8601String()}.zip');
+        final String zipPath = path.join(dumpDirectory.path,
+            '$testName-${DateTime.now().toLocal().toIso8601String()}.zip');
         await exec(
           'zip',
           <String>[

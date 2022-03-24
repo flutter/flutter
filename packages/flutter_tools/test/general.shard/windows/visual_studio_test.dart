@@ -123,10 +123,11 @@ void setMockVswhereResponse(
 ]) {
   fileSystem.file(vswherePath).createSync(recursive: true);
   fileSystem.file(cmakePath).createSync(recursive: true);
-  final String finalResponse =
-      responseOverride ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '');
-  final List<String> requirementArguments =
-      requiredComponents == null ? <String>[] : <String>['-requires', ...requiredComponents];
+  final String finalResponse = responseOverride
+    ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '');
+  final List<String> requirementArguments = requiredComponents == null
+    ? <String>[]
+    : <String>['-requires', ...requiredComponents];
 
   processManager.addCommand(FakeCommand(
     command: <String>[
@@ -282,17 +283,17 @@ void setMockSdkRegResponse(
   const String registryKey = r'InstallationFolder';
   const String installationPath = r'C:\Program Files (x86)\Windows Kits\10\';
   final String stdout = registryPresent
-      ? '''
+    ? '''
 $registryPath
     $registryKey    REG_SZ    $installationPath
 '''
-      : '''
+    : '''
 
 ERROR: The system was unable to find the specified registry key or value.
 ''';
 
   if (filesPresent) {
-    final Directory includeDirectory = fileSystem.directory(installationPath).childDirectory('Include');
+    final Directory includeDirectory =  fileSystem.directory(installationPath).childDirectory('Include');
     includeDirectory.childDirectory('10.0.17763.0').createSync(recursive: true);
     includeDirectory.childDirectory('10.0.18362.0').createSync(recursive: true);
     // Not an actual version; added to ensure that version comparison is number, not string-based.
@@ -387,7 +388,8 @@ void main() {
       expect(visualStudio.cmakePath, isNull);
     });
 
-    testWithoutContext('isInstalled returns false when vswhere returns non-zero', () {
+    testWithoutContext(
+        'isInstalled returns false when vswhere returns non-zero', () {
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
       final FakeProcessManager fakeProcessManager = FakeProcessManager.empty();
 
@@ -513,7 +515,8 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)..['isPrerelease'] = true;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isPrerelease'] = true;
       setMockCompatibleVisualStudioInstallation(
         null,
         fixture.fileSystem,
@@ -587,7 +590,8 @@ void main() {
 
       setNoViableToolchainInstallation(fixture);
 
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)..['isComplete'] = false;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isComplete'] = false;
       setMockAnyVisualStudioInstallation(
         response,
         fixture.fileSystem,
@@ -598,13 +602,15 @@ void main() {
       expect(visualStudio.isComplete, false);
     });
 
-    testWithoutContext("isLaunchable returns false if the installation can't be launched", () {
+    testWithoutContext(
+        "isLaunchable returns false if the installation can't be launched", () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
       setNoViableToolchainInstallation(fixture);
 
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)..['isLaunchable'] = false;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isLaunchable'] = false;
       setMockAnyVisualStudioInstallation(
         response,
         fixture.fileSystem,
@@ -621,7 +627,8 @@ void main() {
 
       setNoViableToolchainInstallation(fixture);
 
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isRebootRequired'] = true;
       setMockAnyVisualStudioInstallation(
         response,
         fixture.fileSystem,
@@ -662,12 +669,12 @@ void main() {
       expect(visualStudio.cmakePath, isNull);
     });
 
-    testWithoutContext(
-        'cmakePath returns null when VS is present but with require components but installation is faulty', () {
+    testWithoutContext('cmakePath returns null when VS is present but with require components but installation is faulty', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isRebootRequired'] = true;
       setMockCompatibleVisualStudioInstallation(
         response,
         fixture.fileSystem,
@@ -677,13 +684,12 @@ void main() {
       expect(visualStudio.cmakePath, isNull);
     });
 
-    testWithoutContext(
-        'hasNecessaryComponents returns false when VS is present with required components but installation is faulty',
-        () {
+    testWithoutContext('hasNecessaryComponents returns false when VS is present with required components but installation is faulty', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
+        ..['isRebootRequired'] = true;
       setMockCompatibleVisualStudioInstallation(
         response,
         fixture.fileSystem,

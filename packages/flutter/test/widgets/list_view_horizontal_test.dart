@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
-Widget buildFrame({bool reverse = false, required TextDirection textDirection}) {
+Widget buildFrame({ bool reverse = false, required TextDirection textDirection }) {
   return Directionality(
     textDirection: textDirection,
     child: Center(

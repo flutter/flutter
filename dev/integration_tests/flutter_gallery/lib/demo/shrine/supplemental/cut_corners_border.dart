@@ -13,10 +13,10 @@ class CutCornersBorder extends OutlineInputBorder {
     this.cut = 7.0,
     double gapPadding = 2.0,
   }) : super(
-          borderSide: borderSide,
-          borderRadius: borderRadius,
-          gapPadding: gapPadding,
-        );
+    borderSide: borderSide,
+    borderRadius: borderRadius,
+    gapPadding: gapPadding,
+  );
 
   @override
   CutCornersBorder copyWith({
@@ -68,9 +68,7 @@ class CutCornersBorder extends OutlineInputBorder {
     if (start > 0.0 || extent! > 0.0) {
       path.relativeMoveTo(extent! + start, center.top);
       _notchedSidesAndBottom(center, path);
-      path
-        ..lineTo(center.left + cut, center.top)
-        ..lineTo(start, center.top);
+      path..lineTo(center.left + cut, center.top)..lineTo(start, center.top);
     } else {
       path.moveTo(center.left + cut, center.top);
       _notchedSidesAndBottom(center, path);
@@ -108,18 +106,16 @@ class CutCornersBorder extends OutlineInputBorder {
     } else {
       final double? extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage);
       switch (textDirection) {
-        case TextDirection.rtl:
-          {
-            final Path path = _notchedCornerPath(outer.middleRect, gapStart + gapPadding - extent!, extent);
-            canvas.drawPath(path, paint);
-            break;
-          }
-        case TextDirection.ltr:
-          {
-            final Path path = _notchedCornerPath(outer.middleRect, gapStart - gapPadding, extent);
-            canvas.drawPath(path, paint);
-            break;
-          }
+        case TextDirection.rtl: {
+          final Path path = _notchedCornerPath(outer.middleRect, gapStart + gapPadding - extent!, extent);
+          canvas.drawPath(path, paint);
+          break;
+        }
+        case TextDirection.ltr: {
+          final Path path = _notchedCornerPath(outer.middleRect, gapStart - gapPadding, extent);
+          canvas.drawPath(path, paint);
+          break;
+        }
         case null:
           break;
       }

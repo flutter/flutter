@@ -50,7 +50,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // Without the timer the animation doesn't begin.
     Timer.run(() async {
       while (block < 25) {
-        await scrollController.animateTo((block % 5) * stepDistance, duration: stepDuration, curve: Curves.easeInOut);
+        await scrollController.animateTo((block % 5) * stepDistance,
+            duration: stepDuration, curve: Curves.easeInOut);
         block++;
       }
     });
@@ -64,11 +65,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(controller: scrollController, children: <Widget>[
-      Wrap(
+    return ListView(
+        controller: scrollController,
         children: <Widget>[
-          for (int i = 0; i < 30; i++) FractionallySizedBox(widthFactor: 0.2, child: ProductPreview(i)), //need case1
-          for (int i = 0; i < 30; i++) ProductPreview(i), //need case2
+            Wrap(
+              children: <Widget>[
+                for (int i = 0; i < 30; i++)
+                  FractionallySizedBox(
+                    widthFactor: 0.2,
+                    child: ProductPreview(i)), //need case1
+                for (int i = 0; i < 30; i++) ProductPreview(i), //need case2
         ],
       ),
     ]);

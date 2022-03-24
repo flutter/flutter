@@ -65,8 +65,8 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   ///
   /// The [testFile] URL must represent a file.
   LocalFileComparator(Uri testFile, {path.Style? pathStyle})
-      : basedir = _getBasedir(testFile, pathStyle),
-        _path = _getPath(pathStyle);
+    : basedir = _getBasedir(testFile, pathStyle),
+      _path = _getPath(pathStyle);
 
   static path.Context _getPath(path.Style? style) {
     return path.Context(style: style ?? path.Style.platform);
@@ -118,7 +118,9 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   Future<List<int>> getGoldenBytes(Uri golden) async {
     final File goldenFile = _getGoldenFile(golden);
     if (!goldenFile.existsSync()) {
-      fail('Could not be compared against non-existent file: "$golden"');
+      fail(
+        'Could not be compared against non-existent file: "$golden"'
+      );
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
     return goldenBytes;
@@ -138,25 +140,24 @@ mixin LocalComparisonOutput {
     Uri golden,
     Uri basedir, {
     String key = '',
-  }) async =>
-      TestAsyncUtils.guard<String>(() async {
-        String additionalFeedback = '';
-        if (result.diffs != null) {
-          additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
-          final Map<String, Image> diffs = result.diffs!;
-          for (final MapEntry<String, Image> entry in diffs.entries) {
-            final File output = getFailureFile(
-              key.isEmpty ? entry.key : '${entry.key}_$key',
-              golden,
-              basedir,
-            );
-            output.parent.createSync(recursive: true);
-            final ByteData? pngBytes = await entry.value.toByteData(format: ImageByteFormat.png);
-            output.writeAsBytesSync(pngBytes!.buffer.asUint8List());
-          }
-        }
-        return 'Golden "$golden": ${result.error}$additionalFeedback';
-      });
+  }) async => TestAsyncUtils.guard<String>(() async {
+    String additionalFeedback = '';
+    if (result.diffs != null) {
+      additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
+      final Map<String, Image> diffs = result.diffs!;
+      for (final MapEntry<String, Image> entry in diffs.entries) {
+        final File output = getFailureFile(
+          key.isEmpty ? entry.key : '${entry.key}_$key',
+          golden,
+          basedir,
+        );
+        output.parent.createSync(recursive: true);
+        final ByteData? pngBytes = await entry.value.toByteData(format: ImageByteFormat.png);
+        output.writeAsBytesSync(pngBytes!.buffer.asUint8List());
+      }
+    }
+    return 'Golden "$golden": ${result.error}$additionalFeedback';
+  });
 
   /// Returns the appropriate file for a given diff from a [ComparisonResult].
   File getFailureFile(String failure, Uri golden, Uri basedir) {
@@ -186,11 +187,13 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
     );
   }
 
-  final Codec testImageCodec = await instantiateImageCodec(Uint8List.fromList(test));
+  final Codec testImageCodec =
+      await instantiateImageCodec(Uint8List.fromList(test));
   final Image testImage = (await testImageCodec.getNextFrame()).image;
   final ByteData? testImageRgba = await testImage.toByteData();
 
-  final Codec masterImageCodec = await instantiateImageCodec(Uint8List.fromList(master));
+  final Codec masterImageCodec =
+      await instantiateImageCodec(Uint8List.fromList(master));
   final Image masterImage = (await masterImageCodec.getNextFrame()).image;
   final ByteData? masterImageRgba = await masterImage.toByteData();
 
@@ -202,8 +205,8 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       passed: false,
       diffPercent: 1.0,
       error: 'Pixel test failed, image sizes do not match.\n'
-          'Master Image: ${masterImage.width} X ${masterImage.height}\n'
-          'Test Image: ${testImage.width} X ${testImage.height}',
+        'Master Image: ${masterImage.width} X ${masterImage.height}\n'
+        'Test Image: ${testImage.width} X ${testImage.height}',
     );
   }
 
@@ -218,17 +221,17 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
   final ByteData isolatedDiffRgba = ByteData(width * height * 4);
 
   for (int x = 0; x < width; x++) {
-    for (int y = 0; y < height; y++) {
+    for (int y =0; y < height; y++) {
       final int byteOffset = (width * y + x) * 4;
       final int testPixel = testImageRgba.getUint32(byteOffset);
       final int masterPixel = masterImageRgba.getUint32(byteOffset);
 
-      final int diffPixel = (_readRed(testPixel) - _readRed(masterPixel)).abs() +
-          (_readGreen(testPixel) - _readGreen(masterPixel)).abs() +
-          (_readBlue(testPixel) - _readBlue(masterPixel)).abs() +
-          (_readAlpha(testPixel) - _readAlpha(masterPixel)).abs();
+      final int diffPixel = (_readRed(testPixel) - _readRed(masterPixel)).abs()
+        + (_readGreen(testPixel) - _readGreen(masterPixel)).abs()
+        + (_readBlue(testPixel) - _readBlue(masterPixel)).abs()
+        + (_readAlpha(testPixel) - _readAlpha(masterPixel)).abs();
 
-      if (diffPixel != 0) {
+      if (diffPixel != 0 ) {
         final int invertedMasterPixel = invertedMasterRgba.getUint32(byteOffset);
         final int invertedTestPixel = invertedTestRgba.getUint32(byteOffset);
         // We grab the max of the 0xAABBGGRR encoded bytes, and then convert
@@ -251,13 +254,13 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       passed: false,
       diffPercent: diffPercent,
       error: 'Pixel test failed, '
-          '${(diffPercent * 100).toStringAsFixed(2)}% '
-          'diff detected.',
-      diffs: <String, Image>{
-        'masterImage': masterImage,
-        'testImage': testImage,
-        'maskedDiff': await _createImage(maskedDiffRgba, width, height),
-        'isolatedDiff': await _createImage(isolatedDiffRgba, width, height),
+        '${(diffPercent * 100).toStringAsFixed(2)}% '
+        'diff detected.',
+      diffs:  <String, Image>{
+        'masterImage' : masterImage,
+        'testImage' : testImage,
+        'maskedDiff' : await _createImage(maskedDiffRgba, width, height),
+        'isolatedDiff' : await _createImage(isolatedDiffRgba, width, height),
       },
     );
   }
@@ -316,9 +319,13 @@ Future<Image> _createImage(ByteData bytes, int width, int height) {
 }
 
 // Converts a 32 bit rgba pixel to a 32 bit abgr pixel
-int _toABGR(int rgba) => (_readAlpha(rgba) << 24) | (_readBlue(rgba) << 16) | (_readGreen(rgba) << 8) | _readRed(rgba);
+int _toABGR(int rgba) =>
+    (_readAlpha(rgba) << 24) |
+    (_readBlue(rgba) << 16) |
+    (_readGreen(rgba) << 8) |
+    _readRed(rgba);
 
 // Converts a 32 bit abgr pixel to a 32 bit rgba pixel
 int _toRGBA(int abgr) =>
-    // This is just a mirror of the other conversion.
-    _toABGR(abgr);
+  // This is just a mirror of the other conversion.
+  _toABGR(abgr);

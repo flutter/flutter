@@ -31,10 +31,10 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     this.scanCode = 0,
     this.characterCodePoint = 0,
     this.modifiers = 0,
-  })  : assert(keyCode != null),
-        assert(scanCode != null),
-        assert(characterCodePoint != null),
-        assert(modifiers != null);
+  }) : assert(keyCode != null),
+       assert(scanCode != null),
+       assert(characterCodePoint != null),
+       assert(modifiers != null);
 
   /// The hardware key code corresponding to this key event.
   ///
@@ -61,8 +61,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   String get keyLabel => characterCodePoint == 0 ? '' : String.fromCharCode(characterCodePoint);
 
   @override
-  PhysicalKeyboardKey get physicalKey =>
-      kWindowsToPhysicalKey[scanCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.windowsPlane + scanCode);
+  PhysicalKeyboardKey get physicalKey => kWindowsToPhysicalKey[scanCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.windowsPlane + scanCode);
 
   @override
   LogicalKeyboardKey get logicalKey {
@@ -94,7 +93,9 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   }
 
   bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
-    if (modifiers & anyMask == 0 && modifiers & leftMask == 0 && modifiers & rightMask == 0) {
+    if (modifiers & anyMask == 0 &&
+        modifiers & leftMask == 0 &&
+        modifiers & rightMask == 0) {
       return false;
     }
     // If only the "anyMask" bit is set, then we respond true for requests of
@@ -129,8 +130,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
         break;
       case ModifierKey.metaModifier:
         // Windows does not provide an "any" key for win key press.
-        result = _isLeftRightModifierPressed(
-            side, modifierLeftMeta | modifierRightMeta, modifierLeftMeta, modifierRightMeta);
+        result = _isLeftRightModifierPressed(side, modifierLeftMeta | modifierRightMeta , modifierLeftMeta, modifierRightMeta);
         break;
       case ModifierKey.capsLockModifier:
         result = modifiers & modifierCaps != 0;
@@ -148,10 +148,10 @@ class RawKeyEventDataWindows extends RawKeyEventData {
         result = false;
         break;
     }
-    assert(!result || getModifierSide(key) != null,
-        "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
+    assert(!result || getModifierSide(key) != null, "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
     return result;
   }
+
 
   @override
   KeyboardSide? getModifierSide(ModifierKey key) {
@@ -208,23 +208,25 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is RawKeyEventDataWindows &&
-        other.keyCode == keyCode &&
-        other.scanCode == scanCode &&
-        other.characterCodePoint == characterCodePoint &&
-        other.modifiers == modifiers;
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataWindows
+        && other.keyCode == keyCode
+        && other.scanCode == scanCode
+        && other.characterCodePoint == characterCodePoint
+        && other.modifiers == modifiers;
   }
 
   @override
   int get hashCode => Object.hash(
-        keyCode,
-        scanCode,
-        characterCodePoint,
-        modifiers,
-      );
+    keyCode,
+    scanCode,
+    characterCodePoint,
+    modifiers,
+  );
 
   // These are not the values defined by the Windows header for each modifier. Since they
   // can't be packaged into a single int, we are re-defining them here to reduce the size

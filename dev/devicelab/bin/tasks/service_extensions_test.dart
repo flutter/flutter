@@ -28,18 +28,12 @@ void main() {
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>[
-          'run',
-          '--verbose',
-          '--no-fast-start',
-          '--no-publish-port',
-          '--disable-service-auth-codes',
-          '-d',
-          device.deviceId,
-          'lib/main.dart'
-        ],
+        <String>['run', '--verbose', '--no-fast-start', '--no-publish-port', '--disable-service-auth-codes', '-d', device.deviceId, 'lib/main.dart'],
       );
-      run.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+      run.stdout
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
         print('run:stdout: $line');
         if (vmServicePort == null) {
           vmServicePort = parseServicePort(line);
@@ -51,14 +45,16 @@ void main() {
           }
         }
       });
-      run.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+      run.stderr
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
         stderr.writeln('run:stderr: $line');
       });
-      unawaited(run.exitCode.then<void>((int exitCode) {
-        ok = false;
-      }));
-      await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);
-      if (!ok) throw 'Failed to run test app.';
+      unawaited(run.exitCode.then<void>((int exitCode) { ok = false; }));
+      await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
+      if (!ok)
+        throw 'Failed to run test app.';
 
       final VmService client = await vmServiceConnectUri('ws://localhost:$vmServicePort/ws');
       final VM vm = await client.getVM();
@@ -119,12 +115,14 @@ void main() {
 
       run.stdin.write('q');
       final int result = await run.exitCode;
-      if (result != 0) throw 'Received unexpected exit code $result from run process.';
+      if (result != 0)
+        throw 'Received unexpected exit code $result from run process.';
     });
     return TaskResult.success(null);
   });
 }
 
 void expect(bool value) {
-  if (!value) throw 'failed assertion in service extensions test';
+  if (!value)
+    throw 'failed assertion in service extensions test';
 }

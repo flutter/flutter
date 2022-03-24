@@ -9,7 +9,7 @@ import '../runner/flutter_command.dart';
 import '../version.dart';
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({bool verboseHelp = false}) {
+  ChannelCommand({ bool verboseHelp = false }) {
     argParser.addFlag(
       'all',
       abbr: 'a',
@@ -51,7 +51,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _listChannels({required bool showAll, required bool verbose}) async {
+  Future<void> _listChannels({ required bool showAll, required bool verbose }) async {
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = globals.flutterVersion.channel;
     final String currentBranch = globals.flutterVersion.getBranchName();
@@ -83,11 +83,10 @@ class ChannelCommand extends FlutterCommand {
       if (split.length > 1) {
         final int index = officialChannels.indexOf(branch);
 
-        if (index != -1) {
-          // Mark all available channels official channels from output
+        if (index != -1) { // Mark all available channels official channels from output
           availableChannels[index] = true;
         } else if (showAll && !seenUnofficialChannels.contains(branch)) {
-          // add other branches to seenUnofficialChannels if --all flag is given (to print later)
+        // add other branches to seenUnofficialChannels if --all flag is given (to print later)
           seenUnofficialChannels.add(branch);
         }
       }

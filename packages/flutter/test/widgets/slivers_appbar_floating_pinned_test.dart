@@ -10,8 +10,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Sliver appBars - floating and pinned - correct elevation', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Localizations(
+    await tester.pumpWidget(Localizations(
         locale: const Locale('en', 'us'),
         delegates: const <LocalizationsDelegate<dynamic>>[
           DefaultWidgetsLocalizations.delegate,

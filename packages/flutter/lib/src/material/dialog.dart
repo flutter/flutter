@@ -52,8 +52,8 @@ class Dialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.child,
-  })  : assert(clipBehavior != null),
-        super(key: key);
+  }) : assert(clipBehavior != null),
+       super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
   /// The background color of the surface of this [Dialog].
@@ -275,9 +275,9 @@ class AlertDialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.scrollable = false,
-  })  : assert(contentPadding != null),
-        assert(clipBehavior != null),
-        super(key: key);
+  }) : assert(contentPadding != null),
+       assert(clipBehavior != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -553,11 +553,12 @@ class AlertDialog extends StatelessWidget {
       final double spacing = (buttonPadding?.horizontal ?? 16) / 2;
       actionsWidget = Padding(
         padding: theme.useMaterial3
-            ? actionsPadding.add(EdgeInsets.all(spacing)).add(const EdgeInsets.only(
-                  right: m3ActionEndPadding,
-                  bottom: m3ActionBottomPadding,
-                ))
-            : actionsPadding.add(EdgeInsets.all(spacing)),
+          ? actionsPadding.add(EdgeInsets.all(spacing))
+            .add(const EdgeInsets.only(
+              right: m3ActionEndPadding,
+              bottom: m3ActionBottomPadding,
+            ))
+          : actionsPadding.add(EdgeInsets.all(spacing)),
         child: OverflowBar(
           alignment: actionsAlignment ?? MainAxisAlignment.end,
           spacing: spacing,
@@ -585,7 +586,8 @@ class AlertDialog extends StatelessWidget {
               ),
             ),
           ),
-        if (actions != null) actionsWidget!,
+        if (actions != null)
+          actionsWidget!,
       ];
     } else {
       columnChildren = <Widget>[
@@ -785,9 +787,9 @@ class SimpleDialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.alignment,
-  })  : assert(titlePadding != null),
-        assert(contentPadding != null),
-        super(key: key);
+  }) : assert(titlePadding != null),
+       assert(contentPadding != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -960,8 +962,7 @@ class SimpleDialog extends StatelessWidget {
   }
 }
 
-Widget _buildMaterialDialogTransitions(
-    BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
   return FadeTransition(
     opacity: CurvedAnimation(
       parent: animation,
@@ -1141,24 +1142,24 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     bool useSafeArea = true,
     RouteSettings? settings,
     Offset? anchorPoint,
-  })  : assert(barrierDismissible != null),
-        super(
-          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
-            final Widget pageChild = Builder(builder: builder);
-            Widget dialog = themes?.wrap(pageChild) ?? pageChild;
-            if (useSafeArea) {
-              dialog = SafeArea(child: dialog);
-            }
-            return dialog;
-          },
-          barrierDismissible: barrierDismissible,
-          barrierColor: barrierColor,
-          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
-          transitionDuration: const Duration(milliseconds: 150),
-          transitionBuilder: _buildMaterialDialogTransitions,
-          settings: settings,
-          anchorPoint: anchorPoint,
-        );
+  }) : assert(barrierDismissible != null),
+       super(
+         pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
+           final Widget pageChild = Builder(builder: builder);
+           Widget dialog = themes?.wrap(pageChild) ?? pageChild;
+           if (useSafeArea) {
+             dialog = SafeArea(child: dialog);
+           }
+           return dialog;
+         },
+         barrierDismissible: barrierDismissible,
+         barrierColor: barrierColor,
+         barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
+         transitionDuration: const Duration(milliseconds: 150),
+         transitionBuilder: _buildMaterialDialogTransitions,
+         settings: settings,
+         anchorPoint: anchorPoint,
+       );
 }
 
 double _paddingScaleFactor(double textScaleFactor) {
@@ -1174,12 +1175,12 @@ double _paddingScaleFactor(double textScaleFactor) {
 // avoid computing values that we may not need upfront.
 class _DefaultsM2 extends DialogTheme {
   _DefaultsM2(this.context)
-      : _textTheme = Theme.of(context).textTheme,
-        super(
-          alignment: Alignment.center,
-          elevation: 24.0,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
-        );
+    : _textTheme = Theme.of(context).textTheme,
+      super(
+        alignment: Alignment.center,
+        elevation: 24.0,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+      );
 
   final BuildContext context;
   final TextTheme _textTheme;
@@ -1203,18 +1204,13 @@ class _DefaultsM2 extends DialogTheme {
 // Generated version v0_90
 class _TokenDefaultsM3 extends DialogTheme {
   _TokenDefaultsM3(this.context)
-      : _colors = Theme.of(context).colorScheme,
-        _textTheme = Theme.of(context).textTheme,
-        super(
-          alignment: Alignment.center,
-          elevation: 6.0,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(28.0),
-                  topRight: Radius.circular(28.0),
-                  bottomLeft: Radius.circular(28.0),
-                  bottomRight: Radius.circular(28.0))),
-        );
+    : _colors = Theme.of(context).colorScheme,
+      _textTheme = Theme.of(context).textTheme,
+      super(
+        alignment: Alignment.center,
+        elevation: 6.0,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0), bottomLeft: Radius.circular(28.0), bottomRight: Radius.circular(28.0))),
+      );
 
   final BuildContext context;
   final ColorScheme _colors;

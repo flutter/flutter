@@ -43,8 +43,12 @@ Future<vms.VmService> _waitAndConnect(
         (dynamic data) => controller.add(data),
         onDone: () => streamClosedCompleter.complete(),
       );
-      final vms.VmService service = vms.VmService(controller.stream, socket.add,
-          disposeHandler: () => socket.close(), streamClosed: streamClosedCompleter.future);
+      final vms.VmService service = vms.VmService(
+        controller.stream,
+        socket.add,
+        disposeHandler: () => socket.close(),
+        streamClosed: streamClosedCompleter.future
+      );
       // This call is to ensure we are able to establish a connection instead of
       // keeping on trucking and failing farther down the process.
       await service.getVersion();
@@ -128,6 +132,7 @@ class DartVm {
     return result;
   }
 
+
   /// Returns a list of [FlutterView] objects running across all Dart VM's.
   ///
   /// If there is no associated isolate with the flutter view (used to determine
@@ -137,8 +142,7 @@ class DartVm {
   Future<List<FlutterView>> getAllFlutterViews() async {
     final List<FlutterView> views = <FlutterView>[];
     final vms.Response rpcResponse = await _vmService.callMethod('_flutter.listViews');
-    for (final Map<String, dynamic> jsonView
-        in (rpcResponse.json!['views'] as List<dynamic>).cast<Map<String, dynamic>>()) {
+    for (final Map<String, dynamic> jsonView in (rpcResponse.json!['views'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       views.add(FlutterView._fromJson(jsonView));
     }
     return views;
@@ -176,7 +180,8 @@ class FlutterView {
     final String? id = json['id'] as String?;
     String? name;
     if (id == null) {
-      throw RpcFormatError('Unable to find view name for the following JSON structure "$json"');
+      throw RpcFormatError(
+          'Unable to find view name for the following JSON structure "$json"');
     }
     if (isolate != null) {
       name = isolate['name'] as String?;
@@ -224,10 +229,12 @@ class IsolateRef {
       throw RpcFormatError('Type "$type" does not match for IsolateRef');
     }
     if (number == null) {
-      throw RpcFormatError('Unable to find number for isolate ref within JSON "$json"');
+      throw RpcFormatError(
+          'Unable to find number for isolate ref within JSON "$json"');
     }
     if (name == null) {
-      throw RpcFormatError('Unable to find name for isolate ref within JSON "$json"');
+      throw RpcFormatError(
+          'Unable to find name for isolate ref within JSON "$json"');
     }
     return IsolateRef._(name, int.parse(number), dartVm);
   }

@@ -31,8 +31,7 @@ void main() {
     expect(text.textHeightBehavior, behavior1);
   });
 
-  testWidgets('DefaultTextStyle.textHeightBehavior takes precedence over DefaultTextHeightBehavior ',
-      (WidgetTester tester) async {
+  testWidgets('DefaultTextStyle.textHeightBehavior takes precedence over DefaultTextHeightBehavior ', (WidgetTester tester) async {
     const TextHeightBehavior behavior1 = TextHeightBehavior(
       applyHeightToLastDescent: false,
       applyHeightToFirstAscent: false,

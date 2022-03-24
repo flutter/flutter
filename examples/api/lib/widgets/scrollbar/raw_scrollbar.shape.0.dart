@@ -29,13 +29,15 @@ class MyStatelessWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: RawScrollbar(
-        shape: const StadiumBorder(side: BorderSide(color: Colors.brown, width: 3.0)),
+        shape: const StadiumBorder(
+            side: BorderSide(color: Colors.brown, width: 3.0)),
         thickness: 15.0,
         thumbColor: Colors.blue,
         thumbVisibility: true,
         child: ListView(
           physics: const BouncingScrollPhysics(),
-          children: List<Text>.generate(100, (int index) => Text((index * index).toString())),
+          children: List<Text>.generate(
+              100, (int index) => Text((index * index).toString())),
         ),
       ),
     );

@@ -24,7 +24,8 @@ TaskFunction createMicrobenchmarkTask() {
     Future<Map<String, double>> _runMicrobench(String benchmarkPath) async {
       Future<Map<String, double>> _run() async {
         print('Running $benchmarkPath');
-        final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
+        final Directory appDir = dir(
+            path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
         final Process flutterProcess = await inDirectory(appDir, () async {
           final List<String> options = <String>[
             '-v',
@@ -63,6 +64,7 @@ TaskFunction createMicrobenchmarkTask() {
       ...await _runMicrobench('lib/foundation/timeline_bench.dart'),
     };
 
-    return TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
+    return TaskResult.success(allResults,
+        benchmarkScoreKeys: allResults.keys.toList());
   };
 }

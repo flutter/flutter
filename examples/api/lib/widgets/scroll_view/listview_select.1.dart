@@ -104,7 +104,8 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
                   onPressed: () {
                     _selectAll = !_selectAll;
                     setState(() {
-                      _selected = List<bool>.generate(listLength, (_) => _selectAll);
+                      _selected =
+                          List<bool>.generate(listLength, (_) => _selectAll);
                     });
                   }),
           ],
@@ -160,7 +161,8 @@ class GridBuilderState extends State<GridBuilder> {
   Widget build(BuildContext context) {
     return GridView.builder(
         itemCount: widget.selectedList.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         itemBuilder: (_, int index) {
           return InkWell(
             onTap: () => _toggle(index),
@@ -175,7 +177,9 @@ class GridBuilderState extends State<GridBuilder> {
             child: GridTile(
                 child: Container(
               child: widget.isSelectionMode
-                  ? Checkbox(onChanged: (bool? x) => _toggle(index), value: widget.selectedList[index])
+                  ? Checkbox(
+                      onChanged: (bool? x) => _toggle(index),
+                      value: widget.selectedList[index])
                   : const Icon(Icons.image),
             )),
           );

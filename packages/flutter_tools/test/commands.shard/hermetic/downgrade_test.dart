@@ -44,9 +44,8 @@ void main() {
 
   testUsingContext('Downgrade exits on unknown channel', () async {
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
-    fileSystem.currentDirectory
-        .childFile('.flutter_tool_state')
-        .writeAsStringSync('{"last-active-master-version":"invalid"}');
+    fileSystem.currentDirectory.childFile('.flutter_tool_state')
+      .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: processManager,
@@ -57,18 +56,22 @@ void main() {
     );
 
     expect(createTestCommandRunner(command).run(const <String>['downgrade']),
-        throwsToolExit(message: 'Flutter is not currently on a known channel.'));
+      throwsToolExit(message: 'Flutter is not currently on a known channel.'));
   });
 
   testUsingContext('Downgrade exits on no recorded version', () async {
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'beta');
-    fileSystem.currentDirectory
-        .childFile('.flutter_tool_state')
-        .writeAsStringSync('{"last-active-master-version":"abcd"}');
+    fileSystem.currentDirectory.childFile('.flutter_tool_state')
+      .writeAsStringSync('{"last-active-master-version":"abcd"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>['git', 'describe', '--tags', 'abcd'], stdout: 'v1.2.3')
+        const FakeCommand(
+          command: <String>[
+            'git', 'describe', '--tags', 'abcd'
+          ],
+          stdout: 'v1.2.3'
+        )
       ]),
       terminal: terminal,
       stdio: stdio,
@@ -76,24 +79,25 @@ void main() {
       logger: bufferLogger,
     );
 
-    expect(
-      createTestCommandRunner(command).run(const <String>['downgrade']),
-      throwsToolExit(
-          message: 'There is no previously recorded version for channel "beta".\n'
-              'Channel "master" was previously on: v1.2.3.'),
+    expect(createTestCommandRunner(command).run(const <String>['downgrade']),
+      throwsToolExit(message:
+        'There is no previously recorded version for channel "beta".\n'
+        'Channel "master" was previously on: v1.2.3.'
+      ),
     );
   });
 
   testUsingContext('Downgrade exits on unknown recorded version', () async {
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
-    fileSystem.currentDirectory
-        .childFile('.flutter_tool_state')
-        .writeAsStringSync('{"last-active-master-version":"invalid"}');
+    fileSystem.currentDirectory.childFile('.flutter_tool_state')
+      .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
-          command: <String>['git', 'describe', '--tags', 'invalid'],
+          command: <String>[
+            'git', 'describe', '--tags', 'invalid'
+          ],
           exitCode: 1,
         )
       ]),
@@ -104,15 +108,14 @@ void main() {
     );
 
     expect(createTestCommandRunner(command).run(const <String>['downgrade']),
-        throwsToolExit(message: 'Failed to parse version for downgrade'));
+      throwsToolExit(message: 'Failed to parse version for downgrade'));
   });
 
-  testUsingContext('Downgrade prompts for user input when terminal is attached - y', () async {
+   testUsingContext('Downgrade prompts for user input when terminal is attached - y', () async {
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
     stdio.hasTerminal = true;
-    fileSystem.currentDirectory
-        .childFile('.flutter_tool_state')
-        .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
+    fileSystem.currentDirectory.childFile('.flutter_tool_state')
+      .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: processManager,
@@ -129,12 +132,11 @@ void main() {
     expect(bufferLogger.statusText, contains('Success'));
   });
 
-  testUsingContext('Downgrade prompts for user input when terminal is attached - n', () async {
+   testUsingContext('Downgrade prompts for user input when terminal is attached - n', () async {
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
     stdio.hasTerminal = true;
-    fileSystem.currentDirectory
-        .childFile('.flutter_tool_state')
-        .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
+    fileSystem.currentDirectory.childFile('.flutter_tool_state')
+      .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: processManager,
@@ -154,9 +156,8 @@ void main() {
   testUsingContext('Downgrade does not prompt when there is no terminal', () async {
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
     stdio.hasTerminal = false;
-    fileSystem.currentDirectory
-        .childFile('.flutter_tool_state')
-        .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
+    fileSystem.currentDirectory.childFile('.flutter_tool_state')
+      .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
@@ -177,9 +178,8 @@ void main() {
   testUsingContext('Downgrade performs correct git commands', () async {
     final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
     stdio.hasTerminal = false;
-    fileSystem.currentDirectory
-        .childFile('.flutter_tool_state')
-        .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
+    fileSystem.currentDirectory.childFile('.flutter_tool_state')
+      .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
@@ -187,13 +187,21 @@ void main() {
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
-          command: <String>['git', 'describe', '--tags', 'g6b00b5e88'],
+          command: <String>[
+            'git', 'describe', '--tags', 'g6b00b5e88'
+          ],
           stdout: 'v1.2.3',
         ),
         const FakeCommand(
-          command: <String>['git', 'reset', '--hard', 'g6b00b5e88'],
+          command: <String>[
+            'git', 'reset', '--hard', 'g6b00b5e88'
+          ],
         ),
-        const FakeCommand(command: <String>['git', 'checkout', 'master', '--']),
+        const FakeCommand(
+          command: <String>[
+            'git', 'checkout', 'master', '--'
+          ]
+        ),
       ]),
       terminal: terminal,
       stdio: stdio,
@@ -220,8 +228,7 @@ class FakeTerminal extends Fake implements Terminal {
   String _selected;
 
   @override
-  Future<String> promptForCharInput(List<String> acceptedCharacters,
-      {Logger logger, String prompt, int defaultChoiceIndex, bool displayAcceptedCharacters = true}) async {
+  Future<String> promptForCharInput(List<String> acceptedCharacters, {Logger logger, String prompt, int defaultChoiceIndex, bool displayAcceptedCharacters = true}) async {
     expect(acceptedCharacters, _characters);
     return _selected;
   }

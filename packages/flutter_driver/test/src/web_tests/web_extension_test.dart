@@ -18,7 +18,8 @@ void main() {
     });
 
     test('web_extension should register a function', () {
-      expect(() => registerWebServiceExtension(call), returnsNormally);
+      expect(() => registerWebServiceExtension(call),
+          returnsNormally);
       expect(js.context.hasProperty(r'$flutterDriver'), true);
     });
   });

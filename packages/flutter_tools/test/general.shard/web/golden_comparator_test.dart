@@ -22,10 +22,11 @@ import '../../src/context.dart';
 final Uri goldenKey = Uri.parse('file://golden_key');
 final Uri goldenKey2 = Uri.parse('file://second_golden_key');
 final Uri testUri = Uri.parse('file://test_uri');
-final Uri testUri2 = Uri.parse('file://second_test_uri');
+final Uri testUri2  = Uri.parse('file://second_test_uri');
 final Uint8List imageBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
 
 void main() {
+
   group('Test that TestGoldenComparator', () {
     FakeProcessManager processManager;
 
@@ -79,8 +80,7 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ],
-        stdout: '${jsonEncode(expectedResponse)}\n',
+        ], stdout: '${jsonEncode(expectedResponse)}\n',
       ));
 
       final TestGoldenComparator comparator = TestGoldenComparator(
@@ -113,8 +113,7 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ],
-        stdout: '${jsonEncode(expectedResponse1)}\n${jsonEncode(expectedResponse2)}\n',
+        ], stdout: '${jsonEncode(expectedResponse1)}\n${jsonEncode(expectedResponse2)}\n',
       ));
 
       final TestGoldenComparator comparator = TestGoldenComparator(
@@ -150,8 +149,7 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ],
-        stdout: '${jsonEncode(expectedResponse1)}\n',
+        ], stdout: '${jsonEncode(expectedResponse1)}\n',
       ));
       processManager.addCommand(FakeCommand(
         command: const <String>[
@@ -160,8 +158,7 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ],
-        stdout: '${jsonEncode(expectedResponse2)}\n',
+        ], stdout: '${jsonEncode(expectedResponse2)}\n',
       ));
 
       final TestGoldenComparator comparator = TestGoldenComparator(
@@ -195,8 +192,7 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output'
-        ],
-        stdout: '${jsonEncode(expectedResponse)}\n',
+        ], stdout: '${jsonEncode(expectedResponse)}\n',
         stdin: stdin,
       ));
 
@@ -225,5 +221,5 @@ class FakeTestCompiler extends Fake implements TestCompiler {
   }
 
   @override
-  Future<void> dispose() async {}
+  Future<void> dispose() async { }
 }

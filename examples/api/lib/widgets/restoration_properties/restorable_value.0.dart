@@ -35,7 +35,8 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 /// RestorationProperty objects can be used because of RestorationMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget> with RestorationMixin {
+class _MyStatefulWidgetState extends State<MyStatefulWidget>
+    with RestorationMixin {
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.
   @override

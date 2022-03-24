@@ -18,7 +18,8 @@ void main() {
       child: ValueListenableBuilder<String?>(
         valueListenable: valueListenable,
         builder: (BuildContext context, String? value, Widget? child) {
-          if (value == null) return const Placeholder();
+          if (value == null)
+            return const Placeholder();
           return Text(value);
         },
       ),
@@ -64,7 +65,8 @@ void main() {
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final ValueListenable<String?> differentListenable = SpyStringValueNotifier('Hendricks');
+    final ValueListenable<String?> differentListenable =
+        SpyStringValueNotifier('Hendricks');
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
 
@@ -79,7 +81,8 @@ void main() {
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final ValueListenable<String?> differentListenable = SpyStringValueNotifier('Hendricks');
+    final ValueListenable<String?> differentListenable =
+       SpyStringValueNotifier('Hendricks');
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
 

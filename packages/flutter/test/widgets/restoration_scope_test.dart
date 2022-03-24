@@ -285,11 +285,7 @@ void main() {
       manager.doSerialization();
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket!.restorationId, 'moving-child');
-      expect(
-          (((rawData[childrenMapKey] as Map<Object?, Object?>)['fixed']! as Map<String, dynamic>)[childrenMapKey]
-                  as Map<Object?, Object?>)
-              .containsKey('moving-child'),
-          isTrue);
+      expect((((rawData[childrenMapKey] as Map<Object?, Object?>)['fixed']! as Map<String, dynamic>)[childrenMapKey] as Map<Object?, Object?>).containsKey('moving-child'), isTrue);
       final RestorationBucket bucket = state.bucket!;
 
       state.bucket!.write('value', 11);
@@ -329,17 +325,17 @@ void main() {
 Map<String, dynamic> _createRawDataSet() {
   return <String, dynamic>{
     valuesMapKey: <String, dynamic>{
-      'value1': 10,
-      'value2': 'Hello',
+      'value1' : 10,
+      'value2' : 'Hello',
     },
     childrenMapKey: <String, dynamic>{
-      'child1': <String, dynamic>{
-        valuesMapKey: <String, dynamic>{
+      'child1' : <String, dynamic>{
+        valuesMapKey : <String, dynamic>{
           'foo': 22,
         },
       },
-      'child2': <String, dynamic>{
-        valuesMapKey: <String, dynamic>{
+      'child2' : <String, dynamic>{
+        valuesMapKey : <String, dynamic>{
           'bar': 33,
         },
       },

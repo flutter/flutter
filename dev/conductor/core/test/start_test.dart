@@ -698,10 +698,7 @@ void main() {
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, conductorVersion);
       expect(state.releaseType, ReleaseType.BETA_HOTFIX);
-      expect(
-          stdio.error,
-          contains(
-              'Parsed version $previousVersion.42 has a different x value than candidate branch $candidateBranch'));
+      expect(stdio.error, contains('Parsed version $previousVersion.42 has a different x value than candidate branch $candidateBranch'));
     });
 
     test('can convert from dev style version to stable version', () async {

@@ -82,33 +82,29 @@ void main() {
     });
 
     testWithoutContext('Flutter web help string', () {
-      expect(
-          flutterWebFeature.generateHelpMessage(),
-          'Enable or disable Flutter for web. '
-          'This setting will take effect on the master, beta, and stable channels.');
+      expect(flutterWebFeature.generateHelpMessage(),
+      'Enable or disable Flutter for web. '
+      'This setting will take effect on the master, beta, and stable channels.');
     });
 
     testWithoutContext('Flutter macOS desktop help string', () {
-      expect(
-          flutterMacOSDesktopFeature.generateHelpMessage(),
-          'Enable or disable beta-quality support for desktop on macOS. '
-          'This setting will take effect on the master, beta, and stable channels. '
-          'Newer beta versions are available on the beta channel.');
+      expect(flutterMacOSDesktopFeature.generateHelpMessage(),
+      'Enable or disable beta-quality support for desktop on macOS. '
+      'This setting will take effect on the master, beta, and stable channels. '
+      'Newer beta versions are available on the beta channel.');
     });
 
     testWithoutContext('Flutter Linux desktop help string', () {
-      expect(
-          flutterLinuxDesktopFeature.generateHelpMessage(),
-          'Enable or disable beta-quality support for desktop on Linux. '
-          'This setting will take effect on the master, beta, and stable channels. '
-          'Newer beta versions are available on the beta channel.');
+      expect(flutterLinuxDesktopFeature.generateHelpMessage(),
+      'Enable or disable beta-quality support for desktop on Linux. '
+      'This setting will take effect on the master, beta, and stable channels. '
+      'Newer beta versions are available on the beta channel.');
     });
 
     testWithoutContext('Flutter Windows desktop help string', () {
-      expect(
-          flutterWindowsDesktopFeature.generateHelpMessage(),
-          'Enable or disable support for desktop on Windows. '
-          'This setting will take effect on the master, beta, and stable channels.');
+      expect(flutterWindowsDesktopFeature.generateHelpMessage(),
+      'Enable or disable support for desktop on Windows. '
+      'This setting will take effect on the master, beta, and stable channels.');
     });
 
     testWithoutContext('help string on multiple channels', () {
@@ -120,9 +116,7 @@ void main() {
         configSetting: 'foo',
       );
 
-      expect(
-          testWithoutContextFeature.generateHelpMessage(),
-          'Enable or disable example. '
+      expect(testWithoutContextFeature.generateHelpMessage(), 'Enable or disable example. '
           'This setting will take effect on the master, beta, and stable channels.');
     });
 
@@ -162,7 +156,7 @@ void main() {
     });
 
     testWithoutContext('Flutter web not enabled with environment variable on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
+     final FeatureFlags featureFlags = createFlags('beta');
       platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
 
       expect(featureFlags.isWebEnabled, true);

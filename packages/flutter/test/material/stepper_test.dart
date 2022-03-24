@@ -448,7 +448,8 @@ void main() {
     expect(continuePressed, isTrue);
   });
 
-  testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async {
+testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async {
+
     int currentStep = 0;
     void setContinue() {
       currentStep += 1;
@@ -461,7 +462,8 @@ void main() {
     Widget builder(BuildContext context, ControlsDetails details) {
       // For the purposes of testing, only render something for the active
       // step.
-      if (!details.isActive) return Container();
+      if (!details.isActive)
+        return Container();
 
       return Container(
         margin: const EdgeInsets.only(top: 16.0),
@@ -580,7 +582,7 @@ void main() {
               steps: <Step>[
                 Step(
                   title: const Text('Step 2'),
-                  content: Stepper(
+                  content:  Stepper(
                     steps: const <Step>[
                       Step(
                         title: Text('Nested step 1'),
@@ -612,29 +614,23 @@ void main() {
     final List<String> lines = fullErrorMessage.split('\n');
     // The lines in the middle of the error message contain the stack trace
     // which will change depending on where the test is run.
-    final String errorMessage = lines
-        .takeWhile(
-          (String line) => line != '',
-        )
-        .join('\n');
+    final String errorMessage = lines.takeWhile(
+      (String line) => line != '',
+    ).join('\n');
     expect(errorMessage.length, lessThan(fullErrorMessage.length));
-    expect(
-        errorMessage,
-        startsWith(
-          '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
-          'The following assertion was thrown building Stepper(',
-        ));
+    expect(errorMessage, startsWith(
+      '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
+      'The following assertion was thrown building Stepper(',
+    ));
     // The description string of the stepper looks slightly different depending
     // on the platform and is omitted here.
-    expect(
-        errorMessage,
-        endsWith(
-          '):\n'
-          'Steppers must not be nested.\n'
-          'The material specification advises that one should avoid\n'
-          'embedding steppers within steppers.\n'
-          'https://material.io/archive/guidelines/components/steppers.html#steppers-usage',
-        ));
+    expect(errorMessage, endsWith(
+      '):\n'
+      'Steppers must not be nested.\n'
+      'The material specification advises that one should avoid\n'
+      'embedding steppers within steppers.\n'
+      'https://material.io/archive/guidelines/components/steppers.html#steppers-usage',
+    ));
   });
 
   ///https://github.com/flutter/flutter/issues/16920
@@ -750,7 +746,8 @@ void main() {
   });
 
   testWidgets('Stepper header title should not overflow', (WidgetTester tester) async {
-    const String longText = 'A long long long long long long long long long long long long text';
+    const String longText =
+        'A long long long long long long long long long long long long text';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -775,7 +772,8 @@ void main() {
   });
 
   testWidgets('Stepper header subtitle should not overflow', (WidgetTester tester) async {
-    const String longText = 'A long long long long long long long long long long long long text';
+    const String longText =
+        'A long long long long long long long long long long long long text';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -807,8 +805,8 @@ void main() {
         home: Material(
           child: Stepper(
             type: StepperType.horizontal,
-            onStepCancel: () {},
-            onStepContinue: () {},
+            onStepCancel: () { },
+            onStepContinue: () { },
             steps: const <Step>[
               Step(
                 title: Text('step1'),
@@ -850,7 +848,7 @@ void main() {
     await tester.pumpAndSettle(); // Complete the theme animation.
 
     expect(buttonMaterial('CONTINUE').color!.value, 0);
-    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0xffffffff);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value,  0xffffffff);
     expect(buttonMaterial('CONTINUE').shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
 
@@ -909,7 +907,7 @@ void main() {
   testWidgets('Vertical and Horizontal Stepper physics test', (WidgetTester tester) async {
     const ScrollPhysics physics = NeverScrollableScrollPhysics();
 
-    for (final StepperType type in StepperType.values) {
+    for(final StepperType type in StepperType.values) {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -930,15 +928,14 @@ void main() {
         ),
       );
 
-      final ListView listView =
-          tester.widget<ListView>(find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)));
+      final ListView listView = tester.widget<ListView>(find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)));
       expect(listView.physics, physics);
     }
   });
 
   testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/77732
-    Widget buildFrame({bool isActive = true, Brightness? brightness}) {
+    Widget buildFrame({ bool isActive = true, Brightness? brightness }) {
       return MaterialApp(
         theme: brightness == Brightness.dark ? ThemeData.dark() : ThemeData.light(),
         home: Scaffold(
@@ -982,66 +979,70 @@ void main() {
   });
 
   testWidgets('Stepper custom elevation', (WidgetTester tester) async {
-    const double elevation = 4.0;
+     const double elevation = 4.0;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SizedBox(
-            width: 200,
-            height: 75,
-            child: Stepper(
-              type: StepperType.horizontal,
-              elevation: elevation,
-              steps: const <Step>[
-                Step(
-                  title: Text('Regular title'),
-                  content: Text('Text content'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               type: StepperType.horizontal,
+               elevation: elevation,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content'),
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
 
-    final Material material = tester.firstWidget<Material>(
-      find.descendant(
-        of: find.byType(Stepper),
-        matching: find.byType(Material),
-      ),
-    );
+     final Material material = tester.firstWidget<Material>(
+       find.descendant(
+         of: find.byType(Stepper),
+         matching: find.byType(Material),
+       ),
+     );
 
-    expect(material.elevation, elevation);
-  });
+     expect(material.elevation, elevation);
+   });
 
-  testWidgets('Stepper with default elevation', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SizedBox(
-            width: 200,
-            height: 75,
-            child: Stepper(
-              type: StepperType.horizontal,
-              steps: const <Step>[
-                Step(title: Text('Regular title'), content: Text('Text content')),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+   testWidgets('Stepper with default elevation', (WidgetTester tester) async {
 
-    final Material material = tester.firstWidget<Material>(
-      find.descendant(
-        of: find.byType(Stepper),
-        matching: find.byType(Material),
-      ),
-    );
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               type: StepperType.horizontal,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content')
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
 
-    expect(material.elevation, 2.0);
-  });
+     final Material material = tester.firstWidget<Material>(
+       find.descendant(
+         of: find.byType(Stepper),
+         matching: find.byType(Material),
+       ),
+     );
+
+     expect(material.elevation, 2.0);
+   });
 
   testWidgets('Stepper horizontal preserves state', (WidgetTester tester) async {
     const Color untappedColor = Colors.blue;
@@ -1085,11 +1086,9 @@ void main() {
     await tester.pumpWidget(widget);
 
     // Set up a getter to examine the MacGuffin's color
-    Color getColor() => tester
-        .widget<ColoredBox>(
-          find.descendant(of: find.byKey(const Key('tappable-color')), matching: find.byType(ColoredBox)),
-        )
-        .color;
+    Color getColor() => tester.widget<ColoredBox>(
+      find.descendant(of: find.byKey(const Key('tappable-color')), matching: find.byType(ColoredBox)),
+    ).color;
 
     // We are on step 1
     expect(find.text('Step 2 Content'), findsNothing);
@@ -1116,46 +1115,46 @@ void main() {
     // The color should still be `tappedColor`
     expect(getColor(), tappedColor);
   });
-  testWidgets('Stepper custom margin', (WidgetTester tester) async {
-    const EdgeInsetsGeometry margin = EdgeInsetsDirectional.only(
-      bottom: 20,
-      top: 20,
-    );
+       testWidgets('Stepper custom margin', (WidgetTester tester) async {
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SizedBox(
-            width: 200,
-            height: 75,
-            child: Stepper(
-              margin: margin,
-              steps: const <Step>[
-                Step(title: Text('Regular title'), content: Text('Text content')),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+      const EdgeInsetsGeometry margin = EdgeInsetsDirectional.only(
+        bottom: 20,
+        top: 20,
+      );
 
-    final Stepper material = tester.firstWidget<Stepper>(
-      find.descendant(
-        of: find.byType(Material),
-        matching: find.byType(Stepper),
-      ),
-    );
+     await tester.pumpWidget(
+       MaterialApp(
+         home: Material(
+           child: SizedBox(
+             width: 200,
+             height: 75,
+             child: Stepper(
+               margin: margin,
+               steps: const <Step>[
+                 Step(
+                   title: Text('Regular title'),
+                   content: Text('Text content')
+                 ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
 
-    expect(material.margin, equals(margin));
-  });
+     final Stepper material = tester.firstWidget<Stepper>(
+       find.descendant(
+         of: find.byType(Material),
+         matching: find.byType(Stepper),
+       ),
+     );
+
+     expect(material.margin, equals(margin));
+   });
 }
 
 class _TappableColorWidget extends StatefulWidget {
-  const _TappableColorWidget({
-    required this.tappedColor,
-    required this.untappedColor,
-    Key? key,
-  }) : super(key: key);
+  const _TappableColorWidget({required this.tappedColor, required this.untappedColor, Key? key,}) : super(key: key);
 
   final Color tappedColor;
   final Color untappedColor;
@@ -1165,6 +1164,7 @@ class _TappableColorWidget extends StatefulWidget {
 }
 
 class _TappableColorWidgetState extends State<_TappableColorWidget> {
+
   Color? color;
 
   @override
@@ -1177,7 +1177,7 @@ class _TappableColorWidgetState extends State<_TappableColorWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        setState(() {
+        setState((){
           color = widget.tappedColor;
         });
       },

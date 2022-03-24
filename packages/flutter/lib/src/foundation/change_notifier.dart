@@ -186,7 +186,8 @@ class ChangeNotifier implements Listenable {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
       } else {
-        final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(_listeners.length * 2, null);
+        final List<VoidCallback?> newListeners =
+            List<VoidCallback?>.filled(_listeners.length * 2, null);
         for (int i = 0; i < _count; i++) {
           newListeners[i] = _listeners[i];
         }
@@ -207,17 +208,20 @@ class ChangeNotifier implements Listenable {
       final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(_count, null);
 
       // Listeners before the index are at the same place.
-      for (int i = 0; i < index; i++) newListeners[i] = _listeners[i];
+      for (int i = 0; i < index; i++)
+        newListeners[i] = _listeners[i];
 
       // Listeners after the index move towards the start of the list.
-      for (int i = index; i < _count; i++) newListeners[i] = _listeners[i + 1];
+      for (int i = index; i < _count; i++)
+        newListeners[i] = _listeners[i + 1];
 
       _listeners = newListeners;
     } else {
       // When there are more listeners than half the length of the list, we only
       // shift our listeners, so that we avoid to reallocate memory for the
       // whole list.
-      for (int i = index; i < _count; i++) _listeners[i] = _listeners[i + 1];
+      for (int i = index; i < _count; i++)
+        _listeners[i] = _listeners[i + 1];
       _listeners[_count] = null;
     }
   }
@@ -298,7 +302,8 @@ class ChangeNotifier implements Listenable {
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
-    if (_count == 0) return;
+    if (_count == 0)
+      return;
 
     // To make sure that listeners removed during this iteration are not called,
     // we set them to null, but we don't shrink the list right away.
@@ -359,7 +364,7 @@ class ChangeNotifier implements Listenable {
           if (_listeners[i] == null) {
             // We swap this item with the next not null item.
             int swapIndex = i + 1;
-            while (_listeners[swapIndex] == null) {
+            while(_listeners[swapIndex] == null) {
               swapIndex += 1;
             }
             _listeners[i] = _listeners[swapIndex];
@@ -417,7 +422,8 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   T get value => _value;
   T _value;
   set value(T newValue) {
-    if (_value == newValue) return;
+    if (_value == newValue)
+      return;
     _value = newValue;
     notifyListeners();
   }

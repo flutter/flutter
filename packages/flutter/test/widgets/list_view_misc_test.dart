@@ -71,7 +71,7 @@ void main() {
     int first = 0;
     int second = 0;
 
-    Widget buildBlock({bool reverse = false}) {
+    Widget buildBlock({ bool reverse = false }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
@@ -79,18 +79,14 @@ void main() {
           reverse: reverse,
           children: <Widget>[
             GestureDetector(
-              onTap: () {
-                first += 1;
-              },
+              onTap: () { first += 1; },
               child: Container(
                 height: 350.0, // more than half the height of the test area
                 color: const Color(0xFF00FF00),
               ),
             ),
             GestureDetector(
-              onTap: () {
-                second += 1;
-              },
+              onTap: () { second += 1; },
               child: Container(
                 height: 350.0, // more than half the height of the test area
                 color: const Color(0xFF0000FF),
@@ -127,7 +123,6 @@ void main() {
         ),
       );
     }
-
     await tester.pumpWidget(buildBlock());
     expect(controller.offset, equals(0.0));
   });

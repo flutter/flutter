@@ -285,7 +285,7 @@ class _FixedViewportOffset extends ViewportOffset {
     double to, {
     required Duration duration,
     required Curve curve,
-  }) async {}
+  }) async { }
 
   @override
   ScrollDirection get userScrollDirection => ScrollDirection.idle;

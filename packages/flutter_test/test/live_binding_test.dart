@@ -21,8 +21,7 @@ void main() {
 
   testWidgets('Input PointerHoverEvent', (WidgetTester tester) async {
     PointerHoverEvent? hoverEvent;
-    await tester.pumpWidget(MaterialApp(
-        home: MouseRegion(
+    await tester.pumpWidget(MaterialApp(home: MouseRegion(
       child: const Text('Test'),
       onHover: (PointerHoverEvent event) {
         hoverEvent = event;
@@ -73,7 +72,9 @@ void main() {
   testWidgets('setSurfaceSize works', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
-    final Size windowCenter = tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio / 2;
+    final Size windowCenter = tester.binding.window.physicalSize /
+        tester.binding.window.devicePixelRatio /
+        2;
     final double windowCenterX = windowCenter.width;
     final double windowCenterY = windowCenter.height;
 

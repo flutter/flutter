@@ -40,7 +40,8 @@ class _MyHomeState extends State<MyHome> with RestorationMixin {
   @override
   void initState() {
     super.initState();
-    _counterRoute = RestorableRouteFuture<int>(onPresent: (NavigatorState navigator, Object? arguments) {
+    _counterRoute = RestorableRouteFuture<int>(
+        onPresent: (NavigatorState navigator, Object? arguments) {
       // Defines what route should be shown (and how it should be added
       // to the navigator) when `RestorableRouteFuture.present` is called.
       return navigator.restorablePush(
@@ -72,7 +73,8 @@ class _MyHomeState extends State<MyHome> with RestorationMixin {
 
   // A static `RestorableRouteBuilder` that can re-create the route during
   // state restoration.
-  static Route<int> _counterRouteBuilder(BuildContext context, Object? arguments) {
+  static Route<int> _counterRouteBuilder(
+      BuildContext context, Object? arguments) {
     return MaterialPageRoute<int>(
       builder: (BuildContext context) => MyCounter(
         title: arguments!.toString(),

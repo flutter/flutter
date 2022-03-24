@@ -6,6 +6,7 @@ library component1;
 
 import 'package:flutter/material.dart';
 
+
 class LogoScreen extends StatelessWidget {
   const LogoScreen({Key? key}) : super(key: key);
 

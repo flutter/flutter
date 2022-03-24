@@ -67,7 +67,8 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   @override
   void dispose() {
     if (_handles != null) {
-      for (final Listenable handle in _handles!.keys) handle.removeListener(_handles![handle]!);
+      for (final Listenable handle in _handles!.keys)
+        handle.removeListener(_handles![handle]!);
     }
     super.dispose();
   }
@@ -157,9 +158,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         if (SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {
           // Build/layout haven't started yet so let's just schedule this for
           // the next frame.
-          setState(() {
-            _keepingAlive = false;
-          });
+          setState(() { _keepingAlive = false; });
         } else {
           // We were probably notified by a descendant when they were yanked out
           // of our subtree somehow. We're probably in the middle of build or
@@ -236,6 +235,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     );
   }
 
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
@@ -243,7 +243,9 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     description.add(DiagnosticsProperty<Map<Listenable, VoidCallback>>(
       'handles',
       _handles,
-      description: _handles != null ? '${_handles!.length} active client${_handles!.length == 1 ? "" : "s"}' : null,
+      description: _handles != null ?
+        '${_handles!.length} active client${ _handles!.length == 1 ? "" : "s" }' :
+        null,
       ifNull: 'no notifications ever received',
     ));
   }
@@ -365,28 +367,33 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   @protected
   void updateKeepAlive() {
     if (wantKeepAlive) {
-      if (_keepAliveHandle == null) _ensureKeepAlive();
+      if (_keepAliveHandle == null)
+        _ensureKeepAlive();
     } else {
-      if (_keepAliveHandle != null) _releaseKeepAlive();
+      if (_keepAliveHandle != null)
+        _releaseKeepAlive();
     }
   }
 
   @override
   void initState() {
     super.initState();
-    if (wantKeepAlive) _ensureKeepAlive();
+    if (wantKeepAlive)
+      _ensureKeepAlive();
   }
 
   @override
   void deactivate() {
-    if (_keepAliveHandle != null) _releaseKeepAlive();
+    if (_keepAliveHandle != null)
+      _releaseKeepAlive();
     super.deactivate();
   }
 
   @mustCallSuper
   @override
   Widget build(BuildContext context) {
-    if (wantKeepAlive && _keepAliveHandle == null) _ensureKeepAlive();
+    if (wantKeepAlive && _keepAliveHandle == null)
+      _ensureKeepAlive();
     return const _NullWidget();
   }
 }

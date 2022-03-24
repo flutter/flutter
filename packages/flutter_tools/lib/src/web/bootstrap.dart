@@ -234,7 +234,8 @@ String generateTestEntrypoint({
 }
 
 /// Generate the unit test bootstrap file.
-String generateTestBootstrapFileContents(String mainUri, String requireUrl, String mapperUrl) {
+String generateTestBootstrapFileContents(
+    String mainUri, String requireUrl, String mapperUrl) {
   return '''
 (function() {
   if (typeof document != 'undefined') {

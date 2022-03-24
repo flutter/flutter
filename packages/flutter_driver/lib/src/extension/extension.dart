@@ -30,16 +30,7 @@ const String _extensionMethodName = 'driver';
 /// eventually completes to a string response.
 typedef DataHandler = Future<String> Function(String? message);
 
-class _DriverBinding extends BindingBase
-    with
-        SchedulerBinding,
-        ServicesBinding,
-        GestureBinding,
-        PaintingBinding,
-        SemanticsBinding,
-        RendererBinding,
-        WidgetsBinding,
-        TestDefaultBinaryMessengerBinding {
+class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding, TestDefaultBinaryMessengerBinding {
   _DriverBinding(this._handler, this._silenceErrors, this._enableTextEntryEmulation, this.finders, this.commands);
 
   final DataHandler? _handler;
@@ -51,8 +42,7 @@ class _DriverBinding extends BindingBase
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    final FlutterDriverExtension extension = FlutterDriverExtension(_handler, _silenceErrors, _enableTextEntryEmulation,
-        finders: finders ?? const <FinderExtension>[], commands: commands ?? const <CommandExtension>[]);
+    final FlutterDriverExtension extension = FlutterDriverExtension(_handler, _silenceErrors, _enableTextEntryEmulation, finders: finders ?? const <FinderExtension>[], commands: commands ?? const <CommandExtension>[]);
     registerServiceExtension(
       name: _extensionMethodName,
       callback: extension.call,
@@ -228,14 +218,8 @@ class _DriverBinding extends BindingBase
 /// }
 /// ```
 ///
-void enableFlutterDriverExtension(
-    {DataHandler? handler,
-    bool silenceErrors = false,
-    bool enableTextEntryEmulation = true,
-    List<FinderExtension>? finders,
-    List<CommandExtension>? commands}) {
-  _DriverBinding(handler, silenceErrors, enableTextEntryEmulation, finders ?? <FinderExtension>[],
-      commands ?? <CommandExtension>[]);
+void enableFlutterDriverExtension({ DataHandler? handler, bool silenceErrors = false, bool enableTextEntryEmulation = true, List<FinderExtension>? finders, List<CommandExtension>? commands}) {
+  _DriverBinding(handler, silenceErrors, enableTextEntryEmulation, finders ?? <FinderExtension>[], commands ?? <CommandExtension>[]);
   assert(WidgetsBinding.instance is _DriverBinding);
 }
 
@@ -247,6 +231,7 @@ typedef CommandDeserializerCallback = Command Function(Map<String, String> param
 
 /// Used to expand the new [Finder].
 abstract class FinderExtension {
+
   /// Identifies the type of finder to be used by the driver extension.
   String get finderType;
 
@@ -270,6 +255,7 @@ abstract class FinderExtension {
 /// See also:
 ///   * [CommandWithTarget], a base class for [Command]s with [Finder]s.
 abstract class CommandExtension {
+
   /// Identifies the type of command to be used by the driver extension.
   String get commandKind;
 
@@ -283,8 +269,7 @@ abstract class CommandExtension {
   /// See also:
   ///   * [CommandWithTarget], a base class for commands with target finders.
   ///   * [Tap], a command that uses [Finder]s as parameter.
-  Command deserialize(
-      Map<String, String> params, DeserializeFinderFactory finderFactory, DeserializeCommandFactory commandFactory);
+  Command deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, DeserializeCommandFactory commandFactory);
 
   /// Calls action for given [command].
   /// Returns action [Result].
@@ -317,8 +302,7 @@ abstract class CommandExtension {
   ///   return const StubCommandResult('stub response');
   /// }
   /// ```
-  Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory,
-      CommandHandlerFactory handlerFactory);
+  Future<Result> call(Command command, WidgetController prober, CreateFinderFactory finderFactory, CommandHandlerFactory handlerFactory);
 }
 
 /// The class that manages communication between a Flutter Driver test and the
@@ -327,8 +311,7 @@ abstract class CommandExtension {
 /// This is not normally used directly. It is instantiated automatically when
 /// calling [enableFlutterDriverExtension].
 @visibleForTesting
-class FlutterDriverExtension
-    with DeserializeFinderFactory, CreateFinderFactory, DeserializeCommandFactory, CommandHandlerFactory {
+class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory, DeserializeCommandFactory, CommandHandlerFactory {
   /// Creates an object to manage a Flutter Driver connection.
   FlutterDriverExtension(
     this._requestDataHandler,
@@ -394,12 +377,13 @@ class FlutterDriverExtension
       return _makeResponse(message, isError: true);
     } catch (error, stackTrace) {
       final String message = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
-      if (!_silenceErrors) _log(message);
+      if (!_silenceErrors)
+        _log(message);
       return _makeResponse(message, isError: true);
     }
   }
 
-  Map<String, dynamic> _makeResponse(dynamic response, {bool isError = false}) {
+  Map<String, dynamic> _makeResponse(dynamic response, { bool isError = false }) {
     return <String, dynamic>{
       'isError': isError,
       'response': response,

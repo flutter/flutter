@@ -33,9 +33,9 @@ class FakeCommand {
     this.stdin,
     this.exception,
     this.outputFollowsExit = false,
-  })  : assert(command != null),
-        assert(duration != null),
-        assert(exitCode != null);
+  }) : assert(command != null),
+       assert(duration != null),
+       assert(exitCode != null);
 
   /// The exact commands that must be matched for this [FakeCommand] to be
   /// considered correct.
@@ -133,13 +133,14 @@ class _FakeProcess implements io.Process {
     this._stdout,
     this._completer,
     bool outputFollowsExit,
-  )   : exitCode = Future<void>.delayed(duration).then((void value) {
-          if (_completer != null) {
-            return _completer.future.then((void _) => _exitCode);
-          }
-          return _exitCode;
-        }),
-        stdin = stdin ?? IOSink(StreamController<List<int>>().sink) {
+  ) : exitCode = Future<void>.delayed(duration).then((void value) {
+        if (_completer != null) {
+          return _completer.future.then((void _) => _exitCode);
+        }
+        return _exitCode;
+      }),
+      stdin = stdin ?? IOSink(StreamController<List<int>>().sink)
+  {
     if (_stderr == null) {
       stderr = const Stream<List<int>>.empty();
     } else if (outputFollowsExit) {
@@ -372,7 +373,7 @@ class _FakeAnyProcessManager extends FakeProcessManager {
   }
 
   @override
-  void addCommand(FakeCommand command) {}
+  void addCommand(FakeCommand command) { }
 
   @override
   bool get hasRemainingExpectations => true;
@@ -394,8 +395,9 @@ class _SequenceProcessManager extends FakeProcessManager {
     Encoding? encoding,
   ) {
     expect(_commands, isNotEmpty,
-        reason: 'ProcessManager was told to execute $command (in $workingDirectory) '
-            'but the FakeProcessManager.list expected no more processes.');
+      reason: 'ProcessManager was told to execute $command (in $workingDirectory) '
+              'but the FakeProcessManager.list expected no more processes.'
+    );
     _commands.first._matches(command, workingDirectory, environment, encoding);
     return _commands.removeAt(0);
   }
@@ -429,11 +431,11 @@ class _HasNoRemainingExpectations extends Matcher {
 
   @override
   Description describeMismatch(
-    dynamic item,
-    Description description,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
-  ) {
+      dynamic item,
+      Description description,
+      Map<dynamic, dynamic> matchState,
+      bool verbose,
+      ) {
     final FakeProcessManager fakeProcessManager = item as FakeProcessManager;
     return description.add(
         'has remaining expectations:\n${fakeProcessManager._remainingExpectations.map((FakeCommand command) => command.command).join('\n')}');

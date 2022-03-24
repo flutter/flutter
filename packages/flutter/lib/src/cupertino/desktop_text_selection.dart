@@ -32,6 +32,7 @@ const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.wit
   darkColor: Color(0xff302928),
 );
 
+
 class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
@@ -85,7 +86,8 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
 }
 
 /// Text selection controls that follows Mac design conventions.
-final TextSelectionControls cupertinoDesktopTextSelectionControls = _CupertinoDesktopTextSelectionControls();
+final TextSelectionControls cupertinoDesktopTextSelectionControls =
+    _CupertinoDesktopTextSelectionControls();
 
 // Generates the child that's passed into CupertinoDesktopTextSelectionToolbar.
 class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {
@@ -115,8 +117,7 @@ class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {
   final double textLineHeight;
 
   @override
-  _CupertinoDesktopTextSelectionControlsToolbarState createState() =>
-      _CupertinoDesktopTextSelectionControlsToolbarState();
+  _CupertinoDesktopTextSelectionControlsToolbarState createState() => _CupertinoDesktopTextSelectionControlsToolbarState();
 }
 
 class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_CupertinoDesktopTextSelectionControlsToolbar> {
@@ -167,7 +168,8 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
 
     final List<Widget> items = <Widget>[];
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
-    final Widget onePhysicalPixelVerticalDivider = SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    final Widget onePhysicalPixelVerticalDivider =
+        SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
 
     void addToolbarButton(
       String text,
@@ -190,7 +192,8 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     if (widget.handleCopy != null) {
       addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
     }
-    if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
+    if (widget.handlePaste != null
+        && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
       addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
     }
     if (widget.handleSelectAll != null) {
@@ -229,8 +232,8 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
     Key? key,
     required this.anchor,
     required this.children,
-  })  : assert(children.length > 0),
-        super(key: key);
+  }) : assert(children.length > 0),
+       super(key: key);
 
   /// The point at which the toolbar will attempt to position itself as closely
   /// as possible.
@@ -285,12 +288,10 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
         delegate: DesktopTextSelectionToolbarLayoutDelegate(
           anchor: anchor - localAdjustment,
         ),
-        child: _defaultToolbarBuilder(
-            context,
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: children,
-            )),
+        child: _defaultToolbarBuilder(context, Column(
+          mainAxisSize: MainAxisSize.min,
+          children: children,
+        )),
       ),
     );
   }
@@ -330,17 +331,17 @@ class _CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
     required BuildContext context,
     required this.onPressed,
     required String text,
-  })  : child = Text(
-          text,
-          overflow: TextOverflow.ellipsis,
-          style: _kToolbarButtonFontStyle.copyWith(
-            color: const CupertinoDynamicColor.withBrightness(
-              color: CupertinoColors.black,
-              darkColor: CupertinoColors.white,
-            ).resolveFrom(context),
-          ),
-        ),
-        super(key: key);
+  }) : child = Text(
+         text,
+         overflow: TextOverflow.ellipsis,
+         style: _kToolbarButtonFontStyle.copyWith(
+           color: const CupertinoDynamicColor.withBrightness(
+             color: CupertinoColors.black,
+             darkColor: CupertinoColors.white,
+           ).resolveFrom(context),
+         ),
+       ),
+       super(key: key);
 
   /// {@macro flutter.cupertino.CupertinoTextSelectionToolbarButton.onPressed}
   final VoidCallback onPressed;

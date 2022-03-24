@@ -42,22 +42,19 @@ void main() {
               scrollDirection: axis,
               controller: controller,
               slivers: <Widget>[
-                SliverToBoxAdapter(
-                    child: Container(
+                SliverToBoxAdapter(child: Container(
                   color: const Color(0xD0FF0000),
                   key: box1Key,
                   height: 250.0,
                   width: 300.0,
                 )),
-                SliverToBoxAdapter(
-                    child: Container(
+                SliverToBoxAdapter(child: Container(
                   color: const Color(0xFFFFFF00),
                   key: box2Key,
                   height: 250.0,
                   width: 300.0,
                 )),
-                SliverToBoxAdapter(
-                    child: Container(
+                SliverToBoxAdapter(child: Container(
                   color: const Color(0xFF6200EA),
                   key: box3Key,
                   height: 250.0,
@@ -187,14 +184,14 @@ void main() {
     final GlobalKey box3Key = GlobalKey();
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      buildTest(
-        box1Key,
-        box2Key,
-        box3Key,
-        controller,
-        axis: Axis.horizontal,
-        reverse: true,
-      ),
+        buildTest(
+          box1Key,
+          box2Key,
+          box3Key,
+          controller,
+          axis: Axis.horizontal,
+          reverse: true,
+        ),
     );
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
@@ -226,7 +223,9 @@ void main() {
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
     final ScrollController controller = ScrollController();
-    await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller, axis: Axis.horizontal));
+    await tester.pumpWidget(
+      buildTest(box1Key, box2Key, box3Key, controller, axis: Axis.horizontal)
+    );
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);
@@ -301,15 +300,17 @@ void main() {
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
     final ScrollController controller = ScrollController();
-    double indicatorNotification = 0;
-    await tester.pumpWidget(NotificationListener<OverscrollIndicatorNotification>(
-      onNotification: (OverscrollIndicatorNotification notification) {
-        notification.disallowIndicator();
-        indicatorNotification += 1;
-        return false;
-      },
-      child: buildTest(box1Key, box2Key, box3Key, controller),
-    ));
+    double indicatorNotification =0;
+    await tester.pumpWidget(
+      NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (OverscrollIndicatorNotification notification) {
+          notification.disallowIndicator();
+          indicatorNotification += 1;
+          return false;
+        },
+        child: buildTest(box1Key, box2Key, box3Key, controller),
+      )
+    );
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);
@@ -339,38 +340,40 @@ void main() {
   testWidgets('Stretch does not overflow bounds of container', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/90197
     await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(size: Size(800.0, 600.0)),
-          child: ScrollConfiguration(
-              behavior: const ScrollBehavior().copyWith(overscroll: false),
-              child: Column(
-                children: <Widget>[
-                  StretchingOverscrollIndicator(
-                    axisDirection: AxisDirection.down,
-                    child: SizedBox(
-                      height: 300,
-                      child: ListView.builder(
-                        itemCount: 20,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Text('Index $index'),
-                          );
-                        },
-                      ),
-                    ),
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(size: Size(800.0, 600.0)),
+        child: ScrollConfiguration(
+          behavior: const ScrollBehavior().copyWith(overscroll: false),
+          child: Column(
+            children: <Widget>[
+              StretchingOverscrollIndicator(
+                axisDirection: AxisDirection.down,
+                child: SizedBox(
+                  height: 300,
+                  child: ListView.builder(
+                    itemCount: 20,
+                    itemBuilder: (BuildContext context, int index){
+                      return Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Text('Index $index'),
+                      );
+                    },
                   ),
-                  Opacity(
-                    opacity: 0.5,
-                    child: Container(
-                      color: const Color(0xD0FF0000),
-                      height: 100,
-                    ),
-                  )
-                ],
-              )),
-        )));
+                ),
+              ),
+              Opacity(
+                opacity: 0.5,
+                child: Container(
+                  color: const Color(0xD0FF0000),
+                  height: 100,
+                ),
+              )
+            ],
+          )
+        ),
+      )
+    ));
 
     expect(find.text('Index 1'), findsOneWidget);
     expect(tester.getCenter(find.text('Index 1')).dy, 51.0);
@@ -407,7 +410,7 @@ void main() {
                       height: 300,
                       child: ListView.builder(
                         itemCount: 20,
-                        itemBuilder: (BuildContext context, int index) {
+                        itemBuilder: (BuildContext context, int index){
                           return Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: Text('Index $index'),
@@ -424,8 +427,10 @@ void main() {
                     ),
                   )
                 ],
-              )),
-        )));
+              )
+          ),
+        )
+    ));
 
     expect(find.text('Index 1'), findsOneWidget);
     expect(tester.getCenter(find.text('Index 1')).dy, 51.0);
@@ -449,7 +454,8 @@ void main() {
 
   testWidgets('Stretch limit', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99264
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
@@ -461,7 +467,7 @@ void main() {
                 height: 300,
                 child: ListView.builder(
                   itemCount: 20,
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (BuildContext context, int index){
                     return Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Text('Index $index'),
@@ -471,7 +477,9 @@ void main() {
               ),
             ),
           ),
-        )));
+        )
+      )
+    );
     const double maxStretchLocation = 52.63178407049861;
 
     expect(find.text('Index 1'), findsOneWidget);
@@ -497,7 +505,8 @@ void main() {
 
   testWidgets('Multiple pointers wll not exceed stretch limit', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99264
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
@@ -509,7 +518,7 @@ void main() {
                 height: 300,
                 child: ListView.builder(
                   itemCount: 20,
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (BuildContext context, int index){
                     return Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Text('Index $index'),
@@ -519,7 +528,9 @@ void main() {
               ),
             ),
           ),
-        )));
+        )
+      )
+    );
     expect(find.text('Index 1'), findsOneWidget);
     expect(tester.getCenter(find.text('Index 1')).dy, 51.0);
 

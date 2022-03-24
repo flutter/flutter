@@ -33,8 +33,7 @@ void main() {
       // Check a control key
       expect(LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.escape.keyId), equals(LogicalKeyboardKey.escape));
       // Check a modifier key
-      expect(
-          LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.shiftLeft.keyId), equals(LogicalKeyboardKey.shiftLeft));
+      expect(LogicalKeyboardKey.findKeyByKeyId(LogicalKeyboardKey.shiftLeft.keyId), equals(LogicalKeyboardKey.shiftLeft));
     });
     test('Control characters are recognized as such', () async {
       // Check some common control characters

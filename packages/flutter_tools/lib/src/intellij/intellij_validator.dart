@@ -22,14 +22,12 @@ const String _communityEditionId = 'IdeaIC';
 
 /// A doctor validator for both Intellij and Android Studio.
 abstract class IntelliJValidator extends DoctorValidator {
-  IntelliJValidator(
-    String title,
-    this.installPath, {
+  IntelliJValidator(String title, this.installPath, {
     required FileSystem fileSystem,
     required UserMessages userMessages,
-  })  : _fileSystem = fileSystem,
-        _userMessages = userMessages,
-        super(title);
+  }) : _fileSystem = fileSystem,
+       _userMessages = userMessages,
+       super(title);
 
   final String installPath;
   final FileSystem _fileSystem;
@@ -146,11 +144,7 @@ abstract class IntelliJValidator extends DoctorValidator {
 
 /// A windows specific implementation of the intellij validator.
 class IntelliJValidatorOnWindows extends IntelliJValidator {
-  IntelliJValidatorOnWindows(
-    String title,
-    this.version,
-    String installPath,
-    this.pluginsPath, {
+  IntelliJValidatorOnWindows(String title, this.version, String installPath, this.pluginsPath, {
     required FileSystem fileSystem,
     required UserMessages userMessages,
   }) : super(title, installPath, fileSystem: fileSystem, userMessages: userMessages);
@@ -218,8 +212,7 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
     if (!platform.environment.containsKey('LOCALAPPDATA')) {
       return validators;
     }
-    final Directory cacheDir =
-        fileSystem.directory(fileSystem.path.join(platform.environment['LOCALAPPDATA']!, 'JetBrains'));
+    final Directory cacheDir = fileSystem.directory(fileSystem.path.join(platform.environment['LOCALAPPDATA']!, 'JetBrains'));
     if (!cacheDir.existsSync()) {
       return validators;
     }
@@ -241,8 +234,8 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
               pluginsPath = '$installPath.plugins';
               addValidator(title, version, installPath, pluginsPath);
             } else if (platform.environment.containsKey('APPDATA')) {
-              final String pluginsPathInAppData =
-                  fileSystem.path.join(platform.environment['APPDATA']!, 'JetBrains', name, 'plugins');
+              final String pluginsPathInAppData = fileSystem.path.join(
+                  platform.environment['APPDATA']!, 'JetBrains', name, 'plugins');
               if (fileSystem.isDirectorySync(pluginsPathInAppData)) {
                 // IntelliJ 2020.1 ~ 2020.2
                 pluginsPath = pluginsPathInAppData;
@@ -259,11 +252,7 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
 
 /// A linux specific implementation of the intellij validator.
 class IntelliJValidatorOnLinux extends IntelliJValidator {
-  IntelliJValidatorOnLinux(
-    String title,
-    this.version,
-    String installPath,
-    this.pluginsPath, {
+  IntelliJValidatorOnLinux(String title, this.version, String installPath, this.pluginsPath, {
     required FileSystem fileSystem,
     required UserMessages userMessages,
   }) : super(title, installPath, fileSystem: fileSystem, userMessages: userMessages);
@@ -343,9 +332,13 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
             // ignored
           }
           if (installPath != null && fileSystem.isDirectorySync(installPath)) {
-            final String pluginsPathInUserHomeDir =
-                fileSystem.path.join(homeDirPath, '.local', 'share', 'JetBrains', name);
-            if (installPath.contains(fileSystem.path.join('JetBrains', 'Toolbox', 'apps'))) {
+            final String pluginsPathInUserHomeDir = fileSystem.path.join(
+                homeDirPath,
+                '.local',
+                'share',
+                'JetBrains',
+                name);
+            if (installPath.contains(fileSystem.path.join('JetBrains','Toolbox','apps'))) {
               // via JetBrains ToolBox app
               final String pluginsPathInInstallDir = '$installPath.plugins';
               if (fileSystem.isDirectorySync(pluginsPathInUserHomeDir)) {
@@ -372,17 +365,14 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
 
 /// A macOS specific implementation of the intellij validator.
 class IntelliJValidatorOnMac extends IntelliJValidator {
-  IntelliJValidatorOnMac(
-    String title,
-    this.id,
-    String installPath, {
+  IntelliJValidatorOnMac(String title, this.id, String installPath, {
     required FileSystem fileSystem,
     required UserMessages userMessages,
     required PlistParser plistParser,
     required String? homeDirPath,
-  })  : _plistParser = plistParser,
-        _homeDirPath = homeDirPath,
-        super(title, installPath, fileSystem: fileSystem, userMessages: userMessages);
+  }) : _plistParser = plistParser,
+       _homeDirPath = homeDirPath,
+       super(title, installPath, fileSystem: fileSystem, userMessages: userMessages);
 
   final String id;
   final PlistParser _plistParser;
@@ -405,7 +395,8 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     final String? homeDirPath = fileSystemUtils.homeDirPath;
     final List<String> installPaths = <String>[
       '/Applications',
-      if (homeDirPath != null) fileSystem.path.join(homeDirPath, 'Applications'),
+      if (homeDirPath != null)
+        fileSystem.path.join(homeDirPath, 'Applications'),
     ];
 
     void checkForIntelliJ(Directory dir) {
@@ -429,10 +420,10 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
     try {
       final Iterable<Directory> installDirs = installPaths
-          .map(fileSystem.directory)
-          .map<List<FileSystemEntity>>((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
-          .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
-          .whereType<Directory>();
+        .map(fileSystem.directory)
+        .map<List<FileSystemEntity>>((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
+        .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
+        .whereType<Directory>();
       for (final Directory dir in installDirs) {
         checkForIntelliJ(dir);
         if (!dir.path.endsWith('.app')) {
@@ -463,9 +454,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       }
 
       for (final String installPath in LineSplitter.split(ceSpotlightResult)) {
-        if (!validators
-            .whereType<IntelliJValidatorOnMac>()
-            .any((IntelliJValidatorOnMac e) => e.installPath == installPath)) {
+        if (!validators.whereType<IntelliJValidatorOnMac>().any((IntelliJValidatorOnMac e) => e.installPath == installPath)) {
           validators.add(IntelliJValidatorOnMac(
             _communityEditionTitle,
             _communityEditionId,
@@ -479,9 +468,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       }
 
       for (final String installPath in LineSplitter.split(ultimateSpotlightResult)) {
-        if (!validators
-            .whereType<IntelliJValidatorOnMac>()
-            .any((IntelliJValidatorOnMac e) => e.installPath == installPath)) {
+        if (!validators.whereType<IntelliJValidatorOnMac>().any((IntelliJValidatorOnMac e) => e.installPath == installPath)) {
           validators.add(IntelliJValidatorOnMac(
             _ultimateEditionTitle,
             _ultimateEditionId,
@@ -495,10 +482,10 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       }
     } on FileSystemException catch (e) {
       validators.add(ValidatorWithResult(
-        userMessages.intellijMacUnknownResult,
-        ValidationResult(ValidationType.missing, <ValidationMessage>[
-          ValidationMessage.error(e.message),
-        ]),
+          userMessages.intellijMacUnknownResult,
+          ValidationResult(ValidationType.missing, <ValidationMessage>[
+            ValidationMessage.error(e.message),
+          ]),
       ));
     }
     return validators;
@@ -509,18 +496,15 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     _plistFile ??= _fileSystem.path.join(installPath, 'Contents', 'Info.plist');
     return _plistFile!;
   }
-
   String? _plistFile;
 
   @override
   String get version {
     return _version ??= _plistParser.getStringValueFromFile(
-          plistFile,
-          PlistParser.kCFBundleShortVersionStringKey,
-        ) ??
-        'unknown';
+        plistFile,
+        PlistParser.kCFBundleShortVersionStringKey,
+      ) ?? 'unknown';
   }
-
   String? _version;
 
   @override
@@ -529,7 +513,8 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       return _pluginsPath!;
     }
 
-    final String? altLocation = _plistParser.getStringValueFromFile(plistFile, 'JetBrainsToolboxApp');
+    final String? altLocation = _plistParser
+      .getStringValueFromFile(plistFile, 'JetBrainsToolboxApp');
 
     if (altLocation != null) {
       _pluginsPath = '$altLocation.plugins';
@@ -567,6 +552,5 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
     return _pluginsPath;
   }
-
   String? _pluginsPath;
 }

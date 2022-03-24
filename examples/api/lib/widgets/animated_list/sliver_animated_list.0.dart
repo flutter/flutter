@@ -13,16 +13,20 @@ class SliverAnimatedListSample extends StatefulWidget {
   const SliverAnimatedListSample({Key? key}) : super(key: key);
 
   @override
-  State<SliverAnimatedListSample> createState() => _SliverAnimatedListSampleState();
+  State<SliverAnimatedListSample> createState() =>
+      _SliverAnimatedListSampleState();
 }
 
 class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
-  final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey<SliverAnimatedListState>();
+  final GlobalKey<SliverAnimatedListState> _listKey =
+      GlobalKey<SliverAnimatedListState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
   late ListModel<int> _list;
   int? _selectedItem;
-  late int _nextItem; // The next item inserted when the user presses the '+' button.
+  late int
+      _nextItem; // The next item inserted when the user presses the '+' button.
 
   @override
   void initState() {
@@ -36,7 +40,8 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
   }
 
   // Used to build list items that haven't been removed.
-  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+  Widget _buildItem(
+      BuildContext context, int index, Animation<double> animation) {
     return CardItem(
       animation: animation,
       item: _list[index],
@@ -55,7 +60,8 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
   // concerned). The widget will be used by the
   // [AnimatedListState.removeItem] method's
   // [AnimatedListRemovedItemBuilder] parameter.
-  Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
+  Widget _buildRemovedItem(
+      int item, BuildContext context, Animation<double> animation) {
     return CardItem(
       animation: animation,
       item: item,
@@ -64,7 +70,8 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
 
   // Insert the "next item" into the list model.
   void _insert() {
-    final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
+    final int index =
+        _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
     _list.insert(index, _nextItem++);
   }
 
@@ -128,7 +135,8 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
   }
 }
 
-typedef RemovedItemBuilder = Widget Function(int item, BuildContext context, Animation<double> animation);
+typedef RemovedItemBuilder = Widget Function(
+    int item, BuildContext context, Animation<double> animation);
 
 // Keeps a Dart [List] in sync with an [AnimatedList].
 //
@@ -162,7 +170,8 @@ class ListModel<E> {
     if (removedItem != null) {
       _animatedList.removeItem(
         index,
-        (BuildContext context, Animation<double> animation) => removedItemBuilder(index, context, animation),
+        (BuildContext context, Animation<double> animation) =>
+            removedItemBuilder(index, context, animation),
       );
     }
     return removedItem;
@@ -211,7 +220,9 @@ class CardItem extends StatelessWidget {
           child: SizedBox(
             height: 80.0,
             child: Card(
-              color: selected ? Colors.black12 : Colors.primaries[item % Colors.primaries.length],
+              color: selected
+                  ? Colors.black12
+                  : Colors.primaries[item % Colors.primaries.length],
               child: Center(
                 child: Text(
                   'Item $item',

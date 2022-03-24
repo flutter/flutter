@@ -39,10 +39,10 @@ class ExpandIcon extends StatefulWidget {
     this.color,
     this.disabledColor,
     this.expandedColor,
-  })  : assert(isExpanded != null),
-        assert(size != null),
-        assert(padding != null),
-        super(key: key);
+  }) : assert(isExpanded != null),
+       assert(size != null),
+       assert(padding != null),
+       super(key: key);
 
   /// Whether the icon is in an expanded state.
   ///
@@ -66,6 +66,7 @@ class ExpandIcon extends StatefulWidget {
   ///
   /// This property must not be null. It defaults to 8.0 padding on all sides.
   final EdgeInsetsGeometry padding;
+
 
   /// The color of the icon.
   ///
@@ -103,8 +104,8 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   late AnimationController _controller;
   late Animation<double> _iconTurns;
 
-  static final Animatable<double> _iconTurnTween =
-      Tween<double>(begin: 0.0, end: 0.5).chain(CurveTween(curve: Curves.fastOutSlowIn));
+  static final Animatable<double> _iconTurnTween = Tween<double>(begin: 0.0, end: 0.5)
+    .chain(CurveTween(curve: Curves.fastOutSlowIn));
 
   @override
   void initState() {
@@ -153,7 +154,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       return widget.color!;
     }
 
-    switch (Theme.of(context).brightness) {
+    switch(Theme.of(context).brightness) {
       case Brightness.light:
         return Colors.black54;
       case Brightness.dark:

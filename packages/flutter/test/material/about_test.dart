@@ -723,8 +723,7 @@ void main() {
     });
   });
 
-  testWidgets("AboutListTile's child should not be offset when the icon is not specified.",
-      (WidgetTester tester) async {
+  testWidgets("AboutListTile's child should not be offset when the icon is not specified.", (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -839,8 +838,7 @@ void main() {
     expect(materialDones[1].color, cardColor);
   });
 
-  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to _PackageLicensePage',
-      (WidgetTester tester) async {
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to _PackageLicensePage', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83819
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
@@ -881,6 +879,7 @@ void main() {
     }
     expect(find.byType(Scrollbar), findsOneWidget);
     expect(find.byType(RawScrollbar), findsNothing);
+
   }, variant: TargetPlatformVariant.all());
 }
 

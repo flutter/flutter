@@ -55,7 +55,8 @@ class ProfilingSummarizer {
 
   /// Creates a ProfilingSummarizer given the timeline events.
   static ProfilingSummarizer fromEvents(List<TimelineEvent> profilingEvents) {
-    final Map<ProfileType, List<TimelineEvent>> eventsByType = <ProfileType, List<TimelineEvent>>{};
+    final Map<ProfileType, List<TimelineEvent>> eventsByType =
+        <ProfileType, List<TimelineEvent>>{};
     for (final TimelineEvent event in profilingEvents) {
       assert(kProfilingEvents.contains(event.name));
       final ProfileType type = _getProfileType(event.name);
@@ -103,8 +104,9 @@ class ProfilingSummarizer {
   double computeAverage(ProfileType profileType) {
     final List<TimelineEvent> events = eventByType[profileType]!;
     assert(events.isNotEmpty);
-    final double total =
-        events.map((TimelineEvent e) => _getProfileValue(profileType, e)).reduce((double a, double b) => a + b);
+    final double total = events
+        .map((TimelineEvent e) => _getProfileValue(profileType, e))
+        .reduce((double a, double b) => a + b);
     return total / events.length;
   }
 
@@ -112,7 +114,9 @@ class ProfilingSummarizer {
   double computePercentile(ProfileType profileType, double percentile) {
     final List<TimelineEvent> events = eventByType[profileType]!;
     assert(events.isNotEmpty);
-    final List<double> doubles = events.map((TimelineEvent e) => _getProfileValue(profileType, e)).toList();
+    final List<double> doubles = events
+        .map((TimelineEvent e) => _getProfileValue(profileType, e))
+        .toList();
     return findPercentile(doubles, percentile);
   }
 
@@ -137,7 +141,8 @@ class ProfilingSummarizer {
         return _getArgValue('gpu_usage', e);
       case ProfileType.Memory:
         final double dirtyMem = _getArgValue('dirty_memory_usage', e);
-        final double ownedSharedMem = _getArgValue('owned_shared_memory_usage', e);
+        final double ownedSharedMem =
+            _getArgValue('owned_shared_memory_usage', e);
         return dirtyMem + ownedSharedMem;
     }
   }

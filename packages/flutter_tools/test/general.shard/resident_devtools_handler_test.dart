@@ -24,7 +24,10 @@ import '../src/fakes.dart';
 
 final vm_service.Isolate isolate = vm_service.Isolate(
   id: '1',
-  pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
   breakpoints: <vm_service.Breakpoint>[],
   exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[
@@ -145,9 +148,12 @@ void main() {
       BufferLogger.test(),
     );
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
-        'streamId': 'Isolate',
-      }),
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        }
+      ),
       listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
@@ -180,7 +186,8 @@ void main() {
       ),
     ], httpAddress: Uri.parse('http://localhost:1234'));
 
-    final FakeFlutterDevice device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
+    final FakeFlutterDevice device = FakeFlutterDevice()
+      ..vmService = fakeVmServiceHost.vmService;
 
     await handler.serveAndAnnounceDevTools(
       flutterDevices: <FlutterDevice>[device],
@@ -193,10 +200,10 @@ void main() {
       FakeResidentRunner(),
       BufferLogger.test(),
     );
-    final FakeVmServiceHost fakeVmServiceHost =
-        FakeVmServiceHost(requests: <VmServiceExpectation>[], httpAddress: Uri.parse('http://localhost:1234'));
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[], httpAddress: Uri.parse('http://localhost:1234'));
 
-    final FakeFlutterDevice device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
+    final FakeFlutterDevice device = FakeFlutterDevice()
+      ..vmService = fakeVmServiceHost.vmService;
 
     await handler.serveAndAnnounceDevTools(
       flutterDevices: <FlutterDevice>[device],
@@ -210,9 +217,12 @@ void main() {
       BufferLogger.test(),
     );
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
-        'streamId': 'Isolate',
-      }),
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate',
+        }
+      ),
       listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
@@ -250,8 +260,7 @@ void main() {
     );
   });
 
-  testWithoutContext('serveAndAnnounceDevTools with skips calling service extensions when VM service disappears',
-      () async {
+  testWithoutContext('serveAndAnnounceDevTools with skips calling service extensions when VM service disappears', () async {
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
       FakeResidentRunner(),
@@ -277,7 +286,8 @@ void main() {
       ),
     ], httpAddress: Uri.parse('http://localhost:1234'));
 
-    final FakeFlutterDevice device = FakeFlutterDevice()..vmService = fakeVmServiceHost.vmService;
+    final FakeFlutterDevice device = FakeFlutterDevice()
+      ..vmService = fakeVmServiceHost.vmService;
 
     await handler.serveAndAnnounceDevTools(
       flutterDevices: <FlutterDevice>[device],
@@ -352,8 +362,10 @@ void main() {
 
     await handler.serveAndAnnounceDevTools(
       flutterDevices: <FlutterDevice>[
-        FakeFlutterDevice()..vmService = vmServiceHostThatDisappears.vmService,
-        FakeFlutterDevice()..vmService = vmServiceHost.vmService,
+        FakeFlutterDevice()
+          ..vmService = vmServiceHostThatDisappears.vmService,
+        FakeFlutterDevice()
+          ..vmService = vmServiceHost.vmService,
       ],
     );
   });
@@ -370,8 +382,7 @@ void main() {
     expect(handler.activeDevToolsServer, null);
   });
 
-  testWithoutContext('Does not launch devtools in browser if ResidentRunner does not support the service protocol',
-      () async {
+  testWithoutContext('Does not launch devtools in browser if ResidentRunner does not support the service protocol', () async {
     final FlutterResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher(),
       FakeResidentRunner()..supportsServiceProtocol = false,
@@ -465,4 +476,4 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types
-class FakeDevice extends Fake implements Device {}
+class FakeDevice extends Fake implements Device { }

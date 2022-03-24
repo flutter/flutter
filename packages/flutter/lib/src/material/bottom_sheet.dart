@@ -81,11 +81,11 @@ class BottomSheet extends StatefulWidget {
     this.constraints,
     required this.onClosing,
     required this.builder,
-  })  : assert(enableDrag != null),
-        assert(onClosing != null),
-        assert(builder != null),
-        assert(elevation == null || elevation >= 0.0),
-        super(key: key);
+  }) : assert(enableDrag != null),
+       assert(onClosing != null),
+       assert(builder != null),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -200,6 +200,7 @@ class BottomSheet extends StatefulWidget {
 }
 
 class _BottomSheetState extends State<BottomSheet> {
+
   final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
 
   double get _childHeight {
@@ -219,7 +220,8 @@ class _BottomSheetState extends State<BottomSheet> {
       "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
       "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
-    if (_dismissUnderway) return;
+    if (_dismissUnderway)
+      return;
     widget.animationController!.value -= details.primaryDelta! / _childHeight;
   }
 
@@ -229,7 +231,8 @@ class _BottomSheetState extends State<BottomSheet> {
       "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
       "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
     );
-    if (_dismissUnderway) return;
+    if (_dismissUnderway)
+      return;
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
@@ -240,7 +243,8 @@ class _BottomSheetState extends State<BottomSheet> {
         isClosing = true;
       }
     } else if (widget.animationController!.value < _closeProgressThreshold) {
-      if (widget.animationController!.value > 0.0) widget.animationController!.fling(velocity: -1.0);
+      if (widget.animationController!.value > 0.0)
+        widget.animationController!.fling(velocity: -1.0);
       isClosing = true;
     } else {
       widget.animationController!.forward();
@@ -295,21 +299,20 @@ class _BottomSheetState extends State<BottomSheet> {
       );
     }
 
-    return !widget.enableDrag
-        ? bottomSheet
-        : GestureDetector(
-            onVerticalDragStart: _handleDragStart,
-            onVerticalDragUpdate: _handleDragUpdate,
-            onVerticalDragEnd: _handleDragEnd,
-            excludeFromSemantics: true,
-            child: bottomSheet,
-          );
+    return !widget.enableDrag ? bottomSheet : GestureDetector(
+      onVerticalDragStart: _handleDragStart,
+      onVerticalDragUpdate: _handleDragUpdate,
+      onVerticalDragEnd: _handleDragEnd,
+      excludeFromSemantics: true,
+      child: bottomSheet,
+    );
   }
 }
 
 // PERSISTENT BOTTOM SHEETS
 
 // See scaffold.dart
+
 
 // MODAL BOTTOM SHEETS
 class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
@@ -323,7 +326,9 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
-      maxHeight: isScrollControlled ? constraints.maxHeight : constraints.maxHeight * 9.0 / 16.0,
+      maxHeight: isScrollControlled
+        ? constraints.maxHeight
+        : constraints.maxHeight * 9.0 / 16.0,
     );
   }
 
@@ -349,9 +354,9 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.constraints,
     this.isScrollControlled = false,
     this.enableDrag = true,
-  })  : assert(isScrollControlled != null),
-        assert(enableDrag != null),
-        super(key: key);
+  }) : assert(isScrollControlled != null),
+       assert(enableDrag != null),
+       super(key: key);
 
   final _ModalBottomSheetRoute<T>? route;
   final bool isScrollControlled;
@@ -426,7 +431,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
         final double animationValue = animationCurve.transform(
-          mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value,
+            mediaQuery.accessibleNavigation ? 1.0 : widget.route!.animation!.value,
         );
         return Semantics(
           scopesRoute: true,
@@ -462,10 +467,10 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     RouteSettings? settings,
     this.transitionAnimationController,
     this.anchorPoint,
-  })  : assert(isScrollControlled != null),
-        assert(isDismissible != null),
-        assert(enableDrag != null),
-        super(settings: settings);
+  }) : assert(isScrollControlled != null),
+       assert(isDismissible != null),
+       assert(enableDrag != null),
+       super(settings: settings);
 
   final WidgetBuilder? builder;
   final CapturedThemes capturedThemes;
@@ -563,8 +568,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   const _BottomSheetSuspendedCurve(
     this.startingPoint, {
     this.curve = Curves.easeOutCubic,
-  })  : assert(startingPoint != null),
-        assert(curve != null);
+  }) : assert(startingPoint != null),
+       assert(curve != null);
 
   /// The progress value at which [curve] should begin.
   ///

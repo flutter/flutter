@@ -35,7 +35,7 @@ void main() {
         home: Center(
           child: CupertinoTextSelectionToolbarButton(
             child: const Text('Tap me'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),

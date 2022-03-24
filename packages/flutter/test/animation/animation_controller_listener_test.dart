@@ -6,6 +6,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+
 void main() {
   test('Disposing controller removes listeners to avoid memory leaks', () {
     final _TestAnimationController controller = _TestAnimationController(
@@ -47,15 +48,15 @@ class _TestAnimationController extends AnimationController {
     AnimationBehavior animationBehavior = AnimationBehavior.normal,
     required TickerProvider vsync,
   }) : super(
-          value: value,
-          duration: duration,
-          reverseDuration: reverseDuration,
-          debugLabel: debugLabel,
-          lowerBound: lowerBound,
-          upperBound: upperBound,
-          animationBehavior: animationBehavior,
-          vsync: vsync,
-        );
+      value: value,
+      duration: duration,
+      reverseDuration: reverseDuration,
+      debugLabel: debugLabel,
+      lowerBound: lowerBound,
+      upperBound: upperBound,
+      animationBehavior: animationBehavior,
+      vsync: vsync,
+  );
 
   void publicNotifyListeners() {
     super.notifyListeners();

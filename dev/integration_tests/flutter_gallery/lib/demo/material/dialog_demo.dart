@@ -16,11 +16,12 @@ enum DialogDemoAction {
 
 const String _alertWithoutTitleText = 'Discard draft?';
 
-const String _alertWithTitleText = 'Let Google help apps determine location. This means sending anonymous location '
-    'data to Google, even when no apps are running.';
+const String _alertWithTitleText =
+  'Let Google help apps determine location. This means sending anonymous location '
+  'data to Google, even when no apps are running.';
 
 class DialogDemoItem extends StatelessWidget {
-  const DialogDemoItem({Key? key, this.icon, this.color, this.text, this.onPressed}) : super(key: key);
+  const DialogDemoItem({ Key? key, this.icon, this.color, this.text, this.onPressed }) : super(key: key);
 
   final IconData? icon;
   final Color? color;
@@ -54,6 +55,7 @@ class DialogDemo extends StatefulWidget {
 }
 
 class DialogDemoState extends State<DialogDemo> {
+
   TimeOfDay? _selectedTime;
 
   @override
@@ -63,12 +65,12 @@ class DialogDemoState extends State<DialogDemo> {
     _selectedTime = TimeOfDay(hour: now.hour, minute: now.minute);
   }
 
-  void showDemoDialog<T>({required BuildContext context, Widget? child}) {
+  void showDemoDialog<T>({ required BuildContext context, Widget? child }) {
     showDialog<T>(
       context: context,
       builder: (BuildContext context) => child!,
-    ).then((T? value) {
-      // The value passed to Navigator.pop() or null.
+    )
+    .then((T? value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('You selected: $value'),
@@ -103,15 +105,11 @@ class DialogDemoState extends State<DialogDemo> {
                   actions: <Widget>[
                     TextButton(
                       child: const Text('CANCEL'),
-                      onPressed: () {
-                        Navigator.pop(context, DialogDemoAction.cancel);
-                      },
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); },
                     ),
                     TextButton(
                       child: const Text('DISCARD'),
-                      onPressed: () {
-                        Navigator.pop(context, DialogDemoAction.discard);
-                      },
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.discard); },
                     ),
                   ],
                 ),
@@ -132,15 +130,11 @@ class DialogDemoState extends State<DialogDemo> {
                   actions: <Widget>[
                     TextButton(
                       child: const Text('DISAGREE'),
-                      onPressed: () {
-                        Navigator.pop(context, DialogDemoAction.disagree);
-                      },
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); },
                     ),
                     TextButton(
                       child: const Text('AGREE'),
-                      onPressed: () {
-                        Navigator.pop(context, DialogDemoAction.agree);
-                      },
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.agree); },
                     ),
                   ],
                 ),
@@ -159,17 +153,13 @@ class DialogDemoState extends State<DialogDemo> {
                       icon: Icons.account_circle,
                       color: theme.primaryColor,
                       text: 'username@gmail.com',
-                      onPressed: () {
-                        Navigator.pop(context, 'username@gmail.com');
-                      },
+                      onPressed: () { Navigator.pop(context, 'username@gmail.com'); },
                     ),
                     DialogDemoItem(
                       icon: Icons.account_circle,
                       color: theme.primaryColor,
                       text: 'user02@gmail.com',
-                      onPressed: () {
-                        Navigator.pop(context, 'user02@gmail.com');
-                      },
+                      onPressed: () { Navigator.pop(context, 'user02@gmail.com'); },
                     ),
                     DialogDemoItem(
                       icon: Icons.add_circle,
@@ -187,7 +177,8 @@ class DialogDemoState extends State<DialogDemo> {
               showTimePicker(
                 context: context,
                 initialTime: _selectedTime!,
-              ).then((TimeOfDay? value) {
+              )
+              .then((TimeOfDay? value) {
                 if (value != null && value != _selectedTime) {
                   _selectedTime = value;
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -200,22 +191,21 @@ class DialogDemoState extends State<DialogDemo> {
           ElevatedButton(
             child: const Text('FULLSCREEN'),
             onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute<DismissDialogAction>(
-                    builder: (BuildContext context) => const FullScreenDialogDemo(),
-                    fullscreenDialog: true,
-                  ));
+              Navigator.push(context, MaterialPageRoute<DismissDialogAction>(
+                builder: (BuildContext context) => const FullScreenDialogDemo(),
+                fullscreenDialog: true,
+              ));
             },
           ),
         ]
-            // Add a little space between the buttons
-            .map<Widget>((Widget button) {
+        // Add a little space between the buttons
+        .map<Widget>((Widget button) {
           return Container(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: button,
           );
-        }).toList(),
+        })
+        .toList(),
       ),
     );
   }

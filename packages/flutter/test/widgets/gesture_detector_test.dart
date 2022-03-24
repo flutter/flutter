@@ -67,18 +67,10 @@ void main() {
 
     final Widget widget = GestureDetector(
       dragStartBehavior: DragStartBehavior.down,
-      onVerticalDragUpdate: (DragUpdateDetails details) {
-        dragDistance += details.primaryDelta ?? 0;
-      },
-      onVerticalDragEnd: (DragEndDetails details) {
-        gestureCount += 1;
-      },
-      onHorizontalDragUpdate: (DragUpdateDetails details) {
-        fail('gesture should not match');
-      },
-      onHorizontalDragEnd: (DragEndDetails details) {
-        fail('gesture should not match');
-      },
+      onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta ?? 0; },
+      onVerticalDragEnd: (DragEndDetails details) { gestureCount += 1; },
+      onHorizontalDragUpdate: (DragUpdateDetails details) { fail('gesture should not match'); },
+      onHorizontalDragEnd: (DragEndDetails details) { fail('gesture should not match'); },
       child: Container(
         color: const Color(0xFF00FF00),
       ),
@@ -167,21 +159,15 @@ void main() {
                   width: 100.0,
                   height: 100.0,
                   child: GestureDetector(
-                    onTap: ButtonVariant.button == kPrimaryButton
-                        ? () {
-                            didTap = true;
-                          }
-                        : null,
-                    onSecondaryTap: ButtonVariant.button == kSecondaryButton
-                        ? () {
-                            didTap = true;
-                          }
-                        : null,
-                    onTertiaryTapDown: ButtonVariant.button == kTertiaryButton
-                        ? (_) {
-                            didTap = true;
-                          }
-                        : null,
+                    onTap: ButtonVariant.button == kPrimaryButton ? () {
+                      didTap = true;
+                    } : null,
+                    onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
+                      didTap = true;
+                    } : null,
+                    onTertiaryTapDown: ButtonVariant.button == kTertiaryButton ? (_) {
+                      didTap = true;
+                    } : null,
                     behavior: behavior,
                   ),
                 ),
@@ -225,21 +211,15 @@ void main() {
       await tester.pumpWidget(
         Center(
           child: GestureDetector(
-            onTap: ButtonVariant.button == kPrimaryButton
-                ? () {
-                    didTap = true;
-                  }
-                : null,
-            onSecondaryTap: ButtonVariant.button == kSecondaryButton
-                ? () {
-                    didTap = true;
-                  }
-                : null,
-            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton
-                ? (_) {
-                    didTap = true;
-                  }
-                : null,
+            onTap: ButtonVariant.button == kPrimaryButton ? () {
+              didTap = true;
+            } : null,
+            onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
+              didTap = true;
+            } : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) {
+              didTap = true;
+            } : null,
           ),
         ),
       );
@@ -253,21 +233,15 @@ void main() {
       await tester.pumpWidget(
         Center(
           child: GestureDetector(
-            onTap: ButtonVariant.button == kPrimaryButton
-                ? () {
-                    didTap = true;
-                  }
-                : null,
-            onSecondaryTap: ButtonVariant.button == kSecondaryButton
-                ? () {
-                    didTap = true;
-                  }
-                : null,
-            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton
-                ? (_) {
-                    didTap = true;
-                  }
-                : null,
+            onTap: ButtonVariant.button == kPrimaryButton ? () {
+              didTap = true;
+            } : null,
+            onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
+              didTap = true;
+            } : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) {
+              didTap = true;
+            } : null,
             child: Container(),
           ),
         ),
@@ -278,7 +252,7 @@ void main() {
     }, variant: buttonVariant);
 
     testWidgets('cache render object', (WidgetTester tester) async {
-      void inputCallback() {}
+      void inputCallback() { }
 
       await tester.pumpWidget(
         Center(
@@ -339,70 +313,46 @@ void main() {
                   () => LongPressGestureRecognizer(),
                   (LongPressGestureRecognizer instance) {
                     instance
-                      ..onLongPress = ButtonVariant.button == kPrimaryButton
-                          ? () {
-                              longPress += 1;
-                            }
-                          : null
-                      ..onSecondaryLongPress = ButtonVariant.button == kSecondaryButton
-                          ? () {
-                              longPress += 1;
-                            }
-                          : null
-                      ..onTertiaryLongPress = ButtonVariant.button == kTertiaryButton
-                          ? () {
-                              longPress += 1;
-                            }
-                          : null;
+                      ..onLongPress = ButtonVariant.button == kPrimaryButton ? () {
+                        longPress += 1;
+                      } : null
+                      ..onSecondaryLongPress = ButtonVariant.button == kSecondaryButton ? () {
+                        longPress += 1;
+                      } : null
+                      ..onTertiaryLongPress = ButtonVariant.button == kTertiaryButton ? () {
+                        longPress += 1;
+                      } : null;
                   },
                 ),
               },
               child: GestureDetector(
-                onTapDown: ButtonVariant.button == kPrimaryButton
-                    ? (TapDownDetails details) {
-                        tapDown += 1;
-                      }
-                    : null,
-                onSecondaryTapDown: ButtonVariant.button == kSecondaryButton
-                    ? (TapDownDetails details) {
-                        tapDown += 1;
-                      }
-                    : null,
-                onTertiaryTapDown: ButtonVariant.button == kTertiaryButton
-                    ? (TapDownDetails details) {
-                        tapDown += 1;
-                      }
-                    : null,
-                onTap: ButtonVariant.button == kPrimaryButton
-                    ? () {
-                        tap += 1;
-                      }
-                    : null,
-                onSecondaryTap: ButtonVariant.button == kSecondaryButton
-                    ? () {
-                        tap += 1;
-                      }
-                    : null,
-                onTertiaryTapUp: ButtonVariant.button == kTertiaryButton
-                    ? (TapUpDetails details) {
-                        tap += 1;
-                      }
-                    : null,
-                onTapCancel: ButtonVariant.button == kPrimaryButton
-                    ? () {
-                        tapCancel += 1;
-                      }
-                    : null,
-                onSecondaryTapCancel: ButtonVariant.button == kSecondaryButton
-                    ? () {
-                        tapCancel += 1;
-                      }
-                    : null,
-                onTertiaryTapCancel: ButtonVariant.button == kTertiaryButton
-                    ? () {
-                        tapCancel += 1;
-                      }
-                    : null,
+                onTapDown: ButtonVariant.button == kPrimaryButton ? (TapDownDetails details) {
+                  tapDown += 1;
+                } : null,
+                onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (TapDownDetails details) {
+                  tapDown += 1;
+                } : null,
+                onTertiaryTapDown: ButtonVariant.button == kTertiaryButton ? (TapDownDetails details) {
+                  tapDown += 1;
+                } : null,
+                onTap: ButtonVariant.button == kPrimaryButton ? () {
+                  tap += 1;
+                } : null,
+                onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
+                  tap += 1;
+                } : null,
+                onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (TapUpDetails details) {
+                  tap += 1;
+                } : null,
+                onTapCancel: ButtonVariant.button == kPrimaryButton ? () {
+                  tapCancel += 1;
+                } : null,
+                onSecondaryTapCancel: ButtonVariant.button == kSecondaryButton ? () {
+                  tapCancel += 1;
+                } : null,
+                onTertiaryTapCancel: ButtonVariant.button == kTertiaryButton ? () {
+                  tapCancel += 1;
+                } : null,
               ),
             ),
           ),
@@ -412,7 +362,8 @@ void main() {
       // Pointer is dragged from the center of the 800x100 gesture detector
       // to a point (400,300) below it. This should never call onTap.
       Future<void> dragOut(Duration timeout) async {
-        final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), buttons: ButtonVariant.button);
+        final TestGesture gesture =
+        await tester.startGesture(const Offset(400.0, 50.0), buttons: ButtonVariant.button);
         // If the timeout is less than kPressTimeout the recognizer will not
         // trigger any callbacks. If the timeout is greater than kLongPressTimeout
         // then onTapDown, onLongPress, and onCancel will be called.
@@ -459,24 +410,18 @@ void main() {
               // however, it is more convenient to have them all in one place.
               gestures: <Type, GestureRecognizerFactory>{
                 LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-                  () => LongPressGestureRecognizer(),
-                  (LongPressGestureRecognizer instance) {
+                      () => LongPressGestureRecognizer(),
+                      (LongPressGestureRecognizer instance) {
                     instance
-                      ..onLongPressUp = ButtonVariant.button == kPrimaryButton
-                          ? () {
-                              longPressUp += 1;
-                            }
-                          : null
-                      ..onSecondaryLongPressUp = ButtonVariant.button == kSecondaryButton
-                          ? () {
-                              longPressUp += 1;
-                            }
-                          : null
-                      ..onTertiaryLongPressUp = ButtonVariant.button == kTertiaryButton
-                          ? () {
-                              longPressUp += 1;
-                            }
-                          : null;
+                      ..onLongPressUp = ButtonVariant.button == kPrimaryButton ? () {
+                        longPressUp += 1;
+                      } : null
+                      ..onSecondaryLongPressUp = ButtonVariant.button == kSecondaryButton ? () {
+                        longPressUp += 1;
+                      } : null
+                      ..onTertiaryLongPressUp = ButtonVariant.button == kTertiaryButton ? () {
+                        longPressUp += 1;
+                      } : null;
                   },
                 ),
               },
@@ -491,14 +436,12 @@ void main() {
         await gesture.up();
       }
 
-      await longPress(
-          kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
+      await longPress(kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
       expect(longPressUp, 1);
     }, variant: buttonVariant);
   });
 
-  testWidgets('Primary and secondary long press callbacks should work together in GestureDetector',
-      (WidgetTester tester) async {
+  testWidgets('Primary and secondary long press callbacks should work together in GestureDetector', (WidgetTester tester) async {
     bool primaryLongPress = false, secondaryLongPress = false;
 
     await tester.pumpWidget(
@@ -637,8 +580,7 @@ void main() {
     expect(forcePressEnded, 1);
   });
 
-  testWidgets('Force Press Callback not called if long press triggered before force press',
-      (WidgetTester tester) async {
+  testWidgets('Force Press Callback not called if long press triggered before force press', (WidgetTester tester) async {
     int forcePressStart = 0;
     int longPressTimes = 0;
 
@@ -773,9 +715,9 @@ void main() {
       key.currentState!.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
       expect(description, <String>[
         'gestures: <none>',
@@ -808,9 +750,9 @@ void main() {
       key.currentState!.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
       expect(description, <String>[
         'gestures: tap, long press',
@@ -831,9 +773,9 @@ void main() {
       key.currentState!.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
       expect(description, <String>[
         'gestures: <none>',
@@ -937,7 +879,8 @@ void main() {
 
 class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {
   @override
-  void assignSemantics(RenderSemanticsGestureHandler renderObject) {}
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+  }
 }
 
 /// A [TestVariant] that runs tests multiple times with different buttons.

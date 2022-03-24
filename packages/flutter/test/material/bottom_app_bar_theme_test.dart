@@ -74,9 +74,9 @@ void main() {
 
   testWidgets('BAB theme customizes shape', (WidgetTester tester) async {
     const BottomAppBarTheme theme = BottomAppBarTheme(
-      color: Colors.white30,
-      shape: CircularNotchedRectangle(),
-      elevation: 1.0,
+        color: Colors.white30,
+        shape: CircularNotchedRectangle(),
+        elevation: 1.0,
     );
 
     await tester.pumpWidget(_withTheme(theme));
@@ -101,10 +101,10 @@ void main() {
 
 PhysicalShape _getBabRenderObject(WidgetTester tester) {
   return tester.widget<PhysicalShape>(
-    find.descendant(
-      of: find.byType(BottomAppBar),
-      matching: find.byType(PhysicalShape),
-    ),
+      find.descendant(
+          of: find.byType(BottomAppBar),
+          matching: find.byType(PhysicalShape),
+      ),
   );
 }
 
@@ -114,20 +114,20 @@ Widget _withTheme(BottomAppBarTheme theme) {
   return MaterialApp(
     theme: ThemeData(bottomAppBarTheme: theme),
     home: Scaffold(
-      floatingActionButton: const FloatingActionButton(onPressed: null),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: RepaintBoundary(
-        key: _painterKey,
-        child: BottomAppBar(
-          child: Row(
-            children: const <Widget>[
-              Icon(Icons.add),
-              Expanded(child: SizedBox()),
-              Icon(Icons.add),
-            ],
+        floatingActionButton: const FloatingActionButton(onPressed: null),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        bottomNavigationBar: RepaintBoundary(
+          key: _painterKey,
+          child: BottomAppBar(
+            child: Row(
+              children: const <Widget>[
+                Icon(Icons.add),
+                Expanded(child: SizedBox()),
+                Icon(Icons.add),
+              ],
+            ),
           ),
         ),
-      ),
     ),
   );
 }

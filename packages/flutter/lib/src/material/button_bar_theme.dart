@@ -40,8 +40,8 @@ class ButtonBarThemeData with Diagnosticable {
     this.buttonAlignedDropdown,
     this.layoutBehavior,
     this.overflowDirection,
-  })  : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
-        assert(buttonHeight == null || buttonHeight >= 0.0);
+  }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
+       assert(buttonHeight == null || buttonHeight >= 0.0);
 
   /// How the children should be placed along the horizontal axis.
   final MainAxisAlignment? alignment;
@@ -144,7 +144,8 @@ class ButtonBarThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static ButtonBarThemeData? lerp(ButtonBarThemeData? a, ButtonBarThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return ButtonBarThemeData(
       alignment: t < 0.5 ? a?.alignment : b?.alignment,
       mainAxisSize: t < 0.5 ? a?.mainAxisSize : b?.mainAxisSize,
@@ -160,31 +161,33 @@ class ButtonBarThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        alignment,
-        mainAxisSize,
-        buttonTextTheme,
-        buttonMinWidth,
-        buttonHeight,
-        buttonPadding,
-        buttonAlignedDropdown,
-        layoutBehavior,
-        overflowDirection,
-      );
+    alignment,
+    mainAxisSize,
+    buttonTextTheme,
+    buttonMinWidth,
+    buttonHeight,
+    buttonPadding,
+    buttonAlignedDropdown,
+    layoutBehavior,
+    overflowDirection,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is ButtonBarThemeData &&
-        other.alignment == alignment &&
-        other.mainAxisSize == mainAxisSize &&
-        other.buttonTextTheme == buttonTextTheme &&
-        other.buttonMinWidth == buttonMinWidth &&
-        other.buttonHeight == buttonHeight &&
-        other.buttonPadding == buttonPadding &&
-        other.buttonAlignedDropdown == buttonAlignedDropdown &&
-        other.layoutBehavior == layoutBehavior &&
-        other.overflowDirection == overflowDirection;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is ButtonBarThemeData
+        && other.alignment == alignment
+        && other.mainAxisSize == mainAxisSize
+        && other.buttonTextTheme == buttonTextTheme
+        && other.buttonMinWidth == buttonMinWidth
+        && other.buttonHeight == buttonHeight
+        && other.buttonPadding == buttonPadding
+        && other.buttonAlignedDropdown == buttonAlignedDropdown
+        && other.layoutBehavior == layoutBehavior
+        && other.overflowDirection == overflowDirection;
   }
 
   @override
@@ -231,8 +234,7 @@ class ButtonBarTheme extends InheritedWidget {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(data != null),
-        super(key: key, child: child);
+  }) : assert(data != null), super(key: key, child: child);
 
   /// The properties used for all descendant [ButtonBar] widgets.
   final ButtonBarThemeData data;

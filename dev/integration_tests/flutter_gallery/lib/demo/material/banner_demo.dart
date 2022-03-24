@@ -13,7 +13,7 @@ enum BannerDemoAction {
 }
 
 class BannerDemo extends StatefulWidget {
-  const BannerDemo({Key? key}) : super(key: key);
+  const BannerDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/material/banner';
 
@@ -98,16 +98,12 @@ class _BannerDemoState extends State<BannerDemo> {
           ),
         ],
       ),
-      body: ListView.builder(
-          itemCount: _displayBanner ? _numItems + 1 : _numItems,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 0 && _displayBanner) {
-              return banner;
-            }
-            return ListTile(
-              title: Text('Item ${_displayBanner ? index : index + 1}'),
-            );
-          }),
+      body: ListView.builder(itemCount: _displayBanner ? _numItems + 1 : _numItems, itemBuilder: (BuildContext context, int index) {
+        if (index == 0 && _displayBanner) {
+          return banner;
+        }
+        return ListTile(title: Text('Item ${_displayBanner ? index : index + 1}'),);
+      }),
     );
   }
 }

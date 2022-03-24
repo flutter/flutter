@@ -109,10 +109,11 @@ abstract class ProgressIndicator extends StatefulWidget {
   final String? semanticsValue;
 
   Color _getValueColor(BuildContext context) {
-    return valueColor?.value ??
-        color ??
-        ProgressIndicatorTheme.of(context).color ??
-        Theme.of(context).colorScheme.primary;
+    return
+      valueColor?.value ??
+      color ??
+      ProgressIndicatorTheme.of(context).color ??
+      Theme.of(context).colorScheme.primary;
   }
 
   @override
@@ -185,7 +186,8 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     paint.color = valueColor;
 
     void drawBar(double x, double width) {
-      if (width <= 0.0) return;
+      if (width <= 0.0)
+        return;
 
       final double left;
       switch (textDirection) {
@@ -215,11 +217,11 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_LinearProgressIndicatorPainter oldPainter) {
-    return oldPainter.backgroundColor != backgroundColor ||
-        oldPainter.valueColor != valueColor ||
-        oldPainter.value != value ||
-        oldPainter.animationValue != animationValue ||
-        oldPainter.textDirection != textDirection;
+    return oldPainter.backgroundColor != backgroundColor
+        || oldPainter.valueColor != valueColor
+        || oldPainter.value != value
+        || oldPainter.animationValue != animationValue
+        || oldPainter.textDirection != textDirection;
   }
 }
 
@@ -270,16 +272,16 @@ class LinearProgressIndicator extends ProgressIndicator {
     this.minHeight,
     String? semanticsLabel,
     String? semanticsValue,
-  })  : assert(minHeight == null || minHeight > 0),
-        super(
-          key: key,
-          value: value,
-          backgroundColor: backgroundColor,
-          color: color,
-          valueColor: valueColor,
-          semanticsLabel: semanticsLabel,
-          semanticsValue: semanticsValue,
-        );
+  }) : assert(minHeight == null || minHeight > 0),
+       super(
+         key: key,
+         value: value,
+         backgroundColor: backgroundColor,
+         color: color,
+         valueColor: valueColor,
+         semanticsLabel: semanticsLabel,
+         semanticsValue: semanticsValue,
+       );
 
   /// {@template flutter.material.LinearProgressIndicator.trackColor}
   /// Color of the track being filled by the linear indicator.
@@ -315,7 +317,8 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
       duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
       vsync: this,
     );
-    if (widget.value == null) _controller.repeat();
+    if (widget.value == null)
+      _controller.repeat();
   }
 
   @override
@@ -323,7 +326,8 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     super.didUpdateWidget(oldWidget);
     if (widget.value == null && !_controller.isAnimating)
       _controller.repeat();
-    else if (widget.value != null && _controller.isAnimating) _controller.stop();
+    else if (widget.value != null && _controller.isAnimating)
+      _controller.stop();
   }
 
   @override
@@ -335,7 +339,9 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
     final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
     final Color trackColor =
-        widget.backgroundColor ?? indicatorTheme.linearTrackColor ?? Theme.of(context).colorScheme.background;
+      widget.backgroundColor ??
+      indicatorTheme.linearTrackColor ??
+      Theme.of(context).colorScheme.background;
     final double minHeight = widget.minHeight ?? indicatorTheme.linearMinHeight ?? 4.0;
 
     return widget._buildSemanticsWrapper(
@@ -362,7 +368,8 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
 
-    if (widget.value != null) return _buildIndicator(context, _controller.value, textDirection);
+    if (widget.value != null)
+      return _buildIndicator(context, _controller.value, textDirection);
 
     return AnimatedBuilder(
       animation: _controller.view,
@@ -383,12 +390,12 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     required this.offsetValue,
     required this.rotationValue,
     required this.strokeWidth,
-  })  : arcStart = value != null
-            ? _startAngle
-            : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
-        arcSweep = value != null
-            ? value.clamp(0.0, 1.0) * _sweep
-            : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
+  }) : arcStart = value != null
+         ? _startAngle
+         : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
+       arcSweep = value != null
+         ? value.clamp(0.0, 1.0) * _sweep
+         : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
 
   final Color? backgroundColor;
   final Color valueColor;
@@ -429,14 +436,14 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CircularProgressIndicatorPainter oldPainter) {
-    return oldPainter.backgroundColor != backgroundColor ||
-        oldPainter.valueColor != valueColor ||
-        oldPainter.value != value ||
-        oldPainter.headValue != headValue ||
-        oldPainter.tailValue != tailValue ||
-        oldPainter.offsetValue != offsetValue ||
-        oldPainter.rotationValue != rotationValue ||
-        oldPainter.strokeWidth != strokeWidth;
+    return oldPainter.backgroundColor != backgroundColor
+        || oldPainter.valueColor != valueColor
+        || oldPainter.value != value
+        || oldPainter.headValue != headValue
+        || oldPainter.tailValue != tailValue
+        || oldPainter.offsetValue != offsetValue
+        || oldPainter.rotationValue != rotationValue
+        || oldPainter.strokeWidth != strokeWidth;
   }
 }
 
@@ -485,16 +492,16 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeWidth = 4.0,
     String? semanticsLabel,
     String? semanticsValue,
-  })  : _indicatorType = _ActivityIndicatorType.material,
-        super(
-          key: key,
-          value: value,
-          backgroundColor: backgroundColor,
-          color: color,
-          valueColor: valueColor,
-          semanticsLabel: semanticsLabel,
-          semanticsValue: semanticsValue,
-        );
+  }) : _indicatorType = _ActivityIndicatorType.material,
+       super(
+         key: key,
+         value: value,
+         backgroundColor: backgroundColor,
+         color: color,
+         valueColor: valueColor,
+         semanticsLabel: semanticsLabel,
+         semanticsValue: semanticsValue,
+       );
 
   /// Creates an adaptive progress indicator that is a
   /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
@@ -512,15 +519,15 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeWidth = 4.0,
     String? semanticsLabel,
     String? semanticsValue,
-  })  : _indicatorType = _ActivityIndicatorType.adaptive,
-        super(
-          key: key,
-          value: value,
-          backgroundColor: backgroundColor,
-          valueColor: valueColor,
-          semanticsLabel: semanticsLabel,
-          semanticsValue: semanticsValue,
-        );
+  }) : _indicatorType = _ActivityIndicatorType.adaptive,
+       super(
+         key: key,
+         value: value,
+         backgroundColor: backgroundColor,
+         valueColor: valueColor,
+         semanticsLabel: semanticsLabel,
+         semanticsValue: semanticsValue,
+       );
 
   final _ActivityIndicatorType _indicatorType;
 
@@ -567,7 +574,8 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
       vsync: this,
     );
-    if (widget.value == null) _controller.repeat();
+    if (widget.value == null)
+      _controller.repeat();
   }
 
   @override
@@ -575,7 +583,8 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     super.didUpdateWidget(oldWidget);
     if (widget.value == null && !_controller.isAnimating)
       _controller.repeat();
-    else if (widget.value != null && _controller.isAnimating) _controller.stop();
+    else if (widget.value != null && _controller.isAnimating)
+      _controller.stop();
   }
 
   @override
@@ -589,8 +598,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     return CupertinoActivityIndicator(key: widget.key, color: tickColor);
   }
 
-  Widget _buildMaterialIndicator(
-      BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     final Color? trackColor = widget.backgroundColor ?? ProgressIndicatorTheme.of(context).circularTrackColor;
 
     return widget._buildSemanticsWrapper(
@@ -635,7 +643,8 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   Widget build(BuildContext context) {
     switch (widget._indicatorType) {
       case _ActivityIndicatorType.material:
-        if (widget.value != null) return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+        if (widget.value != null)
+          return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
         return _buildAnimation();
       case _ActivityIndicatorType.adaptive:
         final ThemeData theme = Theme.of(context);
@@ -648,7 +657,8 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            if (widget.value != null) return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+            if (widget.value != null)
+              return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
             return _buildAnimation();
         }
     }
@@ -666,14 +676,14 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     required double strokeWidth,
     required this.arrowheadScale,
   }) : super(
-          valueColor: valueColor,
-          value: value,
-          headValue: headValue,
-          tailValue: tailValue,
-          offsetValue: offsetValue,
-          rotationValue: rotationValue,
-          strokeWidth: strokeWidth,
-        );
+    valueColor: valueColor,
+    value: value,
+    headValue: headValue,
+    tailValue: tailValue,
+    offsetValue: offsetValue,
+    rotationValue: rotationValue,
+    strokeWidth: strokeWidth,
+  );
 
   final double arrowheadScale;
 
@@ -687,7 +697,7 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     assert(size.width == size.height);
     final double radius = size.width / 2.0;
     final double arrowheadPointX = radius + ux * radius + -uy * strokeWidth * 2.0 * arrowheadScale;
-    final double arrowheadPointY = radius + uy * radius + ux * strokeWidth * 2.0 * arrowheadScale;
+    final double arrowheadPointY = radius + uy * radius +  ux * strokeWidth * 2.0 * arrowheadScale;
     final double arrowheadRadius = strokeWidth * 2.0 * arrowheadScale;
     final double innerRadius = radius - arrowheadRadius;
     final double outerRadius = radius + arrowheadRadius;
@@ -707,7 +717,8 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
   @override
   void paint(Canvas canvas, Size size) {
     super.paint(canvas, size);
-    if (arrowheadScale > 0.0) paintArrowhead(canvas, size);
+    if (arrowheadScale > 0.0)
+      paintArrowhead(canvas, size);
   }
 }
 
@@ -741,15 +752,15 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     String? semanticsLabel,
     String? semanticsValue,
   }) : super(
-          key: key,
-          value: value,
-          backgroundColor: backgroundColor,
-          color: color,
-          valueColor: valueColor,
-          strokeWidth: strokeWidth,
-          semanticsLabel: semanticsLabel,
-          semanticsValue: semanticsValue,
-        );
+    key: key,
+    value: value,
+    backgroundColor: backgroundColor,
+    color: color,
+    valueColor: valueColor,
+    strokeWidth: strokeWidth,
+    semanticsLabel: semanticsLabel,
+    semanticsValue: semanticsValue,
+  );
 
   /// Default stroke width.
   static const double defaultStrokeWidth = 2.5;
@@ -808,7 +819,8 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     final double? value = widget.value;
     if (value != null) {
       _lastValue = value;
-      _controller.value = _convertTween.transform(value) * (1333 / 2 / _kIndeterminateCircularDuration);
+      _controller.value = _convertTween.transform(value)
+        * (1333 / 2 / _kIndeterminateCircularDuration);
     }
     return _buildAnimation();
   }
@@ -831,8 +843,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   }
 
   @override
-  Widget _buildMaterialIndicator(
-      BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     final double? value = widget.value;
     final double arrowheadScale = value == null ? 0.0 : const Interval(0.1, _strokeHeadInterval).transform(value);
     final double rotation;
@@ -847,9 +858,10 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     final double opacity = valueColor.opacity;
     valueColor = valueColor.withOpacity(1.0);
 
-    final Color backgroundColor = widget.backgroundColor ??
-        ProgressIndicatorTheme.of(context).refreshBackgroundColor ??
-        Theme.of(context).canvasColor;
+    final Color backgroundColor =
+      widget.backgroundColor ??
+      ProgressIndicatorTheme.of(context).refreshBackgroundColor ??
+      Theme.of(context).canvasColor;
 
     return widget._buildSemanticsWrapper(
       context: context,

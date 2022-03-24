@@ -11,7 +11,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('FlatButton defaults', (WidgetTester tester) async {
+    testWidgets('FlatButton defaults', (WidgetTester tester) async {
     final Finder rawButtonMaterial = find.descendant(
       of: find.byType(FlatButton),
       matching: find.byType(Material),
@@ -22,7 +22,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: FlatButton(
-          onPressed: () {},
+          onPressed: () { },
           child: const Text('button'),
         ),
       ),
@@ -91,18 +91,17 @@ void main() {
   testWidgets('FlatButton implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     FlatButton(
-      onPressed: () {},
-      textColor: const Color(0xFF00FF00),
-      disabledTextColor: const Color(0xFFFF0000),
-      color: const Color(0xFF000000),
-      highlightColor: const Color(0xFF1565C0),
-      splashColor: const Color(0xFF9E9E9E),
-      child: const Text('Hello'),
+        onPressed: () { },
+        textColor: const Color(0xFF00FF00),
+        disabledTextColor: const Color(0xFFFF0000),
+        color: const Color(0xFF000000),
+        highlightColor: const Color(0xFF1565C0),
+        splashColor: const Color(0xFF9E9E9E),
+        child: const Text('Hello'),
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode n) => n.toString())
-        .toList();
+        .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
       'textColor: Color(0xff00ff00)',
       'disabledTextColor: Color(0xffff0000)',
@@ -112,116 +111,112 @@ void main() {
     ]);
   });
 
-  testWidgets(
-    'Default FlatButton meets a11y contrast guidelines',
-    (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
+  testWidgets('Default FlatButton meets a11y contrast guidelines', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: FlatButton(
+              onPressed: () { },
+              focusNode: focusNode,
+              child: const Text('FlatButton'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Default, not disabled.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(FlatButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+  },
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+  );
+
+  testWidgets('FlatButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    final ColorScheme colorScheme = ColorScheme.fromSwatch();
+
+    Color getTextColor(Set<MaterialState> states) {
+      final Set<MaterialState> interactiveStates = <MaterialState>{
+        MaterialState.pressed,
+        MaterialState.hovered,
+        MaterialState.focused,
+      };
+      if (states.any(interactiveStates.contains)) {
+        return Colors.blue[900]!;
+      }
+      return Colors.blue[800]!;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ButtonTheme(
+              colorScheme: colorScheme,
+              textTheme: ButtonTextTheme.primary,
               child: FlatButton(
                 onPressed: () {},
                 focusNode: focusNode,
+                textColor: MaterialStateColor.resolveWith(getTextColor),
                 child: const Text('FlatButton'),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      // Default, not disabled.
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    // Default, not disabled.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-      // Focused.
-      focusNode.requestFocus();
-      await tester.pumpAndSettle();
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-      // Hovered.
-      final Offset center = tester.getCenter(find.byType(FlatButton));
-      final TestGesture gesture = await tester.createGesture(
-        kind: PointerDeviceKind.mouse,
-      );
-      await gesture.addPointer();
-      addTearDown(gesture.removePointer);
-      await gesture.moveTo(center);
-      await tester.pumpAndSettle();
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(FlatButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-      // Highlighted (pressed).
-      await gesture.down(center);
-      await tester.pump(); // Start the splash and highlight animations.
-      await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-    },
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
-  );
-
-  testWidgets(
-    'FlatButton with colored theme meets a11y contrast guidelines',
-    (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-
-      final ColorScheme colorScheme = ColorScheme.fromSwatch();
-
-      Color getTextColor(Set<MaterialState> states) {
-        final Set<MaterialState> interactiveStates = <MaterialState>{
-          MaterialState.pressed,
-          MaterialState.hovered,
-          MaterialState.focused,
-        };
-        if (states.any(interactiveStates.contains)) {
-          return Colors.blue[900]!;
-        }
-        return Colors.blue[800]!;
-      }
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: ButtonTheme(
-                colorScheme: colorScheme,
-                textTheme: ButtonTextTheme.primary,
-                child: FlatButton(
-                  onPressed: () {},
-                  focusNode: focusNode,
-                  textColor: MaterialStateColor.resolveWith(getTextColor),
-                  child: const Text('FlatButton'),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Default, not disabled.
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-
-      // Focused.
-      focusNode.requestFocus();
-      await tester.pumpAndSettle();
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-
-      // Hovered.
-      final Offset center = tester.getCenter(find.byType(FlatButton));
-      final TestGesture gesture = await tester.createGesture(
-        kind: PointerDeviceKind.mouse,
-      );
-      await gesture.addPointer();
-      addTearDown(gesture.removePointer);
-      await gesture.moveTo(center);
-      await tester.pumpAndSettle();
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-
-      // Highlighted (pressed).
-      await gesture.down(center);
-      await tester.pump(); // Start the splash and highlight animations.
-      await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-    },
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+  },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
@@ -402,14 +397,14 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FlatButton(
           child: Container(),
-          onPressed: () {/* to make sure the button is enabled */},
+          onPressed: () { /* to make sure the button is enabled */ },
         ),
       ),
     );
 
     expect(
-      tester.renderObject(find.byType(FlatButton)),
-      paintsExactlyCountTimes(#clipPath, 0),
+        tester.renderObject(find.byType(FlatButton)),
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 
@@ -421,7 +416,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FlatButton(
           hoverColor: hoverColor,
-          onPressed: () {},
+          onPressed: () { },
           child: const Text('button'),
         ),
       ),
@@ -432,8 +427,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(FlatButton)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects
-        .firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: hoverColor));
 
     await gesture.removePointer();
@@ -521,7 +515,7 @@ void main() {
         child: FlatButton(
           focusColor: focusColor,
           focusNode: focusNode,
-          onPressed: () {},
+          onPressed: () { },
           child: const Text('button'),
         ),
       ),
@@ -531,8 +525,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects
-        .firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
   });
 
@@ -543,36 +536,34 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: FlatButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const Text('ABC'),
           ),
         ),
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                ],
-                label: 'ABC',
-                rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                transform: Matrix4.translationValues(356.0, 276.0, 0.0),
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isEnabled,
-                  SemanticsFlag.isFocusable,
-                ],
-              ),
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ],
+            label: 'ABC',
+            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            transform: Matrix4.translationValues(356.0, 276.0, 0.0),
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton,
+              SemanticsFlag.isEnabled,
+              SemanticsFlag.isFocusable,
             ],
           ),
-          ignoreId: true,
-        ));
+        ],
+      ),
+      ignoreId: true,
+    ));
 
     semantics.dispose();
   });
@@ -585,7 +576,7 @@ void main() {
           data: const MediaQueryData(),
           child: Center(
             child: FlatButton(
-              onPressed: () {},
+              onPressed: () { },
               child: const Text('ABC'),
             ),
           ),
@@ -604,7 +595,7 @@ void main() {
           data: const MediaQueryData(textScaleFactor: 1.3),
           child: Center(
             child: FlatButton(
-              onPressed: () {},
+              onPressed: () { },
               child: const Text('ABC'),
             ),
           ),
@@ -626,7 +617,7 @@ void main() {
           data: const MediaQueryData(textScaleFactor: 3.0),
           child: Center(
             child: FlatButton(
-              onPressed: () {},
+              onPressed: () { },
               child: const Text('ABC'),
             ),
           ),
@@ -653,7 +644,7 @@ void main() {
             child: FlatButton(
               key: key1,
               child: const SizedBox(width: 50.0, height: 8.0),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ),
         ),
@@ -672,7 +663,7 @@ void main() {
             child: FlatButton(
               key: key2,
               child: const SizedBox(width: 50.0, height: 8.0),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ),
         ),
@@ -682,12 +673,11 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
 
-  testWidgets('FlatButton onPressed and onLongPress callbacks are correctly called when non-null',
-      (WidgetTester tester) async {
+  testWidgets('FlatButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
     bool wasPressed;
     Finder flatButton;
 
-    Widget buildFrame({VoidCallback? onPressed, VoidCallback? onLongPress}) {
+    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: FlatButton(
@@ -701,9 +691,7 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () {
-        wasPressed = true;
-      }),
+      buildFrame(onPressed: () { wasPressed = true; }),
     );
     flatButton = find.byType(FlatButton);
     expect(tester.widget<FlatButton>(flatButton).enabled, true);
@@ -713,9 +701,7 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onLongPress: () {
-        wasPressed = true;
-      }),
+      buildFrame(onLongPress: () { wasPressed = true; }),
     );
     flatButton = find.byType(FlatButton);
     expect(tester.widget<FlatButton>(flatButton).enabled, true);
@@ -775,9 +761,7 @@ void main() {
                 visualDensity: visualDensity,
                 key: key,
                 onPressed: () {},
-                child: useText
-                    ? const Text('Text', key: childKey)
-                    : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
+                child: useText ? const Text('Text', key: childKey) : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
               ),
             ),
           ),
@@ -823,65 +807,65 @@ void main() {
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
-  testWidgets('FlatButton height parameter is used when provided', (WidgetTester tester) async {
-    const double buttonHeight = 100;
-    const double buttonDefaultMinHeight = 36.0;
+    testWidgets('FlatButton height parameter is used when provided', (WidgetTester tester) async {
+      const double buttonHeight = 100;
+      const double buttonDefaultMinHeight = 36.0;
 
-    Future<void> buildWidget({double? buttonHeight}) {
-      return tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: FlatButton(
-            height: buttonHeight,
-            child: const Text('button'),
-            onPressed: () {
-              /*ununsed*/
-            },
+      Future<void> buildWidget({double? buttonHeight}) {
+        return tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: FlatButton(
+              height: buttonHeight,
+              child: const Text('button'),
+              onPressed: () {
+                /*ununsed*/
+              },
+            ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
-    final Finder rawMaterialButtonFinder = find.byType(RawMaterialButton);
+      final Finder rawMaterialButtonFinder = find.byType(RawMaterialButton);
 
-    // If height is not provided we expect the default height to be used.
-    await buildWidget();
-    expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minHeight, buttonDefaultMinHeight);
+      // If height is not provided we expect the default height to be used.
+      await buildWidget();
+      expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minHeight, buttonDefaultMinHeight);
 
-    // When the height is provided we expect that is used by the internal widget.
-    await buildWidget(buttonHeight: buttonHeight);
-    expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minHeight, buttonHeight);
-  });
+      // When the height is provided we expect that is used by the internal widget.
+      await buildWidget(buttonHeight: buttonHeight);
+      expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minHeight, buttonHeight);
+    });
 
-  testWidgets('FlatButton minWidth parameter is used when provided', (WidgetTester tester) async {
-    const double buttonMinWidth = 100;
-    const double buttonDefaultMinWidth = 88.0;
+    testWidgets('FlatButton minWidth parameter is used when provided', (WidgetTester tester) async {
+      const double buttonMinWidth = 100;
+      const double buttonDefaultMinWidth = 88.0;
 
-    Future<void> buildWidget({double? buttonMinWidth}) {
-      return tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: FlatButton(
-            minWidth: buttonMinWidth,
-            child: const Text('button'),
-            onPressed: () {
-              /*ununsed*/
-            },
+      Future<void> buildWidget({double? buttonMinWidth}) {
+        return tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: FlatButton(
+              minWidth: buttonMinWidth,
+              child: const Text('button'),
+              onPressed: () {
+                /*ununsed*/
+              },
+            ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
-    final Finder rawMaterialButtonFinder = find.byType(RawMaterialButton);
+      final Finder rawMaterialButtonFinder = find.byType(RawMaterialButton);
 
-    // If minWidth is not provided we expect the default minWidth to be used.
-    await buildWidget();
-    expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minWidth, buttonDefaultMinWidth);
+      // If minWidth is not provided we expect the default minWidth to be used.
+      await buildWidget();
+      expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minWidth, buttonDefaultMinWidth);
 
-    // When minWidth is provided we expect that the internal widget uses it.
-    await buildWidget(buttonMinWidth: buttonMinWidth);
-    expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minWidth, buttonMinWidth);
-  });
+      // When minWidth is provided we expect that the internal widget uses it.
+      await buildWidget(buttonMinWidth: buttonMinWidth);
+      expect(tester.widget<RawMaterialButton>(rawMaterialButtonFinder).constraints.minWidth, buttonMinWidth);
+    });
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

@@ -31,8 +31,7 @@ void main() {
     Cache.enableLocking();
   });
 
-  testUsingContext('pub get usage values are resilient to missing package config files before running "pub get"',
-      () async {
+  testUsingContext('pub get usage values are resilient to missing package config files before running "pub get"', () async {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
     fileSystem.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
@@ -42,13 +41,11 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(
-        await command.usageValues,
-        const CustomDimensions(
-          commandPackagesNumberPlugins: 0,
-          commandPackagesProjectModule: false,
-          commandPackagesAndroidEmbeddingVersion: 'v1',
-        ));
+    expect(await command.usageValues, const CustomDimensions(
+      commandPackagesNumberPlugins: 0,
+      commandPackagesProjectModule: false,
+      commandPackagesAndroidEmbeddingVersion: 'v1',
+    ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
@@ -69,13 +66,11 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(
-        await command.usageValues,
-        const CustomDimensions(
-          commandPackagesNumberPlugins: 0,
-          commandPackagesProjectModule: false,
-          commandPackagesAndroidEmbeddingVersion: 'v1',
-        ));
+    expect(await command.usageValues, const CustomDimensions(
+      commandPackagesNumberPlugins: 0,
+      commandPackagesProjectModule: false,
+      commandPackagesAndroidEmbeddingVersion: 'v1',
+    ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
@@ -91,13 +86,11 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(
-        await command.usageValues,
-        const CustomDimensions(
-          commandPackagesNumberPlugins: 0,
-          commandPackagesProjectModule: false,
-          commandPackagesAndroidEmbeddingVersion: 'v1',
-        ));
+    expect(await command.usageValues, const CustomDimensions(
+      commandPackagesNumberPlugins: 0,
+      commandPackagesProjectModule: false,
+      commandPackagesAndroidEmbeddingVersion: 'v1',
+    ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
@@ -123,7 +116,9 @@ class FakePub extends Fake implements Pub {
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
   }) async {
-    fileSystem.currentDirectory.childDirectory('.dart_tool').childFile('package_config.json')
+    fileSystem.currentDirectory
+      .childDirectory('.dart_tool')
+      .childFile('package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion":2,"packages":[]}');
   }

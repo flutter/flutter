@@ -27,12 +27,12 @@ void main() {
     expect(rawImageSize, const Size(1, 1));
 
     const Size resizeDims = Size(14, 7);
-    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes),
-        width: resizeDims.width.round(), height: resizeDims.height.round(), allowUpscaling: true);
+    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round(), allowUpscaling: true);
     const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56312
+
 
   test('ResizeImage resizes to the correct dimensions (down)', () async {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
@@ -41,8 +41,7 @@ void main() {
     expect(rawImageSize, const Size(50, 50));
 
     const Size resizeDims = Size(25, 25);
-    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes),
-        width: resizeDims.width.round(), height: resizeDims.height.round(), allowUpscaling: true);
+    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round(), allowUpscaling: true);
     const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);
@@ -55,8 +54,7 @@ void main() {
     expect(rawImageSize, const Size(1, 1));
 
     const Size resizeDims = Size(1, 1);
-    final ResizeImage resizedImage =
-        ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round());
+    final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round());
     const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);
@@ -105,8 +103,7 @@ void main() {
       expect(cacheWidth, 123);
       expect(cacheHeight, 321);
       expect(allowUpscaling, false);
-      return PaintingBinding.instance.instantiateImageCodec(bytes,
-          cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
+      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
     }
 
     resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
@@ -145,11 +142,13 @@ Future<Size> _resolveAndGetSize(
 }) async {
   final ImageStream stream = imageProvider.resolve(configuration);
   final Completer<Size> completer = Completer<Size>();
-  final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
-    final int height = image.image.height;
-    final int width = image.image.width;
-    completer.complete(Size(width.toDouble(), height.toDouble()));
-  });
+  final ImageStreamListener listener =
+    ImageStreamListener((ImageInfo image, bool synchronousCall) {
+      final int height = image.image.height;
+      final int width = image.image.width;
+      completer.complete(Size(width.toDouble(), height.toDouble()));
+    }
+  );
   stream.addListener(listener);
   return completer.future;
 }

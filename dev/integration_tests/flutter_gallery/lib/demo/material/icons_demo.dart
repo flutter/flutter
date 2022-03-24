@@ -91,15 +91,16 @@ class _IconsDemoCard extends StatelessWidget {
     );
   }
 
-  Widget _centeredText(String label) => Padding(
-        // Match the default padding of IconButton.
-        padding: const EdgeInsets.all(8.0),
-        child: Text(label, textAlign: TextAlign.center),
-      );
+  Widget _centeredText(String label) =>
+    Padding(
+      // Match the default padding of IconButton.
+      padding: const EdgeInsets.all(8.0),
+      child: Text(label, textAlign: TextAlign.center),
+    );
 
   TableRow _buildIconRow(double size) {
     return TableRow(
-      children: <Widget>[
+      children: <Widget> [
         _centeredText('${size.floor().toString()} ${icon.toString()}'),
         _buildIconButton(size, icon, true),
         _buildIconButton(size, icon, false),
@@ -118,12 +119,14 @@ class _IconsDemoCard extends StatelessWidget {
           explicitChildNodes: true,
           child: Table(
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            children: <TableRow>[
-              TableRow(children: <Widget>[
-                _centeredText('Size ${icon.toString()}'),
-                _centeredText('Enabled ${icon.toString()}'),
-                _centeredText('Disabled ${icon.toString()}'),
-              ]),
+            children: <TableRow> [
+              TableRow(
+                children: <Widget> [
+                  _centeredText('Size ${icon.toString()}'),
+                  _centeredText('Enabled ${icon.toString()}'),
+                  _centeredText('Disabled ${icon.toString()}'),
+                ]
+              ),
               _buildIconRow(18.0),
               _buildIconRow(24.0),
               _buildIconRow(36.0),

@@ -23,17 +23,18 @@ class TestTree extends Object with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
-        for (final TestTree child in children)
-          child.toDiagnosticsNode(
-            name: 'child ${child.name}',
-            style: child.style,
-          ),
-      ];
+    for (final TestTree child in children)
+      child.toDiagnosticsNode(
+        name: 'child ${child.name}',
+        style: child.style,
+      ),
+  ];
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    if (style != null) properties.defaultDiagnosticsTreeStyle = style!;
+    if (style != null)
+      properties.defaultDiagnosticsTreeStyle = style!;
     this.properties.forEach(properties.add);
   }
 }
@@ -121,14 +122,11 @@ void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> prop
 void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object?> property) {
   final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.value.isNotEmpty) {
-    expect(
-        json['values'],
-        equals(
-          property.value.entries
-              .where((MapEntry<String, Object?> entry) => entry.value != null)
-              .map((MapEntry<String, Object?> entry) => entry.key)
-              .toList(),
-        ));
+    expect(json['values'], equals(
+      property.value.entries
+        .where((MapEntry<String, Object?> entry) => entry.value != null)
+        .map((MapEntry<String, Object?> entry) => entry.key).toList(),
+    ));
   } else {
     expect(json.containsKey('values'), isFalse);
   }
@@ -223,69 +221,74 @@ void main() {
     goldenStyleTest(
       'dense',
       style: DiagnosticsTreeStyle.dense,
-      golden: 'TestTree#00000\n'
-          '├child node A: TestTree#00000\n'
-          '├child node B: TestTree#00000\n'
-          '│├child node B1: TestTree#00000\n'
-          '│├child node B2: TestTree#00000\n'
-          '│└child node B3: TestTree#00000\n'
-          '└child node C: TestTree#00000\n',
+      golden:
+      'TestTree#00000\n'
+      '├child node A: TestTree#00000\n'
+      '├child node B: TestTree#00000\n'
+      '│├child node B1: TestTree#00000\n'
+      '│├child node B2: TestTree#00000\n'
+      '│└child node B3: TestTree#00000\n'
+      '└child node C: TestTree#00000\n',
     );
 
     goldenStyleTest(
       'sparse',
       style: DiagnosticsTreeStyle.sparse,
-      golden: 'TestTree#00000\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ └─child node B3: TestTree#00000\n'
-          ' └─child node C: TestTree#00000\n',
+      golden:
+      'TestTree#00000\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ └─child node B3: TestTree#00000\n'
+      ' └─child node C: TestTree#00000\n',
     );
 
     goldenStyleTest(
       'dashed',
       style: DiagnosticsTreeStyle.offstage,
-      golden: 'TestTree#00000\n'
-          ' ╎╌child node A: TestTree#00000\n'
-          ' ╎╌child node B: TestTree#00000\n'
-          ' ╎ ╎╌child node B1: TestTree#00000\n'
-          ' ╎ ╎╌child node B2: TestTree#00000\n'
-          ' ╎ └╌child node B3: TestTree#00000\n'
-          ' └╌child node C: TestTree#00000\n',
+      golden:
+      'TestTree#00000\n'
+      ' ╎╌child node A: TestTree#00000\n'
+      ' ╎╌child node B: TestTree#00000\n'
+      ' ╎ ╎╌child node B1: TestTree#00000\n'
+      ' ╎ ╎╌child node B2: TestTree#00000\n'
+      ' ╎ └╌child node B3: TestTree#00000\n'
+      ' └╌child node C: TestTree#00000\n',
     );
 
     goldenStyleTest(
       'leaf children',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.transition,
-      golden: 'TestTree#00000\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ ╘═╦══ child node B3 ═══\n'
-          ' │   ║ TestTree#00000\n'
-          ' │   ╚═══════════\n'
-          ' ╘═╦══ child node C ═══\n'
-          '   ║ TestTree#00000\n'
-          '   ╚═══════════\n',
+      golden:
+      'TestTree#00000\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ ╘═╦══ child node B3 ═══\n'
+      ' │   ║ TestTree#00000\n'
+      ' │   ╚═══════════\n'
+      ' ╘═╦══ child node C ═══\n'
+      '   ║ TestTree#00000\n'
+      '   ╚═══════════\n',
     );
 
     goldenStyleTest(
       'error children',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.error,
-      golden: 'TestTree#00000\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
-          ' │   ╚══════════════════════════════════════════════════════════════════\n'
-          ' ╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
-          '   ╚══════════════════════════════════════════════════════════════════\n',
+      golden:
+      'TestTree#00000\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
+      ' │   ╚══════════════════════════════════════════════════════════════════\n'
+      ' ╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
+      '   ╚══════════════════════════════════════════════════════════════════\n',
     );
 
     // You would never really want to make everything a transition child like
@@ -295,56 +298,59 @@ void main() {
     goldenStyleTest(
       'transition',
       style: DiagnosticsTreeStyle.transition,
-      golden: 'TestTree#00000:\n'
-          '  ╞═╦══ child node A ═══\n'
-          '  │ ║ TestTree#00000\n'
-          '  │ ╚═══════════\n'
-          '  ╞═╦══ child node B ═══\n'
-          '  │ ║ TestTree#00000:\n'
-          '  │ ║   ╞═╦══ child node B1 ═══\n'
-          '  │ ║   │ ║ TestTree#00000\n'
-          '  │ ║   │ ╚═══════════\n'
-          '  │ ║   ╞═╦══ child node B2 ═══\n'
-          '  │ ║   │ ║ TestTree#00000\n'
-          '  │ ║   │ ╚═══════════\n'
-          '  │ ║   ╘═╦══ child node B3 ═══\n'
-          '  │ ║     ║ TestTree#00000\n'
-          '  │ ║     ╚═══════════\n'
-          '  │ ╚═══════════\n'
-          '  ╘═╦══ child node C ═══\n'
-          '    ║ TestTree#00000\n'
-          '    ╚═══════════\n',
+      golden:
+      'TestTree#00000:\n'
+      '  ╞═╦══ child node A ═══\n'
+      '  │ ║ TestTree#00000\n'
+      '  │ ╚═══════════\n'
+      '  ╞═╦══ child node B ═══\n'
+      '  │ ║ TestTree#00000:\n'
+      '  │ ║   ╞═╦══ child node B1 ═══\n'
+      '  │ ║   │ ║ TestTree#00000\n'
+      '  │ ║   │ ╚═══════════\n'
+      '  │ ║   ╞═╦══ child node B2 ═══\n'
+      '  │ ║   │ ║ TestTree#00000\n'
+      '  │ ║   │ ╚═══════════\n'
+      '  │ ║   ╘═╦══ child node B3 ═══\n'
+      '  │ ║     ║ TestTree#00000\n'
+      '  │ ║     ╚═══════════\n'
+      '  │ ╚═══════════\n'
+      '  ╘═╦══ child node C ═══\n'
+      '    ║ TestTree#00000\n'
+      '    ╚═══════════\n',
     );
 
     goldenStyleTest(
       'error',
       style: DiagnosticsTreeStyle.error,
-      golden: '══╡ TESTTREE#00000 ╞═════════════════════════════════════════════\n'
-          '╞═╦══╡ CHILD NODE A: TESTTREE#00000 ╞════════════════════════════════\n'
-          '│ ╚══════════════════════════════════════════════════════════════════\n'
-          '╞═╦══╡ CHILD NODE B: TESTTREE#00000 ╞════════════════════════════════\n'
-          '│ ║ ╞═╦══╡ CHILD NODE B1: TESTTREE#00000 ╞═══════════════════════════════\n'
-          '│ ║ │ ╚══════════════════════════════════════════════════════════════════\n'
-          '│ ║ ╞═╦══╡ CHILD NODE B2: TESTTREE#00000 ╞═══════════════════════════════\n'
-          '│ ║ │ ╚══════════════════════════════════════════════════════════════════\n'
-          '│ ║ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
-          '│ ║   ╚══════════════════════════════════════════════════════════════════\n'
-          '│ ╚══════════════════════════════════════════════════════════════════\n'
-          '╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
-          '  ╚══════════════════════════════════════════════════════════════════\n'
-          '═════════════════════════════════════════════════════════════════\n',
+      golden:
+      '══╡ TESTTREE#00000 ╞═════════════════════════════════════════════\n'
+      '╞═╦══╡ CHILD NODE A: TESTTREE#00000 ╞════════════════════════════════\n'
+      '│ ╚══════════════════════════════════════════════════════════════════\n'
+      '╞═╦══╡ CHILD NODE B: TESTTREE#00000 ╞════════════════════════════════\n'
+      '│ ║ ╞═╦══╡ CHILD NODE B1: TESTTREE#00000 ╞═══════════════════════════════\n'
+      '│ ║ │ ╚══════════════════════════════════════════════════════════════════\n'
+      '│ ║ ╞═╦══╡ CHILD NODE B2: TESTTREE#00000 ╞═══════════════════════════════\n'
+      '│ ║ │ ╚══════════════════════════════════════════════════════════════════\n'
+      '│ ║ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
+      '│ ║   ╚══════════════════════════════════════════════════════════════════\n'
+      '│ ╚══════════════════════════════════════════════════════════════════\n'
+      '╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
+      '  ╚══════════════════════════════════════════════════════════════════\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
 
     goldenStyleTest(
       'whitespace',
       style: DiagnosticsTreeStyle.whitespace,
-      golden: 'TestTree#00000:\n'
-          '  child node A: TestTree#00000\n'
-          '  child node B: TestTree#00000:\n'
-          '    child node B1: TestTree#00000\n'
-          '    child node B2: TestTree#00000\n'
-          '    child node B3: TestTree#00000\n'
-          '  child node C: TestTree#00000\n',
+      golden:
+      'TestTree#00000:\n'
+      '  child node A: TestTree#00000\n'
+      '  child node B: TestTree#00000:\n'
+      '    child node B1: TestTree#00000\n'
+      '    child node B2: TestTree#00000\n'
+      '    child node B3: TestTree#00000\n'
+      '  child node C: TestTree#00000\n',
     );
 
     // Single line mode does not display children.
@@ -369,8 +375,7 @@ void main() {
           StringProperty('stringProperty1', 'value1', quoted: false, style: propertyStyle),
           DoubleProperty('doubleProperty1', 42.5, style: propertyStyle),
           DoubleProperty('roundedProperty', 1.0 / 3.0, style: propertyStyle),
-          StringProperty('DO_NOT_SHOW', 'DO_NOT_SHOW',
-              level: DiagnosticLevel.hidden, quoted: false, style: propertyStyle),
+          StringProperty('DO_NOT_SHOW', 'DO_NOT_SHOW', level: DiagnosticLevel.hidden, quoted: false, style: propertyStyle),
           DiagnosticsProperty<Object>('DO_NOT_SHOW_NULL', null, defaultValue: null, style: propertyStyle),
           DiagnosticsProperty<Object>('nullProperty', null, style: propertyStyle),
           StringProperty('node_type', '<root node>', showName: false, quoted: false, style: propertyStyle),
@@ -387,9 +392,7 @@ void main() {
               TestTree(name: 'node B1', style: style),
               TestTree(
                 name: 'node B2',
-                properties: <DiagnosticsNode>[
-                  StringProperty('property1', 'value1', quoted: false, style: propertyStyle)
-                ],
+                properties: <DiagnosticsNode>[StringProperty('property1', 'value1', quoted: false, style: propertyStyle)],
                 style: style,
               ),
               TestTree(
@@ -414,7 +417,8 @@ void main() {
         style: lastChildStyle,
       );
 
-      if (tree.style != DiagnosticsTreeStyle.singleLine && tree.style != DiagnosticsTreeStyle.errorProperty) {
+      if (tree.style != DiagnosticsTreeStyle.singleLine &&
+          tree.style != DiagnosticsTreeStyle.errorProperty) {
         expect(tree, hasAGoodToStringDeep);
       }
 
@@ -429,302 +433,309 @@ void main() {
     goldenStyleTest(
       'sparse',
       style: DiagnosticsTreeStyle.sparse,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1: v1\n'
-          ' │ │ p2: v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1: value1\n'
-          ' │ │\n'
-          ' │ └─child node B3: TestTree#00000\n'
-          ' │     <leaf node>\n'
-          ' │     foo: 42\n'
-          ' │\n'
-          ' └─child node C: TestTree#00000\n'
-          '     foo:\n'
-          '       multi\n'
-          '       line\n'
-          '       value!\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ └─child node B3: TestTree#00000\n'
+      ' │     <leaf node>\n'
+      ' │     foo: 42\n'
+      ' │\n'
+      ' └─child node C: TestTree#00000\n'
+      '     foo:\n'
+      '       multi\n'
+      '       line\n'
+      '       value!\n',
     );
 
     goldenStyleTest(
       'sparse with indented single line properties',
       style: DiagnosticsTreeStyle.sparse,
       propertyStyle: DiagnosticsTreeStyle.errorProperty,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1:\n'
-          ' │   value1\n'
-          ' │ doubleProperty1:\n'
-          ' │   42.5\n'
-          ' │ roundedProperty:\n'
-          ' │   0.3\n'
-          ' │ nullProperty:\n'
-          ' │   null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1:\n'
-          ' │ │   v1\n'
-          ' │ │ p2:\n'
-          ' │ │   v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1:\n'
-          ' │ │     value1\n'
-          ' │ │\n'
-          ' │ └─child node B3: TestTree#00000\n'
-          ' │     <leaf node>\n'
-          ' │     foo:\n'
-          ' │       42\n'
-          ' │\n'
-          ' └─child node C: TestTree#00000\n'
-          '     foo:\n'
-          '       multi\n'
-          '       line\n'
-          '       value!\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1:\n'
+      ' │   value1\n'
+      ' │ doubleProperty1:\n'
+      ' │   42.5\n'
+      ' │ roundedProperty:\n'
+      ' │   0.3\n'
+      ' │ nullProperty:\n'
+      ' │   null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1:\n'
+      ' │ │   v1\n'
+      ' │ │ p2:\n'
+      ' │ │   v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1:\n'
+      ' │ │     value1\n'
+      ' │ │\n'
+      ' │ └─child node B3: TestTree#00000\n'
+      ' │     <leaf node>\n'
+      ' │     foo:\n'
+      ' │       42\n'
+      ' │\n'
+      ' └─child node C: TestTree#00000\n'
+      '     foo:\n'
+      '       multi\n'
+      '       line\n'
+      '       value!\n',
     );
 
     goldenStyleTest(
       'dense',
       style: DiagnosticsTreeStyle.dense,
       golden:
-          'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n'
-          '├child node A: TestTree#00000\n'
-          '├child node B: TestTree#00000(p1: v1, p2: v2)\n'
-          '│├child node B1: TestTree#00000\n'
-          '│├child node B2: TestTree#00000(property1: value1)\n'
-          '│└child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
-          '└child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
+        'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n'
+        '├child node A: TestTree#00000\n'
+        '├child node B: TestTree#00000(p1: v1, p2: v2)\n'
+        '│├child node B1: TestTree#00000\n'
+        '│├child node B2: TestTree#00000(property1: value1)\n'
+        '│└child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
+        '└child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
     );
 
     goldenStyleTest(
       'dashed',
       style: DiagnosticsTreeStyle.offstage,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ╎╌child node A: TestTree#00000\n'
-          ' ╎╌child node B: TestTree#00000\n'
-          ' ╎ │ p1: v1\n'
-          ' ╎ │ p2: v2\n'
-          ' ╎ │\n'
-          ' ╎ ╎╌child node B1: TestTree#00000\n'
-          ' ╎ ╎╌child node B2: TestTree#00000\n'
-          ' ╎ ╎   property1: value1\n'
-          ' ╎ ╎\n'
-          ' ╎ └╌child node B3: TestTree#00000\n'
-          ' ╎     <leaf node>\n'
-          ' ╎     foo: 42\n'
-          ' ╎\n'
-          ' └╌child node C: TestTree#00000\n'
-          '     foo:\n'
-          '       multi\n'
-          '       line\n'
-          '       value!\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ╎╌child node A: TestTree#00000\n'
+      ' ╎╌child node B: TestTree#00000\n'
+      ' ╎ │ p1: v1\n'
+      ' ╎ │ p2: v2\n'
+      ' ╎ │\n'
+      ' ╎ ╎╌child node B1: TestTree#00000\n'
+      ' ╎ ╎╌child node B2: TestTree#00000\n'
+      ' ╎ ╎   property1: value1\n'
+      ' ╎ ╎\n'
+      ' ╎ └╌child node B3: TestTree#00000\n'
+      ' ╎     <leaf node>\n'
+      ' ╎     foo: 42\n'
+      ' ╎\n'
+      ' └╌child node C: TestTree#00000\n'
+      '     foo:\n'
+      '       multi\n'
+      '       line\n'
+      '       value!\n',
     );
 
     goldenStyleTest(
       'transition children',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.transition,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1: v1\n'
-          ' │ │ p2: v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1: value1\n'
-          ' │ │\n'
-          ' │ ╘═╦══ child node B3 ═══\n'
-          ' │   ║ TestTree#00000:\n'
-          ' │   ║   <leaf node>\n'
-          ' │   ║   foo: 42\n'
-          ' │   ╚═══════════\n'
-          ' ╘═╦══ child node C ═══\n'
-          '   ║ TestTree#00000:\n'
-          '   ║   foo:\n'
-          '   ║     multi\n'
-          '   ║     line\n'
-          '   ║     value!\n'
-          '   ╚═══════════\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ ╘═╦══ child node B3 ═══\n'
+      ' │   ║ TestTree#00000:\n'
+      ' │   ║   <leaf node>\n'
+      ' │   ║   foo: 42\n'
+      ' │   ╚═══════════\n'
+      ' ╘═╦══ child node C ═══\n'
+      '   ║ TestTree#00000:\n'
+      '   ║   foo:\n'
+      '   ║     multi\n'
+      '   ║     line\n'
+      '   ║     value!\n'
+      '   ╚═══════════\n',
     );
 
     goldenStyleTest(
       'error children',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.error,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1: v1\n'
-          ' │ │ p2: v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1: value1\n'
-          ' │ │\n'
-          ' │ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
-          ' │   ║ <leaf node>\n'
-          ' │   ║ foo: 42\n'
-          ' │   ╚══════════════════════════════════════════════════════════════════\n'
-          ' ╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
-          '   ║ foo:\n'
-          '   ║   multi\n'
-          '   ║   line\n'
-          '   ║   value!\n'
-          '   ╚══════════════════════════════════════════════════════════════════\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
+      ' │   ║ <leaf node>\n'
+      ' │   ║ foo: 42\n'
+      ' │   ╚══════════════════════════════════════════════════════════════════\n'
+      ' ╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
+      '   ║ foo:\n'
+      '   ║   multi\n'
+      '   ║   line\n'
+      '   ║   value!\n'
+      '   ╚══════════════════════════════════════════════════════════════════\n',
     );
+
 
     // You would never really want to make everything a transition child like
     // this but you can and still get a readable tree.
     goldenStyleTest(
       'transition',
       style: DiagnosticsTreeStyle.transition,
-      golden: 'TestTree#00000:\n'
-          '  stringProperty1: value1\n'
-          '  doubleProperty1: 42.5\n'
-          '  roundedProperty: 0.3\n'
-          '  nullProperty: null\n'
-          '  <root node>\n'
-          '  ╞═╦══ child node A ═══\n'
-          '  │ ║ TestTree#00000\n'
-          '  │ ╚═══════════\n'
-          '  ╞═╦══ child node B ═══\n'
-          '  │ ║ TestTree#00000:\n'
-          '  │ ║   p1: v1\n'
-          '  │ ║   p2: v2\n'
-          '  │ ║   ╞═╦══ child node B1 ═══\n'
-          '  │ ║   │ ║ TestTree#00000\n'
-          '  │ ║   │ ╚═══════════\n'
-          '  │ ║   ╞═╦══ child node B2 ═══\n'
-          '  │ ║   │ ║ TestTree#00000:\n'
-          '  │ ║   │ ║   property1: value1\n'
-          '  │ ║   │ ╚═══════════\n'
-          '  │ ║   ╘═╦══ child node B3 ═══\n'
-          '  │ ║     ║ TestTree#00000:\n'
-          '  │ ║     ║   <leaf node>\n'
-          '  │ ║     ║   foo: 42\n'
-          '  │ ║     ╚═══════════\n'
-          '  │ ╚═══════════\n'
-          '  ╘═╦══ child node C ═══\n'
-          '    ║ TestTree#00000:\n'
-          '    ║   foo:\n'
-          '    ║     multi\n'
-          '    ║     line\n'
-          '    ║     value!\n'
-          '    ╚═══════════\n',
+      golden:
+      'TestTree#00000:\n'
+      '  stringProperty1: value1\n'
+      '  doubleProperty1: 42.5\n'
+      '  roundedProperty: 0.3\n'
+      '  nullProperty: null\n'
+      '  <root node>\n'
+      '  ╞═╦══ child node A ═══\n'
+      '  │ ║ TestTree#00000\n'
+      '  │ ╚═══════════\n'
+      '  ╞═╦══ child node B ═══\n'
+      '  │ ║ TestTree#00000:\n'
+      '  │ ║   p1: v1\n'
+      '  │ ║   p2: v2\n'
+      '  │ ║   ╞═╦══ child node B1 ═══\n'
+      '  │ ║   │ ║ TestTree#00000\n'
+      '  │ ║   │ ╚═══════════\n'
+      '  │ ║   ╞═╦══ child node B2 ═══\n'
+      '  │ ║   │ ║ TestTree#00000:\n'
+      '  │ ║   │ ║   property1: value1\n'
+      '  │ ║   │ ╚═══════════\n'
+      '  │ ║   ╘═╦══ child node B3 ═══\n'
+      '  │ ║     ║ TestTree#00000:\n'
+      '  │ ║     ║   <leaf node>\n'
+      '  │ ║     ║   foo: 42\n'
+      '  │ ║     ╚═══════════\n'
+      '  │ ╚═══════════\n'
+      '  ╘═╦══ child node C ═══\n'
+      '    ║ TestTree#00000:\n'
+      '    ║   foo:\n'
+      '    ║     multi\n'
+      '    ║     line\n'
+      '    ║     value!\n'
+      '    ╚═══════════\n',
     );
 
     goldenStyleTest(
       'whitespace',
       style: DiagnosticsTreeStyle.whitespace,
-      golden: 'TestTree#00000:\n'
-          '  stringProperty1: value1\n'
-          '  doubleProperty1: 42.5\n'
-          '  roundedProperty: 0.3\n'
-          '  nullProperty: null\n'
-          '  <root node>\n'
-          '  child node A: TestTree#00000\n'
-          '  child node B: TestTree#00000:\n'
-          '    p1: v1\n'
-          '    p2: v2\n'
-          '    child node B1: TestTree#00000\n'
-          '    child node B2: TestTree#00000:\n'
-          '      property1: value1\n'
-          '    child node B3: TestTree#00000:\n'
-          '      <leaf node>\n'
-          '      foo: 42\n'
-          '  child node C: TestTree#00000:\n'
-          '    foo:\n'
-          '      multi\n'
-          '      line\n'
-          '      value!\n',
+      golden:
+        'TestTree#00000:\n'
+        '  stringProperty1: value1\n'
+        '  doubleProperty1: 42.5\n'
+        '  roundedProperty: 0.3\n'
+        '  nullProperty: null\n'
+        '  <root node>\n'
+        '  child node A: TestTree#00000\n'
+        '  child node B: TestTree#00000:\n'
+        '    p1: v1\n'
+        '    p2: v2\n'
+        '    child node B1: TestTree#00000\n'
+        '    child node B2: TestTree#00000:\n'
+        '      property1: value1\n'
+        '    child node B3: TestTree#00000:\n'
+        '      <leaf node>\n'
+        '      foo: 42\n'
+        '  child node C: TestTree#00000:\n'
+        '    foo:\n'
+        '      multi\n'
+        '      line\n'
+        '      value!\n',
     );
 
     goldenStyleTest(
       'flat',
       style: DiagnosticsTreeStyle.flat,
-      golden: 'TestTree#00000:\n'
-          'stringProperty1: value1\n'
-          'doubleProperty1: 42.5\n'
-          'roundedProperty: 0.3\n'
-          'nullProperty: null\n'
-          '<root node>\n'
-          'child node A: TestTree#00000\n'
-          'child node B: TestTree#00000:\n'
-          'p1: v1\n'
-          'p2: v2\n'
-          'child node B1: TestTree#00000\n'
-          'child node B2: TestTree#00000:\n'
-          'property1: value1\n'
-          'child node B3: TestTree#00000:\n'
-          '<leaf node>\n'
-          'foo: 42\n'
-          'child node C: TestTree#00000:\n'
-          'foo:\n'
-          '  multi\n'
-          '  line\n'
-          '  value!\n',
+      golden:
+      'TestTree#00000:\n'
+      'stringProperty1: value1\n'
+      'doubleProperty1: 42.5\n'
+      'roundedProperty: 0.3\n'
+      'nullProperty: null\n'
+      '<root node>\n'
+      'child node A: TestTree#00000\n'
+      'child node B: TestTree#00000:\n'
+      'p1: v1\n'
+      'p2: v2\n'
+      'child node B1: TestTree#00000\n'
+      'child node B2: TestTree#00000:\n'
+      'property1: value1\n'
+      'child node B3: TestTree#00000:\n'
+      '<leaf node>\n'
+      'foo: 42\n'
+      'child node C: TestTree#00000:\n'
+      'foo:\n'
+      '  multi\n'
+      '  line\n'
+      '  value!\n',
     );
     // Single line mode does not display children.
     goldenStyleTest(
       'single line',
       style: DiagnosticsTreeStyle.singleLine,
-      golden:
-          'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
+      golden: 'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
     );
 
     goldenStyleTest(
       'single line',
       name: 'some name',
       style: DiagnosticsTreeStyle.singleLine,
-      golden:
-          'some name: TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
+      golden: 'some name: TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
     );
 
     // No name so we don't indent.
     goldenStyleTest(
       'indented single line',
       style: DiagnosticsTreeStyle.errorProperty,
-      golden:
-          'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
+      golden: 'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
     );
 
     goldenStyleTest(
       'indented single line',
       name: 'some name',
       style: DiagnosticsTreeStyle.errorProperty,
-      golden: 'some name:\n'
-          '  TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
+      golden:
+      'some name:\n'
+      '  TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
     );
 
     // TODO(jacobr): this is an ugly test case.
@@ -735,24 +746,25 @@ void main() {
       'single line last child',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.singleLine,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1: v1\n'
-          ' │ │ p2: v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1: value1\n'
-          ' │ │\n'
-          ' │ └─child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
-          ' └─child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ └─child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
+      ' └─child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
     );
 
     // TODO(jacobr): this is an ugly test case.
@@ -766,26 +778,27 @@ void main() {
       'indented single line last child',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.errorProperty,
-      golden: 'TestTree#00000\n'
-          ' │ stringProperty1: value1\n'
-          ' │ doubleProperty1: 42.5\n'
-          ' │ roundedProperty: 0.3\n'
-          ' │ nullProperty: null\n'
-          ' │ <root node>\n'
-          ' │\n'
-          ' ├─child node A: TestTree#00000\n'
-          ' ├─child node B: TestTree#00000\n'
-          ' │ │ p1: v1\n'
-          ' │ │ p2: v2\n'
-          ' │ │\n'
-          ' │ ├─child node B1: TestTree#00000\n'
-          ' │ ├─child node B2: TestTree#00000\n'
-          ' │ │   property1: value1\n'
-          ' │ │\n'
-          ' │ └─child node B3:\n'
-          ' │     TestTree#00000(<leaf node>, foo: 42)\n'
-          ' └─child node C:\n'
-          '     TestTree#00000(foo: multi\\nline\\nvalue!)\n',
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ └─child node B3:\n'
+      ' │     TestTree#00000(<leaf node>, foo: 42)\n'
+      ' └─child node C:\n'
+      '     TestTree#00000(foo: multi\\nline\\nvalue!)\n',
     );
   });
 
@@ -809,8 +822,7 @@ void main() {
 
     expect(
       tree.toString(minLevel: DiagnosticLevel.debug),
-      equalsIgnoringHashCodes(
-          'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, DEBUG_ONLY: DEBUG_ONLY)'),
+      equalsIgnoringHashCodes('TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, DEBUG_ONLY: DEBUG_ONLY)'),
     );
   });
 
@@ -993,8 +1005,7 @@ void main() {
     );
 
     expect(DiagnosticsProperty<bool>('name', null).isFiltered(DiagnosticLevel.info), isFalse);
-    expect(DiagnosticsProperty<bool>('name', true, level: DiagnosticLevel.hidden).isFiltered(DiagnosticLevel.info),
-        isTrue);
+    expect(DiagnosticsProperty<bool>('name', true, level: DiagnosticLevel.hidden).isFiltered(DiagnosticLevel.info), isTrue);
     expect(DiagnosticsProperty<bool>('name', null, defaultValue: null).isFiltered(DiagnosticLevel.info), isTrue);
     final DiagnosticsProperty<bool> missingBool = DiagnosticsProperty<bool>('name', null, ifNull: 'missing');
     expect(
@@ -1033,7 +1044,7 @@ void main() {
       tooltip: 'tooltip',
     );
     expect(
-      withTooltip.toString(),
+     withTooltip.toString(),
       equals('name: value (tooltip)'),
     );
     expect(withTooltip.value, equals('value'));
@@ -1079,7 +1090,7 @@ void main() {
   test('unsafe double property test', () {
     final DoubleProperty safe = DoubleProperty.lazy(
       'name',
-      () => 42.0,
+        () => 42.0,
     );
     expect(safe.toString(), equals('name: 42.0'));
     expect(safe.isFiltered(DiagnosticLevel.info), isFalse);
@@ -1121,8 +1132,7 @@ void main() {
       equals('name: 40.0%'),
     );
 
-    final PercentProperty complexPercentProperty =
-        PercentProperty('name', 0.99, unit: 'invisible', tooltip: 'almost transparent');
+    final PercentProperty complexPercentProperty = PercentProperty('name', 0.99, unit: 'invisible', tooltip: 'almost transparent');
     expect(
       complexPercentProperty.toString(),
       equals('name: 99.0% invisible (almost transparent)'),
@@ -1186,7 +1196,7 @@ void main() {
   });
 
   test('callback property test', () {
-    void onClick() {}
+    void onClick() { }
     final ObjectFlagProperty<Function> present = ObjectFlagProperty<Function>(
       'onClick',
       onClick,
@@ -1208,7 +1218,7 @@ void main() {
   });
 
   test('missing callback property test', () {
-    void onClick() {}
+    void onClick() { }
 
     final ObjectFlagProperty<Function> present = ObjectFlagProperty<Function>(
       'onClick',
@@ -1620,7 +1630,7 @@ void main() {
   });
 
   test('has property test', () {
-    void onClick() {}
+    void onClick() { }
     final ObjectFlagProperty<Function> has = ObjectFlagProperty<Function>.has(
       'onClick',
       onClick,
@@ -1645,8 +1655,8 @@ void main() {
   test('iterable flags property test', () {
     // Normal property
     {
-      void onClick() {}
-      void onMove() {}
+      void onClick() { }
+      void onMove() { }
       final Map<String, Function> value = <String, Function>{
         'click': onClick,
         'move': onMove,
@@ -1664,8 +1674,8 @@ void main() {
 
     // Reversed-order property
     {
-      void onClick() {}
-      void onMove() {}
+      void onClick() { }
+      void onMove() { }
       final Map<String, Function> value = <String, Function>{
         'move': onMove,
         'click': onClick,
@@ -1681,7 +1691,7 @@ void main() {
 
     // Partially empty property
     {
-      void onClick() {}
+      void onClick() { }
       final Map<String, Function?> value = <String, Function?>{
         'move': null,
         'click': onClick,
@@ -1725,7 +1735,7 @@ void main() {
   });
 
   test('iterable property test', () {
-    final List<int> ints = <int>[1, 2, 3];
+    final List<int> ints = <int>[1,2,3];
     final IterableProperty<int> intsProperty = IterableProperty<int>(
       'ints',
       ints,
@@ -1734,7 +1744,7 @@ void main() {
     expect(intsProperty.isFiltered(DiagnosticLevel.info), isFalse);
     expect(intsProperty.toString(), equals('ints: 1, 2, 3'));
 
-    final List<double> doubles = <double>[1, 2, 3];
+    final List<double> doubles = <double>[1,2,3];
     final IterableProperty<double> doublesProperty = IterableProperty<double>(
       'doubles',
       doubles,
@@ -1921,7 +1931,7 @@ void main() {
         name: 'Test tree',
         properties: <DiagnosticsNode>[
           DiagnosticsNode.message(
-            '--- example property at max length --',
+          '--- example property at max length --',
             style: propertyStyle,
           ),
           DiagnosticsNode.message(
@@ -1970,9 +1980,9 @@ void main() {
           DiagnosticsProperty<String>(
             'multi-line value',
             '[1.0, 0.0, 0.0, 0.0]\n'
-                '[1.0, 1.0, 0.0, 0.0]\n'
-                '[1.0, 0.0, 1.0, 0.0]\n'
-                '[1.0, 0.0, 0.0, 1.0]\n',
+            '[1.0, 1.0, 0.0, 0.0]\n'
+            '[1.0, 0.0, 1.0, 0.0]\n'
+            '[1.0, 0.0, 0.0, 1.0]\n',
             style: propertyStyle,
           ),
           DiagnosticsNode.message(
@@ -1982,8 +1992,8 @@ void main() {
           DiagnosticsProperty<String>(
             'This property has a very long property name that will be allowed to wrap unlike most property names. This property has a very long property name that will be allowed to wrap unlike most property names',
             'This is a very long message that must wrap as it cannot fit on one line. '
-                'This is a very long message that must wrap as it cannot fit on one line. '
-                'This is a very long message that must wrap as it cannot fit on one line.',
+            'This is a very long message that must wrap as it cannot fit on one line. '
+            'This is a very long message that must wrap as it cannot fit on one line.',
             style: propertyStyle,
           ),
           DiagnosticsNode.message(
@@ -1993,9 +2003,9 @@ void main() {
           DiagnosticsProperty<String>(
             'This property has a very long property name that will be allowed to wrap unlike most property names. This property has a very long property name that will be allowed to wrap unlike most property names',
             '[1.0, 0.0, 0.0, 0.0]\n'
-                '[1.0, 1.0, 0.0, 0.0]\n'
-                '[1.0, 0.0, 1.0, 0.0]\n'
-                '[1.0, 0.0, 0.0, 1.0]\n',
+            '[1.0, 1.0, 0.0, 0.0]\n'
+            '[1.0, 0.0, 1.0, 0.0]\n'
+            '[1.0, 0.0, 0.0, 1.0]\n',
             style: propertyStyle,
           ),
           DiagnosticsNode.message(

@@ -24,9 +24,9 @@ void main() {
     // Add generate:true to pubspec.yaml.
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     final String content = pubspecFile.readAsStringSync().replaceFirst(
-          '\nflutter:\n',
-          '\nflutter:\n  generate: true\n',
-        );
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
     pubspecFile.writeAsStringSync(content);
 
     // Create an l10n.yaml file
@@ -43,8 +43,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello':
-          ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -57,10 +56,10 @@ void main() {
         environment: environment,
         buildSystem: buildSystem,
       ),
-      throwsToolExit(
-        message: 'Generating synthetic localizations package failed with 1 error:'
-            '\n\n'
-            'FormatException: illegal character in input string',
+      throwsToolExit(message:
+        'Generating synthetic localizations package failed with 1 error:'
+        '\n\n'
+        'FormatException: illegal character in input string',
       ),
     );
     await completer.future;
@@ -73,9 +72,9 @@ void main() {
     // Add generate:true to pubspec.yaml.
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     final String content = pubspecFile.readAsStringSync().replaceFirst(
-          '\nflutter:\n',
-          '\nflutter:\n  generate: true\n',
-        );
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
     pubspecFile.writeAsStringSync(content);
 
     // Create an l10n.yaml file
@@ -93,8 +92,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello':
-          ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -107,10 +105,10 @@ void main() {
         environment: environment,
         buildSystem: buildSystem,
       ),
-      throwsToolExit(
-        message: 'Generating synthetic localizations package failed with 1 error:'
-            '\n\n'
-            'FormatException: illegal character in input string',
+      throwsToolExit(message:
+        'Generating synthetic localizations package failed with 1 error:'
+        '\n\n'
+        'FormatException: illegal character in input string',
       ),
     );
     await completer.future;
@@ -123,9 +121,9 @@ void main() {
     // Add generate:true to pubspec.yaml.
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     final String content = pubspecFile.readAsStringSync().replaceFirst(
-          '\nflutter:\n',
-          '\nflutter:\n  generate: true\n',
-        );
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
     pubspecFile.writeAsStringSync(content);
 
     // Create an l10n.yaml file
@@ -141,8 +139,7 @@ void main() {
     );
     final Completer<void> completer = Completer<void>();
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-      'hello':
-          ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
+      'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
     final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
@@ -155,10 +152,10 @@ void main() {
         environment: environment,
         buildSystem: buildSystem,
       ),
-      throwsToolExit(
-        message: 'Generating synthetic localizations package failed with 1 error:'
-            '\n\n'
-            'FormatException: illegal character in input string',
+      throwsToolExit(message:
+        'Generating synthetic localizations package failed with 1 error:'
+        '\n\n'
+        'FormatException: illegal character in input string',
       ),
     );
     await completer.future;
@@ -171,9 +168,9 @@ void main() {
     // Add generate:true to pubspec.yaml.
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     final String content = pubspecFile.readAsStringSync().replaceFirst(
-          '\nflutter:\n',
-          '\nflutter:\n  generate: true\n',
-        );
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
     pubspecFile.writeAsStringSync(content);
 
     final BufferLogger mockBufferLogger = BufferLogger.test();
@@ -200,9 +197,9 @@ void main() {
     // Add generate:true to pubspec.yaml.
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     final String content = pubspecFile.readAsStringSync().replaceFirst(
-          '\nflutter:\n',
-          '\nflutter:\n  generate: true\n',
-        );
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
     pubspecFile.writeAsStringSync(content);
 
     // Create an l10n.yaml file
@@ -235,9 +232,9 @@ void main() {
     // Add generate:true to pubspec.yaml.
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
     final String content = pubspecFile.readAsStringSync().replaceFirst(
-          '\nflutter:\n',
-          '\nflutter:\n  generate: true\n',
-        );
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
     pubspecFile.writeAsStringSync(content);
 
     // Create an l10n.yaml file

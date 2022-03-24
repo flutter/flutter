@@ -635,12 +635,12 @@ class AutofillConfiguration {
     required TextEditingValue currentEditingValue,
     String? hintText,
   }) : this._(
-          enabled: true,
-          uniqueIdentifier: uniqueIdentifier,
-          autofillHints: autofillHints,
-          currentEditingValue: currentEditingValue,
-          hintText: hintText,
-        );
+    enabled: true,
+    uniqueIdentifier: uniqueIdentifier,
+    autofillHints: autofillHints,
+    currentEditingValue: currentEditingValue,
+    hintText: hintText,
+  );
 
   const AutofillConfiguration._({
     required this.enabled,
@@ -648,8 +648,8 @@ class AutofillConfiguration {
     this.autofillHints = const <String>[],
     this.hintText,
     required this.currentEditingValue,
-  })  : assert(uniqueIdentifier != null),
-        assert(autofillHints != null);
+  }) : assert(uniqueIdentifier != null),
+       assert(autofillHints != null);
 
   /// An [AutofillConfiguration] that indicates the [AutofillClient] does not
   /// wish to be autofilled.
@@ -734,13 +734,13 @@ class AutofillConfiguration {
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic>? toJson() {
     return enabled
-        ? <String, dynamic>{
-            'uniqueIdentifier': uniqueIdentifier,
-            'hints': autofillHints,
-            'editingValue': currentEditingValue.toJSON(),
-            if (hintText != null) 'hintText': hintText,
-          }
-        : null;
+      ? <String, dynamic>{
+          'uniqueIdentifier': uniqueIdentifier,
+          'hints': autofillHints,
+          'editingValue': currentEditingValue.toJSON(),
+          if (hintText != null) 'hintText': hintText,
+        }
+      : null;
   }
 }
 
@@ -807,29 +807,29 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
     required this.allConfigurations,
     required TextInputConfiguration currentClientConfiguration,
-  })  : assert(allConfigurations != null),
-        assert(currentClientConfiguration != null),
-        super(
-          inputType: currentClientConfiguration.inputType,
-          obscureText: currentClientConfiguration.obscureText,
-          autocorrect: currentClientConfiguration.autocorrect,
-          smartDashesType: currentClientConfiguration.smartDashesType,
-          smartQuotesType: currentClientConfiguration.smartQuotesType,
-          enableSuggestions: currentClientConfiguration.enableSuggestions,
-          inputAction: currentClientConfiguration.inputAction,
-          textCapitalization: currentClientConfiguration.textCapitalization,
-          keyboardAppearance: currentClientConfiguration.keyboardAppearance,
-          actionLabel: currentClientConfiguration.actionLabel,
-          autofillConfiguration: currentClientConfiguration.autofillConfiguration,
-        );
+  }) : assert(allConfigurations != null),
+       assert(currentClientConfiguration != null),
+       super(inputType: currentClientConfiguration.inputType,
+         obscureText: currentClientConfiguration.obscureText,
+         autocorrect: currentClientConfiguration.autocorrect,
+         smartDashesType: currentClientConfiguration.smartDashesType,
+         smartQuotesType: currentClientConfiguration.smartQuotesType,
+         enableSuggestions: currentClientConfiguration.enableSuggestions,
+         inputAction: currentClientConfiguration.inputAction,
+         textCapitalization: currentClientConfiguration.textCapitalization,
+         keyboardAppearance: currentClientConfiguration.keyboardAppearance,
+         actionLabel: currentClientConfiguration.actionLabel,
+         autofillConfiguration: currentClientConfiguration.autofillConfiguration,
+       );
 
   final Iterable<TextInputConfiguration> allConfigurations;
 
   @override
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> result = super.toJson();
-    result['fields'] =
-        allConfigurations.map((TextInputConfiguration configuration) => configuration.toJson()).toList(growable: false);
+    result['fields'] = allConfigurations
+      .map((TextInputConfiguration configuration) => configuration.toJson())
+      .toList(growable: false);
     return result;
   }
 }

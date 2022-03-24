@@ -224,16 +224,12 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
   List<S>? _debugPreviousSlots;
 
   void _updateChildren() {
-    final SlottedMultiChildRenderObjectWidgetMixin<S> slottedMultiChildRenderObjectWidgetMixin =
-        widget as SlottedMultiChildRenderObjectWidgetMixin<S>;
+    final SlottedMultiChildRenderObjectWidgetMixin<S> slottedMultiChildRenderObjectWidgetMixin = widget as SlottedMultiChildRenderObjectWidgetMixin<S>;
     assert(() {
       _debugPreviousSlots ??= slottedMultiChildRenderObjectWidgetMixin.slots.toList();
       return listEquals(_debugPreviousSlots, slottedMultiChildRenderObjectWidgetMixin.slots.toList());
     }(), '${widget.runtimeType}.slots must not change.');
-    assert(
-        slottedMultiChildRenderObjectWidgetMixin.slots.toSet().length ==
-            slottedMultiChildRenderObjectWidgetMixin.slots.length,
-        'slots must be unique');
+    assert(slottedMultiChildRenderObjectWidgetMixin.slots.toSet().length == slottedMultiChildRenderObjectWidgetMixin.slots.length, 'slots must be unique');
 
     for (final S slot in slottedMultiChildRenderObjectWidgetMixin.slots) {
       _updateChild(slottedMultiChildRenderObjectWidgetMixin.childForSlot(slot), slot);

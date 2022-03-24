@@ -107,7 +107,8 @@ class RasterCacheSummarizer {
     return values.last;
   }
 
-  List<double> _extractValues(String name) => rasterCacheEvents.map((TimelineEvent e) => _getValue(e, name)).toList();
+  List<double> _extractValues(String name) =>
+      rasterCacheEvents.map((TimelineEvent e) => _getValue(e, name)).toList();
 
   double _getValue(TimelineEvent e, String name) {
     assert(e.name == kRasterCacheEvent);

@@ -34,7 +34,6 @@ const Map<String, LogicalKeyboardKey> _kIosToLogicalMap = <String, LogicalKeyboa
   'UIKeyInputPageUp': LogicalKeyboardKey.pageUp,
   'UIKeyInputPageDown': LogicalKeyboardKey.pageDown,
 };
-
 /// Platform-specific key event data for iOS.
 ///
 /// This object contains information about key events obtained from iOS'
@@ -53,10 +52,10 @@ class RawKeyEventDataIos extends RawKeyEventData {
     this.charactersIgnoringModifiers = '',
     this.keyCode = 0,
     this.modifiers = 0,
-  })  : assert(characters != null),
-        assert(charactersIgnoringModifiers != null),
-        assert(keyCode != null),
-        assert(modifiers != null);
+  }) : assert(characters != null),
+       assert(charactersIgnoringModifiers != null),
+       assert(keyCode != null),
+       assert(modifiers != null);
 
   /// The Unicode characters associated with a key-up or key-down event.
   ///
@@ -91,8 +90,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
   String get keyLabel => charactersIgnoringModifiers;
 
   @override
-  PhysicalKeyboardKey get physicalKey =>
-      kIosToPhysicalKey[keyCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.iosPlane + keyCode);
+  PhysicalKeyboardKey get physicalKey => kIosToPhysicalKey[keyCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.iosPlane + keyCode);
 
   @override
   LogicalKeyboardKey get logicalKey {
@@ -121,7 +119,9 @@ class RawKeyEventDataIos extends RawKeyEventData {
     // Unicode value. Control keys such as ESC, CTRL, and SHIFT are not
     // printable. HOME, DEL, arrow keys, and function keys are considered
     // modifier function keys, which generate invalid Unicode scalar values.
-    if (keyLabel.isNotEmpty && !LogicalKeyboardKey.isControlCharacter(keyLabel) && !_isUnprintableKey(keyLabel)) {
+    if (keyLabel.isNotEmpty &&
+        !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
+        !_isUnprintableKey(keyLabel)) {
       // Given that charactersIgnoringModifiers can contain a String of
       // arbitrary length, limit to a maximum of two Unicode scalar values. It
       // is unlikely that a keyboard would produce a code point bigger than 32
@@ -186,28 +186,24 @@ class RawKeyEventDataIos extends RawKeyEventData {
     bool result;
     switch (key) {
       case ModifierKey.controlModifier:
-        result = _isLeftRightModifierPressed(
-            side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);
+        result = _isLeftRightModifierPressed(side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);
         break;
       case ModifierKey.shiftModifier:
-        result = _isLeftRightModifierPressed(
-            side, independentModifier & modifierShift, modifierLeftShift, modifierRightShift);
+        result = _isLeftRightModifierPressed(side, independentModifier & modifierShift, modifierLeftShift, modifierRightShift);
         break;
       case ModifierKey.altModifier:
-        result = _isLeftRightModifierPressed(
-            side, independentModifier & modifierOption, modifierLeftOption, modifierRightOption);
+        result = _isLeftRightModifierPressed(side, independentModifier & modifierOption, modifierLeftOption, modifierRightOption);
         break;
       case ModifierKey.metaModifier:
-        result = _isLeftRightModifierPressed(
-            side, independentModifier & modifierCommand, modifierLeftCommand, modifierRightCommand);
+        result = _isLeftRightModifierPressed(side, independentModifier & modifierCommand, modifierLeftCommand, modifierRightCommand);
         break;
       case ModifierKey.capsLockModifier:
         result = independentModifier & modifierCapsLock != 0;
         break;
-      // On iOS, the function modifier bit is set for any function key, like F1,
-      // F2, etc., but the meaning of ModifierKey.modifierFunction in Flutter is
-      // that of the Fn modifier key, so there's no good way to emulate that on
-      // iOS.
+    // On iOS, the function modifier bit is set for any function key, like F1,
+    // F2, etc., but the meaning of ModifierKey.modifierFunction in Flutter is
+    // that of the Fn modifier key, so there's no good way to emulate that on
+    // iOS.
       case ModifierKey.functionModifier:
       case ModifierKey.numLockModifier:
       case ModifierKey.symbolModifier:
@@ -216,8 +212,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
         result = false;
         break;
     }
-    assert(!result || getModifierSide(key) != null,
-        "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
+    assert(!result || getModifierSide(key) != null, "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
     return result;
   }
 
@@ -261,30 +256,32 @@ class RawKeyEventDataIos extends RawKeyEventData {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('characters', characters));
-    properties.add(DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers));
-    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
-    properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+        properties.add(DiagnosticsProperty<String>('characters', characters));
+        properties.add(DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers));
+        properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+        properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is RawKeyEventDataIos &&
-        other.characters == characters &&
-        other.charactersIgnoringModifiers == charactersIgnoringModifiers &&
-        other.keyCode == keyCode &&
-        other.modifiers == modifiers;
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataIos
+        && other.characters == characters
+        && other.charactersIgnoringModifiers == charactersIgnoringModifiers
+        && other.keyCode == keyCode
+        && other.modifiers == modifiers;
   }
 
   @override
   int get hashCode => Object.hash(
-        characters,
-        charactersIgnoringModifiers,
-        keyCode,
-        modifiers,
-      );
+    characters,
+    charactersIgnoringModifiers,
+    keyCode,
+    modifiers,
+  );
 
   // Modifier key masks. See Apple's UIKey documentation
   // https://developer.apple.com/documentation/uikit/uikeymodifierflags?language=objc

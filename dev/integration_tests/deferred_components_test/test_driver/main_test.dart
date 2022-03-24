@@ -22,7 +22,8 @@ Future<void> main() async {
     final String preloadText = await driver.getText(find.byValueKey('PreloadText'));
     expect(preloadText, 'preload');
 
-    final SerializableFinder fab = find.byValueKey('FloatingActionButton');
+    final SerializableFinder fab =
+      find.byValueKey('FloatingActionButton');
     await driver.tap(fab);
 
     final String placeholderText = await driver.getText(find.byValueKey('PlaceholderText'));

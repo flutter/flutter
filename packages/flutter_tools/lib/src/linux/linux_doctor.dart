@@ -32,9 +32,9 @@ class LinuxDoctorValidator extends DoctorValidator {
   LinuxDoctorValidator({
     required ProcessManager processManager,
     required UserMessages userMessages,
-  })  : _processManager = processManager,
-        _userMessages = userMessages,
-        super('Linux toolchain - develop for Linux desktop');
+  }) : _processManager = processManager,
+       _userMessages = userMessages,
+       super('Linux toolchain - develop for Linux desktop');
 
   final ProcessManager _processManager;
   final UserMessages _userMessages;
@@ -64,14 +64,15 @@ class LinuxDoctorValidator extends DoctorValidator {
 
     final Map<String, _VersionInfo?> installedVersions = <String, _VersionInfo?>{
       // Sort the check to make the call order predictable for unit tests.
-      for (String binary in _requiredBinaryVersions.keys.toList()..sort()) binary: await _getBinaryVersion(binary)
+      for (String binary in _requiredBinaryVersions.keys.toList()..sort())
+          binary: await _getBinaryVersion(binary)
     };
 
     // Determine overall validation level.
     if (installedVersions.values.any((_VersionInfo? versionInfo) => versionInfo?.number == null)) {
       validationType = ValidationType.missing;
-    } else if (installedVersions.keys
-        .any((String binary) => installedVersions[binary]!.number! < _requiredBinaryVersions[binary]!)) {
+    } else if (installedVersions.keys.any((String binary) =>
+          installedVersions[binary]!.number! < _requiredBinaryVersions[binary]!)) {
       validationType = ValidationType.partial;
     }
 

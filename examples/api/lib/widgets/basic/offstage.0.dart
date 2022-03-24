@@ -39,7 +39,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   bool _offstage = true;
 
   Size _getFlutterLogoSize() {
-    final RenderBox renderLogo = _key.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox renderLogo =
+        _key.currentContext!.findRenderObject()! as RenderBox;
     return renderLogo.size;
   }
 
@@ -70,7 +71,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Flutter Logo size is ${_getFlutterLogoSize()}'),
+                    content:
+                        Text('Flutter Logo size is ${_getFlutterLogoSize()}'),
                   ),
                 );
               }),

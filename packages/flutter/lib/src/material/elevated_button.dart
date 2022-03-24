@@ -73,17 +73,17 @@ class ElevatedButton extends ButtonStyleButton {
     Clip clipBehavior = Clip.none,
     required Widget? child,
   }) : super(
-          key: key,
-          onPressed: onPressed,
-          onLongPress: onLongPress,
-          onHover: onHover,
-          onFocusChange: onFocusChange,
-          style: style,
-          focusNode: focusNode,
-          autofocus: autofocus,
-          clipBehavior: clipBehavior,
-          child: child,
-        );
+    key: key,
+    onPressed: onPressed,
+    onLongPress: onLongPress,
+    onHover: onHover,
+    onFocusChange: onFocusChange,
+    style: style,
+    focusNode: focusNode,
+    autofocus: autofocus,
+    clipBehavior: clipBehavior,
+    child: child,
+  );
 
   /// Create an elevated button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -165,17 +165,21 @@ class ElevatedButton extends ButtonStyleButton {
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
   }) {
-    final MaterialStateProperty<Color?>? backgroundColor =
-        (onSurface == null && primary == null) ? null : _ElevatedButtonDefaultBackground(primary, onSurface);
-    final MaterialStateProperty<Color?>? foregroundColor =
-        (onSurface == null && onPrimary == null) ? null : _ElevatedButtonDefaultForeground(onPrimary, onSurface);
-    final MaterialStateProperty<Color?>? overlayColor =
-        (onPrimary == null) ? null : _ElevatedButtonDefaultOverlay(onPrimary);
-    final MaterialStateProperty<double>? elevationValue =
-        (elevation == null) ? null : _ElevatedButtonDefaultElevation(elevation);
+    final MaterialStateProperty<Color?>? backgroundColor = (onSurface == null && primary == null)
+      ? null
+      : _ElevatedButtonDefaultBackground(primary, onSurface);
+    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && onPrimary == null)
+      ? null
+      : _ElevatedButtonDefaultForeground(onPrimary, onSurface);
+    final MaterialStateProperty<Color?>? overlayColor = (onPrimary == null)
+      ? null
+      : _ElevatedButtonDefaultOverlay(onPrimary);
+    final MaterialStateProperty<double>? elevationValue = (elevation == null)
+      ? null
+      : _ElevatedButtonDefaultElevation(elevation);
     final MaterialStateProperty<MouseCursor?>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
-        ? null
-        : _ElevatedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
+      ? null
+      : _ElevatedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
       textStyle: MaterialStateProperty.all<TextStyle?>(textStyle),
@@ -323,7 +327,8 @@ class _ElevatedButtonDefaultBackground extends MaterialStateProperty<Color?> wit
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) return onSurface?.withOpacity(0.12);
+    if (states.contains(MaterialState.disabled))
+      return onSurface?.withOpacity(0.12);
     return primary;
   }
 }
@@ -337,7 +342,8 @@ class _ElevatedButtonDefaultForeground extends MaterialStateProperty<Color?> wit
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) return onSurface?.withOpacity(0.38);
+    if (states.contains(MaterialState.disabled))
+      return onSurface?.withOpacity(0.38);
     return onPrimary;
   }
 }
@@ -350,7 +356,8 @@ class _ElevatedButtonDefaultOverlay extends MaterialStateProperty<Color?> with D
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.hovered)) return onPrimary.withOpacity(0.08);
+    if (states.contains(MaterialState.hovered))
+      return onPrimary.withOpacity(0.08);
     if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
       return onPrimary.withOpacity(0.24);
     return null;
@@ -365,10 +372,14 @@ class _ElevatedButtonDefaultElevation extends MaterialStateProperty<double> with
 
   @override
   double resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) return 0;
-    if (states.contains(MaterialState.hovered)) return elevation + 2;
-    if (states.contains(MaterialState.focused)) return elevation + 2;
-    if (states.contains(MaterialState.pressed)) return elevation + 6;
+    if (states.contains(MaterialState.disabled))
+      return 0;
+    if (states.contains(MaterialState.hovered))
+      return elevation + 2;
+    if (states.contains(MaterialState.focused))
+      return elevation + 2;
+    if (states.contains(MaterialState.pressed))
+      return elevation + 6;
     return elevation;
   }
 }
@@ -382,7 +393,8 @@ class _ElevatedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCurso
 
   @override
   MouseCursor? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) return disabledCursor;
+    if (states.contains(MaterialState.disabled))
+      return disabledCursor;
     return enabledCursor;
   }
 }
@@ -400,20 +412,20 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
-  })  : assert(icon != null),
-        assert(label != null),
-        super(
-          key: key,
-          onPressed: onPressed,
-          onLongPress: onLongPress,
-          onHover: onHover,
-          onFocusChange: onFocusChange,
-          style: style,
-          focusNode: focusNode,
-          autofocus: autofocus ?? false,
-          clipBehavior: clipBehavior ?? Clip.none,
-          child: _ElevatedButtonWithIconChild(icon: icon, label: label),
-        );
+  }) : assert(icon != null),
+       assert(label != null),
+       super(
+         key: key,
+         onPressed: onPressed,
+         onLongPress: onLongPress,
+         onHover: onHover,
+         onFocusChange: onFocusChange,
+         style: style,
+         focusNode: focusNode,
+         autofocus: autofocus ?? false,
+         clipBehavior: clipBehavior ?? Clip.none,
+         child: _ElevatedButtonWithIconChild(icon: icon, label: label),
+      );
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
@@ -424,13 +436,13 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
     return super.defaultStyleOf(context).copyWith(
-          padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
-        );
+      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
+    );
   }
 }
 
 class _ElevatedButtonWithIconChild extends StatelessWidget {
-  const _ElevatedButtonWithIconChild({Key? key, required this.label, required this.icon}) : super(key: key);
+  const _ElevatedButtonWithIconChild({ Key? key, required this.label, required this.icon }) : super(key: key);
 
   final Widget label;
   final Widget icon;

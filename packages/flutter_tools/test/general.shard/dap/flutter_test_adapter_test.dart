@@ -13,11 +13,14 @@ import 'mocks.dart';
 
 void main() {
   group('flutter test adapter', () {
-    final String expectedFlutterExecutable =
-        globals.platform.isWindows ? r'C:\fake\flutter\bin\flutter.bat' : '/fake/flutter/bin/flutter';
+    final String expectedFlutterExecutable = globals.platform.isWindows
+        ? r'C:\fake\flutter\bin\flutter.bat'
+        : '/fake/flutter/bin/flutter';
 
     setUpAll(() {
-      Cache.flutterRoot = globals.platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter';
+      Cache.flutterRoot = globals.platform.isWindows
+          ? r'C:\fake\flutter'
+          : '/fake/flutter';
     });
 
     test('includes toolArgs', () async {
@@ -44,10 +47,8 @@ void main() {
 
     group('includes customTool', () {
       test('with no args replaced', () async {
-        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
-          fileSystem: globals.fs,
-          platform: globals.platform,
-        );
+        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(fileSystem: globals.fs,
+        platform: globals.platform,);
         final Completer<void> responseCompleter = Completer<void>();
         final MockRequest request = MockRequest();
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
@@ -67,10 +68,8 @@ void main() {
       });
 
       test('with all args replaced', () async {
-        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(
-          fileSystem: globals.fs,
-          platform: globals.platform,
-        );
+        final MockFlutterTestDebugAdapter adapter = MockFlutterTestDebugAdapter(fileSystem: globals.fs,
+        platform: globals.platform,);
         final Completer<void> responseCompleter = Completer<void>();
         final MockRequest request = MockRequest();
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(

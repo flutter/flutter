@@ -28,17 +28,19 @@ Future<void> main() async {
 
 Future<void> _setAppVersion(int version) async {
   final File targetFile = File(_targetPath);
-  await targetFile.writeAsString((await targetFile.readAsString()).replaceFirst(
-    RegExp(r'CLOSE\?version=\d+'),
-    'CLOSE?version=$version',
-  ));
+  await targetFile.writeAsString(
+    (await targetFile.readAsString()).replaceFirst(
+      RegExp(r'CLOSE\?version=\d+'),
+      'CLOSE?version=$version',
+    )
+  );
 }
 
-Future<void> _rebuildApp({required int version}) async {
+Future<void> _rebuildApp({ required int version }) async {
   await _setAppVersion(version);
   await runCommand(
     _flutter,
-    <String>['clean'],
+    <String>[ 'clean' ],
     workingDirectory: _testAppDirectory,
   );
   await runCommand(
@@ -81,8 +83,7 @@ Future<void> runWebServiceWorkerTest({
     print('Waiting for app to load $waitForCounts');
     await Future.any(<Future<Object?>>[
       () async {
-        while (!waitForCounts.entries
-            .every((MapEntry<String, int> entry) => (requestedPathCounts[entry.key] ?? 0) >= entry.value)) {
+        while (!waitForCounts.entries.every((MapEntry<String, int> entry) => (requestedPathCounts[entry.key] ?? 0) >= entry.value)) {
           await Future<void>.delayed(const Duration(milliseconds: 100));
         }
       }(),
@@ -146,10 +147,11 @@ Future<void> runWebServiceWorkerTest({
       'assets/AssetManifest.json': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.ico'.
-      if (!headless) ...<String, int>{
-        'manifest.json': 1,
-        'favicon.ico': 1,
-      }
+      if (!headless)
+        ...<String, int>{
+          'manifest.json': 1,
+          'favicon.ico': 1,
+        }
     });
     expect(reportedVersion, '1');
     reportedVersion = null;
@@ -185,12 +187,14 @@ Future<void> runWebServiceWorkerTest({
       'assets/AssetManifest.json': 1,
       'assets/FontManifest.json': 1,
       'CLOSE': 1,
-      if (!headless) 'favicon.ico': 1,
+      if (!headless)
+        'favicon.ico': 1,
     });
 
     expect(reportedVersion, '2');
     reportedVersion = null;
     await server!.stop();
+
 
     //////////////////////////////////////////////////////
     // Non-caching server
@@ -213,10 +217,11 @@ Future<void> runWebServiceWorkerTest({
       'assets/AssetManifest.json': 1,
       'CLOSE': 1,
       // In headless mode Chrome does not load 'manifest.json' and 'favicon.ico'.
-      if (!headless) ...<String, int>{
-        'manifest.json': 1,
-        'favicon.ico': 1,
-      }
+      if (!headless)
+        ...<String, int>{
+          'manifest.json': 1,
+          'favicon.ico': 1,
+        }
     });
 
     expect(reportedVersion, '3');
@@ -232,7 +237,8 @@ Future<void> runWebServiceWorkerTest({
     expectRequestCounts(<String, int>{
       'flutter_service_worker.js': 1,
       'CLOSE': 1,
-      if (!headless) 'manifest.json': 1,
+      if (!headless)
+        'manifest.json': 1,
     });
     expect(reportedVersion, '3');
     reportedVersion = null;
@@ -258,10 +264,11 @@ Future<void> runWebServiceWorkerTest({
       'assets/AssetManifest.json': 1,
       'assets/FontManifest.json': 2,
       'CLOSE': 1,
-      if (!headless) ...<String, int>{
-        'manifest.json': 1,
-        'favicon.ico': 1,
-      }
+      if (!headless)
+        ...<String, int>{
+          'manifest.json': 1,
+          'favicon.ico': 1,
+        }
     });
 
     expect(reportedVersion, '4');

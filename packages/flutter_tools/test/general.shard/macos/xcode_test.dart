@@ -195,8 +195,7 @@ void main() {
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
-        testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied',
-            () {
+        testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(13, null, null);
 
@@ -209,7 +208,8 @@ void main() {
             FakeCommand(
               command: <String>['xcrun', 'clang'],
               exitCode: 1,
-              stderr: 'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.',
+              stderr:
+                  'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.',
             ),
           ]);
 
@@ -248,8 +248,7 @@ void main() {
         });
 
         group('SDK location', () {
-          const String sdkroot =
-              'Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.2.sdk';
+          const String sdkroot = 'Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.2.sdk';
 
           testWithoutContext('--show-sdk-path iphoneos', () async {
             fakeProcessManager.addCommand(const FakeCommand(
@@ -269,7 +268,7 @@ void main() {
             ));
 
             expect(() async => xcode.sdkLocation(EnvironmentType.physical),
-                throwsToolExit(message: 'Could not find SDK location'));
+              throwsToolExit(message: 'Could not find SDK location'));
             expect(fakeProcessManager.hasRemainingExpectations, isFalse);
           });
         });
@@ -339,10 +338,9 @@ void main() {
               'xcdevice',
               'observe',
               '--both',
-            ],
-            stdout: 'Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418\n'
-                'Attach: 00008027-00192736010F802E\n'
-                'Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418',
+            ], stdout: 'Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418\n'
+              'Attach: 00008027-00192736010F802E\n'
+              'Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418',
             stderr: 'Some error',
           ));
 
@@ -358,7 +356,8 @@ void main() {
             if (event.containsKey(XCDeviceEvent.attach)) {
               if (event[XCDeviceEvent.attach] == 'd83d5bc53967baa0ee18626ba87b6254b2ab5418') {
                 attach1.complete();
-              } else if (event[XCDeviceEvent.attach] == '00008027-00192736010F802E') {
+              } else
+              if (event[XCDeviceEvent.attach] == '00008027-00192736010F802E') {
                 attach2.complete();
               }
             } else if (event.containsKey(XCDeviceEvent.detach)) {
@@ -594,7 +593,7 @@ void main() {
           Artifacts: () => Artifacts.test(),
         });
 
-        testUsingContext('Sdk Version is parsed correctly', () async {
+        testUsingContext('Sdk Version is parsed correctly',()  async {
           const String devicesOutput = '''
 [
   {
@@ -640,14 +639,14 @@ void main() {
           ));
 
           final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
-          expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
-          expect(await devices[1].sdkNameAndVersion, 'iOS 10.1');
-          expect(await devices[2].sdkNameAndVersion, 'iOS unknown version');
+          expect(await devices[0].sdkNameAndVersion,'iOS 13.3 17C54');
+          expect(await devices[1].sdkNameAndVersion,'iOS 10.1');
+          expect(await devices[2].sdkNameAndVersion,'iOS unknown version');
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
         });
 
-        testUsingContext('handles bad output', () async {
+        testUsingContext('handles bad output',()  async {
           fakeProcessManager.addCommand(const FakeCommand(
             command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
             stdout: 'Something bad happened, not JSON',
@@ -800,12 +799,10 @@ void main() {
 
           final List<String> errors = await xcdevice.getDiagnostics();
           expect(errors, hasLength(4));
-          expect(errors[0],
-              'Error: iPhone is not paired with your computer. To use iPhone with Xcode, unlock it and choose to trust this computer when prompted. (code -9)');
+          expect(errors[0], 'Error: iPhone is not paired with your computer. To use iPhone with Xcode, unlock it and choose to trust this computer when prompted. (code -9)');
           expect(errors[1], 'Error: iPhone is not paired with your computer.');
           expect(errors[2], 'Error: Xcode pairing error. (code -13)');
-          expect(errors[3],
-              'Error: iPhone is busy: Preparing debugger support for iPhone. Xcode will continue when iPhone is finished. (code -10)');
+          expect(errors[3], 'Error: iPhone is busy: Preparing debugger support for iPhone. Xcode will continue when iPhone is finished. (code -10)');
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,

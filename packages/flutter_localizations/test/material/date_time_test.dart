@@ -13,13 +13,13 @@ void main() {
   group(GlobalMaterialLocalizations, () {
     test('uses exact locale when exists', () async {
       final GlobalMaterialLocalizations localizations =
-          await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'PT')) as GlobalMaterialLocalizations;
+        await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'PT')) as GlobalMaterialLocalizations;
       expect(localizations.formatDecimal(10000), '10\u00A0000');
     });
 
     test('falls back to language code when exact locale is missing', () async {
       final GlobalMaterialLocalizations localizations =
-          await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'XX')) as GlobalMaterialLocalizations;
+        await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'XX')) as GlobalMaterialLocalizations;
       expect(localizations.formatDecimal(10000), '10.000');
     });
 
@@ -69,7 +69,7 @@ void main() {
     group('formatMinute', () {
       test('formats English', () async {
         final GlobalMaterialLocalizations localizations =
-            await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'US')) as GlobalMaterialLocalizations;
+          await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'US')) as GlobalMaterialLocalizations;
         expect(localizations.formatMinute(const TimeOfDay(hour: 1, minute: 32)), '32');
       });
     });
@@ -108,8 +108,7 @@ void main() {
       });
 
       testWidgets('formats ${TimeOfDayFormat.frenchCanadian}', (WidgetTester tester) async {
-        expect(
-            await formatTimeOfDay(tester, const Locale('fr', 'CA'), const TimeOfDay(hour: 9, minute: 32)), '09 h 32');
+        expect(await formatTimeOfDay(tester, const Locale('fr', 'CA'), const TimeOfDay(hour: 9, minute: 32)), '09 h 32');
       });
 
       testWidgets('formats ${TimeOfDayFormat.a_space_h_colon_mm}', (WidgetTester tester) async {
@@ -163,8 +162,8 @@ void main() {
       });
 
       testWidgets('formats dates in Serbian (Latin)', (WidgetTester tester) async {
-        final Map<DateType, String> formatted = await formatDate(
-            tester, const Locale.fromSubtags(languageCode: 'sr', scriptCode: 'Latn'), DateTime(2018, 8));
+        final Map<DateType, String> formatted = await formatDate(tester,
+          const Locale.fromSubtags(languageCode:'sr', scriptCode: 'Latn'), DateTime(2018, 8));
         expect(formatted[DateType.year], '2018.');
         expect(formatted[DateType.medium], 'sre 1. avg');
         expect(formatted[DateType.full], 'sreda, 1. avgust 2018.');

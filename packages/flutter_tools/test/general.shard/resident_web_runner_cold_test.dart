@@ -170,9 +170,9 @@ void main() {
     expect(result.message, contains('Failed to recompile application.'));
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.list(<BuildResult>[
-          BuildResult(success: true),
-          BuildResult(success: false),
-        ]),
+      BuildResult(success: true),
+      BuildResult(success: false),
+    ]),
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -224,13 +224,14 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   final FakeWebDevice device;
 
+
   DevFS _devFS;
 
   @override
   DevFS get devFS => _devFS;
 
   @override
-  set devFS(DevFS value) {}
+  set devFS(DevFS value) { }
 
   @override
   FlutterVmService vmService;

@@ -38,16 +38,18 @@ Future<void> main(List<String> arguments) async {
   final ArgParser argParser = _createArgsParser();
   final ArgResults args = argParser.parse(arguments);
   if (args['help'] as bool) {
-    print('Usage:');
-    print(argParser.usage);
+    print ('Usage:');
+    print (argParser.usage);
     exit(0);
   }
   // If we're run from the `tools` dir, set the cwd to the repo root.
-  if (path.basename(Directory.current.path) == 'tools') Directory.current = Directory.current.parent.parent;
+  if (path.basename(Directory.current.path) == 'tools')
+    Directory.current = Directory.current.parent.parent;
 
   final ProcessResult flutter = Process.runSync('flutter', <String>[]);
   final File versionFile = File('version');
-  if (flutter.exitCode != 0 || !versionFile.existsSync()) throw Exception('Failed to determine Flutter version.');
+  if (flutter.exitCode != 0 || !versionFile.existsSync())
+    throw Exception('Failed to determine Flutter version.');
   final String version = versionFile.readAsStringSync();
 
   // Create the pubspec.yaml file.
@@ -101,7 +103,8 @@ Future<void> main(List<String> arguments) async {
   printStream(process.stdout, prefix: 'pub:stdout: ');
   printStream(process.stderr, prefix: 'pub:stderr: ');
   final int code = await process.done;
-  if (code != 0) exit(code);
+  if (code != 0)
+    exit(code);
 
   createFooter('$kDocsRoot/lib/', version);
   copyAssets();
@@ -153,28 +156,18 @@ Future<void> main(List<String> arguments) async {
     '--allow-tools',
     if (args['json'] as bool) '--json',
     if (args['validate-links'] as bool) '--validate-links' else '--no-validate-links',
-    '--link-to-source-excludes',
-    '../../bin/cache',
-    '--link-to-source-root',
-    '../..',
-    '--link-to-source-uri-template',
-    'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
+    '--link-to-source-excludes', '../../bin/cache',
+    '--link-to-source-root', '../..',
+    '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
     '--inject-html',
     '--use-base-href',
-    '--header',
-    'styles.html',
-    '--header',
-    'analytics.html',
-    '--header',
-    'survey.html',
-    '--header',
-    'snippets.html',
-    '--header',
-    'opensearch.html',
-    '--footer-text',
-    'lib/footer.html',
-    '--allow-warnings-in-packages',
-    flutterPackages.join(','),
+    '--header', 'styles.html',
+    '--header', 'analytics.html',
+    '--header', 'survey.html',
+    '--header', 'snippets.html',
+    '--header', 'opensearch.html',
+    '--footer-text', 'lib/footer.html',
+    '--allow-warnings-in-packages', flutterPackages.join(','),
     '--exclude-packages',
     <String>[
       'analyzer',
@@ -218,8 +211,7 @@ Future<void> main(List<String> arguments) async {
       'package:web_socket_channel/html.dart',
     ].join(','),
     '--favicon=favicon.ico',
-    '--package-order',
-    'flutter,Dart,$kPlatformIntegrationPackageName,flutter_test,flutter_driver',
+    '--package-order', 'flutter,Dart,$kPlatformIntegrationPackageName,flutter_test,flutter_driver',
     '--auto-include-dependencies',
   ];
 
@@ -232,28 +224,21 @@ Future<void> main(List<String> arguments) async {
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   ));
-  printStream(
-    process.stdout,
-    prefix: args['json'] as bool ? '' : 'dartdoc:stdout: ',
-    filter: args['verbose'] as bool
-        ? const <Pattern>[]
-        : <Pattern>[
-            RegExp(r'^generating docs for library '), // unnecessary verbosity
-            RegExp(r'^pars'), // unnecessary verbosity
-          ],
+  printStream(process.stdout, prefix: args['json'] as bool ? '' : 'dartdoc:stdout: ',
+    filter: args['verbose'] as bool ? const <Pattern>[] : <Pattern>[
+      RegExp(r'^generating docs for library '), // unnecessary verbosity
+      RegExp(r'^pars'), // unnecessary verbosity
+    ],
   );
-  printStream(
-    process.stderr,
-    prefix: args['json'] as bool ? '' : 'dartdoc:stderr: ',
-    filter: args['verbose'] as bool
-        ? const <Pattern>[]
-        : <Pattern>[
-            RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
-          ],
+  printStream(process.stderr, prefix: args['json'] as bool ? '' : 'dartdoc:stderr: ',
+    filter: args['verbose'] as bool ? const <Pattern>[] : <Pattern>[
+      RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
+    ],
   );
   final int exitCode = await process.done;
 
-  if (exitCode != 0) exit(exitCode);
+  if (exitCode != 0)
+    exit(exitCode);
 
   sanityCheckDocs();
   checkForUnresolvedDirectives('$kPublishRoot/api');
@@ -263,15 +248,18 @@ Future<void> main(List<String> arguments) async {
 
 ArgParser _createArgsParser() {
   final ArgParser parser = ArgParser();
-  parser.addFlag('help', abbr: 'h', negatable: false, help: 'Show command help.');
-  parser.addFlag('verbose',
-      defaultsTo: true,
+  parser.addFlag('help', abbr: 'h', negatable: false,
+      help: 'Show command help.');
+  parser.addFlag('verbose', defaultsTo: true,
       help: 'Whether to report all error messages (on) or attempt to '
           'filter out some known false positives (off).  Shut this off '
           'locally if you want to address Flutter-specific issues.');
-  parser.addFlag('checked', abbr: 'c', help: 'Run dartdoc in checked mode.');
-  parser.addFlag('json', help: 'Display json-formatted output from dartdoc and skip stdout/stderr prefixing.');
-  parser.addFlag('validate-links', help: 'Display warnings for broken links generated by dartdoc (slow)');
+  parser.addFlag('checked', abbr: 'c',
+      help: 'Run dartdoc in checked mode.');
+  parser.addFlag('json',
+      help: 'Display json-formatted output from dartdoc and skip stdout/stderr prefixing.');
+  parser.addFlag('validate-links',
+      help: 'Display warnings for broken links generated by dartdoc (slow)');
   return parser;
 }
 
@@ -282,16 +270,20 @@ final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
 /// On LUCI builds, the git HEAD is detached, so first check for the env
 /// variable "LUCI_BRANCH"; if it is not set, fall back to calling git.
 String getBranchName({
-  @visibleForTesting Platform platform = const LocalPlatform(),
-  @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
+  @visibleForTesting
+  Platform platform = const LocalPlatform(),
+  @visibleForTesting
+  ProcessManager processManager = const LocalProcessManager(),
 }) {
   final String? luciBranch = platform.environment['LUCI_BRANCH'];
   if (luciBranch != null && luciBranch.trim().isNotEmpty) {
     return luciBranch.trim();
   }
   final ProcessResult gitResult = processManager.runSync(<String>['git', 'status', '-b', '--porcelain']);
-  if (gitResult.exitCode != 0) throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
-  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch((gitResult.stdout as String).trim().split('\n').first);
+  if (gitResult.exitCode != 0)
+    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
+  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(
+      (gitResult.stdout as String).trim().split('\n').first);
   return gitBranchMatch == null ? '' : gitBranchMatch.group(1)!.split('...').first;
 }
 
@@ -299,7 +291,8 @@ String gitRevision() {
   const int kGitRevisionLength = 10;
 
   final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
-  if (gitResult.exitCode != 0) throw 'git rev-parse exit with non-zero exit code: ${gitResult.exitCode}';
+  if (gitResult.exitCode != 0)
+    throw 'git rev-parse exit with non-zero exit code: ${gitResult.exitCode}';
   final String gitRevision = (gitResult.stdout as String).trim();
 
   return gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
@@ -345,11 +338,12 @@ void createSearchMetadata(String templatePath, String metadataPath) {
 /// specified, for each source/destination file pair.
 ///
 /// Creates `destDir` if needed.
-void copyDirectorySync(Directory srcDir, Directory destDir,
-    [void Function(File srcFile, File destFile)? onFileCopied]) {
-  if (!srcDir.existsSync()) throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+void copyDirectorySync(Directory srcDir, Directory destDir, [void Function(File srcFile, File destFile)? onFileCopied]) {
+  if (!srcDir.existsSync())
+    throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
 
-  if (!destDir.existsSync()) destDir.createSync(recursive: true);
+  if (!destDir.existsSync())
+    destDir.createSync(recursive: true);
 
   for (final FileSystemEntity entity in srcDir.listSync()) {
     final String newPath = path.join(destDir.path, path.basename(entity.path));
@@ -370,8 +364,10 @@ void copyAssets() {
   if (assetsDir.existsSync()) {
     assetsDir.deleteSync(recursive: true);
   }
-  copyDirectorySync(Directory(path.join(kDocsRoot, 'assets')), Directory(path.join(kPublishRoot, 'assets')),
-      (File src, File dest) => print('Copied ${src.path} to ${dest.path}'));
+  copyDirectorySync(
+      Directory(path.join(kDocsRoot, 'assets')),
+      Directory(path.join(kPublishRoot, 'assets')),
+          (File src, File dest) => print('Copied ${src.path} to ${dest.path}'));
 }
 
 /// Clean out any existing snippets so that we don't publish old files from
@@ -396,12 +392,10 @@ void _sanityCheckExample(File file, RegExp regExp) {
       }
     }
     if (!found) {
-      throw Exception(
-          "Missing example code in ${file.path}. Either it didn't get published, publishing has changed, or the example no longer exists.");
+      throw Exception("Missing example code in ${file.path}. Either it didn't get published, publishing has changed, or the example no longer exists.");
     }
   } else {
-    throw Exception(
-        "Missing example code sanity test file ${file.path}. Either it didn't get published, or you might have to update the test to look at a different file.");
+    throw Exception("Missing example code sanity test file ${file.path}. Either it didn't get published, or you might have to update the test to look at a different file.");
   }
 }
 
@@ -426,20 +420,17 @@ void sanityCheckDocs() {
 
   // Check a "sample" example, any one will do.
   final File sampleExample = File('$kPublishRoot/api/widgets/showGeneralDialog.html');
-  final RegExp sampleRegExp = RegExp(
-      r'\s*<pre id="longSnippet1" class="language-dart">\s*<code class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;');
+  final RegExp sampleRegExp = RegExp(r'\s*<pre id="longSnippet1" class="language-dart">\s*<code class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;');
   _sanityCheckExample(sampleExample, sampleRegExp);
 
   // Check a "snippet" example, any one will do.
   final File snippetExample = File('$kPublishRoot/api/widgets/ModalRoute/barrierColor.html');
-  final RegExp snippetRegExp = RegExp(
-      r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.backgroundColor;.*</pre>');
+  final RegExp snippetRegExp = RegExp(r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.backgroundColor;.*</pre>');
   _sanityCheckExample(snippetExample, snippetRegExp);
 
   // Check a "dartpad" example, any one will do.
   final File dartpadExample = File('$kPublishRoot/api/widgets/PhysicalShape-class.html');
-  final RegExp dartpadRegExp = RegExp(
-      r'\s*<iframe class="snippet-dartpad" src="https://dartpad\.dev.*sample_id=widgets\.PhysicalShape\.\d+.*">\s*</iframe>');
+  final RegExp dartpadRegExp = RegExp(r'\s*<iframe class="snippet-dartpad" src="https://dartpad\.dev.*sample_id=widgets\.PhysicalShape\.\d+.*">\s*</iframe>');
   _sanityCheckExample(dartpadExample, dartpadRegExp);
 }
 
@@ -496,8 +487,8 @@ void addHtmlBaseToIndex() {
     'href="/javadoc/"',
   );
   indexContents = indexContents.replaceAll(
-    'href="iOS/iOS-library.html"',
-    'href="/objcdoc/"',
+      'href="iOS/iOS-library.html"',
+      'href="/objcdoc/"',
   );
 
   indexFile.writeAsStringSync(indexContents);
@@ -512,9 +503,11 @@ void writeSnippetsIndexFile() {
   final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
   if (snippetsDir.existsSync()) {
     const JsonEncoder jsonEncoder = JsonEncoder.withIndent('    ');
-    final Iterable<File> files =
-        snippetsDir.listSync().whereType<File>().where((File file) => path.extension(file.path) == '.json');
-    // Combine all the metadata into a single JSON array.
+    final Iterable<File> files = snippetsDir
+        .listSync()
+        .whereType<File>()
+        .where((File file) => path.extension(file.path) == '.json');
+        // Combine all the metadata into a single JSON array.
     final Iterable<String> fileContents = files.map((File file) => file.readAsStringSync());
     final List<dynamic> metadataObjects = fileContents.map<dynamic>(json.decode).toList();
     final String jsonArray = jsonEncoder.convert(metadataObjects);
@@ -529,19 +522,20 @@ List<String> findPackageNames() {
 /// Finds all packages in the Flutter SDK
 List<Directory> findPackages() {
   return Directory('packages')
-      .listSync()
-      .where((FileSystemEntity entity) {
-        if (entity is! Directory) return false;
-        final File pubspec = File('${entity.path}/pubspec.yaml');
-        if (!pubspec.existsSync()) {
-          print("Unexpected package '${entity.path}' found in packages directory");
-          return false;
-        }
-        // TODO(ianh): Use a real YAML parser here
-        return !pubspec.readAsStringSync().contains('nodoc: true');
-      })
-      .cast<Directory>()
-      .toList();
+    .listSync()
+    .where((FileSystemEntity entity) {
+      if (entity is! Directory)
+        return false;
+      final File pubspec = File('${entity.path}/pubspec.yaml');
+      if (!pubspec.existsSync()) {
+        print("Unexpected package '${entity.path}' found in packages directory");
+        return false;
+      }
+      // TODO(ianh): Use a real YAML parser here
+      return !pubspec.readAsStringSync().contains('nodoc: true');
+    })
+    .cast<Directory>()
+    .toList();
 }
 
 /// Returns import or on-disk paths for all libraries in the Flutter SDK.
@@ -560,12 +554,16 @@ Iterable<String> libraryRefs() sync* {
   yield '$kPlatformIntegrationPackageName/ios.dart';
 }
 
-void printStream(Stream<List<int>> stream, {String prefix = '', List<Pattern> filter = const <Pattern>[]}) {
+void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> filter = const <Pattern>[] }) {
   assert(prefix != null);
   assert(filter != null);
-  stream.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
-    if (!filter.any((Pattern pattern) => line.contains(pattern))) print('$prefix$line'.trim());
-  });
+  stream
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
+    .listen((String line) {
+      if (!filter.any((Pattern pattern) => line.contains(pattern)))
+        print('$prefix$line'.trim());
+    });
 }
 
 Future<Process> runPubProcess({
@@ -573,7 +571,8 @@ Future<Process> runPubProcess({
   required List<String> arguments,
   String? workingDirectory,
   Map<String, String>? environment,
-  @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
+  @visibleForTesting
+  ProcessManager processManager = const LocalProcessManager(),
 }) {
   return processManager.start(
     <Object>[dartBinaryPath, 'pub', ...arguments],

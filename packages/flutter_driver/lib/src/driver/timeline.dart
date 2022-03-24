@@ -37,8 +37,12 @@ class TimelineEvent {
         phase = json['ph'] as String?,
         processId = json['pid'] as int?,
         threadId = json['tid'] as int?,
-        duration = json['dur'] != null ? Duration(microseconds: json['dur'] as int) : null,
-        threadDuration = json['tdur'] != null ? Duration(microseconds: json['tdur'] as int) : null,
+        duration = json['dur'] != null
+            ? Duration(microseconds: json['dur'] as int)
+            : null,
+        threadDuration = json['tdur'] != null
+            ? Duration(microseconds: json['tdur'] as int)
+            : null,
         timestampMicros = json['ts'] as int?,
         threadTimestampMicros = json['tts'] as int?,
         arguments = json['args'] as Map<String, dynamic>?;
@@ -111,9 +115,11 @@ List<TimelineEvent>? _parseEvents(Map<String, dynamic> json) {
     return null;
   }
 
-  final List<TimelineEvent> timelineEvents = Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
-      .map<TimelineEvent>((Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
-      .toList();
+  final List<TimelineEvent> timelineEvents =
+      Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
+          .map<TimelineEvent>(
+              (Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
+          .toList();
 
   timelineEvents.sort((TimelineEvent e1, TimelineEvent e2) {
     final int? ts1 = e1.timestampMicros;

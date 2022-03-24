@@ -36,14 +36,7 @@ class TableBorder {
     BorderRadius borderRadius = BorderRadius.zero,
   }) {
     final BorderSide side = BorderSide(color: color, width: width, style: style);
-    return TableBorder(
-        top: side,
-        right: side,
-        bottom: side,
-        left: side,
-        horizontalInside: side,
-        verticalInside: side,
-        borderRadius: borderRadius);
+    return TableBorder(top: side, right: side, bottom: side, left: side, horizontalInside: side, verticalInside: side, borderRadius: borderRadius);
   }
 
   /// Creates a border for a table where all the interior sides use the same
@@ -106,21 +99,24 @@ class TableBorder {
         bottom.color != topColor ||
         left.color != topColor ||
         horizontalInside.color != topColor ||
-        verticalInside.color != topColor) return false;
+        verticalInside.color != topColor)
+      return false;
 
     final double topWidth = top.width;
     if (right.width != topWidth ||
         bottom.width != topWidth ||
         left.width != topWidth ||
         horizontalInside.width != topWidth ||
-        verticalInside.width != topWidth) return false;
+        verticalInside.width != topWidth)
+      return false;
 
     final BorderStyle topStyle = top.style;
     if (right.style != topStyle ||
         bottom.style != topStyle ||
         left.style != topStyle ||
         horizontalInside.style != topStyle ||
-        verticalInside.style != topStyle) return false;
+        verticalInside.style != topStyle)
+      return false;
 
     return true;
   }
@@ -159,9 +155,12 @@ class TableBorder {
   /// {@macro dart.ui.shadow.lerp}
   static TableBorder? lerp(TableBorder? a, TableBorder? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return b!.scale(t);
-    if (b == null) return a.scale(1.0 - t);
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b!.scale(t);
+    if (b == null)
+      return a.scale(1.0 - t);
     return TableBorder(
       top: BorderSide.lerp(a.top, b.top, t),
       right: BorderSide.lerp(a.right, b.right, t),
@@ -262,7 +261,7 @@ class TableBorder {
         }
       }
     }
-    if (!isUniform || borderRadius == BorderRadius.zero)
+    if(!isUniform || borderRadius == BorderRadius.zero)
       paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
     else {
       final RRect outer = borderRadius.toRRect(rect);
@@ -274,16 +273,18 @@ class TableBorder {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is TableBorder &&
-        other.top == top &&
-        other.right == right &&
-        other.bottom == bottom &&
-        other.left == left &&
-        other.horizontalInside == horizontalInside &&
-        other.verticalInside == verticalInside &&
-        other.borderRadius == borderRadius;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is TableBorder
+        && other.top == top
+        && other.right == right
+        && other.bottom == bottom
+        && other.left == left
+        && other.horizontalInside == horizontalInside
+        && other.verticalInside == verticalInside
+        && other.borderRadius == borderRadius;
   }
 
   @override

@@ -50,16 +50,17 @@ PrintCallback print = core_internals.print;
 String get clock {
   final DateTime now = DateTime.now();
   return '$reverse▌'
-      '${now.hour.toString().padLeft(2, "0")}:'
-      '${now.minute.toString().padLeft(2, "0")}:'
-      '${now.second.toString().padLeft(2, "0")}'
-      '▐$reset';
+         '${now.hour.toString().padLeft(2, "0")}:'
+         '${now.minute.toString().padLeft(2, "0")}:'
+         '${now.second.toString().padLeft(2, "0")}'
+         '▐$reset';
 }
 
 String prettyPrintDuration(Duration duration) {
   String result = '';
   final int minutes = duration.inMinutes;
-  if (minutes > 0) result += '${minutes}min ';
+  if (minutes > 0)
+    result += '${minutes}min ';
   final int seconds = duration.inSeconds - minutes * 60;
   final int milliseconds = duration.inMilliseconds - (seconds * 1000 + minutes * 60 * 1000);
   result += '$seconds.${milliseconds.toString().padLeft(3, "0")}s';

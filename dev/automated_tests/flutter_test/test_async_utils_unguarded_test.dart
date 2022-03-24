@@ -8,9 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
   DebugPrintCallback get debugPrintOverride => testPrint;
-  static void testPrint(String? message, {int? wrapWidth}) {
-    print(message);
-  }
+  static void testPrint(String? message, { int? wrapWidth }) { print(message); }
 }
 
 Future<void> helperFunction(WidgetTester tester) async {

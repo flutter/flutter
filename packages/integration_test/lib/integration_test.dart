@@ -81,7 +81,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     });
 
     final TestExceptionReporter oldTestExceptionReporter = reportTestException;
-    reportTestException = (FlutterErrorDetails details, String testDescription) {
+    reportTestException =
+        (FlutterErrorDetails details, String testDescription) {
       results[testDescription] = Failure(testDescription, details.toString());
       oldTestExceptionReporter(details, testDescription);
     };
@@ -153,7 +154,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
   static IntegrationTestWidgetsFlutterBinding ensureInitialized() {
-    if (_instance == null) IntegrationTestWidgetsFlutterBinding();
+    if (_instance == null)
+      IntegrationTestWidgetsFlutterBinding();
     return _instance!;
   }
 
@@ -205,7 +207,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// The callback function to response the driver side input.
   @visibleForTesting
   Future<Map<String, dynamic>> callback(Map<String, String> params) async {
-    return callbackManager.callback(params, this /* as IntegrationTestResults */);
+    return callbackManager.callback(
+        params, this /* as IntegrationTestResults */);
   }
 
   // Emulates the Flutter driver extension, returning 'pass' or 'fail'.
@@ -225,9 +228,11 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated('This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-        'This feature was deprecated after v2.6.0-1.0.pre.')
-        Duration? timeout,
+    @Deprecated(
+      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+      'This feature was deprecated after v2.6.0-1.0.pre.'
+    )
+    Duration? timeout,
   }) async {
     await super.runTest(
       testBody,
@@ -257,7 +262,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
       final String address = 'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws';
       try {
         _vmService = await _vmServiceConnectUri(address, httpClient: httpClient);
-      } on SocketException catch (e, s) {
+      } on SocketException catch(e, s) {
         throw StateError(
           'Failed to connect to VM Service at $address.\n'
           'This may happen if DDS is enabled. If this test was launched via '

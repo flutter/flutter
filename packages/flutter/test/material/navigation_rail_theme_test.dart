@@ -12,8 +12,7 @@ void main() {
     expect(const NavigationRailThemeData().hashCode, const NavigationRailThemeData().copyWith().hashCode);
   });
 
-  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified',
-      (WidgetTester tester) async {
+  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (WidgetTester tester) async {
     // Material 3 defaults
     await tester.pumpWidget(
       MaterialApp(
@@ -43,9 +42,7 @@ void main() {
     expect(find.byType(NavigationIndicator), findsWidgets);
   });
 
-  testWidgets(
-      'Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)',
-      (WidgetTester tester) async {
+  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)', (WidgetTester tester) async {
     // This test can be removed when `useMaterial3` is deprecated.
     await tester.pumpWidget(
       MaterialApp(
@@ -75,8 +72,7 @@ void main() {
     expect(find.byType(NavigationIndicator), findsNothing);
   });
 
-  testWidgets('NavigationRailThemeData values are used when no NavigationRail properties are specified',
-      (WidgetTester tester) async {
+  testWidgets('NavigationRailThemeData values are used when no NavigationRail properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 7.0;
     const double selectedIconSize = 25.0;
@@ -141,9 +137,7 @@ void main() {
     expect(_indicatorDecoration(tester)?.color, indicatorColor);
   });
 
-  testWidgets(
-      'NavigationRail values take priority over NavigationRailThemeData values when both properties are specified',
-      (WidgetTester tester) async {
+  testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 7.0;
     const double selectedIconSize = 25.0;
@@ -301,15 +295,14 @@ Material _railMaterial(WidgetTester tester) {
   );
 }
 
+
 ShapeDecoration? _indicatorDecoration(WidgetTester tester) {
-  return tester
-      .firstWidget<Container>(
-        find.descendant(
-          of: find.byType(NavigationIndicator),
-          matching: find.byType(Container),
-        ),
-      )
-      .decoration as ShapeDecoration?;
+  return tester.firstWidget<Container>(
+    find.descendant(
+      of: find.byType(NavigationIndicator),
+      matching: find.byType(Container),
+    ),
+  ).decoration as ShapeDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {
@@ -322,47 +315,40 @@ IconThemeData _unselectedIconTheme(WidgetTester tester) {
 
 IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
   // The first IconTheme is the one added by the navigation rail.
-  return tester
-      .firstWidget<IconTheme>(
-        find.ancestor(
-          of: find.byIcon(icon),
-          matching: find.byType(IconTheme),
-        ),
-      )
-      .data;
+  return tester.firstWidget<IconTheme>(
+    find.ancestor(
+      of: find.byIcon(icon),
+      matching: find.byType(IconTheme),
+    ),
+  ).data;
 }
 
 TextStyle _selectedLabelStyle(WidgetTester tester) {
-  return tester
-      .widget<RichText>(
-        find.descendant(
-          of: find.text('Abc'),
-          matching: find.byType(RichText),
-        ),
-      )
-      .text
-      .style!;
+  return tester.widget<RichText>(
+    find.descendant(
+      of: find.text('Abc'),
+      matching: find.byType(RichText),
+    ),
+  ).text.style!;
 }
 
 TextStyle _unselectedLabelStyle(WidgetTester tester) {
-  return tester
-      .widget<RichText>(
-        find.descendant(
-          of: find.text('Def'),
-          matching: find.byType(RichText),
-        ),
-      )
-      .text
-      .style!;
+  return tester.widget<RichText>(
+    find.descendant(
+      of: find.text('Def'),
+      matching: find.byType(RichText),
+    ),
+  ).text.style!;
 }
 
 Size _destinationSize(WidgetTester tester) {
-  return tester.getSize(find
-      .ancestor(
-        of: find.byIcon(Icons.favorite),
-        matching: find.byType(Material),
-      )
-      .first);
+  return tester.getSize(
+    find.ancestor(
+      of: find.byIcon(Icons.favorite),
+      matching: find.byType(Material),
+    )
+    .first
+  );
 }
 
 Align _destinationsAlign(WidgetTester tester) {

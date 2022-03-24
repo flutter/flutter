@@ -96,8 +96,7 @@ void main() {
         libraries: <String>['lib1', 'lib2'],
         assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
       );
-      expect(component.toString(),
-          '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  Assets:\n    - asset1\n    - asset2');
+      expect(component.toString(), '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  Assets:\n    - asset1\n    - asset2');
     });
 
     testWithoutContext('toString produces correct string for assigned component', () {
@@ -106,11 +105,8 @@ void main() {
         libraries: <String>['lib1', 'lib2'],
         assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
       );
-      component.assignLoadingUnits(<LoadingUnit>[
-        LoadingUnit(id: 2, libraries: <String>['lib1'])
-      ]);
-      expect(component.toString(),
-          '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  LoadingUnits:\n    - 2\n  Assets:\n    - asset1\n    - asset2');
+      component.assignLoadingUnits(<LoadingUnit>[LoadingUnit(id: 2, libraries: <String>['lib1'])]);
+      expect(component.toString(), '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  LoadingUnits:\n    - 2\n  Assets:\n    - asset1\n    - asset2');
     });
   });
 
@@ -132,7 +128,7 @@ void main() {
         path: 'path/to/so.so',
         libraries: <String>['lib1', 'lib4'],
       );
-      expect(unit.toString(), '\nLoadingUnit 2\n  Libraries:\n  - lib1\n  - lib4');
+      expect(unit.toString(),'\nLoadingUnit 2\n  Libraries:\n  - lib1\n  - lib4');
     });
 
     testWithoutContext('equalsIgnoringPath works for various input', () {
@@ -326,9 +322,8 @@ void main() {
 ] }
 
 ''', flush: true);
-      final List<LoadingUnit> loadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
-          fileSystem.directory('/'), BufferLogger.test(),
-          abis: <String>['test-abi2']);
+      final List<LoadingUnit> loadingUnits =
+          LoadingUnit.parseGeneratedLoadingUnits(fileSystem.directory('/'), BufferLogger.test(), abis: <String>['test-abi2']);
       expect(loadingUnits.length, 2); // base module (id 1) is not parsed.
 
       expect(loadingUnits[0].id, 2);

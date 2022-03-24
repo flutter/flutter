@@ -16,7 +16,8 @@ void main() {
   late VmService vmService;
   late LiveTestWidgetsFlutterBinding binding;
   setUpAll(() async {
-    final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
+    final developer.ServiceProtocolInfo info =
+        await developer.Service.getInfo();
 
     if (info.serverUri == null) {
       fail('This test _must_ be run with --enable-vmservice.');
@@ -41,7 +42,8 @@ void main() {
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
-    vmService.onExtensionEvent
+    vmService
+        .onExtensionEvent
         .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 
@@ -76,7 +78,8 @@ void main() {
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
-    vmService.onExtensionEvent
+    vmService
+        .onExtensionEvent
         .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ExpandingBox extends StatefulWidget {
-  const ExpandingBox({Key? key, required this.collapsedSize, required this.expandedSize}) : super(key: key);
+  const ExpandingBox({ Key? key, required this.collapsedSize, required this.expandedSize }) : super(key: key);
 
   final double collapsedSize;
   final double expandedSize;
@@ -56,8 +56,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
         itemBuilder: (BuildContext context, int index) => index == 0
-            ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-            : Container(height: 300, color: Colors.red),
+              ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
+              : Container(height: 300, color: Colors.red),
         itemCount: 2,
       ),
     ));
@@ -101,8 +101,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
         itemBuilder: (BuildContext context, int index) => index == 0
-            ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-            : Container(height: 300, color: Colors.red),
+              ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
+              : Container(height: 300, color: Colors.red),
         itemCount: 2,
       ),
     ));
@@ -159,14 +159,12 @@ void main() {
   testWidgets('shrink listview while ballistic', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: GestureDetector(
-        onTap: () {
-          assert(false);
-        },
+        onTap: () { assert(false); },
         child: ListView.builder(
           physics: const RangeMaintainingScrollPhysics(parent: BouncingScrollPhysics()),
           itemBuilder: (BuildContext context, int index) => index == 0
-              ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-              : Container(height: 300, color: Colors.red),
+                ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
+                : Container(height: 300, color: Colors.red),
           itemCount: 2,
         ),
       ),
@@ -251,7 +249,6 @@ void main() {
         ),
       );
     }
-
     await tester.pumpWidget(build(200.0));
     // to verify that changing the size of the viewport while you are overdragged does not change the
     // scroll position, we must ensure that:
@@ -259,8 +256,7 @@ void main() {
     // - scroll extents have changed
     // - position does not change at the same time
     // - old position is out of old range AND new range
-    await tester.drag(find.byType(Placeholder), const Offset(0.0, 100.0),
-        touchSlopY: 0.0, warnIfMissed: false); // it'll hit the scrollable
+    await tester.drag(find.byType(Placeholder), const Offset(0.0, 100.0), touchSlopY: 0.0, warnIfMissed: false); // it'll hit the scrollable
     await tester.pump();
     final Rect oldPosition = tester.getRect(find.byType(Placeholder));
     await tester.pumpWidget(build(220.0));
@@ -286,7 +282,8 @@ void main() {
               child: ListView(
                 children: <Widget>[
                   SizedBox(height: itemExtent, child: Placeholder(key: key)),
-                  if (twoItems) const SizedBox(height: itemExtent, child: Placeholder()),
+                  if (twoItems)
+                    const SizedBox(height: itemExtent, child: Placeholder()),
                 ],
               ),
             ),

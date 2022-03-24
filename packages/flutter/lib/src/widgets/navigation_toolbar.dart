@@ -20,6 +20,7 @@ import 'framework.dart';
 /// the iOS [CupertinoNavigationBar] or wrap this widget with more theming
 /// specifications for your own custom app bar.
 class NavigationToolbar extends StatelessWidget {
+
   /// Creates a widget that lays out its children in a manner suitable for a
   /// toolbar.
   const NavigationToolbar({
@@ -29,9 +30,9 @@ class NavigationToolbar extends StatelessWidget {
     this.trailing,
     this.centerMiddle = true,
     this.middleSpacing = kMiddleSpacing,
-  })  : assert(centerMiddle != null),
-        assert(middleSpacing != null),
-        super(key: key);
+  }) : assert(centerMiddle != null),
+       assert(middleSpacing != null),
+       super(key: key);
 
   /// The default spacing around the [middle] widget in dp.
   static const double kMiddleSpacing = 16.0;
@@ -85,8 +86,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     required this.centerMiddle,
     required this.middleSpacing,
     required this.textDirection,
-  })  : assert(middleSpacing != null),
-        assert(textDirection != null);
+  }) : assert(middleSpacing != null),
+       assert(textDirection != null);
 
   // If false the middle widget should be start-justified within the space
   // between the leading and trailing widgets.
@@ -154,7 +155,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
         middleStart = (size.width - middleSize.width) / 2.0;
         if (middleStart + middleSize.width > size.width - trailingWidth)
           middleStart = size.width - trailingWidth - middleSize.width;
-        else if (middleStart < middleStartMargin) middleStart = middleStartMargin;
+        else if (middleStart < middleStartMargin)
+          middleStart = middleStartMargin;
       }
 
       final double middleX;
@@ -173,8 +175,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_ToolbarLayout oldDelegate) {
-    return oldDelegate.centerMiddle != centerMiddle ||
-        oldDelegate.middleSpacing != middleSpacing ||
-        oldDelegate.textDirection != textDirection;
+    return oldDelegate.centerMiddle != centerMiddle
+        || oldDelegate.middleSpacing != middleSpacing
+        || oldDelegate.textDirection != textDirection;
   }
 }

@@ -43,14 +43,16 @@ class PluginTest {
   final String template;
 
   Future<TaskResult> call() async {
-    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
+    final Directory tempDir =
+        Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
     // FFI plugins do not have support for `flutter test`.
     // `flutter test` does not do a native build.
     // Supporting `flutter test` would require invoking a native build.
     final bool runFlutterTest = template != 'plugin_ffi';
     try {
       section('Create plugin');
-      final _FlutterProject plugin = await _FlutterProject.create(tempDir, options, buildTarget,
+      final _FlutterProject plugin = await _FlutterProject.create(
+          tempDir, options, buildTarget,
           name: 'plugintest', template: template, environment: pluginCreateEnvironment);
       if (dartOnlyPlugin) {
         await plugin.convertDefaultPluginToDartPlugin();
@@ -64,7 +66,8 @@ class PluginTest {
           name: 'plugintestapp', template: 'app', environment: appCreateEnvironment);
       try {
         section('Add plugins');
-        await app.addPlugin('plugintest', pluginPath: path.join('..', 'plugintest'));
+        await app.addPlugin('plugintest',
+            pluginPath: path.join('..', 'plugintest'));
         await app.addPlugin('path_provider');
         section('Build app');
         await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
@@ -98,7 +101,8 @@ class _FlutterProject {
   Future<void> addPlugin(String plugin, {String? pluginPath}) async {
     final File pubspec = pubspecFile;
     String content = await pubspec.readAsString();
-    final String dependency = pluginPath != null ? '$plugin:\n    path: $pluginPath' : '$plugin:';
+    final String dependency =
+        pluginPath != null ? '$plugin:\n    path: $pluginPath' : '$plugin:';
     content = content.replaceFirst(
       '\ndependencies:\n',
       '\ndependencies:\n  $dependency\n',
@@ -154,13 +158,14 @@ class $dartPluginClass {
   }
 
   static Future<_FlutterProject> create(
-    Directory directory,
-    List<String> options,
-    String target, {
-    required String name,
-    required String template,
-    Map<String, String>? environment,
-  }) async {
+      Directory directory,
+      List<String> options,
+      String target,
+      {
+        required String name,
+        required String template,
+        Map<String, String>? environment,
+      }) async {
     await inDirectory(directory, () async {
       await flutter(
         'create',
@@ -189,22 +194,29 @@ class $dartPluginClass {
     if (!podspec.existsSync()) {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
-    final String versionString = target == 'ios' ? "s.platform = :ios, '9.0'" : "s.platform = :osx, '10.11'";
+    final String versionString = target == 'ios'
+        ? "s.platform = :ios, '9.0'"
+        : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
       throw TaskResult.failure('Update this test to match plugin minimum $target deployment version');
     }
     podspecContent = podspecContent.replaceFirst(
-        versionString, target == 'ios' ? "s.platform = :ios, '7.0'" : "s.platform = :osx, '10.8'");
+      versionString,
+      target == 'ios'
+          ? "s.platform = :ios, '7.0'"
+          : "s.platform = :osx, '10.8'"
+    );
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
 
   Future<void> build(String target, {bool validateNativeBuildProject = true}) async {
     await inDirectory(Directory(rootPath), () async {
-      final String buildOutput = await evalFlutter('build', options: <String>[
+      final String buildOutput =  await evalFlutter('build', options: <String>[
         target,
         '-v',
-        if (target == 'ios') '--no-codesign',
+        if (target == 'ios')
+          '--no-codesign',
       ]);
 
       if (target == 'ios' || target == 'macos') {
@@ -251,7 +263,8 @@ class $dartPluginClass {
     if (Platform.isWindows) {
       // A running Gradle daemon might prevent us from deleting the project
       // folder on Windows.
-      final String wrapperPath = path.absolute(path.join(rootPath, 'android', 'gradlew.bat'));
+      final String wrapperPath =
+          path.absolute(path.join(rootPath, 'android', 'gradlew.bat'));
       if (File(wrapperPath).existsSync()) {
         await exec(wrapperPath, <String>['--stop'], canFail: true);
       }

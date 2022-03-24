@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 
+
 void main() {
   late ImageProvider image;
 
@@ -117,12 +118,11 @@ void main() {
       ),
     );
 
-    expect(
-        tester.getSemantics(find.byType(ImageIcon)),
-        matchesSemantics(
-          label: 'test',
-          textDirection: TextDirection.ltr,
-        ));
+    expect(tester.getSemantics(find.byType(ImageIcon)), matchesSemantics(
+      label: 'test',
+      textDirection: TextDirection.ltr,
+    ));
     handle.dispose();
   });
+
 }

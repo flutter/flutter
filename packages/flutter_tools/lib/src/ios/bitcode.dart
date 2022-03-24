@@ -13,8 +13,7 @@ import '../macos/xcode.dart';
 
 const bool kBitcodeEnabledDefault = false;
 
-Future<void> validateBitcode(
-    BuildMode buildMode, TargetPlatform targetPlatform, EnvironmentType environmentType) async {
+Future<void> validateBitcode(BuildMode buildMode, TargetPlatform targetPlatform, EnvironmentType environmentType) async {
   final Artifacts? localArtifacts = globals.artifacts;
   final String? flutterFrameworkPath = localArtifacts?.getArtifactPath(
     Artifact.flutterFramework,
@@ -49,7 +48,7 @@ Version _parseVersionFromClang(String? clangVersion) {
   final RegExp pattern = RegExp(r'Apple (LLVM|clang) version (\d+\.\d+\.\d+) ');
   Never _invalid() {
     throwToolExit('Unable to parse Clang version from "$clangVersion". '
-        'Expected a string like "Apple (LLVM|clang) #.#.# (clang-####.#.##.#)".');
+                  'Expected a string like "Apple (LLVM|clang) #.#.# (clang-####.#.##.#)".');
   }
 
   if (clangVersion == null || clangVersion.isEmpty) {

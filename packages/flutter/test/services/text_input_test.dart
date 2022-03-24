@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:convert' show jsonDecode;
 import 'dart:ui';
 
@@ -20,8 +21,7 @@ void main() {
         extentOffset: 0,
         isDirectional: true,
       );
-      const TextSelection invalidSelection2 = TextSelection(
-        baseOffset: 123,
+      const TextSelection invalidSelection2 = TextSelection(baseOffset: 123,
         extentOffset: -1,
         affinity: TextAffinity.upstream,
       );
@@ -52,8 +52,7 @@ void main() {
         const TextSelection selection = TextSelection(baseOffset: 5, extentOffset: 13);
         expect(
           const TextEditingValue(text: testText, selection: selection).replaced(selection, ''),
-          const TextEditingValue(
-              text: 'From proposition, anything follows.', selection: TextSelection.collapsed(offset: 5)),
+          const TextEditingValue(text:  'From proposition, anything follows.', selection: TextSelection.collapsed(offset: 5)),
         );
       });
 
@@ -61,8 +60,7 @@ void main() {
         const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
         expect(
           const TextEditingValue(text: testText, selection: selection).replaced(selection, ''),
-          const TextEditingValue(
-              text: 'From proposition, anything follows.', selection: TextSelection.collapsed(offset: 5)),
+          const TextEditingValue(text:  'From proposition, anything follows.', selection: TextSelection.collapsed(offset: 5)),
         );
       });
 
@@ -71,7 +69,7 @@ void main() {
         expect(
           const TextEditingValue(text: testText, selection: selection).replaced(selection, 'AA'),
           const TextEditingValue(
-            text: 'From AAa false proposition, anything follows.',
+            text:  'From AAa false proposition, anything follows.',
             // The caret moves to the end of the text inserted.
             selection: TextSelection.collapsed(offset: 7),
           ),
@@ -83,11 +81,8 @@ void main() {
         expect(
           // From |a false |proposition, anything follows.
           // Replace the first whitespace with "AA".
-          const TextEditingValue(text: testText, selection: selection)
-              .replaced(const TextRange(start: 4, end: 5), 'AA'),
-          const TextEditingValue(
-              text: 'FromAAa false proposition, anything follows.',
-              selection: TextSelection(baseOffset: 14, extentOffset: 6)),
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 4, end: 5), 'AA'),
+          const TextEditingValue(text:  'FromAAa false proposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 6)),
         );
       });
 
@@ -96,9 +91,8 @@ void main() {
         expect(
           // From |a false |proposition, anything follows.
           // replace the first "p" with "AA".
-          const TextEditingValue(text: testText, selection: selection)
-              .replaced(const TextRange(start: 13, end: 14), 'AA'),
-          const TextEditingValue(text: 'From a false AAroposition, anything follows.', selection: selection),
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 13, end: 14), 'AA'),
+          const TextEditingValue(text:  'From a false AAroposition, anything follows.', selection: selection),
         );
       });
 
@@ -107,11 +101,8 @@ void main() {
         expect(
           // From |a false |proposition, anything follows.
           // replace the first "a" with "AA".
-          const TextEditingValue(text: testText, selection: selection)
-              .replaced(const TextRange(start: 5, end: 6), 'AA'),
-          const TextEditingValue(
-              text: 'From AA false proposition, anything follows.',
-              selection: TextSelection(baseOffset: 14, extentOffset: 5)),
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 5, end: 6), 'AA'),
+          const TextEditingValue(text:  'From AA false proposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 5)),
         );
       });
 
@@ -120,11 +111,8 @@ void main() {
         expect(
           // From |a false |proposition, anything follows.
           // replace the second whitespace with "AA".
-          const TextEditingValue(text: testText, selection: selection)
-              .replaced(const TextRange(start: 12, end: 13), 'AA'),
-          const TextEditingValue(
-              text: 'From a falseAAproposition, anything follows.',
-              selection: TextSelection(baseOffset: 14, extentOffset: 5)),
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 12, end: 13), 'AA'),
+          const TextEditingValue(text:  'From a falseAAproposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 5)),
         );
       });
 
@@ -133,9 +121,8 @@ void main() {
         expect(
           // From |a false |proposition, anything follows.
           // Delete the first "p".
-          const TextEditingValue(text: testText, selection: selection)
-              .replaced(const TextRange(start: 13, end: 14), ''),
-          const TextEditingValue(text: 'From a false roposition, anything follows.', selection: selection),
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 13, end: 14), ''),
+          const TextEditingValue(text:  'From a false roposition, anything follows.', selection: selection),
         );
       });
 
@@ -145,9 +132,7 @@ void main() {
           // From |a false |proposition, anything follows.
           // Delete the first "a".
           const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 5, end: 6), ''),
-          const TextEditingValue(
-              text: 'From  false proposition, anything follows.',
-              selection: TextSelection(baseOffset: 12, extentOffset: 5)),
+          const TextEditingValue(text:  'From  false proposition, anything follows.', selection: TextSelection(baseOffset: 12, extentOffset: 5)),
         );
       });
 
@@ -156,11 +141,8 @@ void main() {
         expect(
           // From |a false |proposition, anything follows.
           // Delete the second whitespace.
-          const TextEditingValue(text: testText, selection: selection)
-              .replaced(const TextRange(start: 12, end: 13), ''),
-          const TextEditingValue(
-              text: 'From a falseproposition, anything follows.',
-              selection: TextSelection(baseOffset: 12, extentOffset: 5)),
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 12, end: 13), ''),
+          const TextEditingValue(text:  'From a falseproposition, anything follows.', selection: TextSelection(baseOffset: 12, extentOffset: 5)),
         );
       });
     });
@@ -292,26 +274,22 @@ void main() {
       const TextInputType signed = TextInputType.numberWithOptions(signed: true);
       const TextInputType signed2 = TextInputType.numberWithOptions(signed: true);
       const TextInputType decimal = TextInputType.numberWithOptions(decimal: true);
-      const TextInputType signedDecimal = TextInputType.numberWithOptions(signed: true, decimal: true);
+      const TextInputType signedDecimal =
+        TextInputType.numberWithOptions(signed: true, decimal: true);
 
       expect(text.toString(), 'TextInputType(name: TextInputType.text, signed: null, decimal: null)');
       expect(number.toString(), 'TextInputType(name: TextInputType.number, signed: false, decimal: false)');
       expect(signed.toString(), 'TextInputType(name: TextInputType.number, signed: true, decimal: false)');
       expect(decimal.toString(), 'TextInputType(name: TextInputType.number, signed: false, decimal: true)');
       expect(signedDecimal.toString(), 'TextInputType(name: TextInputType.number, signed: true, decimal: true)');
-      expect(TextInputType.multiline.toString(),
-          'TextInputType(name: TextInputType.multiline, signed: null, decimal: null)');
+      expect(TextInputType.multiline.toString(), 'TextInputType(name: TextInputType.multiline, signed: null, decimal: null)');
       expect(TextInputType.phone.toString(), 'TextInputType(name: TextInputType.phone, signed: null, decimal: null)');
-      expect(TextInputType.datetime.toString(),
-          'TextInputType(name: TextInputType.datetime, signed: null, decimal: null)');
-      expect(TextInputType.emailAddress.toString(),
-          'TextInputType(name: TextInputType.emailAddress, signed: null, decimal: null)');
+      expect(TextInputType.datetime.toString(), 'TextInputType(name: TextInputType.datetime, signed: null, decimal: null)');
+      expect(TextInputType.emailAddress.toString(), 'TextInputType(name: TextInputType.emailAddress, signed: null, decimal: null)');
       expect(TextInputType.url.toString(), 'TextInputType(name: TextInputType.url, signed: null, decimal: null)');
-      expect(TextInputType.visiblePassword.toString(),
-          'TextInputType(name: TextInputType.visiblePassword, signed: null, decimal: null)');
+      expect(TextInputType.visiblePassword.toString(), 'TextInputType(name: TextInputType.visiblePassword, signed: null, decimal: null)');
       expect(TextInputType.name.toString(), 'TextInputType(name: TextInputType.name, signed: null, decimal: null)');
-      expect(TextInputType.streetAddress.toString(),
-          'TextInputType(name: TextInputType.address, signed: null, decimal: null)');
+      expect(TextInputType.streetAddress.toString(), 'TextInputType(name: TextInputType.address, signed: null, decimal: null)');
       expect(TextInputType.none.toString(), 'TextInputType(name: TextInputType.none, signed: null, decimal: null)');
 
       expect(text == number, false);
@@ -454,7 +432,8 @@ void main() {
       expect(client.latestMethodCall, isEmpty);
 
       // Send performPrivateCommand message.
-      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
           jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abc"}}'),
@@ -479,7 +458,8 @@ void main() {
       expect(client.latestMethodCall, isEmpty);
 
       // Send performPrivateCommand message.
-      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
           jsonDecode('{"action": "actionCommand", "data": {"input_context" : [0.5, 0.8]}}'),
@@ -504,7 +484,8 @@ void main() {
       expect(client.latestMethodCall, isEmpty);
 
       // Send onConnectionClosed message.
-      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[1, 0, 1],
         'method': 'TextInputClient.showAutocorrectionPromptRect',
       });
@@ -526,7 +507,8 @@ void main() {
       expect(client.latestMethodCall, isEmpty);
 
       // Send showToolbar message.
-      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[1, 0, 1],
         'method': 'TextInputClient.showToolbar',
       });
@@ -554,7 +536,8 @@ void main() {
       expect(connection.scribbleInProgress, false);
 
       // Send scribbleInteractionBegan message.
-      ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      ByteData? messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[1, 0, 1],
         'method': 'TextInputClient.scribbleInteractionBegan',
       });
@@ -567,7 +550,8 @@ void main() {
       expect(connection.scribbleInProgress, true);
 
       // Send scribbleInteractionFinished message.
-      messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[1, 0, 1],
         'method': 'TextInputClient.scribbleInteractionFinished',
       });
@@ -595,7 +579,8 @@ void main() {
       expect(otherElement.latestMethodCall, isEmpty);
 
       // Send focusElement message.
-      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[targetElement.elementIdentifier, 0.0, 0.0],
         'method': 'TextInputClient.focusElement',
       });
@@ -627,15 +612,14 @@ void main() {
         FakeScribbleElement(elementIdentifier: 'other2', bounds: const Rect.fromLTWH(100.0, 100.0, 100.0, 100.0)),
       ];
 
-      void registerElements(FakeScribbleElement element) =>
-          TextInput.registerScribbleElement(element.elementIdentifier, element);
-      void unregisterElements(FakeScribbleElement element) =>
-          TextInput.unregisterScribbleElement(element.elementIdentifier);
+      void registerElements(FakeScribbleElement element) => TextInput.registerScribbleElement(element.elementIdentifier, element);
+      void unregisterElements(FakeScribbleElement element) => TextInput.unregisterScribbleElement(element.elementIdentifier);
 
       <FakeScribbleElement>[...targetElements, ...otherElements].forEach(registerElements);
 
       // Send requestElementsInRect message.
-      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[0.0, 50.0, 50.0, 100.0],
         'method': 'TextInputClient.requestElementsInRect',
       });
@@ -650,13 +634,10 @@ void main() {
 
       <FakeScribbleElement>[...targetElements, ...otherElements].forEach(unregisterElements);
 
-      final List<List<dynamic>> responses =
-          (const JSONMessageCodec().decodeMessage(responseBytes) as List<dynamic>).cast<List<dynamic>>();
+      final List<List<dynamic>> responses = (const JSONMessageCodec().decodeMessage(responseBytes) as List<dynamic>).cast<List<dynamic>>();
       expect(responses.first.length, 2);
-      expect(responses.first.first,
-          containsAllInOrder(<dynamic>[targetElements.first.elementIdentifier, 0.0, 0.0, 100.0, 100.0]));
-      expect(responses.first.last,
-          containsAllInOrder(<dynamic>[targetElements.last.elementIdentifier, 0.0, 100.0, 100.0, 100.0]));
+      expect(responses.first.first, containsAllInOrder(<dynamic>[targetElements.first.elementIdentifier, 0.0, 0.0, 100.0, 100.0]));
+      expect(responses.first.last, containsAllInOrder(<dynamic>[targetElements.last.elementIdentifier, 0.0, 100.0, 100.0, 100.0]));
     });
   });
 

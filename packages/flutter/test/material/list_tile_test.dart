@@ -15,7 +15,7 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 class TestIcon extends StatefulWidget {
-  const TestIcon({Key? key}) : super(key: key);
+  const TestIcon({ Key? key }) : super(key: key);
 
   @override
   TestIconState createState() => TestIconState();
@@ -32,7 +32,7 @@ class TestIconState extends State<TestIcon> {
 }
 
 class TestText extends StatefulWidget {
-  const TestText(this.text, {Key? key}) : super(key: key);
+  const TestText(this.text, { Key? key }) : super(key: key);
 
   final String text;
 
@@ -79,9 +79,9 @@ void main() {
     const ListTileThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[]);
   });
@@ -106,9 +106,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[
       'dense: true',
@@ -187,12 +187,7 @@ void main() {
 
     const double leftPadding = 10.0;
     const double rightPadding = 20.0;
-    Widget buildFrame(
-        {bool dense = false,
-        bool isTwoLine = false,
-        bool isThreeLine = false,
-        double textScaleFactor = 1.0,
-        double? subtitleScaleFactor}) {
+    Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double? subtitleScaleFactor }) {
       hasSubtitle = isTwoLine || isThreeLine;
       subtitleScaleFactor ??= textScaleFactor;
       return MaterialApp(
@@ -220,7 +215,8 @@ void main() {
     void testChildren() {
       expect(find.byKey(leadingKey), findsOneWidget);
       expect(find.text('title'), findsOneWidget);
-      if (hasSubtitle) expect(find.text('subtitle'), findsOneWidget);
+      if (hasSubtitle)
+        expect(find.text('subtitle'), findsOneWidget);
       expect(find.byKey(trailingKey), findsOneWidget);
     }
 
@@ -240,7 +236,8 @@ void main() {
     void testHorizontalGeometry() {
       expect(leftKey(leadingKey), math.max(16.0, leftPadding));
       expect(left('title'), 56.0 + math.max(16.0, leftPadding));
-      if (hasSubtitle) expect(left('subtitle'), 56.0 + math.max(16.0, leftPadding));
+      if (hasSubtitle)
+        expect(left('subtitle'), 56.0 + math.max(16.0, leftPadding));
       expect(left('title'), rightKey(leadingKey) + 32.0);
       expect(rightKey(trailingKey), 800.0 - math.max(16.0, rightPadding));
       expect(widthKey(trailingKey), 24.0);
@@ -360,7 +357,7 @@ void main() {
   });
 
   testWidgets('ListTile.divideTiles', (WidgetTester tester) async {
-    final List<String> titles = <String>['first', 'second', 'third'];
+    final List<String> titles = <String>[ 'first', 'second', 'third' ];
 
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -467,9 +464,7 @@ void main() {
 
     Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
-    ShapeBorder inkWellBorder() => tester
-        .widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell)))
-        .customBorder!;
+    ShapeBorder inkWellBorder() => tester.widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell))).customBorder!;
 
     // A selected ListTile's leading, trailing, and text get the primary color by default
     await tester.pumpWidget(buildFrame(selected: true));
@@ -784,13 +779,12 @@ void main() {
       ),
     );
     //                                                                          LEFT                  TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)), const Rect.fromLTWH(0.0, 0.0, 800.0, 177.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(16.0, 16.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 24.0 - 16.0, 16.0, 24.0, 24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)), const Rect.fromLTWH(0.0, 177.0, 800.0, 48.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(16.0, 177.0 + 4.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),
-        const Rect.fromLTWH(800.0 - 24.0 - 16.0, 177.0 + 12.0, 24.0, 24.0));
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 177.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0,        177.0, 800.0,  48.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 177.0 +  4.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 177.0 + 12.0,  24.0,  24.0));
 
     // NON-DENSE "ONE"-LINE
     await tester.pumpWidget(
@@ -815,13 +809,12 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 2)); // the text styles are animated when we change dense
     //                                                                          LEFT                 TOP                   WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)), const Rect.fromLTWH(0.0, 0.0, 800.0, 216.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(16.0, 16.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 24.0 - 16.0, 16.0, 24.0, 24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)), const Rect.fromLTWH(0.0, 216.0, 800.0, 56.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(16.0, 216.0 + 8.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),
-        const Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0, 24.0, 24.0));
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 216.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 216.0       , 800.0,  56.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 216.0 +  8.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
 
     // DENSE "TWO"-LINE
     await tester.pumpWidget(
@@ -849,13 +842,12 @@ void main() {
       ),
     );
     //                                                                          LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)), const Rect.fromLTWH(0.0, 0.0, 800.0, 180.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(16.0, 16.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 24.0 - 16.0, 16.0, 24.0, 24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)), const Rect.fromLTWH(0.0, 180.0, 800.0, 64.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(16.0, 180.0 + 12.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),
-        const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 20.0, 24.0, 24.0));
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 180.0,        800.0,  64.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 180.0 + 12.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 20.0,  24.0,  24.0));
 
     // NON-DENSE "TWO"-LINE
     await tester.pumpWidget(
@@ -881,13 +873,12 @@ void main() {
       ),
     );
     //                                                                          LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)), const Rect.fromLTWH(0.0, 0.0, 800.0, 180.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(16.0, 16.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 24.0 - 16.0, 16.0, 24.0, 24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)), const Rect.fromLTWH(0.0, 180.0, 800.0, 72.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(16.0, 180.0 + 16.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),
-        const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 24.0, 24.0, 24.0));
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 180.0,        800.0,  72.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 24.0,  24.0,  24.0));
 
     // DENSE "THREE"-LINE
     await tester.pumpWidget(
@@ -917,13 +908,12 @@ void main() {
       ),
     );
     //                                                                          LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)), const Rect.fromLTWH(0.0, 0.0, 800.0, 180.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(16.0, 16.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 24.0 - 16.0, 16.0, 24.0, 24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)), const Rect.fromLTWH(0.0, 180.0, 800.0, 76.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(16.0, 180.0 + 16.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),
-        const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 16.0, 24.0, 24.0));
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 180.0,        800.0,  76.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 16.0,  24.0,  24.0));
 
     // NON-DENSE THREE-LINE
     await tester.pumpWidget(
@@ -951,13 +941,12 @@ void main() {
       ),
     );
     //                                                                          LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)), const Rect.fromLTWH(0.0, 0.0, 800.0, 180.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(16.0, 16.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 24.0 - 16.0, 16.0, 24.0, 24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)), const Rect.fromLTWH(0.0, 180.0, 800.0, 88.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(16.0, 180.0 + 16.0, 40.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),
-        const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 16.0, 24.0, 24.0));
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 180.0,        800.0,  88.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 16.0,  24.0,  24.0));
 
     // "ONE-LINE" with Small Leading Widget
     await tester.pumpWidget(
@@ -966,12 +955,12 @@ void main() {
           child: ListView(
             children: const <Widget>[
               ListTile(
-                leading: SizedBox(height: 12.0, width: 24.0, child: Placeholder()),
+                leading: SizedBox(height:12.0, width:24.0, child: Placeholder()),
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
                 title: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
               ),
               ListTile(
-                leading: SizedBox(height: 12.0, width: 24.0, child: Placeholder()),
+                leading: SizedBox(height:12.0, width:24.0, child: Placeholder()),
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
                 title: Text('A'),
               ),
@@ -982,13 +971,12 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 2)); // the text styles are animated when we change dense
     //                                                                          LEFT                 TOP           WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)), const Rect.fromLTWH(0.0, 0.0, 800.0, 216.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0, 16.0, 24.0, 12.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 24.0 - 16.0, 16.0, 24.0, 24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)), const Rect.fromLTWH(0.0, 216.0, 800.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(2)), const Rect.fromLTWH(16.0, 216.0 + 16.0, 24.0, 12.0));
-    expect(tester.getRect(find.byType(Placeholder).at(3)),
-        const Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0, 24.0, 24.0));
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 216.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(               16.0,         16.0,  24.0,  12.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 216.0       , 800.0,  56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(2)),  const Rect.fromLTWH(               16.0, 216.0 + 16.0,  24.0,  12.0));
+    expect(tester.getRect(find.byType(Placeholder).at(3)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
   });
 
   testWidgets('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
@@ -1017,7 +1005,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0, 0.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,  0.0, 24.0, 48.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 48.0, 24.0, 48.0));
 
     // Non-dense One line
@@ -1042,7 +1030,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0, 0.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,  0.0, 24.0, 56.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 56.0, 24.0, 56.0));
 
     // Dense Two line
@@ -1069,7 +1057,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0, 8.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,        8.0, 24.0, 48.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 64.0 + 8.0, 24.0, 48.0));
 
     // Non-dense Two line
@@ -1096,7 +1084,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0, 8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,        8.0, 24.0, 56.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 72.0 + 8.0, 24.0, 56.0));
 
     // Dense Three line
@@ -1109,14 +1097,14 @@ void main() {
                 leading: oversizedWidget,
                 title: Text('A'),
                 subtitle: Text('A'),
-                isThreeLine: true,
+                isThreeLine:  true,
                 dense: true,
               ),
               ListTile(
                 leading: oversizedWidget,
                 title: Text('B'),
                 subtitle: Text('B'),
-                isThreeLine: true,
+                isThreeLine:  true,
                 dense: true,
               ),
             ],
@@ -1125,7 +1113,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0, 16.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,        16.0, 24.0, 48.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 76.0 + 16.0, 24.0, 48.0));
 
     // Non-dense Three line
@@ -1138,14 +1126,14 @@ void main() {
                 leading: oversizedWidget,
                 title: Text('A'),
                 subtitle: Text('A'),
-                isThreeLine: true,
+                isThreeLine:  true,
                 dense: false,
               ),
               ListTile(
                 leading: oversizedWidget,
                 title: Text('B'),
                 subtitle: Text('B'),
-                isThreeLine: true,
+                isThreeLine:  true,
                 dense: false,
               ),
             ],
@@ -1154,7 +1142,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0, 16.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,        16.0, 24.0, 56.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 88.0 + 16.0, 24.0, 56.0));
   });
 
@@ -1184,7 +1172,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,    0, 24.0, 48.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 48.0, 24.0, 48.0));
 
     // Non-dense One line
@@ -1209,7 +1197,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 0.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,  0.0, 24.0, 56.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 56.0, 24.0, 56.0));
 
     // Dense Two line
@@ -1236,9 +1224,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 8.0, 24.0, 48.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),
-        const Rect.fromLTWH(800.0 - 16.0 - 24.0, 64.0 + 8.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        8.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 64.0 + 8.0, 24.0, 48.0));
 
     // Non-dense Two line
     await tester.pumpWidget(
@@ -1264,9 +1251,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 8.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),
-        const Rect.fromLTWH(800.0 - 16.0 - 24.0, 72.0 + 8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 72.0 + 8.0, 24.0, 56.0));
 
     // Dense Three line
     await tester.pumpWidget(
@@ -1278,14 +1264,14 @@ void main() {
                 trailing: oversizedWidget,
                 title: Text('A'),
                 subtitle: Text('A'),
-                isThreeLine: true,
+                isThreeLine:  true,
                 dense: true,
               ),
               ListTile(
                 trailing: oversizedWidget,
                 title: Text('B'),
                 subtitle: Text('B'),
-                isThreeLine: true,
+                isThreeLine:  true,
                 dense: true,
               ),
             ],
@@ -1294,9 +1280,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 16.0, 24.0, 48.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),
-        const Rect.fromLTWH(800.0 - 16.0 - 24.0, 76.0 + 16.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 76.0 + 16.0, 24.0, 48.0));
 
     // Non-dense Three line
     await tester.pumpWidget(
@@ -1308,14 +1293,14 @@ void main() {
                 trailing: oversizedWidget,
                 title: Text('A'),
                 subtitle: Text('A'),
-                isThreeLine: true,
+                isThreeLine:  true,
                 dense: false,
               ),
               ListTile(
                 trailing: oversizedWidget,
                 title: Text('B'),
                 subtitle: Text('B'),
-                isThreeLine: true,
+                isThreeLine:  true,
                 dense: false,
               ),
             ],
@@ -1324,9 +1309,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 16.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),
-        const Rect.fromLTWH(800.0 - 16.0 - 24.0, 88.0 + 16.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 88.0 + 16.0, 24.0, 56.0));
   });
 
   testWidgets('ListTile only accepts focus when enabled', (WidgetTester tester) async {
@@ -1445,7 +1429,6 @@ void main() {
         ),
       );
     }
-
     await tester.pumpWidget(buildApp());
 
     await tester.pumpAndSettle();
@@ -1454,13 +1437,13 @@ void main() {
       find.byType(Material),
       paints
         ..rect(
-          color: Colors.orange[500],
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
+            color: Colors.orange[500],
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
         ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          ),
     );
 
     // Check when the list tile is disabled.
@@ -1471,9 +1454,9 @@ void main() {
       find.byType(Material),
       paints
         ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          ),
     );
   });
 
@@ -1499,7 +1482,6 @@ void main() {
         ),
       );
     }
-
     await tester.pumpWidget(buildApp());
 
     await tester.pump();
@@ -1508,13 +1490,13 @@ void main() {
       find.byType(Material),
       paints
         ..rect(
-          color: const Color(0x1f000000),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
+            color: const Color(0x1f000000),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
         ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          ),
     );
 
     // Start hovering
@@ -1529,17 +1511,17 @@ void main() {
       find.byType(Material),
       paints
         ..rect(
-          color: const Color(0x1f000000),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
+            color: const Color(0x1f000000),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
         ..rect(
-          color: Colors.orange[500],
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
+            color: Colors.orange[500],
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
         ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          ),
     );
 
     await tester.pumpWidget(buildApp(enabled: false));
@@ -1549,13 +1531,13 @@ void main() {
       find.byType(Material),
       paints
         ..rect(
-          color: Colors.orange[500],
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
+            color: Colors.orange[500],
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          )
         ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          ),
     );
   });
 
@@ -1574,13 +1556,11 @@ void main() {
                 color: Colors.white,
                 child: ListTile(
                   key: tileKey,
-                  onTap: enabled
-                      ? () {
-                          setState(() {
-                            tapped = true;
-                          });
-                        }
-                      : null,
+                  onTap: enabled ? () {
+                    setState(() {
+                      tapped = true;
+                    });
+                  } : null,
                   hoverColor: Colors.orange[500],
                   autofocus: true,
                 ),
@@ -1660,24 +1640,23 @@ void main() {
     // Check if a path was painted with the correct color and shape
     expect(
       find.byType(Material),
-      paints
-        ..path(
-          color: tileColor,
-          // Corners should be included
-          includes: <Offset>[
-            Offset(rect.left, rect.top),
-            Offset(rect.right, rect.top),
-            Offset(rect.left, rect.bottom),
-            Offset(rect.right, rect.bottom),
-          ],
-          // Points outside rect should be excluded
-          excludes: <Offset>[
-            Offset(rect.left - 1, rect.top - 1),
-            Offset(rect.right + 1, rect.top - 1),
-            Offset(rect.left - 1, rect.bottom + 1),
-            Offset(rect.right + 1, rect.bottom + 1),
-          ],
-        ),
+      paints..path(
+        color: tileColor,
+        // Corners should be included
+        includes: <Offset>[
+          Offset(rect.left, rect.top),
+          Offset(rect.right, rect.top),
+          Offset(rect.left, rect.bottom),
+          Offset(rect.right, rect.bottom),
+        ],
+        // Points outside rect should be excluded
+        excludes: <Offset>[
+          Offset(rect.left - 1, rect.top - 1),
+          Offset(rect.right + 1, rect.top - 1),
+          Offset(rect.left - 1, rect.bottom + 1),
+          Offset(rect.right + 1, rect.bottom + 1),
+        ],
+      ),
     );
 
     // Test stadium shape
@@ -1687,24 +1666,23 @@ void main() {
     // Check if a path was painted with the correct color and shape
     expect(
       find.byType(Material),
-      paints
-        ..path(
-          color: tileColor,
-          // Center points of sides should be included
-          includes: <Offset>[
-            Offset(rect.left + rect.width / 2, rect.top),
-            Offset(rect.left, rect.top + rect.height / 2),
-            Offset(rect.right, rect.top + rect.height / 2),
-            Offset(rect.left + rect.width / 2, rect.bottom),
-          ],
-          // Corners should be excluded
-          excludes: <Offset>[
-            Offset(rect.left, rect.top),
-            Offset(rect.right, rect.top),
-            Offset(rect.left, rect.bottom),
-            Offset(rect.right, rect.bottom),
-          ],
-        ),
+      paints..path(
+        color: tileColor,
+        // Center points of sides should be included
+        includes: <Offset>[
+          Offset(rect.left + rect.width / 2, rect.top),
+          Offset(rect.left, rect.top + rect.height / 2),
+          Offset(rect.right, rect.top + rect.height / 2),
+          Offset(rect.left + rect.width / 2, rect.bottom),
+        ],
+        // Corners should be excluded
+        excludes: <Offset>[
+          Offset(rect.left, rect.top),
+          Offset(rect.right, rect.top),
+          Offset(rect.left, rect.bottom),
+          Offset(rect.right, rect.bottom),
+        ],
+      ),
     );
   });
 
@@ -1803,7 +1781,7 @@ void main() {
                   selectedTileColor: selectedTileColor,
                   tileColor: tileColor,
                   onTap: () {
-                    setState(() => isSelected = !isSelected);
+                    setState(()=> isSelected = !isSelected);
                   },
                   title: const Text('Title'),
                 );
@@ -1872,7 +1850,7 @@ void main() {
                 return ListTile(
                   selected: isSelected,
                   onTap: () {
-                    setState(() => isSelected = !isSelected);
+                    setState(()=> isSelected = !isSelected);
                   },
                   title: const Text('Title'),
                 );
@@ -1911,7 +1889,7 @@ void main() {
                   return ListTile(
                     selected: isSelected,
                     onTap: () {
-                      setState(() => isSelected = !isSelected);
+                      setState(()=> isSelected = !isSelected);
                     },
                     title: const Text('Title'),
                   );
@@ -1932,8 +1910,7 @@ void main() {
     expect(find.byType(Material), paints..path(color: theme.selectedTileColor));
   });
 
-  testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties",
-      (WidgetTester tester) async {
+  testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
     final Color selectedTileColor = Colors.red.shade500;
@@ -1954,7 +1931,7 @@ void main() {
                     selectedTileColor: selectedTileColor,
                     selected: isSelected,
                     onTap: () {
-                      setState(() => isSelected = !isSelected);
+                      setState(()=> isSelected = !isSelected);
                     },
                     title: const Text('Title'),
                   );
@@ -2051,6 +2028,7 @@ void main() {
     });
 
     testWidgets('ListTile with enabled feedback by default', (WidgetTester tester) async {
+
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -2146,8 +2124,7 @@ void main() {
   });
 
   testWidgets('ListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection,
-        {double? themeHorizontalTitleGap, double? widgetHorizontalTitleGap}) {
+    Widget buildFrame(TextDirection textDirection, { double? themeHorizontalTitleGap, double? widgetHorizontalTitleGap }) {
       return MediaQuery(
         data: const MediaQueryData(),
         child: Directionality(
@@ -2198,8 +2175,7 @@ void main() {
     expect(right('title'), 744.0);
   });
 
-  testWidgets('ListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)',
-      (WidgetTester tester) async {
+  testWidgets('ListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(),
@@ -2281,8 +2257,7 @@ void main() {
   });
 
   testWidgets('ListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection,
-        {double? themeMinVerticalPadding, double? widgetMinVerticalPadding}) {
+    Widget buildFrame(TextDirection textDirection, { double? themeMinVerticalPadding, double? widgetMinVerticalPadding }) {
       return MediaQuery(
         data: const MediaQueryData(),
         child: Directionality(
@@ -2304,6 +2279,7 @@ void main() {
         ),
       );
     }
+
 
     await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinVerticalPadding: 80));
     // 80 + 80 + 16(Title) = 176
@@ -2327,7 +2303,7 @@ void main() {
   });
 
   testWidgets('ListTile minLeadingWidth = 60.0', (WidgetTester tester) async {
-    Widget buildFrame(TextDirection textDirection, {double? themeMinLeadingWidth, double? widgetMinLeadingWidth}) {
+    Widget buildFrame(TextDirection textDirection, { double? themeMinLeadingWidth, double? widgetMinLeadingWidth }) {
       return MediaQuery(
         data: const MediaQueryData(),
         child: Directionality(
@@ -2365,6 +2341,7 @@ void main() {
     await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinLeadingWidth: 0, widgetMinLeadingWidth: 60));
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
     expect(left('title'), 92.0);
+
 
     await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetMinLeadingWidth: 60));
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
@@ -2499,10 +2476,10 @@ void main() {
     final Key leadingKey = UniqueKey();
     final Key trailingKey = UniqueKey();
 
-    Widget buildFrame({required Brightness brightness, required bool selected}) {
+    Widget buildFrame({ required Brightness brightness, required bool selected }) {
       final ThemeData theme = brightness == Brightness.light
-          ? ThemeData.from(colorScheme: const ColorScheme.light())
-          : ThemeData.from(colorScheme: const ColorScheme.dark());
+        ? ThemeData.from(colorScheme: const ColorScheme.light())
+        : ThemeData.from(colorScheme: const ColorScheme.dark());
       return MaterialApp(
         theme: theme,
         home: Material(
@@ -2535,7 +2512,7 @@ void main() {
     // For this configuration, ListTile defers to the default IconTheme.
     // The default dark theme's IconTheme has color:white
     await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: false));
-    expect(iconColor(leadingKey), Colors.white);
+    expect(iconColor(leadingKey),  Colors.white);
     expect(iconColor(trailingKey), Colors.white);
   });
 }

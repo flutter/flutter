@@ -14,8 +14,8 @@ class XcodeBuildSystemMigration extends ProjectMigrator {
   XcodeBuildSystemMigration(
     IosProject project,
     Logger logger,
-  )   : _xcodeWorkspaceSharedSettings = project.xcodeWorkspaceSharedSettings,
-        super(logger);
+  ) : _xcodeWorkspaceSharedSettings = project.xcodeWorkspaceSharedSettings,
+      super(logger);
 
   final File _xcodeWorkspaceSharedSettings;
 

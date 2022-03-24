@@ -28,7 +28,9 @@ import '../../src/fakes.dart';
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
-  environment: <String, String>{'HOME': '/'},
+  environment: <String, String>{
+    'HOME': '/'
+  },
 );
 
 void main() {
@@ -142,17 +144,9 @@ void main() {
     testWithoutContext('compares correctly', () {
       // This list must be sorted in ascending preference order
       final List<String> testList = <String>[
-        '8',
-        '8.0',
-        '8.1',
-        '8.2',
-        '9',
-        '9.0',
-        '9.1',
-        '9.2',
-        '10',
-        '10.0',
-        '10.1',
+        '8', '8.0', '8.1', '8.2',
+        '9', '9.0', '9.1', '9.2',
+        '10', '10.0', '10.1',
       ];
 
       for (int i = 0; i < testList.length; i++) {
@@ -232,14 +226,12 @@ void main() {
     });
 
     testUsingContext('Apple Watch is unsupported', () {
-      expect(
-          IOSSimulator(
-            'x',
-            name: 'Apple Watch',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.watchOS-8-0',
-          ).isSupported(),
-          false);
+      expect(IOSSimulator(
+        'x',
+        name: 'Apple Watch',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.watchOS-8-0',
+      ).isSupported(), false);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
       FileSystem: () => fileSystem,
@@ -247,14 +239,12 @@ void main() {
     });
 
     testUsingContext('iPad 2 is supported', () {
-      expect(
-          IOSSimulator(
-            'x',
-            name: 'iPad 2',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          ).isSupported(),
-          true);
+      expect(IOSSimulator(
+        'x',
+        name: 'iPad 2',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+      ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
       FileSystem: () => fileSystem,
@@ -262,14 +252,12 @@ void main() {
     });
 
     testUsingContext('iPad Retina is supported', () {
-      expect(
-          IOSSimulator(
-            'x',
-            name: 'iPad Retina',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          ).isSupported(),
-          true);
+      expect(IOSSimulator(
+        'x',
+        name: 'iPad Retina',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+      ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
       FileSystem: () => fileSystem,
@@ -277,14 +265,12 @@ void main() {
     });
 
     testUsingContext('iPhone 5 is supported', () {
-      expect(
-          IOSSimulator(
-            'x',
-            name: 'iPhone 5',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          ).isSupported(),
-          true);
+      expect(IOSSimulator(
+        'x',
+        name: 'iPhone 5',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+      ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
       FileSystem: () => fileSystem,
@@ -292,14 +278,12 @@ void main() {
     });
 
     testUsingContext('iPhone 5s is supported', () {
-      expect(
-          IOSSimulator(
-            'x',
-            name: 'iPhone 5s',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          ).isSupported(),
-          true);
+      expect(IOSSimulator(
+        'x',
+        name: 'iPhone 5s',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+      ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
       FileSystem: () => fileSystem,
@@ -307,14 +291,12 @@ void main() {
     });
 
     testUsingContext('iPhone SE is supported', () {
-      expect(
-          IOSSimulator(
-            'x',
-            name: 'iPhone SE',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          ).isSupported(),
-          true);
+      expect(IOSSimulator(
+        'x',
+        name: 'iPhone SE',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+      ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
       FileSystem: () => fileSystem,
@@ -322,14 +304,12 @@ void main() {
     });
 
     testUsingContext('iPhone 7 Plus is supported', () {
-      expect(
-          IOSSimulator(
-            'x',
-            name: 'iPhone 7 Plus',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          ).isSupported(),
-          true);
+      expect(IOSSimulator(
+        'x',
+        name: 'iPhone 7 Plus',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+      ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
       FileSystem: () => fileSystem,
@@ -337,14 +317,12 @@ void main() {
     });
 
     testUsingContext('iPhone X is supported', () {
-      expect(
-          IOSSimulator(
-            'x',
-            name: 'iPhone X',
-            simControl: simControl,
-            simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          ).isSupported(),
-          true);
+      expect(IOSSimulator(
+        'x',
+        name: 'iPhone X',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+      ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
       FileSystem: () => fileSystem,
@@ -414,14 +392,15 @@ void main() {
       ]));
       await launchDeviceSystemLogTool(device);
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-    }, overrides: <Type, Generator>{
+    },
+    overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       FileSystem: () => fileSystem,
       Platform: () => macosPlatform,
       FileSystemUtils: () => FileSystemUtils(
-            fileSystem: fileSystem,
-            platform: macosPlatform,
-          ),
+        fileSystem: fileSystem,
+        platform: macosPlatform,
+      ),
     });
 
     testUsingContext('unified logging with app name', () async {
@@ -452,7 +431,8 @@ void main() {
 
       await launchDeviceUnifiedLogging(device, 'My Super Awesome App');
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-    }, overrides: <Type, Generator>{
+    },
+      overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       FileSystem: () => fileSystem,
     });
@@ -484,10 +464,11 @@ void main() {
 
       await launchDeviceUnifiedLogging(device, null);
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => fakeProcessManager,
-      FileSystem: () => fileSystem,
-    });
+    },
+      overrides: <Type, Generator>{
+        ProcessManager: () => fakeProcessManager,
+        FileSystem: () => fileSystem,
+      });
   });
 
   group('log reader', () {
@@ -511,10 +492,15 @@ void main() {
 
       testUsingContext('simulator can parse Xcode 8/iOS 10-style logs', () async {
         fakeProcessManager
-          ..addCommand(const FakeCommand(command: <String>['tail', '-n', '0', '-F', 'system.log'], stdout: '''
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', 'system.log'],
+            stdout: '''
 Dec 20 17:04:32 md32-11-vm1 My Super Awesome App[88374]: flutter: The Dart VM service is listening on http://127.0.0.1:64213/1Uoeu523990=/
-Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''))
-          ..addCommand(const FakeCommand(command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']));
+Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
+          ))
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
+          ));
 
         final IOSSimulator device = IOSSimulator(
           '123456',
@@ -540,11 +526,16 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''))
 
       testUsingContext('simulator can output `)`', () async {
         fakeProcessManager
-          ..addCommand(const FakeCommand(command: <String>['tail', '-n', '0', '-F', 'system.log'], stdout: '''
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', 'system.log'],
+            stdout: '''
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) ))))))))))
-2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''))
-          ..addCommand(const FakeCommand(command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']));
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
+          ))
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
+          ));
 
         final IOSSimulator device = IOSSimulator(
           '123456',
@@ -572,7 +563,9 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''))
 
       testUsingContext('multiline messages', () async {
         fakeProcessManager
-          ..addCommand(const FakeCommand(command: <String>['tail', '-n', '0', '-F', 'system.log'], stdout: '''
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', 'system.log'],
+            stdout: '''
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Single line message
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Multi line message
   continues...
@@ -586,8 +579,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''))
   and it goes...
   and goes...
 2017-09-13 15:36:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Single line message, not the part of the above
-'''))
-          ..addCommand(const FakeCommand(command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']));
+'''
+          ))
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
+          ));
 
         final IOSSimulator device = IOSSimulator(
           '123456',
@@ -628,22 +624,24 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''))
 
       testUsingContext('log reader handles escaped multiline messages', () async {
         const String logPredicate = 'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
-            'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
-            'OR processImageUUID == senderImageUUID) AND NOT(eventMessage CONTAINS ": could not find icon '
-            'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
-            'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
-        fakeProcessManager.addCommand(const FakeCommand(command: <String>[
-          'xcrun',
-          'simctl',
-          'spawn',
-          '123456',
-          'log',
-          'stream',
-          '--style',
-          'json',
-          '--predicate',
-          logPredicate,
-        ], stdout: r'''
+          'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
+          'OR processImageUUID == senderImageUUID) AND NOT(eventMessage CONTAINS ": could not find icon '
+          'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
+          'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
+        fakeProcessManager.addCommand(const FakeCommand(
+            command:  <String>[
+              'xcrun',
+              'simctl',
+              'spawn',
+              '123456',
+              'log',
+              'stream',
+              '--style',
+              'json',
+              '--predicate',
+              logPredicate,
+            ],
+            stdout: r'''
 },{
   "traceID" : 37579774151491588,
   "eventMessage" : "Single line message",
@@ -656,7 +654,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''))
   "eventMessage" : "Single line message, not the part of the above",
   "eventType" : "logEvent"
 },{
-'''));
+'''
+          ));
 
         final IOSSimulator device = IOSSimulator(
           '123456',
@@ -670,8 +669,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''))
 
         final List<String> lines = await logReader.logLines.toList();
         expect(lines, <String>[
-          'Single line message',
-          'Multi line message\n  continues...\n  continues...',
+          'Single line message', 'Multi line message\n  continues...\n  continues...',
           'Single line message, not the part of the above'
         ]);
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -687,19 +685,19 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''))
             'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
             'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
         fakeProcessManager.addCommand(const FakeCommand(
-          command: <String>[
-            'xcrun',
-            'simctl',
-            'spawn',
-            '123456',
-            'log',
-            'stream',
-            '--style',
-            'json',
-            '--predicate',
-            logPredicate,
-          ],
-          stdout: '"eventMessage" : "message with incorrect escaping""',
+            command:  <String>[
+              'xcrun',
+              'simctl',
+              'spawn',
+              '123456',
+              'log',
+              'stream',
+              '--style',
+              'json',
+              '--predicate',
+              logPredicate,
+            ],
+            stdout: '"eventMessage" : "message with incorrect escaping""',
         ));
 
         final IOSSimulator device = IOSSimulator(
@@ -956,8 +954,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''))
 
       const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
       final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
-      final LaunchResult result =
-          await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+      final LaunchResult result = await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
       expect(result.started, isFalse);
       expect(simControl.requests, isEmpty);
@@ -1063,6 +1060,7 @@ flutter:
       Xcode: () => xcode,
     });
 
+
     testUsingContext('is true with editable host app', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
@@ -1125,7 +1123,7 @@ class FakeSimControl extends Fake implements SimControl {
   final List<LaunchRequest> requests = <LaunchRequest>[];
 
   @override
-  Future<RunResult> launch(String deviceId, String appIdentifier, [List<String> launchArgs]) async {
+  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) async {
     requests.add(LaunchRequest(deviceId, appIdentifier, launchArgs));
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }

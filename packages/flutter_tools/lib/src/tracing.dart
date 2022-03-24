@@ -64,8 +64,8 @@ class Tracing {
         final List<FlutterView> views = await vmService.getFlutterViews();
         for (final FlutterView view in views) {
           final String? uiIsolateId = view.uiIsolate?.id;
-          if (uiIsolateId != null &&
-              await vmService.flutterAlreadyPaintedFirstUsefulFrame(
+          if (uiIsolateId != null && await vmService
+              .flutterAlreadyPaintedFirstUsefulFrame(
                 isolateId: uiIsolateId,
               )) {
             done = true;
@@ -101,9 +101,8 @@ class Tracing {
           await whenFirstFrameRendered.future;
           timer.cancel();
         }
-        // The exception is rethrown, so don't catch only Exceptions.
-      } catch (exception) {
-        // ignore: avoid_catches_without_on_clauses
+      // The exception is rethrown, so don't catch only Exceptions.
+      } catch (exception) { // ignore: avoid_catches_without_on_clauses
         status.cancel();
         rethrow;
       }
@@ -123,8 +122,7 @@ class Tracing {
 
 /// Download the startup trace information from the given observatory client and
 /// store it to `$output/start_up_info.json`.
-Future<void> downloadStartupTrace(
-  FlutterVmService vmService, {
+Future<void> downloadStartupTrace(FlutterVmService vmService, {
   bool awaitFirstFrame = true,
   required Logger logger,
   required Directory output,

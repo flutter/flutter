@@ -59,8 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: Column(
         children: <Widget>[
-          Text(
-            '$offset',
+          Text('$offset',
             key: const ValueKey<String>(keys.kOffsetText),
           ),
           Text(

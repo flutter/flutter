@@ -9,8 +9,7 @@ import '../common.dart';
 
 const int _kNumIters = 10000;
 
-void _testCurve(Curve curve,
-    {required String name, required String description, required BenchmarkResultPrinter printer}) {
+void _testCurve(Curve curve, {required String name, required String description, required BenchmarkResultPrinter printer}) {
   final Stopwatch watch = Stopwatch();
   print('$description benchmark...');
   watch.start();

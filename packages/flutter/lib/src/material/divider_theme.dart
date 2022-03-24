@@ -28,6 +28,7 @@ import 'theme.dart';
 ///    application.
 @immutable
 class DividerThemeData with Diagnosticable {
+
   /// Creates a theme that can be used for [DividerTheme] or
   /// [ThemeData.dividerTheme].
   const DividerThemeData({
@@ -95,23 +96,25 @@ class DividerThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        color,
-        space,
-        thickness,
-        indent,
-        endIndent,
-      );
+    color,
+    space,
+    thickness,
+    indent,
+    endIndent,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is DividerThemeData &&
-        other.color == color &&
-        other.space == space &&
-        other.thickness == thickness &&
-        other.indent == indent &&
-        other.endIndent == endIndent;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is DividerThemeData
+        && other.color == color
+        && other.space == space
+        && other.thickness == thickness
+        && other.indent == indent
+        && other.endIndent == endIndent;
   }
 
   @override
@@ -136,8 +139,8 @@ class DividerTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(data != null),
-        super(key: key, child: child);
+  }) : assert(data != null),
+       super(key: key, child: child);
 
   /// The properties for descendant [Divider]s, [VerticalDivider]s, dividers
   /// between [ListTile]s, and dividers between rows in [DataTable]s.

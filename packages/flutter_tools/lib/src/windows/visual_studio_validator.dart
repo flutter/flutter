@@ -13,9 +13,9 @@ class VisualStudioValidator extends DoctorValidator {
   const VisualStudioValidator({
     required VisualStudio visualStudio,
     required UserMessages userMessages,
-  })  : _visualStudio = visualStudio,
-        _userMessages = userMessages,
-        super('Visual Studio - develop for Windows');
+  }) : _visualStudio = visualStudio,
+       _userMessages = userMessages,
+       super('Visual Studio - develop for Windows');
 
   final VisualStudio _visualStudio;
   final UserMessages _userMessages;
@@ -29,11 +29,13 @@ class VisualStudioValidator extends DoctorValidator {
     if (_visualStudio.isInstalled) {
       status = ValidationType.installed;
 
-      messages.add(ValidationMessage(_userMessages.visualStudioLocation(_visualStudio.installLocation ?? 'unknown')));
+      messages.add(ValidationMessage(
+          _userMessages.visualStudioLocation(_visualStudio.installLocation ?? 'unknown')
+      ));
 
       messages.add(ValidationMessage(_userMessages.visualStudioVersion(
-        _visualStudio.displayName ?? 'unknown',
-        _visualStudio.fullVersion ?? 'unknown',
+          _visualStudio.displayName ?? 'unknown',
+          _visualStudio.fullVersion ?? 'unknown',
       )));
 
       if (_visualStudio.isPrerelease) {
@@ -49,10 +51,10 @@ class VisualStudioValidator extends DoctorValidator {
       if (!_visualStudio.isAtLeastMinimumVersion) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.error(
-          _userMessages.visualStudioTooOld(
-            _visualStudio.minimumVersionDescription,
-            _visualStudio.workloadDescription,
-          ),
+            _userMessages.visualStudioTooOld(
+                _visualStudio.minimumVersionDescription,
+                _visualStudio.workloadDescription,
+            ),
         ));
       } else if (_visualStudio.isRebootRequired) {
         status = ValidationType.partial;
@@ -66,10 +68,10 @@ class VisualStudioValidator extends DoctorValidator {
       } else if (!_visualStudio.hasNecessaryComponents) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.error(
-          _userMessages.visualStudioMissingComponents(
-            _visualStudio.workloadDescription,
-            _visualStudio.necessaryComponentDescriptions(),
-          ),
+            _userMessages.visualStudioMissingComponents(
+                _visualStudio.workloadDescription,
+                _visualStudio.necessaryComponentDescriptions(),
+            ),
         ));
       } else if (windows10SdkVersion == null) {
         status = ValidationType.partial;

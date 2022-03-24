@@ -24,11 +24,12 @@ abstract class ChromiumValidator extends DoctorValidator {
           ValidationMessage.hint('$chromiumSearchLocation is not executable.')
         else
           ValidationMessage('$kChromeEnvironment = $chromiumSearchLocation')
-      else if (!canRunChromium)
-        ValidationMessage.hint('Cannot find $_name. Try setting '
-            '$kChromeEnvironment to a $_name executable.')
       else
-        ValidationMessage('$_name at $chromiumSearchLocation'),
+        if (!canRunChromium)
+          ValidationMessage.hint('Cannot find $_name. Try setting '
+            '$kChromeEnvironment to a $_name executable.')
+        else
+          ValidationMessage('$_name at $chromiumSearchLocation'),
     ];
     if (!canRunChromium) {
       return ValidationResult(
@@ -49,9 +50,9 @@ class ChromeValidator extends ChromiumValidator {
   const ChromeValidator({
     required Platform platform,
     required ChromiumLauncher chromiumLauncher,
-  })  : _platform = platform,
-        _chromiumLauncher = chromiumLauncher,
-        super('Chrome - develop for the web');
+  }) : _platform = platform,
+       _chromiumLauncher = chromiumLauncher,
+       super('Chrome - develop for the web');
 
   @override
   final Platform _platform;
@@ -68,9 +69,9 @@ class EdgeValidator extends ChromiumValidator {
   const EdgeValidator({
     required Platform platform,
     required ChromiumLauncher chromiumLauncher,
-  })  : _platform = platform,
-        _chromiumLauncher = chromiumLauncher,
-        super('Edge - develop for the web');
+  }) : _platform = platform,
+       _chromiumLauncher = chromiumLauncher,
+       super('Edge - develop for the web');
 
   @override
   final Platform _platform;

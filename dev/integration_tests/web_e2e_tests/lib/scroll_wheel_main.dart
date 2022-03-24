@@ -79,33 +79,31 @@ abstract class DeltaMode {
   static const int kPage = 0x02;
 }
 
-void dispatchMouseWheelEvent(int mouseX, int mouseY, int deltaMode, double deltaX, double deltaY) {
+void dispatchMouseWheelEvent(int mouseX, int mouseY,
+    int deltaMode, double deltaX, double deltaY) {
   final html.EventTarget target = html.document.elementFromPoint(mouseX, mouseY)!;
 
-  target.dispatchEvent(html.MouseEvent(
-    'mouseover',
+  target.dispatchEvent(html.MouseEvent('mouseover',
     screenX: mouseX,
     screenY: mouseY,
     clientX: mouseX,
     clientY: mouseY,
   ));
 
-  target.dispatchEvent(html.MouseEvent(
-    'mousemove',
+  target.dispatchEvent(html.MouseEvent('mousemove',
     screenX: mouseX,
     screenY: mouseY,
     clientX: mouseX,
     clientY: mouseY,
   ));
 
-  target.dispatchEvent(html.WheelEvent(
-    'wheel',
+  target.dispatchEvent(html.WheelEvent('wheel',
     screenX: mouseX,
     screenY: mouseY,
     clientX: mouseX,
     clientY: mouseY,
     deltaMode: deltaMode,
-    deltaX: deltaX,
-    deltaY: deltaY,
+    deltaX : deltaX,
+    deltaY : deltaY,
   ));
 }

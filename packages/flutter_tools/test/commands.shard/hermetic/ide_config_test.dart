@@ -22,12 +22,13 @@ void main() {
     Directory intellijDir;
     Directory toolsDir;
 
-    Map<String, String> _getFilesystemContents([Directory root]) {
+    Map<String, String> _getFilesystemContents([ Directory root ]) {
       final String tempPath = tempDir.absolute.path;
-      final List<String> paths = (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
-        final String relativePath = globals.fs.path.relative(entity.path, from: tempPath);
-        return relativePath;
-      }).toList();
+      final List<String> paths =
+        (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
+          final String relativePath = globals.fs.path.relative(entity.path, from: tempPath);
+          return relativePath;
+        }).toList();
       final Map<String, String> contents = <String, String>{};
       for (final String path in paths) {
         final String absPath = globals.fs.path.join(tempPath, path);
@@ -40,7 +41,7 @@ void main() {
       return contents;
     }
 
-    Map<String, String> _getManifest(Directory base, String marker, {bool isTemplate = false}) {
+    Map<String, String> _getManifest(Directory base, String marker, { bool isTemplate = false }) {
       final String basePath = globals.fs.path.relative(base.path, from: tempDir.absolute.path);
       final String suffix = isTemplate ? Template.copyTemplateExtension : '';
       return <String, String>{
@@ -93,7 +94,8 @@ void main() {
 
       for (final String path in expectedContents.keys) {
         final String absPath = globals.fs.path.join(tempDir.absolute.path, path);
-        expect(_fileOrDirectoryExists(globals.fs.path.join(dir.path, path)), true, reason: "$path doesn't exist");
+        expect(_fileOrDirectoryExists(globals.fs.path.join(dir.path, path)), true,
+            reason: "$path doesn't exist");
         if (globals.fs.file(absPath).existsSync()) {
           expect(globals.fs.file(absPath).readAsStringSync(), equals(expectedContents[path]),
               reason: "$path contents don't match");
@@ -296,7 +298,11 @@ void main() {
         'existing',
         isTemplate: true,
       );
-      String deepIml = globals.fs.path.join('packages', 'flutter_tools', 'ide_templates', 'intellij');
+      String deepIml = globals.fs.path.join(
+        'packages',
+        'flutter_tools',
+        'ide_templates',
+        'intellij');
       // Remove the all the dir entries too.
       updatedTemplates.remove(deepIml);
       deepIml = globals.fs.path.join(deepIml, 'packages');
@@ -314,5 +320,6 @@ void main() {
         expectedContents: expectedContents,
       );
     });
+
   });
 }

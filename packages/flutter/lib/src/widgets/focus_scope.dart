@@ -366,7 +366,7 @@ class Focus extends StatefulWidget {
   ///
   ///  * [maybeOf], which is similar to this function, but will return null
   ///    instead of throwing if it doesn't find a [Focus] node.
-  static FocusNode of(BuildContext context, {bool scopeOk = false}) {
+  static FocusNode of(BuildContext context, { bool scopeOk = false }) {
     assert(context != null);
     assert(scopeOk != null);
     final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
@@ -418,7 +418,7 @@ class Focus extends StatefulWidget {
   ///
   ///  * [of], which is similar to this function, but will throw an exception if
   ///    it doesn't find a [Focus] node instead of returning null.
-  static FocusNode? maybeOf(BuildContext context, {bool scopeOk = false}) {
+  static FocusNode? maybeOf(BuildContext context, { bool scopeOk = false }) {
     assert(context != null);
     assert(scopeOk != null);
     final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
@@ -451,12 +451,9 @@ class Focus extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
     properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'AUTOFOCUS', defaultValue: false));
-    properties
-        .add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: false));
-    properties.add(FlagProperty('descendantsAreFocusable',
-        value: descendantsAreFocusable, ifFalse: 'DESCENDANTS UNFOCUSABLE', defaultValue: true));
-    properties.add(FlagProperty('descendantsAreTraversable',
-        value: descendantsAreTraversable, ifFalse: 'DESCENDANTS UNTRAVERSABLE', defaultValue: true));
+    properties.add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: false));
+    properties.add(FlagProperty('descendantsAreFocusable', value: descendantsAreFocusable, ifFalse: 'DESCENDANTS UNFOCUSABLE', defaultValue: true));
+    properties.add(FlagProperty('descendantsAreTraversable', value: descendantsAreTraversable, ifFalse: 'DESCENDANTS UNTRAVERSABLE', defaultValue: true));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
   }
 
@@ -475,13 +472,13 @@ class _FocusWithExternalFocusNode extends Focus {
     ValueChanged<bool>? onFocusChange,
     bool includeSemantics = true,
   }) : super(
-          key: key,
-          child: child,
-          focusNode: focusNode,
-          autofocus: autofocus,
-          onFocusChange: onFocusChange,
-          includeSemantics: includeSemantics,
-        );
+    key: key,
+    child: child,
+    focusNode: focusNode,
+    autofocus: autofocus,
+    onFocusChange: onFocusChange,
+    includeSemantics: includeSemantics,
+  );
 
   @override
   bool get _usingExternalFocus => true;
@@ -784,7 +781,7 @@ class FocusScope extends Focus {
     required FocusScopeNode focusScopeNode,
     bool autofocus,
     ValueChanged<bool>? onFocusChange,
-  }) = _FocusScopeWithExternalFocusNode;
+  })  = _FocusScopeWithExternalFocusNode;
 
   /// Returns the [FocusScopeNode] of the [FocusScope] that most tightly
   /// encloses the given [context].
@@ -813,12 +810,13 @@ class _FocusScopeWithExternalFocusNode extends FocusScope {
     bool autofocus = false,
     ValueChanged<bool>? onFocusChange,
   }) : super(
-          key: key,
-          child: child,
-          node: focusScopeNode,
-          autofocus: autofocus,
-          onFocusChange: onFocusChange,
-        );
+    key: key,
+    child: child,
+    node: focusScopeNode,
+    autofocus: autofocus,
+    onFocusChange: onFocusChange,
+  );
+
 
   @override
   bool get _usingExternalFocus => true;

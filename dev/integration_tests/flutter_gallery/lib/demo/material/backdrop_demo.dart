@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 // (CategoryView) on top of the backdrop.
 
 class Category {
-  const Category({this.title, this.assets});
+  const Category({ this.title, this.assets });
   final String? title;
   final List<String>? assets;
   @override
@@ -95,7 +95,7 @@ const List<Category> allCategories = <Category>[
 ];
 
 class CategoryView extends StatelessWidget {
-  const CategoryView({Key? key, this.category}) : super(key: key);
+  const CategoryView({ Key? key, this.category }) : super(key: key);
 
   final Category? category;
 
@@ -293,13 +293,15 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   // the user must either tap its heading or the backdrop's menu icon.
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (_controller.isAnimating || _controller.status == AnimationStatus.completed) return;
+    if (_controller.isAnimating || _controller.status == AnimationStatus.completed)
+      return;
 
     _controller.value -= details.primaryDelta! / _backdropHeight;
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_controller.isAnimating || _controller.status == AnimationStatus.completed) return;
+    if (_controller.isAnimating || _controller.status == AnimationStatus.completed)
+      return;
 
     final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
     if (flingVelocity < 0.0)
@@ -339,7 +341,9 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
         ),
-        color: selected ? Colors.white.withOpacity(0.25) : Colors.transparent,
+        color: selected
+          ? Colors.white.withOpacity(0.25)
+          : Colors.transparent,
         child: ListTile(
           title: Text(category.title!),
           selected: selected,

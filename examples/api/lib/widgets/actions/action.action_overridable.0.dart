@@ -38,7 +38,8 @@ class DigitInput extends StatefulWidget {
 }
 
 class DigitInputState extends State<DigitInput> {
-  late final Action<DeleteCharacterIntent> _deleteTextAction = CallbackAction<DeleteCharacterIntent>(
+  late final Action<DeleteCharacterIntent> _deleteTextAction =
+      CallbackAction<DeleteCharacterIntent>(
     onInvoke: (DeleteCharacterIntent intent) {
       // For simplicity we delete everything in the section.
       widget.controller.clear();
@@ -51,8 +52,8 @@ class DigitInputState extends State<DigitInput> {
     return Actions(
       actions: <Type, Action<Intent>>{
         // Make the default `DeleteCharacterIntent` handler overridable.
-        DeleteCharacterIntent:
-            Action<DeleteCharacterIntent>.overridable(defaultAction: _deleteTextAction, context: context),
+        DeleteCharacterIntent: Action<DeleteCharacterIntent>.overridable(
+            defaultAction: _deleteTextAction, context: context),
       },
       child: TextField(
         controller: widget.controller,
@@ -75,7 +76,8 @@ class SimpleUSPhoneNumberEntry extends StatefulWidget {
   const SimpleUSPhoneNumberEntry({Key? key}) : super(key: key);
 
   @override
-  State<SimpleUSPhoneNumberEntry> createState() => _SimpleUSPhoneNumberEntryState();
+  State<SimpleUSPhoneNumberEntry> createState() =>
+      _SimpleUSPhoneNumberEntryState();
 }
 
 class _DeleteDigit extends Action<DeleteCharacterIntent> {
@@ -87,7 +89,8 @@ class _DeleteDigit extends Action<DeleteCharacterIntent> {
     assert(callingAction != null);
     callingAction?.invoke(intent);
 
-    if (state.lineNumberController.text.isEmpty && state.lineNumberFocusNode.hasFocus) {
+    if (state.lineNumberController.text.isEmpty &&
+        state.lineNumberFocusNode.hasFocus) {
       state.prefixFocusNode.requestFocus();
     }
 

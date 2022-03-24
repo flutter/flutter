@@ -56,8 +56,7 @@ void main() {
     expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
   });
 
-  testWidgets('NavigationBarThemeData values are used when no NavigationBar properties are specified',
-      (WidgetTester tester) async {
+  testWidgets('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -129,9 +128,7 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
-  testWidgets(
-      'NavigationBar values take priority over NavigationBarThemeData values when both properties are specified',
-      (WidgetTester tester) async {
+  testWidgets('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -182,11 +179,9 @@ List<NavigationDestination> _destinations() {
 }
 
 double _barHeight(WidgetTester tester) {
-  return tester
-      .getRect(
-        find.byType(NavigationBar),
-      )
-      .height;
+  return tester.getRect(
+    find.byType(NavigationBar),
+  ).height;
 }
 
 Material _barMaterial(WidgetTester tester) {
@@ -199,14 +194,12 @@ Material _barMaterial(WidgetTester tester) {
 }
 
 ShapeDecoration? _indicator(WidgetTester tester) {
-  return tester
-      .firstWidget<Container>(
-        find.descendant(
-          of: find.byType(FadeTransition),
-          matching: find.byType(Container),
-        ),
-      )
-      .decoration as ShapeDecoration?;
+  return tester.firstWidget<Container>(
+    find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ),
+  ).decoration as ShapeDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {
@@ -218,38 +211,30 @@ IconThemeData _unselectedIconTheme(WidgetTester tester) {
 }
 
 IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
-  return tester
-      .firstWidget<IconTheme>(
-        find.ancestor(
-          of: find.byIcon(icon),
-          matching: find.byType(IconTheme),
-        ),
-      )
-      .data;
+  return tester.firstWidget<IconTheme>(
+    find.ancestor(
+      of: find.byIcon(icon),
+      matching: find.byType(IconTheme),
+    ),
+  ).data;
 }
 
 TextStyle _selectedLabelStyle(WidgetTester tester) {
-  return tester
-      .widget<RichText>(
-        find.descendant(
-          of: find.text('Abc'),
-          matching: find.byType(RichText),
-        ),
-      )
-      .text
-      .style!;
+  return tester.widget<RichText>(
+    find.descendant(
+      of: find.text('Abc'),
+      matching: find.byType(RichText),
+    ),
+  ).text.style!;
 }
 
 TextStyle _unselectedLabelStyle(WidgetTester tester) {
-  return tester
-      .widget<RichText>(
-        find.descendant(
-          of: find.text('Def'),
-          matching: find.byType(RichText),
-        ),
-      )
-      .text
-      .style!;
+  return tester.widget<RichText>(
+    find.descendant(
+      of: find.text('Def'),
+      matching: find.byType(RichText),
+    ),
+  ).text.style!;
 }
 
 NavigationDestinationLabelBehavior _labelBehavior(WidgetTester tester) {

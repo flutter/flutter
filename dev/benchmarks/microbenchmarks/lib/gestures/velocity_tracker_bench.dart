@@ -10,7 +10,7 @@ import 'data/velocity_tracker_data.dart';
 const int _kNumIters = 10000;
 
 class TrackerBenchmark {
-  TrackerBenchmark({required this.name, required this.tracker});
+  TrackerBenchmark({required this.name, required this.tracker });
 
   final VelocityTracker tracker;
   final String name;
@@ -21,9 +21,7 @@ void main() {
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   final List<TrackerBenchmark> benchmarks = <TrackerBenchmark>[
     TrackerBenchmark(name: 'velocity_tracker_iteration', tracker: VelocityTracker.withKind(PointerDeviceKind.touch)),
-    TrackerBenchmark(
-        name: 'velocity_tracker_iteration_ios_fling',
-        tracker: IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch)),
+    TrackerBenchmark(name: 'velocity_tracker_iteration_ios_fling', tracker: IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch)),
   ];
   final Stopwatch watch = Stopwatch();
 
@@ -36,7 +34,8 @@ void main() {
       for (final PointerEvent event in velocityEventData) {
         if (event is PointerDownEvent || event is PointerMoveEvent)
           tracker.addPosition(event.timeStamp, event.position);
-        if (event is PointerUpEvent) tracker.getVelocity();
+        if (event is PointerUpEvent)
+          tracker.getVelocity();
       }
     }
     watch.stop();

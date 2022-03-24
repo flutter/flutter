@@ -14,7 +14,8 @@ void main() {
 
   ByteData _makeByteData(String str) {
     final List<int> list = utf8.encode(str);
-    final ByteBuffer buffer = list is Uint8List ? list.buffer : Uint8List.fromList(list).buffer;
+    final ByteBuffer buffer =
+        list is Uint8List ? list.buffer : Uint8List.fromList(list).buffer;
     return ByteData.view(buffer);
   }
 

@@ -18,35 +18,34 @@ void main() {
   LiveTestWidgetsFlutterBinding().framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
 
   testWidgets('Should show event indicator for pointer events', (WidgetTester tester) async {
-    final AnimationSheetBuilder animationSheet =
-        AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     final List<Offset> taps = <Offset>[];
     Widget target({bool recording = true}) => Container(
-          padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
-          child: animationSheet.record(
-            MaterialApp(
-              home: Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 128, 128, 128),
-                  border: Border.all(),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    color: Colors.black,
-                    child: GestureDetector(
-                      onTapDown: (TapDownDetails details) {
-                        taps.add(details.globalPosition);
-                      },
-                    ),
-                  ),
+      padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
+      child: animationSheet.record(
+        MaterialApp(
+          home: Container(
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 128, 128, 128),
+              border: Border.all(),
+            ),
+            child: Center(
+              child: Container(
+                width: 40,
+                height: 40,
+                color: Colors.black,
+                child: GestureDetector(
+                  onTapDown: (TapDownDetails details) {
+                    taps.add(details.globalPosition);
+                  },
                 ),
               ),
             ),
-            recording: recording,
           ),
-        );
+        ),
+        recording: recording,
+      ),
+    );
 
     await tester.pumpWidget(target(recording: false));
 
@@ -77,35 +76,34 @@ void main() {
   }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
   testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
-    final AnimationSheetBuilder animationSheet =
-        AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     final List<Offset> taps = <Offset>[];
     Widget target({bool recording = true}) => Container(
-          padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
-          child: animationSheet.record(
-            MaterialApp(
-              home: Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 128, 128, 128),
-                  border: Border.all(),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    color: Colors.black,
-                    child: GestureDetector(
-                      onTapDown: (TapDownDetails details) {
-                        taps.add(details.globalPosition);
-                      },
-                    ),
-                  ),
+      padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
+      child: animationSheet.record(
+        MaterialApp(
+          home: Container(
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 128, 128, 128),
+              border: Border.all(),
+            ),
+            child: Center(
+              child: Container(
+                width: 40,
+                height: 40,
+                color: Colors.black,
+                child: GestureDetector(
+                  onTapDown: (TapDownDetails details) {
+                    taps.add(details.globalPosition);
+                  },
                 ),
               ),
             ),
-            recording: recording,
           ),
-        );
+        ),
+        recording: recording,
+      ),
+    );
 
     await tester.binding.setSurfaceSize(const Size(300, 300));
     await tester.pumpWidget(target(recording: false));

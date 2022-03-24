@@ -86,12 +86,10 @@ void main() {
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-      expect(
-          () => commandRunner.run(<String>[
-                'config',
-                '--build-dir=/foo',
-              ]),
-          throwsToolExit());
+      expect(() => commandRunner.run(<String>[
+        'config',
+        '--build-dir=/foo',
+      ]), throwsToolExit());
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
@@ -119,8 +117,7 @@ void main() {
       expect(globals.config.getValue('enable-macos-desktop'), true);
 
       await commandRunner.run(<String>[
-        'config',
-        '--clear-features',
+        'config', '--clear-features',
       ]);
 
       expect(globals.config.getValue('enable-android'), null);
@@ -157,7 +154,10 @@ void main() {
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-      await commandRunner.run(<String>['config', '--enable-web']);
+      await commandRunner.run(<String>[
+        'config',
+        '--enable-web'
+      ]);
 
       expect(
         testLogger.statusText,
@@ -225,11 +225,9 @@ void main() {
 
       // Verify that we only send the analytics disable event, and no other
       // info.
-      expect(
-          testUsage.events,
-          equals(<TestUsageEvent>[
-            const TestUsageEvent('analytics', 'enabled', label: 'false'),
-          ]));
+      expect(testUsage.events, equals(<TestUsageEvent>[
+        const TestUsageEvent('analytics', 'enabled', label: 'false'),
+      ]));
       expect(testUsage.commands, isEmpty);
       expect(testUsage.timings, isEmpty);
     }, overrides: <Type, Generator>{
@@ -249,11 +247,9 @@ void main() {
 
       // Verify that we only send the analytics enable event, and no other
       // info.
-      expect(
-          testUsage.events,
-          equals(<TestUsageEvent>[
-            const TestUsageEvent('analytics', 'enabled', label: 'true'),
-          ]));
+      expect(testUsage.events, equals(<TestUsageEvent>[
+        const TestUsageEvent('analytics', 'enabled', label: 'true'),
+      ]));
       expect(testUsage.commands, isEmpty);
       expect(testUsage.timings, isEmpty);
     }, overrides: <Type, Generator>{

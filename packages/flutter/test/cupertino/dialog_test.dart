@@ -82,9 +82,10 @@ void main() {
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog'), findsOneWidget);
+
   });
 
-  testWidgets('Dialog configurable to be barrier dismissible', (WidgetTester tester) async {
+ testWidgets('Dialog configurable to be barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(createAppWithCenteredButton(const Text('Go')));
 
     final BuildContext context = tester.element(find.text('Go'));
@@ -144,7 +145,7 @@ void main() {
       ),
     );
 
-    final RichText cancelText = tester.widget<RichText>(
+    final RichText cancelText =  tester.widget<RichText>(
       find.descendant(of: find.text('Cancel'), matching: find.byType(RichText)),
     );
 
@@ -161,8 +162,7 @@ void main() {
 
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(const MaterialApp(
-        home: Material(
+    await tester.pumpWidget(const MaterialApp(home: Material(
       child: CupertinoAlertDialog(
         title: Text('The Title'),
         content: Text('Content'),
@@ -564,8 +564,7 @@ void main() {
     expect(okButtonBox.size.height, actionsSectionBox.size.height);
   });
 
-  testWidgets('Actions section height for 2 side-by-side buttons is height of tallest button.',
-      (WidgetTester tester) async {
+  testWidgets('Actions section height for 2 side-by-side buttons is height of tallest button.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     late double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
@@ -610,8 +609,7 @@ void main() {
     );
   });
 
-  testWidgets('Actions section height for 2 stacked buttons with enough room is height of both buttons.',
-      (WidgetTester tester) async {
+  testWidgets('Actions section height for 2 stacked buttons with enough room is height of both buttons.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     late double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
@@ -653,8 +651,7 @@ void main() {
     );
   });
 
-  testWidgets('Actions section height for 2 stacked buttons without enough room and regular font is 1.5 buttons tall.',
-      (WidgetTester tester) async {
+  testWidgets('Actions section height for 2 stacked buttons without enough room and regular font is 1.5 buttons tall.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -688,9 +685,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Actions section height for 2 stacked buttons without enough room and large accessibility font is 50% of dialog height.',
-      (WidgetTester tester) async {
+  testWidgets('Actions section height for 2 stacked buttons without enough room and large accessibility font is 50% of dialog height.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -730,8 +725,7 @@ void main() {
     );
   });
 
-  testWidgets('Actions section height for 3 buttons without enough room is 1.5 buttons tall.',
-      (WidgetTester tester) async {
+  testWidgets('Actions section height for 3 buttons without enough room is 1.5 buttons tall.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -815,15 +809,12 @@ void main() {
     // We don't test for exclusion because for some reason the Path is reporting
     // that even points beyond Rect.largest are within the Path. That's not an
     // issue for our use-case, so we don't worry about it.
-    expect(
-        actionsSectionBox,
-        paints
-          ..path(
-            includes: <Offset>[
-              Offset.zero,
-              Offset(actionsSectionBox.size.width, actionsSectionBox.size.height),
-            ],
-          ));
+    expect(actionsSectionBox, paints..path(
+      includes: <Offset>[
+        Offset.zero,
+        Offset(actionsSectionBox.size.width, actionsSectionBox.size.height),
+      ],
+    ));
   });
 
   testWidgets('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
@@ -872,32 +863,33 @@ void main() {
     );
     final Offset bottomDividerCenter = Offset(
       secondButtonBox.size.width / 2.0,
-      firstButtonBox.size.height + dividerThickness + secondButtonBox.size.height + (0.5 * dividerThickness),
+      firstButtonBox.size.height
+        + dividerThickness
+        + secondButtonBox.size.height
+        + (0.5 * dividerThickness),
     );
 
     // Before pressing the button, verify following expectations:
     // - Background includes the button that will be pressed
     // - Background excludes the divider above and below the button that will be pressed
     // - Pressed button background does NOT include the button that will be pressed
-    expect(
-      actionsSectionBox,
-      paints
-        ..path(
-          color: normalButtonBackgroundColor,
-          includes: <Offset>[
-            pressedButtonCenter,
-          ],
-          excludes: <Offset>[
-            topDividerCenter,
-            bottomDividerCenter,
-          ],
-        )
-        ..path(
-          color: pressedButtonBackgroundColor,
-          excludes: <Offset>[
-            pressedButtonCenter,
-          ],
-        ),
+    expect(actionsSectionBox, paints
+      ..path(
+        color: normalButtonBackgroundColor,
+        includes: <Offset>[
+          pressedButtonCenter,
+        ],
+        excludes: <Offset>[
+          topDividerCenter,
+          bottomDividerCenter,
+        ],
+      )
+      ..path(
+        color: pressedButtonBackgroundColor,
+        excludes: <Offset>[
+          pressedButtonCenter,
+        ],
+      ),
     );
 
     // Press down on the button.
@@ -908,31 +900,29 @@ void main() {
     // - Background excludes the pressed button
     // - Background includes the divider above and below the pressed button
     // - Pressed button background includes the pressed
-    expect(
-      actionsSectionBox,
-      paints
-        ..path(
-          color: normalButtonBackgroundColor,
-          // The background should contain the divider above and below the pressed
-          // button. While pressed, surrounding dividers disappear, which means
-          // they become part of the background.
-          includes: <Offset>[
-            topDividerCenter,
-            bottomDividerCenter,
-          ],
-          // The background path should not include the tapped button background...
-          excludes: <Offset>[
-            pressedButtonCenter,
-          ],
-        )
-        // For a pressed button, a dedicated path is painted with a pressed button
-        // background color...
-        ..path(
-          color: pressedButtonBackgroundColor,
-          includes: <Offset>[
-            pressedButtonCenter,
-          ],
-        ),
+    expect(actionsSectionBox, paints
+      ..path(
+        color: normalButtonBackgroundColor,
+        // The background should contain the divider above and below the pressed
+        // button. While pressed, surrounding dividers disappear, which means
+        // they become part of the background.
+        includes: <Offset>[
+          topDividerCenter,
+          bottomDividerCenter,
+        ],
+        // The background path should not include the tapped button background...
+        excludes: <Offset>[
+          pressedButtonCenter,
+        ],
+      )
+      // For a pressed button, a dedicated path is painted with a pressed button
+      // background color...
+      ..path(
+        color: pressedButtonBackgroundColor,
+        includes: <Offset>[
+          pressedButtonCenter,
+        ],
+      ),
     );
 
     // We must explicitly cause an "up" gesture to avoid a crash.
@@ -1060,8 +1050,7 @@ void main() {
 
     // Enter animation.
     await tester.pump();
-    final Finder fadeTransitionFinder =
-        find.ancestor(of: find.byType(CupertinoAlertDialog), matching: find.byType(FadeTransition));
+    final Finder fadeTransitionFinder = find.ancestor(of: find.byType(CupertinoAlertDialog), matching: find.byType(FadeTransition));
     FadeTransition transition = tester.firstWidget(fadeTransitionFinder);
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -1235,12 +1224,10 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        isNot(includesNodeWith(
-          label: 'Custom label',
-          flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
-        )));
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Custom label',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    )));
   });
 
   testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
@@ -1273,8 +1260,7 @@ void main() {
     expect(find.byType(CupertinoAlertDialog), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoAlertDialog',
-      (WidgetTester tester) async {
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoAlertDialog', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83819
     const double textScaleFactor = 1.0;
     final ScrollController actionScrollController = ScrollController();
@@ -1329,14 +1315,11 @@ void main() {
       ),
     );
 
-    final List<CupertinoScrollbar> scrollbars = find
-        .descendant(
-          of: find.byType(CupertinoAlertDialog),
-          matching: find.byType(CupertinoScrollbar),
-        )
-        .evaluate()
-        .map((Element e) => e.widget as CupertinoScrollbar)
-        .toList();
+    final List<CupertinoScrollbar> scrollbars =
+      find.descendant(
+        of: find.byType(CupertinoAlertDialog),
+        matching: find.byType(CupertinoScrollbar),
+      ).evaluate().map((Element e) => e.widget as CupertinoScrollbar).toList();
 
     expect(scrollbars.length, 2);
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
@@ -1516,6 +1499,7 @@ Widget createAppWithCenteredButton(Widget child) {
   );
 }
 
+
 class _RestorableDialogTestWidget extends StatelessWidget {
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return CupertinoDialogRoute<void>(
@@ -1539,8 +1523,7 @@ class _RestorableDialogTestWidget extends StatelessWidget {
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Home'),
       ),
-      child: Center(
-          child: CupertinoButton(
+      child: Center(child: CupertinoButton(
         onPressed: () {
           Navigator.of(context).restorablePush(_dialogBuilder);
         },

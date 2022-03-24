@@ -31,16 +31,18 @@ void main() {
     FileSystem testFileSystem;
     setUp(() async {
       testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+        style: globals.platform.isWindows
+          ? FileSystemStyle.windows
+          : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory =
-          testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_variant_test.');
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_variant_test.');
     });
 
     testUsingContext('main asset and variants', () async {
       globals.fs.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync('''
+        ..writeAsStringSync(
+'''
 name: test
 dependencies:
   flutter:
@@ -48,7 +50,8 @@ dependencies:
 flutter:
   assets:
     - a/b/c/foo
-''');
+'''
+      );
       globals.fs.file('.packages').createSync();
 
       final List<String> assets = <String>[

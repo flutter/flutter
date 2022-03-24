@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 class TestCustomPainter extends CustomPainter {
-  TestCustomPainter({required this.log, required this.name});
+  TestCustomPainter({ required this.log, required this.name });
 
   final List<String> log;
   final String name;
@@ -20,7 +20,8 @@ class TestCustomPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(TestCustomPainter oldPainter) {
-    return name != oldPainter.name || log != oldPainter.log;
+    return name != oldPainter.name
+        || log != oldPainter.log;
   }
 }
 
@@ -32,23 +33,23 @@ void main() {
       MaterialApp(
         routes: <String, WidgetBuilder>{
           '/': (BuildContext context) => RepaintBoundary(
-                child: RepaintBoundary(
-                  child: FlipWidget(
-                    left: CustomPaint(
-                      painter: TestCustomPainter(
-                        log: log,
-                        name: 'left',
-                      ),
-                    ),
-                    right: CustomPaint(
-                      painter: TestCustomPainter(
-                        log: log,
-                        name: 'right',
-                      ),
-                    ),
+            child: RepaintBoundary(
+              child: FlipWidget(
+                left: CustomPaint(
+                  painter: TestCustomPainter(
+                    log: log,
+                    name: 'left',
+                  ),
+                ),
+                right: CustomPaint(
+                  painter: TestCustomPainter(
+                    log: log,
+                    name: 'right',
                   ),
                 ),
               ),
+            ),
+          ),
           '/second': (BuildContext context) => Container(),
         },
       ),

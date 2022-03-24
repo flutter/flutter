@@ -21,9 +21,9 @@ class IconTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(data != null),
-        assert(child != null),
-        super(key: key, child: child);
+  }) : assert(data != null),
+       assert(child != null),
+       super(key: key, child: child);
 
   /// Creates an icon theme that controls the color, opacity, and size of
   /// descendant widgets, and merges in the current icon theme, if any.
@@ -70,13 +70,13 @@ class IconTheme extends InheritedTheme {
   static IconThemeData of(BuildContext context) {
     final IconThemeData iconThemeData = _getInheritedIconThemeData(context).resolve(context);
     return iconThemeData.isConcrete
-        ? iconThemeData
-        : iconThemeData.copyWith(
-            size: iconThemeData.size ?? const IconThemeData.fallback().size,
-            color: iconThemeData.color ?? const IconThemeData.fallback().color,
-            opacity: iconThemeData.opacity ?? const IconThemeData.fallback().opacity,
-            shadows: iconThemeData.shadows ?? const IconThemeData.fallback().shadows,
-          );
+      ? iconThemeData
+      : iconThemeData.copyWith(
+        size: iconThemeData.size ?? const IconThemeData.fallback().size,
+        color: iconThemeData.color ?? const IconThemeData.fallback().color,
+        opacity: iconThemeData.opacity ?? const IconThemeData.fallback().opacity,
+        shadows: iconThemeData.shadows ?? const IconThemeData.fallback().shadows,
+      );
   }
 
   static IconThemeData _getInheritedIconThemeData(BuildContext context) {

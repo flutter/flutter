@@ -30,10 +30,10 @@ void main() {
   testWidgets('test default icon buttons are sized up to 48', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-        child: IconButton(
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
+          child: IconButton(
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.link),
+          ),
       ),
     );
 
@@ -47,11 +47,11 @@ void main() {
   testWidgets('test small icons are sized up to 48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-        child: IconButton(
-          iconSize: 10.0,
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
+          child: IconButton(
+            iconSize: 10.0,
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.link),
+          ),
       ),
     );
 
@@ -62,12 +62,12 @@ void main() {
   testWidgets('test icons can be small when total size is >48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-        child: IconButton(
-          iconSize: 10.0,
-          padding: const EdgeInsets.all(30.0),
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
+          child: IconButton(
+            iconSize: 10.0,
+            padding: const EdgeInsets.all(30.0),
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.link),
+          ),
       ),
     );
 
@@ -75,19 +75,19 @@ void main() {
     expect(iconButton.size, const Size(70.0, 70.0));
   });
 
-  testWidgets('when both iconSize and IconTheme.of(context).size are null, size falls back to 24.0',
-      (WidgetTester tester) async {
+  testWidgets('when both iconSize and IconTheme.of(context).size are null, size falls back to 24.0', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(
       wrap(
           child: IconTheme(
-        data: const IconThemeData(),
-        child: IconButton(
-          focusNode: focusNode,
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
-      )),
+            data: const IconThemeData(),
+            child: IconButton(
+              focusNode: focusNode,
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
     );
 
     final RenderBox icon = tester.renderObject(find.byType(Icon));
@@ -99,48 +99,51 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-          child: IconTheme(
-        data: const IconThemeData(size: 10),
-        child: IconButton(
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
-      )),
-    );
-
-    icon = tester.renderObject(find.byType(Icon));
-    expect(icon.size, const Size(10.0, 10.0));
-
-    await tester.pumpWidget(
-      wrap(
-          child: Theme(
-        data: ThemeData(
-          iconTheme: const IconThemeData(size: 10),
-        ),
-        child: IconButton(
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
-      )),
-    );
-
-    icon = tester.renderObject(find.byType(Icon));
-    expect(icon.size, const Size(10.0, 10.0));
-
-    await tester.pumpWidget(
-      wrap(
-          child: Theme(
-        data: ThemeData(
-          iconTheme: const IconThemeData(size: 20),
-        ),
         child: IconTheme(
           data: const IconThemeData(size: 10),
           child: IconButton(
             onPressed: mockOnPressedFunction.handler,
             icon: const Icon(Icons.link),
           ),
-        ),
-      )),
+        )
+      ),
+    );
+
+    icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+
+    await tester.pumpWidget(
+      wrap(
+          child: Theme(
+            data: ThemeData(
+              iconTheme: const IconThemeData(size: 10),
+            ),
+            child: IconButton(
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
+    );
+
+    icon = tester.renderObject(find.byType(Icon));
+    expect(icon.size, const Size(10.0, 10.0));
+
+    await tester.pumpWidget(
+      wrap(
+          child: Theme(
+            data: ThemeData(
+              iconTheme: const IconThemeData(size: 20),
+            ),
+            child: IconTheme(
+              data: const IconThemeData(size: 10),
+              child: IconButton(
+                onPressed: mockOnPressedFunction.handler,
+                icon: const Icon(Icons.link),
+              ),
+            ),
+          )
+      ),
     );
 
     icon = tester.renderObject(find.byType(Icon));
@@ -149,17 +152,18 @@ void main() {
     await tester.pumpWidget(
       wrap(
           child: IconTheme(
-        data: const IconThemeData(size: 20),
-        child: Theme(
-          data: ThemeData(
-            iconTheme: const IconThemeData(size: 10),
-          ),
-          child: IconButton(
-            onPressed: mockOnPressedFunction.handler,
-            icon: const Icon(Icons.link),
-          ),
-        ),
-      )),
+            data: const IconThemeData(size: 20),
+            child: Theme(
+              data: ThemeData(
+                iconTheme: const IconThemeData(size: 10),
+              ),
+              child: IconButton(
+                onPressed: mockOnPressedFunction.handler,
+                icon: const Icon(Icons.link),
+              ),
+            ),
+          )
+      ),
     );
 
     icon = tester.renderObject(find.byType(Icon));
@@ -170,13 +174,14 @@ void main() {
     await tester.pumpWidget(
       wrap(
           child: IconTheme(
-        data: const IconThemeData(size: 30.0),
-        child: IconButton(
-          iconSize: 10.0,
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.link),
-        ),
-      )),
+            data: const IconThemeData(size: 30.0),
+            child: IconButton(
+              iconSize: 10.0,
+              onPressed: mockOnPressedFunction.handler,
+              icon: const Icon(Icons.link),
+            ),
+          )
+      ),
     );
 
     final RenderBox icon = tester.renderObject(find.byType(Icon));
@@ -249,12 +254,12 @@ void main() {
   testWidgets('test default icon buttons are constrained', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-        child: IconButton(
-          padding: EdgeInsets.zero,
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.ac_unit),
-          iconSize: 80.0,
-        ),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.ac_unit),
+            iconSize: 80.0,
+          ),
       ),
     );
 
@@ -269,7 +274,7 @@ void main() {
         child: Material(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
+            children: <Widget> [
               IconButton(
                 onPressed: mockOnPressedFunction.handler,
                 icon: const Icon(Icons.ac_unit),
@@ -287,11 +292,11 @@ void main() {
   testWidgets('test default padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-        child: IconButton(
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.ac_unit),
-          iconSize: 80.0,
-        ),
+          child: IconButton(
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.ac_unit),
+            iconSize: 80.0,
+          ),
       ),
     );
 
@@ -368,12 +373,12 @@ void main() {
     const Color directHighlightColor = Color(0xFF0000F0);
 
     Widget buttonWidget = wrap(
-      child: IconButton(
-        icon: const Icon(Icons.android),
-        splashColor: directSplashColor,
-        highlightColor: directHighlightColor,
-        onPressed: () {/* enable the button */},
-      ),
+        child: IconButton(
+          icon: const Icon(Icons.android),
+          splashColor: directSplashColor,
+          highlightColor: directHighlightColor,
+          onPressed: () { /* enable the button */ },
+        ),
     );
 
     await tester.pumpWidget(
@@ -399,10 +404,10 @@ void main() {
     const Color themeHighlightColor1 = Color(0xFF00FF00);
 
     buttonWidget = wrap(
-      child: IconButton(
-        icon: const Icon(Icons.android),
-        onPressed: () {/* enable the button */},
-      ),
+        child: IconButton(
+          icon: const Icon(Icons.android),
+          onPressed: () { /* enable the button */ },
+        ),
     );
 
     await tester.pumpWidget(
@@ -454,7 +459,7 @@ void main() {
             child: IconButton(
               icon: const Icon(Icons.android),
               splashRadius: splashRadius,
-              onPressed: () {/* enable the button */},
+              onPressed: () { /* enable the button */ },
             ),
           ),
         ),
@@ -468,7 +473,8 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(IconButton))),
-      paints..circle(radius: splashRadius),
+      paints
+        ..circle(radius: splashRadius),
     );
 
     await gesture.up();
@@ -486,28 +492,23 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-            TestSemantics.root(
-              children: <TestSemantics>[
-                TestSemantics.rootChild(
-                  rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-                  actions: <SemanticsAction>[
-                    SemanticsAction.tap,
-                  ],
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.isButton,
-                    SemanticsFlag.isEnabled,
-                    SemanticsFlag.isFocusable,
-                  ],
-                  label: 'link',
-                ),
-              ],
-            ),
-            ignoreId: true,
-            ignoreTransform: true));
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isButton,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
+          ],
+          label: 'link',
+        ),
+      ],
+    ), ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();
   });
@@ -524,23 +525,18 @@ void main() {
       ),
     );
 
-    expect(
-        semantics,
-        hasSemantics(
-            TestSemantics.root(
-              children: <TestSemantics>[
-                TestSemantics.rootChild(
-                  rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.isButton,
-                  ],
-                  label: 'link',
-                ),
-              ],
-            ),
-            ignoreId: true,
-            ignoreTransform: true));
+    expect(semantics, hasSemantics(TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton,
+            ],
+            label: 'link',
+          ),
+        ],
+    ), ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();
   });
@@ -864,7 +860,7 @@ void main() {
   });
 }
 
-Widget wrap({required Widget child}) {
+Widget wrap({ required Widget child }) {
   return FocusTraversalGroup(
     policy: ReadingOrderTraversalPolicy(),
     child: Directionality(

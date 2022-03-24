@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestStatefulWidget extends StatefulWidget {
-  const TestStatefulWidget({Key? key}) : super(key: key);
+  const TestStatefulWidget({ Key? key }) : super(key: key);
 
   @override
   TestStatefulWidgetState createState() => TestStatefulWidgetState();
@@ -19,7 +19,7 @@ class TestStatefulWidgetState extends State<TestStatefulWidget> {
 }
 
 class TestChildWidget extends StatefulWidget {
-  const TestChildWidget({Key? key}) : super(key: key);
+  const TestChildWidget({ Key? key }) : super(key: key);
 
   @override
   TestChildState createState() => TestChildState();
@@ -29,9 +29,7 @@ class TestChildState extends State<TestChildWidget> {
   bool toggle = true;
 
   void toggleMe() {
-    setState(() {
-      toggle = !toggle;
-    });
+    setState(() { toggle = !toggle; });
   }
 
   @override
@@ -56,23 +54,17 @@ void main() {
             children: const <TableRow>[
               TableRow(
                 children: <Widget>[
-                  Text('AAAAAA'),
-                  Text('B'),
-                  Text('C'),
+                  Text('AAAAAA'), Text('B'), Text('C'),
                 ],
               ),
               TableRow(
                 children: <Widget>[
-                  Text('D'),
-                  Text('EEE'),
-                  Text('F'),
+                  Text('D'), Text('EEE'), Text('F'),
                 ],
               ),
               TableRow(
                 children: <Widget>[
-                  Text('G'),
-                  Text('H'),
-                  Text('III'),
+                  Text('G'), Text('H'), Text('III'),
                 ],
               ),
             ],
@@ -99,7 +91,7 @@ void main() {
       children: const <TableRow>[
         TableRow(
           decoration: BoxDecoration(
-            color: Colors.yellow,
+              color: Colors.yellow,
           ),
           children: <Widget>[Placeholder()],
         ),
@@ -143,23 +135,17 @@ void main() {
             children: const <TableRow>[
               TableRow(
                 children: <Widget>[
-                  Text('A1'),
-                  Text('B1'),
-                  Text('C1'),
+                  Text('A1'), Text('B1'), Text('C1'),
                 ],
               ),
               TableRow(
                 children: <Widget>[
-                  Text('A2'),
-                  Text('B2'),
-                  Text('C2'),
+                  Text('A2'), Text('B2'), Text('C2'),
                 ],
               ),
               TableRow(
                 children: <Widget>[
-                  Text('A3'),
-                  Text('B3'),
-                  Text('C3'),
+                  Text('A3'), Text('B3'), Text('C3'),
                 ],
               ),
             ],
@@ -219,23 +205,17 @@ void main() {
             children: const <TableRow>[
               TableRow(
                 children: <Widget>[
-                  Text('A1'),
-                  Text('B1'),
-                  Text('C1'),
+                  Text('A1'), Text('B1'), Text('C1'),
                 ],
               ),
               TableRow(
                 children: <Widget>[
-                  Text('A2'),
-                  Text('B2'),
-                  Text('C2'),
+                  Text('A2'), Text('B2'), Text('C2'),
                 ],
               ),
               TableRow(
                 children: <Widget>[
-                  Text('A3'),
-                  Text('B3'),
-                  Text('C3'),
+                  Text('A3'), Text('B3'), Text('C3'),
                 ],
               ),
             ],
@@ -290,23 +270,17 @@ void main() {
             children: const <TableRow>[
               TableRow(
                 children: <Widget>[
-                  Text('AAAAAA'),
-                  Text('B'),
-                  Text('C'),
+                  Text('AAAAAA'), Text('B'), Text('C'),
                 ],
               ),
               TableRow(
                 children: <Widget>[
-                  Text('D'),
-                  Text('EEE'),
-                  Text('F'),
+                  Text('D'), Text('EEE'), Text('F'),
                 ],
               ),
               TableRow(
                 children: <Widget>[
-                  Text('G'),
-                  Text('H'),
-                  Text('III'),
+                  Text('G'), Text('H'), Text('III'),
                 ],
               ),
             ],
@@ -328,23 +302,17 @@ void main() {
           children: const <TableRow>[
             TableRow(
               children: <Widget>[
-                Text('A'),
-                Text('B'),
-                Text('C'),
+                Text('A'), Text('B'), Text('C'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('D'),
-                Text('E'),
-                Text('F'),
+                Text('D'), Text('E'), Text('F'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('G'),
-                Text('H'),
-                Text('I'),
+                Text('G'), Text('H'), Text('I'),
               ],
             ),
           ],
@@ -362,18 +330,12 @@ void main() {
           children: const <TableRow>[
             TableRow(
               children: <Widget>[
-                Text('a'),
-                Text('b'),
-                Text('c'),
-                Text('d'),
+                Text('a'), Text('b'), Text('c'), Text('d'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('e'),
-                Text('f'),
-                Text('g'),
-                Text('h'),
+                Text('e'), Text('f'), Text('g'), Text('h'),
               ],
             ),
           ],
@@ -398,22 +360,12 @@ void main() {
           children: const <TableRow>[
             TableRow(
               children: <Widget>[
-                cell,
-                cell,
-                cell,
-                cell,
-                cell,
-                cell,
+                cell, cell, cell, cell, cell, cell,
               ],
             ),
             TableRow(
               children: <Widget>[
-                cell,
-                cell,
-                cell,
-                cell,
-                cell,
-                cell,
+                cell, cell, cell, cell, cell, cell,
               ],
             ),
           ],
@@ -461,23 +413,17 @@ void main() {
           children: const <TableRow>[
             TableRow(
               children: <Widget>[
-                Text('AAAAAA'),
-                Text('B'),
-                Text('C'),
+                Text('AAAAAA'), Text('B'), Text('C'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('D'),
-                Text('EEE'),
-                Text('F'),
+                Text('D'), Text('EEE'), Text('F'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('G'),
-                Text('H'),
-                Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -491,23 +437,17 @@ void main() {
           children: const <TableRow>[
             TableRow(
               children: <Widget>[
-                Text('AAA'),
-                Text('B'),
-                Text('C'),
+                Text('AAA'), Text('B'), Text('C'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('D'),
-                Text('E'),
-                Text('FFFFFF'),
+                Text('D'), Text('E'), Text('FFFFFF'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('G'),
-                Text('H'),
-                Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -526,29 +466,23 @@ void main() {
   testWidgets('Table widget - intrinsic sizing test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
-        textDirection: TextDirection.ltr,
+      textDirection: TextDirection.ltr,
         child: Table(
           defaultColumnWidth: const IntrinsicColumnWidth(),
           children: const <TableRow>[
             TableRow(
               children: <Widget>[
-                Text('AAA'),
-                Text('B'),
-                Text('C'),
+                Text('AAA'), Text('B'), Text('C'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('D'),
-                Text('E'),
-                Text('FFFFFF'),
+                Text('D'), Text('E'), Text('FFFFFF'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('G'),
-                Text('H'),
-                Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -574,23 +508,17 @@ void main() {
           children: const <TableRow>[
             TableRow(
               children: <Widget>[
-                Text('AAAAAA'),
-                Text('B'),
-                Text('C'),
+                Text('AAAAAA'), Text('B'), Text('C'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('D'),
-                Text('EEE'),
-                Text('F'),
+                Text('D'), Text('EEE'), Text('F'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('G'),
-                Text('H'),
-                Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -605,23 +533,17 @@ void main() {
           children: const <TableRow>[
             TableRow(
               children: <Widget>[
-                Text('A'),
-                Text('B'),
-                Text('C'),
+                Text('A'), Text('B'), Text('C'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('D'),
-                Text('EEE'),
-                Text('F'),
+                Text('D'), Text('EEE'), Text('F'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('G'),
-                Text('H'),
-                Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -646,23 +568,17 @@ void main() {
           children: const <TableRow>[
             TableRow(
               children: <Widget>[
-                Text('AAA'),
-                Text('B'),
-                Text('C'),
+                Text('AAA'), Text('B'), Text('C'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('D'),
-                Text('E'),
-                Text('FFFFFF'),
+                Text('D'), Text('E'), Text('FFFFFF'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('G'),
-                Text('H'),
-                Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -677,23 +593,17 @@ void main() {
           children: const <TableRow>[
             TableRow(
               children: <Widget>[
-                Text('AAA'),
-                Text('B'),
-                Text('C'),
+                Text('AAA'), Text('B'), Text('C'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('D'),
-                Text('E'),
-                Text('FFFFFF'),
+                Text('D'), Text('E'), Text('FFFFFF'),
               ],
             ),
             TableRow(
               children: <Widget>[
-                Text('G'),
-                Text('H'),
-                Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -832,7 +742,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          children: <Widget>[
+          children: <Widget> [
             Expanded(
               key: tableKey,
               child: Table(
@@ -859,7 +769,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          children: <Widget>[
+          children: <Widget> [
             Expanded(child: TestStatefulWidget(key: key)),
             Expanded(
               key: tableKey,
@@ -886,7 +796,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          children: <Widget>[
+          children: <Widget> [
             Expanded(
               key: tableKey,
               child: Table(
@@ -913,7 +823,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          children: <Widget>[
+          children: <Widget> [
             Expanded(
               key: tableKey,
               child: Table(
@@ -947,23 +857,17 @@ void main() {
         children: const <TableRow>[
           TableRow(
             children: <Widget>[
-              Text('A'),
-              Text('B'),
-              Text('C'),
+              Text('A'), Text('B'), Text('C'),
             ],
           ),
           TableRow(
             children: <Widget>[
-              Text('D'),
-              Text('EEE'),
-              Text('F'),
+              Text('D'), Text('EEE'), Text('F'),
             ],
           ),
           TableRow(
             children: <Widget>[
-              Text('G'),
-              Text('H'),
-              Text('III'),
+              Text('G'), Text('H'), Text('III'),
             ],
           ),
         ],
@@ -1005,9 +909,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Table(children: const <TableRow>[
-            TableRow(children: <Widget>[TestChildWidget()])
-          ]),
+          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
         ),
       );
       expect(find.text('CRASHHH'), findsNothing);
@@ -1018,9 +920,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Table(children: const <TableRow>[
-            TableRow(children: <Widget>[TestChildWidget()])
-          ]),
+          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
         ),
       );
 
@@ -1033,7 +933,8 @@ void main() {
     expect(
       () => Table(defaultVerticalAlignment: TableCellVerticalAlignment.baseline),
       throwsA(
-        isAssertionError.having((AssertionError error) => error.message, 'exception message', contains('baseline')),
+        isAssertionError
+          .having((AssertionError error) => error.message, 'exception message', contains('baseline')),
       ),
     );
   });
@@ -1099,8 +1000,7 @@ void main() {
     expect(table.column(2).last.runtimeType, isNot(toBeReplaced));
   });
 
-  testWidgets('Do not crash if a child that has not been layed out in a previous build is removed',
-      (WidgetTester tester) async {
+  testWidgets('Do not crash if a child that has not been layed out in a previous build is removed', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/60488.
     Widget buildTable(Key key) {
       return Directionality(

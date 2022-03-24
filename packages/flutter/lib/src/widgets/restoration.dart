@@ -60,8 +60,8 @@ class RestorationScope extends StatefulWidget {
     Key? key,
     required this.restorationId,
     required this.child,
-  })  : assert(child != null),
-        super(key: key);
+  }) : assert(child != null),
+       super(key: key);
 
   /// Returns the [RestorationBucket] inserted into the widget tree by the
   /// closest ancestor [RestorationScope] of `context`.
@@ -150,8 +150,8 @@ class UnmanagedRestorationScope extends InheritedWidget {
     Key? key,
     this.bucket,
     required Widget child,
-  })  : assert(child != null),
-        super(key: key, child: child);
+  }) : assert(child != null),
+       super(key: key, child: child);
 
   /// The [RestorationBucket] that this widget will insert into the widget tree.
   ///
@@ -225,8 +225,8 @@ class RootRestorationScope extends StatefulWidget {
     Key? key,
     required this.restorationId,
     required this.child,
-  })  : assert(child != null),
-        super(key: key);
+  }) : assert(child != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -492,7 +492,6 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
     _restorationId = restorationId;
     _owner = owner;
   }
-
   void _unregister() {
     assert(_debugAssertNotDisposed());
     assert(_restorationId != null);
@@ -742,14 +741,11 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   void registerForRestoration(RestorableProperty<Object?> property, String restorationId) {
     assert(property != null);
     assert(restorationId != null);
-    assert(
-      property._restorationId == null || (_debugDoingRestore && property._restorationId == restorationId),
-      'Property is already registered under ${property._restorationId}.',
+    assert(property._restorationId == null || (_debugDoingRestore && property._restorationId == restorationId),
+           'Property is already registered under ${property._restorationId}.',
     );
-    assert(
-      _debugDoingRestore ||
-          !_properties.keys.map((RestorableProperty<Object?> r) => r._restorationId).contains(restorationId),
-      '"$restorationId" is already registered to another property.',
+    assert(_debugDoingRestore || !_properties.keys.map((RestorableProperty<Object?> r) => r._restorationId).contains(restorationId),
+           '"$restorationId" is already registered to another property.',
     );
     final bool hasSerializedValue = bucket?.contains(restorationId) ?? false;
     final Object? initialValue = hasSerializedValue
@@ -759,16 +755,18 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     if (!property.isRegistered) {
       property._register(restorationId, this);
       void listener() {
-        if (bucket == null) return;
+        if (bucket == null)
+          return;
         _updateProperty(property);
       }
-
       property.addListener(listener);
       _properties[property] = listener;
     }
 
     assert(
-      property._restorationId == restorationId && property._owner == this && _properties.containsKey(property),
+      property._restorationId == restorationId &&
+      property._owner == this &&
+      _properties.containsKey(property),
     );
 
     property.initWithValue(initialValue);
@@ -897,11 +895,11 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
           ),
           ErrorDescription(
             'The RestorableProperties with the following IDs were not re-registered to $this when '
-            '"restoreState" was called:',
+                '"restoreState" was called:',
           ),
           ..._debugPropertiesWaitingForReregistration!.map((RestorableProperty<Object?> property) => ErrorDescription(
-                ' * ${property._restorationId}',
-              )),
+            ' * ${property._restorationId}',
+          )),
         ]);
       }
       _debugPropertiesWaitingForReregistration = null;

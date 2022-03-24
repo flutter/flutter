@@ -21,15 +21,15 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fileSystem.file('.dart_tool/package_config.json')
+    fileSystem
+      .file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion":2,"packages":[]}');
   });
 
   group('FlutterPlatform', () {
-    testUsingContext(
-        'ensureConfiguration throws an error if an '
-        'explicitObservatoryPort is specified and more than one test file', () async {
+    testUsingContext('ensureConfiguration throws an error if an '
+      'explicitObservatoryPort is specified and more than one test file', () async {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
         shellPath: '/',
         debuggingOptions: DebuggingOptions.enabled(
@@ -46,9 +46,8 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext(
-        'ensureConfiguration throws an error if a precompiled '
-        'entrypoint is specified and more that one test file', () {
+    testUsingContext('ensureConfiguration throws an error if a precompiled '
+      'entrypoint is specified and more that one test file', () {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         shellPath: '/',
@@ -64,48 +63,44 @@ void main() {
     });
 
     testUsingContext('installHook creates a FlutterPlatform', () {
-      expect(
-          () => installHook(
-                shellPath: 'abc',
-                debuggingOptions: DebuggingOptions.enabled(
-                  BuildInfo.debug,
-                  startPaused: true,
-                ),
-              ),
-          throwsAssertionError);
+      expect(() => installHook(
+        shellPath: 'abc',
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          startPaused: true,
+        ),
+      ), throwsAssertionError);
 
-      expect(
-          () => installHook(
-                shellPath: 'abc',
-                debuggingOptions: DebuggingOptions.enabled(
-                  BuildInfo.debug,
-                  startPaused: true,
-                  hostVmServicePort: 123,
-                ),
-              ),
-          throwsAssertionError);
+      expect(() => installHook(
+        shellPath: 'abc',
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          startPaused: true,
+          hostVmServicePort: 123,
+        ),
+      ), throwsAssertionError);
 
       FlutterPlatform capturedPlatform;
       final Map<String, String> expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};
       final FlutterPlatform flutterPlatform = installHook(
-          shellPath: 'abc',
-          debuggingOptions: DebuggingOptions.enabled(
-            BuildInfo.debug,
-            startPaused: true,
-            disableServiceAuthCodes: true,
-            hostVmServicePort: 200,
-          ),
-          enableObservatory: true,
-          machine: true,
-          precompiledDillPath: 'def',
-          precompiledDillFiles: expectedPrecompiledDillFiles,
-          updateGoldens: true,
-          buildTestAssets: true,
-          serverType: InternetAddressType.IPv6,
-          icudtlPath: 'ghi',
-          platformPluginRegistration: (FlutterPlatform platform) {
-            capturedPlatform = platform;
-          });
+        shellPath: 'abc',
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          startPaused: true,
+          disableServiceAuthCodes: true,
+          hostVmServicePort: 200,
+        ),
+        enableObservatory: true,
+        machine: true,
+        precompiledDillPath: 'def',
+        precompiledDillFiles: expectedPrecompiledDillFiles,
+        updateGoldens: true,
+        buildTestAssets: true,
+        serverType: InternetAddressType.IPv6,
+        icudtlPath: 'ghi',
+        platformPluginRegistration: (FlutterPlatform platform) {
+          capturedPlatform = platform;
+        });
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));
       expect(flutterPlatform.shellPath, equals('abc'));
@@ -125,19 +120,18 @@ void main() {
   });
 }
 
-class FakeSuitePlatform extends Fake implements SuitePlatform {}
+class FakeSuitePlatform extends Fake implements SuitePlatform { }
 
 // A FlutterPlatform with enough fields set to load and start a test.
 class TestFlutterPlatform extends FlutterPlatform {
-  TestFlutterPlatform()
-      : super(
-          shellPath: '/',
-          debuggingOptions: DebuggingOptions.enabled(
-            const BuildInfo(
-              BuildMode.debug,
-              '',
-              treeShakeIcons: false,
-            ),
-          ),
-        );
+  TestFlutterPlatform() : super(
+    shellPath: '/',
+    debuggingOptions: DebuggingOptions.enabled(
+      const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+      ),
+    ),
+  );
 }

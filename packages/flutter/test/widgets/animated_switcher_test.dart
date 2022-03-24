@@ -305,8 +305,7 @@ void main() {
     expect(StatefulTestState.generation, equals(3));
   });
 
-  testWidgets('AnimatedSwitcher updates widgets without animating if they are isomorphic.',
-      (WidgetTester tester) async {
+  testWidgets('AnimatedSwitcher updates widgets without animating if they are isomorphic.', (WidgetTester tester) async {
     Future<void> pumpChild(Widget child) async {
       return tester.pumpWidget(
         Directionality(
@@ -333,8 +332,7 @@ void main() {
     expect(find.text('2'), findsOneWidget);
   });
 
-  testWidgets('AnimatedSwitcher updates previous child transitions if the transitionBuilder changes.',
-      (WidgetTester tester) async {
+  testWidgets('AnimatedSwitcher updates previous child transitions if the transitionBuilder changes.', (WidgetTester tester) async {
     final UniqueKey containerOne = UniqueKey();
     final UniqueKey containerTwo = UniqueKey();
     final UniqueKey containerThree = UniqueKey();

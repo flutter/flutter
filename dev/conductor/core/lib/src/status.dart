@@ -49,7 +49,8 @@ class StatusCommand extends Command<void> {
   void run() {
     final File stateFile = checkouts.fileSystem.file(argResults![kStateOption]);
     if (!stateFile.existsSync()) {
-      stdio.printStatus('No persistent state file found at ${argResults![kStateOption]}.');
+      stdio.printStatus(
+          'No persistent state file found at ${argResults![kStateOption]}.');
       return;
     }
     final pb.ConductorState state = readStateFromFile(stateFile);

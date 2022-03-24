@@ -37,8 +37,10 @@ class NewGalleryChromeRunTest {
 
   /// Runs the test.
   Future<TaskResult> run() async {
-    final Directory galleryParentDir = Directory.systemTemp.createTempSync('flutter_gallery_v2_chrome_run.');
-    final Directory galleryDir = Directory(path.join(galleryParentDir.path, 'gallery'));
+    final Directory galleryParentDir =
+        Directory.systemTemp.createTempSync('flutter_gallery_v2_chrome_run.');
+    final Directory galleryDir =
+        Directory(path.join(galleryParentDir.path, 'gallery'));
 
     await getNewGallery(galleryVersion, galleryDir);
 
@@ -64,12 +66,16 @@ class NewGalleryChromeRunTest {
 
       bool success = true;
 
-      process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+      process.stdout
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
         if (line.contains(successfullyLoadedString)) {
           // Successfully started.
-          Future<void>.delayed(durationToWaitForError, () {
-            process.stdin.write('q');
-          });
+          Future<void>.delayed(
+            durationToWaitForError,
+            () {process.stdin.write('q');}
+          );
         }
         if (line.contains(exceptionString)) {
           success = false;
@@ -79,7 +85,10 @@ class NewGalleryChromeRunTest {
         stdoutDone.complete();
       });
 
-      process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+      process.stderr
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
         print('stderr: $line');
       }, onDone: () {
         stderrDone.complete();

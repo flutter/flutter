@@ -33,7 +33,8 @@ void main() {
 
   testWithoutContext('parseLocalizationsOptions handles valid yaml configuration', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+    final File configFile = fileSystem.file('l10n.yaml')
+      ..writeAsStringSync('''
 arb-dir: arb
 template-arb-file: example.arb
 output-localization-file: bar
@@ -81,7 +82,9 @@ preferred-supported-locales: ['en_US', 'de']
     expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
   });
 
-  testWithoutContext('parseLocalizationsOptions throws exception on invalid yaml configuration', () async {
+  testWithoutContext(
+      'parseLocalizationsOptions throws exception on invalid yaml configuration',
+      () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
 use-deferred-loading: string

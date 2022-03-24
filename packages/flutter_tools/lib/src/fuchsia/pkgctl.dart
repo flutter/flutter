@@ -11,10 +11,12 @@ import 'fuchsia_pm.dart';
 /// Fuchsia device.
 class FuchsiaPkgctl {
   /// Teaches pkgctl on [device] about the Fuchsia package server
-  Future<bool> addRepo(FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> addRepo(
+      FuchsiaDevice device, FuchsiaPackageServer server) async {
     final String localIp = await device.hostAddress;
     final String configUrl = 'http://[$localIp]:${server.port}/config.json';
-    final RunResult result = await device.shell('pkgctl repo add url -n ${server.name} $configUrl');
+    final RunResult result =
+        await device.shell('pkgctl repo add url -n ${server.name} $configUrl');
     return result.exitCode == 0;
   }
 

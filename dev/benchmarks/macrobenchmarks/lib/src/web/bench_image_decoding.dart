@@ -21,11 +21,10 @@ import 'recorder.dart';
 /// cannot decode image frames (it always returns 1 dummy frame, even for
 /// animated images).
 class BenchImageDecoding extends RawRecorder {
-  BenchImageDecoding()
-      : super(
-          name: benchmarkName,
-          useCustomWarmUp: true,
-        );
+  BenchImageDecoding() : super(
+    name: benchmarkName,
+    useCustomWarmUp: true,
+  );
 
   static const String benchmarkName = 'bench_image_decoding';
 
@@ -62,7 +61,8 @@ class BenchImageDecoding extends RawRecorder {
   Future<void> body(Profile profile) async {
     await profile.recordAsync('recordImageDecode', () async {
       final List<Future<void>> allDecodes = <Future<void>>[
-        for (final Uint8List data in _imageData) _decodeImage(data),
+        for (final Uint8List data in _imageData)
+          _decodeImage(data),
       ];
       await Future.wait(allDecodes);
     }, reported: true);
@@ -81,8 +81,10 @@ Future<void> _decodeImage(Uint8List data) async {
   final ui.Codec codec = await ui.instantiateImageCodec(data);
   const int decodeFrameCount = 5;
   if (codec.frameCount < decodeFrameCount) {
-    throw Exception('Test image contains too few frames for this benchmark (${codec.frameCount}). '
-        'Choose a test image with at least $decodeFrameCount frames.');
+    throw Exception(
+      'Test image contains too few frames for this benchmark (${codec.frameCount}). '
+      'Choose a test image with at least $decodeFrameCount frames.'
+    );
   }
   for (int i = 0; i < decodeFrameCount; i++) {
     (await codec.getNextFrame()).image.dispose();

@@ -77,14 +77,16 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   }
 
   static double _getLeftPadding(_TextSelectionToolbarItemPosition position) {
-    if (position == _TextSelectionToolbarItemPosition.first || position == _TextSelectionToolbarItemPosition.only) {
+    if (position == _TextSelectionToolbarItemPosition.first
+        || position == _TextSelectionToolbarItemPosition.only) {
       return _kEndPadding;
     }
     return _kMiddlePadding;
   }
 
   static double _getRightPadding(_TextSelectionToolbarItemPosition position) {
-    if (position == _TextSelectionToolbarItemPosition.last || position == _TextSelectionToolbarItemPosition.only) {
+    if (position == _TextSelectionToolbarItemPosition.last
+        || position == _TextSelectionToolbarItemPosition.only) {
       return _kEndPadding;
     }
     return _kMiddlePadding;
@@ -92,7 +94,9 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
 
   static _TextSelectionToolbarItemPosition _getPosition(int index, int total) {
     if (index == 0) {
-      return total == 1 ? _TextSelectionToolbarItemPosition.only : _TextSelectionToolbarItemPosition.first;
+      return total == 1
+          ? _TextSelectionToolbarItemPosition.only
+          : _TextSelectionToolbarItemPosition.first;
     }
     if (index == total - 1) {
       return _TextSelectionToolbarItemPosition.last;

@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 class TestInherited extends InheritedWidget {
-  const TestInherited({Key? key, required Widget child, this.shouldNotify = true}) : super(key: key, child: child);
+  const TestInherited({ Key? key, required Widget child, this.shouldNotify = true })
+    : super(key: key, child: child);
 
   final bool shouldNotify;
 
@@ -19,7 +20,8 @@ class TestInherited extends InheritedWidget {
 }
 
 class ValueInherited extends InheritedWidget {
-  const ValueInherited({Key? key, required Widget child, required this.value}) : super(key: key, child: child);
+  const ValueInherited({ Key? key, required Widget child, required this.value })
+    : super(key: key, child: child);
 
   final int value;
 
@@ -28,7 +30,7 @@ class ValueInherited extends InheritedWidget {
 }
 
 class ExpectFail extends StatefulWidget {
-  const ExpectFail(this.onError, {Key? key}) : super(key: key);
+  const ExpectFail(this.onError, { Key? key }) : super(key: key);
   final VoidCallback onError;
 
   @override
@@ -51,8 +53,8 @@ class ExpectFailState extends State<ExpectFail> {
 }
 
 class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
-  const ChangeNotifierInherited({Key? key, required Widget child, ChangeNotifier? notifier})
-      : super(key: key, child: child, notifier: notifier);
+  const ChangeNotifierInherited({ Key? key, required Widget child, ChangeNotifier? notifier })
+    : super(key: key, child: child, notifier: notifier);
 }
 
 void main() {
@@ -168,6 +170,7 @@ void main() {
   });
 
   testWidgets('Update inherited when removing node and child has global key', (WidgetTester tester) async {
+
     final List<String> log = <String>[];
 
     final Key key = GlobalKey();
@@ -230,8 +233,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('Update inherited when removing node and child has global key with constant child',
-      (WidgetTester tester) async {
+  testWidgets('Update inherited when removing node and child has global key with constant child', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
     final Key key = GlobalKey();
@@ -290,8 +292,8 @@ void main() {
     log.clear();
   });
 
-  testWidgets('Update inherited when removing node and child has global key with constant child, minimised',
-      (WidgetTester tester) async {
+  testWidgets('Update inherited when removing node and child has global key with constant child, minimised', (WidgetTester tester) async {
+
     final List<int> log = <int>[];
 
     final Widget child = Builder(
@@ -337,8 +339,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('Inherited widget notifies descendants when descendant previously failed to find a match',
-      (WidgetTester tester) async {
+  testWidgets('Inherited widget notifies descendants when descendant previously failed to find a match', (WidgetTester tester) async {
     int? inheritedValue = -1;
 
     final Widget inner = Container(
@@ -367,9 +368,7 @@ void main() {
     expect(inheritedValue, equals(3));
   });
 
-  testWidgets(
-      "Inherited widget doesn't notify descendants when descendant did not previously fail to find a match and had no dependencies",
-      (WidgetTester tester) async {
+  testWidgets("Inherited widget doesn't notify descendants when descendant did not previously fail to find a match and had no dependencies", (WidgetTester tester) async {
     int buildCount = 0;
 
     final Widget inner = Container(
@@ -396,9 +395,7 @@ void main() {
     expect(buildCount, equals(1));
   });
 
-  testWidgets(
-      'Inherited widget does notify descendants when descendant did not previously fail to find a match but did have other dependencies',
-      (WidgetTester tester) async {
+  testWidgets('Inherited widget does notify descendants when descendant did not previously fail to find a match but did have other dependencies', (WidgetTester tester) async {
     int buildCount = 0;
 
     final Widget inner = Container(

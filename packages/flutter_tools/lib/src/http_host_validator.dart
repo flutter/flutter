@@ -27,7 +27,8 @@ const List<String> macOSRequiredHttpHosts = <String>[
 List<String> androidRequiredHttpHosts(Platform platform) {
   return <String>[
     // If kEnvCloudUrl is set, it will be used as the maven host
-    if (!platform.environment.containsKey(kEnvCloudUrl)) 'https://maven.google.com/',
+    if (!platform.environment.containsKey(kEnvCloudUrl))
+      'https://maven.google.com/',
   ];
 }
 
@@ -37,10 +38,10 @@ class HttpHostValidator extends DoctorValidator {
     required Platform platform,
     required FeatureFlags featureFlags,
     required HttpClient httpClient,
-  })  : _platform = platform,
-        _featureFlags = featureFlags,
-        _httpClient = httpClient,
-        super('HTTP Host Availability');
+  }) : _platform = platform,
+      _featureFlags = featureFlags,
+      _httpClient = httpClient,
+      super('HTTP Host Availability');
 
   final Platform _platform;
   final FeatureFlags _featureFlags;
@@ -50,11 +51,11 @@ class HttpHostValidator extends DoctorValidator {
   String get slowWarning => 'HTTP Host availability check is taking a long time...';
 
   List<String> get _requiredHosts => <String>[
-        if (_featureFlags.isMacOSEnabled) ...macOSRequiredHttpHosts,
-        if (_featureFlags.isAndroidEnabled) ...androidRequiredHttpHosts(_platform),
-        _platform.environment[kEnvPubHostedUrl] ?? kPubDevHttpHost,
-        _platform.environment[kEnvCloudUrl] ?? kgCloudHttpHost,
-      ];
+    if (_featureFlags.isMacOSEnabled) ...macOSRequiredHttpHosts,
+    if (_featureFlags.isAndroidEnabled) ...androidRequiredHttpHosts(_platform),
+    _platform.environment[kEnvPubHostedUrl] ?? kPubDevHttpHost,
+    _platform.environment[kEnvCloudUrl] ?? kgCloudHttpHost,
+  ];
 
   /// Make a head request to the HTTP host for checking availability
   Future<_HostValidationResult> _checkHostAvailability(String host) async {
@@ -66,7 +67,7 @@ class HttpHostValidator extends DoctorValidator {
       // HTTP host is available if no exception happened
       return _HostValidationResult.success(host);
     } on TimeoutException {
-      return _HostValidationResult.fail(host, 'Failed to connect to host in $timeout second${timeout == 1 ? '' : 's'}');
+      return _HostValidationResult.fail(host, 'Failed to connect to host in $timeout second${timeout == 1 ? '': 's'}');
     } on SocketException catch (e) {
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
     } on HttpException catch (e) {
@@ -75,17 +76,14 @@ class HttpHostValidator extends DoctorValidator {
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
     } on FormatException catch (e) {
       if (e.message.contains('Invalid radix-10 number')) {
-        return _HostValidationResult.fail(host,
-            'The value of $kDoctorHostTimeout(${_platform.environment[kDoctorHostTimeout]}) is not a valid duration in seconds');
-      } else if (e.message.contains('Invalid empty scheme')) {
+        return _HostValidationResult.fail(host, 'The value of $kDoctorHostTimeout(${_platform.environment[kDoctorHostTimeout]}) is not a valid duration in seconds');
+      } else if (e.message.contains('Invalid empty scheme')){
         // Check if the invalid host is kEnvPubHostedUrl, else it must be kEnvCloudUrl
         final String? pubHostedUrl = _platform.environment[kEnvPubHostedUrl];
         if (pubHostedUrl != null && host == pubHostedUrl) {
-          return _HostValidationResult.fail(host,
-              'The value of $kEnvPubHostedUrl(${_platform.environment[kEnvPubHostedUrl]}) could not be parsed as a valid url');
+          return _HostValidationResult.fail(host, 'The value of $kEnvPubHostedUrl(${_platform.environment[kEnvPubHostedUrl]}) could not be parsed as a valid url');
         }
-        return _HostValidationResult.fail(host,
-            'The value of $kEnvCloudUrl(${_platform.environment[kEnvCloudUrl]}) could not be parsed as a valid url');
+        return _HostValidationResult.fail(host, 'The value of $kEnvCloudUrl(${_platform.environment[kEnvCloudUrl]}) could not be parsed as a valid url');
       }
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
     } on ArgumentError catch (e) {
@@ -94,11 +92,9 @@ class HttpHostValidator extends DoctorValidator {
         // Check if the invalid host is kEnvPubHostedUrl, else it must be kEnvCloudUrl
         final String? pubHostedUrl = _platform.environment[kEnvPubHostedUrl];
         if (pubHostedUrl != null && host == pubHostedUrl) {
-          return _HostValidationResult.fail(
-              host, 'The value of $kEnvPubHostedUrl(${_platform.environment[kEnvPubHostedUrl]}) is not a valid host');
+          return _HostValidationResult.fail(host, 'The value of $kEnvPubHostedUrl(${_platform.environment[kEnvPubHostedUrl]}) is not a valid host');
         }
-        return _HostValidationResult.fail(
-            host, 'The value of $kEnvCloudUrl(${_platform.environment[kEnvCloudUrl]}) is not a valid host');
+        return _HostValidationResult.fail(host, 'The value of $kEnvCloudUrl(${_platform.environment[kEnvCloudUrl]}) is not a valid host');
       }
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: $exceptionMessage');
     }
@@ -107,26 +103,26 @@ class HttpHostValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    final Iterable<Future<_HostValidationResult>> availabilityResultFutures =
-        _requiredHosts.map(_checkHostAvailability);
+    final Iterable<Future<_HostValidationResult>> availabilityResultFutures = _requiredHosts.map(_checkHostAvailability);
     final List<_HostValidationResult> availabilityResults = await Future.wait(availabilityResultFutures);
 
     if (availabilityResults.every((_HostValidationResult result) => result.available)) {
       return ValidationResult(
-        ValidationType.installed,
-        messages..add(const ValidationMessage('All required HTTP hosts are available')),
+          ValidationType.installed,
+          messages..add(const ValidationMessage('All required HTTP hosts are available')),
       );
     }
 
     availabilityResults.removeWhere((_HostValidationResult result) => result.available);
 
     for (final _HostValidationResult result in availabilityResults) {
-      messages.add(
-          ValidationMessage.error('HTTP host "${result.host}" is not reachable. Reason: ${result.failResultInfo}'));
+      messages.add(ValidationMessage.error('HTTP host "${result.host}" is not reachable. Reason: ${result.failResultInfo}'));
     }
 
     return ValidationResult(
-      availabilityResults.length == _requiredHosts.length ? ValidationType.notAvailable : ValidationType.partial,
+      availabilityResults.length == _requiredHosts.length
+        ? ValidationType.notAvailable
+        : ValidationType.partial,
       messages,
     );
   }
@@ -134,8 +130,8 @@ class HttpHostValidator extends DoctorValidator {
 
 class _HostValidationResult {
   _HostValidationResult.success(this.host)
-      : failResultInfo = '',
-        available = true;
+    : failResultInfo = '',
+      available = true;
 
   _HostValidationResult.fail(this.host, this.failResultInfo) : available = false;
 

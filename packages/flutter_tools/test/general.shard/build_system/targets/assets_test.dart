@@ -35,10 +35,14 @@ void main() {
       platform: FakePlatform(),
     );
     fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
-    fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart').createSync(recursive: true);
-    fileSystem.file('assets/foo/bar.png').createSync(recursive: true);
-    fileSystem.file('assets/wildcard/#bar.png').createSync(recursive: true);
-    fileSystem.file('.packages').createSync();
+    fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
+      .createSync(recursive: true);
+    fileSystem.file('assets/foo/bar.png')
+      .createSync(recursive: true);
+    fileSystem.file('assets/wildcard/#bar.png')
+      .createSync(recursive: true);
+    fileSystem.file('.packages')
+      .createSync();
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
@@ -52,7 +56,8 @@ flutter:
   });
 
   testUsingContext('includes LICENSE file inputs in dependencies', () async {
-    fileSystem.file('.packages').writeAsStringSync('foo:file:///bar/lib');
+    fileSystem.file('.packages')
+      .writeAsStringSync('foo:file:///bar/lib');
     fileSystem.file('bar/LICENSE')
       ..createSync(recursive: true)
       ..writeAsStringSync('THIS IS A LICENSE');
@@ -111,98 +116,97 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext(
-      'processSkSLBundle returns null if there is no path '
-      'to the bundle', () {
-    expect(
-        processSkSLBundle(
-          null,
-          targetPlatform: TargetPlatform.android,
-          fileSystem: MemoryFileSystem.test(),
-          logger: BufferLogger.test(),
-          engineVersion: null,
-        ),
-        isNull);
+  testWithoutContext('processSkSLBundle returns null if there is no path '
+    'to the bundle', () {
+
+    expect(processSkSLBundle(
+      null,
+      targetPlatform: TargetPlatform.android,
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      engineVersion: null,
+    ), isNull);
   });
 
-  testWithoutContext(
-      'processSkSLBundle throws exception if bundle file is '
-      'missing', () {
-    expect(
-        () => processSkSLBundle(
-              'does_not_exist.sksl',
-              targetPlatform: TargetPlatform.android,
-              fileSystem: MemoryFileSystem.test(),
-              logger: BufferLogger.test(),
-              engineVersion: null,
-            ),
-        throwsException);
+  testWithoutContext('processSkSLBundle throws exception if bundle file is '
+    'missing', () {
+
+    expect(() => processSkSLBundle(
+      'does_not_exist.sksl',
+      targetPlatform: TargetPlatform.android,
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      engineVersion: null,
+    ), throwsException);
   });
 
-  testWithoutContext(
-      'processSkSLBundle throws exception if the bundle is not '
-      'valid JSON', () {
+  testWithoutContext('processSkSLBundle throws exception if the bundle is not '
+    'valid JSON', () {
+
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     fileSystem.file('bundle.sksl').writeAsStringSync('{');
 
-    expect(
-        () => processSkSLBundle(
-              'bundle.sksl',
-              targetPlatform: TargetPlatform.android,
-              fileSystem: fileSystem,
-              logger: logger,
-              engineVersion: null,
-            ),
-        throwsException);
+    expect(() => processSkSLBundle(
+      'bundle.sksl',
+      targetPlatform: TargetPlatform.android,
+      fileSystem: fileSystem,
+      logger: logger,
+      engineVersion: null,
+    ), throwsException);
     expect(logger.errorText, contains('was not a JSON object'));
   });
 
-  testWithoutContext(
-      'processSkSLBundle throws exception if the bundle is not '
-      'a JSON object', () {
+  testWithoutContext('processSkSLBundle throws exception if the bundle is not '
+    'a JSON object', () {
+
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     fileSystem.file('bundle.sksl').writeAsStringSync('[]');
 
-    expect(
-        () => processSkSLBundle(
-              'bundle.sksl',
-              targetPlatform: TargetPlatform.android,
-              fileSystem: fileSystem,
-              logger: logger,
-              engineVersion: null,
-            ),
-        throwsException);
+    expect(() => processSkSLBundle(
+      'bundle.sksl',
+      targetPlatform: TargetPlatform.android,
+      fileSystem: fileSystem,
+      logger: logger,
+      engineVersion: null,
+    ), throwsException);
     expect(logger.errorText, contains('was not a JSON object'));
   });
 
-  testWithoutContext(
-      'processSkSLBundle throws an exception if the engine '
-      'revision is different', () {
+  testWithoutContext('processSkSLBundle throws an exception if the engine '
+    'revision is different', () {
+
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
-    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(<String, String>{'engineRevision': '1'}));
+    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
+      <String, String>{
+        'engineRevision': '1'
+      }
+    ));
 
-    expect(
-        () => processSkSLBundle(
-              'bundle.sksl',
-              targetPlatform: TargetPlatform.android,
-              fileSystem: fileSystem,
-              logger: logger,
-              engineVersion: '2',
-            ),
-        throwsException);
+    expect(() => processSkSLBundle(
+      'bundle.sksl',
+      targetPlatform: TargetPlatform.android,
+      fileSystem: fileSystem,
+      logger: logger,
+      engineVersion: '2',
+    ), throwsException);
     expect(logger.errorText, contains('Expected Flutter 1, but found 2'));
   });
 
-  testWithoutContext(
-      'processSkSLBundle warns if the bundle target platform is '
-      'different from the current target', () async {
+  testWithoutContext('processSkSLBundle warns if the bundle target platform is '
+    'different from the current target', () async {
+
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
-    fileSystem.file('bundle.sksl').writeAsStringSync(
-        json.encode(<String, Object>{'engineRevision': '2', 'platform': 'fuchsia-arm64', 'data': <String, Object>{}}));
+    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
+      <String, Object>{
+        'engineRevision': '2',
+        'platform': 'fuchsia-arm64',
+        'data': <String, Object>{}
+      }
+    ));
 
     final DevFSContent content = processSkSLBundle(
       'bundle.sksl',
@@ -217,10 +221,16 @@ flutter:
   });
 
   testWithoutContext('processSkSLBundle does not warn and produces bundle', () async {
+
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
-    fileSystem.file('bundle.sksl').writeAsStringSync(
-        json.encode(<String, Object>{'engineRevision': '2', 'platform': 'android', 'data': <String, Object>{}}));
+    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
+      <String, Object>{
+        'engineRevision': '2',
+        'platform': 'android',
+        'data': <String, Object>{}
+      }
+    ));
 
     final DevFSContent content = processSkSLBundle(
       'bundle.sksl',

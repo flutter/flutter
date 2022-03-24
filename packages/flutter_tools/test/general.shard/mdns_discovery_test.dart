@@ -25,14 +25,14 @@ void main() {
           bool? includeLoopback,
           bool? includeLinkLocal,
           InternetAddressType? type,
-        }) async =>
-            <NetworkInterface>[],
+        }) async => <NetworkInterface>[],
       );
     });
 
     tearDown(() {
       resetNetworkInterfaceLister();
     });
+
 
     testWithoutContext('No ports available', () async {
       final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
@@ -189,7 +189,7 @@ void main() {
     testWithoutContext('Query returns null', () async {
       final MDnsClient client = FakeMDnsClient(
         <PtrResourceRecord>[],
-        <String, List<SrvResourceRecord>>{},
+         <String, List<SrvResourceRecord>>{},
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
@@ -202,8 +202,8 @@ void main() {
     });
 
     testWithoutContext('Throws Exception when client throws OSError on start', () async {
-      final MDnsClient client =
-          FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}, osErrorOnStart: true);
+      final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}, osErrorOnStart: true);
+
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
@@ -241,9 +241,7 @@ void main() {
 }
 
 class FakeMDnsClient extends Fake implements MDnsClient {
-  FakeMDnsClient(
-    this.ptrRecords,
-    this.srvResponse, {
+  FakeMDnsClient(this.ptrRecords, this.srvResponse, {
     this.txtResponse = const <String, List<TxtResourceRecord>>{},
     this.osErrorOnStart = false,
   });

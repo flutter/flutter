@@ -47,9 +47,9 @@ class ChipTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  })  : assert(child != null),
-        assert(data != null),
-        super(key: key, child: child);
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, child: child);
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.
@@ -460,7 +460,8 @@ class ChipThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return ChipThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
@@ -484,38 +485,42 @@ class ChipThemeData with Diagnosticable {
 
   // Special case because BorderSide.lerp() doesn't support null arguments.
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
-    if (a == null && b == null) return null;
-    if (a == null) return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
-    if (b == null) return BorderSide.lerp(BorderSide(width: 0, color: a.color.withAlpha(0)), a, t);
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
+    if (b == null)
+      return BorderSide.lerp(BorderSide(width: 0, color: a.color.withAlpha(0)), a, t);
     return BorderSide.lerp(a, b, t);
   }
 
   // TODO(perclasson): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
   static OutlinedBorder? _lerpShapes(OutlinedBorder? a, OutlinedBorder? b, double t) {
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return ShapeBorder.lerp(a, b, t) as OutlinedBorder?;
   }
 
   @override
   int get hashCode => Object.hash(
-        backgroundColor,
-        deleteIconColor,
-        disabledColor,
-        selectedColor,
-        secondarySelectedColor,
-        shadowColor,
-        selectedShadowColor,
-        checkmarkColor,
-        labelPadding,
-        padding,
-        side,
-        shape,
-        labelStyle,
-        secondaryLabelStyle,
-        brightness,
-        elevation,
-        pressElevation,
-      );
+    backgroundColor,
+    deleteIconColor,
+    disabledColor,
+    selectedColor,
+    secondarySelectedColor,
+    shadowColor,
+    selectedShadowColor,
+    checkmarkColor,
+    labelPadding,
+    padding,
+    side,
+    shape,
+    labelStyle,
+    secondaryLabelStyle,
+    brightness,
+    elevation,
+    pressElevation,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -525,24 +530,24 @@ class ChipThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ChipThemeData &&
-        other.backgroundColor == backgroundColor &&
-        other.deleteIconColor == deleteIconColor &&
-        other.disabledColor == disabledColor &&
-        other.selectedColor == selectedColor &&
-        other.secondarySelectedColor == secondarySelectedColor &&
-        other.shadowColor == shadowColor &&
-        other.selectedShadowColor == selectedShadowColor &&
-        other.checkmarkColor == checkmarkColor &&
-        other.labelPadding == labelPadding &&
-        other.padding == padding &&
-        other.side == side &&
-        other.shape == shape &&
-        other.labelStyle == labelStyle &&
-        other.secondaryLabelStyle == secondaryLabelStyle &&
-        other.brightness == brightness &&
-        other.elevation == elevation &&
-        other.pressElevation == pressElevation;
+    return other is ChipThemeData
+        && other.backgroundColor == backgroundColor
+        && other.deleteIconColor == deleteIconColor
+        && other.disabledColor == disabledColor
+        && other.selectedColor == selectedColor
+        && other.secondarySelectedColor == secondarySelectedColor
+        && other.shadowColor == shadowColor
+        && other.selectedShadowColor == selectedShadowColor
+        && other.checkmarkColor == checkmarkColor
+        && other.labelPadding == labelPadding
+        && other.padding == padding
+        && other.side == side
+        && other.shape == shape
+        && other.labelStyle == labelStyle
+        && other.secondaryLabelStyle == secondaryLabelStyle
+        && other.brightness == brightness
+        && other.elevation == elevation
+        && other.pressElevation == pressElevation;
   }
 
   @override

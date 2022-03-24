@@ -102,12 +102,10 @@ void main() {
     /// that is of type Material, this code retrieves the built
     /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
-      find
-          .descendant(
-            of: find.byKey(popupButtonApp),
-            matching: find.byType(Material),
-          )
-          .last,
+      find.descendant(
+        of: find.byKey(popupButtonApp),
+        matching: find.byType(Material),
+      ).last,
     );
     expect(button.color, null);
     expect(button.shape, null);
@@ -118,12 +116,10 @@ void main() {
     /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
     /// built [PopupMenuItem].
     final DefaultTextStyle text = tester.widget<DefaultTextStyle>(
-      find
-          .descendant(
-            of: find.byKey(popupItemKey),
-            matching: find.byType(DefaultTextStyle),
-          )
-          .last,
+      find.descendant(
+        of: find.byKey(popupItemKey),
+        matching: find.byType(DefaultTextStyle),
+      ).last,
     );
     expect(text.style.fontFamily, 'Roboto');
     expect(text.style.color, const Color(0xdd000000));
@@ -165,12 +161,10 @@ void main() {
     /// that is of type Material, this code retrieves the built
     /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
-      find
-          .descendant(
-            of: find.byKey(popupButtonApp),
-            matching: find.byType(Material),
-          )
-          .last,
+      find.descendant(
+        of: find.byKey(popupButtonApp),
+        matching: find.byType(Material),
+      ).last,
     );
     expect(button.color, popupMenuTheme.color);
     expect(button.shape, popupMenuTheme.shape);
@@ -181,12 +175,10 @@ void main() {
     /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
     /// built [PopupMenuItem].
     final DefaultTextStyle text = tester.widget<DefaultTextStyle>(
-      find
-          .descendant(
-            of: find.byKey(popupItemKey),
-            matching: find.byType(DefaultTextStyle),
-          )
-          .last,
+      find.descendant(
+        of: find.byKey(popupItemKey),
+        matching: find.byType(DefaultTextStyle),
+      ).last,
     );
     expect(text.style, popupMenuTheme.textStyle);
   });
@@ -238,12 +230,10 @@ void main() {
     /// that is of type Material, this code retrieves the built
     /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
-      find
-          .descendant(
-            of: find.byKey(popupButtonApp),
-            matching: find.byType(Material),
-          )
-          .last,
+      find.descendant(
+        of: find.byKey(popupButtonApp),
+        matching: find.byType(Material),
+      ).last,
     );
     expect(button.color, color);
     expect(button.shape, shape);
@@ -254,12 +244,10 @@ void main() {
     /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
     /// built [PopupMenuItem].
     final DefaultTextStyle text = tester.widget<DefaultTextStyle>(
-      find
-          .descendant(
-            of: find.byKey(popupItemKey),
-            matching: find.byType(DefaultTextStyle),
-          )
-          .last,
+      find.descendant(
+        of: find.byKey(popupItemKey),
+        matching: find.byType(DefaultTextStyle),
+      ).last,
     );
     expect(text.style, textStyle);
   });
@@ -299,7 +287,7 @@ void main() {
                     ),
                     PopupMenuItem<void>(
                       key: enabledPopupItemKey,
-                      onTap: () {},
+                      onTap: () { },
                       child: const Text('enabled'),
                     ),
                   ];
@@ -319,12 +307,10 @@ void main() {
     /// that is of type Material, this code retrieves the built
     /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
-      find
-          .descendant(
-            of: find.byKey(popupButtonApp),
-            matching: find.byType(Material),
-          )
-          .last,
+      find.descendant(
+        of: find.byKey(popupButtonApp),
+        matching: find.byType(Material),
+      ).last,
     );
     expect(button.color, Colors.pink);
     expect(button.shape, const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))));

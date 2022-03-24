@@ -30,8 +30,8 @@ void _tests() {
           Semantics(
             selected: true,
             checked: true,
-            onTap: () {},
-            onDecrease: () {},
+            onTap: () { },
+            onDecrease: () { },
             value: 'test-value',
             increasedValue: 'test-increasedValue',
             decreasedValue: 'test-decreasedValue',
@@ -54,11 +54,11 @@ void _tests() {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     final String code = semantics
-        .generateTestSemanticsExpressionForCurrentSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest)
-        .split('\n')
-        .map<String>((String line) => line.trim())
-        .join('\n')
-        .trim();
+      .generateTestSemanticsExpressionForCurrentSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest)
+      .split('\n')
+      .map<String>((String line) => line.trim())
+      .join('\n')
+      .trim();
 
     File? findThisTestFile(Directory directory) {
       for (final FileSystemEntity entity in directory.listSync()) {
@@ -67,9 +67,7 @@ void _tests() {
           if (childSearch != null) {
             return childSearch;
           }
-        } else if (entity is File &&
-            entity.path
-                .endsWith('semantics_tester_generate_test_semantics_expression_for_current_semantics_tree_test.dart')) {
+        } else if (entity is File && entity.path.endsWith('semantics_tester_generate_test_semantics_expression_for_current_semantics_tree_test.dart')) {
           return entity;
         }
       }
@@ -79,15 +77,14 @@ void _tests() {
     final File thisTestFile = findThisTestFile(Directory.current)!;
     expect(thisTestFile, isNotNull);
     String expectedCode = thisTestFile.readAsStringSync();
-    expectedCode = expectedCode
-        .substring(
-          expectedCode.indexOf('v' * 12) + 12,
-          expectedCode.indexOf('^' * 12) - 3,
-        )
-        .split('\n')
-        .map<String>((String line) => line.trim())
-        .join('\n')
-        .trim();
+    expectedCode = expectedCode.substring(
+      expectedCode.indexOf('v' * 12) + 12,
+      expectedCode.indexOf('^' * 12) - 3,
+    )
+      .split('\n')
+      .map<String>((String line) => line.trim())
+      .join('\n')
+      .trim();
     semantics.dispose();
     expect('$code,', expectedCode);
   });
@@ -133,11 +130,7 @@ void _tests() {
                                 TestSemantics(
                                   id: 6,
                                   tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.hasCheckedState,
-                                    SemanticsFlag.isChecked,
-                                    SemanticsFlag.isSelected
-                                  ],
+                                  flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.isSelected],
                                   actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
                                   label: '\u202aInteractive text\u202c',
                                   value: 'test-value',

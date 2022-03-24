@@ -198,7 +198,8 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('xcodebuild isInstalled is false when Xcode is not fully installed', () {
+  testWithoutContext(
+      'xcodebuild isInstalled is false when Xcode is not fully installed', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
@@ -287,8 +288,7 @@ void main() {
     ]);
 
     expect(
-        await xcodeProjectInterpreter.getBuildSettings('',
-            buildContext: const XcodeProjectBuildContext(deviceId: '123', scheme: 'Free')),
+        await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(deviceId: '123', scheme: 'Free')),
         const <String, String>{});
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
@@ -387,8 +387,7 @@ void main() {
       ),
     ]);
     expect(
-        await xcodeProjectInterpreter.getBuildSettings('',
-            buildContext: const XcodeProjectBuildContext(scheme: 'Free')),
+        await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(scheme: 'Free')),
         const <String, String>{});
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
@@ -559,31 +558,18 @@ Information about project "Runner":
   });
 
   testWithoutContext('expected scheme for flavored build is the title-cased flavor', () {
-    expect(
-        XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false)), 'Hello');
-    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false)),
-        'HELLO');
-    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false)),
-        'Hello');
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false)), 'Hello');
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false)), 'HELLO');
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false)), 'Hello');
   });
   testWithoutContext('expected build configuration for flavored build is Mode-Flavor', () {
-    expect(
-        XcodeProjectInfo.expectedBuildConfigurationFor(
-            const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false), 'Hello'),
-        'Debug-Hello');
-    expect(
-        XcodeProjectInfo.expectedBuildConfigurationFor(
-            const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false), 'Hello'),
-        'Profile-Hello');
-    expect(
-        XcodeProjectInfo.expectedBuildConfigurationFor(
-            const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false), 'Hello'),
-        'Release-Hello');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false), 'Hello'), 'Debug-Hello');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false), 'Hello'), 'Profile-Hello');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false), 'Hello'), 'Release-Hello');
   });
 
   testWithoutContext('scheme for default project is Runner', () {
-    final XcodeProjectInfo info =
-        XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner'], logger);
+    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner'], logger);
 
     expect(info.schemeFor(BuildInfo.debug), 'Runner');
     expect(info.schemeFor(BuildInfo.profile), 'Runner');
@@ -592,8 +578,7 @@ Information about project "Runner":
   });
 
   testWithoutContext('build configuration for default project is matched against BuildMode', () {
-    final XcodeProjectInfo info =
-        XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Profile', 'Release'], <String>['Runner'], logger);
+    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Profile', 'Release'], <String>['Runner'], logger);
 
     expect(info.buildConfigurationFor(BuildInfo.debug, 'Runner'), 'Debug');
     expect(info.buildConfigurationFor(BuildInfo.profile, 'Runner'), 'Profile');
@@ -625,7 +610,9 @@ Information about project "Runner":
 
     expect(
       defaultInfo.reportFlavorNotFoundAndExit,
-      throwsToolExit(message: 'The Xcode project does not define custom schemes. You cannot use the --flavor option.'),
+      throwsToolExit(
+        message: 'The Xcode project does not define custom schemes. You cannot use the --flavor option.'
+      ),
     );
   });
 
@@ -639,7 +626,9 @@ Information about project "Runner":
 
     expect(
       info.reportFlavorNotFoundAndExit,
-      throwsToolExit(message: 'You must specify a --flavor option to select one of the available schemes.'),
+      throwsToolExit(
+        message: 'You must specify a --flavor option to select one of the available schemes.'
+      ),
     );
   });
 
@@ -651,14 +640,10 @@ Information about project "Runner":
       logger,
     );
 
-    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false), 'Free'),
-        'debug (free)');
-    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Paid', treeShakeIcons: false), 'Paid'),
-        'Debug paid');
-    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'FREE', treeShakeIcons: false), 'Free'),
-        'profile - Free');
-    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false), 'Paid'),
-        'Release-Paid');
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false), 'Free'), 'debug (free)');
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Paid', treeShakeIcons: false), 'Paid'), 'Debug paid');
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'FREE', treeShakeIcons: false), 'Free'), 'profile - Free');
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false), 'Paid'), 'Release-Paid');
   });
 
   testWithoutContext('build configuration for project with inconsistent naming is null', () {
@@ -672,7 +657,7 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false), 'Free'), null);
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid', treeShakeIcons: false), 'Paid'), null);
   });
-  group('environmentVariablesAsXcodeBuildSettings', () {
+ group('environmentVariablesAsXcodeBuildSettings', () {
     FakePlatform platform;
 
     setUp(() {
@@ -715,64 +700,7 @@ Information about project "Runner":
       testUsingContext('does not exclude arm64 simulator when supported by all plugins', () async {
         const BuildInfo buildInfo = BuildInfo.debug;
         final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
-        final Directory podXcodeProject = project.ios.hostAppRoot
-            .childDirectory('Pods')
-            .childDirectory('Pods.xcodeproj')
-          ..createSync(recursive: true);
-
-        final String buildDirectory = fileSystem.path.absolute('build', 'ios');
-        fakeProcessManager.addCommands(<FakeCommand>[
-          kWhichSysctlCommand,
-          kARMCheckCommand,
-          FakeCommand(command: <String>[
-            '/usr/bin/arch',
-            '-arm64e',
-            'xcrun',
-            'xcodebuild',
-            '-alltargets',
-            '-sdk',
-            'iphonesimulator',
-            '-project',
-            podXcodeProject.path,
-            '-showBuildSettings',
-            'BUILD_DIR=$buildDirectory',
-            'OBJROOT=$buildDirectory',
-          ], stdout: '''
-Build settings for action build and target plugin1:
-    ENABLE_BITCODE = NO;
-    EXCLUDED_ARCHS = i386;
-    INFOPLIST_FILE = Runner/Info.plist;
-    UNRELATED_BUILD_SETTING = arm64;
-
-Build settings for action build and target plugin2:
-    ENABLE_BITCODE = NO;
-    EXCLUDED_ARCHS = i386;
-    INFOPLIST_FILE = Runner/Info.plist;
-    UNRELATED_BUILD_SETTING = arm64;
-				'''),
-        ]);
-        await updateGeneratedXcodeProperties(
-          project: project,
-          buildInfo: buildInfo,
-        );
-
-        final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
-        expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386\n'));
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      }, overrides: <Type, Generator>{
-        Artifacts: () => localArtifacts,
-        Platform: () => macOS,
-        FileSystem: () => fs,
-        ProcessManager: () => fakeProcessManager,
-        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-      });
-
-      testUsingContext('excludes arm64 simulator when build setting fetch fails', () async {
-        const BuildInfo buildInfo = BuildInfo.debug;
-        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
-        final Directory podXcodeProject = project.ios.hostAppRoot
-            .childDirectory('Pods')
-            .childDirectory('Pods.xcodeproj')
+        final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
           ..createSync(recursive: true);
 
         final String buildDirectory = fileSystem.path.absolute('build', 'ios');
@@ -794,7 +722,63 @@ Build settings for action build and target plugin2:
               'BUILD_DIR=$buildDirectory',
               'OBJROOT=$buildDirectory',
             ],
-            exitCode: 1,
+            stdout: '''
+Build settings for action build and target plugin1:
+    ENABLE_BITCODE = NO;
+    EXCLUDED_ARCHS = i386;
+    INFOPLIST_FILE = Runner/Info.plist;
+    UNRELATED_BUILD_SETTING = arm64;
+
+Build settings for action build and target plugin2:
+    ENABLE_BITCODE = NO;
+    EXCLUDED_ARCHS = i386;
+    INFOPLIST_FILE = Runner/Info.plist;
+    UNRELATED_BUILD_SETTING = arm64;
+				'''
+          ),
+        ]);
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+        );
+
+        final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+        expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386\n'));
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => localArtifacts,
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => fakeProcessManager,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      testUsingContext('excludes arm64 simulator when build setting fetch fails', () async {
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
+          ..createSync(recursive: true);
+
+        final String buildDirectory = fileSystem.path.absolute('build', 'ios');
+        fakeProcessManager.addCommands(<FakeCommand>[
+          kWhichSysctlCommand,
+          kARMCheckCommand,
+          FakeCommand(
+              command: <String>[
+                '/usr/bin/arch',
+                '-arm64e',
+                'xcrun',
+                'xcodebuild',
+                '-alltargets',
+                '-sdk',
+                'iphonesimulator',
+                '-project',
+                podXcodeProject.path,
+                '-showBuildSettings',
+                'BUILD_DIR=$buildDirectory',
+                'OBJROOT=$buildDirectory',
+              ],
+              exitCode: 1,
           ),
         ]);
         await updateGeneratedXcodeProperties(
@@ -816,29 +800,29 @@ Build settings for action build and target plugin2:
       testUsingContext('excludes arm64 simulator when unsupported by plugins', () async {
         const BuildInfo buildInfo = BuildInfo.debug;
         final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
-        final Directory podXcodeProject = project.ios.hostAppRoot
-            .childDirectory('Pods')
-            .childDirectory('Pods.xcodeproj')
+        final Directory podXcodeProject = project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
           ..createSync(recursive: true);
 
         final String buildDirectory = fileSystem.path.absolute('build', 'ios');
         fakeProcessManager.addCommands(<FakeCommand>[
           kWhichSysctlCommand,
           kARMCheckCommand,
-          FakeCommand(command: <String>[
-            '/usr/bin/arch',
-            '-arm64e',
-            'xcrun',
-            'xcodebuild',
-            '-alltargets',
-            '-sdk',
-            'iphonesimulator',
-            '-project',
-            podXcodeProject.path,
-            '-showBuildSettings',
-            'BUILD_DIR=$buildDirectory',
-            'OBJROOT=$buildDirectory',
-          ], stdout: '''
+          FakeCommand(
+              command: <String>[
+                '/usr/bin/arch',
+                '-arm64e',
+                'xcrun',
+                'xcodebuild',
+                '-alltargets',
+                '-sdk',
+                'iphonesimulator',
+                '-project',
+                podXcodeProject.path,
+                '-showBuildSettings',
+                'BUILD_DIR=$buildDirectory',
+                'OBJROOT=$buildDirectory',
+              ],
+              stdout: '''
 Build settings for action build and target plugin1:
     ENABLE_BITCODE = NO;
     EXCLUDED_ARCHS = i386;
@@ -850,7 +834,8 @@ Build settings for action build and target plugin2:
     EXCLUDED_ARCHS = i386 arm64;
     INFOPLIST_FILE = Runner/Info.plist;
     UNRELATED_BUILD_SETTING = arm64;
-				'''),
+				'''
+          ),
         ]);
         await updateGeneratedXcodeProperties(
           project: project,
@@ -1171,8 +1156,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo =
-          BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -1190,8 +1174,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo =
-          BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -1208,8 +1191,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo =
-          BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,

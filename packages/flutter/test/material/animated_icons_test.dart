@@ -253,7 +253,8 @@ void main() {
       RecordedTranslate(-48, -48),
       RecordedScale(0.5, 0.5),
     ]);
-    await expectLater(find.byType(AnimatedIcon), matchesGoldenFile('animated_icons_test.icon.rtl.png'));
+    await expectLater(find.byType(AnimatedIcon),
+        matchesGoldenFile('animated_icons_test.icon.rtl.png'));
   });
 
   testWidgets('Inherited text direction ltr', (WidgetTester tester) async {
@@ -279,7 +280,8 @@ void main() {
     expect(canvas.invocations, const <RecordedCanvasCall>[
       RecordedScale(0.5, 0.5),
     ]);
-    await expectLater(find.byType(AnimatedIcon), matchesGoldenFile('animated_icons_test.icon.ltr.png'));
+    await expectLater(find.byType(AnimatedIcon),
+        matchesGoldenFile('animated_icons_test.icon.ltr.png'));
   });
 
   testWidgets('Inherited text direction overridden', (WidgetTester tester) async {
@@ -335,7 +337,8 @@ class PaintColorMatcher extends Matcher {
   final int expectedColor;
 
   @override
-  Description describe(Description description) => description.add('color was not $expectedColor');
+  Description describe(Description description) =>
+    description.add('color was not $expectedColor');
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {

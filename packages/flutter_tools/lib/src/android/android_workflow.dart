@@ -43,30 +43,27 @@ class AndroidWorkflow implements Workflow {
     required AndroidSdk? androidSdk,
     required FeatureFlags featureFlags,
     required OperatingSystemUtils operatingSystemUtils,
-  })  : _androidSdk = androidSdk,
-        _featureFlags = featureFlags,
-        _operatingSystemUtils = operatingSystemUtils;
+  }) : _androidSdk = androidSdk,
+       _featureFlags = featureFlags,
+       _operatingSystemUtils = operatingSystemUtils;
 
   final AndroidSdk? _androidSdk;
   final FeatureFlags _featureFlags;
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  bool get appliesToHostPlatform =>
-      _featureFlags.isAndroidEnabled
-      // Android Studio is not currently supported on Linux Arm64 Hosts.
-      &&
-      _operatingSystemUtils.hostPlatform != HostPlatform.linux_arm64;
+  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled
+    // Android Studio is not currently supported on Linux Arm64 Hosts.
+    && _operatingSystemUtils.hostPlatform != HostPlatform.linux_arm64;
 
   @override
-  bool get canListDevices => appliesToHostPlatform && _androidSdk != null && _androidSdk?.adbPath != null;
+  bool get canListDevices => appliesToHostPlatform && _androidSdk != null
+    && _androidSdk?.adbPath != null;
 
   @override
-  bool get canLaunchDevices =>
-      appliesToHostPlatform &&
-      _androidSdk != null &&
-      _androidSdk?.adbPath != null &&
-      (_androidSdk?.validateSdkWellFormed().isEmpty ?? false);
+  bool get canLaunchDevices => appliesToHostPlatform && _androidSdk != null
+    && _androidSdk?.adbPath != null
+    && (_androidSdk?.validateSdkWellFormed().isEmpty ?? false);
 
   @override
   bool get canListEmulators => canListDevices && _androidSdk?.emulatorPath != null;
@@ -88,20 +85,20 @@ class AndroidValidator extends DoctorValidator {
     required Platform platform,
     required ProcessManager processManager,
     required UserMessages userMessages,
-  })  : _androidSdk = androidSdk,
-        _androidStudio = androidStudio,
-        _fileSystem = fileSystem,
-        _logger = logger,
-        _operatingSystemUtils = OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        ),
-        _platform = platform,
-        _processManager = processManager,
-        _userMessages = userMessages,
-        super('Android toolchain - develop for Android devices');
+  }) : _androidSdk = androidSdk,
+       _androidStudio = androidStudio,
+       _fileSystem = fileSystem,
+       _logger = logger,
+       _operatingSystemUtils = OperatingSystemUtils(
+         fileSystem: fileSystem,
+         logger: logger,
+         platform: platform,
+         processManager: processManager,
+       ),
+       _platform = platform,
+       _processManager = processManager,
+       _userMessages = userMessages,
+       super('Android toolchain - develop for Android devices');
 
   final AndroidSdk? _androidSdk;
   final AndroidStudio? _androidStudio;
@@ -202,10 +199,9 @@ class AndroidValidator extends DoctorValidator {
     String? sdkVersionText;
     final AndroidSdkVersion? androidSdkLatestVersion = androidSdk.latestVersion;
     if (androidSdkLatestVersion != null) {
-      if (androidSdkLatestVersion.sdkLevel < kAndroidSdkMinVersion ||
-          androidSdkLatestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
-        messages.add(
-          ValidationMessage.error(_userMessages.androidSdkBuildToolsOutdated(
+      if (androidSdkLatestVersion.sdkLevel < kAndroidSdkMinVersion || androidSdkLatestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
+        messages.add(ValidationMessage.error(
+          _userMessages.androidSdkBuildToolsOutdated(
             kAndroidSdkMinVersion,
             kAndroidSdkBuildToolsMinVersion.toString(),
             _platform,
@@ -216,7 +212,8 @@ class AndroidValidator extends DoctorValidator {
       sdkVersionText = _userMessages.androidStatusInfo(androidSdkLatestVersion.buildToolsVersionName);
 
       messages.add(ValidationMessage(_userMessages.androidSdkPlatformToolsVersion(
-          androidSdkLatestVersion.platformName, androidSdkLatestVersion.buildToolsVersionName)));
+        androidSdkLatestVersion.platformName,
+        androidSdkLatestVersion.buildToolsVersionName)));
     } else {
       messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(_platform)));
     }
@@ -277,16 +274,16 @@ class AndroidLicenseValidator extends DoctorValidator {
     required AndroidStudio? androidStudio,
     required Stdio stdio,
     required UserMessages userMessages,
-  })  : _androidSdk = androidSdk,
-        _platform = platform,
-        _operatingSystemUtils = operatingSystemUtils,
-        _fileSystem = fileSystem,
-        _processManager = processManager,
-        _logger = logger,
-        _androidStudio = androidStudio,
-        _stdio = stdio,
-        _userMessages = userMessages,
-        super('Android license subvalidator');
+  }) : _androidSdk = androidSdk,
+       _platform = platform,
+       _operatingSystemUtils = operatingSystemUtils,
+       _fileSystem = fileSystem,
+       _processManager = processManager,
+       _logger = logger,
+       _androidStudio = androidStudio,
+       _stdio = stdio,
+       _userMessages = userMessages,
+       super('Android license subvalidator');
 
   final AndroidSdk _androidSdk;
   final AndroidStudio? _androidStudio;
@@ -306,10 +303,9 @@ class AndroidLicenseValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior
-    if (_androidSdk == null ||
-        _androidSdk.latestVersion == null ||
+    if (_androidSdk == null || _androidSdk.latestVersion == null ||
         _androidSdk.validateSdkWellFormed().isNotEmpty ||
-        !await _checkJavaVersionNoOutput()) {
+        ! await _checkJavaVersionNoOutput()) {
       return ValidationResult(ValidationType.missing, messages);
     }
 
@@ -397,15 +393,15 @@ class AndroidLicenseValidator extends DoctorValidator {
       // We expect logcat streams to occasionally contain invalid utf-8,
       // see: https://github.com/flutter/flutter/pull/8864.
       final Future<void> output = process.stdout
-          .transform<String>(const Utf8Decoder(reportErrors: false))
-          .transform<String>(const LineSplitter())
-          .listen(_handleLine)
-          .asFuture<void>(null);
+        .transform<String>(const Utf8Decoder(reportErrors: false))
+        .transform<String>(const LineSplitter())
+        .listen(_handleLine)
+        .asFuture<void>(null);
       final Future<void> errors = process.stderr
-          .transform<String>(const Utf8Decoder(reportErrors: false))
-          .transform<String>(const LineSplitter())
-          .listen(_handleLine)
-          .asFuture<void>(null);
+        .transform<String>(const Utf8Decoder(reportErrors: false))
+        .transform<String>(const LineSplitter())
+        .listen(_handleLine)
+        .asFuture<void>(null);
       await Future.wait<void>(<Future<void>>[output, errors]);
       return status ?? LicensesAccepted.unknown;
     } on ProcessException catch (e) {
@@ -422,8 +418,10 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     if (!_canRunSdkManager()) {
-      throwToolExit('Android sdkmanager not found. Update to the latest Android SDK and ensure that '
-          'the cmdline-tools are installed to resolve this.');
+      throwToolExit(
+        'Android sdkmanager not found. Update to the latest Android SDK and ensure that '
+        'the cmdline-tools are installed to resolve this.'
+      );
     }
 
     try {
@@ -435,12 +433,13 @@ class AndroidLicenseValidator extends DoctorValidator {
       // The real stdin will never finish streaming. Pipe until the child process
       // finishes.
       unawaited(process.stdin.addStream(_stdio.stdin)
-          // If the process exits unexpectedly with an error, that will be
-          // handled by the caller.
-          .catchError((dynamic err, StackTrace stack) {
-        _logger.printTrace('Echoing stdin to the licenses subprocess failed:');
-        _logger.printTrace('$err\n$stack');
-      }));
+        // If the process exits unexpectedly with an error, that will be
+        // handled by the caller.
+        .catchError((dynamic err, StackTrace stack) {
+          _logger.printTrace('Echoing stdin to the licenses subprocess failed:');
+          _logger.printTrace('$err\n$stack');
+        }
+      ));
 
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.

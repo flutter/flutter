@@ -169,8 +169,7 @@ void main() {
       command: <String>[
         '/foo/bar/sdkmanager',
         '--licenses',
-      ],
-      stdout: 'asdasassad',
+      ], stdout: 'asdasassad',
     ));
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       androidSdk: sdk,
@@ -198,8 +197,7 @@ All SDK package licenses accepted.
       command: <String>[
         '/foo/bar/sdkmanager',
         '--licenses',
-      ],
-      stdout: output,
+      ], stdout: output,
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
@@ -229,8 +227,7 @@ Review licenses that have not been accepted (y/N)?
       command: <String>[
         '/foo/bar/sdkmanager',
         '--licenses',
-      ],
-      stdout: output,
+      ], stdout: output,
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
@@ -260,8 +257,7 @@ Review licenses that have not been accepted (y/N)?
       command: <String>[
         '/foo/bar/sdkmanager',
         '--licenses',
-      ],
-      stdout: output,
+      ], stdout: output,
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
@@ -375,8 +371,7 @@ Review licenses that have not been accepted (y/N)?
       command: <String>[
         'which',
         'java',
-      ],
-      exitCode: 1,
+      ], exitCode: 1,
     ));
     final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion()
       ..sdkLevel = 28
@@ -386,7 +381,7 @@ Review licenses that have not been accepted (y/N)?
       ..licensesAvailable = true
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
-      // Test with invalid SDK and build tools
+    // Test with invalid SDK and build tools
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager'
       ..latestVersion = sdkVersion;
@@ -476,8 +471,7 @@ Review licenses that have not been accepted (y/N)?
       command: <String>[
         'home/java/bin/java',
         '-version',
-      ],
-      stderr: javaVersionText,
+      ], stderr: javaVersionText,
     ));
     final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion()
       ..sdkLevel = 29
@@ -509,8 +503,9 @@ Review licenses that have not been accepted (y/N)?
       errorMessage,
     );
     expect(
-      validationResult.messages
-          .any((ValidationMessage message) => message.message.contains('Unable to locate Android SDK')),
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains('Unable to locate Android SDK')
+      ),
       false,
     );
   });
@@ -527,8 +522,9 @@ Review licenses that have not been accepted (y/N)?
     ).validate();
 
     expect(
-      validationResult.messages
-          .any((ValidationMessage message) => message.message.contains('flutter config --android-sdk')),
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains('flutter config --android-sdk')
+      ),
       true,
     );
   });
@@ -584,7 +580,9 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
 }
 
 class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  CustomFakeOperatingSystemUtils({HostPlatform hostPlatform = HostPlatform.linux_x64}) : _hostPlatform = hostPlatform;
+  CustomFakeOperatingSystemUtils({
+    HostPlatform hostPlatform = HostPlatform.linux_x64
+  })  : _hostPlatform = hostPlatform;
 
   final HostPlatform _hostPlatform;
 

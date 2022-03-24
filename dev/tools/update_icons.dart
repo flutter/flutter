@@ -164,7 +164,8 @@ const Set<String> _iconsMirroredWhenRTL = <String>{
 
 void main(List<String> args) {
   // If we're run from the `tools` dir, set the cwd to the repo root.
-  if (path.basename(Directory.current.path) == 'tools') Directory.current = Directory.current.parent.parent;
+  if (path.basename(Directory.current.path) == 'tools')
+    Directory.current = Directory.current.parent.parent;
 
   final ArgResults argResults = _handleArguments(args);
 
@@ -221,18 +222,25 @@ void main(List<String> args) {
 
 ArgResults _handleArguments(List<String> args) {
   final ArgParser argParser = ArgParser()
-    ..addOption(_iconsPathOption, defaultsTo: _defaultIconsPath, help: 'Location of the material icons file')
+    ..addOption(_iconsPathOption,
+        defaultsTo: _defaultIconsPath,
+        help: 'Location of the material icons file')
     ..addOption(_iconsTemplatePathOption,
         defaultsTo: _defaultIconsPath,
-        help: 'Location of the material icons file template. Usually the same as --$_iconsPathOption')
+        help:
+            'Location of the material icons file template. Usually the same as --$_iconsPathOption')
     ..addOption(_newCodepointsPathOption,
-        defaultsTo: _defaultNewCodepointsPath, help: 'Location of the new codepoints directory')
+        defaultsTo: _defaultNewCodepointsPath,
+        help: 'Location of the new codepoints directory')
     ..addOption(_oldCodepointsPathOption,
-        defaultsTo: _defaultOldCodepointsPath, help: 'Location of the existing codepoints directory')
+        defaultsTo: _defaultOldCodepointsPath,
+        help: 'Location of the existing codepoints directory')
     ..addOption(_fontFamilyOption,
-        defaultsTo: _defaultFontFamily, help: 'The font family to use for the IconData constants')
+        defaultsTo: _defaultFontFamily,
+        help: 'The font family to use for the IconData constants')
     ..addFlag(_enforceSafetyChecks,
-        defaultsTo: true, help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable')
+        defaultsTo: true,
+        help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable')
     ..addFlag(_dryRunOption);
   argParser.addFlag('help', abbr: 'h', negatable: false, callback: (bool help) {
     if (help) {
@@ -244,8 +252,9 @@ ArgResults _handleArguments(List<String> args) {
 }
 
 Map<String, String> stringToTokenPairMap(String codepointData) {
-  final Iterable<String> cleanData =
-      LineSplitter.split(codepointData).map((String line) => line.trim()).where((String line) => line.isNotEmpty);
+  final Iterable<String> cleanData = LineSplitter.split(codepointData)
+      .map((String line) => line.trim())
+      .where((String line) => line.isNotEmpty);
 
   final Map<String, String> pairs = <String, String>{};
 
@@ -261,13 +270,14 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
 }
 
 String _regenerateIconsFile(
-  String templateFileContents,
-  Map<String, String> tokenPairMap,
-  String fontFamily,
-  bool enforceSafetyChecks,
-) {
-  final List<Icon> newIcons =
-      tokenPairMap.entries.map((MapEntry<String, String> entry) => Icon(entry, fontFamily)).toList();
+    String templateFileContents,
+    Map<String, String> tokenPairMap,
+    String fontFamily,
+    bool enforceSafetyChecks,
+  ) {
+  final List<Icon> newIcons = tokenPairMap.entries
+      .map((MapEntry<String, String> entry) => Icon(entry, fontFamily))
+      .toList();
   newIcons.sort((Icon a, Icon b) => a._compareTo(b));
 
   final StringBuffer buf = StringBuffer();
@@ -286,12 +296,13 @@ String _regenerateIconsFile(
         // Automatically finds and generates all icon declarations.
         for (final String style in <String>['', '_outlined', '_rounded', '_sharp']) {
           try {
-            final Icon agnosticIcon =
-                newIcons.firstWhere((Icon icon) => icon.id == '${ids[0]}$style', orElse: () => throw ids[0]);
-            final Icon iOSIcon =
-                newIcons.firstWhere((Icon icon) => icon.id == '${ids[1]}$style', orElse: () => throw ids[1]);
-            platformAdaptiveDeclarations.add(
-              Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon),
+            final Icon agnosticIcon = newIcons.firstWhere(
+                (Icon icon) => icon.id == '${ids[0]}$style',
+                orElse: () => throw ids[0]);
+            final Icon iOSIcon = newIcons.firstWhere(
+                (Icon icon) => icon.id == '${ids[1]}$style',
+                orElse: () => throw ids[1]);
+            platformAdaptiveDeclarations.add(Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon),
             );
           } catch (e) {
             if (style == '') {
@@ -336,7 +347,8 @@ bool testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldCo
     stderr.writeln('🆕 $diff new codepoints: ${newCodepointsSet.difference(oldCodepointsSet)}');
   }
   if (!newCodepointsSet.containsAll(oldCodepointsSet)) {
-    stderr.writeln('❌ new codepoints file does not contain all ${oldCodepointsSet.length} '
+    stderr.writeln(
+        '❌ new codepoints file does not contain all ${oldCodepointsSet.length} '
         'existing codepoints. Missing: ${oldCodepointsSet.difference(newCodepointsSet)}');
     return false;
   } else {
@@ -438,7 +450,9 @@ class Icon {
   String get dartDoc =>
       '<i class="material-icons$htmlSuffix md-36">$shortId</i> &#x2014; $family icon named "$name"$style';
 
-  String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId) ? ', matchTextDirection: true' : '';
+  String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId)
+      ? ', matchTextDirection: true'
+      : '';
 
   String get declaration =>
       "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: '$fontFamily'$mirroredInRTL);";

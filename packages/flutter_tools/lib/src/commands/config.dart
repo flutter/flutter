@@ -12,17 +12,20 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
 class ConfigCommand extends FlutterCommand {
-  ConfigCommand({bool verboseHelp = false}) {
+  ConfigCommand({ bool verboseHelp = false }) {
     argParser.addFlag('analytics',
-        help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
+      help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
     argParser.addFlag('clear-ios-signing-cert',
-        negatable: false,
-        help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
+      negatable: false,
+      help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
-    argParser.addOption('build-dir',
-        help: 'The relative path to override a projects build directory.', valueHelp: 'out/');
-    argParser.addFlag('machine', negatable: false, hide: !verboseHelp, help: 'Print config values as json.');
+    argParser.addOption('build-dir', help: 'The relative path to override a projects build directory.',
+        valueHelp: 'out/');
+    argParser.addFlag('machine',
+      negatable: false,
+      hide: !verboseHelp,
+      help: 'Print config values as json.');
     for (final Feature feature in allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
@@ -44,10 +47,11 @@ class ConfigCommand extends FlutterCommand {
   final String name = 'config';
 
   @override
-  final String description = 'Configure Flutter settings.\n\n'
-      'To remove a setting, configure it to an empty string.\n\n'
-      'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve '
-      "Flutter tools over time. See Google's privacy policy: https://www.google.com/intl/en/policies/privacy/";
+  final String description =
+    'Configure Flutter settings.\n\n'
+    'To remove a setting, configure it to an empty string.\n\n'
+    'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve '
+    "Flutter tools over time. See Google's privacy policy: https://www.google.com/intl/en/policies/privacy/";
 
   @override
   final String category = FlutterCommandCategory.sdk;
@@ -70,22 +74,25 @@ class ConfigCommand extends FlutterCommand {
         featuresByName[configSetting] = feature;
       }
     }
-    String values = globals.config.keys.map<String>((String key) {
-      String configFooter = '';
-      if (featuresByName.containsKey(key)) {
-        final FeatureChannelSetting setting = featuresByName[key]!.getSettingForChannel(channel);
-        if (!setting.available) {
-          configFooter = '(Unavailable)';
-        }
-      }
-      return '  $key: ${globals.config.getValue(key)} $configFooter';
-    }).join('\n');
+    String values = globals.config.keys
+        .map<String>((String key) {
+          String configFooter = '';
+          if (featuresByName.containsKey(key)) {
+            final FeatureChannelSetting setting = featuresByName[key]!.getSettingForChannel(channel);
+            if (!setting.available) {
+              configFooter = '(Unavailable)';
+            }
+          }
+          return '  $key: ${globals.config.getValue(key)} $configFooter';
+        }).join('\n');
     if (values.isEmpty) {
       values = '  No settings have been configured.';
     }
-    final bool analyticsEnabled = globals.flutterUsage.enabled && !globals.flutterUsage.suppressAnalytics;
-    return '\nSettings:\n$values\n\n'
-        'Analytics reporting is currently ${analyticsEnabled ? 'enabled' : 'disabled'}.';
+    final bool analyticsEnabled = globals.flutterUsage.enabled &&
+                                  !globals.flutterUsage.suppressAnalytics;
+    return
+      '\nSettings:\n$values\n\n'
+      'Analytics reporting is currently ${analyticsEnabled ? 'enabled' : 'disabled'}.';
   }
 
   /// Return null to disable analytics recording of the `config` command.

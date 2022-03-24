@@ -26,8 +26,8 @@ class _ActiveItem implements Comparable<_ActiveItem> {
   _ActiveItem.incoming(this.controller, this.itemIndex) : removedItemBuilder = null;
   _ActiveItem.outgoing(this.controller, this.itemIndex, this.removedItemBuilder);
   _ActiveItem.index(this.itemIndex)
-      : controller = null,
-        removedItemBuilder = null;
+    : controller = null,
+      removedItemBuilder = null;
 
   final AnimationController? controller;
   final AnimatedListRemovedItemBuilder? removedItemBuilder;
@@ -73,9 +73,9 @@ class AnimatedList extends StatefulWidget {
     this.shrinkWrap = false,
     this.padding,
     this.clipBehavior = Clip.hardEdge,
-  })  : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0),
-        super(key: key);
+  }) : assert(itemBuilder != null),
+       assert(initialItemCount != null && initialItemCount >= 0),
+       super(key: key);
 
   /// Called, as needed, to build list item widgets.
   ///
@@ -271,7 +271,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   /// This method's semantics are the same as Dart's [List.insert] method:
   /// it increases the length of the list by one and shifts all items at or
   /// after [index] towards the end of the list.
-  void insertItem(int index, {Duration duration = _kDuration}) {
+  void insertItem(int index, { Duration duration = _kDuration }) {
     _sliverAnimatedListKey.currentState!.insertItem(index, duration: duration);
   }
 
@@ -286,7 +286,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   /// This method's semantics are the same as Dart's [List.remove] method:
   /// it decreases the length of the list by one and shifts all items at or
   /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder, {Duration duration = _kDuration}) {
+  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     _sliverAnimatedListKey.currentState!.removeItem(index, builder, duration: duration);
   }
 
@@ -340,9 +340,9 @@ class SliverAnimatedList extends StatefulWidget {
     Key? key,
     required this.itemBuilder,
     this.initialItemCount = 0,
-  })  : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0),
-        super(key: key);
+  }) : assert(itemBuilder != null),
+       assert(initialItemCount != null && initialItemCount >= 0),
+       super(key: key);
 
   /// Called, as needed, to build list item widgets.
   ///
@@ -448,6 +448,7 @@ class SliverAnimatedList extends StatefulWidget {
 /// [SliverAnimatedList] item input handlers can also refer to their
 /// [SliverAnimatedListState] with the static [SliverAnimatedList.of] method.
 class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProviderStateMixin {
+
   final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
   int _itemsCount = 0;
@@ -515,7 +516,7 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
   /// This method's semantics are the same as Dart's [List.insert] method:
   /// it increases the length of the list by one and shifts all items at or
   /// after [index] towards the end of the list.
-  void insertItem(int index, {Duration duration = _kDuration}) {
+  void insertItem(int index, { Duration duration = _kDuration }) {
     assert(index != null && index >= 0);
     assert(duration != null);
 
@@ -525,10 +526,12 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     // Increment the incoming and outgoing item indices to account
     // for the insertion.
     for (final _ActiveItem item in _incomingItems) {
-      if (item.itemIndex >= itemIndex) item.itemIndex += 1;
+      if (item.itemIndex >= itemIndex)
+        item.itemIndex += 1;
     }
     for (final _ActiveItem item in _outgoingItems) {
-      if (item.itemIndex >= itemIndex) item.itemIndex += 1;
+      if (item.itemIndex >= itemIndex)
+        item.itemIndex += 1;
     }
 
     final AnimationController controller = AnimationController(
@@ -562,7 +565,7 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
   /// This method's semantics are the same as Dart's [List.remove] method:
   /// it decreases the length of the list by one and shifts all items at or
   /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder, {Duration duration = _kDuration}) {
+  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     assert(index != null && index >= 0);
     assert(builder != null);
     assert(duration != null);
@@ -572,8 +575,8 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     assert(_activeItemAt(_outgoingItems, itemIndex) == null);
 
     final _ActiveItem? incomingItem = _removeActiveItemAt(_incomingItems, itemIndex);
-    final AnimationController controller =
-        incomingItem?.controller ?? AnimationController(duration: duration, value: 1.0, vsync: this);
+    final AnimationController controller = incomingItem?.controller
+      ?? AnimationController(duration: duration, value: 1.0, vsync: this);
     final _ActiveItem outgoingItem = _ActiveItem.outgoing(controller, itemIndex, builder);
     setState(() {
       _outgoingItems
@@ -587,10 +590,12 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
       // Decrement the incoming and outgoing item indices to account
       // for the removal.
       for (final _ActiveItem item in _incomingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex) item.itemIndex -= 1;
+        if (item.itemIndex > outgoingItem.itemIndex)
+          item.itemIndex -= 1;
       }
       for (final _ActiveItem item in _outgoingItems) {
-        if (item.itemIndex > outgoingItem.itemIndex) item.itemIndex -= 1;
+        if (item.itemIndex > outgoingItem.itemIndex)
+          item.itemIndex -= 1;
       }
 
       setState(() => _itemsCount -= 1);

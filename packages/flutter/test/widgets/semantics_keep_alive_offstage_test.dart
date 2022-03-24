@@ -9,8 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Un-layouted RenderObject in keep alive offstage area do not crash semantics compiler',
-      (WidgetTester tester) async {
+  testWidgets('Un-layouted RenderObject in keep alive offstage area do not crash semantics compiler', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20313.
 
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -103,11 +102,10 @@ Widget _buildTestWidget({
                   height: 250.0,
                   child: Text('Item $i'),
                 );
-              })
-                ..add(ProblemWidget(
-                  extraPadding: extraPadding,
-                  text: text,
-                )),
+              })..add(ProblemWidget(
+                extraPadding: extraPadding,
+                text: text,
+              )),
             ),
           ),
           Expanded(

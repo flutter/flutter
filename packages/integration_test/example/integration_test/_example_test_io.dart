@@ -32,7 +32,9 @@ void main() {
       // Verify that platform version is retrieved.
       expect(
         find.byWidgetPredicate(
-          (Widget widget) => widget is Text && widget.data!.startsWith('Platform: ${Platform.operatingSystem}'),
+          (Widget widget) =>
+              widget is Text &&
+              widget.data!.startsWith('Platform: ${Platform.operatingSystem}'),
         ),
         findsOneWidget,
       );

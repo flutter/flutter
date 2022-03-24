@@ -90,8 +90,7 @@ void main() {
 
     testWidgets('Material text field - default style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(
-        MaterialApp(
+      await tester.pumpWidget(MaterialApp(
           home: Scaffold(
             body: Center(
               child: SizedBox(
@@ -124,14 +123,13 @@ void main() {
       ));
       final Evaluation result = await textContrastGuideline.evaluate(tester);
       expect(result.passed, false);
-      expect(
-          result.reason,
-          'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), label: "this is a test",'
-          ' textDirection: ltr):\nExpected contrast ratio of at least '
-          '4.5 but found 1.17 for a font size of 14.0. The '
-          'computed light color was: Color(0xfffafafa), The computed dark color was:'
-          ' Color(0xffffeb3b)\n'
-          'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html');
+      expect(result.reason,
+        'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), label: "this is a test",'
+        ' textDirection: ltr):\nExpected contrast ratio of at least '
+        '4.5 but found 1.17 for a font size of 14.0. The '
+        'computed light color was: Color(0xfffafafa), The computed dark color was:'
+        ' Color(0xffffeb3b)\n'
+        'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html');
       handle.dispose();
     });
 
@@ -156,10 +154,37 @@ void main() {
 
     testWidgets('offscreen text is skipped', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(_boilerplate(Stack(
-        children: <Widget>[
-          Positioned(
-            left: -300.0,
+      await tester.pumpWidget(_boilerplate(
+        Stack(
+          children: <Widget>[
+            Positioned(
+              left: -300.0,
+              child: Container(
+                width: 200.0,
+                height: 200.0,
+                color: Colors.yellow,
+                child: const Text(
+                  'this is a test',
+                  style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+                ),
+              ),
+            ),
+          ],
+        )
+      ));
+
+      final Evaluation result = await textContrastGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+
+    testWidgets('Disabled button is excluded from text contrast guideline', (WidgetTester tester) async {
+      // Regression test https://github.com/flutter/flutter/issues/94428
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          ElevatedButton(
+            onPressed: null,
             child: Container(
               width: 200.0,
               height: 200.0,
@@ -170,31 +195,8 @@ void main() {
               ),
             ),
           ),
-        ],
-      )));
-
-      final Evaluation result = await textContrastGuideline.evaluate(tester);
-      expect(result.passed, true);
-      handle.dispose();
-    });
-
-    testWidgets('Disabled button is excluded from text contrast guideline', (WidgetTester tester) async {
-      // Regression test https://github.com/flutter/flutter/issues/94428
-      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(_boilerplate(
-        ElevatedButton(
-          onPressed: null,
-          child: Container(
-            width: 200.0,
-            height: 200.0,
-            color: Colors.yellow,
-            child: const Text(
-              'this is a test',
-              style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
-            ),
-          ),
-        ),
-      ));
+        )
+      );
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
     });
@@ -351,6 +353,7 @@ void main() {
       await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: findIcons)));
       await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: findTexts, minimumRatio: 3.0)));
     });
+
   });
 
   group('tap target size guideline', () {
@@ -361,7 +364,7 @@ void main() {
           width: 48.0,
           height: 48.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
@@ -376,7 +379,7 @@ void main() {
           width: 47.0,
           height: 48.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
@@ -391,7 +394,7 @@ void main() {
           width: 48.0,
           height: 47.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
@@ -408,7 +411,7 @@ void main() {
             width: 48.0,
             height: 48.0,
             child: GestureDetector(
-              onTap: () {},
+              onTap: () { },
             ),
           ),
         ),
@@ -424,17 +427,16 @@ void main() {
           width: 48.0,
           height: 47.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
       final Evaluation result = await androidTapTargetGuideline.evaluate(tester);
       expect(result.passed, false);
-      expect(
-          result.reason,
-          'SemanticsNode#4(Rect.fromLTRB(376.0, 276.5, 424.0, 323.5), actions: [tap]): expected tap '
-          'target size of at least Size(48.0, 48.0), but found Size(48.0, 47.0)\n'
-          'See also: https://support.google.com/accessibility/android/answer/7101858?hl=en');
+      expect(result.reason,
+        'SemanticsNode#4(Rect.fromLTRB(376.0, 276.5, 424.0, 323.5), actions: [tap]): expected tap '
+        'target size of at least Size(48.0, 48.0), but found Size(48.0, 47.0)\n'
+        'See also: https://support.google.com/accessibility/android/answer/7101858?hl=en');
       handle.dispose();
     });
 
@@ -444,7 +446,7 @@ void main() {
         width: 48.0,
         height: 47.0,
         child: GestureDetector(
-          onTap: () {},
+          onTap: () { },
         ),
       );
       await tester.pumpWidget(
@@ -517,22 +519,24 @@ void main() {
 
     testWidgets('Does not fail on mergedIntoParent child', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(_boilerplate(MergeSemantics(
-        child: Semantics(
-          container: true,
-          child: SizedBox(
-            width: 50.0,
-            height: 50.0,
-            child: Semantics(
-              container: true,
-              child: GestureDetector(
-                onTap: () {},
-                child: const SizedBox(width: 4.0, height: 4.0),
+      await tester.pumpWidget(_boilerplate(
+        MergeSemantics(
+          child: Semantics(
+            container: true,
+            child: SizedBox(
+              width: 50.0,
+              height: 50.0,
+              child: Semantics(
+                container: true,
+                child: GestureDetector(
+                  onTap: () { },
+                  child: const SizedBox(width: 4.0, height: 4.0),
+                ),
               ),
             ),
           ),
-        ),
-      )));
+        )
+      ));
 
       final Evaluation overlappingRightResult = await androidTapTargetGuideline.evaluate(tester);
       expect(overlappingRightResult.passed, true);
@@ -551,7 +555,8 @@ void main() {
                   ),
                   TextSpan(
                     text: 'flutter repo',
-                    recognizer: TapGestureRecognizer()..onTap = () {},
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () { },
                   ),
                 ],
               ),
@@ -573,7 +578,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
-        onTap: () {},
+        onTap: () { },
         label: 'test',
         child: const SizedBox(width: 10.0, height: 10.0),
       )));
@@ -585,7 +590,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
-        onLongPress: () {},
+        onLongPress: () { },
         label: '',
         child: const SizedBox(width: 10.0, height: 10.0),
       )));
@@ -598,7 +603,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
-        onTap: () {},
+        onTap: () { },
         label: '',
         child: const SizedBox(width: 10.0, height: 10.0),
       )));
@@ -611,7 +616,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
-        onLongPress: () {},
+        onLongPress: () { },
         label: '',
         child: Semantics(
           label: 'test',
@@ -626,17 +631,18 @@ void main() {
 
   testWidgets('regression test for material widget', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData.light(),
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        body: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            primary: const Color(0xFFFBBC04),
-            elevation: 0,
-          ),
-          onPressed: () {},
-          child: const Text('Button', style: TextStyle(color: Colors.black)),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(),
+        home: Scaffold(
+          backgroundColor: Colors.white,
+          body: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: const Color(0xFFFBBC04),
+              elevation: 0,
+            ),
+            onPressed: () {},
+            child: const Text('Button', style: TextStyle(color: Colors.black)),
         ),
       ),
     ));

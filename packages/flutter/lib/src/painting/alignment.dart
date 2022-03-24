@@ -88,11 +88,16 @@ abstract class AlignmentGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static AlignmentGeometry? lerp(AlignmentGeometry? a, AlignmentGeometry? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return b! * t;
-    if (b == null) return a * (1.0 - t);
-    if (a is Alignment && b is Alignment) return Alignment.lerp(a, b, t);
-    if (a is AlignmentDirectional && b is AlignmentDirectional) return AlignmentDirectional.lerp(a, b, t);
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b! * t;
+    if (b == null)
+      return a * (1.0 - t);
+    if (a is Alignment && b is Alignment)
+      return Alignment.lerp(a, b, t);
+    if (a is AlignmentDirectional && b is AlignmentDirectional)
+      return AlignmentDirectional.lerp(a, b, t);
     return _MixedAlignment(
       ui.lerpDouble(a._x, b._x, t)!,
       ui.lerpDouble(a._start, b._start, t)!,
@@ -113,14 +118,19 @@ abstract class AlignmentGeometry {
 
   @override
   String toString() {
-    if (_start == 0.0) return Alignment._stringify(_x, _y);
-    if (_x == 0.0) return AlignmentDirectional._stringify(_start, _y);
+    if (_start == 0.0)
+      return Alignment._stringify(_x, _y);
+    if (_x == 0.0)
+      return AlignmentDirectional._stringify(_start, _y);
     return '${Alignment._stringify(_x, _y)} + ${AlignmentDirectional._stringify(_start, 0.0)}';
   }
 
   @override
   bool operator ==(Object other) {
-    return other is AlignmentGeometry && other._x == _x && other._start == _start && other._y == _y;
+    return other is AlignmentGeometry
+        && other._x == _x
+        && other._start == _start
+        && other._y == _y;
   }
 
   @override
@@ -172,8 +182,8 @@ class Alignment extends AlignmentGeometry {
   ///
   /// The [x] and [y] arguments must not be null.
   const Alignment(this.x, this.y)
-      : assert(x != null),
-        assert(y != null);
+    : assert(x != null),
+      assert(y != null);
 
   /// The distance fraction in the horizontal direction.
   ///
@@ -230,7 +240,8 @@ class Alignment extends AlignmentGeometry {
 
   @override
   AlignmentGeometry add(AlignmentGeometry other) {
-    if (other is Alignment) return this + other;
+    if (other is Alignment)
+      return this + other;
     return super.add(other);
   }
 
@@ -322,9 +333,12 @@ class Alignment extends AlignmentGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static Alignment? lerp(Alignment? a, Alignment? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return Alignment(ui.lerpDouble(0.0, b!.x, t)!, ui.lerpDouble(0.0, b.y, t)!);
-    if (b == null) return Alignment(ui.lerpDouble(a.x, 0.0, t)!, ui.lerpDouble(a.y, 0.0, t)!);
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return Alignment(ui.lerpDouble(0.0, b!.x, t)!, ui.lerpDouble(0.0, b.y, t)!);
+    if (b == null)
+      return Alignment(ui.lerpDouble(a.x, 0.0, t)!, ui.lerpDouble(a.y, 0.0, t)!);
     return Alignment(ui.lerpDouble(a.x, b.x, t)!, ui.lerpDouble(a.y, b.y, t)!);
   }
 
@@ -332,17 +346,26 @@ class Alignment extends AlignmentGeometry {
   Alignment resolve(TextDirection? direction) => this;
 
   static String _stringify(double x, double y) {
-    if (x == -1.0 && y == -1.0) return 'Alignment.topLeft';
-    if (x == 0.0 && y == -1.0) return 'Alignment.topCenter';
-    if (x == 1.0 && y == -1.0) return 'Alignment.topRight';
-    if (x == -1.0 && y == 0.0) return 'Alignment.centerLeft';
-    if (x == 0.0 && y == 0.0) return 'Alignment.center';
-    if (x == 1.0 && y == 0.0) return 'Alignment.centerRight';
-    if (x == -1.0 && y == 1.0) return 'Alignment.bottomLeft';
-    if (x == 0.0 && y == 1.0) return 'Alignment.bottomCenter';
-    if (x == 1.0 && y == 1.0) return 'Alignment.bottomRight';
+    if (x == -1.0 && y == -1.0)
+      return 'Alignment.topLeft';
+    if (x == 0.0 && y == -1.0)
+      return 'Alignment.topCenter';
+    if (x == 1.0 && y == -1.0)
+      return 'Alignment.topRight';
+    if (x == -1.0 && y == 0.0)
+      return 'Alignment.centerLeft';
+    if (x == 0.0 && y == 0.0)
+      return 'Alignment.center';
+    if (x == 1.0 && y == 0.0)
+      return 'Alignment.centerRight';
+    if (x == -1.0 && y == 1.0)
+      return 'Alignment.bottomLeft';
+    if (x == 0.0 && y == 1.0)
+      return 'Alignment.bottomCenter';
+    if (x == 1.0 && y == 1.0)
+      return 'Alignment.bottomRight';
     return 'Alignment(${x.toStringAsFixed(1)}, '
-        '${y.toStringAsFixed(1)})';
+                     '${y.toStringAsFixed(1)})';
   }
 
   @override
@@ -365,8 +388,8 @@ class AlignmentDirectional extends AlignmentGeometry {
   ///
   /// The [start] and [y] arguments must not be null.
   const AlignmentDirectional(this.start, this.y)
-      : assert(start != null),
-        assert(y != null);
+    : assert(start != null),
+      assert(y != null);
 
   /// The distance fraction in the horizontal direction.
   ///
@@ -439,7 +462,8 @@ class AlignmentDirectional extends AlignmentGeometry {
 
   @override
   AlignmentGeometry add(AlignmentGeometry other) {
-    if (other is AlignmentDirectional) return this + other;
+    if (other is AlignmentDirectional)
+      return this + other;
     return super.add(other);
   }
 
@@ -490,9 +514,12 @@ class AlignmentDirectional extends AlignmentGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static AlignmentDirectional? lerp(AlignmentDirectional? a, AlignmentDirectional? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return AlignmentDirectional(ui.lerpDouble(0.0, b!.start, t)!, ui.lerpDouble(0.0, b.y, t)!);
-    if (b == null) return AlignmentDirectional(ui.lerpDouble(a.start, 0.0, t)!, ui.lerpDouble(a.y, 0.0, t)!);
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return AlignmentDirectional(ui.lerpDouble(0.0, b!.start, t)!, ui.lerpDouble(0.0, b.y, t)!);
+    if (b == null)
+      return AlignmentDirectional(ui.lerpDouble(a.start, 0.0, t)!, ui.lerpDouble(a.y, 0.0, t)!);
     return AlignmentDirectional(ui.lerpDouble(a.start, b.start, t)!, ui.lerpDouble(a.y, b.y, t)!);
   }
 
@@ -508,17 +535,26 @@ class AlignmentDirectional extends AlignmentGeometry {
   }
 
   static String _stringify(double start, double y) {
-    if (start == -1.0 && y == -1.0) return 'AlignmentDirectional.topStart';
-    if (start == 0.0 && y == -1.0) return 'AlignmentDirectional.topCenter';
-    if (start == 1.0 && y == -1.0) return 'AlignmentDirectional.topEnd';
-    if (start == -1.0 && y == 0.0) return 'AlignmentDirectional.centerStart';
-    if (start == 0.0 && y == 0.0) return 'AlignmentDirectional.center';
-    if (start == 1.0 && y == 0.0) return 'AlignmentDirectional.centerEnd';
-    if (start == -1.0 && y == 1.0) return 'AlignmentDirectional.bottomStart';
-    if (start == 0.0 && y == 1.0) return 'AlignmentDirectional.bottomCenter';
-    if (start == 1.0 && y == 1.0) return 'AlignmentDirectional.bottomEnd';
+    if (start == -1.0 && y == -1.0)
+      return 'AlignmentDirectional.topStart';
+    if (start == 0.0 && y == -1.0)
+      return 'AlignmentDirectional.topCenter';
+    if (start == 1.0 && y == -1.0)
+      return 'AlignmentDirectional.topEnd';
+    if (start == -1.0 && y == 0.0)
+      return 'AlignmentDirectional.centerStart';
+    if (start == 0.0 && y == 0.0)
+      return 'AlignmentDirectional.center';
+    if (start == 1.0 && y == 0.0)
+      return 'AlignmentDirectional.centerEnd';
+    if (start == -1.0 && y == 1.0)
+      return 'AlignmentDirectional.bottomStart';
+    if (start == 0.0 && y == 1.0)
+      return 'AlignmentDirectional.bottomCenter';
+    if (start == 1.0 && y == 1.0)
+      return 'AlignmentDirectional.bottomEnd';
     return 'AlignmentDirectional(${start.toStringAsFixed(1)}, '
-        '${y.toStringAsFixed(1)})';
+                                '${y.toStringAsFixed(1)})';
   }
 
   @override
@@ -613,8 +649,8 @@ class TextAlignVertical {
   /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
   const TextAlignVertical({
     required this.y,
-  })  : assert(y != null),
-        assert(y >= -1.0 && y <= 1.0);
+  }) : assert(y != null),
+       assert(y >= -1.0 && y <= 1.0);
 
   /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
   /// locations of the top and bottom of the input box.
@@ -623,10 +659,8 @@ class TextAlignVertical {
   /// Aligns a TextField's input Text with the topmost location within a
   /// TextField's input box.
   static const TextAlignVertical top = TextAlignVertical(y: -1.0);
-
   /// Aligns a TextField's input Text to the center of the TextField.
   static const TextAlignVertical center = TextAlignVertical(y: 0.0);
-
   /// Aligns a TextField's input Text with the bottommost location within a
   /// TextField.
   static const TextAlignVertical bottom = TextAlignVertical(y: 1.0);

@@ -103,14 +103,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           dragStartBehavior: DragStartBehavior.down,
-          children: List<Widget>.generate(
-              250,
-              (int i) => GestureDetector(
-                    onTap: () {
-                      log.add('tap $i');
-                    },
-                    child: Text('$i', style: testFont),
-                  )),
+          children: List<Widget>.generate(250, (int i) => GestureDetector(
+            onTap: () { log.add('tap $i'); },
+            child: Text('$i', style: testFont),
+          )),
         ),
       ),
     );
@@ -137,14 +133,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           dragStartBehavior: DragStartBehavior.down,
-          children: List<Widget>.generate(
-              250,
-              (int i) => GestureDetector(
-                    onTap: () {
-                      log.add('tap $i');
-                    },
-                    child: Text('$i', style: testFont),
-                  )),
+          children: List<Widget>.generate(250, (int i) => GestureDetector(
+            onTap: () { log.add('tap $i'); },
+            child: Text('$i', style: testFont),
+          )),
         ),
       ),
     );

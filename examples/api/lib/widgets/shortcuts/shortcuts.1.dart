@@ -102,7 +102,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           child: Column(
             children: <Widget>[
               const Text('Add to the counter by pressing the up arrow key'),
-              const Text('Subtract from the counter by pressing the down arrow key'),
+              const Text(
+                  'Subtract from the counter by pressing the down arrow key'),
               AnimatedBuilder(
                 animation: model,
                 builder: (BuildContext context, Widget? child) {

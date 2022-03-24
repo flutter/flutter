@@ -66,7 +66,8 @@ Future<void> main() async {
         final Finder demoItem = find.text(demo.title);
         print('Scrolling to "${demo.title}"...');
         await controller.scrollIntoView(demoItem, alignment: 0.5);
-        if (_kSkippedDemoTitles.contains(demo.title)) continue;
+        if (_kSkippedDemoTitles.contains(demo.title))
+          continue;
         for (int i = 0; i < 2; i += 1) {
           print('Tapping "${demo.title}"...');
           await controller.tap(demoItem); // Launch the demo
@@ -90,8 +91,10 @@ Future<void> main() async {
 final Finder backFinder = find.byElementPredicate(
   (Element element) {
     final Widget widget = element.widget;
-    if (widget is Tooltip) return widget.message == 'Back';
-    if (widget is CupertinoNavigationBarBackButton) return true;
+    if (widget is Tooltip)
+      return widget.message == 'Back';
+    if (widget is CupertinoNavigationBarBackButton)
+      return true;
     return false;
   },
   description: 'Material or Cupertino back button',
@@ -119,20 +122,21 @@ class _LiveWidgetController extends LiveWidgetController {
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
   Future<Finder> _waitForElement(Finder finder) async {
-    if (frameSync) await _waitUntilFrame(() => binding.transientCallbackCount == 0);
+    if (frameSync)
+      await _waitUntilFrame(() => binding.transientCallbackCount == 0);
     await _waitUntilFrame(() => finder.precache());
-    if (frameSync) await _waitUntilFrame(() => binding.transientCallbackCount == 0);
+    if (frameSync)
+      await _waitUntilFrame(() => binding.transientCallbackCount == 0);
     return finder;
   }
 
   @override
-  Future<void> tap(Finder finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) async {
+  Future<void> tap(Finder finder, { int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true }) async {
     await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons, warnIfMissed: warnIfMissed);
   }
 
   Future<void> scrollIntoView(Finder finder, {required double alignment}) async {
     final Finder target = await _waitForElement(finder);
-    await Scrollable.ensureVisible(target.evaluate().single,
-        duration: const Duration(milliseconds: 100), alignment: alignment);
+    await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: alignment);
   }
 }

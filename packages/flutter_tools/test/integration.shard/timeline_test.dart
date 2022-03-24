@@ -42,9 +42,11 @@ void main() {
     final Timer timer = Timer(const Duration(minutes: 5), () {
       // This message is intended to show up in CI logs.
       // ignore: avoid_print
-      print('Warning: test isolate is still active after 5 minutes. This is likely an '
-          'app-not-responding error and not a flake. See https://github.com/flutter/flutter/issues/79498 '
-          'for the bug this test is attempting to exercise.');
+      print(
+        'Warning: test isolate is still active after 5 minutes. This is likely an '
+        'app-not-responding error and not a flake. See https://github.com/flutter/flutter/issues/79498 '
+        'for the bug this test is attempting to exercise.'
+      );
     });
 
     // Subscribe to all available streams.
@@ -61,6 +63,7 @@ void main() {
       vmService.streamListen(EventStreams.kStdout),
       vmService.streamListen(EventStreams.kStderr),
     ]);
+
 
     // Verify that the app can be interacted with by querying the brightness
     // for 30 seconds. Once this time has elapsed, wait for any pending requests and

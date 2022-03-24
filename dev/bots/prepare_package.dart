@@ -209,9 +209,8 @@ class ArchiveCreator {
       subprocessOutput: subprocessOutput,
       platform: platform,
     )..environment['PUB_CACHE'] = path.join(
-        flutterRoot.absolute.path,
-        '.pub-cache',
-      );
+      flutterRoot.absolute.path, '.pub-cache',
+    );
     final String flutterExecutable = path.join(
       flutterRoot.absolute.path,
       'bin',
@@ -253,10 +252,11 @@ class ArchiveCreator {
     required this.httpReader,
     required String flutterExecutable,
     required String dartExecutable,
-  })  : assert(revision.length == 40),
-        _processRunner = processRunner,
-        _flutter = flutterExecutable,
-        _dart = dartExecutable;
+  }) :
+    assert(revision.length == 40),
+    _processRunner = processRunner,
+    _flutter = flutterExecutable,
+    _dart = dartExecutable;
 
   /// The platform to use for the environment and determining which
   /// platform we're running on.
@@ -299,7 +299,8 @@ class ArchiveCreator {
 
   late final Future<String> _dartArch = (() async {
     // Parse 'arch' out of a string like '... "os_arch"\n'.
-    return (await _runDart(<String>['--version'])).trim().split(' ').last.replaceAll('"', '').split('_')[1];
+    return (await _runDart(<String>['--version']))
+        .trim().split(' ').last.replaceAll('"', '').split('_')[1];
   })();
 
   /// Get the name of the channel as a string.
@@ -395,9 +396,11 @@ class ArchiveCreator {
       try {
         gitVersion = await _runGit(<String>['describe', '--tags', '--exact-match', revision]);
       } on PreparePackageException catch (exception) {
-        throw PreparePackageException('Git error when checking for a version tag attached to revision $revision.\n'
-            'Perhaps there is no tag at that revision?:\n'
-            '$exception');
+        throw PreparePackageException(
+          'Git error when checking for a version tag attached to revision $revision.\n'
+          'Perhaps there is no tag at that revision?:\n'
+          '$exception'
+        );
       }
     } else {
       gitVersion = await _runGit(<String>['describe', '--tags', '--abbrev=0', revision]);
@@ -474,7 +477,6 @@ class ArchiveCreator {
       '--',
       '**/.packages',
     ]);
-
     /// Remove package_config files and any contents in .dart_tool
     await _runGit(<String>[
       'clean',
@@ -688,10 +690,10 @@ class ArchivePublisher {
           entry,
       newEntry,
     ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {
-        final DateTime aDate = DateTime.parse(a['release_date'] as String);
-        final DateTime bDate = DateTime.parse(b['release_date'] as String);
-        return bDate.compareTo(aDate);
-      });
+      final DateTime aDate = DateTime.parse(a['release_date'] as String);
+      final DateTime bDate = DateTime.parse(b['release_date'] as String);
+      return bDate.compareTo(aDate);
+    });
     return jsonData;
   }
 

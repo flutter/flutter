@@ -38,9 +38,7 @@ const List<String> kReservedKotlinKeywords = <String>['when', 'in'];
 /// Files in the destination will contain none of the '.tmpl', '.copy.tmpl',
 /// 'img.tmpl', or '-<language>.tmpl' extensions.
 class Template {
-  factory Template(
-    Directory templateSource,
-    Directory? imageSourceDir, {
+  factory Template(Directory templateSource, Directory? imageSourceDir, {
     required FileSystem fileSystem,
     required Logger logger,
     required TemplateRenderer templateRenderer,
@@ -57,16 +55,15 @@ class Template {
   }
 
   Template._(
-    List<Directory> templateSources,
-    this.imageSourceDirectories, {
+    List<Directory> templateSources, this.imageSourceDirectories, {
     required FileSystem fileSystem,
     required Logger logger,
     required TemplateRenderer templateRenderer,
     required Set<Uri>? templateManifest,
-  })  : _fileSystem = fileSystem,
-        _logger = logger,
-        _templateRenderer = templateRenderer,
-        _templateManifest = templateManifest ?? <Uri>{} {
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _templateRenderer = templateRenderer,
+       _templateManifest = templateManifest ?? <Uri>{} {
     for (final Directory sourceDirectory in templateSources) {
       if (!sourceDirectory.existsSync()) {
         throwToolExit('Template source directory does not exist: ${sourceDirectory.absolute.path}');
@@ -75,7 +72,8 @@ class Template {
 
     final Map<FileSystemEntity, Directory> templateFiles = <FileSystemEntity, Directory>{
       for (final Directory sourceDirectory in templateSources)
-        for (final FileSystemEntity entity in sourceDirectory.listSync(recursive: true)) entity: sourceDirectory,
+        for (final FileSystemEntity entity in sourceDirectory.listSync(recursive: true))
+          entity: sourceDirectory,
     };
     for (final FileSystemEntity entity in templateFiles.keys.whereType<File>()) {
       if (_templateManifest.isNotEmpty && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
@@ -84,7 +82,8 @@ class Template {
         continue;
       }
 
-      final String relativePath = fileSystem.path.relative(entity.path, from: templateFiles[entity]!.absolute.path);
+      final String relativePath = fileSystem.path.relative(entity.path,
+          from: templateFiles[entity]!.absolute.path);
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
@@ -94,8 +93,7 @@ class Template {
     }
   }
 
-  static Future<Template> fromName(
-    String name, {
+  static Future<Template> fromName(String name, {
     required FileSystem fileSystem,
     required Set<Uri>? templateManifest,
     required Logger logger,
@@ -114,9 +112,7 @@ class Template {
     );
   }
 
-  static Future<Template> merged(
-    List<String> names,
-    Directory directory, {
+  static Future<Template> merged(List<String> names, Directory directory, {
     required FileSystem fileSystem,
     required Set<Uri> templateManifest,
     required Logger logger,
@@ -124,7 +120,10 @@ class Template {
   }) async {
     // All named templates are placed in the 'templates' directory
     return Template._(
-      <Directory>[for (final String name in names) _templateDirectoryInPackage(name, fileSystem)],
+      <Directory>[
+        for (final String name in names)
+          _templateDirectoryInPackage(name, fileSystem)
+      ],
       <Directory>[
         for (final String name in names)
           if ((await _templateImageDirectory(name, fileSystem, logger)).existsSync())
@@ -149,7 +148,7 @@ class Template {
   final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
   final List<Directory> imageSourceDirectories;
 
-  final Map<String /* relative */, String /* absolute source */ > _templateFilePaths = <String, String>{};
+  final Map<String /* relative */, String /* absolute source */> _templateFilePaths = <String, String>{};
 
   /// Render the template into [directory].
   ///
@@ -228,15 +227,15 @@ class Template {
       final String destinationDirPath = destination.absolute.path;
       final String pathSeparator = _fileSystem.path.separator;
       String finalDestinationPath = _fileSystem.path
-          .join(destinationDirPath, relativeDestinationPath)
-          .replaceAll(copyTemplateExtension, '')
-          .replaceAll(imageTemplateExtension, '')
-          .replaceAll(testTemplateExtension, '')
-          .replaceAll(templateExtension, '');
+        .join(destinationDirPath, relativeDestinationPath)
+        .replaceAll(copyTemplateExtension, '')
+        .replaceAll(imageTemplateExtension, '')
+        .replaceAll(testTemplateExtension, '')
+        .replaceAll(templateExtension, '');
 
       if (android != null && android && androidIdentifier != null) {
-        finalDestinationPath =
-            finalDestinationPath.replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
+        finalDestinationPath = finalDestinationPath
+            .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }
       if (projectName != null) {
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
@@ -351,26 +350,32 @@ class Template {
 }
 
 Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
-  final String templatesDir = fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates');
+  final String templatesDir = fileSystem.path.join(Cache.flutterRoot!,
+      'packages', 'flutter_tools', 'templates');
   return fileSystem.directory(fileSystem.path.join(templatesDir, name));
 }
 
 // Returns the directory containing the 'name' template directory in
 // flutter_template_images, to resolve image placeholder against.
 Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Logger logger) async {
-  final String toolPackagePath = fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
+  final String toolPackagePath = fileSystem.path.join(
+      Cache.flutterRoot!, 'packages', 'flutter_tools');
   final String packageFilePath = fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: logger,
   );
   final Uri? imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
-  return fileSystem.directory(imagePackageLibDir).parent.childDirectory('templates').childDirectory(name);
+  return fileSystem.directory(imagePackageLibDir)
+      .parent
+      .childDirectory('templates')
+      .childDirectory(name);
 }
 
 String _escapeKotlinKeywords(String androidIdentifier) {
   final List<String> segments = androidIdentifier.split('.');
-  final List<String> correctedSegments =
-      segments.map((String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment).toList();
+  final List<String> correctedSegments = segments.map(
+    (String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment
+  ).toList();
   return correctedSegments.join('.');
 }

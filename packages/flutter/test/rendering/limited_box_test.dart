@@ -142,11 +142,11 @@ void main() {
   test('LimitedBox: no child use parent', () {
     RenderBox box;
     final RenderBox parent = RenderConstrainedOverflowBox(
-      minWidth: 10.0,
-      child: box = RenderLimitedBox(
-        maxWidth: 100.0,
-        maxHeight: 200.0,
-      ),
+        minWidth: 10.0,
+        child: box = RenderLimitedBox(
+          maxWidth: 100.0,
+          maxHeight: 200.0,
+        ),
     );
     layout(parent);
     expect(box.size, const Size(10.0, 600.0));

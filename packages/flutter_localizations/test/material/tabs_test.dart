@@ -9,7 +9,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Test semantics of TabPageSelector in pt-BR', (WidgetTester tester) async {
+  testWidgets('Test semantics of TabPageSelector in pt-BR',
+      (WidgetTester tester) async {
     final TabController controller = TabController(
       vsync: const TestVSync(),
       length: 2,
@@ -48,7 +49,8 @@ void main() {
 
     final SemanticsHandle handle = tester.ensureSemantics();
 
-    expect(tester.getSemantics(find.byType(TabPageSelector)), matchesSemantics(label: 'Guia 1 de 2'));
+    expect(tester.getSemantics(find.byType(TabPageSelector)),
+        matchesSemantics(label: 'Guia 1 de 2'));
 
     handle.dispose();
   });

@@ -249,7 +249,8 @@ void main() {
     expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
     expect(find.text('Paste'), findsNothing);
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     // Make sure it does not paint caret for a period of time.
@@ -319,7 +320,8 @@ void main() {
 
     expect(find.text('initialValue'), findsOneWidget);
 
-    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(CupertinoTextFormFieldRow));
+    final FormFieldState<String> state = tester
+        .state<FormFieldState<String>>(find.byType(CupertinoTextFormFieldRow));
     state.didChange('changedValue');
 
     expect(find.text('initialValue'), findsNothing);
@@ -344,7 +346,8 @@ void main() {
       ),
     );
 
-    state = tester.state<FormFieldState<String>>(find.byType(CupertinoTextFormFieldRow));
+    state = tester
+        .state<FormFieldState<String>>(find.byType(CupertinoTextFormFieldRow));
 
     await tester.enterText(find.byType(CupertinoTextField), 'Soup');
 
@@ -362,7 +365,8 @@ void main() {
       ),
     );
 
-    final CupertinoTextField widget = tester.widget(find.byType(CupertinoTextField));
+    final CupertinoTextField widget =
+        tester.widget(find.byType(CupertinoTextField));
     expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
   });
 

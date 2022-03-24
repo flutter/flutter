@@ -119,7 +119,8 @@ class Feedback {
   ///  * [forTap] to just trigger the platform-specific feedback without wrapping
   ///    a [GestureTapCallback].
   static GestureTapCallback? wrapForTap(GestureTapCallback? callback, BuildContext context) {
-    if (callback == null) return null;
+    if (callback == null)
+      return null;
     return () {
       Feedback.forTap(context);
       callback();
@@ -161,7 +162,8 @@ class Feedback {
   ///  * [forLongPress] to just trigger the platform-specific feedback without
   ///    wrapping a [GestureLongPressCallback].
   static GestureLongPressCallback? wrapForLongPress(GestureLongPressCallback? callback, BuildContext context) {
-    if (callback == null) return null;
+    if (callback == null)
+      return null;
     return () {
       Feedback.forLongPress(context);
       callback();

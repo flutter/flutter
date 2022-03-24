@@ -65,8 +65,7 @@ class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidg
 
 /// A render object that demonstrates the usage of [SlottedContainerRenderObjectMixin]
 /// by providing slots for two children that will be arranged diagonally.
-class RenderDiagonal extends RenderBox
-    with SlottedContainerRenderObjectMixin<DiagonalSlot>, DebugOverflowIndicatorMixin {
+class RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<DiagonalSlot>, DebugOverflowIndicatorMixin {
   RenderDiagonal({Color? backgroundColor}) : _backgroundColor = backgroundColor;
 
   // Getters and setters to configure the [RenderObject] with the configuration
@@ -97,8 +96,10 @@ class RenderDiagonal extends RenderBox
   @override
   Iterable<RenderBox> get children {
     return <RenderBox>[
-      if (_topLeft != null) _topLeft!,
-      if (_bottomRight != null) _bottomRight!,
+      if (_topLeft != null)
+        _topLeft!,
+      if (_bottomRight != null)
+        _bottomRight!,
     ];
   }
 
@@ -152,7 +153,8 @@ class RenderDiagonal extends RenderBox
     if (backgroundColor != null) {
       context.canvas.drawRect(
         offset & size,
-        Paint()..color = backgroundColor!,
+        Paint()
+          ..color = backgroundColor!,
       );
     }
 
@@ -187,7 +189,7 @@ class RenderDiagonal extends RenderBox
   // HIT TEST
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     for (final RenderBox child in children) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
@@ -220,8 +222,7 @@ class RenderDiagonal extends RenderBox
   double computeMaxIntrinsicWidth(double height) {
     final double topLeftWidth = _topLeft?.getMaxIntrinsicWidth(double.infinity) ?? 0;
     final double bottomRightWith = _bottomRight?.getMaxIntrinsicWidth(double.infinity) ?? 0;
-    return topLeftWidth + bottomRightWith;
-  }
+    return topLeftWidth + bottomRightWith;  }
 
   @override
   double computeMinIntrinsicHeight(double width) {

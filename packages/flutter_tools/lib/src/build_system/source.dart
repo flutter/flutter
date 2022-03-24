@@ -23,7 +23,7 @@ abstract class ResolvedFiles {
 /// Collects sources for a [Target] into a single list of [FileSystemEntities].
 class SourceVisitor implements ResolvedFiles {
   /// Create a new [SourceVisitor] from an [Environment].
-  SourceVisitor(this.environment, [this.inputs = true]);
+  SourceVisitor(this.environment, [ this.inputs = true ]);
 
   /// The current environment.
   final Environment environment;
@@ -70,10 +70,10 @@ class SourceVisitor implements ResolvedFiles {
 
   Iterable<File> _processList(String rawText) {
     return rawText
-        // Put every file on right-hand side on the separate line
+    // Put every file on right-hand side on the separate line
         .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
         .split('\n')
-        // Expand escape sequences, so that '\ ', for example,ß becomes ' '
+    // Expand escape sequences, so that '\ ', for example,ß becomes ' '
         .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)!).trim())
         .where((String path) => path.isNotEmpty)
         .toSet()
@@ -99,20 +99,25 @@ class SourceVisitor implements ResolvedFiles {
     // to resolve it to, error out.
     switch (rawParts.first) {
       case Environment.kProjectDirectory:
-        segments.addAll(environment.fileSystem.path.split(environment.projectDir.resolveSymbolicLinksSync()));
+        segments.addAll(
+          environment.fileSystem.path.split(environment.projectDir.resolveSymbolicLinksSync()));
         break;
       case Environment.kBuildDirectory:
-        segments.addAll(environment.fileSystem.path.split(environment.buildDir.resolveSymbolicLinksSync()));
+        segments.addAll(environment.fileSystem.path.split(
+          environment.buildDir.resolveSymbolicLinksSync()));
         break;
       case Environment.kCacheDirectory:
-        segments.addAll(environment.fileSystem.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
+        segments.addAll(
+          environment.fileSystem.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
         break;
       case Environment.kFlutterRootDirectory:
         // flutter root will not contain a symbolic link.
-        segments.addAll(environment.fileSystem.path.split(environment.flutterRootDir.absolute.path));
+        segments.addAll(
+          environment.fileSystem.path.split(environment.flutterRootDir.absolute.path));
         break;
       case Environment.kOutputDirectory:
-        segments.addAll(environment.fileSystem.path.split(environment.outputDir.resolveSymbolicLinksSync()));
+        segments.addAll(
+          environment.fileSystem.path.split(environment.outputDir.resolveSymbolicLinksSync()));
         break;
       default:
         throw InvalidPatternException(pattern);
@@ -123,7 +128,8 @@ class SourceVisitor implements ResolvedFiles {
       if (optional && !environment.fileSystem.isFileSync(filePath)) {
         return;
       }
-      sources.add(environment.fileSystem.file(environment.fileSystem.path.normalize(filePath)));
+      sources.add(environment.fileSystem.file(
+        environment.fileSystem.path.normalize(filePath)));
       return;
     }
     // Perform a simple match by splitting the wildcard containing file one
@@ -145,7 +151,8 @@ class SourceVisitor implements ResolvedFiles {
       if (wildcardSegments.isEmpty) {
         sources.add(environment.fileSystem.file(entity.absolute));
       } else if (wildcardSegments.length == 1) {
-        if (filename.startsWith(wildcardSegments[0]) || filename.endsWith(wildcardSegments[0])) {
+        if (filename.startsWith(wildcardSegments[0]) ||
+            filename.endsWith(wildcardSegments[0])) {
           sources.add(environment.fileSystem.file(entity.absolute));
         }
       } else if (filename.startsWith(wildcardSegments[0])) {
@@ -165,16 +172,20 @@ class SourceVisitor implements ResolvedFiles {
   void visitArtifact(Artifact artifact, TargetPlatform? platform, BuildMode? mode) {
     // This is not a local engine.
     if (environment.engineVersion != null) {
-      sources.add(
-        environment.flutterRootDir.childDirectory('bin').childDirectory('internal').childFile('engine.version'),
+      sources.add(environment.flutterRootDir
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('engine.version'),
       );
       return;
     }
-    final String path = environment.artifacts.getArtifactPath(artifact, platform: platform, mode: mode);
+    final String path = environment.artifacts
+      .getArtifactPath(artifact, platform: platform, mode: mode);
     if (environment.fileSystem.isDirectorySync(path)) {
       sources.addAll(<File>[
         for (FileSystemEntity entity in environment.fileSystem.directory(path).listSync(recursive: true))
-          if (entity is File) entity,
+          if (entity is File)
+            entity,
       ]);
       return;
     }
@@ -190,8 +201,10 @@ class SourceVisitor implements ResolvedFiles {
   void visitHostArtifact(HostArtifact artifact) {
     // This is not a local engine.
     if (environment.engineVersion != null) {
-      sources.add(
-        environment.flutterRootDir.childDirectory('bin').childDirectory('internal').childFile('engine.version'),
+      sources.add(environment.flutterRootDir
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('engine.version'),
       );
       return;
     }
@@ -199,7 +212,8 @@ class SourceVisitor implements ResolvedFiles {
     if (entity is Directory) {
       sources.addAll(<File>[
         for (FileSystemEntity entity in entity.listSync(recursive: true))
-          if (entity is File) entity,
+          if (entity is File)
+            entity,
       ]);
       return;
     }
@@ -211,7 +225,7 @@ class SourceVisitor implements ResolvedFiles {
 abstract class Source {
   /// This source is a file URL which contains some references to magic
   /// environment variables.
-  const factory Source.pattern(String pattern, {bool optional}) = _PatternSource;
+  const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
 
   /// The source is provided by an [Artifact].
   ///
@@ -237,7 +251,7 @@ abstract class Source {
 }
 
 class _PatternSource implements Source {
-  const _PatternSource(this.value, {this.optional = false});
+  const _PatternSource(this.value, { this.optional = false });
 
   final String value;
   final bool optional;
@@ -250,7 +264,7 @@ class _PatternSource implements Source {
 }
 
 class _ArtifactSource implements Source {
-  const _ArtifactSource(this.artifact, {this.platform, this.mode});
+  const _ArtifactSource(this.artifact, { this.platform, this.mode });
 
   final Artifact artifact;
   final TargetPlatform? platform;

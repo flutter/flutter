@@ -93,11 +93,14 @@ FakeCommand _missingBinaryCommand(String binary) {
 
 FakeCommand _missingBinaryException(String binary) {
   return FakeCommand(
-      command: <String>[binary, '--version'], exitCode: 1, exception: ProcessException(binary, <String>[]));
+    command: <String>[binary, '--version'],
+    exitCode: 1,
+    exception: ProcessException(binary, <String>[])
+  );
 }
 
 void main() {
-  testWithoutContext('Full validation when everything is available at the necessary version', () async {
+  testWithoutContext('Full validation when everything is available at the necessary version',() async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),

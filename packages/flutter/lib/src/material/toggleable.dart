@@ -183,7 +183,8 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// visual representation of the Toggleable matches the current [value].
   void animateToValue() {
     if (tristate) {
-      if (value == null) _positionController.value = 0.0;
+      if (value == null)
+        _positionController.value = 0.0;
       if (value ?? true)
         _positionController.forward();
       else
@@ -222,7 +223,8 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   }
 
   void _handleTap([Intent? _]) {
-    if (!isInteractive) return;
+    if (!isInteractive)
+      return;
     switch (value) {
       case false:
         onChanged!(true);
@@ -239,9 +241,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 
   void _handleTapEnd([TapUpDetails? _]) {
     if (_downPosition != null) {
-      setState(() {
-        _downPosition = null;
-      });
+      setState(() { _downPosition = null; });
     }
     _reactionController.reverse();
   }
@@ -249,9 +249,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   bool _focused = false;
   void _handleFocusHighlightChanged(bool focused) {
     if (focused != _focused) {
-      setState(() {
-        _focused = focused;
-      });
+      setState(() { _focused = focused; });
       if (focused) {
         _reactionFocusFadeController.forward();
       } else {
@@ -263,9 +261,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   bool _hovering = false;
   void _handleHoverChanged(bool hovering) {
     if (hovering != _hovering) {
-      setState(() {
-        _hovering = hovering;
-      });
+      setState(() { _hovering = hovering; });
       if (hovering) {
         _reactionHoverFadeController.forward();
       } else {
@@ -283,11 +279,11 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///  * [MaterialState.focused], if the Toggleable has input focus
   ///  * [MaterialState.selected], if [value] is true or null
   Set<MaterialState> get states => <MaterialState>{
-        if (!isInteractive) MaterialState.disabled,
-        if (_hovering) MaterialState.hovered,
-        if (_focused) MaterialState.focused,
-        if (value ?? true) MaterialState.selected,
-      };
+    if (!isInteractive) MaterialState.disabled,
+    if (_hovering) MaterialState.hovered,
+    if (_focused) MaterialState.focused,
+    if (value ?? true) MaterialState.selected,
+  };
 
   /// Typically wraps a `painter` that draws the actual visuals of the
   /// Toggleable with logic to toggle it.
@@ -564,13 +560,15 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
         begin: 0.0,
         end: splashRadius,
       );
-      final double reactionRadius =
-          isFocused || isHovered ? splashRadius : radialReactionRadiusTween.evaluate(reaction);
+      final double reactionRadius = isFocused || isHovered
+          ? splashRadius
+          : radialReactionRadiusTween.evaluate(reaction);
       if (reactionRadius > 0.0) {
         canvas.drawCircle(center + offset, reactionRadius, reactionPaint);
       }
     }
   }
+
 
   @override
   void dispose() {

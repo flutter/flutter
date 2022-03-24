@@ -9,8 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Future<void> setAppLifeCycleState(AppLifecycleState state) async {
-    final ByteData? message = const StringCodec().encodeMessage(state.toString());
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    final ByteData? message =
+        const StringCodec().encodeMessage(state.toString());
+    await ServicesBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/lifecycle', message, (_) {});
   }
 
   testWidgets('Ticker mute control test', (WidgetTester tester) async {
@@ -99,7 +101,7 @@ void main() {
     late Ticker ticker;
 
     void testFunction() {
-      ticker = Ticker((Duration _) {});
+      ticker = Ticker((Duration _) { });
     }
 
     testFunction();

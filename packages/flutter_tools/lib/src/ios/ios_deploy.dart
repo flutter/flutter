@@ -32,11 +32,11 @@ class IOSDeploy {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-  })  : _platform = platform,
-        _cache = cache,
-        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-        _logger = logger,
-        _binaryPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
+  }) : _platform = platform,
+       _cache = cache,
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+       _logger = logger,
+       _binaryPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
 
   final Cache _cache;
   final String _binaryPath;
@@ -87,7 +87,7 @@ class IOSDeploy {
   Future<int> installApp({
     required String deviceId,
     required String bundlePath,
-    required List<String> launchArguments,
+    required List<String>launchArguments,
     required IOSDeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
   }) async {
@@ -102,7 +102,8 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != IOSDeviceConnectionInterface.network) '--no-wifi',
+      if (interfaceType != IOSDeviceConnectionInterface.network)
+        '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
         launchArguments.join(' '),
@@ -145,7 +146,8 @@ class IOSDeploy {
         appDeltaDirectory.path,
       ],
       '--debug',
-      if (interfaceType != IOSDeviceConnectionInterface.network) '--no-wifi',
+      if (interfaceType != IOSDeviceConnectionInterface.network)
+        '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
         launchArguments.join(' '),
@@ -180,7 +182,8 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != IOSDeviceConnectionInterface.network) '--no-wifi',
+      if (interfaceType != IOSDeviceConnectionInterface.network)
+        '--no-wifi',
       '--justlaunch',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
@@ -243,7 +246,7 @@ class IOSDeployDebugger {
     required ProcessUtils processUtils,
     required List<String> launchCommand,
     required Map<String, String> iosDeployEnv,
-  })  : _processUtils = processUtils,
+  }) : _processUtils = processUtils,
         _logger = logger,
         _launchCommand = launchCommand,
         _iosDeployEnv = iosDeployEnv,
@@ -472,7 +475,8 @@ String _monitorIOSDeployFailure(String stdout, Logger logger) {
     logger.printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
 Your device is locked. Unlock your device first before running.
-═══════════════════════════════════════════════════════════════════════════════════''', emphasis: true);
+═══════════════════════════════════════════════════════════════════════════════════''',
+        emphasis: true);
   } else if (stdout.contains(unknownAppLaunchError)) {
     logger.printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
@@ -480,7 +484,8 @@ Error launching app. Try launching from within Xcode via:
     open ios/Runner.xcworkspace
 
 Your Xcode version may be too old for your iOS version.
-═══════════════════════════════════════════════════════════════════════════════════''', emphasis: true);
+═══════════════════════════════════════════════════════════════════════════════════''',
+        emphasis: true);
   }
 
   return stdout;

@@ -43,11 +43,11 @@ class BuildInfo {
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
-  })  : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
-        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
-        fileSystemRoots = fileSystemRoots ?? const <String>[],
-        dartDefines = dartDefines ?? const <String>[],
-        dartExperiments = dartExperiments ?? const <String>[];
+  }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
+       extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
+       fileSystemRoots = fileSystemRoots ?? const <String>[],
+       dartDefines = dartDefines ?? const <String>[],
+       dartExperiments = dartExperiments ?? const <String>[];
 
   final BuildMode mode;
 
@@ -166,8 +166,7 @@ class BuildInfo {
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
-  static const BuildInfo jitRelease =
-      BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
   static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
 
   /// Returns whether a debug build is requested.
@@ -216,17 +215,28 @@ class BuildInfo {
     // the Environment map.
     return <String, String>{
       kBuildMode: getNameForBuildMode(mode),
-      if (dartDefines.isNotEmpty) kDartDefines: encodeDartDefines(dartDefines),
-      if (dartObfuscation != null) kDartObfuscation: dartObfuscation.toString(),
-      if (extraFrontEndOptions.isNotEmpty) kExtraFrontEndOptions: extraFrontEndOptions.join(','),
-      if (extraGenSnapshotOptions.isNotEmpty) kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
-      if (splitDebugInfoPath != null) kSplitDebugInfo: splitDebugInfoPath!,
-      if (trackWidgetCreation != null) kTrackWidgetCreation: trackWidgetCreation.toString(),
-      if (treeShakeIcons != null) kIconTreeShakerFlag: treeShakeIcons.toString(),
-      if (bundleSkSLPath != null) kBundleSkSLPath: bundleSkSLPath!,
-      if (codeSizeDirectory != null) kCodeSizeDirectory: codeSizeDirectory!,
-      if (fileSystemRoots.isNotEmpty) kFileSystemRoots: fileSystemRoots.join(','),
-      if (fileSystemScheme != null) kFileSystemScheme: fileSystemScheme!,
+      if (dartDefines.isNotEmpty)
+        kDartDefines: encodeDartDefines(dartDefines),
+      if (dartObfuscation != null)
+        kDartObfuscation: dartObfuscation.toString(),
+      if (extraFrontEndOptions.isNotEmpty)
+        kExtraFrontEndOptions: extraFrontEndOptions.join(','),
+      if (extraGenSnapshotOptions.isNotEmpty)
+        kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
+      if (splitDebugInfoPath != null)
+        kSplitDebugInfo: splitDebugInfoPath!,
+      if (trackWidgetCreation != null)
+        kTrackWidgetCreation: trackWidgetCreation.toString(),
+      if (treeShakeIcons != null)
+        kIconTreeShakerFlag: treeShakeIcons.toString(),
+      if (bundleSkSLPath != null)
+        kBundleSkSLPath: bundleSkSLPath!,
+      if (codeSizeDirectory != null)
+        kCodeSizeDirectory: codeSizeDirectory!,
+      if (fileSystemRoots.isNotEmpty)
+        kFileSystemRoots: fileSystemRoots.join(','),
+      if (fileSystemScheme != null)
+        kFileSystemScheme: fileSystemScheme!,
     };
   }
 
@@ -236,17 +246,28 @@ class BuildInfo {
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
     return <String, String>{
-      if (dartDefines.isNotEmpty) 'DART_DEFINES': encodeDartDefines(dartDefines),
-      if (dartObfuscation != null) 'DART_OBFUSCATION': dartObfuscation.toString(),
-      if (extraFrontEndOptions.isNotEmpty) 'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
-      if (extraGenSnapshotOptions.isNotEmpty) 'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
-      if (splitDebugInfoPath != null) 'SPLIT_DEBUG_INFO': splitDebugInfoPath!,
-      if (trackWidgetCreation != null) 'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
-      if (treeShakeIcons != null) 'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
-      if (performanceMeasurementFile != null) 'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
-      if (bundleSkSLPath != null) 'BUNDLE_SKSL_PATH': bundleSkSLPath!,
-      if (packagesPath != null) 'PACKAGE_CONFIG': packagesPath,
-      if (codeSizeDirectory != null) 'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
+      if (dartDefines.isNotEmpty)
+        'DART_DEFINES': encodeDartDefines(dartDefines),
+      if (dartObfuscation != null)
+        'DART_OBFUSCATION': dartObfuscation.toString(),
+      if (extraFrontEndOptions.isNotEmpty)
+        'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
+      if (extraGenSnapshotOptions.isNotEmpty)
+        'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
+      if (splitDebugInfoPath != null)
+        'SPLIT_DEBUG_INFO': splitDebugInfoPath!,
+      if (trackWidgetCreation != null)
+        'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
+      if (treeShakeIcons != null)
+        'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
+      if (performanceMeasurementFile != null)
+        'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
+      if (bundleSkSLPath != null)
+        'BUNDLE_SKSL_PATH': bundleSkSLPath!,
+      if (packagesPath != null)
+        'PACKAGE_CONFIG': packagesPath,
+      if (codeSizeDirectory != null)
+        'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
     };
   }
 
@@ -255,17 +276,28 @@ class BuildInfo {
   List<String> toGradleConfig() {
     // PACKAGE_CONFIG not currently supported.
     return <String>[
-      if (dartDefines.isNotEmpty) '-Pdart-defines=${encodeDartDefines(dartDefines)}',
-      if (dartObfuscation != null) '-Pdart-obfuscation=$dartObfuscation',
-      if (extraFrontEndOptions.isNotEmpty) '-Pextra-front-end-options=${extraFrontEndOptions.join(',')}',
-      if (extraGenSnapshotOptions.isNotEmpty) '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions.join(',')}',
-      if (splitDebugInfoPath != null) '-Psplit-debug-info=$splitDebugInfoPath',
-      if (trackWidgetCreation != null) '-Ptrack-widget-creation=$trackWidgetCreation',
-      if (treeShakeIcons != null) '-Ptree-shake-icons=$treeShakeIcons',
-      if (performanceMeasurementFile != null) '-Pperformance-measurement-file=$performanceMeasurementFile',
-      if (bundleSkSLPath != null) '-Pbundle-sksl-path=$bundleSkSLPath',
-      if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
-      for (String projectArg in androidProjectArgs) '-P$projectArg',
+      if (dartDefines.isNotEmpty)
+        '-Pdart-defines=${encodeDartDefines(dartDefines)}',
+      if (dartObfuscation != null)
+        '-Pdart-obfuscation=$dartObfuscation',
+      if (extraFrontEndOptions.isNotEmpty)
+        '-Pextra-front-end-options=${extraFrontEndOptions.join(',')}',
+      if (extraGenSnapshotOptions.isNotEmpty)
+        '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions.join(',')}',
+      if (splitDebugInfoPath != null)
+        '-Psplit-debug-info=$splitDebugInfoPath',
+      if (trackWidgetCreation != null)
+        '-Ptrack-widget-creation=$trackWidgetCreation',
+      if (treeShakeIcons != null)
+        '-Ptree-shake-icons=$treeShakeIcons',
+      if (performanceMeasurementFile != null)
+        '-Pperformance-measurement-file=$performanceMeasurementFile',
+      if (bundleSkSLPath != null)
+        '-Pbundle-sksl-path=$bundleSkSLPath',
+      if (codeSizeDirectory != null)
+        '-Pcode-size-directory=$codeSizeDirectory',
+      for (String projectArg in androidProjectArgs)
+        '-P$projectArg',
     ];
   }
 }
@@ -388,14 +420,18 @@ String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String? b
   if (buildNumber == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform == TargetPlatform.ios ||
+      targetPlatform == TargetPlatform.darwin) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
     if (tmpBuildNumber.isEmpty) {
       return null;
     }
-    final List<String> segments = tmpBuildNumber.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpBuildNumber
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     if (segments.isEmpty) {
       segments.add('0');
     }
@@ -431,14 +467,18 @@ String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? bui
   if (buildName == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform == TargetPlatform.ios ||
+      targetPlatform == TargetPlatform.darwin) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
     if (tmpBuildName.isEmpty) {
       return null;
     }
-    final List<String> segments = tmpBuildName.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpBuildName
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     while (segments.length < 3) {
       segments.add('0');
     }
@@ -516,7 +556,8 @@ enum AndroidArch {
 }
 
 /// The default set of iOS device architectures to build for.
-List<DarwinArch> defaultIOSArchsForEnvironment(EnvironmentType environmentType) {
+List<DarwinArch> defaultIOSArchsForEnvironment(
+    EnvironmentType environmentType) {
   if (environmentType == EnvironmentType.simulator) {
     return <DarwinArch>[
       DarwinArch.x86_64,
@@ -657,7 +698,7 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.darwin;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
-    case 'linux-arm64':
+   case 'linux-arm64':
       return TargetPlatform.linux_arm64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
@@ -764,7 +805,8 @@ String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
 
   final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
   if (localFilesystem.path.isAbsolute(buildDir)) {
-    throw Exception('build-dir config setting in ${globals.config.configPath} must be relative');
+    throw Exception(
+        'build-dir config setting in ${globals.config.configPath} must be relative');
   }
   return buildDir;
 }
@@ -802,8 +844,9 @@ String getWebBuildDirectory() {
 
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
-  final String arch =
-      (targetPlatform == null) ? _getCurrentHostPlatformArchName() : getNameForTargetPlatformArch(targetPlatform);
+  final String arch = (targetPlatform == null) ?
+      _getCurrentHostPlatformArchName() :
+      getNameForTargetPlatformArch(targetPlatform);
   final String subDirs = 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
@@ -931,7 +974,10 @@ List<String> decodeCommaSeparated(Map<String, String> environmentDefines, String
   if (!environmentDefines.containsKey(key) || environmentDefines[key]!.isEmpty) {
     return <String>[];
   }
-  return environmentDefines[key]!.split(',').cast<String>().toList();
+  return environmentDefines[key]!
+    .split(',')
+    .cast<String>()
+    .toList();
 }
 
 /// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
@@ -939,14 +985,17 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
   if (!environmentDefines.containsKey(key) || environmentDefines[key]!.isEmpty) {
     return <String>[];
   }
-  return environmentDefines[key]!.split(',').map<Object>(_defineDecoder.convert).cast<String>().toList();
+  return environmentDefines[key]!
+    .split(',')
+    .map<Object>(_defineDecoder.convert)
+    .cast<String>()
+    .toList();
 }
 
 /// The null safety runtime mode the app should be built in.
 enum NullSafetyMode {
   sound,
   unsound,
-
   /// The null safety mode was not detected. Only supported for 'flutter test'.
   autodetect,
 }

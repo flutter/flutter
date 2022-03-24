@@ -37,7 +37,9 @@ class XCResultGenerator {
   /// then stores the useful information the json into an [XCResult] object.
   ///
   /// A`issueDiscarders` can be passed to discard any issues that matches the description of any [XCResultIssueDiscarder] in the list.
-  Future<XCResult> generate({List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[]}) async {
+  Future<XCResult> generate(
+      {List<XCResultIssueDiscarder> issueDiscarders =
+          const <XCResultIssueDiscarder>[]}) async {
     final RunResult result = await processUtils.run(
       <String>[
         ...xcode.xcrunCommand(),
@@ -53,14 +55,16 @@ class XCResultGenerator {
       return XCResult.failed(errorMessage: result.stderr);
     }
     if (result.stdout.isEmpty) {
-      return XCResult.failed(errorMessage: 'xcresult parser: Unrecognized top level json format.');
+      return XCResult.failed(
+          errorMessage: 'xcresult parser: Unrecognized top level json format.');
     }
     final Object? resultJson = json.decode(result.stdout);
     if (resultJson == null || resultJson is! Map<String, Object?>) {
       // If json parsing failed, indicate such error.
       // This also includes the top level json object is an array, which indicates
       // the structure of the json is changed and this parser class possibly needs to update for this change.
-      return XCResult.failed(errorMessage: 'xcresult parser: Unrecognized top level json format.');
+      return XCResult.failed(
+          errorMessage: 'xcresult parser: Unrecognized top level json format.');
     }
     return XCResult(resultJson: resultJson, issueDiscarders: issueDiscarders);
   }
@@ -72,14 +76,13 @@ class XCResultGenerator {
 /// The result contains useful information such as build errors and warnings.
 class XCResult {
   /// Parse the `resultJson` and stores useful informations in the returned `XCResult`.
-  factory XCResult(
-      {required Map<String, Object?> resultJson,
-      List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[]}) {
+  factory XCResult({required Map<String, Object?> resultJson, List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[]}) {
     final List<XCResultIssue> issues = <XCResultIssue>[];
 
     final Object? issuesMap = resultJson['issues'];
     if (issuesMap == null || issuesMap is! Map<String, Object?>) {
-      return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the issues map.');
+      return XCResult.failed(
+          errorMessage: 'xcresult parser: Failed to parse the issues map.');
     }
 
     final Object? errorSummaries = issuesMap['errorSummaries'];
@@ -161,7 +164,8 @@ class XCResultIssue {
     final List<String> warnings = <String>[];
     // Parse url and convert it to a location String.
     String? location;
-    final Object? documentLocationInCreatingWorkspaceMap = issueJson['documentLocationInCreatingWorkspace'];
+    final Object? documentLocationInCreatingWorkspaceMap =
+        issueJson['documentLocationInCreatingWorkspace'];
     if (documentLocationInCreatingWorkspaceMap is Map<String, Object?>) {
       final Object? urlMap = documentLocationInCreatingWorkspaceMap['url'];
       if (urlMap is Map<String, Object?>) {
@@ -169,7 +173,8 @@ class XCResultIssue {
         if (urlValue is String) {
           location = _convertUrlToLocationString(urlValue);
           if (location == null) {
-            warnings.add('(XCResult) The `url` exists but it was failed to be parsed. url: $urlValue');
+            warnings.add(
+                '(XCResult) The `url` exists but it was failed to be parsed. url: $urlValue');
           }
         }
       }
@@ -231,8 +236,15 @@ enum XCResultIssueType {
 
 /// Discards the [XCResultIssue] that matches any of the matchers.
 class XCResultIssueDiscarder {
-  XCResultIssueDiscarder({this.typeMatcher, this.subTypeMatcher, this.messageMatcher, this.locationMatcher})
-      : assert(typeMatcher != null || subTypeMatcher != null || messageMatcher != null || locationMatcher != null);
+  XCResultIssueDiscarder(
+      {this.typeMatcher,
+      this.subTypeMatcher,
+      this.messageMatcher,
+      this.locationMatcher})
+      : assert(typeMatcher != null ||
+            subTypeMatcher != null ||
+            messageMatcher != null ||
+            locationMatcher != null);
 
   /// The type of the discarder.
   ///
@@ -268,11 +280,13 @@ String? _convertUrlToLocationString(String url) {
     path: fragmentLocation.path,
     query: fragmentLocation.fragment,
   );
-  String startingLineNumber = fileLocation.queryParameters['StartingLineNumber'] ?? '';
+  String startingLineNumber =
+      fileLocation.queryParameters['StartingLineNumber'] ?? '';
   if (startingLineNumber.isNotEmpty) {
     startingLineNumber = ':$startingLineNumber';
   }
-  String startingColumnNumber = fileLocation.queryParameters['StartingColumnNumber'] ?? '';
+  String startingColumnNumber =
+      fileLocation.queryParameters['StartingColumnNumber'] ?? '';
   if (startingColumnNumber.isNotEmpty) {
     startingColumnNumber = ':$startingColumnNumber';
   }
@@ -280,14 +294,19 @@ String? _convertUrlToLocationString(String url) {
 }
 
 // Determine if an `issue` should be discarded based on the `discarder`.
-bool _shouldDiscardIssue({required XCResultIssue issue, required XCResultIssueDiscarder discarder}) {
+bool _shouldDiscardIssue(
+    {required XCResultIssue issue, required XCResultIssueDiscarder discarder}) {
   if (issue.type == discarder.typeMatcher) {
     return true;
   }
-  if (issue.subType != null && discarder.subTypeMatcher != null && discarder.subTypeMatcher!.hasMatch(issue.subType!)) {
+  if (issue.subType != null &&
+      discarder.subTypeMatcher != null &&
+      discarder.subTypeMatcher!.hasMatch(issue.subType!)) {
     return true;
   }
-  if (issue.message != null && discarder.messageMatcher != null && discarder.messageMatcher!.hasMatch(issue.message!)) {
+  if (issue.message != null &&
+      discarder.messageMatcher != null &&
+      discarder.messageMatcher!.hasMatch(issue.message!)) {
     return true;
   }
   if (issue.location != null &&

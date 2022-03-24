@@ -212,13 +212,13 @@ abstract class Logger {
 
   /// A [SilentStatus] or an [AnonymousSpinnerStatus] (depending on whether the
   /// terminal is fancy enough), already started.
-  Status startSpinner({VoidCallback? onFinish});
+  Status startSpinner({ VoidCallback? onFinish });
 
   /// Send an event to be emitted.
   ///
   /// Only surfaces a value in machine modes, Loggers may ignore this message in
   /// non-machine modes.
-  void sendEvent(String name, [Map<String, dynamic>? args]) {}
+  void sendEvent(String name, [Map<String, dynamic>? args]) { }
 
   /// Clears all output.
   void clear();
@@ -283,8 +283,7 @@ class DelegatingLogger implements Logger {
   set fatalWarnings(bool value) => _delegate.fatalWarnings = value;
 
   @override
-  void printError(
-    String message, {
+  void printError(String message, {
     StackTrace? stackTrace,
     bool? emphasis,
     TerminalColor? color,
@@ -304,8 +303,7 @@ class DelegatingLogger implements Logger {
   }
 
   @override
-  void printWarning(
-    String message, {
+  void printWarning(String message, {
     bool? emphasis,
     TerminalColor? color,
     int? indent,
@@ -323,8 +321,7 @@ class DelegatingLogger implements Logger {
   }
 
   @override
-  void printStatus(
-    String message, {
+  void printStatus(String message, {
     bool? emphasis,
     TerminalColor? color,
     bool? newline,
@@ -332,8 +329,7 @@ class DelegatingLogger implements Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
-    _delegate.printStatus(
-      message,
+    _delegate.printStatus(message,
       emphasis: emphasis,
       color: color,
       newline: newline,
@@ -344,8 +340,7 @@ class DelegatingLogger implements Logger {
   }
 
   @override
-  void printBox(
-    String message, {
+  void printBox(String message, {
     String? title,
   }) {
     _delegate.printBox(message, title: title);
@@ -362,13 +357,11 @@ class DelegatingLogger implements Logger {
   }
 
   @override
-  Status startProgress(
-    String message, {
+  Status startProgress(String message, {
     String? progressId,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    return _delegate.startProgress(
-      message,
+    return _delegate.startProgress(message,
       progressId: progressId,
       progressIndicatorPadding: progressIndicatorPadding,
     );
@@ -413,9 +406,10 @@ class StdoutLogger extends Logger {
     required Stdio stdio,
     required OutputPreferences outputPreferences,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  })  : _stdio = stdio,
-        _outputPreferences = outputPreferences,
-        _stopwatchFactory = stopwatchFactory;
+  })
+    : _stdio = stdio,
+      _outputPreferences = outputPreferences,
+      _stopwatchFactory = stopwatchFactory;
 
   @override
   final Terminal terminal;
@@ -447,8 +441,7 @@ class StdoutLogger extends Logger {
   }) {
     hadErrorOutput = true;
     _status?.pause();
-    message = wrapText(
-      message,
+    message = wrapText(message,
       indent: indent,
       hangingIndent: hangingIndent,
       shouldWrap: wrap ?? _outputPreferences.wrapText,
@@ -476,8 +469,7 @@ class StdoutLogger extends Logger {
   }) {
     hadWarningOutput = true;
     _status?.pause();
-    message = wrapText(
-      message,
+    message = wrapText(message,
       indent: indent,
       hangingIndent: hangingIndent,
       shouldWrap: wrap ?? _outputPreferences.wrapText,
@@ -502,8 +494,7 @@ class StdoutLogger extends Logger {
     bool? wrap,
   }) {
     _status?.pause();
-    message = wrapText(
-      message,
+    message = wrapText(message,
       indent: indent,
       hangingIndent: hangingIndent,
       shouldWrap: wrap ?? _outputPreferences.wrapText,
@@ -523,8 +514,7 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  void printBox(
-    String message, {
+  void printBox(String message, {
     String? title,
   }) {
     _status?.pause();
@@ -545,7 +535,7 @@ class StdoutLogger extends Logger {
   void writeToStdErr(String message) => _stdio.stderrWrite(message);
 
   @override
-  void printTrace(String message) {}
+  void printTrace(String message) { }
 
   @override
   Status startProgress(
@@ -581,7 +571,7 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  Status startSpinner({VoidCallback? onFinish}) {
+  Status startSpinner({ VoidCallback? onFinish }) {
     if (_status != null || !supportsColor) {
       return SilentStatus(
         onFinish: onFinish,
@@ -607,7 +597,7 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  void sendEvent(String name, [Map<String, dynamic>? args]) {}
+  void sendEvent(String name, [Map<String, dynamic>? args]) { }
 
   @override
   void clear() {
@@ -703,24 +693,23 @@ class WindowsStdoutLogger extends StdoutLogger {
     required OutputPreferences outputPreferences,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : super(
-          terminal: terminal,
-          stdio: stdio,
-          outputPreferences: outputPreferences,
-          stopwatchFactory: stopwatchFactory,
-        );
+      terminal: terminal,
+      stdio: stdio,
+      outputPreferences: outputPreferences,
+      stopwatchFactory: stopwatchFactory,
+    );
 
   @override
   void writeToStdOut(String message) {
     final String windowsMessage = terminal.supportsEmoji
-        ? message
-        : message
-            .replaceAll('🔥', '')
-            .replaceAll('🖼️', '')
-            .replaceAll('✗', 'X')
-            .replaceAll('✓', '√')
-            .replaceAll('🔨', '')
-            .replaceAll('💪', '')
-            .replaceAll('✏️', '');
+      ? message
+      : message.replaceAll('🔥', '')
+               .replaceAll('🖼️', '')
+               .replaceAll('✗', 'X')
+               .replaceAll('✓', '√')
+               .replaceAll('🔨', '')
+               .replaceAll('💪', '')
+               .replaceAll('✏️', '');
     _stdio.stdoutWrite(windowsMessage);
   }
 }
@@ -730,16 +719,16 @@ class BufferLogger extends Logger {
     required this.terminal,
     required OutputPreferences outputPreferences,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  })  : _outputPreferences = outputPreferences,
-        _stopwatchFactory = stopwatchFactory;
+  }) : _outputPreferences = outputPreferences,
+       _stopwatchFactory = stopwatchFactory;
 
   /// Create a [BufferLogger] with test preferences.
   BufferLogger.test({
     Terminal? terminal,
     OutputPreferences? outputPreferences,
-  })  : terminal = terminal ?? Terminal.test(),
-        _outputPreferences = outputPreferences ?? OutputPreferences.test(),
-        _stopwatchFactory = const StopwatchFactory();
+  }) : terminal = terminal ?? Terminal.test(),
+       _outputPreferences = outputPreferences ?? OutputPreferences.test(),
+       _stopwatchFactory = const StopwatchFactory();
 
   @override
   final OutputPreferences _outputPreferences;
@@ -782,8 +771,7 @@ class BufferLogger extends Logger {
   }) {
     hadErrorOutput = true;
     _error.writeln(terminal.color(
-      wrapText(
-        message,
+      wrapText(message,
         indent: indent,
         hangingIndent: hangingIndent,
         shouldWrap: wrap ?? _outputPreferences.wrapText,
@@ -804,8 +792,7 @@ class BufferLogger extends Logger {
   }) {
     hadWarningOutput = true;
     _warning.writeln(terminal.color(
-      wrapText(
-        message,
+      wrapText(message,
         indent: indent,
         hangingIndent: hangingIndent,
         shouldWrap: wrap ?? _outputPreferences.wrapText,
@@ -826,16 +813,14 @@ class BufferLogger extends Logger {
     bool? wrap,
   }) {
     if (newline ?? true) {
-      _status.writeln(wrapText(
-        message,
+      _status.writeln(wrapText(message,
         indent: indent,
         hangingIndent: hangingIndent,
         shouldWrap: wrap ?? _outputPreferences.wrapText,
         columnWidth: _outputPreferences.wrapColumn,
       ));
     } else {
-      _status.write(wrapText(
-        message,
+      _status.write(wrapText(message,
         indent: indent,
         hangingIndent: hangingIndent,
         shouldWrap: wrap ?? _outputPreferences.wrapText,
@@ -845,8 +830,7 @@ class BufferLogger extends Logger {
   }
 
   @override
-  void printBox(
-    String message, {
+  void printBox(String message, {
     String? title,
   }) {
     _generateBox(
@@ -892,15 +876,19 @@ class BufferLogger extends Logger {
 
   @override
   void sendEvent(String name, [Map<String, dynamic>? args]) {
-    _events.write(json.encode(<String, Object?>{'name': name, 'args': args}));
+    _events.write(json.encode(<String, Object?>{
+      'name': name,
+      'args': args
+    }));
   }
 }
 
 class VerboseLogger extends DelegatingLogger {
-  VerboseLogger(Logger parent, {StopwatchFactory stopwatchFactory = const StopwatchFactory()})
-      : _stopwatch = stopwatchFactory.createStopwatch(),
-        _stopwatchFactory = stopwatchFactory,
-        super(parent) {
+  VerboseLogger(Logger parent, {
+    StopwatchFactory stopwatchFactory = const StopwatchFactory()
+  }) : _stopwatch = stopwatchFactory.createStopwatch(),
+       _stopwatchFactory = stopwatchFactory,
+       super(parent) {
     _stopwatch.start();
   }
 
@@ -924,8 +912,7 @@ class VerboseLogger extends DelegatingLogger {
     hadErrorOutput = true;
     _emit(
       _LogType.error,
-      wrapText(
-        message,
+      wrapText(message,
         indent: indent,
         hangingIndent: hangingIndent,
         shouldWrap: wrap ?? _outputPreferences.wrapText,
@@ -937,19 +924,18 @@ class VerboseLogger extends DelegatingLogger {
 
   @override
   void printWarning(
-    String message, {
-    StackTrace? stackTrace,
-    bool? emphasis,
-    TerminalColor? color,
-    int? indent,
-    int? hangingIndent,
-    bool? wrap,
-  }) {
+      String message, {
+        StackTrace? stackTrace,
+        bool? emphasis,
+        TerminalColor? color,
+        int? indent,
+        int? hangingIndent,
+        bool? wrap,
+      }) {
     hadWarningOutput = true;
     _emit(
       _LogType.warning,
-      wrapText(
-        message,
+      wrapText(message,
         indent: indent,
         hangingIndent: hangingIndent,
         shouldWrap: wrap ?? _outputPreferences.wrapText,
@@ -969,20 +955,16 @@ class VerboseLogger extends DelegatingLogger {
     int? hangingIndent,
     bool? wrap,
   }) {
-    _emit(
-        _LogType.status,
-        wrapText(
-          message,
-          indent: indent,
-          hangingIndent: hangingIndent,
-          shouldWrap: wrap ?? _outputPreferences.wrapText,
-          columnWidth: _outputPreferences.wrapColumn,
-        ));
+    _emit(_LogType.status, wrapText(message,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      shouldWrap: wrap ?? _outputPreferences.wrapText,
+      columnWidth: _outputPreferences.wrapColumn,
+    ));
   }
 
   @override
-  void printBox(
-    String message, {
+  void printBox(String message, {
     String? title,
   }) {
     String composedMessage = '';
@@ -1027,7 +1009,7 @@ class VerboseLogger extends DelegatingLogger {
     )..start();
   }
 
-  void _emit(_LogType type, String message, [StackTrace? stackTrace]) {
+  void _emit(_LogType type, String message, [ StackTrace? stackTrace ]) {
     if (message.trim().isEmpty) {
       return;
     }
@@ -1073,7 +1055,7 @@ class VerboseLogger extends DelegatingLogger {
   }
 
   @override
-  void sendEvent(String name, [Map<String, dynamic>? args]) {}
+  void sendEvent(String name, [Map<String, dynamic>? args]) { }
 }
 
 class PrefixedErrorLogger extends DelegatingLogger {
@@ -1161,10 +1143,10 @@ abstract class Status {
   }
 
   /// Call to clear the current line but not end the progress.
-  void pause() {}
+  void pause() { }
 
   /// Call to resume after a pause.
-  void resume() {}
+  void resume() { }
 
   @protected
   void finish() {
@@ -1180,9 +1162,9 @@ class SilentStatus extends Status {
     required Stopwatch stopwatch,
     VoidCallback? onFinish,
   }) : super(
-          onFinish: onFinish,
-          stopwatch: stopwatch,
-        );
+    onFinish: onFinish,
+    stopwatch: stopwatch,
+  );
 
   @override
   void finish() {
@@ -1201,10 +1183,10 @@ class SummaryStatus extends Status {
     this.padding = kDefaultStatusPadding,
     VoidCallback? onFinish,
     required Stdio stdio,
-  })  : _stdio = stdio,
-        super(
-          onFinish: onFinish,
-          stopwatch: stopwatch,
+  }) : _stdio = stdio,
+       super(
+         onFinish: onFinish,
+         stopwatch: stopwatch,
         );
 
   final String message;
@@ -1265,12 +1247,12 @@ class AnonymousSpinnerStatus extends Status {
     required Stopwatch stopwatch,
     required Stdio stdio,
     required Terminal terminal,
-  })  : _stdio = stdio,
-        _terminal = terminal,
-        _animation = _selectAnimation(terminal),
-        super(
-          onFinish: onFinish,
-          stopwatch: stopwatch,
+  }) : _stdio = stdio,
+       _terminal = terminal,
+       _animation = _selectAnimation(terminal),
+       super(
+         onFinish: onFinish,
+         stopwatch: stopwatch,
         );
 
   final Stdio _stdio;
@@ -1308,9 +1290,9 @@ class AnonymousSpinnerStatus extends Status {
   static List<String> _selectAnimation(Terminal terminal) {
     final List<String> animations = terminal.supportsEmoji ? _emojiAnimations : _asciiAnimations;
     return animations[terminal.preferredStyle % animations.length]
-        .runes
-        .map<String>((int scalar) => String.fromCharCode(scalar))
-        .toList();
+      .runes
+      .map<String>((int scalar) => String.fromCharCode(scalar))
+      .toList();
   }
 
   final List<String> _animation;
@@ -1325,9 +1307,11 @@ class AnonymousSpinnerStatus extends Status {
   void _writeToStdOut(String message) => _stdio.stdoutWrite(message);
 
   void _clear(int length) {
-    _writeToStdOut('${_backspaceChar * length}'
-        '${_clearChar * length}'
-        '${_backspaceChar * length}');
+    _writeToStdOut(
+      '${_backspaceChar * length}'
+      '${_clearChar * length}'
+      '${_backspaceChar * length}'
+    );
   }
 
   @override
@@ -1403,10 +1387,10 @@ class SpinnerStatus extends AnonymousSpinnerStatus {
     required Stdio stdio,
     required Terminal terminal,
   }) : super(
-          onFinish: onFinish,
-          stopwatch: stopwatch,
-          stdio: stdio,
-          terminal: terminal,
+         onFinish: onFinish,
+         stopwatch: stopwatch,
+         stdio: stdio,
+         terminal: terminal,
         );
 
   final String message;

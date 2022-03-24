@@ -45,7 +45,8 @@ class PictureCachePage extends StatelessWidget {
 }
 
 class ListItem extends StatelessWidget {
-  const ListItem({Key? key, required this.index}) : super(key: key);
+  const ListItem({Key? key, required this.index})
+      : super(key: key);
 
   final int index;
 
@@ -223,7 +224,8 @@ class ListItem extends StatelessWidget {
       onTap: () {},
       child: Row(
         children: <Widget>[
-          Container(width: 40, alignment: Alignment.center, child: _buildRankText()),
+          Container(
+              width: 40, alignment: Alignment.center, child: _buildRankText()),
           const CircleAvatar(
             radius: 11.5,
           ),

@@ -60,7 +60,7 @@ void main() {
         await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/textinput',
           messageBytes,
-          (ByteData? _) {},
+              (ByteData? _) {},
         );
 
         expect(client.latestMethodCall, 'updateEditingValueWithDeltas');

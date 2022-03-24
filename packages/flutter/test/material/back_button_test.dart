@@ -153,16 +153,14 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(
-        tester.getSemantics(find.byType(BackButton)),
-        matchesSemantics(
-          label: 'Back',
-          isButton: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          hasTapAction: true,
-          isFocusable: true,
-        ));
+    expect(tester.getSemantics(find.byType(BackButton)), matchesSemantics(
+      label: 'Back',
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      isFocusable: true,
+    ));
     handle.dispose();
   });
 

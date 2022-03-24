@@ -23,18 +23,18 @@ class TestInkSplash extends InkSplash {
     VoidCallback? onRemoved,
     required TextDirection textDirection,
   }) : super(
-          controller: controller,
-          referenceBox: referenceBox,
-          position: position,
-          color: color,
-          containedInkWell: containedInkWell,
-          rectCallback: rectCallback,
-          borderRadius: borderRadius,
-          customBorder: customBorder,
-          radius: radius,
-          onRemoved: onRemoved,
-          textDirection: textDirection,
-        );
+    controller: controller,
+    referenceBox: referenceBox,
+    position: position,
+    color: color,
+    containedInkWell: containedInkWell,
+    rectCallback: rectCallback,
+    borderRadius: borderRadius,
+    customBorder: customBorder,
+    radius: radius,
+    onRemoved: onRemoved,
+    textDirection: textDirection,
+  );
 
   @override
   void confirm() {

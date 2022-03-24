@@ -41,7 +41,7 @@ class _BottomPicker extends StatelessWidget {
         ),
         child: GestureDetector(
           // Blocks taps from propagating to the modal sheet and popping.
-          onTap: () {},
+          onTap: () { },
           child: SafeArea(
             top: false,
             child: child,
@@ -101,7 +101,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   DateTime dateTime = DateTime.now();
 
   Widget _buildColorPicker(BuildContext context) {
-    final FixedExtentScrollController scrollController = FixedExtentScrollController(initialItem: _selectedColorIndex);
+    final FixedExtentScrollController scrollController =
+        FixedExtentScrollController(initialItem: _selectedColorIndex);
 
     return GestureDetector(
       onTap: () async {
@@ -163,8 +164,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Countdown Timer'),
           Text(
             '${timer.inHours}:'
-            '${(timer.inMinutes % 60).toString().padLeft(2, '0')}:'
-            '${(timer.inSeconds % 60).toString().padLeft(2, '0')}',
+                '${(timer.inMinutes % 60).toString().padLeft(2,'0')}:'
+                '${(timer.inSeconds % 60).toString().padLeft(2,'0')}',
             style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
           ),
         ],
@@ -192,13 +193,15 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           },
         );
       },
-      child: _Menu(children: <Widget>[
-        const Text('Date'),
-        Text(
-          DateFormat.yMMMMd().format(date),
-          style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
-        ),
-      ]),
+      child: _Menu(
+        children: <Widget>[
+          const Text('Date'),
+          Text(
+            DateFormat.yMMMMd().format(date),
+            style: TextStyle(color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context)),
+          ),
+        ]
+      ),
     );
   }
 

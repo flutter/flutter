@@ -72,8 +72,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) {
-          // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -92,9 +91,9 @@ void main() {
       expect(crashingUsage.sentException.toString(), 'Exception: an exception % --');
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
-            'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-            'FLUTTER_ROOT': '/',
-          }),
+        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+        'FLUTTER_ROOT': '/',
+      }),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
@@ -125,8 +124,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) {
-          // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -136,9 +134,9 @@ void main() {
       await completer.future;
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
-            'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-            'FLUTTER_ROOT': '/',
-          }),
+        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+        'FLUTTER_ROOT': '/',
+      }),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
@@ -154,27 +152,26 @@ void main() {
         '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
       )..createSync(recursive: true);
       devtoolsDir.childFile('version.json').writeAsStringSync(
-            '{"version": "1.2.3"}',
-          );
+        '{"version": "1.2.3"}',
+      );
 
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
       unawaited(runZoned<Future<void>>(
         () {
-          unawaited(runner.run(
-            <String>['crash'],
-            () => <FlutterCommand>[
-              CrashingFlutterCommand(),
-            ],
-            // This flutterVersion disables crash reporting.
-            flutterVersion: '[user-branch]/',
-            reportCrashes: true,
-          ));
-          return null;
+        unawaited(runner.run(
+          <String>['crash'],
+          () => <FlutterCommand>[
+            CrashingFlutterCommand(),
+          ],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          reportCrashes: true,
+        ));
+        return null;
         },
-        onError: (Object error, StackTrace stack) {
-          // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -203,10 +200,12 @@ void main() {
       expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
       expect(await sentDetails.doctorText.text, contains('[✓] Flutter'));
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(environment: <String, String>{
-            'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-            'FLUTTER_ROOT': '/',
-          }),
+      Platform: () => FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+          'FLUTTER_ROOT': '/',
+        }
+      ),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       UserMessages: () => CustomBugInstructions(),
@@ -221,7 +220,7 @@ class CrashingFlutterCommand extends FlutterCommand {
   CrashingFlutterCommand({
     bool asyncCrash = false,
     Completer<void> completer,
-  })  : _asyncCrash = asyncCrash,
+  }) :  _asyncCrash = asyncCrash,
         _completer = completer;
 
   final bool _asyncCrash;
@@ -254,11 +253,10 @@ class CrashingFlutterCommand extends FlutterCommand {
 }
 
 class CrashingUsage implements Usage {
-  CrashingUsage()
-      : _impl = Usage(
-          versionOverride: '[user-branch]',
-          runningOnBot: true,
-        );
+  CrashingUsage() : _impl = Usage(
+    versionOverride: '[user-branch]',
+    runningOnBot: true,
+  );
 
   final Usage _impl;
 
@@ -297,7 +295,8 @@ class CrashingUsage implements Usage {
   String get clientId => _impl.clientId;
 
   @override
-  void sendCommand(String command, {CustomDimensions parameters}) => _impl.sendCommand(command, parameters: parameters);
+  void sendCommand(String command, {CustomDimensions parameters}) =>
+      _impl.sendCommand(command, parameters: parameters);
 
   @override
   void sendEvent(
@@ -306,14 +305,13 @@ class CrashingUsage implements Usage {
     String label,
     int value,
     CustomDimensions parameters,
-  }) =>
-      _impl.sendEvent(
-        category,
-        parameter,
-        label: label,
-        value: value,
-        parameters: parameters,
-      );
+  }) => _impl.sendEvent(
+    category,
+    parameter,
+    label: label,
+    value: value,
+    parameters: parameters,
+  );
 
   @override
   void sendTiming(
@@ -321,8 +319,7 @@ class CrashingUsage implements Usage {
     String variableName,
     Duration duration, {
     String label,
-  }) =>
-      _impl.sendTiming(category, variableName, duration, label: label);
+  }) => _impl.sendTiming(category, variableName, duration, label: label);
 
   @override
   Stream<Map<String, dynamic>> get onSend => _impl.onSend;

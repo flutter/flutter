@@ -160,6 +160,7 @@ const Feature flutterAndroidFeature = Feature(
   ),
 );
 
+
 /// The [Feature] for iOS devices.
 const Feature flutterIOSFeature = Feature(
   name: 'Flutter for iOS',
@@ -230,14 +231,15 @@ const Feature windowsUwpEmbedding = Feature(
 /// settings.
 class Feature {
   /// Creates a [Feature].
-  const Feature(
-      {required this.name,
-      this.environmentOverride,
-      this.configSetting,
-      this.extraHelpText,
-      this.master = const FeatureChannelSetting(),
-      this.beta = const FeatureChannelSetting(),
-      this.stable = const FeatureChannelSetting()});
+  const Feature({
+    required this.name,
+    this.environmentOverride,
+    this.configSetting,
+    this.extraHelpText,
+    this.master = const FeatureChannelSetting(),
+    this.beta = const FeatureChannelSetting(),
+    this.stable = const FeatureChannelSetting()
+  });
 
   /// The user visible name for this feature.
   final String name;
@@ -287,7 +289,8 @@ class Feature {
     } else if (channels.length == 2) {
       buffer.write('the ${channels.join(' and ')} channels.');
     } else {
-      final String prefix = (channels.toList()..removeLast()).join(', ');
+      final String prefix = (channels.toList()
+        ..removeLast()).join(', ');
       buffer.write('the $prefix, and ${channels.last} channels.');
     }
     if (extraHelpText != null) {

@@ -56,22 +56,22 @@ Future<void> run(List<String> args) async {
     ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
     ..addOption(_kOptionTests, help: 'Path to json file that maps Dart test files to precompiled dill files')
     ..addOption(_kOptionCoverageDirectory, help: 'The path to the directory that will have coverage collected')
-    ..addFlag(
-      _kOptionCoverage,
+    ..addFlag(_kOptionCoverage,
       defaultsTo: false,
       negatable: false,
       help: 'Whether to collect coverage information.',
     )
-    ..addOption(
-      _kOptionCoveragePath,
-      defaultsTo: 'coverage/lcov.info',
-      help: 'Where to store coverage information (if coverage is enabled).',
+    ..addOption(_kOptionCoveragePath,
+        defaultsTo: 'coverage/lcov.info',
+        help: 'Where to store coverage information (if coverage is enabled).',
     );
   final ArgResults argResults = parser.parse(args);
-  if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
+  if (_kRequiredOptions
+      .any((String option) => !argResults.options.contains(option))) {
     throwToolExit('Missing option! All options must be specified.');
   }
-  final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
+  final Directory tempDir =
+      globals.fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
   try {
     Cache.flutterRoot = tempDir.path;
 
@@ -95,7 +95,8 @@ Future<void> run(List<String> args) async {
 
     // Put the tester shell where runTests expects it.
     // TODO(garymm): Switch to a Fuchsia-specific Artifacts impl.
-    final Link testerDestLink = globals.fs.link(globals.artifacts.getArtifactPath(Artifact.flutterTester));
+    final Link testerDestLink =
+        globals.fs.link(globals.artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(globals.fs.path.absolute(shellPath));
 
@@ -112,25 +113,25 @@ Future<void> run(List<String> args) async {
     CoverageCollector collector;
     if (argResults['coverage'] as bool) {
       collector = CoverageCollector(
-          packagesPath: globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
-          libraryPredicate: (String libraryName) {
-            // If we have a specified coverage directory then accept all libraries.
-            if (coverageDirectory != null) {
-              return true;
-            }
-            final String projectName = FlutterProject.current().manifest.appName;
-            return libraryName.contains(projectName);
-          });
+        packagesPath: globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
+        libraryPredicate: (String libraryName) {
+          // If we have a specified coverage directory then accept all libraries.
+          if (coverageDirectory != null) {
+            return true;
+          }
+          final String projectName = FlutterProject.current().manifest.appName;
+          return libraryName.contains(projectName);
+        });
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
       }
       testDirectory = globals.fs.directory(argResults[_kOptionTestDirectory]);
     }
 
+
     final Map<String, String> tests = <String, String>{};
     final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
-        (json.decode(globals.fs.file(argResults[_kOptionTests]).readAsStringSync()) as List<dynamic>)
-            .cast<Map<String, dynamic>>());
+      (json.decode(globals.fs.file(argResults[_kOptionTests]).readAsStringSync()) as List<dynamic>).cast<Map<String, dynamic>>());
     for (final Map<String, dynamic> map in jsonList) {
       final String source = globals.fs.file(map['source']).resolveSymbolicLinksSync();
       final String dill = globals.fs.file(map['dill']).resolveSymbolicLinksSync();
@@ -166,8 +167,7 @@ Future<void> run(List<String> args) async {
       } else {
         globals.fs.currentDirectory = testDirectory;
       }
-      if (!collector.collectCoverageData(argResults[_kOptionCoveragePath] as String,
-          coverageDirectory: coverageDirectory)) {
+      if (!collector.collectCoverageData(argResults[_kOptionCoveragePath] as String, coverageDirectory: coverageDirectory)) {
         throwToolExit('Failed to collect coverage data');
       }
     }

@@ -164,7 +164,8 @@ class WriteBuffer {
 /// The byte order used is [Endian.host] throughout.
 class ReadBuffer {
   /// Creates a [ReadBuffer] for reading from the specified [data].
-  ReadBuffer(this.data) : assert(data != null);
+  ReadBuffer(this.data)
+    : assert(data != null);
 
   /// The underlying data being read.
   final ByteData data;
@@ -257,6 +258,7 @@ class ReadBuffer {
 
   void _alignTo(int alignment) {
     final int mod = _position % alignment;
-    if (mod != 0) _position += alignment - mod;
+    if (mod != 0)
+      _position += alignment - mod;
   }
 }

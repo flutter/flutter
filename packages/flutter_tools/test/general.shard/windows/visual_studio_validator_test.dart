@@ -162,7 +162,7 @@ void main() {
 
       final ValidationResult result = await validator.validate();
       final ValidationMessage expectedDisplayNameMessage = ValidationMessage(
-          userMessages.visualStudioVersion(fakeVisualStudio.displayName!, fakeVisualStudio.fullVersion!));
+        userMessages.visualStudioVersion(fakeVisualStudio.displayName!, fakeVisualStudio.fullVersion!));
 
       expect(result.messages.contains(expectedDisplayNameMessage), true);
       expect(result.type, ValidationType.installed);

@@ -14,8 +14,7 @@ class FastScrollHeavyGridViewMemoryTest extends MemoryTest {
   FastScrollHeavyGridViewMemoryTest()
       : super(
           '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-          'test_memory/heavy_gridview.dart',
-          kPackageName,
+          'test_memory/heavy_gridview.dart', kPackageName,
         );
 
   @override

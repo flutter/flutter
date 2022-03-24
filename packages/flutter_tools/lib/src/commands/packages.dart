@@ -21,17 +21,13 @@ import '../runner/flutter_command.dart';
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
     addSubcommand(PackagesGetCommand('get', false));
-    addSubcommand(
-        PackagesInteractiveGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions."));
+    addSubcommand(PackagesInteractiveGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions."));
     addSubcommand(PackagesInteractiveGetCommand('add', 'Add a dependency to pubspec.yaml.'));
     addSubcommand(PackagesInteractiveGetCommand('remove', 'Removes a dependency from the current package.'));
     addSubcommand(PackagesTestCommand());
-    addSubcommand(
-        PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
-    addSubcommand(
-        PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand(
-        'deps', 'Print package dependencies')); // path to package can be specified with --directory argument
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies')); // path to package can be specified with --directory argument
     addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
     addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
@@ -39,8 +35,7 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesForwardCommand('login', 'Log into pub.dev.'));
     addSubcommand(PackagesForwardCommand('logout', 'Log out of pub.dev.'));
     addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
-    addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded',
-        requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('token', 'Manage authentication tokens for hosted pub repositories.'));
     addSubcommand(PackagesPassthroughCommand());
   }
@@ -64,8 +59,7 @@ class PackagesCommand extends FlutterCommand {
 class PackagesGetCommand extends FlutterCommand {
   PackagesGetCommand(this.name, this.upgrade) {
     requiresPubspecYaml();
-    argParser.addFlag(
-      'offline',
+    argParser.addFlag('offline',
       negatable: false,
       help: 'Use cached packages instead of accessing the network.',
     );
@@ -78,7 +72,7 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   String get description {
-    return '${upgrade ? "Upgrade" : "Get"} packages in a Flutter project.';
+    return '${ upgrade ? "Upgrade" : "Get" } packages in a Flutter project.';
   }
 
   @override
@@ -101,9 +95,9 @@ class PackagesGetCommand extends FlutterCommand {
 
     final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
     // Do not send plugin analytics if pub has not run before.
-    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync() &&
-        rootProject.packagesFile.existsSync() &&
-        rootProject.packageConfigFile.existsSync();
+    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
+      && rootProject.packagesFile.existsSync()
+      && rootProject.packageConfigFile.existsSync();
     if (hasPlugins) {
       // Do not fail pub get if package config files are invalid before pub has
       // had a chance to run.
@@ -154,9 +148,8 @@ class PackagesGetCommand extends FlutterCommand {
       );
       pubGetTimer.stop();
       globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
-      // Not limiting to catching Exception because the exception is rethrown.
-    } catch (_) {
-      // ignore: avoid_catches_without_on_clauses
+    // Not limiting to catching Exception because the exception is rethrown.
+    } catch (_) { // ignore: avoid_catches_without_on_clauses
       pubGetTimer.stop();
       globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'failure');
       rethrow;
@@ -173,8 +166,10 @@ class PackagesGetCommand extends FlutterCommand {
     final String? workingDirectory = argumentResults.rest.length == 1 ? argumentResults.rest[0] : null;
     final String? target = findProjectRoot(globals.fs, workingDirectory);
     if (target == null) {
-      throwToolExit('Expected to find project root in '
-          '${workingDirectory ?? "current working directory"}.');
+      throwToolExit(
+        'Expected to find project root in '
+        '${ workingDirectory ?? "current working directory" }.'
+      );
     }
     final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
@@ -203,11 +198,11 @@ class PackagesTestCommand extends FlutterCommand {
   @override
   String get description {
     return 'Run the "test" package.\n'
-        'This is similar to "flutter test", but instead of hosting the tests in the '
-        'flutter environment it hosts the tests in a pure Dart environment. The main '
-        'differences are that the "dart:ui" library is not available and that tests '
-        'run faster. This is helpful for testing libraries that do not depend on any '
-        'packages from the Flutter SDK. It is equivalent to "pub run test".';
+           'This is similar to "flutter test", but instead of hosting the tests in the '
+           'flutter environment it hosts the tests in a pure Dart environment. The main '
+           'differences are that the "dart:ui" library is not available and that tests '
+           'run faster. This is helpful for testing libraries that do not depend on any '
+           'packages from the Flutter SDK. It is equivalent to "pub run test".';
   }
 
   @override
@@ -241,7 +236,7 @@ class PackagesForwardCommand extends FlutterCommand {
   @override
   String get description {
     return '$_description.\n'
-        'This runs the "pub" tool in a Flutter context.';
+           'This runs the "pub" tool in a Flutter context.';
   }
 
   @override
@@ -251,7 +246,8 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final List<String> subArgs = argResults!.rest.toList()..removeWhere((String arg) => arg == '--');
+    final List<String> subArgs = argResults!.rest.toList()
+      ..removeWhere((String arg) => arg == '--');
     await pub.interactively(<String>[_commandName, ...subArgs], stdio: globals.stdio);
     return FlutterCommandResult.success();
   }
@@ -267,7 +263,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
   @override
   String get description {
     return 'Pass the remaining arguments to Dart\'s "pub" tool.\n'
-        'This runs the "pub" tool in a Flutter context.';
+           'This runs the "pub" tool in a Flutter context.';
   }
 
   @override
@@ -297,7 +293,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
   @override
   String get description {
     return '$_description.\n'
-        'This runs the "pub" tool in a Flutter context.';
+           'This runs the "pub" tool in a Flutter context.';
   }
 
   @override

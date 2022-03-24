@@ -57,7 +57,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -68,12 +68,10 @@ void main() {
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(material.color, const Color(0xffffffff));
     // Default value for ThemeData.typography is Typography.material2014()
-    expect(content.text.style,
-        Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().black.bodyText2));
+    expect(content.text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().black.bodyText2));
   });
 
-  testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger',
-      (WidgetTester tester) async {
+  testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
@@ -88,7 +86,7 @@ void main() {
                   actions: <Widget>[
                     TextButton(
                       child: const Text('Action'),
-                      onPressed: () {},
+                      onPressed: () { },
                     ),
                   ],
                 ));
@@ -110,8 +108,7 @@ void main() {
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(material.color, const Color(0xffffffff));
     // Default value for ThemeData.typography is Typography.material2014()
-    expect(content.text.style,
-        Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().black.bodyText2));
+    expect(content.text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().black.bodyText2));
   });
 
   testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {
@@ -126,7 +123,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -147,8 +144,7 @@ void main() {
     expect(leadingTopLeft.dx - materialTopLeft.dx, 11);
   });
 
-  testWidgets('MaterialBanner uses values from MaterialBannerThemeData when presented by ScaffoldMessenger',
-      (WidgetTester tester) async {
+  testWidgets('MaterialBanner uses values from MaterialBannerThemeData when presented by ScaffoldMessenger', (WidgetTester tester) async {
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
@@ -166,7 +162,7 @@ void main() {
                   actions: <Widget>[
                     TextButton(
                       child: const Text('Action'),
-                      onPressed: () {},
+                      onPressed: () { },
                     ),
                   ],
                 ));
@@ -216,7 +212,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -237,8 +233,7 @@ void main() {
     expect(leadingTopLeft.dx - materialTopLeft.dx, 22);
   });
 
-  testWidgets('MaterialBanner widget properties take priority over theme when presented by ScaffoldMessenger',
-      (WidgetTester tester) async {
+  testWidgets('MaterialBanner widget properties take priority over theme when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const TextStyle textStyle = TextStyle(color: Colors.green);
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
@@ -262,7 +257,7 @@ void main() {
                   actions: <Widget>[
                     TextButton(
                       child: const Text('Action'),
-                      onPressed: () {},
+                      onPressed: () { },
                     ),
                   ],
                 ));
@@ -305,7 +300,7 @@ void main() {
           actions: <Widget>[
             TextButton(
               child: const Text('Action'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -316,8 +311,7 @@ void main() {
     expect(material.color, colorScheme.surface);
   });
 
-  testWidgets('MaterialBanner uses color scheme when necessary when presented by ScaffoldMessenger',
-      (WidgetTester tester) async {
+  testWidgets('MaterialBanner uses color scheme when necessary when presented by ScaffoldMessenger', (WidgetTester tester) async {
     final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
@@ -334,7 +328,7 @@ void main() {
                   actions: <Widget>[
                     TextButton(
                       child: const Text('Action'),
-                      onPressed: () {},
+                      onPressed: () { },
                     ),
                   ],
                 ));

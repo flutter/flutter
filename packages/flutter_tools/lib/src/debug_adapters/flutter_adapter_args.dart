@@ -9,7 +9,9 @@ import 'package:dds/dap.dart';
 /// This class represents the data passed from the client editor to the debug
 /// adapter in attachRequest, which is a request to attach to/debug a running
 /// application.
-class FlutterAttachRequestArguments extends DartCommonLaunchAttachRequestArguments implements AttachRequestArguments {
+class FlutterAttachRequestArguments
+    extends DartCommonLaunchAttachRequestArguments
+    implements AttachRequestArguments {
   FlutterAttachRequestArguments({
     this.toolArgs,
     this.customTool,
@@ -43,7 +45,8 @@ class FlutterAttachRequestArguments extends DartCommonLaunchAttachRequestArgumen
         vmServiceUri = obj['vmServiceUri'] as String?,
         super.fromMap(obj);
 
-  static FlutterAttachRequestArguments fromJson(Map<String, Object?> obj) => FlutterAttachRequestArguments.fromMap(obj);
+  static FlutterAttachRequestArguments fromJson(Map<String, Object?> obj) =>
+      FlutterAttachRequestArguments.fromMap(obj);
 
   /// Arguments to be passed to the tool that will run [program] (for example, the VM or Flutter tool).
   final List<String>? toolArgs;
@@ -74,7 +77,8 @@ class FlutterAttachRequestArguments extends DartCommonLaunchAttachRequestArgumen
         ...super.toJson(),
         if (toolArgs != null) 'toolArgs': toolArgs,
         if (customTool != null) 'customTool': customTool,
-        if (customToolReplacesArgs != null) 'customToolReplacesArgs': customToolReplacesArgs,
+        if (customToolReplacesArgs != null)
+          'customToolReplacesArgs': customToolReplacesArgs,
         if (vmServiceUri != null) 'vmServiceUri': vmServiceUri,
       };
 }
@@ -84,7 +88,9 @@ class FlutterAttachRequestArguments extends DartCommonLaunchAttachRequestArgumen
 /// This class represents the data passed from the client editor to the debug
 /// adapter in launchRequest, which is a request to start debugging an
 /// application.
-class FlutterLaunchRequestArguments extends DartCommonLaunchAttachRequestArguments implements LaunchRequestArguments {
+class FlutterLaunchRequestArguments
+    extends DartCommonLaunchAttachRequestArguments
+    implements LaunchRequestArguments {
   FlutterLaunchRequestArguments({
     this.noDebug,
     required this.program,
@@ -164,5 +170,6 @@ class FlutterLaunchRequestArguments extends DartCommonLaunchAttachRequestArgumen
         if (customToolReplacesArgs != null) 'customToolReplacesArgs': customToolReplacesArgs,
       };
 
-  static FlutterLaunchRequestArguments fromJson(Map<String, Object?> obj) => FlutterLaunchRequestArguments.fromMap(obj);
+  static FlutterLaunchRequestArguments fromJson(Map<String, Object?> obj) =>
+      FlutterLaunchRequestArguments.fromMap(obj);
 }

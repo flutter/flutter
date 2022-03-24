@@ -39,7 +39,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
       return Row(
         children: <Widget>[
           SizedBox(
@@ -73,7 +74,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
                           height: 50,
-                          color: index.isEven ? Colors.amberAccent : Colors.blueAccent,
+                          color: index.isEven
+                              ? Colors.amberAccent
+                              : Colors.blueAccent,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text('Scrollable 2 : Index $index'),

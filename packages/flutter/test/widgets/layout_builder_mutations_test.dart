@@ -14,8 +14,8 @@ class Wrapper extends StatelessWidget {
   const Wrapper({
     Key? key,
     required this.child,
-  })  : assert(child != null),
-        super(key: key);
+  }) : assert(child != null),
+       super(key: key);
 
   final Widget child;
 

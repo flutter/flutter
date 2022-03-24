@@ -109,7 +109,8 @@ void main() {
         ),
       ),
     ));
-    final State<StatefulWidget> state = tester.state(find.byType(_StatefulTestWidget));
+    final State<StatefulWidget> state =
+        tester.state(find.byType(_StatefulTestWidget));
     expect(state, isNotNull);
 
     controller.forward();

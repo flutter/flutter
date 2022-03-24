@@ -41,7 +41,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   /// Creates a [TestDefaultBinaryMessenger] instance.
   ///
   /// The [delegate] instance must not be null.
-  TestDefaultBinaryMessenger(this.delegate) : assert(delegate != null);
+  TestDefaultBinaryMessenger(this.delegate): assert(delegate != null);
 
   /// The delegate [BinaryMessenger].
   final BinaryMessenger delegate;
@@ -84,13 +84,11 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     ui.PlatformMessageResponseCallback? callback,
   ) {
     Future<ByteData?>? result;
-    if (_inboundHandlers.containsKey(channel)) result = _inboundHandlers[channel]!(data);
+    if (_inboundHandlers.containsKey(channel))
+      result = _inboundHandlers[channel]!(data);
     result ??= Future<ByteData?>.value();
     if (callback != null)
-      result = result.then((ByteData? result) {
-        callback(result);
-        return result;
-      });
+      result = result.then((ByteData? result) { callback(result); return result; });
     return result;
   }
 
@@ -129,9 +127,9 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     }
     if (resultFuture != null) {
       _pendingMessages.add(resultFuture);
-      resultFuture.catchError((Object error) {
-        /* errors are the responsibility of the caller */
-      }).whenComplete(() => _pendingMessages.remove(resultFuture));
+      resultFuture
+        .catchError((Object error) { /* errors are the responsibility of the caller */ })
+        .whenComplete(() => _pendingMessages.remove(resultFuture));
     }
     return resultFuture;
   }
@@ -183,7 +181,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   ///
   ///  * [setMockMethodCallHandler], which wraps this method but decodes
   ///    the messages using a [MethodCodec].
-  void setMockMessageHandler(String channel, MessageHandler? handler, [Object? identity]) {
+  void setMockMessageHandler(String channel, MessageHandler? handler, [ Object? identity ]) {
     if (handler == null) {
       _outboundHandlers.remove(channel);
       _outboundHandlerIdentities.remove(channel);

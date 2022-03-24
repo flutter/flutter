@@ -15,6 +15,7 @@ import 'test_data/migrate_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
 
+
 void main() {
   Directory tempDir;
   FlutterRunTestDriver flutter;
@@ -70,15 +71,11 @@ migration:
 ''', flush: true);
     FlutterProjectMetadata metadata = FlutterProjectMetadata(metadataFile, logger);
 
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].createRevision,
-        equals('fj19vkla9vnlka9vni3n808v3nch8cd'));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].baseRevision,
-        equals('93kf9v3njfa90vnidfjvn39nvi3vnie'));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].createRevision, equals('fj19vkla9vnlka9vni3n808v3nch8cd'));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.root].baseRevision, equals('93kf9v3njfa90vnidfjvn39nvi3vnie'));
 
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].createRevision,
-        equals('abfj19vkla9vnlka9vni3n808v3nch8cd'));
-    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].baseRevision,
-        equals('ab93kf9v3njfa90vnidfjvn39nvi3vnie'));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].createRevision, equals('abfj19vkla9vnlka9vni3n808v3nch8cd'));
+    expect(metadata.migrateConfig.platformConfigs[SupportedPlatform.android].baseRevision, equals('ab93kf9v3njfa90vnidfjvn39nvi3vnie'));
 
     expect(metadata.migrateConfig.unmanagedFiles[0], equals('lib/main.dart'));
     expect(metadata.migrateConfig.unmanagedFiles[1], equals('ios/Runner.xcodeproj/project.pbxproj'));
@@ -110,14 +107,10 @@ project_type: app
     const String testBaseRevision = 'testanas9anlnq9ba7bjhavan3kma';
     MigrateConfig config = MigrateConfig(
       platformConfigs: <SupportedPlatform, MigratePlatformConfig>{
-        SupportedPlatform.android:
-            MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.ios:
-            MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.root:
-            MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
-        SupportedPlatform.windows:
-            MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.android: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.ios: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.root: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
+        SupportedPlatform.windows: MigratePlatformConfig(createRevision: testCreateRevision, baseRevision: testBaseRevision),
       },
       unmanagedFiles: <String>[
         'lib/main.dart',

@@ -22,7 +22,8 @@ final RegExp _lifecycleSentinelRegExp = RegExp(r'==== lifecycle\: (.+) ====');
 TaskFunction androidLifecyclesTest({
   Map<String, String>? environment,
 }) {
-  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_activity_destroy.');
+  final Directory tempDir = Directory.systemTemp
+      .createTempSync('flutter_devicelab_activity_destroy.');
   return () async {
     try {
       section('Create app');
@@ -85,22 +86,26 @@ void main() {
         final StreamController<String> lifecyles = StreamController<String>();
         final StreamIterator<String> lifecycleItr = StreamIterator<String>(lifecyles.stream);
 
-        final StreamSubscription<void> stdout =
-            run.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String log) {
-          final RegExpMatch? match = _lifecycleSentinelRegExp.firstMatch(log);
-          print('stdout: $log');
-          if (match == null) {
-            return;
-          }
-          final String lifecycle = match[1]!;
-          print('stdout: Found app lifecycle: $lifecycle');
-          lifecyles.add(lifecycle);
-        });
+        final StreamSubscription<void> stdout = run.stdout
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String log) {
+            final RegExpMatch? match = _lifecycleSentinelRegExp.firstMatch(log);
+              print('stdout: $log');
+              if (match == null) {
+                return;
+              }
+              final String lifecycle = match[1]!;
+              print('stdout: Found app lifecycle: $lifecycle');
+              lifecyles.add(lifecycle);
+          });
 
-        final StreamSubscription<void> stderr =
-            run.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String log) {
-          print('stderr: $log');
-        });
+        final StreamSubscription<void> stderr = run.stderr
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String log) {
+            print('stderr: $log');
+          });
 
         Future<void> expectedLifecycle(String expected) async {
           section('Wait for lifecycle: $expected (mode: $mode)');
@@ -117,8 +122,7 @@ void main() {
         await device.shellExec('input', <String>['keyevent', 'KEYCODE_APP_SWITCH']);
 
         await expectedLifecycle('AppLifecycleState.inactive');
-        if (device.apiLevel == 28) {
-          // Device lab currently runs 28.
+        if (device.apiLevel == 28) { // Device lab currently runs 28.
           await expectedLifecycle('AppLifecycleState.paused');
           await expectedLifecycle('AppLifecycleState.detached');
         }
@@ -132,8 +136,7 @@ void main() {
         await device.shellExec('am', <String>['start', '-a', 'android.settings.SETTINGS']);
 
         await expectedLifecycle('AppLifecycleState.inactive');
-        if (device.apiLevel == 28) {
-          // Device lab currently runs 28.
+        if (device.apiLevel == 28) { // Device lab currently runs 28.
           await expectedLifecycle('AppLifecycleState.paused');
           await expectedLifecycle('AppLifecycleState.detached');
         }
@@ -165,7 +168,7 @@ void main() {
       }
 
       final TaskResult releaseResult = await runTestFor('release');
-      if (releaseResult.failed) {
+       if (releaseResult.failed) {
         return releaseResult;
       }
 

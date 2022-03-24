@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';
@@ -61,7 +62,8 @@ class Velocity {
 
   @override
   bool operator ==(Object other) {
-    return other is Velocity && other.pixelsPerSecond == pixelsPerSecond;
+    return other is Velocity
+        && other.pixelsPerSecond == pixelsPerSecond;
   }
 
   @override
@@ -93,10 +95,10 @@ class VelocityEstimate {
     required this.confidence,
     required this.duration,
     required this.offset,
-  })  : assert(pixelsPerSecond != null),
-        assert(confidence != null),
-        assert(duration != null),
-        assert(offset != null);
+  }) : assert(pixelsPerSecond != null),
+       assert(confidence != null),
+       assert(duration != null),
+       assert(offset != null);
 
   /// The number of pixels per second of velocity in the x and y directions.
   final Offset pixelsPerSecond;
@@ -116,14 +118,13 @@ class VelocityEstimate {
   final Offset offset;
 
   @override
-  String toString() =>
-      'VelocityEstimate(${pixelsPerSecond.dx.toStringAsFixed(1)}, ${pixelsPerSecond.dy.toStringAsFixed(1)}; offset: $offset, duration: $duration, confidence: ${confidence.toStringAsFixed(1)})';
+  String toString() => 'VelocityEstimate(${pixelsPerSecond.dx.toStringAsFixed(1)}, ${pixelsPerSecond.dy.toStringAsFixed(1)}; offset: $offset, duration: $duration, confidence: ${confidence.toStringAsFixed(1)})';
 }
 
 class _PointAtTime {
   const _PointAtTime(this.point, this.time)
-      : assert(point != null),
-        assert(time != null);
+    : assert(point != null),
+      assert(time != null);
 
   final Duration time;
   final Offset point;
@@ -143,6 +144,7 @@ class _PointAtTime {
 /// The quality of the velocity estimation will be better if more data points
 /// have been received.
 class VelocityTracker {
+
   /// Create a new velocity tracker for a pointer [kind].
   VelocityTracker.withKind(this.kind);
 
@@ -161,7 +163,8 @@ class VelocityTracker {
   /// Adds a position as the given time to the tracker.
   void addPosition(Duration time, Offset position) {
     _index += 1;
-    if (_index == _historySize) _index = 0;
+    if (_index == _historySize)
+      _index = 0;
     _samples[_index] = _PointAtTime(position, time);
   }
 
@@ -180,7 +183,8 @@ class VelocityTracker {
     int index = _index;
 
     final _PointAtTime? newestSample = _samples[index];
-    if (newestSample == null) return null;
+    if (newestSample == null)
+      return null;
 
     _PointAtTime previousSample = newestSample;
     _PointAtTime oldestSample = newestSample;
@@ -189,12 +193,14 @@ class VelocityTracker {
     // the samples represent continuous motion.
     do {
       final _PointAtTime? sample = _samples[index];
-      if (sample == null) break;
+      if (sample == null)
+        break;
 
       final double age = (newestSample.time - sample.time).inMicroseconds.toDouble() / 1000;
       final double delta = (sample.time - previousSample.time).inMicroseconds.abs().toDouble() / 1000;
       previousSample = sample;
-      if (age > _horizonMilliseconds || delta > _assumePointerMoveStoppedMilliseconds) break;
+      if (age > _horizonMilliseconds || delta > _assumePointerMoveStoppedMilliseconds)
+        break;
 
       oldestSample = sample;
       final Offset position = sample.point;
@@ -214,8 +220,7 @@ class VelocityTracker {
         final LeastSquaresSolver ySolver = LeastSquaresSolver(time, y, w);
         final PolynomialFit? yFit = ySolver.solve(2);
         if (yFit != null) {
-          return VelocityEstimate(
-            // convert from pixels/ms to pixels/s
+          return VelocityEstimate( // convert from pixels/ms to pixels/s
             pixelsPerSecond: Offset(xFit.coefficients[1] * 1000, yFit.coefficients[1] * 1000),
             confidence: xFit.confidence * yFit.confidence,
             duration: newestSample.time - oldestSample.time,
@@ -244,7 +249,8 @@ class VelocityTracker {
   /// estimate or if the estimated velocity is zero.
   Velocity getVelocity() {
     final VelocityEstimate? estimate = getVelocityEstimate();
-    if (estimate == null || estimate.pixelsPerSecond == Offset.zero) return Velocity.zero;
+    if (estimate == null || estimate.pixelsPerSecond == Offset.zero)
+      return Velocity.zero;
     return Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
   }
 }
@@ -286,7 +292,8 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
   void addPosition(Duration time, Offset position) {
     assert(() {
       final _PointAtTime? previousPoint = _touchSamples[_index];
-      if (previousPoint == null || previousPoint.time <= time) return true;
+      if (previousPoint == null || previousPoint.time <= time)
+        return true;
       throw FlutterError(
         'The position being added ($position) has a smaller timestamp ($time) '
         'than its predecessor: $previousPoint.',
@@ -313,9 +320,9 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
     assert(dt >= 0);
 
     return dt > 0
-        // Convert dt to milliseconds to preserve floating point precision.
-        ? (end.point - start.point) * 1000 / (dt.toDouble() / 1000)
-        : Offset.zero;
+      // Convert dt to milliseconds to preserve floating point precision.
+      ? (end.point - start.point) * 1000 / (dt.toDouble() / 1000)
+      : Offset.zero;
   }
 
   @override
@@ -326,15 +333,17 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
     // installed on the scroll view would report. Typically in an iOS scroll
     // view the velocity values are different between the two, because the
     // scroll view usually slows down when the touch is released.
-    final Offset estimatedVelocity =
-        _previousVelocityAt(-2) * 0.6 + _previousVelocityAt(-1) * 0.35 + _previousVelocityAt(0) * 0.05;
+    final Offset estimatedVelocity = _previousVelocityAt(-2) * 0.6
+                                   + _previousVelocityAt(-1) * 0.35
+                                   + _previousVelocityAt(0) * 0.05;
 
     final _PointAtTime? newestSample = _touchSamples[_index];
     _PointAtTime? oldestNonNullSample;
 
     for (int i = 1; i <= _sampleSize; i += 1) {
       oldestNonNullSample = _touchSamples[(_index + i) % _sampleSize];
-      if (oldestNonNullSample != null) break;
+      if (oldestNonNullSample != null)
+        break;
     }
 
     if (oldestNonNullSample == null || newestSample == null) {

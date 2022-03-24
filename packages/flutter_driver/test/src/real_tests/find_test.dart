@@ -80,4 +80,4 @@ void main() {
   });
 }
 
-class FakeDeserialize extends Fake with DeserializeFinderFactory {}
+class FakeDeserialize extends Fake with DeserializeFinderFactory { }

@@ -39,12 +39,10 @@ IconThemeData getIconData(WidgetTester tester) {
 
 DefaultTextStyle getLabelStyle(WidgetTester tester) {
   return tester.widget(
-    find
-        .descendant(
-          of: find.byType(RawChip),
-          matching: find.byType(DefaultTextStyle),
-        )
-        .last,
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(DefaultTextStyle),
+    ).last,
   );
 }
 
@@ -81,9 +79,9 @@ void main() {
     const ChipThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[]);
   });
@@ -158,7 +156,7 @@ void main() {
             child: Center(
               child: RawChip(
                 label: const SizedBox(width: 100, height: 100),
-                onSelected: (bool newValue) {},
+                onSelected: (bool newValue) { },
               ),
             ),
           ),
@@ -208,7 +206,7 @@ void main() {
                   child: Center(
                     child: RawChip(
                       label: const SizedBox(width: 100, height: 100),
-                      onSelected: (bool newValue) {},
+                      onSelected: (bool newValue) { },
                     ),
                   ),
                 ),
@@ -256,11 +254,11 @@ void main() {
                       backgroundColor: backgroundColor,
                       elevation: elevation,
                       padding: const EdgeInsets.all(50),
-                      labelPadding: const EdgeInsets.all(25),
+                      labelPadding:const EdgeInsets.all(25),
                       labelStyle: const TextStyle(fontSize: fontSize),
                       shape: shape,
                       label: const SizedBox(width: 100, height: 100),
-                      onSelected: (bool newValue) {},
+                      onSelected: (bool newValue) { },
                     ),
                   ),
                 ),
@@ -300,6 +298,7 @@ void main() {
     expect(chipTheme.secondarySelectedColor, equals(Colors.tealAccent[200]!.withAlpha(0x3d)));
     expect(chipTheme.deleteIconColor, equals(Colors.white.withAlpha(0xde)));
   });
+
 
   testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
@@ -505,29 +504,34 @@ void main() {
     const Color disabledColor = Color(0x00000006);
 
     Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) return disabledColor;
+      if (states.contains(MaterialState.disabled))
+        return disabledColor;
 
-      if (states.contains(MaterialState.pressed)) return pressedColor;
+      if (states.contains(MaterialState.pressed))
+        return pressedColor;
 
-      if (states.contains(MaterialState.hovered)) return hoverColor;
+      if (states.contains(MaterialState.hovered))
+        return hoverColor;
 
-      if (states.contains(MaterialState.focused)) return focusedColor;
+      if (states.contains(MaterialState.focused))
+        return focusedColor;
 
-      if (states.contains(MaterialState.selected)) return selectedColor;
+      if (states.contains(MaterialState.selected))
+        return selectedColor;
 
       return defaultColor;
     }
 
-    final TextStyle labelStyle = TextStyle(
+    final TextStyle labelStyle =  TextStyle(
       color: MaterialStateColor.resolveWith(getTextColor),
     );
-    Widget chipWidget({bool enabled = true, bool selected = false}) {
+    Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
         theme: ThemeData(
           chipTheme: ThemeData.light().chipTheme.copyWith(
-                labelStyle: labelStyle,
-                secondaryLabelStyle: labelStyle,
-              ),
+            labelStyle: labelStyle,
+            secondaryLabelStyle: labelStyle,
+          ),
         ),
         home: Scaffold(
           body: Focus(
@@ -541,7 +545,6 @@ void main() {
         ),
       );
     }
-
     Color textColor() {
       return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style!.color!;
     }
@@ -591,17 +594,18 @@ void main() {
     BorderSide getBorderSide(Set<MaterialState> states) {
       Color color = defaultColor;
 
-      if (states.contains(MaterialState.selected)) color = selectedColor;
+      if (states.contains(MaterialState.selected))
+        color = selectedColor;
 
       return BorderSide(color: color);
     }
 
-    Widget chipWidget({bool selected = false}) {
+    Widget chipWidget({ bool selected = false }) {
       return MaterialApp(
         theme: ThemeData(
           chipTheme: ThemeData.light().chipTheme.copyWith(
-                side: MaterialStateBorderSide.resolveWith(getBorderSide),
-              ),
+            side: MaterialStateBorderSide.resolveWith(getBorderSide),
+          ),
         ),
         home: Scaffold(
           body: ChoiceChip(
@@ -628,7 +632,8 @@ void main() {
 
     BorderSide getBorderSide(Set<MaterialState> states) {
       Color color = defaultColor;
-      if (states.contains(MaterialState.selected)) color = selectedColor;
+      if (states.contains(MaterialState.selected))
+        color = selectedColor;
       return BorderSide(color: color);
     }
 
@@ -640,7 +645,7 @@ void main() {
       side: _MaterialStateBorderSide(getBorderSide),
     );
 
-    Widget chipWidget({bool selected = false}) {
+    Widget chipWidget({ bool selected = false }) {
       return MaterialApp(
         theme: ThemeData(chipTheme: chipTheme),
         home: Scaffold(
@@ -664,7 +669,8 @@ void main() {
 
   testWidgets('Chip uses stateful shape from chip theme', (WidgetTester tester) async {
     OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) return const RoundedRectangleBorder();
+      if (states.contains(MaterialState.selected))
+        return const RoundedRectangleBorder();
 
       return null;
     }
@@ -677,7 +683,8 @@ void main() {
       shape: _MaterialStateOutlinedBorder(getShape),
     );
 
-    Widget chipWidget({bool selected = false}) {
+
+    Widget chipWidget({ bool selected = false }) {
       return MaterialApp(
         theme: ThemeData(chipTheme: chipTheme),
         home: Scaffold(

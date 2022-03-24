@@ -15,9 +15,9 @@ class _FadeUpwardsPageTransition extends StatelessWidget {
     Key? key,
     required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
     required this.child,
-  })  : _positionAnimation = routeAnimation.drive(_bottomUpTween.chain(_fastOutSlowInTween)),
-        _opacityAnimation = routeAnimation.drive(_easeInTween),
-        super(key: key);
+  }) : _positionAnimation = routeAnimation.drive(_bottomUpTween.chain(_fastOutSlowInTween)),
+       _opacityAnimation = routeAnimation.drive(_easeInTween),
+       super(key: key);
 
   // Fractional offset from 1/4 screen below the top to fully on screen.
   static final Tween<Offset> _bottomUpTween = Tween<Offset>(
@@ -157,19 +157,21 @@ class _ZoomPageTransition extends StatelessWidget {
     required this.animation,
     required this.secondaryAnimation,
     this.child,
-  })  : assert(animation != null),
-        assert(secondaryAnimation != null),
-        super(key: key);
+  }) : assert(animation != null),
+       assert(secondaryAnimation != null),
+       super(key: key);
 
   // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
   // the native transition.
   static final List<TweenSequenceItem<double>> fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
     TweenSequenceItem<double>(
-      tween: Tween<double>(begin: 0.0, end: 0.4).chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
+      tween: Tween<double>(begin: 0.0, end: 0.4)
+        .chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
       weight: 0.166666,
     ),
     TweenSequenceItem<double>(
-      tween: Tween<double>(begin: 0.4, end: 1.0).chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1.0))),
+      tween: Tween<double>(begin: 0.4, end: 1.0)
+        .chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1.0))),
       weight: 1.0 - 0.166666,
     ),
   ];
@@ -258,9 +260,9 @@ class _ZoomEnterTransition extends StatelessWidget {
     required this.animation,
     this.reverse = false,
     this.child,
-  })  : assert(animation != null),
-        assert(reverse != null),
-        super(key: key);
+  }) : assert(animation != null),
+       assert(reverse != null),
+       super(key: key);
 
   final Animation<double> animation;
   final Widget? child;
@@ -303,9 +305,14 @@ class _ZoomEnterTransition extends StatelessWidget {
       opacity = _scrimOpacityTween.evaluate(animation)!;
     }
 
-    final Animation<double> fadeTransition = reverse ? kAlwaysCompleteAnimation : _fadeInTransition.animate(animation);
+    final Animation<double> fadeTransition = reverse
+      ? kAlwaysCompleteAnimation
+      : _fadeInTransition.animate(animation);
 
-    final Animation<double> scaleTransition = (reverse ? _scaleDownTransition : _scaleUpTransition).animate(animation);
+    final Animation<double> scaleTransition = (reverse
+      ? _scaleDownTransition
+      : _scaleUpTransition
+    ).animate(animation);
 
     return AnimatedBuilder(
       animation: animation,
@@ -332,9 +339,9 @@ class _ZoomExitTransition extends StatelessWidget {
     required this.animation,
     this.reverse = false,
     this.child,
-  })  : assert(animation != null),
-        assert(reverse != null),
-        super(key: key);
+  }) : assert(animation != null),
+       assert(reverse != null),
+       super(key: key);
 
   final Animation<double> animation;
   final bool reverse;
@@ -357,8 +364,13 @@ class _ZoomExitTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> fadeTransition = reverse ? _fadeOutTransition.animate(animation) : kAlwaysCompleteAnimation;
-    final Animation<double> scaleTransition = (reverse ? _scaleDownTransition : _scaleUpTransition).animate(animation);
+    final Animation<double> fadeTransition = reverse
+      ? _fadeOutTransition.animate(animation)
+      : kAlwaysCompleteAnimation;
+    final Animation<double> scaleTransition = (reverse
+      ? _scaleDownTransition
+      : _scaleUpTransition
+    ).animate(animation);
 
     return FadeTransition(
       opacity: fadeTransition,
@@ -553,8 +565,7 @@ class PageTransitionsTheme with Diagnosticable {
   /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder]
   /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
   /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
-  const PageTransitionsTheme({Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders})
-      : _builders = builders;
+  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders }) : _builders = builders;
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
     TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
@@ -581,9 +592,11 @@ class PageTransitionsTheme with Diagnosticable {
   ) {
     TargetPlatform platform = Theme.of(context).platform;
 
-    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route)) platform = TargetPlatform.iOS;
+    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route))
+      platform = TargetPlatform.iOS;
 
-    final PageTransitionsBuilder matchingBuilder = builders[platform] ?? const FadeUpwardsPageTransitionsBuilder();
+    final PageTransitionsBuilder matchingBuilder =
+      builders[platform] ?? const FadeUpwardsPageTransitionsBuilder();
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 
@@ -595,10 +608,14 @@ class PageTransitionsTheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    if (other is PageTransitionsTheme && identical(builders, other.builders)) return true;
-    return other is PageTransitionsTheme && listEquals<PageTransitionsBuilder?>(_all(other.builders), _all(builders));
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    if (other is PageTransitionsTheme && identical(builders, other.builders))
+      return true;
+    return other is PageTransitionsTheme
+        && listEquals<PageTransitionsBuilder?>(_all(other.builders), _all(builders));
   }
 
   @override

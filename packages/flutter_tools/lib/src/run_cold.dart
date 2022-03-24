@@ -20,7 +20,6 @@ import 'tracing.dart';
 import 'vmservice.dart';
 
 const String kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
-
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     List<FlutterDevice> devices, {
@@ -212,7 +211,7 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  void printHelp({@required bool details}) {
+  void printHelp({ @required bool details }) {
     globals.printStatus('Flutter run key commands.');
     if (details) {
       printHelpDetails();

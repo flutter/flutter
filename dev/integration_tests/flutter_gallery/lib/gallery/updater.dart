@@ -9,7 +9,8 @@ import 'package:url_launcher/url_launcher.dart';
 typedef UpdateUrlFetcher = Future<String?> Function();
 
 class Updater extends StatefulWidget {
-  const Updater({required this.updateUrlFetcher, this.child, Key? key}) : super(key: key);
+  const Updater({ required this.updateUrlFetcher, this.child, Key? key })
+    : super(key: key);
 
   final UpdateUrlFetcher updateUrlFetcher;
   final Widget? child;
@@ -28,19 +29,22 @@ class UpdaterState extends State<Updater> {
   static DateTime? _lastUpdateCheck;
   Future<void> _checkForUpdates() async {
     // Only prompt once a day
-    if (_lastUpdateCheck != null && DateTime.now().difference(_lastUpdateCheck!) < const Duration(days: 1)) {
+    if (_lastUpdateCheck != null &&
+        DateTime.now().difference(_lastUpdateCheck!) < const Duration(days: 1)) {
       return; // We already checked for updates recently
     }
     _lastUpdateCheck = DateTime.now();
 
     final String? updateUrl = await widget.updateUrlFetcher();
     final bool? wantsUpdate = await showDialog<bool>(context: context, builder: _buildDialog);
-    if (wantsUpdate != null && updateUrl != null && wantsUpdate) launch(updateUrl);
+    if (wantsUpdate != null && updateUrl != null && wantsUpdate)
+      launch(updateUrl);
   }
 
   Widget _buildDialog(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle dialogTextStyle = theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);
+    final TextStyle dialogTextStyle =
+        theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);
     return AlertDialog(
       title: const Text('Update Flutter Gallery?'),
       content: Text('A newer version is available.', style: dialogTextStyle),

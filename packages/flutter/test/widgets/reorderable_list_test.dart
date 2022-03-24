@@ -145,7 +145,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    void check({List<int> visible = const <int>[], List<int> hidden = const <int>[]}) {
+    void check({ List<int> visible = const <int>[], List<int> hidden = const <int>[] }) {
       for (final int i in visible) {
         expect(find.text('item $i'), findsOneWidget);
       }
@@ -204,27 +204,21 @@ void main() {
     const Color iconColor = Color(0xff0000ff);
 
     TextStyle getIconStyle() {
-      return tester
-          .widget<RichText>(
-            find.descendant(
-              of: find.byType(Icon),
-              matching: find.byType(RichText),
-            ),
-          )
-          .text
-          .style!;
+      return tester.widget<RichText>(
+        find.descendant(
+          of: find.byType(Icon),
+          matching: find.byType(RichText),
+        ),
+      ).text.style!;
     }
 
     TextStyle getTextStyle() {
-      return tester
-          .widget<RichText>(
-            find.descendant(
-              of: find.text('item 0'),
-              matching: find.byType(RichText),
-            ),
-          )
-          .text
-          .style!;
+      return tester.widget<RichText>(
+        find.descendant(
+          of: find.text('item 0'),
+          matching: find.byType(RichText),
+        ),
+      ).text.style!;
     }
 
     // This SliverReorderableList has just one item: "item 0".
@@ -265,10 +259,10 @@ void main() {
       TestList(
         items: List<int>.from(<int>[0, 1, 2, 3]),
         proxyDecorator: (
-          Widget child,
-          int index,
-          Animation<double> animation,
-        ) {
+            Widget child,
+            int index,
+            Animation<double> animation,
+            ) {
           return AnimatedBuilder(
             animation: animation,
             builder: (BuildContext context, Widget? child) {
@@ -321,8 +315,7 @@ void main() {
     expect(getItemFadeTransition(), findsNothing);
   });
 
-  testWidgets('ReorderableList supports items with nested list views without throwing layout exception.',
-      (WidgetTester tester) async {
+  testWidgets('ReorderableList supports items with nested list views without throwing layout exception.', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
@@ -376,8 +369,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('ReorderableList supports items with nested list views without throwing layout exception.',
-      (WidgetTester tester) async {
+  testWidgets('ReorderableList supports items with nested list views without throwing layout exception.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83224.
     await tester.pumpWidget(
       MaterialApp(
@@ -432,8 +424,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('SliverReorderableList - properly animates the drop at starting position in a reversed list',
-      (WidgetTester tester) async {
+  testWidgets('SliverReorderableList - properly animates the drop at starting position in a reversed list', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84625
     final List<int> items = List<int>.generate(8, (int index) => index);
 
@@ -598,82 +589,83 @@ void main() {
     expect(endIndex, equals(0));
   });
 
+
+
   testWidgets('ReorderableList asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
-    final List<int> numbers = <int>[0, 1, 2];
-    expect(
-        () => ReorderableList(
-              itemBuilder: (BuildContext context, int index) {
-                return SizedBox(
-                    key: ValueKey<int>(numbers[index]),
-                    height: 20 + numbers[index] * 10,
-                    child: ReorderableDragStartListener(
-                      index: index,
-                      child: Text(numbers[index].toString()),
-                    ));
-              },
-              itemCount: numbers.length,
-              itemExtent: 30,
-              prototypeItem: const SizedBox(),
-              onReorder: (int fromIndex, int toIndex) {},
-            ),
-        throwsAssertionError);
+    final List<int> numbers = <int>[0,1,2];
+    expect(() => ReorderableList(
+      itemBuilder: (BuildContext context, int index) {
+        return SizedBox(
+            key: ValueKey<int>(numbers[index]),
+            height: 20 + numbers[index] * 10,
+            child: ReorderableDragStartListener(
+              index: index,
+              child: Text(numbers[index].toString()),
+            )
+        );
+      },
+      itemCount: numbers.length,
+      itemExtent: 30,
+      prototypeItem: const SizedBox(),
+      onReorder: (int fromIndex, int toIndex) { },
+    ), throwsAssertionError);
   });
 
-  testWidgets('SliverReorderableList asserts on both non-null itemExtent and prototypeItem',
-      (WidgetTester tester) async {
-    final List<int> numbers = <int>[0, 1, 2];
-    expect(
-        () => SliverReorderableList(
-              itemBuilder: (BuildContext context, int index) {
-                return SizedBox(
-                    key: ValueKey<int>(numbers[index]),
-                    height: 20 + numbers[index] * 10,
-                    child: ReorderableDragStartListener(
-                      index: index,
-                      child: Text(numbers[index].toString()),
-                    ));
-              },
-              itemCount: numbers.length,
-              itemExtent: 30,
-              prototypeItem: const SizedBox(),
-              onReorder: (int fromIndex, int toIndex) {},
-            ),
-        throwsAssertionError);
+  testWidgets('SliverReorderableList asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
+    expect(() => SliverReorderableList(
+      itemBuilder: (BuildContext context, int index) {
+        return SizedBox(
+            key: ValueKey<int>(numbers[index]),
+            height: 20 + numbers[index] * 10,
+            child: ReorderableDragStartListener(
+              index: index,
+              child: Text(numbers[index].toString()),
+            )
+        );
+      },
+      itemCount: numbers.length,
+      itemExtent: 30,
+      prototypeItem: const SizedBox(),
+      onReorder: (int fromIndex, int toIndex) { },
+    ), throwsAssertionError);
   });
 
-  testWidgets('if itemExtent is non-null, children have same extent in the scroll direction',
-      (WidgetTester tester) async {
-    final List<int> numbers = <int>[0, 1, 2];
+  testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return ReorderableList(
-              itemBuilder: (BuildContext context, int index) {
-                return SizedBox(
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ReorderableList(
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
                     key: ValueKey<int>(numbers[index]),
                     // children with different heights
                     height: 20 + numbers[index] * 10,
                     child: ReorderableDragStartListener(
                       index: index,
                       child: Text(numbers[index].toString()),
-                    ));
-              },
-              itemCount: numbers.length,
-              itemExtent: 30,
-              onReorder: (int fromIndex, int toIndex) {
-                if (fromIndex < toIndex) {
-                  toIndex--;
-                }
-                final int value = numbers.removeAt(fromIndex);
-                numbers.insert(toIndex, value);
-              },
-            );
-          },
+                    )
+                  );
+                },
+                itemCount: numbers.length,
+                itemExtent: 30,
+                onReorder: (int fromIndex, int toIndex) {
+                  if (fromIndex < toIndex) {
+                    toIndex--;
+                  }
+                  final int value = numbers.removeAt(fromIndex);
+                  numbers.insert(toIndex, value);
+                },
+              );
+            },
+          ),
         ),
-      ),
-    ));
+      )
+    );
 
     final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
     final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
@@ -684,36 +676,38 @@ void main() {
     expect(item2Height, 30.0);
   });
 
-  testWidgets('if prototypeItem is non-null, children have same extent in the scroll direction',
-      (WidgetTester tester) async {
-    final List<int> numbers = <int>[0, 1, 2];
+  testWidgets('if prototypeItem is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+    final List<int> numbers = <int>[0,1,2];
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return ReorderableList(
-              itemBuilder: (BuildContext context, int index) {
-                return SizedBox(
-                    key: ValueKey<int>(numbers[index]),
-                    // children with different heights
-                    height: 20 + numbers[index] * 10,
-                    child: ReorderableDragStartListener(
-                      index: index,
-                      child: Text(numbers[index].toString()),
-                    ));
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ReorderableList(
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(
+                        key: ValueKey<int>(numbers[index]),
+                        // children with different heights
+                        height: 20 + numbers[index] * 10,
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: Text(numbers[index].toString()),
+                        )
+                    );
+                  },
+                  itemCount: numbers.length,
+                  prototypeItem: const SizedBox(
+                    height: 30,
+                    child: Text('3'),
+                  ),
+                  onReorder: (int oldIndex, int newIndex) {  },
+                );
               },
-              itemCount: numbers.length,
-              prototypeItem: const SizedBox(
-                height: 30,
-                child: Text('3'),
-              ),
-              onReorder: (int oldIndex, int newIndex) {},
-            );
-          },
-        ),
-      ),
-    ));
+            ),
+          ),
+        )
+    );
 
     final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
     final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
@@ -737,7 +731,6 @@ void main() {
         }
         items.insert(toIndex, items.removeAt(fromIndex));
       }
-
       // The list has five elements of height 100
       await tester.pumpWidget(
         MaterialApp(
@@ -784,7 +777,6 @@ void main() {
         }
         items.insert(toIndex, items.removeAt(fromIndex));
       }
-
       // The list has five elements of height 100
       await tester.pumpWidget(
         MaterialApp(
@@ -834,7 +826,6 @@ void main() {
         }
         items.insert(toIndex, items.removeAt(fromIndex));
       }
-
       // The list has five elements of height 100
       await tester.pumpWidget(
         MaterialApp(
@@ -882,7 +873,6 @@ void main() {
         }
         items.insert(toIndex, items.removeAt(fromIndex));
       }
-
       // The list has five elements of height 100
       await tester.pumpWidget(
         MaterialApp(

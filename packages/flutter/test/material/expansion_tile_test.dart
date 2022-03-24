@@ -101,9 +101,9 @@ void main() {
 
     double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
     Container getContainer(Key key) => tester.firstWidget(find.descendant(
-          of: find.byKey(key),
-          matching: find.byType(Container),
-        ));
+      of: find.byKey(key),
+      matching: find.byType(Container),
+    ));
 
     expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
     expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
@@ -151,7 +151,7 @@ void main() {
     expect(collapsedContainerDecoration.color, Colors.transparent);
     expect(collapsedContainerDecoration.border!.top.color, dividerColor);
     expect(collapsedContainerDecoration.border!.bottom.color, dividerColor);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ExpansionTile Theme dependencies', (WidgetTester tester) async {
     final Key expandedTitleKey = UniqueKey();
@@ -209,7 +209,7 @@ void main() {
     expect(textColor(collapsedTitleKey), foregroundColor);
     expect(iconColor(expandedIconKey), unselectedWidgetColor);
     expect(iconColor(collapsedIconKey), foregroundColor);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -258,12 +258,12 @@ void main() {
       ),
     );
 
-    // This text should be offstage while ExpansionTile collapsed
-    expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
-    expect(find.text('Maintaining State'), findsNothing);
-    // This text shouldn't be there while ExpansionTile collapsed
-    expect(find.text('Discarding State'), findsNothing);
-  });
+     // This text should be offstage while ExpansionTile collapsed
+     expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
+     expect(find.text('Maintaining State'), findsNothing);
+     // This text shouldn't be there while ExpansionTile collapsed
+     expect(find.text('Discarding State'), findsNothing);
+   });
 
   testWidgets('ExpansionTile padding test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
@@ -378,13 +378,10 @@ void main() {
           ),
         );
       },
-      throwsA(isA<AssertionError>().having(
-          (AssertionError error) => error.toString(),
-          '.toString()',
-          contains(
-            'CrossAxisAlignment.baseline is not supported since the expanded'
-            ' children are aligned in a column, not a row. Try to use another constant.',
-          ))),
+      throwsA(isA<AssertionError>().having((AssertionError error) => error.toString(), '.toString()', contains(
+        'CrossAxisAlignment.baseline is not supported since the expanded'
+        ' children are aligned in a column, not a row. Try to use another constant.',
+      ))),
     );
   });
 
@@ -405,6 +402,7 @@ void main() {
       ),
     ));
 
+
     await tester.tap(find.text('title'));
     await tester.pumpAndSettle();
 
@@ -419,6 +417,7 @@ void main() {
     // By default the value of extendedCrossAxisAlignment is CrossAxisAlignment.center, hence
     // the offset of left and right edges from Column should be equal.
     expect(child1Rect.left - columnRect.left, columnRect.right - child1Rect.right);
+
   });
 
   testWidgets('childrenPadding default value', (WidgetTester tester) async {
@@ -501,24 +500,20 @@ void main() {
       ),
     ));
 
-    BoxDecoration boxDecoration = tester
-        .firstWidget<Container>(find.descendant(
-          of: find.byKey(expansionTileKey),
-          matching: find.byType(Container),
-        ))
-        .decoration! as BoxDecoration;
+    BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
 
     expect(boxDecoration.color, collapsedBackgroundColor);
 
     await tester.tap(find.text('Title'));
     await tester.pumpAndSettle();
 
-    boxDecoration = tester
-        .firstWidget<Container>(find.descendant(
-          of: find.byKey(expansionTileKey),
-          matching: find.byType(Container),
-        ))
-        .decoration! as BoxDecoration;
+    boxDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
 
     expect(boxDecoration.color, backgroundColor);
   });

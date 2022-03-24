@@ -44,19 +44,19 @@ void main() {
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
       expect(
-        getApkDirectory(project).path,
-        '/build/app/outputs/flutter-apk',
+        getApkDirectory(project).path, '/build/app/outputs/flutter-apk',
       );
     });
 
     testWithoutContext('getApkDirectory in module projects', () {
-      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync(kModulePubspec);
+      fileSystem.currentDirectory
+        .childFile('pubspec.yaml')
+        .writeAsStringSync(kModulePubspec);
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
       expect(project.isModule, true);
       expect(
-        getApkDirectory(project).path,
-        '/build/host/outputs/apk',
+        getApkDirectory(project).path, '/build/host/outputs/apk',
       );
     });
 
@@ -64,26 +64,26 @@ void main() {
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
       expect(
-        getBundleDirectory(project).path,
-        '/build/app/outputs/bundle',
+        getBundleDirectory(project).path, '/build/app/outputs/bundle',
       );
     });
 
     testWithoutContext('getBundleDirectory in module projects', () {
-      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync(kModulePubspec);
+      fileSystem.currentDirectory
+        .childFile('pubspec.yaml')
+        .writeAsStringSync(kModulePubspec);
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
       expect(project.isModule, true);
       expect(
-        getBundleDirectory(project).path,
-        '/build/host/outputs/bundle',
+        getBundleDirectory(project).path, '/build/host/outputs/bundle',
       );
     });
 
     testWithoutContext('getRepoDirectory', () {
       expect(
         getRepoDirectory(fileSystem.directory('foo')).path,
-        equals(fileSystem.path.join('foo', 'outputs', 'repo')),
+        equals(fileSystem.path.join('foo','outputs', 'repo')),
       );
     });
   });
@@ -161,13 +161,11 @@ void main() {
         const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1', treeShakeIcons: false), splitPerAbi: true),
       );
 
-      expect(
-          apks,
-          unorderedEquals(<String>[
-            'app-armeabi-v7a-flavor1-release.apk',
-            'app-arm64-v8a-flavor1-release.apk',
-            'app-x86_64-flavor1-release.apk',
-          ]));
+      expect(apks, unorderedEquals(<String>[
+        'app-armeabi-v7a-flavor1-release.apk',
+        'app-arm64-v8a-flavor1-release.apk',
+        'app-x86_64-flavor1-release.apk',
+      ]));
     });
 
     testWithoutContext('Finds APK with split-per-abi when flavor contains uppercase letters', () {
@@ -175,25 +173,22 @@ void main() {
         const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavorA', treeShakeIcons: false), splitPerAbi: true),
       );
 
-      expect(
-          apks,
-          unorderedEquals(<String>[
-            'app-armeabi-v7a-flavora-release.apk',
-            'app-arm64-v8a-flavora-release.apk',
-            'app-x86_64-flavora-release.apk',
-          ]));
+      expect(apks, unorderedEquals(<String>[
+        'app-armeabi-v7a-flavora-release.apk',
+        'app-arm64-v8a-flavora-release.apk',
+        'app-x86_64-flavora-release.apk',
+      ]));
     });
+
   });
 
   group('gradle build', () {
     testUsingContext('do not crash if there is no Android SDK', () async {
       expect(() {
         updateLocalProperties(project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
-      },
-          throwsToolExit(
-            message:
-                '${globals.logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
-          ));
+      }, throwsToolExit(
+        message: '${globals.logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
+      ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
     });
@@ -218,8 +213,7 @@ void main() {
     }
 
     String propertyFor(String key, File file) {
-      final Iterable<String> result = file
-          .readAsLinesSync()
+      final Iterable<String> result = file.readAsLinesSync()
           .where((String line) => line.startsWith('$key='))
           .map((String line) => line.split('=')[1]);
       return result.isEmpty ? null : result.first;
@@ -234,6 +228,7 @@ void main() {
       final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifest);
+
 
       updateLocalProperties(
         project: FlutterProject.fromDirectoryTest(globals.fs.directory('path/to/project')),
@@ -327,8 +322,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo =
-          BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -346,8 +340,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo =
-          BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -364,8 +357,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo =
-          BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -388,15 +380,13 @@ flutter:
       );
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo:
-            const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false),
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false),
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '3',
       );
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo:
-            const BuildInfo(BuildMode.release, null, buildName: '1.0.3', buildNumber: '4', treeShakeIcons: false),
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.3', buildNumber: '4', treeShakeIcons: false),
         expectedBuildName: '1.0.3',
         expectedBuildNumber: '4',
       );
@@ -458,7 +448,8 @@ flutter:
     });
 
     testWithoutContext('throws on unsupported versions', () {
-      expect(() => getGradleVersionFor('3.6.0'), throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
+      expect(() => getGradleVersionFor('3.6.0'),
+          throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
     });
   });
 
@@ -472,9 +463,12 @@ flutter:
     testUsingContext('returns true when the project is using AndroidX', () async {
       final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_android.');
 
-      androidDirectory.childFile('gradle.properties').writeAsStringSync('android.useAndroidX=true');
+      androidDirectory
+        .childFile('gradle.properties')
+        .writeAsStringSync('android.useAndroidX=true');
 
       expect(isAppUsingAndroidX(androidDirectory), isTrue);
+
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -483,9 +477,12 @@ flutter:
     testUsingContext('returns false when the project is not using AndroidX', () async {
       final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_android.');
 
-      androidDirectory.childFile('gradle.properties').writeAsStringSync('android.useAndroidX=false');
+      androidDirectory
+        .childFile('gradle.properties')
+        .writeAsStringSync('android.useAndroidX=false');
 
       expect(isAppUsingAndroidX(androidDirectory), isFalse);
+
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -495,6 +492,7 @@ flutter:
       final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_android.');
 
       expect(isAppUsingAndroidX(androidDirectory), isFalse);
+
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -521,42 +519,45 @@ flutter:
       );
 
       expect(
-          logger.statusText,
-          contains('\n'
-              'Consuming the Module\n'
-              '  1. Open <host>/app/build.gradle\n'
-              '  2. Ensure you have the repositories configured, otherwise add them:\n'
-              '\n'
-              '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
-              '      repositories {\n'
-              '        maven {\n'
-              "            url 'build/'\n"
-              '        }\n'
-              '        maven {\n'
-              '            url "\$storageUrl/download.flutter.io"\n'
-              '        }\n'
-              '      }\n'
-              '\n'
-              '  3. Make the host app depend on the Flutter module:\n'
-              '\n'
-              '    dependencies {\n'
-              "      releaseImplementation 'com.mycompany:flutter_release:2.2'\n"
-              "      debugImplementation 'com.mycompany:flutter_debug:2.2'\n"
-              "      profileImplementation 'com.mycompany:flutter_profile:2.2'\n"
-              '    }\n'
-              '\n'
-              '\n'
-              '  4. Add the `profile` build type:\n'
-              '\n'
-              '    android {\n'
-              '      buildTypes {\n'
-              '        profile {\n'
-              '          initWith debug\n'
-              '        }\n'
-              '      }\n'
-              '    }\n'
-              '\n'
-              'To learn more, visit https://flutter.dev/go/build-aar\n'));
+        logger.statusText,
+        contains(
+          '\n'
+          'Consuming the Module\n'
+          '  1. Open <host>/app/build.gradle\n'
+          '  2. Ensure you have the repositories configured, otherwise add them:\n'
+          '\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
+          '      repositories {\n'
+          '        maven {\n'
+          "            url 'build/'\n"
+          '        }\n'
+          '        maven {\n'
+          '            url "\$storageUrl/download.flutter.io"\n'
+          '        }\n'
+          '      }\n'
+          '\n'
+          '  3. Make the host app depend on the Flutter module:\n'
+          '\n'
+          '    dependencies {\n'
+          "      releaseImplementation 'com.mycompany:flutter_release:2.2'\n"
+          "      debugImplementation 'com.mycompany:flutter_debug:2.2'\n"
+          "      profileImplementation 'com.mycompany:flutter_profile:2.2'\n"
+          '    }\n'
+          '\n'
+          '\n'
+          '  4. Add the `profile` build type:\n'
+          '\n'
+          '    android {\n'
+          '      buildTypes {\n'
+          '        profile {\n'
+          '          initWith debug\n'
+          '        }\n'
+          '      }\n'
+          '    }\n'
+          '\n'
+          'To learn more, visit https://flutter.dev/go/build-aar\n'
+        )
+      );
     });
 
     testWithoutContext('stdout contains release', () async {
@@ -569,29 +570,32 @@ flutter:
       );
 
       expect(
-          logger.statusText,
-          contains('\n'
-              'Consuming the Module\n'
-              '  1. Open <host>/app/build.gradle\n'
-              '  2. Ensure you have the repositories configured, otherwise add them:\n'
-              '\n'
-              '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
-              '      repositories {\n'
-              '        maven {\n'
-              "            url 'build/'\n"
-              '        }\n'
-              '        maven {\n'
-              '            url "\$storageUrl/download.flutter.io"\n'
-              '        }\n'
-              '      }\n'
-              '\n'
-              '  3. Make the host app depend on the Flutter module:\n'
-              '\n'
-              '    dependencies {\n'
-              "      releaseImplementation 'com.mycompany:flutter_release:1.0'\n"
-              '    }\n'
-              '\n'
-              'To learn more, visit https://flutter.dev/go/build-aar\n'));
+        logger.statusText,
+        contains(
+          '\n'
+          'Consuming the Module\n'
+          '  1. Open <host>/app/build.gradle\n'
+          '  2. Ensure you have the repositories configured, otherwise add them:\n'
+          '\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
+          '      repositories {\n'
+          '        maven {\n'
+          "            url 'build/'\n"
+          '        }\n'
+          '        maven {\n'
+          '            url "\$storageUrl/download.flutter.io"\n'
+          '        }\n'
+          '      }\n'
+          '\n'
+          '  3. Make the host app depend on the Flutter module:\n'
+          '\n'
+          '    dependencies {\n'
+          "      releaseImplementation 'com.mycompany:flutter_release:1.0'\n"
+          '    }\n'
+          '\n'
+          'To learn more, visit https://flutter.dev/go/build-aar\n'
+        )
+      );
     });
 
     testWithoutContext('stdout contains debug', () async {
@@ -604,29 +608,32 @@ flutter:
       );
 
       expect(
-          logger.statusText,
-          contains('\n'
-              'Consuming the Module\n'
-              '  1. Open <host>/app/build.gradle\n'
-              '  2. Ensure you have the repositories configured, otherwise add them:\n'
-              '\n'
-              '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
-              '      repositories {\n'
-              '        maven {\n'
-              "            url 'build/'\n"
-              '        }\n'
-              '        maven {\n'
-              '            url "\$storageUrl/download.flutter.io"\n'
-              '        }\n'
-              '      }\n'
-              '\n'
-              '  3. Make the host app depend on the Flutter module:\n'
-              '\n'
-              '    dependencies {\n'
-              "      debugImplementation 'com.mycompany:flutter_debug:1.0'\n"
-              '    }\n'
-              '\n'
-              'To learn more, visit https://flutter.dev/go/build-aar\n'));
+        logger.statusText,
+        contains(
+          '\n'
+          'Consuming the Module\n'
+          '  1. Open <host>/app/build.gradle\n'
+          '  2. Ensure you have the repositories configured, otherwise add them:\n'
+          '\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
+          '      repositories {\n'
+          '        maven {\n'
+          "            url 'build/'\n"
+          '        }\n'
+          '        maven {\n'
+          '            url "\$storageUrl/download.flutter.io"\n'
+          '        }\n'
+          '      }\n'
+          '\n'
+          '  3. Make the host app depend on the Flutter module:\n'
+          '\n'
+          '    dependencies {\n'
+          "      debugImplementation 'com.mycompany:flutter_debug:1.0'\n"
+          '    }\n'
+          '\n'
+          'To learn more, visit https://flutter.dev/go/build-aar\n'
+        )
+      );
     });
 
     testWithoutContext('stdout contains profile', () async {
@@ -640,40 +647,43 @@ flutter:
       );
 
       expect(
-          logger.statusText,
-          contains('\n'
-              'Consuming the Module\n'
-              '  1. Open <host>/app/build.gradle\n'
-              '  2. Ensure you have the repositories configured, otherwise add them:\n'
-              '\n'
-              '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
-              '      repositories {\n'
-              '        maven {\n'
-              "            url 'build/'\n"
-              '        }\n'
-              '        maven {\n'
-              '            url "\$storageUrl/download.flutter.io"\n'
-              '        }\n'
-              '      }\n'
-              '\n'
-              '  3. Make the host app depend on the Flutter module:\n'
-              '\n'
-              '    dependencies {\n'
-              "      profileImplementation 'com.mycompany:flutter_profile:1.0'\n"
-              '    }\n'
-              '\n'
-              '\n'
-              '  4. Add the `profile` build type:\n'
-              '\n'
-              '    android {\n'
-              '      buildTypes {\n'
-              '        profile {\n'
-              '          initWith debug\n'
-              '        }\n'
-              '      }\n'
-              '    }\n'
-              '\n'
-              'To learn more, visit https://flutter.dev/go/build-aar\n'));
+        logger.statusText,
+        contains(
+          '\n'
+          'Consuming the Module\n'
+          '  1. Open <host>/app/build.gradle\n'
+          '  2. Ensure you have the repositories configured, otherwise add them:\n'
+          '\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
+          '      repositories {\n'
+          '        maven {\n'
+          "            url 'build/'\n"
+          '        }\n'
+          '        maven {\n'
+          '            url "\$storageUrl/download.flutter.io"\n'
+          '        }\n'
+          '      }\n'
+          '\n'
+          '  3. Make the host app depend on the Flutter module:\n'
+          '\n'
+          '    dependencies {\n'
+          "      profileImplementation 'com.mycompany:flutter_profile:1.0'\n"
+          '    }\n'
+          '\n'
+          '\n'
+          '  4. Add the `profile` build type:\n'
+          '\n'
+          '    android {\n'
+          '      buildTypes {\n'
+          '        profile {\n'
+          '          initWith debug\n'
+          '        }\n'
+          '      }\n'
+          '    }\n'
+          '\n'
+          'To learn more, visit https://flutter.dev/go/build-aar\n'
+        )
+      );
     });
   });
 
@@ -681,10 +691,8 @@ flutter:
     // If this test fails, you probably edited templates/app/android.tmpl.
     // That's fine, but you now need to add a copy of that file to gradle/settings.gradle.legacy_versions, separated
     // from the previous versions by a line that just says ";EOF".
-    final File templateSettingsDotGradle = globals.fs.file(globals.fs.path
-        .join(Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'app', 'android.tmpl', 'settings.gradle'));
-    final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path
-        .join(Cache.flutterRoot, 'packages', 'flutter_tools', 'gradle', 'settings.gradle.legacy_versions'));
+    final File templateSettingsDotGradle = globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'app', 'android.tmpl', 'settings.gradle'));
+    final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'packages','flutter_tools', 'gradle', 'settings.gradle.legacy_versions'));
     expect(
       legacySettingsDotGradleFiles.readAsStringSync().split(';EOF').map<String>((String body) => body.trim()),
       contains(templateSettingsDotGradle.readAsStringSync().trim()),
@@ -700,4 +708,4 @@ class FakeGradleUtils extends GradleUtils {
   }
 }
 
-class FakeAndroidSdk extends Fake implements AndroidSdk {}
+class FakeAndroidSdk extends Fake implements AndroidSdk { }

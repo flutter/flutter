@@ -281,8 +281,7 @@ void main() {
     scale.dispose();
   });
 
-  testGesture('Scale gestures starting from allowed device kinds cannot be ended from unallowed devices',
-      (GestureTester tester) {
+  testGesture('Scale gestures starting from allowed device kinds cannot be ended from unallowed devices', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
 
     bool didStartScale = false;
@@ -351,22 +350,12 @@ void main() {
 
     final List<String> log = <String>[];
 
-    scale.onStart = (ScaleStartDetails details) {
-      log.add('scale-start');
-    };
-    scale.onUpdate = (ScaleUpdateDetails details) {
-      log.add('scale-update');
-    };
-    scale.onEnd = (ScaleEndDetails details) {
-      log.add('scale-end');
-    };
+    scale.onStart = (ScaleStartDetails details) { log.add('scale-start'); };
+    scale.onUpdate = (ScaleUpdateDetails details) { log.add('scale-update'); };
+    scale.onEnd = (ScaleEndDetails details) { log.add('scale-end'); };
 
-    drag.onStart = (DragStartDetails details) {
-      log.add('drag-start');
-    };
-    drag.onEnd = (DragEndDetails details) {
-      log.add('drag-end');
-    };
+    drag.onStart = (DragStartDetails details) { log.add('drag-start'); };
+    drag.onEnd = (DragEndDetails details) { log.add('drag-end'); };
 
     final TestPointer pointer1 = TestPointer();
 
@@ -602,7 +591,7 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedDelta, const Offset(10.0, 10.0));
     updatedDelta = null;
-    expect(updatedRotation, -math.pi);
+    expect(updatedRotation, - math.pi);
     updatedRotation = null;
     tester.route(pointer3.move(const Offset(10.0, 20.0)));
     expect(updatedFocalPoint, const Offset(15.0, 25.0));
@@ -715,18 +704,17 @@ void main() {
     scale.dispose();
   });
 
-  testWidgets('ScaleGestureRecognizer asserts when kind and supportedDevices are both set',
-      (WidgetTester tester) async {
+  testWidgets('ScaleGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
     expect(
       () {
         ScaleGestureRecognizer(
-          kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
+            kind: PointerDeviceKind.touch,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
         );
       },
       throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(), 'description',
-            contains('kind == null || supportedDevices == null')),
+        isA<AssertionError>().having((AssertionError error) => error.toString(),
+        'description', contains('kind == null || supportedDevices == null')),
       ),
     );
   });

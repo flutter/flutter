@@ -12,7 +12,8 @@ import 'package:process_runner/process_runner.dart';
 //
 // See README.md for more information.
 
-final Directory flutterRoot = Directory(path.fromUri(Platform.script)).absolute.parent.parent.parent.parent.parent;
+final Directory flutterRoot =
+  Directory(path.fromUri(Platform.script)).absolute.parent.parent.parent.parent.parent;
 final Directory flutterPackageDir = Directory(path.join(flutterRoot.path, 'packages', 'flutter'));
 final Directory testPrivateDir = Directory(path.join(flutterPackageDir.path, 'test_private'));
 final Directory privateTestsDir = Directory(path.join(testPrivateDir.path, 'test'));
@@ -189,11 +190,12 @@ class TestCase {
     }
 
     // Copy the pubspec to the right place.
-    makeAbsolute(pubspec, workingDirectory: privateTestsDir).copySync(path.join(tmpdir.absolute.path, 'pubspec.yaml'));
+    makeAbsolute(pubspec, workingDirectory: privateTestsDir)
+        .copySync(path.join(tmpdir.absolute.path, 'pubspec.yaml'));
 
     // Use Flutter's analysis_options.yaml file from packages/flutter.
-    File(path.join(tmpdir.absolute.path, 'analysis_options.yaml')).writeAsStringSync(
-        'include: ${path.toUri(path.join(flutterRoot.path, 'packages', 'flutter', 'analysis_options.yaml'))}');
+    File(path.join(tmpdir.absolute.path, 'analysis_options.yaml'))
+        .writeAsStringSync('include: ${path.toUri(path.join(flutterRoot.path, 'packages', 'flutter', 'analysis_options.yaml'))}');
 
     return true;
   }
@@ -223,14 +225,7 @@ class TestCase {
     for (final File test in tests) {
       final String testPath = path.join(path.dirname(test.path), 'lib', path.basenameWithoutExtension(test.path));
       final ProcessRunnerResult result = await runner.runProcess(
-        <String>[
-          flutter,
-          'test',
-          '--enable-experiment=non-nullable',
-          '--no-sound-null-safety',
-          '--null-assertions',
-          testPath
-        ],
+        <String>[flutter, 'test', '--enable-experiment=non-nullable', '--no-sound-null-safety', '--null-assertions', testPath],
         failOk: true,
       );
       if (result.exitCode != 0) {

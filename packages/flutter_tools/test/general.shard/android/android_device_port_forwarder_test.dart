@@ -10,9 +10,8 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  testWithoutContext(
-      'AndroidDevicePortForwarder returns the generated host '
-      'port from stdout', () async {
+  testWithoutContext('AndroidDevicePortForwarder returns the generated host '
+    'port from stdout', () async {
     final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
@@ -28,9 +27,8 @@ void main() {
     expect(await forwarder.forward(123), 456);
   });
 
-  testWithoutContext(
-      'AndroidDevicePortForwarder returns the supplied host '
-      'port when stdout is empty', () async {
+  testWithoutContext('AndroidDevicePortForwarder returns the supplied host '
+    'port when stdout is empty', () async {
     final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
@@ -45,9 +43,8 @@ void main() {
     expect(await forwarder.forward(123, hostPort: 456), 456);
   });
 
-  testWithoutContext(
-      'AndroidDevicePortForwarder returns the supplied host port '
-      'when stdout is the host port', () async {
+  testWithoutContext('AndroidDevicePortForwarder returns the supplied host port '
+    'when stdout is the host port', () async {
     final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
@@ -63,9 +60,8 @@ void main() {
     expect(await forwarder.forward(123, hostPort: 456), 456);
   });
 
-  testWithoutContext(
-      'AndroidDevicePortForwarder throws an exception when stdout '
-      'is not blank nor the host port', () async {
+  testWithoutContext('AndroidDevicePortForwarder throws an exception when stdout '
+    'is not blank nor the host port', () async {
     final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
@@ -81,9 +77,8 @@ void main() {
     expect(forwarder.forward(123, hostPort: 456), throwsProcessException());
   });
 
-  testWithoutContext(
-      'AndroidDevicePortForwarder forwardedPorts returns empty '
-      'list when forward failed', () {
+  testWithoutContext('AndroidDevicePortForwarder forwardedPorts returns empty '
+    'list when forward failed', () {
     final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',

@@ -85,8 +85,8 @@ void main() {
     void listener() {
       didReceiveCallback = true;
     }
-
-    final ReverseAnimation animation = ReverseAnimation(controller)..addListener(listener);
+    final ReverseAnimation animation = ReverseAnimation(controller)
+      ..addListener(listener);
     expect(didReceiveCallback, isFalse);
     controller.value = 0.6;
     expect(didReceiveCallback, isTrue);
@@ -262,8 +262,7 @@ FlutterError
       reverseDuration: const Duration(milliseconds: 50),
       vsync: const TestVSync(),
     );
-    final CurvedAnimation curved =
-        CurvedAnimation(parent: controller, curve: Curves.linear, reverseCurve: Curves.linear);
+    final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: Curves.linear, reverseCurve: Curves.linear);
 
     controller.forward();
     tick(Duration.zero);
@@ -311,7 +310,8 @@ FlutterError
       reverseDuration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: forwardCurve, reverseCurve: reverseCurve);
+    final CurvedAnimation curved = CurvedAnimation(
+        parent: controller, curve: forwardCurve, reverseCurve: reverseCurve);
 
     expect(forwardCurve.transform(0.5), 1.0);
     expect(reverseCurve.transform(0.5), 0.0);
@@ -438,15 +438,18 @@ FlutterError
     final Animation<double> animation = TweenSequence<double>(
       <TweenSequenceItem<double>>[
         TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 5.0, end: 10.0).chain(CurveTween(curve: const Interval(0.5, 1.0))),
+          tween: Tween<double>(begin: 5.0, end: 10.0)
+            .chain(CurveTween(curve: const Interval(0.5, 1.0))),
           weight: 4.0,
         ),
         TweenSequenceItem<double>(
-          tween: ConstantTween<double>(10.0).chain(CurveTween(curve: Curves.linear)), // linear is a no-op
+          tween: ConstantTween<double>(10.0)
+            .chain(CurveTween(curve: Curves.linear)), // linear is a no-op
           weight: 2.0,
         ),
         TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 10.0, end: 5.0).chain(CurveTween(curve: const Interval(0.0, 0.5))),
+          tween: Tween<double>(begin: 10.0, end: 5.0)
+            .chain(CurveTween(curve: const Interval(0.0, 0.5))),
           weight: 4.0,
         ),
       ],
@@ -492,4 +495,5 @@ FlutterError
     controller.value = 1.0;
     expect(animation.value, 10.0);
   });
+
 }

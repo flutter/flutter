@@ -25,11 +25,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   static const List<String> _drawerContents = <String>[
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
+    'A', 'B', 'C', 'D', 'E',
   ];
 
   static final Animatable<Offset> _drawerDetailsTween = Tween<Offset>(
@@ -239,8 +235,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    'Tap here to open the drawer',
+                  child: Text('Tap here to open the drawer',
                     style: Theme.of(context).textTheme.subtitle1,
                   ),
                 ),

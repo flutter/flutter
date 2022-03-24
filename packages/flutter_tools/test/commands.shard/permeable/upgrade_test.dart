@@ -41,11 +41,10 @@ void main() {
       realCommandRunner = UpgradeCommandRunner();
       processManager = FakeProcessManager.empty();
       fakeCommandRunner.willHaveUncommittedChanges = false;
-      fakePlatform = FakePlatform()
-        ..environment = Map<String, String>.unmodifiable(<String, String>{
-          'ENV1': 'irrelevant',
-          'ENV2': 'irrelevant',
-        });
+      fakePlatform = FakePlatform()..environment = Map<String, String>.unmodifiable(<String, String>{
+        'ENV1': 'irrelevant',
+        'ENV2': 'irrelevant',
+      });
     });
 
     testUsingContext('throws on unknown tag, official branch,  noforce', () async {
@@ -157,32 +156,23 @@ void main() {
       const String version = '1.2.3';
 
       processManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>['git', 'fetch', '--tags']),
         const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          '--verify',
-          '@{u}',
-        ], stdout: revision),
-        const FakeCommand(command: <String>[
-          'git',
-          'tag',
-          '--points-at',
-          revision,
+          'git', 'fetch', '--tags'
         ]),
         const FakeCommand(command: <String>[
-          'git',
-          'describe',
-          '--match',
-          '*.*.*',
-          '--long',
-          '--tags',
-          revision,
-        ], stdout: version),
+          'git', 'rev-parse', '--verify', '@{u}',
+        ],
+        stdout: revision),
+        const FakeCommand(command: <String>[
+          'git', 'tag', '--points-at', revision,
+        ]),
+        const FakeCommand(command: <String>[
+          'git', 'describe', '--match', '*.*.*', '--long', '--tags', revision,
+        ],
+        stdout: version),
       ]);
 
-      final FlutterVersion updateVersion =
-          await realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion());
+      final FlutterVersion updateVersion = await realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion());
 
       expect(updateVersion.frameworkVersion, version);
       expect(updateVersion.frameworkRevision, revision);
@@ -194,7 +184,9 @@ void main() {
 
     testUsingContext('fetchLatestVersion throws toolExit if HEAD is detached', () async {
       processManager.addCommands(const <FakeCommand>[
-        FakeCommand(command: <String>['git', 'fetch', '--tags']),
+        FakeCommand(command: <String>[
+          'git', 'fetch', '--tags'
+        ]),
         FakeCommand(
           command: <String>['git', 'rev-parse', '--verify', '@{u}'],
           exception: ProcessException(
@@ -207,11 +199,11 @@ void main() {
 
       await expectLater(
         () async => realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion()),
-        throwsToolExit(
-            message: 'Unable to upgrade Flutter: Your Flutter checkout '
-                'is currently not on a release branch.\n'
-                'Use "flutter channel" to switch to an official channel, and retry. '
-                'Alternatively, re-install Flutter by going to https://flutter.dev/docs/get-started/install.'),
+        throwsToolExit(message: 'Unable to upgrade Flutter: Your Flutter checkout '
+          'is currently not on a release branch.\n'
+          'Use "flutter channel" to switch to an official channel, and retry. '
+          'Alternatively, re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
+        ),
       );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
@@ -221,7 +213,9 @@ void main() {
 
     testUsingContext('fetchLatestVersion throws toolExit if no upstream configured', () async {
       processManager.addCommands(const <FakeCommand>[
-        FakeCommand(command: <String>['git', 'fetch', '--tags']),
+        FakeCommand(command: <String>[
+          'git', 'fetch', '--tags'
+        ]),
         FakeCommand(
           command: <String>['git', 'rev-parse', '--verify', '@{u}'],
           exception: ProcessException(
@@ -234,10 +228,10 @@ void main() {
 
       await expectLater(
         () async => realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion()),
-        throwsToolExit(
-            message: 'Unable to upgrade Flutter: The current Flutter '
-                'branch/channel is not tracking any remote repository.\n'
-                'Re-install Flutter by going to https://flutter.dev/docs/get-started/install.'),
+        throwsToolExit(message: 'Unable to upgrade Flutter: The current Flutter '
+          'branch/channel is not tracking any remote repository.\n'
+          'Re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
+        ),
       );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
@@ -260,7 +254,7 @@ void main() {
       );
 
       await expectLater(
-        () async => realCommandRunner.attemptReset(revision),
+            () async => realCommandRunner.attemptReset(revision),
         throwsToolExit(message: errorMessage),
       );
       expect(processManager, hasNoRemainingExpectations);
@@ -271,15 +265,15 @@ void main() {
 
     testUsingContext('flutterUpgradeContinue passes env variables to child process', () async {
       processManager.addCommand(
-        FakeCommand(command: <String>[
-          globals.fs.path.join('bin', 'flutter'),
-          'upgrade',
-          '--continue',
-          '--no-version-check',
-        ], environment: <String, String>{
-          'FLUTTER_ALREADY_LOCKED': 'true',
-          ...fakePlatform.environment
-        }),
+        FakeCommand(
+          command: <String>[
+            globals.fs.path.join('bin', 'flutter'),
+            'upgrade',
+            '--continue',
+            '--no-version-check',
+          ],
+          environment: <String, String>{'FLUTTER_ALREADY_LOCKED': 'true', ...fakePlatform.environment}
+        ),
       );
       await realCommandRunner.flutterUpgradeContinue();
       expect(processManager, hasNoRemainingExpectations);
@@ -325,15 +319,15 @@ void main() {
 
     testUsingContext('precacheArtifacts passes env variables to child process', () async {
       processManager.addCommand(
-        FakeCommand(command: <String>[
-          globals.fs.path.join('bin', 'flutter'),
-          '--no-color',
-          '--no-version-check',
-          'precache',
-        ], environment: <String, String>{
-          'FLUTTER_ALREADY_LOCKED': 'true',
-          ...fakePlatform.environment
-        }),
+        FakeCommand(
+          command: <String>[
+            globals.fs.path.join('bin', 'flutter'),
+            '--no-color',
+            '--no-version-check',
+            'precache',
+          ],
+          environment: <String, String>{'FLUTTER_ALREADY_LOCKED': 'true', ...fakePlatform.environment}
+        ),
       );
       await realCommandRunner.precacheArtifacts();
       expect(processManager, hasNoRemainingExpectations);
@@ -422,21 +416,12 @@ void main() {
           fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
             const FakeCommand(
               command: <String>[
-                'git',
-                'tag',
-                '--points-at',
-                'HEAD',
+                'git', 'tag', '--points-at', 'HEAD',
               ],
             ),
             const FakeCommand(
               command: <String>[
-                'git',
-                'describe',
-                '--match',
-                '*.*.*',
-                '--long',
-                '--tags',
-                'HEAD',
+                'git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD',
               ],
               stdout: 'v1.12.16-19-gb45b676af',
             ),
@@ -471,12 +456,13 @@ void main() {
           FlutterVersion: () => FakeFlutterVersion(),
           ProcessManager: () => fakeProcessManager,
           PersistentToolState: () => PersistentToolState.test(
-                directory: tempDir,
-                logger: testLogger,
-              ),
+            directory: tempDir,
+            logger: testLogger,
+          ),
         });
       });
     });
+
   });
 }
 

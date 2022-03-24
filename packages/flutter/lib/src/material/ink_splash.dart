@@ -20,7 +20,8 @@ RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, Re
     assert(containedInkWell);
     return rectCallback;
   }
-  if (containedInkWell) return () => Offset.zero & referenceBox.size;
+  if (containedInkWell)
+    return () => Offset.zero & referenceBox.size;
   return null;
 }
 
@@ -123,15 +124,15 @@ class InkSplash extends InteractiveInkFeature {
     ShapeBorder? customBorder,
     double? radius,
     VoidCallback? onRemoved,
-  })  : assert(textDirection != null),
-        _position = position,
-        _borderRadius = borderRadius ?? BorderRadius.zero,
-        _customBorder = customBorder,
-        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position!),
-        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
-        _repositionToReferenceBox = !containedInkWell,
-        _textDirection = textDirection,
-        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
+  }) : assert(textDirection != null),
+       _position = position,
+       _borderRadius = borderRadius ?? BorderRadius.zero,
+       _customBorder = customBorder,
+       _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position!),
+       _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
+       _repositionToReferenceBox = !containedInkWell,
+       _textDirection = textDirection,
+       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     assert(_borderRadius != null);
     _radiusController = AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
@@ -184,7 +185,8 @@ class InkSplash extends InteractiveInkFeature {
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed) dispose();
+    if (status == AnimationStatus.completed)
+      dispose();
   }
 
   @override

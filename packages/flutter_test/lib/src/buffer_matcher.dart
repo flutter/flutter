@@ -70,5 +70,5 @@ class _BufferGoldenMatcher extends AsyncMatcher {
 /// ```
 /// {@end-tool}
 AsyncMatcher bufferMatchesGoldenFile(String key, {int? version}) {
-  return _BufferGoldenMatcher(Uri.parse(key), version);
+   return _BufferGoldenMatcher(Uri.parse(key), version);
 }

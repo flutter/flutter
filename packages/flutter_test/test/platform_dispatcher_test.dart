@@ -141,8 +141,7 @@ void main() {
     expect(WidgetsBinding.instance.platformDispatcher.textScaleFactor, originalTextScaleFactor);
   });
 
-  testWidgets('TestWindow sends fake locales when WidgetsBindingObserver notifiers are called',
-      (WidgetTester tester) async {
+  testWidgets('TestWindow sends fake locales when WidgetsBindingObserver notifiers are called', (WidgetTester tester) async {
     final List<Locale> defaultLocales = WidgetsBinding.instance.platformDispatcher.locales;
     final TestObserver observer = TestObserver();
     retrieveTestBinding(tester).addObserver(observer);

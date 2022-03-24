@@ -26,7 +26,11 @@ class NestedViewEventBody extends StatefulWidget {
   State<NestedViewEventBody> createState() => NestedViewEventBodyState();
 }
 
-enum _LastTestStatus { pending, success, error }
+enum _LastTestStatus {
+  pending,
+  success,
+  error
+}
 
 class NestedViewEventBodyState extends State<NestedViewEventBody> {
   MethodChannel? viewChannel;
@@ -46,16 +50,15 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
         children: <Widget>[
           SizedBox(
             height: 300,
-            child: showPlatformView
-                ? AndroidPlatformView(
-                    key: const ValueKey<String>('PlatformView'),
-                    viewType: 'simple_view',
-                    onPlatformViewCreated: onPlatformViewCreated,
-                  )
-                : null,
+              child: showPlatformView ?
+                AndroidPlatformView(
+                  key: const ValueKey<String>('PlatformView'),
+                  viewType: 'simple_view',
+                  onPlatformViewCreated: onPlatformViewCreated,
+                ) : null,
           ),
           if (_lastTestStatus != _LastTestStatus.pending) _statusWidget(),
-          if (viewChannel != null) ...<Widget>[
+          if (viewChannel != null) ... <Widget>[
             ElevatedButton(
               key: const ValueKey<String>('ShowAlertDialog'),
               onPressed: onShowAlertDialogPressed,
@@ -80,8 +83,8 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
                 ),
                 if (nestedViewClickCount > 0)
                   Text(
-                    'Click count: $nestedViewClickCount',
-                    key: const ValueKey<String>('NestedViewClickCount'),
+                      'Click count: $nestedViewClickCount',
+                      key: const ValueKey<String>('NestedViewClickCount'),
                   ),
               ],
             ),
@@ -117,7 +120,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
       setState(() {
         _lastTestStatus = _LastTestStatus.success;
       });
-    } catch (e) {
+    } catch(e) {
       setState(() {
         _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
@@ -137,7 +140,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
       setState(() {
         nestedViewClickCount++;
       });
-    } catch (e) {
+    } catch(e) {
       setState(() {
         _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
@@ -163,8 +166,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
     setState(() {
       viewChannel = MethodChannel('simple_view/$id');
     });
-    driverDataHandler
-        .registerHandler('hierarchy')
-        .complete(() async => (await channel.invokeMethod<String>('getViewHierarchy'))!);
+    driverDataHandler.registerHandler('hierarchy')
+      .complete(() async => (await channel.invokeMethod<String>('getViewHierarchy'))!);
   }
 }

@@ -97,24 +97,41 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
     // Compute the command-line arguments for package:test.
     final List<String> testArgs = <String>[
-      if (!globals.terminal.supportsColor) '--no-color',
-      if (debuggingOptions.startPaused) '--pause-after-load',
-      if (machine) ...<String>['-r', 'json'] else ...<String>['-r', reporter ?? 'compact'],
-      if (timeout != null) ...<String>['--timeout', timeout],
+      if (!globals.terminal.supportsColor)
+        '--no-color',
+      if (debuggingOptions.startPaused)
+        '--pause-after-load',
+      if (machine)
+        ...<String>['-r', 'json']
+      else
+        ...<String>['-r', reporter ?? 'compact'],
+      if (timeout != null)
+        ...<String>['--timeout', timeout],
       '--concurrency=$concurrency',
-      for (final String name in names) ...<String>['--name', name],
-      for (final String plainName in plainNames) ...<String>['--plain-name', plainName],
-      if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
-      if (tags != null) ...<String>['--tags', tags],
-      if (excludeTags != null) ...<String>['--exclude-tags', excludeTags],
-      if (runSkipped) '--run-skipped',
-      if (totalShards != null) '--total-shards=$totalShards',
-      if (shardIndex != null) '--shard-index=$shardIndex',
+      for (final String name in names)
+        ...<String>['--name', name],
+      for (final String plainName in plainNames)
+        ...<String>['--plain-name', plainName],
+      if (randomSeed != null)
+        '--test-randomize-ordering-seed=$randomSeed',
+      if (tags != null)
+        ...<String>['--tags', tags],
+      if (excludeTags != null)
+        ...<String>['--exclude-tags', excludeTags],
+      if (runSkipped)
+        '--run-skipped',
+      if (totalShards != null)
+        '--total-shards=$totalShards',
+      if (shardIndex != null)
+        '--shard-index=$shardIndex',
       '--chain-stack-traces',
     ];
     if (web) {
-      final String tempBuildDir =
-          globals.fs.systemTempDirectory.createTempSync('flutter_test.').absolute.uri.toFilePath();
+      final String tempBuildDir = globals.fs.systemTempDirectory
+        .createTempSync('flutter_test.')
+        .absolute
+        .uri
+        .toFilePath();
       final WebMemoryFS result = await WebTestCompiler(
         logger: globals.logger,
         fileSystem: globals.fs,
@@ -171,7 +188,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       ..add('--')
       ..addAll(testFiles);
 
-    final InternetAddressType serverType = ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
+    final InternetAddressType serverType =
+        ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,

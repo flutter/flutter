@@ -90,20 +90,25 @@ void main() {
     // Create version file
     flutterSdk.childFile('version').writeAsStringSync('1.2.3');
     // Create a pubspec file
-    flutter = flutterSdk.childDirectory('packages').childDirectory('flutter')..createSync(recursive: true);
+    flutter = flutterSdk.childDirectory('packages').childDirectory('flutter')
+      ..createSync(recursive: true);
     flutter.childFile('pubspec.yaml').writeAsStringSync(kFlutterPubspecYaml);
   });
 
-  testWithoutContext('createTemporaryFlutterSdk creates an unpinned flutter SDK', () {
+  testWithoutContext(
+      'createTemporaryFlutterSdk creates an unpinned flutter SDK', () {
     // A stray extra package should not cause a crash.
-    final Directory extra = flutterSdk.childDirectory('packages').childDirectory('extra')..createSync(recursive: true);
+    final Directory extra = flutterSdk
+        .childDirectory('packages')
+        .childDirectory('extra')
+      ..createSync(recursive: true);
     extra.childFile('pubspec.yaml').writeAsStringSync(kExtraPubspecYaml);
 
     // Create already parsed pubspecs.
     final PubspecYaml flutterPubspec = PubspecYaml(flutter);
 
-    final PubspecDependency gitDependency =
-        flutterPubspec.dependencies.firstWhere((PubspecDependency dep) => dep.kind == DependencyKind.git);
+    final PubspecDependency gitDependency = flutterPubspec.dependencies
+        .firstWhere((PubspecDependency dep) => dep.kind == DependencyKind.git);
     expect(
       gitDependency.lockLine,
       '''

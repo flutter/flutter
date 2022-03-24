@@ -54,8 +54,8 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   const ScrollAwareImageProvider({
     required this.context,
     required this.imageProvider,
-  })  : assert(context != null),
-        assert(imageProvider != null);
+  }) : assert(context != null),
+       assert(imageProvider != null);
 
   /// The context that may or may not be enclosed by a [Scrollable].
   ///

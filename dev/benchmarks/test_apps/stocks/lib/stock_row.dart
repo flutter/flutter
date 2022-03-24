@@ -32,7 +32,8 @@ class StockRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
-    if (stock.percentChange > 0) changeInPrice = '+$changeInPrice';
+    if (stock.percentChange > 0)
+      changeInPrice = '+$changeInPrice';
     return InkWell(
       key: ValueKey<String>(stock.symbol),
       onTap: _getHandler(onPressed),
@@ -40,7 +41,11 @@ class StockRow extends StatelessWidget {
       onLongPress: _getHandler(onLongPressed),
       child: Container(
         padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
-        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor))),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Theme.of(context).dividerColor)
+          )
+        ),
         child: Row(
           children: <Widget>[
             Container(
@@ -57,7 +62,9 @@ class StockRow extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     flex: 2,
-                    child: Text(stock.symbol),
+                    child: Text(
+                      stock.symbol
+                    ),
                   ),
                   Expanded(
                     child: Text(

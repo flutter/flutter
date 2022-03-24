@@ -90,7 +90,7 @@ void main() {
     testWidgets('clamps animated size to constraints', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
-          child: SizedBox(
+          child: SizedBox (
             width: 100.0,
             height: 100.0,
             child: AnimatedSize(
@@ -111,7 +111,7 @@ void main() {
       // Attempt to animate beyond the outer SizedBox.
       await tester.pumpWidget(
         const Center(
-          child: SizedBox(
+          child: SizedBox (
             width: 100.0,
             height: 100.0,
             child: AnimatedSize(
@@ -137,7 +137,7 @@ void main() {
         await tester.pump(Duration(milliseconds: millis));
       }
 
-      void verify({double? size, RenderAnimatedSizeState? state}) {
+      void verify({ double? size, RenderAnimatedSizeState? state }) {
         assert(size != null || state != null);
         final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
         if (size != null) {
@@ -286,7 +286,7 @@ void main() {
       final RenderAnimatedSize renderObject = tester.renderObject(find.byType(AnimatedSize));
       expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-      for (final Clip clip in Clip.values) {
+      for(final Clip clip in Clip.values) {
         await tester.pumpWidget(
           Center(
             child: AnimatedSize(
@@ -376,22 +376,24 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: Row(
-          children: <Widget>[
-            SizedBox(
-              key: key1,
-              height: 200,
-              child: animatedSize,
-            ),
-            const SizedBox(
-              key: key2,
-              height: 200,
-            )
-          ],
-        ),
-      ));
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: <Widget>[
+              SizedBox(
+                key: key1,
+                height: 200,
+                child: animatedSize,
+              ),
+              const SizedBox(
+                key: key2,
+                height: 200,
+              )
+            ],
+          ),
+        )
+      );
 
       setState(() {
         childSize = const Size.square(150);
@@ -401,22 +403,24 @@ void main() {
 
       // Immediately reparent the AnimatedSize subtree to a different parent
       // with the same incoming constraints.
-      await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: Row(
-          children: <Widget>[
-            const SizedBox(
-              key: key1,
-              height: 200,
-            ),
-            SizedBox(
-              key: key2,
-              height: 200,
-              child: animatedSize,
-            )
-          ],
-        ),
-      ));
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: <Widget>[
+              const SizedBox(
+                key: key1,
+                height: 200,
+              ),
+              SizedBox(
+                key: key2,
+                height: 200,
+                child: animatedSize,
+              )
+            ],
+          ),
+        )
+      );
 
       expect(
         tester.renderObject<RenderBox>(find.byType(AnimatedSize)).size,

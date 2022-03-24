@@ -39,7 +39,7 @@ void main() {
     final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder.test(
       processManager: processManager,
       logger: BufferLogger.test(),
-      operatingSystemUtils: operatingSystemUtils,
+        operatingSystemUtils: operatingSystemUtils,
     );
     final int hostPort = await portForwarder.forward(456);
 

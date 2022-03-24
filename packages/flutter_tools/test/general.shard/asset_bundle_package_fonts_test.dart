@@ -26,8 +26,7 @@ void main() {
     // rolls into Flutter.
     return path?.replaceAll('/', globals.fs.path.separator);
   }
-
-  void writePubspecFile(String path, String name, {String fontsSection}) {
+  void writePubspecFile(String path, String name, { String fontsSection }) {
     if (fontsSection == null) {
       fontsSection = '';
     } else {
@@ -100,7 +99,9 @@ $fontsSection
 
     setUp(() async {
       testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+        style: globals.platform.isWindows
+          ? FileSystemStyle.windows
+          : FileSystemStyle.posix,
       );
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     });
@@ -132,7 +133,8 @@ $fontsSection
       const String font = 'bar';
       writeFontAsset('p/p/lib/', font);
 
-      const String expectedFontManifest = '[{"fonts":[{"asset":"packages/test_package/bar"}],"family":"foo"}]';
+      const String expectedFontManifest =
+          '[{"fonts":[{"asset":"packages/test_package/bar"}],"family":"foo"}]';
       await buildAndVerifyFonts(
         <String>[],
         <String>[font],
@@ -160,7 +162,8 @@ $fontsSection
       const String localFont = 'a/bar';
       writeFontAsset('', localFont);
 
-      const String expectedFontManifest = '[{"fonts":[{"asset":"packages/test_package/bar"},{"asset":"a/bar"}],'
+      const String expectedFontManifest =
+          '[{"fonts":[{"asset":"packages/test_package/bar"},{"asset":"a/bar"}],'
           '"family":"foo"}]';
       await buildAndVerifyFonts(
         <String>[localFont],
@@ -190,7 +193,8 @@ $fontsSection
       const String font = 'a/bar';
       writeFontAsset('p/p/', font);
 
-      const String expectedFontManifest = '[{"family":"packages/test_package/foo",'
+      const String expectedFontManifest =
+          '[{"family":"packages/test_package/foo",'
           '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';
       await buildAndVerifyFonts(
         <String>[],
@@ -221,7 +225,8 @@ $fontsSection
       const String font = 'bar';
       writeFontAsset('p2/p/lib/', font);
 
-      const String expectedFontManifest = '[{"family":"packages/test_package/foo",'
+      const String expectedFontManifest =
+          '[{"family":"packages/test_package/foo",'
           '"fonts":[{"asset":"packages/test_package2/bar"}]}]';
       await buildAndVerifyFonts(
         <String>[],
@@ -253,7 +258,8 @@ $fontsSection
       const String font = 'a/bar';
       writeFontAsset('p/p/', font);
 
-      const String expectedFontManifest = '[{"family":"packages/test_package/foo",'
+      const String expectedFontManifest =
+          '[{"family":"packages/test_package/foo",'
           '"fonts":[{"weight":400,"style":"italic","asset":"packages/test_package/a/bar"}]}]';
       await buildAndVerifyFonts(
         <String>[],
@@ -288,7 +294,8 @@ $fontsSection
       writeFontAsset('', font);
       writeFontAsset('p/p/', font);
 
-      const String expectedFontManifest = '[{"fonts":[{"asset":"a/bar"}],"family":"foo"},'
+      const String expectedFontManifest =
+          '[{"fonts":[{"asset":"a/bar"}],"family":"foo"},'
           '{"family":"packages/test_package/foo",'
           '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';
       await buildAndVerifyFonts(

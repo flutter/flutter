@@ -5,7 +5,8 @@
 import 'package:flutter/material.dart';
 
 class MultiWidgetConstructTable extends StatefulWidget {
-  const MultiWidgetConstructTable(this.columnCount, this.rowCount, {Key? key}) : super(key: key);
+  const MultiWidgetConstructTable(this.columnCount, this.rowCount, {Key? key})
+      : super(key: key);
 
   final int columnCount;
   final int rowCount;
@@ -14,23 +15,12 @@ class MultiWidgetConstructTable extends StatefulWidget {
   State<MultiWidgetConstructTable> createState() => _MultiWidgetConstructTableState();
 }
 
-class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable> with SingleTickerProviderStateMixin {
+class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
+    with SingleTickerProviderStateMixin {
   static const List<MaterialColor> colorList = <MaterialColor>[
-    Colors.pink,
-    Colors.red,
-    Colors.deepOrange,
-    Colors.orange,
-    Colors.amber,
-    Colors.yellow,
-    Colors.lime,
-    Colors.lightGreen,
-    Colors.green,
-    Colors.teal,
-    Colors.cyan,
-    Colors.lightBlue,
-    Colors.blue,
-    Colors.indigo,
-    Colors.purple,
+    Colors.pink, Colors.red, Colors.deepOrange, Colors.orange, Colors.amber,
+    Colors.yellow, Colors.lime, Colors.lightGreen, Colors.green, Colors.teal,
+    Colors.cyan, Colors.lightBlue, Colors.blue, Colors.indigo, Colors.purple,
   ];
   int counter = 0;
 
@@ -82,14 +72,16 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable> w
                         ? Container(
                             // This key forces rebuilding the element
                             key: ValueKey<int>(widgetCounter + label),
-                            color: Color.lerp(Colors.white, baseColor, label / totalLength),
+                            color: Color.lerp(
+                                Colors.white, baseColor, label / totalLength),
                             constraints: BoxConstraints.expand(height: height),
                             child: Text('${widgetCounter + label}'),
                           )
                         : MyContainer(
                             // This key forces rebuilding the element
                             key: ValueKey<int>(widgetCounter + label),
-                            color: Color.lerp(Colors.white, baseColor, label / totalLength)!,
+                            color: Color.lerp(
+                                Colors.white, baseColor, label / totalLength)!,
                             constraints: BoxConstraints.expand(height: height),
                             child: Text('${widgetCounter + label}'),
                           );
@@ -106,7 +98,8 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable> w
 
 // This class is intended to break the original Widget tree
 class MyContainer extends StatelessWidget {
-  const MyContainer({required this.color, required this.child, required this.constraints, Key? key}) : super(key: key);
+  const MyContainer({required this.color, required this.child, required this.constraints, Key? key})
+      : super(key: key);
   final Color color;
   final Widget child;
   final BoxConstraints constraints;

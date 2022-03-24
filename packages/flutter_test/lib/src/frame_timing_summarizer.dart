@@ -27,11 +27,13 @@ class FrameTimingSummarizer {
     final List<Duration> frameBuildTime = List<Duration>.unmodifiable(
       data.map<Duration>((FrameTiming datum) => datum.buildDuration),
     );
-    final List<Duration> frameBuildTimeSorted = List<Duration>.from(frameBuildTime)..sort();
+    final List<Duration> frameBuildTimeSorted =
+        List<Duration>.from(frameBuildTime)..sort();
     final List<Duration> frameRasterizerTime = List<Duration>.unmodifiable(
       data.map<Duration>((FrameTiming datum) => datum.rasterDuration),
     );
-    final List<Duration> frameRasterizerTimeSorted = List<Duration>.from(frameRasterizerTime)..sort();
+    final List<Duration> frameRasterizerTimeSorted =
+        List<Duration>.from(frameRasterizerTime)..sort();
     final List<Duration> vsyncOverhead = List<Duration>.unmodifiable(
       data.map<Duration>((FrameTiming datum) => datum.vsyncOverhead),
     );
@@ -51,7 +53,8 @@ class FrameTimingSummarizer {
       data.map<int>((FrameTiming datum) => datum.pictureCacheBytes),
     );
     final List<int> pictureCacheBytesSorted = List<int>.from(pictureCacheBytes)..sort();
-    final List<Duration> vsyncOverheadSorted = List<Duration>.from(vsyncOverhead)..sort();
+    final List<Duration> vsyncOverheadSorted =
+        List<Duration>.from(vsyncOverhead)..sort();
     Duration add(Duration a, Duration b) => a + b;
     int addInts(int a, int b) => a + b;
     return FrameTimingSummarizer._(
@@ -65,7 +68,8 @@ class FrameTimingSummarizer {
       p99FrameBuildTime: _findPercentile(frameBuildTimeSorted, 0.99),
       worstFrameBuildTime: frameBuildTimeSorted.last,
       missedFrameBuildBudget: _countExceed(frameBuildTimeSorted, kBuildBudget),
-      averageFrameRasterizerTime: frameRasterizerTime.reduce(add) ~/ data.length,
+      averageFrameRasterizerTime:
+          frameRasterizerTime.reduce(add) ~/ data.length,
       p90FrameRasterizerTime: _findPercentile(frameRasterizerTimeSorted, 0.90),
       p99FrameRasterizerTime: _findPercentile(frameRasterizerTimeSorted, 0.99),
       worstFrameRasterizerTime: frameRasterizerTimeSorted.last,
@@ -85,7 +89,8 @@ class FrameTimingSummarizer {
       p90PictureCacheBytes: _findPercentile(pictureCacheBytesSorted, 0.90),
       p99PictureCacheBytes: _findPercentile(pictureCacheBytesSorted, 0.99),
       worstPictureCacheBytes: pictureCacheBytesSorted.last,
-      missedFrameRasterizerBudget: _countExceed(frameRasterizerTimeSorted, kBuildBudget),
+      missedFrameRasterizerBudget:
+          _countExceed(frameRasterizerTimeSorted, kBuildBudget),
       averageVsyncOverhead: vsyncOverhead.reduce(add) ~/ data.length,
       p90VsyncOverhead: _findPercentile(vsyncOverheadSorted, 0.90),
       p99VsyncOverhead: _findPercentile(vsyncOverheadSorted, 0.99),
@@ -243,15 +248,23 @@ class FrameTimingSummarizer {
   ///
   /// See [TimelineSummary.summaryJson] for detail.
   Map<String, dynamic> get summary => <String, dynamic>{
-        'average_frame_build_time_millis': averageFrameBuildTime.inMicroseconds / 1E3,
-        '90th_percentile_frame_build_time_millis': p90FrameBuildTime.inMicroseconds / 1E3,
-        '99th_percentile_frame_build_time_millis': p99FrameBuildTime.inMicroseconds / 1E3,
-        'worst_frame_build_time_millis': worstFrameBuildTime.inMicroseconds / 1E3,
+        'average_frame_build_time_millis':
+            averageFrameBuildTime.inMicroseconds / 1E3,
+        '90th_percentile_frame_build_time_millis':
+            p90FrameBuildTime.inMicroseconds / 1E3,
+        '99th_percentile_frame_build_time_millis':
+            p99FrameBuildTime.inMicroseconds / 1E3,
+        'worst_frame_build_time_millis':
+            worstFrameBuildTime.inMicroseconds / 1E3,
         'missed_frame_build_budget_count': missedFrameBuildBudget,
-        'average_frame_rasterizer_time_millis': averageFrameRasterizerTime.inMicroseconds / 1E3,
-        '90th_percentile_frame_rasterizer_time_millis': p90FrameRasterizerTime.inMicroseconds / 1E3,
-        '99th_percentile_frame_rasterizer_time_millis': p99FrameRasterizerTime.inMicroseconds / 1E3,
-        'worst_frame_rasterizer_time_millis': worstFrameRasterizerTime.inMicroseconds / 1E3,
+        'average_frame_rasterizer_time_millis':
+            averageFrameRasterizerTime.inMicroseconds / 1E3,
+        '90th_percentile_frame_rasterizer_time_millis':
+            p90FrameRasterizerTime.inMicroseconds / 1E3,
+        '99th_percentile_frame_rasterizer_time_millis':
+            p99FrameRasterizerTime.inMicroseconds / 1E3,
+        'worst_frame_rasterizer_time_millis':
+            worstFrameRasterizerTime.inMicroseconds / 1E3,
         'average_layer_cache_count': averageLayerCacheCount,
         '90th_percentile_layer_cache_count': p90LayerCacheCount,
         '99th_percentile_layer_cache_count': p99LayerCacheCount,
@@ -270,8 +283,12 @@ class FrameTimingSummarizer {
         'worst_picture_cache_memory': worstPictureCacheBytes / 1024.0 / 1024.0,
         'missed_frame_rasterizer_budget_count': missedFrameRasterizerBudget,
         'frame_count': frameBuildTime.length,
-        'frame_build_times': frameBuildTime.map<int>((Duration datum) => datum.inMicroseconds).toList(),
-        'frame_rasterizer_times': frameRasterizerTime.map<int>((Duration datum) => datum.inMicroseconds).toList(),
+        'frame_build_times': frameBuildTime
+            .map<int>((Duration datum) => datum.inMicroseconds)
+            .toList(),
+        'frame_rasterizer_times': frameRasterizerTime
+            .map<int>((Duration datum) => datum.inMicroseconds)
+            .toList(),
         'new_gen_gc_count': newGenGCCount,
         'old_gen_gc_count': oldGenGCCount,
       };

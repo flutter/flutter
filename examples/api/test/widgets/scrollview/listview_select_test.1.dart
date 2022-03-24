@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/scroll_view/listview_select.1.dart' as example;
+import 'package:flutter_api_samples/widgets/scroll_view/listview_select.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('long press ListTile should enable edit mode', (WidgetTester tester) async {
+  testWidgets('long press ListTile should enable edit mode',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MyApp(),
     );
@@ -24,7 +26,8 @@ void main() {
     expect(checkBoxFinder, findsWidgets);
   });
 
-  testWidgets('Pressing cross button should disable edit mode', (WidgetTester tester) async {
+  testWidgets('Pressing cross button should disable edit mode',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MyApp(),
     );
@@ -46,7 +49,8 @@ void main() {
     expect(crossIconFinder, findsNothing);
   });
 
-  testWidgets('tapping ListTile or checkBox should toggle ListTile state', (WidgetTester tester) async {
+  testWidgets('tapping ListTile or checkBox should toggle ListTile state',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MyApp(),
     );

@@ -8,17 +8,21 @@ class MaskConstant {
   const MaskConstant({required this.name, required this.value, required this.description});
 
   const MaskConstant.platform({required String platform, required int value})
-      : this(
-            name: '$platform Plane',
-            value: value,
-            description: 'The plane value for the private keys defined by the $platform embedding.');
+    : this(
+        name: '$platform Plane',
+        value: value,
+        description: 'The plane value for the private keys defined by the $platform embedding.'
+      );
 
   final String name;
   final int value;
   final String description;
 
   String get upperCamelName {
-    return name.split(' ').map<String>((String word) => lowerCamelToUpperCamel(word.toLowerCase())).join();
+    return name
+      .split(' ')
+      .map<String>((String word) => lowerCamelToUpperCamel(word.toLowerCase()))
+      .join();
   }
 
   String get lowerCamelName {

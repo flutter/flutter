@@ -9,7 +9,9 @@ import 'debug.dart';
 import 'framework.dart';
 import 'scroll_notification.dart';
 
-export 'package:flutter/rendering.dart' show AxisDirection, GrowthDirection;
+export 'package:flutter/rendering.dart' show
+  AxisDirection,
+  GrowthDirection;
 
 /// A widget that is bigger on the inside.
 ///
@@ -65,13 +67,13 @@ class Viewport extends MultiChildRenderObjectWidget {
     this.cacheExtentStyle = CacheExtentStyle.pixel,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
-  })  : assert(offset != null),
-        assert(slivers != null),
-        assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
-        assert(cacheExtentStyle != null),
-        assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
-        assert(clipBehavior != null),
-        super(key: key, children: slivers);
+  }) : assert(offset != null),
+       assert(slivers != null),
+       assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
+       assert(cacheExtentStyle != null),
+       assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
+       assert(clipBehavior != null),
+       super(key: key, children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
   ///
@@ -334,8 +336,8 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
     required this.offset,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
-  })  : assert(offset != null),
-        super(key: key, children: slivers);
+  }) : assert(offset != null),
+       super(key: key, children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
   ///

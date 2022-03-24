@@ -65,19 +65,21 @@ class CupertinoNavBarSample extends StatelessWidget {
 }
 
 class NextPage extends StatelessWidget {
-  const NextPage({Key? key}) : super(key: key);
+  const NextPage({ Key? key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final Brightness brightness = CupertinoTheme.brightnessOf(context);
-    return CupertinoPageScaffold(
+    return  CupertinoPageScaffold(
       child: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: CupertinoColors.systemYellow,
             border: Border(
               bottom: BorderSide(
-                color: brightness == Brightness.light ? CupertinoColors.black : CupertinoColors.white,
+                color: brightness == Brightness.light
+                  ? CupertinoColors.black
+                  : CupertinoColors.white,
               ),
             ),
             // The middle widget is visible in both collapsed and expanded states.

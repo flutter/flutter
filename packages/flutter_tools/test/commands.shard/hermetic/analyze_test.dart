@@ -112,7 +112,8 @@ void main() {
           ),
         ),
       );
-    }, overrides: <Type, Generator>{
+    },
+    overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
@@ -121,7 +122,8 @@ void main() {
   testWithoutContext('analyze inRepo', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analysis_test.');
+    final Directory tempDir = fileSystem.systemTempDirectory
+      .createTempSync('flutter_analysis_test.');
     Cache.flutterRoot = _kFlutterRoot;
 
     // Absolute paths

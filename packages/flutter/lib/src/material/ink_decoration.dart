@@ -153,15 +153,14 @@ class Ink extends StatefulWidget {
     this.width,
     this.height,
     this.child,
-  })  : assert(padding == null || padding.isNonNegative),
-        assert(decoration == null || decoration.debugAssertIsValid()),
-        assert(
-          color == null || decoration == null,
-          'Cannot provide both a color and a decoration\n'
-          'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
-        ),
-        decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
-        super(key: key);
+  }) : assert(padding == null || padding.isNonNegative),
+       assert(decoration == null || decoration.debugAssertIsValid()),
+       assert(color == null || decoration == null,
+         'Cannot provide both a color and a decoration\n'
+         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
+       ),
+       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
+       super(key: key);
 
   /// Creates a widget that shows an image (obtained from an [ImageProvider]) on
   /// a [Material].
@@ -194,24 +193,24 @@ class Ink extends StatefulWidget {
     this.width,
     this.height,
     this.child,
-  })  : assert(padding == null || padding.isNonNegative),
-        assert(image != null),
-        assert(alignment != null),
-        assert(repeat != null),
-        assert(matchTextDirection != null),
-        decoration = BoxDecoration(
-          image: DecorationImage(
-            image: image,
-            onError: onImageError,
-            colorFilter: colorFilter,
-            fit: fit,
-            alignment: alignment,
-            centerSlice: centerSlice,
-            repeat: repeat,
-            matchTextDirection: matchTextDirection,
-          ),
-        ),
-        super(key: key);
+  }) : assert(padding == null || padding.isNonNegative),
+       assert(image != null),
+       assert(alignment != null),
+       assert(repeat != null),
+       assert(matchTextDirection != null),
+       decoration = BoxDecoration(
+         image: DecorationImage(
+           image: image,
+           onError: onImageError,
+           colorFilter: colorFilter,
+           fit: fit,
+           alignment: alignment,
+           centerSlice: centerSlice,
+           repeat: repeat,
+           matchTextDirection: matchTextDirection,
+         ),
+       ),
+       super(key: key);
 
   /// The [child] contained by the container.
   ///
@@ -244,9 +243,11 @@ class Ink extends StatefulWidget {
   final double? height;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null) return padding ?? EdgeInsets.zero;
+    if (decoration == null || decoration!.padding == null)
+      return padding ?? EdgeInsets.zero;
     final EdgeInsetsGeometry decorationPadding = decoration!.padding!;
-    if (padding == null) return decorationPadding;
+    if (padding == null)
+      return decorationPadding;
     return padding!.add(decorationPadding);
   }
 
@@ -336,9 +337,9 @@ class InkDecoration extends InkFeature {
     required MaterialInkController controller,
     required RenderBox referenceBox,
     VoidCallback? onRemoved,
-  })  : assert(configuration != null),
-        _configuration = configuration,
-        super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
+  }) : assert(configuration != null),
+       _configuration = configuration,
+       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
     this.decoration = decoration;
     controller.addInkFeature(this);
   }
@@ -352,7 +353,8 @@ class InkDecoration extends InkFeature {
   Decoration? get decoration => _decoration;
   Decoration? _decoration;
   set decoration(Decoration? value) {
-    if (value == _decoration) return;
+    if (value == _decoration)
+      return;
     _decoration = value;
     _painter?.dispose();
     _painter = _decoration?.createBoxPainter(_handleChanged);
@@ -368,7 +370,8 @@ class InkDecoration extends InkFeature {
   ImageConfiguration _configuration;
   set configuration(ImageConfiguration value) {
     assert(value != null);
-    if (value == _configuration) return;
+    if (value == _configuration)
+      return;
     _configuration = value;
     controller.markNeedsPaint();
   }
@@ -385,7 +388,8 @@ class InkDecoration extends InkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    if (_painter == null) return;
+    if (_painter == null)
+      return;
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     final ImageConfiguration sizedConfiguration = configuration.copyWith(
       size: referenceBox.size,

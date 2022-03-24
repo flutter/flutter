@@ -299,7 +299,7 @@ void main() {
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
     });
-  },
-      skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
-      timeout: const Timeout(Duration(minutes: 7)));
+  }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
+     timeout: const Timeout(Duration(minutes: 7))
+  );
 }

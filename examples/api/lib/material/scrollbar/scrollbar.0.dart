@@ -33,7 +33,8 @@ class MyStatelessWidget extends StatelessWidget {
     return Scrollbar(
       child: GridView.builder(
         itemCount: 120,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
         itemBuilder: (BuildContext context, int index) {
           return Center(
             child: Text('item $index'),

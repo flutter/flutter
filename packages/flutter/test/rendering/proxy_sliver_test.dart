@@ -124,7 +124,7 @@ void main() {
   test('RenderSliverAnimatedOpacity reuses its layer', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
-    )..value = 0.5; // must not be 0 or 1.0. Otherwise, it won't create a layer
+    )..value = 0.5;  // must not be 0 or 1.0. Otherwise, it won't create a layer
 
     final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
       opacity: opacityAnimation,

@@ -75,7 +75,7 @@ class SharedAppData extends StatefulWidget {
   /// rebuilds with [SharedAppData.setValue].
   ///
   /// This widget is automatically created by the [WidgetsApp].
-  const SharedAppData({Key? key, required this.child}) : super(key: key);
+  const SharedAppData({ Key? key, required this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -122,8 +122,7 @@ class SharedAppData extends StatefulWidget {
   /// The type parameter `K` is the type of the value's keyword and `V`
   /// is the type of the value.
   static void setValue<K extends Object, V>(BuildContext context, K key, V value) {
-    final _SharedAppModel? model =
-        context.getElementForInheritedWidgetOfExactType<_SharedAppModel>()?.widget as _SharedAppModel?;
+    final _SharedAppModel? model = context.getElementForInheritedWidgetOfExactType<_SharedAppModel>()?.widget as _SharedAppModel?;
     assert(_debugHasSharedAppData(model, context, 'setValue'));
     model!.sharedAppDataState.setValue<K, V>(key, value);
   }
@@ -176,9 +175,11 @@ class _SharedAppDataState extends State<SharedAppData> {
 }
 
 class _SharedAppModel extends InheritedModel<Object> {
-  _SharedAppModel({Key? key, required this.sharedAppDataState, required Widget child})
-      : data = sharedAppDataState.data,
-        super(key: key, child: child);
+  _SharedAppModel({
+    Key? key,
+    required this.sharedAppDataState,
+    required Widget child
+  }) : data = sharedAppDataState.data, super(key: key, child: child);
 
   final _SharedAppDataState sharedAppDataState;
   final Map<Object, Object?> data;

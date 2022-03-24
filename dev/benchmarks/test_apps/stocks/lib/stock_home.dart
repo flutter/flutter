@@ -4,8 +4,7 @@
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart'
-    show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
+import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
 import 'package:flutter/scheduler.dart' show timeDilation;
 
 import 'i18n/stock_strings.dart';
@@ -17,7 +16,6 @@ import 'stock_types.dart';
 typedef ModeUpdater = void Function(StockMode mode);
 
 enum _StockMenuItem { autorefresh, refresh, speedUp, speedDown }
-
 enum StockHomeTab { market, portfolio }
 
 class _NotImplementedDialog extends StatelessWidget {
@@ -85,7 +83,8 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleStockModeChange(StockMode? value) {
-    if (widget.updater != null) widget.updater(widget.configuration.copyWith(stockMode: value));
+    if (widget.updater != null)
+      widget.updater(widget.configuration.copyWith(stockMode: value));
   }
 
   void _handleStockMenu(BuildContext context, _StockMenuItem value) {
@@ -200,9 +199,7 @@ class StockHomeState extends State<StockHome> {
           tooltip: 'Search',
         ),
         PopupMenuButton<_StockMenuItem>(
-          onSelected: (_StockMenuItem value) {
-            _handleStockMenu(context, value);
-          },
+          onSelected: (_StockMenuItem value) { _handleStockMenu(context, value); },
           itemBuilder: (BuildContext context) => <PopupMenuItem<_StockMenuItem>>[
             CheckedPopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.autorefresh,
@@ -234,11 +231,14 @@ class StockHomeState extends State<StockHome> {
   }
 
   static Iterable<Stock> _getStockList(StockData stocks, Iterable<String> symbols) {
-    return symbols.map<Stock?>((String symbol) => stocks[symbol]).where((Stock? stock) => stock != null).cast<Stock>();
+    return symbols.map<Stock?>((String symbol) => stocks[symbol])
+      .where((Stock? stock) => stock != null)
+      .cast<Stock>();
   }
 
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
-    if (_searchQuery.text.isEmpty) return stocks;
+    if (_searchQuery.text.isEmpty)
+      return stocks;
     final RegExp regexp = RegExp(_searchQuery.text, caseSensitive: false);
     return stocks.where((Stock stock) => stock.symbol.contains(regexp));
   }
@@ -267,8 +267,7 @@ class StockHomeState extends State<StockHome> {
         Navigator.pushNamed(context, '/stock', arguments: stock.symbol);
       },
       onShow: (Stock stock) {
-        _scaffoldKey.currentState!
-            .showBottomSheet<void>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
+        _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
       },
     );
   }
@@ -283,7 +282,7 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  static const List<String> portfolioSymbols = <String>['AAPL', 'FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
+  static const List<String> portfolioSymbols = <String>['AAPL','FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
 
   AppBar buildSearchBar() {
     return AppBar(

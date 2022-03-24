@@ -37,7 +37,7 @@ class BasicMessageChannel<T> {
   ///
   /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
-  const BasicMessageChannel(this.name, this.codec, {BinaryMessenger? binaryMessenger})
+  const BasicMessageChannel(this.name, this.codec, { BinaryMessenger? binaryMessenger })
       : assert(name != null),
         assert(codec != null),
         _binaryMessenger = binaryMessenger;
@@ -115,7 +115,7 @@ class MethodChannel {
   ///
   /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
-  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])
+  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger ])
       : assert(name != null),
         assert(codec != null),
         _binaryMessenger = binaryMessenger;
@@ -152,7 +152,7 @@ class MethodChannel {
   /// The `T` type argument is the expected return type. It is treated as
   /// nullable.
   @optionalTypeArgs
-  Future<T?> _invokeMethod<T>(String method, {required bool missingOk, dynamic arguments}) async {
+  Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
     assert(method != null);
     final ByteData? result = await binaryMessenger.send(
       name,
@@ -336,7 +336,7 @@ class MethodChannel {
   ///  * <https://api.flutter.dev/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
   @optionalTypeArgs
-  Future<T?> invokeMethod<T>(String method, [dynamic arguments]) {
+  Future<T?> invokeMethod<T>(String method, [ dynamic arguments ]) {
     return _invokeMethod<T>(method, missingOk: false, arguments: arguments);
   }
 
@@ -349,7 +349,7 @@ class MethodChannel {
   /// See also:
   ///
   ///  * [invokeMethod], which this call delegates to.
-  Future<List<T>?> invokeListMethod<T>(String method, [dynamic arguments]) async {
+  Future<List<T>?> invokeListMethod<T>(String method, [ dynamic arguments ]) async {
     final List<dynamic>? result = await invokeMethod<List<dynamic>>(method, arguments);
     return result?.cast<T>();
   }
@@ -363,7 +363,7 @@ class MethodChannel {
   /// See also:
   ///
   ///  * [invokeMethod], which this call delegates to.
-  Future<Map<K, V>?> invokeMapMethod<K, V>(String method, [dynamic arguments]) async {
+  Future<Map<K, V>?> invokeMapMethod<K, V>(String method, [ dynamic arguments ]) async {
     final Map<dynamic, dynamic>? result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
     return result?.cast<K, V>();
   }
@@ -392,7 +392,9 @@ class MethodChannel {
     );
     binaryMessenger.setMessageHandler(
       name,
-      handler == null ? null : (ByteData? message) => _handleAsMethodCall(message, handler),
+      handler == null
+        ? null
+        : (ByteData? message) => _handleAsMethodCall(message, handler),
     );
   }
 
@@ -425,12 +427,11 @@ class MethodChannel {
 /// {@macro flutter.services.method_channel.FIFO}
 class OptionalMethodChannel extends MethodChannel {
   /// Creates a [MethodChannel] that ignores missing platform plugins.
-  const OptionalMethodChannel(String name,
-      [MethodCodec codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])
-      : super(name, codec, binaryMessenger);
+  const OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])
+    : super(name, codec, binaryMessenger);
 
   @override
-  Future<T?> invokeMethod<T>(String method, [dynamic arguments]) async {
+  Future<T?> invokeMethod<T>(String method, [ dynamic arguments ]) async {
     return super._invokeMethod<T>(method, missingOk: true, arguments: arguments);
   }
 }
@@ -485,7 +486,7 @@ class EventChannel {
   /// through the [FlutterError] facility. Stream activation happens only when
   /// stream listener count changes from 0 to 1. Stream deactivation happens
   /// only when stream listener count changes from 1 to 0.
-  Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
+  Stream<dynamic> receiveBroadcastStream([ dynamic arguments ]) {
     final MethodChannel methodChannel = MethodChannel(name, codec);
     late StreamController<dynamic> controller;
     controller = StreamController<dynamic>.broadcast(onListen: () async {

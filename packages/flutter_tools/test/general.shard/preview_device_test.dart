@@ -58,7 +58,9 @@ void main() {
       fileSystem: fileSystem,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: const <String>['/.tmp_rand0/flutter_preview.rand0/splash'],
+          command: const <String>[
+            '/.tmp_rand0/flutter_preview.rand0/splash'
+          ],
           stdout: 'The Dart VM service is listening on http://127.0.0.1:64494/fZ_B2N6JRwY=/\n',
           completer: completer,
         )
@@ -67,7 +69,10 @@ void main() {
       platform: FakePlatform(),
       builderFactory: () => FakeBundleBuilder(fileSystem),
     );
-    fileSystem.directory('artifacts_temp').childDirectory('Debug').createSync(recursive: true);
+    fileSystem
+      .directory('artifacts_temp')
+      .childDirectory('Debug')
+      .createSync(recursive: true);
 
     final LaunchResult result = await device.startApp(
       FakeApplicationPackage(),
@@ -79,27 +84,28 @@ void main() {
   });
 }
 
-class FakeFlutterProject extends Fake implements FlutterProject {}
-
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
-
+class FakeFlutterProject extends Fake implements FlutterProject { }
+class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 class FakeBundleBuilder extends Fake implements BundleBuilder {
   FakeBundleBuilder(this.fileSystem);
 
   final FileSystem fileSystem;
 
   @override
-  Future<void> build(
-      {@required TargetPlatform platform,
-      @required BuildInfo buildInfo,
-      FlutterProject project,
-      String mainPath,
-      String manifestPath = defaultManifestPath,
-      String applicationKernelFilePath,
-      String depfilePath,
-      String assetDirPath,
-      @visibleForTesting BuildSystem buildSystem}) async {
-    final Directory assetDirectory = fileSystem.directory(assetDirPath).childDirectory('flutter_assets')
+  Future<void> build({
+    @required TargetPlatform platform,
+    @required BuildInfo buildInfo,
+    FlutterProject project,
+    String mainPath,
+    String manifestPath = defaultManifestPath,
+    String applicationKernelFilePath,
+    String depfilePath,
+    String assetDirPath,
+    @visibleForTesting BuildSystem buildSystem
+  }) async {
+    final Directory assetDirectory = fileSystem
+      .directory(assetDirPath)
+      .childDirectory('flutter_assets')
       ..createSync(recursive: true);
     assetDirectory.childFile('kernel_blob.bin').createSync();
   }

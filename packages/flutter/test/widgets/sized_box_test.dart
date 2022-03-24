@@ -193,10 +193,12 @@ void main() {
   });
 
   testWidgets('SizedBox.square tests', (WidgetTester tester) async {
-    await tester.pumpWidget(const SizedBox.square(
-      dimension: 100,
-      child: SizedBox.shrink(),
-    ));
+    await tester.pumpWidget(
+        const SizedBox.square(
+          dimension: 100,
+          child: SizedBox.shrink(),
+        )
+    );
 
     expect(
       tester.renderObject<RenderConstrainedBox>(find.byType(SizedBox).first).additionalConstraints,

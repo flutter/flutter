@@ -250,8 +250,10 @@ abstract class DeletableChipAttributes {
   /// [deleteButtonTooltipMessage].
   ///
   /// Defaults to true.
-  @Deprecated('Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.')
+  @Deprecated(
+    'Migrate to deleteButtonTooltipMessage. '
+    'This feature was deprecated after v2.10.0-0.3.pre.'
+  )
   bool get useDeleteButtonTooltip;
 }
 
@@ -572,14 +574,16 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
-    @Deprecated('Migrate to deleteButtonTooltipMessage. '
-        'This feature was deprecated after v2.10.0-0.3.pre.')
-        this.useDeleteButtonTooltip = true,
-  })  : assert(label != null),
-        assert(autofocus != null),
-        assert(clipBehavior != null),
-        assert(elevation == null || elevation >= 0.0),
-        super(key: key);
+    @Deprecated(
+      'Migrate to deleteButtonTooltipMessage. '
+      'This feature was deprecated after v2.10.0-0.3.pre.'
+    )
+    this.useDeleteButtonTooltip = true,
+  }) : assert(label != null),
+       assert(autofocus != null),
+       assert(clipBehavior != null),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   @override
   final Widget? avatar;
@@ -620,8 +624,10 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   @override
   final Color? shadowColor;
   @override
-  @Deprecated('Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.')
+  @Deprecated(
+    'Migrate to deleteButtonTooltipMessage. '
+    'This feature was deprecated after v2.10.0-0.3.pre.'
+  )
   final bool useDeleteButtonTooltip;
 
   @override
@@ -748,17 +754,19 @@ class InputChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-    @Deprecated('Migrate to deleteButtonTooltipMessage. '
-        'This feature was deprecated after v2.10.0-0.3.pre.')
-        this.useDeleteButtonTooltip = true,
-  })  : assert(selected != null),
-        assert(isEnabled != null),
-        assert(label != null),
-        assert(clipBehavior != null),
-        assert(autofocus != null),
-        assert(pressElevation == null || pressElevation >= 0.0),
-        assert(elevation == null || elevation >= 0.0),
-        super(key: key);
+    @Deprecated(
+      'Migrate to deleteButtonTooltipMessage. '
+      'This feature was deprecated after v2.10.0-0.3.pre.'
+    )
+    this.useDeleteButtonTooltip = true,
+  }) : assert(selected != null),
+       assert(isEnabled != null),
+       assert(label != null),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   @override
   final Widget? avatar;
@@ -823,8 +831,10 @@ class InputChip extends StatelessWidget
   @override
   final ShapeBorder avatarBorder;
   @override
-  @Deprecated('Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.')
+  @Deprecated(
+    'Migrate to deleteButtonTooltipMessage. '
+    'This feature was deprecated after v2.10.0-0.3.pre.'
+  )
   final bool useDeleteButtonTooltip;
 
   @override
@@ -923,7 +933,11 @@ class InputChip extends StatelessWidget
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.io/design/components/chips.html>
-class ChoiceChip extends StatelessWidget implements ChipAttributes, SelectableChipAttributes, DisabledChipAttributes {
+class ChoiceChip extends StatelessWidget
+    implements
+        ChipAttributes,
+        SelectableChipAttributes,
+        DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
   /// The [label], [selected], [autofocus], and [clipBehavior] arguments must
@@ -954,13 +968,13 @@ class ChoiceChip extends StatelessWidget implements ChipAttributes, SelectableCh
     this.shadowColor,
     this.selectedShadowColor,
     this.avatarBorder = const CircleBorder(),
-  })  : assert(selected != null),
-        assert(label != null),
-        assert(clipBehavior != null),
-        assert(autofocus != null),
-        assert(pressElevation == null || pressElevation >= 0.0),
-        assert(elevation == null || elevation >= 0.0),
-        super(key: key);
+  }) : assert(selected != null),
+       assert(label != null),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   @override
   final Widget? avatar;
@@ -1135,7 +1149,11 @@ class ChoiceChip extends StatelessWidget implements ChipAttributes, SelectableCh
 ///    vertical runs.
 ///  * <https://material.io/design/components/chips.html>
 class FilterChip extends StatelessWidget
-    implements ChipAttributes, SelectableChipAttributes, CheckmarkableChipAttributes, DisabledChipAttributes {
+    implements
+        ChipAttributes,
+        SelectableChipAttributes,
+        CheckmarkableChipAttributes,
+        DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
   /// The [selected], [label], [autofocus], and [clipBehavior] arguments must
@@ -1168,13 +1186,13 @@ class FilterChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-  })  : assert(selected != null),
-        assert(label != null),
-        assert(clipBehavior != null),
-        assert(autofocus != null),
-        assert(pressElevation == null || pressElevation >= 0.0),
-        assert(elevation == null || elevation >= 0.0),
-        super(key: key);
+  }) : assert(selected != null),
+       assert(label != null),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   @override
   final Widget? avatar;
@@ -1337,17 +1355,17 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
-  })  : assert(label != null),
-        assert(clipBehavior != null),
-        assert(autofocus != null),
-        assert(
-          onPressed != null,
-          'Rather than disabling an ActionChip by setting onPressed to null, '
-          'remove it from the interface entirely.',
-        ),
-        assert(pressElevation == null || pressElevation >= 0.0),
-        assert(elevation == null || elevation >= 0.0),
-        super(key: key);
+  }) : assert(label != null),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
+       assert(
+         onPressed != null,
+         'Rather than disabling an ActionChip by setting onPressed to null, '
+         'remove it from the interface entirely.',
+       ),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   @override
   final Widget? avatar;
@@ -1493,18 +1511,20 @@ class RawChip extends StatefulWidget
     this.showCheckmark = true,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-    @Deprecated('Migrate to deleteButtonTooltipMessage. '
-        'This feature was deprecated after v2.10.0-0.3.pre.')
-        this.useDeleteButtonTooltip = true,
-  })  : assert(label != null),
-        assert(isEnabled != null),
-        assert(selected != null),
-        assert(clipBehavior != null),
-        assert(autofocus != null),
-        assert(pressElevation == null || pressElevation >= 0.0),
-        assert(elevation == null || elevation >= 0.0),
-        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
-        super(key: key);
+    @Deprecated(
+      'Migrate to deleteButtonTooltipMessage. '
+      'This feature was deprecated after v2.10.0-0.3.pre.'
+    )
+    this.useDeleteButtonTooltip = true,
+  }) : assert(label != null),
+       assert(isEnabled != null),
+       assert(selected != null),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
+       assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
+       super(key: key);
 
   @override
   final Widget? avatar;
@@ -1569,8 +1589,10 @@ class RawChip extends StatefulWidget
   @override
   final ShapeBorder avatarBorder;
   @override
-  @Deprecated('Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.')
+  @Deprecated(
+    'Migrate to deleteButtonTooltipMessage. '
+    'This feature was deprecated after v2.10.0-0.3.pre.'
+  )
   final bool useDeleteButtonTooltip;
 
   /// If set, this indicates that the chip should be disabled if all of the
@@ -1604,7 +1626,9 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   bool get hasAvatar => widget.avatar != null;
 
   bool get canTap {
-    return widget.isEnabled && widget.tapEnabled && (widget.onPressed != null || widget.onSelected != null);
+    return widget.isEnabled
+        && widget.tapEnabled
+        && (widget.onPressed != null || widget.onSelected != null);
   }
 
   bool _isTapping = false;
@@ -1643,11 +1667,12 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
 
     // These will delay the start of some animations, and/or reduce their
     // length compared to the overall select animation, using Intervals.
-    final double checkmarkPercentage = _kCheckmarkDuration.inMilliseconds / _kSelectDuration.inMilliseconds;
-    final double checkmarkReversePercentage =
-        _kCheckmarkReverseDuration.inMilliseconds / _kSelectDuration.inMilliseconds;
-    final double avatarDrawerReversePercentage =
-        _kReverseDrawerDuration.inMilliseconds / _kSelectDuration.inMilliseconds;
+    final double checkmarkPercentage = _kCheckmarkDuration.inMilliseconds /
+        _kSelectDuration.inMilliseconds;
+    final double checkmarkReversePercentage = _kCheckmarkReverseDuration.inMilliseconds /
+        _kSelectDuration.inMilliseconds;
+    final double avatarDrawerReversePercentage = _kReverseDrawerDuration.inMilliseconds /
+        _kSelectDuration.inMilliseconds;
     checkmarkAnimation = CurvedAnimation(
       parent: selectController,
       curve: Interval(1.0 - checkmarkPercentage, 1.0, curve: Curves.fastOutSlowIn),
@@ -1719,14 +1744,13 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   }
 
   OutlinedBorder _getShape(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
-    final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, materialStates) ??
-        MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.side, materialStates) ??
-        MaterialStateProperty.resolveAs<BorderSide?>(chipDefaults.side, materialStates);
-    final OutlinedBorder resolvedShape =
-        MaterialStateProperty.resolveAs<OutlinedBorder?>(widget.shape, materialStates) ??
-            MaterialStateProperty.resolveAs<OutlinedBorder?>(chipTheme.shape, materialStates) ??
-            MaterialStateProperty.resolveAs<OutlinedBorder?>(chipDefaults.shape, materialStates) ??
-            const StadiumBorder();
+    final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, materialStates)
+      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.side, materialStates)
+      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipDefaults.side, materialStates);
+    final OutlinedBorder resolvedShape = MaterialStateProperty.resolveAs<OutlinedBorder?>(widget.shape, materialStates)
+      ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipTheme.shape, materialStates)
+      ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipDefaults.shape, materialStates)
+      ?? const StadiumBorder();
     return resolvedShape.copyWith(side: resolvedSide);
   }
 
@@ -1734,18 +1758,20 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   /// different animations.
   Color? _getBackgroundColor(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
     final ColorTween backgroundTween = ColorTween(
-      begin: widget.disabledColor ?? chipTheme.disabledColor ?? theme.disabledColor,
-      end: widget.backgroundColor ??
-          chipTheme.backgroundColor ??
-          theme.chipTheme.backgroundColor ??
-          chipDefaults.backgroundColor,
+      begin: widget.disabledColor
+        ?? chipTheme.disabledColor
+        ?? theme.disabledColor,
+      end: widget.backgroundColor
+        ?? chipTheme.backgroundColor
+        ?? theme.chipTheme.backgroundColor
+        ?? chipDefaults.backgroundColor,
     );
     final ColorTween selectTween = ColorTween(
       begin: backgroundTween.evaluate(enableController),
-      end: widget.selectedColor ??
-          chipTheme.selectedColor ??
-          theme.chipTheme.selectedColor ??
-          chipDefaults.selectedColor,
+      end: widget.selectedColor
+        ?? chipTheme.selectedColor
+        ?? theme.chipTheme.selectedColor
+        ?? chipDefaults.selectedColor,
     );
     return selectTween.evaluate(selectionFade);
   }
@@ -1817,8 +1843,8 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       button: true,
       child: _wrapWithTooltip(
         tooltip: widget.useDeleteButtonTooltip
-            ? widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context).deleteButtonTooltip
-            : null,
+          ? widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context).deleteButtonTooltip
+          : null,
         enabled: widget.onDeleted != null,
         child: InkWell(
           // Radius should be slightly less than the full size of the chip.
@@ -1828,10 +1854,10 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
           onTap: widget.isEnabled ? widget.onDeleted : null,
           child: IconTheme(
             data: theme.iconTheme.copyWith(
-              color: widget.deleteIconColor ??
-                  chipTheme.deleteIconColor ??
-                  theme.chipTheme.deleteIconColor ??
-                  chipDefaults.deleteIconColor,
+              color: widget.deleteIconColor
+                ?? chipTheme.deleteIconColor
+                ?? theme.chipTheme.deleteIconColor
+                ?? chipDefaults.deleteIconColor,
             ),
             child: widget.deleteIcon,
           ),
@@ -1872,26 +1898,43 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final TextDirection? textDirection = Directionality.maybeOf(context);
     final OutlinedBorder resolvedShape = _getShape(theme, chipTheme, chipDefaults);
 
-    final double elevation = widget.elevation ?? chipTheme.elevation ?? theme.chipTheme.elevation ?? _defaultElevation;
-    final double pressElevation =
-        widget.pressElevation ?? chipTheme.pressElevation ?? theme.chipTheme.pressElevation ?? _defaultPressElevation;
-    final Color shadowColor =
-        widget.shadowColor ?? chipTheme.shadowColor ?? theme.chipTheme.shadowColor ?? _defaultShadowColor;
-    final Color selectedShadowColor = widget.selectedShadowColor ??
-        chipTheme.selectedShadowColor ??
-        theme.chipTheme.selectedShadowColor ??
-        _defaultShadowColor;
-    final Color? checkmarkColor = widget.checkmarkColor ?? chipTheme.checkmarkColor ?? theme.chipTheme.checkmarkColor;
-    final bool showCheckmark = widget.showCheckmark ?? chipTheme.showCheckmark ?? theme.chipTheme.showCheckmark ?? true;
-    final EdgeInsetsGeometry padding =
-        widget.padding ?? chipTheme.padding ?? theme.chipTheme.padding ?? chipDefaults.padding!;
-    final TextStyle labelStyle = chipTheme.labelStyle ?? theme.chipTheme.labelStyle ?? chipDefaults.labelStyle!;
-    final EdgeInsetsGeometry labelPadding =
-        widget.labelPadding ?? chipTheme.labelPadding ?? theme.chipTheme.labelPadding ?? defaultLabelPadding;
+    final double elevation = widget.elevation
+      ?? chipTheme.elevation
+      ?? theme.chipTheme.elevation
+      ?? _defaultElevation;
+    final double pressElevation = widget.pressElevation
+      ?? chipTheme.pressElevation
+      ?? theme.chipTheme.pressElevation
+      ?? _defaultPressElevation;
+    final Color shadowColor = widget.shadowColor
+      ?? chipTheme.shadowColor
+      ?? theme.chipTheme.shadowColor
+      ?? _defaultShadowColor;
+    final Color selectedShadowColor = widget.selectedShadowColor
+      ?? chipTheme.selectedShadowColor
+      ?? theme.chipTheme.selectedShadowColor
+      ?? _defaultShadowColor;
+    final Color? checkmarkColor = widget.checkmarkColor
+      ?? chipTheme.checkmarkColor
+      ?? theme.chipTheme.checkmarkColor;
+    final bool showCheckmark = widget.showCheckmark
+      ?? chipTheme.showCheckmark
+      ?? theme.chipTheme.showCheckmark
+      ?? true;
+    final EdgeInsetsGeometry padding = widget.padding
+      ?? chipTheme.padding
+      ?? theme.chipTheme.padding
+      ?? chipDefaults.padding!;
+    final TextStyle labelStyle = chipTheme.labelStyle
+      ?? theme.chipTheme.labelStyle
+      ?? chipDefaults.labelStyle!;
+    final EdgeInsetsGeometry labelPadding = widget.labelPadding
+      ?? chipTheme.labelPadding
+      ?? theme.chipTheme.labelPadding
+      ?? defaultLabelPadding;
 
     final TextStyle effectiveLabelStyle = labelStyle.merge(widget.labelStyle);
-    final Color? resolvedLabelColor =
-        MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
+    final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
 
     Widget result = Material(
@@ -2022,12 +2065,12 @@ class _ChipRedirectingHitDetectionWidget extends SingleChildRenderObjectWidget {
 }
 
 class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
-  _RenderChipRedirectingHitDetection(BoxConstraints additionalConstraints)
-      : super(additionalConstraints: additionalConstraints);
+  _RenderChipRedirectingHitDetection(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
 
   @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    if (!size.contains(position)) return false;
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+    if (!size.contains(position))
+      return false;
     // Only redirects hit detection which occurs above and below the render object.
     // In order to make this assumption true, I have removed the minimum width
     // constraints, since any reasonable chip would be at least that wide.
@@ -2054,8 +2097,8 @@ class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderO
     required this.deleteDrawerAnimation,
     required this.enableAnimation,
     this.avatarBorder,
-  })  : assert(theme != null),
-        super(key: key);
+  }) : assert(theme != null),
+       super(key: key);
 
   final _ChipRenderTheme theme;
   final bool? value;
@@ -2153,32 +2196,32 @@ class _ChipRenderTheme {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _ChipRenderTheme &&
-        other.avatar == avatar &&
-        other.label == label &&
-        other.deleteIcon == deleteIcon &&
-        other.brightness == brightness &&
-        other.padding == padding &&
-        other.labelPadding == labelPadding &&
-        other.showAvatar == showAvatar &&
-        other.showCheckmark == showCheckmark &&
-        other.checkmarkColor == checkmarkColor &&
-        other.canTapBody == canTapBody;
+    return other is _ChipRenderTheme
+        && other.avatar == avatar
+        && other.label == label
+        && other.deleteIcon == deleteIcon
+        && other.brightness == brightness
+        && other.padding == padding
+        && other.labelPadding == labelPadding
+        && other.showAvatar == showAvatar
+        && other.showCheckmark == showCheckmark
+        && other.checkmarkColor == checkmarkColor
+        && other.canTapBody == canTapBody;
   }
 
   @override
   int get hashCode => Object.hash(
-        avatar,
-        label,
-        deleteIcon,
-        brightness,
-        padding,
-        labelPadding,
-        showAvatar,
-        showCheckmark,
-        checkmarkColor,
-        canTapBody,
-      );
+    avatar,
+    label,
+    deleteIcon,
+    brightness,
+    padding,
+    labelPadding,
+    showAvatar,
+    showCheckmark,
+    checkmarkColor,
+    canTapBody,
+  );
 }
 
 class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_ChipSlot> {
@@ -2192,10 +2235,10 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     required this.deleteDrawerAnimation,
     required this.enableAnimation,
     this.avatarBorder,
-  })  : assert(theme != null),
-        assert(textDirection != null),
-        _theme = theme,
-        _textDirection = textDirection {
+  }) : assert(theme != null),
+       assert(textDirection != null),
+       _theme = theme,
+       _textDirection = textDirection {
     checkmarkAnimation.addListener(markNeedsPaint);
     avatarDrawerAnimation.addListener(markNeedsLayout);
     deleteDrawerAnimation.addListener(markNeedsLayout);
@@ -2240,9 +2283,12 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   @override
   Iterable<RenderBox> get children {
     return <RenderBox>[
-      if (avatar != null) avatar!,
-      if (label != null) label!,
-      if (deleteIcon != null) deleteIcon!,
+      if (avatar != null)
+        avatar!,
+      if (label != null)
+        label!,
+      if (deleteIcon != null)
+        deleteIcon!,
     ];
   }
 
@@ -2275,14 +2321,22 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     // The overall padding isn't affected by missing avatar or delete icon
     // because we add the padding regardless to give extra padding for the label
     // when they're missing.
-    final double overallPadding = theme.padding.horizontal + theme.labelPadding.horizontal;
-    return overallPadding + _minWidth(avatar, height) + _minWidth(label, height) + _minWidth(deleteIcon, height);
+    final double overallPadding = theme.padding.horizontal +
+        theme.labelPadding.horizontal;
+    return overallPadding +
+        _minWidth(avatar, height) +
+        _minWidth(label, height) +
+        _minWidth(deleteIcon, height);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double overallPadding = theme.padding.horizontal + theme.labelPadding.horizontal;
-    return overallPadding + _maxWidth(avatar, height) + _maxWidth(label, height) + _maxWidth(deleteIcon, height);
+    final double overallPadding = theme.padding.horizontal +
+        theme.labelPadding.horizontal;
+    return overallPadding +
+        _maxWidth(avatar, height) +
+        _maxWidth(label, height) +
+        _maxWidth(deleteIcon, height);
   }
 
   @override
@@ -2302,14 +2356,16 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     return label!.getDistanceToActualBaseline(baseline);
   }
 
-  Size _layoutLabel(BoxConstraints contentConstraints, double iconSizes, Size size, Size rawSize,
-      [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
+  Size _layoutLabel(BoxConstraints contentConstraints, double iconSizes, Size size, Size rawSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
     // Now that we know the label height and the width of the icons, we can
     // determine how much to shrink the width constraints for the "real" layout.
     if (contentConstraints.maxWidth.isFinite) {
       final double maxWidth = math.max(
         0.0,
-        contentConstraints.maxWidth - iconSizes - theme.labelPadding.horizontal - theme.padding.horizontal,
+        contentConstraints.maxWidth
+        - iconSizes
+        - theme.labelPadding.horizontal
+        - theme.padding.horizontal,
       );
       final Size updatedSize = layoutChild(
         label!,
@@ -2341,8 +2397,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     );
   }
 
-  Size _layoutAvatar(BoxConstraints contentConstraints, double contentSize,
-      [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
+  Size _layoutAvatar(BoxConstraints contentConstraints, double contentSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
     final double requestedSize = math.max(0.0, contentSize);
     final BoxConstraints avatarConstraints = BoxConstraints.tightFor(
       width: requestedSize,
@@ -2363,8 +2418,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     return Size(avatarWidth, avatarHeight);
   }
 
-  Size _layoutDeleteIcon(BoxConstraints contentConstraints, double contentSize,
-      [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
+  Size _layoutDeleteIcon(BoxConstraints contentConstraints, double contentSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
     final double requestedSize = math.max(0.0, contentSize);
     final BoxConstraints deleteIconConstraints = BoxConstraints.tightFor(
       width: requestedSize,
@@ -2382,19 +2436,20 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
     if (!size.contains(position)) {
       return false;
     }
-    final bool hitIsOnDeleteIcon = deleteIcon != null &&
-        _hitIsOnDeleteIcon(
-          padding: theme.padding,
-          tapPosition: position,
-          chipSize: size,
-          deleteButtonSize: deleteIcon!.size,
-          textDirection: textDirection!,
-        );
-    final RenderBox? hitTestChild = hitIsOnDeleteIcon ? (deleteIcon ?? label ?? avatar) : (label ?? avatar);
+    final bool hitIsOnDeleteIcon = deleteIcon != null && _hitIsOnDeleteIcon(
+      padding: theme.padding,
+      tapPosition: position,
+      chipSize: size,
+      deleteButtonSize: deleteIcon!.size,
+      textDirection: textDirection!,
+    );
+    final RenderBox? hitTestChild = hitIsOnDeleteIcon
+        ? (deleteIcon ?? label ?? avatar)
+        : (label ?? avatar);
 
     if (hitTestChild != null) {
       final Offset center = hitTestChild.size.center(Offset.zero);
@@ -2437,10 +2492,9 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     // This is the overall size of the content: it doesn't include
     // theme.padding, that is added in at the end.
     final Size overallSize = Size(
-          avatarSize.width + labelSize.width + deleteIconSize.width,
-          contentSize,
-        ) +
-        densityAdjustment;
+      avatarSize.width + labelSize.width + deleteIconSize.width,
+      contentSize,
+    ) + densityAdjustment;
     final Size paddedSize = Size(
       overallSize.width + theme.padding.horizontal,
       overallSize.height + theme.padding.vertical,
@@ -2526,7 +2580,9 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
           _pressRect = Rect.fromLTWH(
             0.0,
             0.0,
-            deleteIconShowing ? start + theme.padding.left : sizes.overall.width + theme.padding.horizontal,
+            deleteIconShowing
+                ? start + theme.padding.left
+                : sizes.overall.width + theme.padding.horizontal,
             sizes.overall.height + theme.padding.vertical,
           );
         } else {
@@ -2616,14 +2672,17 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
     final ColorTween fadeTween = ColorTween(begin: Colors.transparent, end: paintColor);
 
-    paintColor =
-        checkmarkAnimation.status == AnimationStatus.reverse ? fadeTween.evaluate(checkmarkAnimation) : paintColor;
+    paintColor = checkmarkAnimation.status == AnimationStatus.reverse
+        ? fadeTween.evaluate(checkmarkAnimation)
+        : paintColor;
 
     final Paint paint = Paint()
       ..color = paintColor!
       ..style = PaintingStyle.stroke
       ..strokeWidth = _kCheckmarkStrokeWidth * (avatar != null ? avatar!.size.height / 24.0 : 1.0);
-    final double t = checkmarkAnimation.status == AnimationStatus.reverse ? 1.0 : checkmarkAnimation.value;
+    final double t = checkmarkAnimation.status == AnimationStatus.reverse
+        ? 1.0
+        : checkmarkAnimation.value;
     if (t == 0.0) {
       // Nothing to draw.
       return;
@@ -2657,13 +2716,13 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
         final Paint darkenPaint = Paint()
           ..color = selectionScrimTween.evaluate(checkmarkAnimation)!
           ..blendMode = BlendMode.srcATop;
-        final Path path = avatarBorder!.getOuterPath(avatarRect);
+        final Path path =  avatarBorder!.getOuterPath(avatarRect);
         context.canvas.drawPath(path, darkenPaint);
       }
       // Need to make the check mark be a little smaller than the avatar.
       final double checkSize = avatar!.size.height * 0.75;
-      final Offset checkOffset =
-          _boxParentData(avatar!).offset + Offset(avatar!.size.height * 0.125, avatar!.size.height * 0.125);
+      final Offset checkOffset = _boxParentData(avatar!).offset +
+          Offset(avatar!.size.height * 0.125, avatar!.size.height * 0.125);
       _paintCheck(context.canvas, offset + checkOffset, checkSize);
     }
   }
@@ -2735,23 +2794,22 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
   @override
   void debugPaint(PaintingContext context, Offset offset) {
-    assert(!_debugShowTapTargetOutlines ||
-        () {
-          // Draws a rect around the tap targets to help with visualizing where
-          // they really are.
-          final Paint outlinePaint = Paint()
-            ..color = const Color(0xff800000)
-            ..strokeWidth = 1.0
-            ..style = PaintingStyle.stroke;
-          if (deleteIconShowing) {
-            context.canvas.drawRect(_deleteButtonRect.shift(offset), outlinePaint);
-          }
-          context.canvas.drawRect(
-            _pressRect.shift(offset),
-            outlinePaint..color = const Color(0xff008000),
-          );
-          return true;
-        }());
+    assert(!_debugShowTapTargetOutlines || () {
+      // Draws a rect around the tap targets to help with visualizing where
+      // they really are.
+      final Paint outlinePaint = Paint()
+        ..color = const Color(0xff800000)
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      if (deleteIconShowing) {
+        context.canvas.drawRect(_deleteButtonRect.shift(offset), outlinePaint);
+      }
+      context.canvas.drawRect(
+        _pressRect.shift(offset),
+        outlinePaint..color = const Color(0xff008000),
+      );
+      return true;
+    }());
   }
 
   @override
@@ -2767,7 +2825,7 @@ class _ChipSizes {
     required this.label,
     required this.deleteIcon,
     required this.densityAdjustment,
-  });
+});
   final Size size;
   final Size overall;
   final double content;

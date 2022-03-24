@@ -39,10 +39,12 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
     const double maxScrollExtent = kDefaultTotalSampleCount * kScrollDelta;
     const double pictureHeight = kRows * kRowHeight;
     if (maxScrollExtent > pictureHeight) {
-      throw Exception('Bad combination of constant values kRowHeight, kRows, and '
-          'kScrollData. With these numbers there is risk that the picture '
-          'will scroll out of the clip entirely. To fix the issue reduce '
-          'kScrollDelta, or increase either kRows or kRowHeight.');
+      throw Exception(
+        'Bad combination of constant values kRowHeight, kRows, and '
+        'kScrollData. With these numbers there is risk that the picture '
+        'will scroll out of the clip entirely. To fix the issue reduce '
+        'kScrollDelta, or increase either kRows or kRowHeight.'
+      );
     }
 
     // Create one static picture, then never change it again.

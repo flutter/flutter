@@ -17,8 +17,10 @@ void main() {
   final List<String> targetPlatforms = <String>[
     'apk',
     'web',
-    if (platform.isWindows) 'windows',
-    if (platform.isMacOS) ...<String>['macos', 'ios'],
+    if (platform.isWindows)
+      'windows',
+    if (platform.isMacOS)
+      ...<String>['macos', 'ios'],
   ];
 
   setUpAll(() {
@@ -28,9 +30,7 @@ void main() {
       'bin',
       'flutter',
     );
-    processManager.runSync(<String>[
-      flutterBin,
-      'config',
+    processManager.runSync(<String>[flutterBin, 'config',
       '--enable-macos-desktop',
       '--enable-windows-desktop',
       '--enable-web',
@@ -61,7 +61,8 @@ int x = 'String';
         'build',
         targetPlatform,
         '--no-pub',
-        if (targetPlatform == 'ios') '--no-codesign',
+        if (targetPlatform == 'ios')
+          '--no-codesign',
       ], workingDirectory: projectRoot.path);
 
       expect(

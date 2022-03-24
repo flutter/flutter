@@ -48,7 +48,8 @@ void main() {
           '--headless'
         ],
         'perfLoggingPrefs': <String, String>{
-          'traceCategories': 'devtools.timeline,'
+          'traceCategories':
+          'devtools.timeline,'
               'v8,blink.console,benchmark,blink,'
               'blink.user_timing'
         }
@@ -82,7 +83,8 @@ void main() {
           '--no-first-run',
         ],
         'perfLoggingPrefs': <String, String>{
-          'traceCategories': 'devtools.timeline,'
+          'traceCategories':
+          'devtools.timeline,'
               'v8,blink.console,benchmark,blink,'
               'blink.user_timing'
         }
@@ -90,13 +92,14 @@ void main() {
     };
 
     expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary), expected);
+
   });
 
   testWithoutContext('getDesiredCapabilities Firefox with headless on', () {
     final Map<String, dynamic> expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
-      'moz:firefoxOptions': <String, dynamic>{
+      'moz:firefoxOptions' : <String, dynamic>{
         'args': <String>['-headless'],
         'prefs': <String, dynamic>{
           'dom.file.createInChild': true,
@@ -119,7 +122,7 @@ void main() {
     final Map<String, dynamic> expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
-      'moz:firefoxOptions': <String, dynamic>{
+      'moz:firefoxOptions' : <String, dynamic>{
         'args': <String>[],
         'prefs': <String, dynamic>{
           'dom.file.createInChild': true,
@@ -201,8 +204,8 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     WebRunnerFactory: () => FakeWebRunnerFactory(
-          doResolveToError: true,
-        ),
+      doResolveToError: true,
+    ),
   });
 }
 
@@ -214,18 +217,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   final bool doResolveToError;
 
   @override
-  ResidentRunner createWebRunner(FlutterDevice device,
-      {String target,
-      bool stayResident,
-      FlutterProject flutterProject,
-      bool ipv6,
-      DebuggingOptions debuggingOptions,
-      UrlTunneller urlTunneller,
-      Logger logger,
-      FileSystem fileSystem,
-      SystemClock systemClock,
-      Usage usage,
-      bool machine = false}) {
+  ResidentRunner createWebRunner(FlutterDevice device, {String target, bool stayResident, FlutterProject flutterProject, bool ipv6, DebuggingOptions debuggingOptions, UrlTunneller urlTunneller, Logger logger, FileSystem fileSystem, SystemClock systemClock, Usage usage, bool machine = false}) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(
       doResolveToError: doResolveToError,

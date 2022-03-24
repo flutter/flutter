@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
 void main() {
-  runApp(const PlatformViewApp());
+  runApp(
+    const PlatformViewApp()
+  );
 }
 
 class PlatformViewApp extends StatefulWidget {
@@ -38,7 +40,7 @@ class PlatformViewAppState extends State<PlatformViewApp> {
 }
 
 class PlatformViewLayout extends StatelessWidget {
-  const PlatformViewLayout({Key? key}) : super(key: key);
+  const PlatformViewLayout({ Key? key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +56,7 @@ class PlatformViewLayout extends StatelessWidget {
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
               child: Stack(
-                children: const <Widget>[
+                children: const <Widget> [
                   DummyPlatformView(),
                   RotationContainer(),
                 ],
@@ -100,7 +102,8 @@ class RotationContainer extends StatefulWidget {
   State<RotationContainer> createState() => _RotationContainerState();
 }
 
-class _RotationContainerState extends State<RotationContainer> with SingleTickerProviderStateMixin {
+class _RotationContainerState extends State<RotationContainer>
+  with SingleTickerProviderStateMixin {
   late AnimationController _rotationController;
 
   @override
@@ -113,7 +116,6 @@ class _RotationContainerState extends State<RotationContainer> with SingleTicker
     );
     _rotationController.repeat();
   }
-
   @override
   Widget build(BuildContext context) {
     return RotationTransition(

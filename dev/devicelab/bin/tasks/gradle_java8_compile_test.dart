@@ -14,6 +14,7 @@ Future<void> main() async {
   await task(() async {
     try {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
+
         section('check main plugin file exists');
         final File pluginMainKotlinFile = File(
           path.join(
@@ -86,9 +87,14 @@ class AaaPlugin: FlutterPlugin, MethodCallHandler {
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
             'build',
-            options: <String>['apk', '--debug', '--target-platform=android-arm'],
+            options: <String>[
+              'apk',
+              '--debug',
+              '--target-platform=android-arm'
+            ],
           );
         });
+
       });
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {

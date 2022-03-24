@@ -26,7 +26,8 @@ void main() {
     final ExpressionCompiler expressionCompiler = WebExpressionCompiler(residentCompiler, fileSystem: fileSystem);
 
     final ExpressionCompilationResult result =
-        await expressionCompiler.compileExpressionToJs(null, null, 1, 1, null, null, null, null);
+      await expressionCompiler.compileExpressionToJs(
+        null, null, 1, 1, null, null, null, null);
 
     expectResult(result, false, 'a');
   });
@@ -37,7 +38,8 @@ void main() {
     final ExpressionCompiler expressionCompiler = WebExpressionCompiler(residentCompiler, fileSystem: fileSystem);
 
     final ExpressionCompilationResult result =
-        await expressionCompiler.compileExpressionToJs(null, null, 1, 1, null, null, null, null);
+      await expressionCompiler.compileExpressionToJs(
+        null, null, 1, 1, null, null, null, null);
 
     expectResult(result, true, 'Error: a');
   });
@@ -47,18 +49,18 @@ void main() {
     final ExpressionCompiler expressionCompiler = WebExpressionCompiler(residentCompiler, fileSystem: fileSystem);
 
     final ExpressionCompilationResult result =
-        await expressionCompiler.compileExpressionToJs(null, null, 1, 1, null, null, null, 'a');
+      await expressionCompiler.compileExpressionToJs(
+        null, null, 1, 1, null, null, null, 'a');
 
     expectResult(result, true, "InternalError: frontend server failed to compile 'a'");
   });
 }
 
 void expectResult(ExpressionCompilationResult result, bool isError, String value) {
-  expect(
-      result,
-      const TypeMatcher<ExpressionCompilationResult>()
-          .having((ExpressionCompilationResult instance) => instance.isError, 'isError', isError)
-          .having((ExpressionCompilationResult instance) => instance.result, 'result', value));
+  expect(result,
+    const TypeMatcher<ExpressionCompilationResult>()
+      .having((ExpressionCompilationResult instance) => instance.isError, 'isError', isError)
+      .having((ExpressionCompilationResult instance) => instance.result, 'result', value));
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {

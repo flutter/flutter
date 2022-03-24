@@ -40,8 +40,8 @@ class Texture extends LeafRenderObjectWidget {
     required this.textureId,
     this.freeze = false,
     this.filterQuality = FilterQuality.low,
-  })  : assert(textureId != null),
-        super(key: key);
+  }) : assert(textureId != null),
+       super(key: key);
 
   /// The identity of the backend texture.
   final int textureId;
@@ -60,8 +60,7 @@ class Texture extends LeafRenderObjectWidget {
   final FilterQuality filterQuality;
 
   @override
-  TextureBox createRenderObject(BuildContext context) =>
-      TextureBox(textureId: textureId, freeze: freeze, filterQuality: filterQuality);
+  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId, freeze: freeze, filterQuality: filterQuality);
 
   @override
   void updateRenderObject(BuildContext context, TextureBox renderObject) {

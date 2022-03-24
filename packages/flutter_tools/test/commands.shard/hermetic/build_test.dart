@@ -20,14 +20,11 @@ void main() {
     final FakeBuildInfoCommand command = FakeBuildInfoCommand();
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
-    expect(
-        () => commandRunner.run(<String>[
-              'fake',
-              '--obfuscate',
-            ]),
-        throwsToolExit(
-            message: '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
-                'combination with "--${FlutterOptions.kSplitDebugInfoOption}"'));
+    expect(() => commandRunner.run(<String>[
+      'fake',
+      '--obfuscate',
+    ]), throwsToolExit(message: '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
+        'combination with "--${FlutterOptions.kSplitDebugInfoOption}"'));
   });
   group('Fatal Logs', () {
     FakeBuildCommand command;
@@ -75,15 +72,11 @@ void main() {
     testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
       command = FakeBuildCommand();
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
-      await expectLater(
-          createTestCommandRunner(command).run(<String>[
-            'build',
-            'test',
-            '--${FlutterOptions.kFatalWarnings}',
-          ]),
-          throwsToolExit(
-              message:
-                  'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'build',
+        'test',
+        '--${FlutterOptions.kFatalWarnings}',
+      ]), throwsToolExit(message: 'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -92,15 +85,11 @@ void main() {
     testUsingContext('fails if --fatal-warnings specified and errors emitted', () async {
       command = FakeBuildCommand();
       testLogger.printError('Error: Danger Will Robinson!');
-      await expectLater(
-          createTestCommandRunner(command).run(<String>[
-            'build',
-            'test',
-            '--${FlutterOptions.kFatalWarnings}',
-          ]),
-          throwsToolExit(
-              message:
-                  'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'build',
+        'test',
+        '--${FlutterOptions.kFatalWarnings}',
+      ]), throwsToolExit(message: 'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),

@@ -41,8 +41,8 @@ void main() {
     final String canonicalizedFlutterRootPath = fileSystem.path.canonicalize(getFlutterRoot());
     if (platform.isWindows) {
       flutterRootUri
-        ..write('/')
-        ..write(canonicalizedFlutterRootPath.replaceAll(r'\', '/'));
+          ..write('/')
+          ..write(canonicalizedFlutterRootPath.replaceAll(r'\', '/'));
     } else {
       flutterRootUri.write(canonicalizedFlutterRootPath);
     }
@@ -82,12 +82,12 @@ void main() {
     projectPath = fileSystem.path.join(tempDir.path, 'flutter_project');
     final String projectWithErrors = fileSystem.path.join(tempDir.path, 'flutter_project_errors');
     fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'))
-      ..createSync(recursive: true)
-      ..writeAsStringSync(pubspecYamlSrc);
+        ..createSync(recursive: true)
+        ..writeAsStringSync(pubspecYamlSrc);
     _createDotPackages(projectPath);
     libMain = fileSystem.file(fileSystem.path.join(projectPath, 'lib', 'main.dart'))
-      ..createSync(recursive: true)
-      ..writeAsStringSync(mainDartSrc);
+        ..createSync(recursive: true)
+        ..writeAsStringSync(mainDartSrc);
     errorFile = fileSystem.file(fileSystem.path.join(projectWithErrors, 'other', 'error.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync(r"""import 'package:flutter/material.dart""");
@@ -107,34 +107,37 @@ void main() {
 
   testWithoutContext('passing one file works', () async {
     await runCommand(
-        arguments: <String>['analyze', '--no-pub', libMain.path], statusTextContains: <String>['No issues found!']);
+      arguments: <String>['analyze', '--no-pub', libMain.path],
+      statusTextContains: <String>['No issues found!']
+    );
   });
 
   testWithoutContext('passing one file with errors are detected', () async {
-    await runCommand(arguments: <String>[
-      'analyze',
-      '--no-pub',
-      errorFile.path
-    ], statusTextContains: <String>[
-      'Analyzing error.dart',
-      "error $analyzerSeparator Target of URI doesn't exist",
-      "error $analyzerSeparator Expected to find ';'",
-      'error $analyzerSeparator Unterminated string literal'
-    ], exitMessageContains: '3 issues found', exitCode: 1);
+    await runCommand(
+        arguments: <String>['analyze', '--no-pub', errorFile.path],
+        statusTextContains: <String>[
+          'Analyzing error.dart',
+          "error $analyzerSeparator Target of URI doesn't exist",
+          "error $analyzerSeparator Expected to find ';'",
+          'error $analyzerSeparator Unterminated string literal'
+        ],
+        exitMessageContains: '3 issues found',
+        exitCode: 1
+    );
   });
 
   testWithoutContext('passing more than one file with errors', () async {
-    await runCommand(arguments: <String>[
-      'analyze',
-      '--no-pub',
-      libMain.path,
-      errorFile.path
-    ], statusTextContains: <String>[
-      'Analyzing 2 items',
-      "error $analyzerSeparator Target of URI doesn't exist",
-      "error $analyzerSeparator Expected to find ';'",
-      'error $analyzerSeparator Unterminated string literal'
-    ], exitMessageContains: '3 issues found', exitCode: 1);
+    await runCommand(
+        arguments: <String>['analyze', '--no-pub', libMain.path, errorFile.path],
+        statusTextContains: <String>[
+          'Analyzing 2 items',
+          "error $analyzerSeparator Target of URI doesn't exist",
+          "error $analyzerSeparator Expected to find ';'",
+          'error $analyzerSeparator Unterminated string literal'
+        ],
+        exitMessageContains: '3 issues found',
+        exitCode: 1
+    );
   });
 
   testWithoutContext('passing more than one file success', () async {
@@ -143,20 +146,23 @@ void main() {
       ..writeAsStringSync('');
     await runCommand(
         arguments: <String>['analyze', '--no-pub', libMain.path, secondFile.path],
-        statusTextContains: <String>['No issues found!']);
+        statusTextContains: <String>['No issues found!']
+    );
   });
 
   testWithoutContext('mixing directory and files success', () async {
     await runCommand(
         arguments: <String>['analyze', '--no-pub', libMain.path, projectPath],
-        statusTextContains: <String>['No issues found!']);
+        statusTextContains: <String>['No issues found!']
+    );
   });
 
   testWithoutContext('file not found', () async {
     await runCommand(
         arguments: <String>['analyze', '--no-pub', 'not_found.abc'],
         exitMessageContains: "not_found.abc' does not exist",
-        exitCode: 1);
+        exitCode: 1
+    );
   });
 
   // Analyze in the current directory - no arguments
@@ -176,9 +182,9 @@ void main() {
       '// onPressed: _incrementCounter,',
     );
     source = source.replaceFirst(
-      '_counter++;',
-      '_counter++; throw "an error message";',
-    );
+        '_counter++;',
+        '_counter++; throw "an error message";',
+      );
     libMain.writeAsStringSync(source);
 
     // Analyze in the current directory - no arguments
@@ -201,7 +207,7 @@ void main() {
     // Insert an analysis_options.yaml file in the project
     // which will trigger a lint for broken code that was inserted earlier
     final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
-    optionsFile.writeAsStringSync('''
+      optionsFile.writeAsStringSync('''
   include: package:flutter/analysis_options_user.yaml
   linter:
     rules:
@@ -249,12 +255,14 @@ void bar() {
 ''');
 
     // Analyze in the current directory - no arguments
-    await runCommand(arguments: <String>[
-      'analyze',
-      '--no-pub'
-    ], statusTextContains: <String>[
-      'Analyzing',
-    ], exitMessageContains: '1 issue found.', exitCode: 1);
+    await runCommand(
+      arguments: <String>['analyze', '--no-pub'],
+      statusTextContains: <String>[
+        'Analyzing',
+      ],
+      exitMessageContains: '1 issue found.',
+      exitCode: 1
+    );
   });
 
   testWithoutContext('analyze once returns no issues when source is error-free', () async {
@@ -345,7 +353,7 @@ analyzer:
 
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
     await runCommand(
-      arguments: <String>['analyze', '--no-pub', '--fatal-infos', '--no-fatal-warnings'],
+      arguments: <String>['analyze','--no-pub', '--fatal-infos', '--no-fatal-warnings'],
       statusTextContains: <String>[
         'warning',
         'missing_return',

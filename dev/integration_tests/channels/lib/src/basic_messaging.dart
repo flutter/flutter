@@ -33,22 +33,23 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
   @override
   dynamic readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case _dateTime:
-        return DateTime.fromMillisecondsSinceEpoch(buffer.getInt64());
-      case _pair:
-        return Pair(readValue(buffer), readValue(buffer));
-      default:
-        return super.readValueOfType(type, buffer);
+    case _dateTime:
+      return DateTime.fromMillisecondsSinceEpoch(buffer.getInt64());
+    case _pair:
+      return Pair(readValue(buffer), readValue(buffer));
+    default: return super.readValueOfType(type, buffer);
     }
   }
 }
 
 Future<TestStepResult> basicBinaryHandshake(ByteData? message) async {
-  const BasicMessageChannel<ByteData?> channel = BasicMessageChannel<ByteData?>(
+  const BasicMessageChannel<ByteData?> channel =
+      BasicMessageChannel<ByteData?>(
     'binary-msg',
     BinaryCodec(),
   );
-  return _basicMessageHandshake<ByteData?>('Binary >${toString(message)}<', channel, message);
+  return _basicMessageHandshake<ByteData?>(
+      'Binary >${toString(message)}<', channel, message);
 }
 
 Future<TestStepResult> basicStringHandshake(String? message) async {
@@ -60,7 +61,8 @@ Future<TestStepResult> basicStringHandshake(String? message) async {
 }
 
 Future<TestStepResult> basicJsonHandshake(dynamic message) async {
-  const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
+  const BasicMessageChannel<dynamic> channel =
+      BasicMessageChannel<dynamic>(
     'json-msg',
     JSONMessageCodec(),
   );
@@ -68,15 +70,18 @@ Future<TestStepResult> basicJsonHandshake(dynamic message) async {
 }
 
 Future<TestStepResult> basicStandardHandshake(dynamic message) async {
-  const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
+  const BasicMessageChannel<dynamic> channel =
+      BasicMessageChannel<dynamic>(
     'std-msg',
     ExtendedStandardMessageCodec(),
   );
-  return _basicMessageHandshake<dynamic>('Standard >${toString(message)}<', channel, message);
+  return _basicMessageHandshake<dynamic>(
+      'Standard >${toString(message)}<', channel, message);
 }
 
 Future<TestStepResult> basicBinaryMessageToUnknownChannel() async {
-  const BasicMessageChannel<ByteData?> channel = BasicMessageChannel<ByteData?>(
+  const BasicMessageChannel<ByteData?> channel =
+      BasicMessageChannel<ByteData?>(
     'binary-unknown',
     BinaryCodec(),
   );
@@ -92,7 +97,8 @@ Future<TestStepResult> basicStringMessageToUnknownChannel() async {
 }
 
 Future<TestStepResult> basicJsonMessageToUnknownChannel() async {
-  const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
+  const BasicMessageChannel<dynamic> channel =
+      BasicMessageChannel<dynamic>(
     'json-unknown',
     JSONMessageCodec(),
   );
@@ -100,7 +106,8 @@ Future<TestStepResult> basicJsonMessageToUnknownChannel() async {
 }
 
 Future<TestStepResult> basicStandardMessageToUnknownChannel() async {
-  const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
+  const BasicMessageChannel<dynamic> channel =
+      BasicMessageChannel<dynamic>(
     'std-unknown',
     ExtendedStandardMessageCodec(),
   );
@@ -164,7 +171,9 @@ Future<TestStepResult> _basicMessageToUnknownChannel<T>(
 
 String toString(dynamic message) {
   if (message is ByteData)
-    return message.buffer.asUint8List(message.offsetInBytes, message.lengthInBytes).toString();
+    return message.buffer
+        .asUint8List(message.offsetInBytes, message.lengthInBytes)
+        .toString();
   else
     return '$message';
 }

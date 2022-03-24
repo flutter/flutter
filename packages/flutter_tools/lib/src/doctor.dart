@@ -104,17 +104,14 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
       if (globals.iosWorkflow!.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[
-          XcodeValidator(xcode: globals.xcode!, userMessages: userMessages),
-          globals.cocoapodsValidator!
-        ]),
+        GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode!, userMessages: userMessages), globals.cocoapodsValidator!]),
       if (webWorkflow.appliesToHostPlatform)
         ChromeValidator(
           chromiumLauncher: ChromiumLauncher(
             browserFinder: findChromeExecutable,
             fileSystem: globals.fs,
             operatingSystemUtils: globals.os,
-            platform: globals.platform,
+            platform:  globals.platform,
             processManager: globals.processManager,
             logger: globals.logger,
           ),
@@ -125,9 +122,14 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           processManager: globals.processManager,
           userMessages: userMessages,
         ),
-      if (windowsWorkflow!.appliesToHostPlatform) visualStudioValidator!,
-      if (ideValidators.isNotEmpty) ...ideValidators else NoIdeValidator(),
-      if (proxyValidator.shouldShow) proxyValidator,
+      if (windowsWorkflow!.appliesToHostPlatform)
+        visualStudioValidator!,
+      if (ideValidators.isNotEmpty)
+        ...ideValidators
+      else
+        NoIdeValidator(),
+      if (proxyValidator.shouldShow)
+        proxyValidator,
       if (globals.deviceManager?.canListAnything ?? false)
         DeviceValidator(
           deviceManager: globals.deviceManager,
@@ -174,6 +176,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (webWorkflow.appliesToHostPlatform) {
         _workflows!.add(webWorkflow);
       }
+
     }
     return _workflows!;
   }
@@ -193,21 +196,21 @@ class Doctor {
   /// Return a list of [ValidatorTask] objects and starts validation on all
   /// objects in [validators].
   List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[
-        for (final DoctorValidator validator in validators)
-          ValidatorTask(
-            validator,
-            // We use an asyncGuard() here to be absolutely certain that
-            // DoctorValidators do not result in an uncaught exception. Since the
-            // Future returned by the asyncGuard() is not awaited, we pass an
-            // onError callback to it and translate errors into ValidationResults.
-            asyncGuard<ValidationResult>(
-              validator.validate,
-              onError: (Object exception, StackTrace stackTrace) {
-                return ValidationResult.crash(exception, stackTrace);
-              },
-            ),
-          ),
-      ];
+    for (final DoctorValidator validator in validators)
+      ValidatorTask(
+        validator,
+        // We use an asyncGuard() here to be absolutely certain that
+        // DoctorValidators do not result in an uncaught exception. Since the
+        // Future returned by the asyncGuard() is not awaited, we pass an
+        // onError callback to it and translate errors into ValidationResults.
+        asyncGuard<ValidationResult>(
+          validator.validate,
+          onError: (Object exception, StackTrace stackTrace) {
+            return ValidationResult.crash(exception, stackTrace);
+          },
+        ),
+      ),
+  ];
 
   List<Workflow> get workflows {
     return DoctorValidatorsProvider._instance.workflows;
@@ -347,7 +350,8 @@ class Doctor {
         _logger.printStatus('$leadingBox ${validator.title} (${result.statusInfo})',
             hangingIndent: result.leadingBox.length + 1);
       } else {
-        _logger.printStatus('$leadingBox ${validator.title}', hangingIndent: result.leadingBox.length + 1);
+        _logger.printStatus('$leadingBox ${validator.title}',
+            hangingIndent: result.leadingBox.length + 1);
       }
 
       for (final ValidationMessage message in result.messages) {
@@ -355,16 +359,14 @@ class Doctor {
           int hangingIndent = 2;
           int indent = 4;
           final String indicator = showColor ? message.coloredIndicator : message.indicator;
-          for (final String line
-              in '$indicator ${showPii ? message.message : message.piiStrippedMessage}'.split('\n')) {
+          for (final String line in '$indicator ${showPii ? message.message : message.piiStrippedMessage}'.split('\n')) {
             _logger.printStatus(line, hangingIndent: hangingIndent, indent: indent, emphasis: true);
             // Only do hanging indent for the first line.
             hangingIndent = 0;
             indent = 6;
           }
           if (message.contextUrl != null) {
-            _logger.printStatus('🔨 ${message.contextUrl}',
-                hangingIndent: hangingIndent, indent: indent, emphasis: true);
+            _logger.printStatus('🔨 ${message.contextUrl}', hangingIndent: hangingIndent, indent: indent, emphasis: true);
           }
         }
       }
@@ -379,15 +381,11 @@ class Doctor {
     }
 
     if (issues > 0) {
-      _logger.printStatus(
-          '${showColor ? globals.terminal.color('!', TerminalColor.yellow) : '!'}'
-          ' Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.',
-          hangingIndent: 2);
+      _logger.printStatus('${showColor ? globals.terminal.color('!', TerminalColor.yellow) : '!'}'
+        ' Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
     } else {
-      _logger.printStatus(
-          '${showColor ? globals.terminal.color('•', TerminalColor.green) : '•'}'
-          ' No issues found!',
-          hangingIndent: 2);
+      _logger.printStatus('${showColor ? globals.terminal.color('•', TerminalColor.green) : '•'}'
+        ' No issues found!', hangingIndent: 2);
     }
 
     return doctorResult;
@@ -419,16 +417,16 @@ class FlutterValidator extends DoctorValidator {
     required ProcessManager processManager,
     required String Function() flutterRoot,
     required OperatingSystemUtils operatingSystemUtils,
-  })  : _flutterVersion = flutterVersion,
-        _devToolsVersion = devToolsVersion,
-        _platform = platform,
-        _userMessages = userMessages,
-        _fileSystem = fileSystem,
-        _artifacts = artifacts,
-        _processManager = processManager,
-        _flutterRoot = flutterRoot,
-        _operatingSystemUtils = operatingSystemUtils,
-        super('Flutter');
+  }) : _flutterVersion = flutterVersion,
+       _devToolsVersion = devToolsVersion,
+       _platform = platform,
+       _userMessages = userMessages,
+       _fileSystem = fileSystem,
+       _artifacts = artifacts,
+       _processManager = processManager,
+       _flutterRoot = flutterRoot,
+       _operatingSystemUtils = operatingSystemUtils,
+       super('Flutter');
 
   final Platform _platform;
   final FlutterVersion Function() _flutterVersion;
@@ -522,9 +520,9 @@ class DeviceValidator extends DoctorValidator {
   DeviceValidator({
     DeviceManager? deviceManager,
     UserMessages? userMessages,
-  })  : _deviceManager = deviceManager ?? globals.deviceManager!,
-        _userMessages = userMessages ?? globals.userMessages,
-        super('Connected device');
+  }) : _deviceManager = deviceManager ?? globals.deviceManager!,
+       _userMessages = userMessages ?? globals.userMessages,
+       super('Connected device');
 
   final DeviceManager _deviceManager;
   final UserMessages _userMessages;
@@ -537,15 +535,14 @@ class DeviceValidator extends DoctorValidator {
     final List<Device> devices = await _deviceManager.getAllConnectedDevices();
     List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages =
-          (await Device.descriptions(devices)).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
+      installedMessages = (await Device.descriptions(devices))
+          .map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 
     List<ValidationMessage> diagnosticMessages = <ValidationMessage>[];
     final List<String> diagnostics = await _deviceManager.getDeviceDiagnostics();
     if (diagnostics.isNotEmpty) {
-      diagnosticMessages =
-          diagnostics.map<ValidationMessage>((String message) => ValidationMessage.hint(message)).toList();
+      diagnosticMessages = diagnostics.map<ValidationMessage>((String message) => ValidationMessage.hint(message)).toList();
     } else if (devices.isEmpty) {
       diagnosticMessages = <ValidationMessage>[ValidationMessage.hint(_userMessages.devicesMissing)];
     }
@@ -554,11 +551,17 @@ class DeviceValidator extends DoctorValidator {
       return ValidationResult(ValidationType.notAvailable, diagnosticMessages);
     } else if (diagnostics.isNotEmpty) {
       installedMessages.addAll(diagnosticMessages);
-      return ValidationResult(ValidationType.installed, installedMessages,
-          statusInfo: _userMessages.devicesAvailable(devices.length));
+      return ValidationResult(
+        ValidationType.installed,
+        installedMessages,
+        statusInfo: _userMessages.devicesAvailable(devices.length)
+      );
     } else {
-      return ValidationResult(ValidationType.installed, installedMessages,
-          statusInfo: _userMessages.devicesAvailable(devices.length));
+      return ValidationResult(
+        ValidationType.installed,
+        installedMessages,
+        statusInfo: _userMessages.devicesAvailable(devices.length)
+      );
     }
   }
 }
@@ -568,8 +571,7 @@ class DoctorText {
   DoctorText(
     BufferLogger logger, {
     @visibleForTesting Doctor? doctor,
-  })  : _doctor = doctor ?? Doctor(logger: logger),
-        _logger = logger;
+  }) : _doctor = doctor ?? Doctor(logger: logger), _logger = logger;
 
   final BufferLogger _logger;
   final Doctor _doctor;
@@ -583,8 +585,7 @@ class DoctorText {
 
   Future<String> _runDiagnosis(bool showPii) async {
     try {
-      await _doctor.diagnose(
-          showColor: false, startedValidatorTasks: _validatorTasks, showPii: showPii, sendEvent: _sendDoctorEvent);
+      await _doctor.diagnose(showColor: false, startedValidatorTasks: _validatorTasks, showPii: showPii, sendEvent: _sendDoctorEvent);
       // Do not send the doctor event a second time.
       _sendDoctorEvent = false;
       final String text = _logger.statusText;

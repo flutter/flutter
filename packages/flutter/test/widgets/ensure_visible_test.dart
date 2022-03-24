@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 Finder findKey(int i) => find.byKey(ValueKey<int>(i));
 
-Widget buildSingleChildScrollView(Axis scrollDirection, {bool reverse = false}) {
+Widget buildSingleChildScrollView(Axis scrollDirection, { bool reverse = false }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
@@ -38,7 +38,7 @@ Widget buildSingleChildScrollView(Axis scrollDirection, {bool reverse = false}) 
   );
 }
 
-Widget buildListView(Axis scrollDirection, {bool reverse = false, bool shrinkWrap = false}) {
+Widget buildListView(Axis scrollDirection, { bool reverse = false, bool shrinkWrap = false }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
@@ -66,6 +66,7 @@ Widget buildListView(Axis scrollDirection, {bool reverse = false, bool shrinkWra
 }
 
 void main() {
+
   group('SingleChildScrollView', () {
     testWidgets('SingleChildScrollView ensureVisible Axis.vertical', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
@@ -727,9 +728,7 @@ void main() {
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(-3), width: 200.0, height: 200.0)),
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(-2), width: 200.0, height: 200.0)),
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(-1), width: 200.0, height: 200.0)),
-                      SliverToBoxAdapter(
-                          key: ValueKey<String>('center'),
-                          child: SizedBox(key: ValueKey<int>(0), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(key: ValueKey<String>('center'), child: SizedBox(key: ValueKey<int>(0), width: 200.0, height: 200.0)),
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(1), width: 200.0, height: 200.0)),
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(2), width: 200.0, height: 200.0)),
                       SliverToBoxAdapter(child: SizedBox(key: ValueKey<int>(3), width: 200.0, height: 200.0)),
@@ -770,6 +769,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getTopLeft(findKey(3)).dy, equals(100.0));
+
 
       await prepare(-480.0);
       Scrollable.ensureVisible(findContext(-3));

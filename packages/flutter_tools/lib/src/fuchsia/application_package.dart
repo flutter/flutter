@@ -48,7 +48,7 @@ class PrebuiltFuchsiaApp extends FuchsiaApp implements PrebuiltApplicationPackag
   PrebuiltFuchsiaApp({
     required this.applicationPackage,
   }) : // TODO(zanderso): Extract the archive and extract the id from meta/package.
-        super(projectBundleId: applicationPackage.path);
+       super(projectBundleId: applicationPackage.path);
 
   @override
   File farArchive(BuildMode buildMode) => globals.fs.file(applicationPackage);
@@ -61,7 +61,8 @@ class PrebuiltFuchsiaApp extends FuchsiaApp implements PrebuiltApplicationPackag
 }
 
 class BuildableFuchsiaApp extends FuchsiaApp {
-  BuildableFuchsiaApp({required this.project}) : super(projectBundleId: project.project.manifest.appName);
+  BuildableFuchsiaApp({required this.project}) :
+      super(projectBundleId: project.project.manifest.appName);
 
   final FuchsiaProject project;
 

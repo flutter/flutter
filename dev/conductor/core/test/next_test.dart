@@ -89,7 +89,8 @@ void main() {
           operatingSystem: localOperatingSystem,
           pathSeparator: localPathSeparator,
         );
-        final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')..createSync(recursive: true);
+        final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
+            ..createSync(recursive: true);
         // this branch already present in ciYaml
         _initializeCiYamlFile(ciYaml, enabledBranches: <String>[candidateBranch]);
         final pb.ConductorState state = pb.ConductorState(
@@ -128,12 +129,15 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
         expect(stdio.error, isEmpty);
-        expect(stdio.stdout, contains('You must now codesign the engine binaries for commit $revision1'));
+        expect(
+          stdio.stdout,
+          contains('You must now codesign the engine binaries for commit $revision1'));
       });
 
       test('confirms to stdout when all engine cherrypicks were auto-applied', () async {
         stdio.stdin.add('n');
-        final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')..createSync(recursive: true);
+        final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
+            ..createSync(recursive: true);
         _initializeCiYamlFile(ciYaml);
         final FakeProcessManager processManager = FakeProcessManager.empty();
         final FakePlatform platform = FakePlatform(
@@ -197,7 +201,7 @@ void main() {
             command: const <String>['git', 'checkout', workingBranch],
             onRun: () {
               final File file = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
-                ..createSync(recursive: true);
+                  ..createSync(recursive: true);
               _initializeCiYamlFile(file);
             },
           ),
@@ -255,10 +259,10 @@ void main() {
 
         expect(processManager, hasNoRemainingExpectations);
         expect(
-            stdio.stdout,
-            contains(
-                'You must now open a pull request at https://github.com/flutter/engine/compare/flutter-1.2-candidate.3...org:cherrypicks-flutter-1.2-candidate.3?expand=1'));
-        expect(stdio.stdout, contains('Are you ready to push your engine branch to the repository $remoteUrl? (y/n) '));
+          stdio.stdout,
+          contains('You must now open a pull request at https://github.com/flutter/engine/compare/flutter-1.2-candidate.3...org:cherrypicks-flutter-1.2-candidate.3?expand=1'));
+        expect(stdio.stdout, contains(
+                'Are you ready to push your engine branch to the repository $remoteUrl? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
         expect(stdio.error, isEmpty);
       });
@@ -412,8 +416,10 @@ void main() {
         fileSystem.directory(engineCheckoutPath).createSync(recursive: true);
         // create framework repo
         final Directory frameworkDir = fileSystem.directory(frameworkCheckoutPath);
-        final File engineRevisionFile =
-            frameworkDir.childDirectory('bin').childDirectory('internal').childFile('engine.version');
+        final File engineRevisionFile = frameworkDir
+            .childDirectory('bin')
+            .childDirectory('internal')
+            .childFile('engine.version');
         engineRevisionFile.createSync(recursive: true);
         engineRevisionFile.writeAsStringSync(oldEngineVersion, flush: true);
       });
@@ -482,7 +488,8 @@ void main() {
           FakeCommand(
             command: const <String>['git', 'checkout', workingBranch],
             onRun: () {
-              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')..createSync();
+              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
+                  ..createSync();
               _initializeCiYamlFile(file);
             },
           ),
@@ -551,7 +558,8 @@ void main() {
           FakeCommand(
             command: const <String>['git', 'checkout', 'upstream/$candidateBranch'],
             onRun: () {
-              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')..createSync();
+              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
+                  ..createSync();
               _initializeCiYamlFile(file);
             },
           ),
@@ -599,8 +607,7 @@ void main() {
           fileSystem.file(stateFile),
         );
 
-        expect(stdio.stdout,
-            contains('Are you ready to push your framework branch to the repository $mirrorRemoteUrl? (y/n) '));
+        expect(stdio.stdout, contains('Are you ready to push your framework branch to the repository $mirrorRemoteUrl? (y/n) '));
         expect(stdio.error, contains('Aborting command.'));
         expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
       });
@@ -621,7 +628,8 @@ void main() {
           FakeCommand(
             command: const <String>['git', 'checkout', workingBranch],
             onRun: () {
-              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')..createSync();
+              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
+                  ..createSync();
               _initializeCiYamlFile(file);
             },
           ),
@@ -879,8 +887,7 @@ void main() {
         expect(stdio.error, contains('Aborting command.'));
         expect(
           stdio.stdout,
-          contains(
-              'About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
+          contains('About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
         );
         expect(finalState.currentPhase, ReleasePhase.PUBLISH_CHANNEL);
       });
@@ -935,13 +942,11 @@ void main() {
         expect(stdio.error, isEmpty);
         expect(
           stdio.stdout,
-          contains(
-              'About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
+          contains('About to execute command: `git push ${FrameworkRepository.defaultUpstream} $revision1:$releaseChannel`'),
         );
         expect(
           stdio.stdout,
-          contains(
-              'Release archive packages must be verified on cloud storage: https://ci.chromium.org/p/flutter/g/beta_packaging/console'),
+          contains('Release archive packages must be verified on cloud storage: https://ci.chromium.org/p/flutter/g/beta_packaging/console'),
         );
         expect(finalState.currentPhase, ReleasePhase.VERIFY_RELEASE);
       });
@@ -1067,15 +1072,7 @@ void main() {
       final pb.Repository testPbRepository = pb.Repository();
       (checkouts.processManager as FakeProcessManager).addCommands(<FakeCommand>[
         FakeCommand(
-          command: <String>[
-            'git',
-            'clone',
-            '--origin',
-            'upstream',
-            '--',
-            testRepository.upstreamRemote.url,
-            '/flutter/dev/conductor/flutter_conductor_checkouts/test-repo/test-repo'
-          ],
+          command: <String>['git', 'clone', '--origin', 'upstream', '--', testRepository.upstreamRemote.url, '/flutter/dev/conductor/flutter_conductor_checkouts/test-repo/test-repo'],
         ),
         const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
@@ -1137,17 +1134,16 @@ class _UnimplementedStdio implements Stdio {
 }
 
 class _TestRepository extends Repository {
-  _TestRepository.fromCheckouts(Checkouts checkouts, [String name = 'test-repo'])
-      : super(
-          fileSystem: checkouts.fileSystem,
-          parentDirectory: checkouts.directory.childDirectory(name),
-          platform: checkouts.platform,
-          processManager: checkouts.processManager,
-          name: name,
-          requiredLocalBranches: <String>[],
-          stdio: checkouts.stdio,
-          upstreamRemote: const Remote(name: RemoteName.upstream, url: 'git@github.com:upstream/repo.git'),
-        );
+  _TestRepository.fromCheckouts(Checkouts checkouts, [String name = 'test-repo']) : super(
+    fileSystem: checkouts.fileSystem,
+    parentDirectory: checkouts.directory.childDirectory(name),
+    platform: checkouts.platform,
+    processManager: checkouts.processManager,
+    name: name,
+    requiredLocalBranches: <String>[],
+    stdio: checkouts.stdio,
+    upstreamRemote: const Remote(name: RemoteName.upstream, url: 'git@github.com:upstream/repo.git'),
+  );
 
   @override
   Future<_TestRepository> cloneRepository(String? cloneName) async {
@@ -1162,11 +1158,11 @@ class _TestNextContext extends NextContext {
     required File stateFile,
     required Checkouts checkouts,
   }) : super(
-          autoAccept: autoAccept,
-          force: force,
-          checkouts: checkouts,
-          stateFile: stateFile,
-        );
+    autoAccept: autoAccept,
+    force: force,
+    checkouts: checkouts,
+    stateFile: stateFile,
+  );
 
   @override
   Future<bool> prompt(String message) {

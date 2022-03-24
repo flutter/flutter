@@ -302,7 +302,6 @@ void main() {
         Future<AndroidSemanticsNode> getCheckboxSemantics(String key) async {
           return getSemantics(find.byValueKey(key));
         }
-
         expect(
           await getCheckboxSemantics(checkboxKeyValue),
           hasAndroidSemantics(
@@ -349,7 +348,6 @@ void main() {
         Future<AndroidSemanticsNode> getRadioSemantics(String key) async {
           return getSemantics(find.byValueKey(key));
         }
-
         expect(
           await getRadioSemantics(radio2KeyValue),
           hasAndroidSemantics(
@@ -386,7 +384,6 @@ void main() {
         Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
           return getSemantics(find.byValueKey(key));
         }
-
         expect(
           await getSwitchSemantics(switchKeyValue),
           hasAndroidSemantics(
@@ -425,7 +422,6 @@ void main() {
         Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
           return getSemantics(find.byValueKey(key));
         }
-
         expect(
           await getSwitchSemantics(labeledSwitchKeyValue),
           hasAndroidSemantics(
@@ -723,5 +719,6 @@ void main() {
         await driver.tap(find.byValueKey('back'));
       });
     });
+
   });
 }

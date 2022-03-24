@@ -13,10 +13,14 @@ import '../runner/flutter_command.dart';
 
 class EmulatorsCommand extends FlutterCommand {
   EmulatorsCommand() {
-    argParser.addOption('launch', help: 'The full or partial ID of the emulator to launch.');
+    argParser.addOption('launch',
+        help: 'The full or partial ID of the emulator to launch.');
     argParser.addFlag('cold',
-        help: 'Used with the "--launch" flag to cold boot the emulator instance (Android only).', negatable: false);
-    argParser.addFlag('create', help: 'Creates a new Android emulator based on a Pixel device.', negatable: false);
+        help: 'Used with the "--launch" flag to cold boot the emulator instance (Android only).',
+        negatable: false);
+    argParser.addFlag('create',
+        help: 'Creates a new Android emulator based on a Pixel device.',
+        negatable: false);
     argParser.addOption('name',
         help: 'Used with the "--create" flag. Specifies a name for the emulator being created.');
   }
@@ -49,15 +53,18 @@ class EmulatorsCommand extends FlutterCommand {
       await _createEmulator(name: stringArg('name'));
     } else {
       final String? searchText =
-          argumentResults.rest != null && argumentResults.rest.isNotEmpty ? argumentResults.rest.first : null;
+          argumentResults.rest != null && argumentResults.rest.isNotEmpty
+              ? argumentResults.rest.first
+              : null;
       await _listEmulators(searchText);
     }
 
     return FlutterCommandResult.success();
   }
 
-  Future<void> _launchEmulator(String id, {required bool coldBoot}) async {
-    final List<Emulator> emulators = await emulatorManager!.getEmulatorsMatching(id);
+  Future<void> _launchEmulator(String id, { required bool coldBoot }) async {
+    final List<Emulator> emulators =
+        await emulatorManager!.getEmulatorsMatching(id);
 
     if (emulators.isEmpty) {
       globals.printStatus("No emulator found that matches '$id'.");
@@ -71,8 +78,9 @@ class EmulatorsCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _createEmulator({String? name}) async {
-    final CreateEmulatorResult createResult = await emulatorManager!.createEmulator(name: name);
+  Future<void> _createEmulator({ String? name }) async {
+    final CreateEmulatorResult createResult =
+        await emulatorManager!.createEmulator(name: name);
 
     if (createResult.success) {
       globals.printStatus("Emulator '${createResult.emulatorName}' created successfully.");
@@ -114,10 +122,12 @@ class EmulatorsCommand extends FlutterCommand {
   }) {
     globals.printStatus('');
     if (showRunInstruction) {
-      globals.printStatus("To run an emulator, run 'flutter emulators --launch <emulator id>'.");
+      globals.printStatus(
+          "To run an emulator, run 'flutter emulators --launch <emulator id>'.");
     }
     if (showCreateInstruction) {
-      globals.printStatus("To create a new emulator, run 'flutter emulators --create [--name xyz]'.");
+      globals.printStatus(
+          "To create a new emulator, run 'flutter emulators --create [--name xyz]'.");
     }
 
     if (showRunInstruction || showCreateInstruction) {

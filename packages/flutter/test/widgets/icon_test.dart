@@ -110,6 +110,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 
+
   testWidgets('Icon with custom font', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(

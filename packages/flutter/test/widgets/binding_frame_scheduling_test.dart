@@ -25,7 +25,7 @@ void main() {
 
     // Framework starts with detached statue. Sends resumed signal to enable frame.
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(PlatformDispatcher.instance.onBeginFrame, isNull);
     expect(PlatformDispatcher.instance.onDrawFrame, isNull);
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);

@@ -38,29 +38,35 @@ void main() {
         isBot: false,
       );
       int? runExitCode;
-      run.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
-        print('run:stdout: $line');
-        if (!line.startsWith('Building flutter tool...') &&
+      run.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          print('run:stdout: $line');
+          if (
+            !line.startsWith('Building flutter tool...') &&
             !line.startsWith('Running "flutter pub get" in ui...') &&
             !line.startsWith('Resolving dependencies...') &&
             // Catch engine piped output from unrelated concurrent Flutter apps
             !line.contains(RegExp(r'[A-Z]\/flutter \([0-9]+\):')) &&
             // Empty lines could be due to the progress spinner breaking up.
-            line.length > 1) {
-          stdout.add(line);
-        }
-        if (line.contains('Quit (terminate the application on the device).')) {
-          ready.complete();
-        }
-      });
-      run.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
-        print('run:stderr: $line');
-        stderr.add(line);
-      });
-      unawaited(run.exitCode.then<void>((int exitCode) {
-        runExitCode = exitCode;
-      }));
-      await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);
+            line.length > 1
+          ) {
+            stdout.add(line);
+          }
+          if (line.contains('Quit (terminate the application on the device).')) {
+            ready.complete();
+          }
+        });
+      run.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          print('run:stderr: $line');
+          stderr.add(line);
+        });
+      unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
+      await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (runExitCode != null) {
         throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';
       }
@@ -91,7 +97,10 @@ void main() {
 }
 
 void _findNextMatcherInList(
-    List<String> list, bool Function(String testLine) matcher, String errorMessageExpectedLine) {
+  List<String> list,
+  bool Function(String testLine) matcher,
+  String errorMessageExpectedLine
+) {
   final List<String> copyOfListForErrorMessage = List<String>.from(list);
 
   while (list.isNotEmpty) {

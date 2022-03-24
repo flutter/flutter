@@ -10,6 +10,7 @@ import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
+
 /// Generates the key mapping for GTK, based on the information in the key
 /// data structure given to it.
 class GtkCodeGenerator extends PlatformCodeGenerator {
@@ -18,9 +19,9 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     LogicalKeyData logicalData,
     String modifierBitMapping,
     String lockBitMapping,
-  )   : _modifierBitMapping = parseMapOfListOfString(modifierBitMapping),
-        _lockBitMapping = parseMapOfListOfString(lockBitMapping),
-        super(keyData, logicalData);
+  ) : _modifierBitMapping = parseMapOfListOfString(modifierBitMapping),
+      _lockBitMapping = parseMapOfListOfString(lockBitMapping),
+      super(keyData, logicalData);
 
   /// This generates the map of XKB scan codes to Flutter physical keys.
   String get _xkbScanCodeMap {
@@ -28,7 +29,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.xKbScanCode != null) {
         lines.add(entry.xKbScanCode!,
-            '    {${toHex(entry.xKbScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
+          '    {${toHex(entry.xKbScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -39,17 +40,18 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('GTK keyval map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.gtkValues, entry.gtkNames, (int value, String name) {
-        lines.add(value, '    {${toHex(value)}, ${toHex(entry.value, digits: 11)}},  // $name');
+        lines.add(value,
+          '    {${toHex(value)}, ${toHex(entry.value, digits: 11)}},  // $name');
       });
     }
     return lines.sortedJoin().trimRight();
   }
 
   static String constructMapFromModToKeys(
-    Map<String, List<String>> source,
-    PhysicalKeyData physicalData,
-    LogicalKeyData logicalData,
-    String debugFunctionName,
+      Map<String, List<String>> source,
+      PhysicalKeyData physicalData,
+      LogicalKeyData logicalData,
+      String debugFunctionName,
   ) {
     final StringBuffer result = StringBuffer();
     source.forEach((String modifierBitName, List<String> keyNames) {
@@ -59,8 +61,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
       final String? secondaryLogicalName = keyNames.length == 3 ? keyNames[2] : null;
       final PhysicalKeyEntry primaryPhysical = physicalData.entryByName(primaryPhysicalName);
       final LogicalKeyEntry primaryLogical = logicalData.entryByName(primaryLogicalName);
-      final LogicalKeyEntry? secondaryLogical =
-          secondaryLogicalName == null ? null : logicalData.entryByName(secondaryLogicalName);
+      final LogicalKeyEntry? secondaryLogical = secondaryLogicalName == null ? null : logicalData.entryByName(secondaryLogicalName);
       if (secondaryLogical == null && secondaryLogicalName != null) {
         print('Unrecognized secondary logical key $secondaryLogicalName specified for $debugFunctionName.');
         return;
@@ -84,13 +85,11 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   String get _gtkModifierBitMap {
     return constructMapFromModToKeys(_modifierBitMapping, keyData, logicalData, 'gtkModifierBitMap');
   }
-
   final Map<String, List<String>> _modifierBitMapping;
 
   String get _gtkModeBitMap {
     return constructMapFromModToKeys(_lockBitMapping, keyData, logicalData, 'gtkModeBitMap');
   }
-
   final Map<String, List<String>> _lockBitMapping;
 
   /// This generates the mask values for the part of a key code that defines its plane.
@@ -111,8 +110,8 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   String get templatePath => path.join(dataRoot, 'gtk_key_mapping_cc.tmpl');
 
   @override
-  String outputPath(String platform) =>
-      path.join(PlatformCodeGenerator.engineRoot, 'shell', 'platform', 'linux', 'key_mapping.cc');
+  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
+      'shell', 'platform', 'linux', 'key_mapping.cc');
 
   @override
   Map<String, String> mappings() {

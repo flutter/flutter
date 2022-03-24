@@ -115,8 +115,7 @@ String? parseAppVersion(WindowsUwpProject project) {
   try {
     document = XmlDocument.parse(appManifestFile.readAsStringSync());
   } on XmlParserException {
-    throwToolExit(
-        'Error parsing $appManifestFile. Please ensure that the appx manifest is a valid XML document and try again.');
+    throwToolExit('Error parsing $appManifestFile. Please ensure that the appx manifest is a valid XML document and try again.');
   }
   for (final XmlElement metaData in document.findAllElements('Identity')) {
     return metaData.getAttribute('Version');

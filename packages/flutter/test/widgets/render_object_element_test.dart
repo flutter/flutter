@@ -28,7 +28,7 @@ class Pair<T> {
 /// and the other child in the bottom half. It will swap which child is on top
 /// and which is on bottom every time the widget is rendered.
 abstract class Swapper extends RenderObjectWidget {
-  const Swapper({Key? key, this.stable, this.swapper}) : super(key: key);
+  const Swapper({ Key? key, this.stable, this.swapper }) : super(key: key);
 
   final Widget? stable;
   final Widget? swapper;
@@ -80,8 +80,10 @@ abstract class SwapperElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (stable != null) visitor(stable!);
-    if (swapper != null) visitor(swapper!);
+    if (stable != null)
+      visitor(stable!);
+    if (swapper != null)
+      visitor(swapper!);
   }
 
   @override
@@ -141,10 +143,13 @@ class RenderSwapper extends RenderBox {
   RenderBox? _stable;
   RenderBox? get stable => _stable;
   set stable(RenderBox? child) {
-    if (child == _stable) return;
-    if (_stable != null) dropChild(_stable!);
+    if (child == _stable)
+      return;
+    if (_stable != null)
+      dropChild(_stable!);
     _stable = child;
-    if (child != null) adoptChild(child);
+    if (child != null)
+      adoptChild(child);
   }
 
   bool? _swapperIsOnTop;
@@ -155,16 +160,21 @@ class RenderSwapper extends RenderBox {
       _swapperIsOnTop = isOnTop;
       markNeedsLayout();
     }
-    if (child == _swapper) return;
-    if (_swapper != null) dropChild(_swapper!);
+    if (child == _swapper)
+      return;
+    if (_swapper != null)
+      dropChild(_swapper!);
     _swapper = child;
-    if (child != null) adoptChild(child);
+    if (child != null)
+      adoptChild(child);
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    if (_stable != null) visitor(_stable!);
-    if (_swapper != null) visitor(_swapper!);
+    if (_stable != null)
+      visitor(_stable!);
+    if (_swapper != null)
+      visitor(_swapper!);
   }
 
   @override
@@ -224,8 +234,7 @@ class RenderSwapper extends RenderBox {
 BoxParentData parentDataFor(RenderObject renderObject) => renderObject.parentData! as BoxParentData;
 
 void main() {
-  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments',
-      (WidgetTester tester) async {
+  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments', (WidgetTester tester) async {
     const Key redKey = ValueKey<String>('red');
     const Key blueKey = ValueKey<String>('blue');
     Widget widget() {
@@ -269,8 +278,7 @@ void main() {
     expect(swapper.removeSlots, contains(false));
   });
 
-  testWidgets('RenderObjectElement *ChildRenderObject methods fail with deprecation message',
-      (WidgetTester tester) async {
+  testWidgets('RenderObjectElement *ChildRenderObject methods fail with deprecation message', (WidgetTester tester) async {
     const Key redKey = ValueKey<String>('red');
     const Key blueKey = ValueKey<String>('blue');
     Widget widget() {

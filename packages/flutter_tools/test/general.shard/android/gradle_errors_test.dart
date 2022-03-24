@@ -22,21 +22,21 @@ void main() {
   group('gradleErrors', () {
     testWithoutContext('list of errors', () {
       // If you added a new Gradle error, please update this test.
-      expect(
-          gradleErrors,
-          equals(<GradleHandledError>[
-            licenseNotAcceptedHandler,
-            networkErrorHandler,
-            permissionDeniedErrorHandler,
-            flavorUndefinedHandler,
-            r8FailureHandler,
-            minSdkVersion,
-            transformInputIssue,
-            lockFileDepMissing,
-            multidexErrorHandler,
-            incompatibleKotlinVersionHandler,
-            minCompileSdkVersionHandler,
-          ]));
+      expect(gradleErrors,
+        equals(<GradleHandledError>[
+          licenseNotAcceptedHandler,
+          networkErrorHandler,
+          permissionDeniedErrorHandler,
+          flavorUndefinedHandler,
+          r8FailureHandler,
+          minSdkVersion,
+          transformInputIssue,
+          lockFileDepMissing,
+          multidexErrorHandler,
+          incompatibleKotlinVersionHandler,
+          minCompileSdkVersionHandler,
+        ])
+      );
     });
   });
 
@@ -100,7 +100,11 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText, contains('Gradle threw an error while downloading artifacts from the network.'));
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -126,7 +130,11 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText, contains('Gradle threw an error while downloading artifacts from the network.'));
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -143,7 +151,11 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText, contains('Gradle threw an error while downloading artifacts from the network.'));
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -176,7 +188,11 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText, contains('Gradle threw an error while downloading artifacts from the network.'));
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -201,7 +217,11 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText, contains('Gradle threw an error while downloading artifacts from the network.'));
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -237,7 +257,11 @@ Exception in thread "main" java.net.SocketException: Connection reset
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText, contains('Gradle threw an error while downloading artifacts from the network.'));
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -260,7 +284,11 @@ A problem occurred configuring root project 'android'.
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText, contains('Gradle threw an error while downloading artifacts from the network.'));
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -287,7 +315,11 @@ A problem occurred configuring root project 'android'.
       expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText, contains('Gradle threw an error while downloading artifacts from the network.'));
+      expect(testLogger.errorText,
+        contains(
+          'Gradle threw an error while downloading artifacts from the network.'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -320,16 +352,18 @@ Execution failed for task ':app:mergeDexDebug'.
      Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
 
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(
-          await multidexErrorHandler.handler(
-              project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true),
-          equals(GradleBuildStatus.exit));
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.exit));
 
-      expect(
-          testLogger.statusText,
-          contains(
-              'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'));
-      expect(testLogger.statusText, contains('Your `android/app/src/main/AndroidManifest.xml` does not contain'));
+      expect(testLogger.statusText,
+        contains(
+          'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'Your `android/app/src/main/AndroidManifest.xml` does not contain'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -377,17 +411,18 @@ Execution failed for task ':app:mergeDexDebug'.
 ''', flush: true);
 
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(
-          await multidexErrorHandler.handler(
-              project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true),
-          equals(GradleBuildStatus.retry));
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.retry));
 
-      expect(
-          testLogger.statusText,
-          contains(
-              'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'));
-      expect(
-          testLogger.statusText, contains('android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java'));
+      expect(testLogger.statusText,
+        contains(
+          'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -437,19 +472,23 @@ Execution failed for task ':app:mergeDexDebug'.
 ''', flush: true);
 
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(
-          await multidexErrorHandler.handler(
-              project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true),
-          equals(GradleBuildStatus.exit));
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: true), equals(GradleBuildStatus.exit));
 
-      expect(
-          testLogger.statusText,
-          contains(
-              'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'));
       expect(testLogger.statusText,
-          contains('Flutter tool can add multidex support. The following file will be added by flutter:'));
-      expect(
-          testLogger.statusText, contains('android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java'));
+        contains(
+          'Multidex support is required for your android app to build since the number of methods has exceeded 64k.'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'Flutter tool can add multidex support. The following file will be added by flutter:'
+        )
+      );
+      expect(testLogger.statusText,
+        contains(
+          'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -481,12 +520,13 @@ Execution failed for task ':app:mergeDexDebug'.
      Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html''';
 
       expect(formatTestErrorMessage(errorMessage, multidexErrorHandler), isTrue);
-      expect(
-          await multidexErrorHandler.handler(
-              project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: false),
-          equals(GradleBuildStatus.exit));
+      expect(await multidexErrorHandler.handler(project: FlutterProject.fromDirectory(globals.fs.currentDirectory), multidexEnabled: false), equals(GradleBuildStatus.exit));
 
-      expect(testLogger.statusText, contains('Flutter multidex handling is disabled.'));
+      expect(testLogger.statusText,
+        contains(
+          'Flutter multidex handling is disabled.'
+        )
+      );
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -507,13 +547,16 @@ Command: /home/android/gradlew assembleRelease
         contains('Gradle does not have execution permission.'),
       );
       expect(
-          testLogger.statusText,
-          contains('\n'
-              '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
-              '│ [!] Gradle does not have execution permission.                                                  │\n'
-              '│ You should change the ownership of the project directory to your user, or move the project to a │\n'
-              '│ directory with execute permissions.                                                             │\n'
-              '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'));
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Gradle does not have execution permission.                                                  │\n'
+          '│ You should change the ownership of the project directory to your user, or move the project to a │\n'
+          '│ directory with execute permissions.                                                             │\n'
+          '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
     });
   });
 
@@ -534,20 +577,25 @@ Command: /home/android/gradlew assembleRelease
         contains('Gradle does not have execution permission.'),
       );
       expect(
-          testLogger.statusText,
-          contains('\n'
-              '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
-              '│ [!] Gradle does not have execution permission.                                                  │\n'
-              '│ You should change the ownership of the project directory to your user, or move the project to a │\n'
-              '│ directory with execute permissions.                                                             │\n'
-              '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'));
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Gradle does not have execution permission.                                                  │\n'
+          '│ You should change the ownership of the project directory to your user, or move the project to a │\n'
+          '│ directory with execute permissions.                                                             │\n'
+          '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
     });
   });
 
   group('license not accepted', () {
     testWithoutContext('pattern', () {
       expect(
-        licenseNotAcceptedHandler.test('You have not accepted the license agreements of the following SDK components'),
+        licenseNotAcceptedHandler.test(
+          'You have not accepted the license agreements of the following SDK components'
+        ),
         isTrue,
       );
     });
@@ -559,15 +607,18 @@ Command: /home/android/gradlew assembleRelease
       );
 
       expect(
-          testLogger.statusText,
-          contains('\n'
-              '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
-              '│ [!] Unable to download needed Android SDK components, as the following licenses have not been │\n'
-              '│ accepted: foo, bar                                                                            │\n'
-              '│                                                                                               │\n'
-              '│ To resolve this, please run the following command in a Terminal:                              │\n'
-              '│ flutter doctor --android-licenses                                                             │\n'
-              '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'));
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Unable to download needed Android SDK components, as the following licenses have not been │\n'
+          '│ accepted: foo, bar                                                                            │\n'
+          '│                                                                                               │\n'
+          '│ To resolve this, please run the following command in a Terminal:                              │\n'
+          '│ flutter doctor --android-licenses                                                             │\n'
+          '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
     });
   });
 
@@ -580,19 +631,27 @@ Command: /home/android/gradlew assembleRelease
 
     testWithoutContext('pattern', () {
       expect(
-        flavorUndefinedHandler.test('Task assembleFooRelease not found in root project.'),
+        flavorUndefinedHandler.test(
+          'Task assembleFooRelease not found in root project.'
+        ),
         isTrue,
       );
       expect(
-        flavorUndefinedHandler.test('Task assembleBarRelease not found in root project.'),
+        flavorUndefinedHandler.test(
+          'Task assembleBarRelease not found in root project.'
+        ),
         isTrue,
       );
       expect(
-        flavorUndefinedHandler.test('Task assembleBar not found in root project.'),
+        flavorUndefinedHandler.test(
+          'Task assembleBar not found in root project.'
+        ),
         isTrue,
       );
       expect(
-        flavorUndefinedHandler.test('Task assembleBar_foo not found in root project.'),
+        flavorUndefinedHandler.test(
+          'Task assembleBar_foo not found in root project.'
+        ),
         isTrue,
       );
     });
@@ -600,10 +659,10 @@ Command: /home/android/gradlew assembleRelease
     testUsingContext('handler - with flavor', () async {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <String>[
-          'gradlew',
-          'app:tasks',
-          '--all',
-          '--console=auto',
+      'gradlew',
+        'app:tasks' ,
+        '--all',
+        '--console=auto',
         ],
         stdout: '''
 assembleRelease
@@ -623,18 +682,24 @@ assembleFooTest
       );
 
       expect(
-          testLogger.statusText,
-          contains('Gradle project does not define a task suitable '
-              'for the requested build.'));
+        testLogger.statusText,
+        contains(
+          'Gradle project does not define a task suitable '
+          'for the requested build.'
+        )
+      );
       expect(
-          testLogger.statusText,
-          contains('\n'
-              '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
-              '│ [!]  Gradle project does not define a task suitable for the requested build.                    │\n'
-              '│                                                                                                 │\n'
-              '│ The /android/app/build.gradle file defines product flavors: flavor1, flavor_2. You must specify │\n'
-              '│ a --flavor option to select one of them.                                                        │\n'
-              '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'));
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!]  Gradle project does not define a task suitable for the requested build.                    │\n'
+          '│                                                                                                 │\n'
+          '│ The /android/app/build.gradle file defines product flavors: flavor1, flavor_2. You must specify │\n'
+          '│ a --flavor option to select one of them.                                                        │\n'
+          '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
@@ -647,7 +712,7 @@ assembleFooTest
       fakeProcessManager.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
-          'app:tasks',
+          'app:tasks' ,
           '--all',
           '--console=auto',
         ],
@@ -663,14 +728,17 @@ assembleProfile
       );
 
       expect(
-          testLogger.statusText,
-          contains('\n'
-              '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
-              '│ [!]  Gradle project does not define a task suitable for the requested build.                  │\n'
-              '│                                                                                               │\n'
-              '│ The /android/app/build.gradle file does not define any custom product flavors. You cannot use │\n'
-              '│ the --flavor option.                                                                          │\n'
-              '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'));
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!]  Gradle project does not define a task suitable for the requested build.                  │\n'
+          '│                                                                                               │\n'
+          '│ The /android/app/build.gradle file does not define any custom product flavors. You cannot use │\n'
+          '│ the --flavor option.                                                                          │\n'
+          '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
@@ -681,8 +749,7 @@ assembleProfile
   });
 
   group('higher minSdkVersion', () {
-    const String stdoutLine =
-        'uses-sdk:minSdkVersion 16 cannot be smaller than version 19 declared in library [:webview_flutter] /tmp/cirrus-ci-build/all_plugins/build/webview_flutter/intermediates/library_manifest/release/AndroidManifest.xml as the library might be using APIs not available in 16';
+    const String stdoutLine = 'uses-sdk:minSdkVersion 16 cannot be smaller than version 19 declared in library [:webview_flutter] /tmp/cirrus-ci-build/all_plugins/build/webview_flutter/intermediates/library_manifest/release/AndroidManifest.xml as the library might be using APIs not available in 16';
 
     testWithoutContext('pattern', () {
       expect(
@@ -698,23 +765,26 @@ assembleProfile
       );
 
       expect(
-          testLogger.statusText,
-          contains('\n'
-              '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
-              '│ The plugin webview_flutter requires a higher Android SDK version.                             │\n'
-              '│ Fix this issue by adding the following to the file /android/app/build.gradle:                 │\n'
-              '│ android {                                                                                     │\n'
-              '│   defaultConfig {                                                                             │\n'
-              '│     minSdkVersion 19                                                                          │\n'
-              '│   }                                                                                           │\n'
-              '│ }                                                                                             │\n'
-              '│                                                                                               │\n'
-              "│ Note that your app won't be available to users running Android SDKs below 19.                 │\n"
-              '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
-              '│ Android SDK.                                                                                  │\n'
-              '│ For more information, see:                                                                    │\n'
-              '│ https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration                 │\n'
-              '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'));
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ The plugin webview_flutter requires a higher Android SDK version.                             │\n'
+          '│ Fix this issue by adding the following to the file /android/app/build.gradle:                 │\n'
+          '│ android {                                                                                     │\n'
+          '│   defaultConfig {                                                                             │\n'
+          '│     minSdkVersion 19                                                                          │\n'
+          '│   }                                                                                           │\n'
+          '│ }                                                                                             │\n'
+          '│                                                                                               │\n'
+          "│ Note that your app won't be available to users running Android SDKs below 19.                 │\n"
+          '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
+          '│ Android SDK.                                                                                  │\n'
+          '│ For more information, see:                                                                    │\n'
+          '│ https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration                 │\n'
+          '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -727,7 +797,9 @@ assembleProfile
   group('transform input issue', () {
     testWithoutContext('pattern', () {
       expect(
-        transformInputIssue.test('https://issuetracker.google.com/issues/158753935'),
+        transformInputIssue.test(
+          'https://issuetracker.google.com/issues/158753935'
+        ),
         isTrue,
       );
     });
@@ -738,17 +810,20 @@ assembleProfile
       );
 
       expect(
-          testLogger.statusText,
-          contains('\n'
-              '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
-              '│ This issue appears to be https://github.com/flutter/flutter/issues/58247.     │\n'
-              '│ Fix this issue by adding the following to the file /android/app/build.gradle: │\n'
-              '│ android {                                                                     │\n'
-              '│   lintOptions {                                                               │\n'
-              '│     checkReleaseBuilds false                                                  │\n'
-              '│   }                                                                           │\n'
-              '│ }                                                                             │\n'
-              '└───────────────────────────────────────────────────────────────────────────────┘\n'));
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
+          '│ This issue appears to be https://github.com/flutter/flutter/issues/58247.     │\n'
+          '│ Fix this issue by adding the following to the file /android/app/build.gradle: │\n'
+          '│ android {                                                                     │\n'
+          '│   lintOptions {                                                               │\n'
+          '│     checkReleaseBuilds false                                                  │\n'
+          '│   }                                                                           │\n'
+          '│ }                                                                             │\n'
+          '└───────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -765,7 +840,8 @@ assembleProfile
 Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 > Could not resolve all artifacts for configuration ':app:debugRuntimeClasspath'.
    > Resolved 'androidx.lifecycle:lifecycle-common:2.2.0' which is not part of the dependency lock state
-   > Resolved 'androidx.customview:customview:1.0.0' which is not part of the dependency lock state'''),
+   > Resolved 'androidx.customview:customview:1.0.0' which is not part of the dependency lock state'''
+        ),
         isTrue,
       );
     });
@@ -776,13 +852,16 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       );
 
       expect(
-          testLogger.statusText,
-          contains('\n'
-              '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
-              '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
-              '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
-              '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
-              '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'));
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
+          '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
+          '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
+          '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -794,8 +873,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
   group('Incompatible Kotlin version', () {
     testWithoutContext('pattern', () {
       expect(
-        incompatibleKotlinVersionHandler.test(
-            'Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.5.1, expected version is 1.1.15.'),
+        incompatibleKotlinVersionHandler.test('Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 1.5.1, expected version is 1.1.15.'),
         isTrue,
       );
     });
@@ -806,14 +884,17 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       );
 
       expect(
-          testLogger.statusText,
-          contains('\n'
-              '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
-              '│ [!] Your project requires a newer version of the Kotlin Gradle plugin.                       │\n'
-              '│ Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then │\n'
-              '│ update /android/build.gradle:                                                                │\n'
-              "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
-              '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'));
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a newer version of the Kotlin Gradle plugin.                       │\n'
+          '│ Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then │\n'
+          '│ update /android/build.gradle:                                                                │\n'
+          "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
+          '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -855,15 +936,18 @@ Execution failed for task ':app:checkDebugAarMetadata'.
       );
 
       expect(
-          testLogger.statusText,
-          contains('\n'
-              '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
-              '│ [!] Your project requires a higher compileSdkVersion.                         │\n'
-              '│ Fix this issue by bumping the compileSdkVersion in /android/app/build.gradle: │\n'
-              '│ android {                                                                     │\n'
-              '│   compileSdkVersion 31                                                        │\n'
-              '│ }                                                                             │\n'
-              '└───────────────────────────────────────────────────────────────────────────────┘\n'));
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a higher compileSdkVersion.                         │\n'
+          '│ Fix this issue by bumping the compileSdkVersion in /android/app/build.gradle: │\n'
+          '│ android {                                                                     │\n'
+          '│   compileSdkVersion 31                                                        │\n'
+          '│ }                                                                             │\n'
+          '└───────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
@@ -874,7 +958,9 @@ Execution failed for task ':app:checkDebugAarMetadata'.
 }
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {
-  return errorMessage.split('\n').any((String line) => error.test(line));
+  return errorMessage
+    .split('\n')
+    .any((String line) => error.test(line));
 }
 
 Platform fakePlatform(String name) {
@@ -901,8 +987,7 @@ class _TestPromptTerminal extends AnsiTerminal {
   final String promptResult;
 
   @override
-  Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
+  Future<String> promptForCharInput(List<String> acceptedCharacters, {
     Logger logger,
     String prompt,
     int defaultChoiceIndex,

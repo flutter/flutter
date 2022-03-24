@@ -135,36 +135,36 @@ void main() {
     });
   });
 
-  testWithoutContext('startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables',
-      () async {
+  testWithoutContext('startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables', () async {
     final Completer<void> completer = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
-          command: const <String>['debug'],
-          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
-          completer: completer,
-          environment: const <String, String>{
-            'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-            'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
-            'FLUTTER_ENGINE_SWITCH_3': 'enable-software-rendering=true',
-            'FLUTTER_ENGINE_SWITCH_4': 'skia-deterministic-rendering=true',
-            'FLUTTER_ENGINE_SWITCH_5': 'trace-skia=true',
-            'FLUTTER_ENGINE_SWITCH_6': 'trace-allowlist=foo,bar',
-            'FLUTTER_ENGINE_SWITCH_7': 'trace-skia-allowlist=skia.a,skia.b',
-            'FLUTTER_ENGINE_SWITCH_8': 'trace-systrace=true',
-            'FLUTTER_ENGINE_SWITCH_9': 'endless-trace-buffer=true',
-            'FLUTTER_ENGINE_SWITCH_10': 'dump-skp-on-shader-compilation=true',
-            'FLUTTER_ENGINE_SWITCH_11': 'cache-sksl=true',
-            'FLUTTER_ENGINE_SWITCH_12': 'purge-persistent-cache=true',
-            'FLUTTER_ENGINE_SWITCH_13': 'enable-checked-mode=true',
-            'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
-            'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
-            'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
-            'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
-            'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
-            'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
-            'FLUTTER_ENGINE_SWITCHES': '19'
-          }),
+        command: const <String>['debug'],
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
+        completer: completer,
+        environment: const <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-software-rendering=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'skia-deterministic-rendering=true',
+          'FLUTTER_ENGINE_SWITCH_5': 'trace-skia=true',
+          'FLUTTER_ENGINE_SWITCH_6': 'trace-allowlist=foo,bar',
+          'FLUTTER_ENGINE_SWITCH_7': 'trace-skia-allowlist=skia.a,skia.b',
+          'FLUTTER_ENGINE_SWITCH_8': 'trace-systrace=true',
+          'FLUTTER_ENGINE_SWITCH_9': 'endless-trace-buffer=true',
+          'FLUTTER_ENGINE_SWITCH_10': 'dump-skp-on-shader-compilation=true',
+          'FLUTTER_ENGINE_SWITCH_11': 'cache-sksl=true',
+          'FLUTTER_ENGINE_SWITCH_12': 'purge-persistent-cache=true',
+          'FLUTTER_ENGINE_SWITCH_13': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
+          'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
+          'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
+          'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
+          'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
+          'FLUTTER_ENGINE_SWITCHES': '19'
+        }
+      ),
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
     final FakeApplicationPackage package = FakeApplicationPackage();
@@ -197,22 +197,21 @@ void main() {
     expect(result.started, true);
   });
 
-  testWithoutContext(
-      'startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables when debugging is disabled',
-      () async {
+  testWithoutContext('startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables when debugging is disabled', () async {
     final Completer<void> completer = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
-          command: const <String>['debug'],
-          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
-          completer: completer,
-          environment: const <String, String>{
-            'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-            'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
-            'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
-            'FLUTTER_ENGINE_SWITCH_4': 'cache-sksl=true',
-            'FLUTTER_ENGINE_SWITCHES': '4'
-          }),
+        command: const <String>['debug'],
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
+        completer: completer,
+        environment: const <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
+          'FLUTTER_ENGINE_SWITCH_4': 'cache-sksl=true',
+          'FLUTTER_ENGINE_SWITCHES': '4'
+        }
+      ),
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
     final FakeApplicationPackage package = FakeApplicationPackage();
@@ -328,14 +327,14 @@ class FakeDesktopDevice extends DesktopDevice {
     required OperatingSystemUtils operatingSystemUtils,
     this.nullExecutablePathForDevice = false,
   }) : super(
-          'dummy',
-          platformType: PlatformType.linux,
-          ephemeral: false,
-          processManager: processManager,
-          logger: logger,
-          fileSystem: fileSystem,
-          operatingSystemUtils: operatingSystemUtils,
-        );
+      'dummy',
+      platformType: PlatformType.linux,
+      ephemeral: false,
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
+  );
 
   /// The [mainPath] last passed to [buildForDevice].
   String? lastBuiltMainPath;
@@ -377,8 +376,7 @@ class FakeDesktopDevice extends DesktopDevice {
   }
 }
 
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
-
+class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   String get name => 'Example';

@@ -8,14 +8,14 @@ import 'velocity_tracker_data.dart';
 
 bool _withinTolerance(double actual, double expected) {
   const double kTolerance = 0.001; // Within .1% of expected value
-  final double diff = (actual - expected) / expected;
+  final double diff = (actual - expected)/expected;
   return diff.abs() < kTolerance;
 }
 
 bool _checkVelocity(Velocity actual, Offset expected) {
-  return (actual != null) &&
-      _withinTolerance(actual.pixelsPerSecond.dx, expected.dx) &&
-      _withinTolerance(actual.pixelsPerSecond.dy, expected.dy);
+  return (actual != null)
+      && _withinTolerance(actual.pixelsPerSecond.dx, expected.dx)
+      && _withinTolerance(actual.pixelsPerSecond.dy, expected.dy);
 }
 
 void main() {
@@ -39,7 +39,8 @@ void main() {
     final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     int i = 0;
     for (final PointerEvent event in velocityEventData) {
-      if (event is PointerDownEvent || event is PointerMoveEvent) tracker.addPosition(event.timeStamp, event.position);
+      if (event is PointerDownEvent || event is PointerMoveEvent)
+        tracker.addPosition(event.timeStamp, event.position);
       if (event is PointerUpEvent) {
         _checkVelocity(tracker.getVelocity(), expected[i]);
         i += 1;
@@ -63,7 +64,8 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/pull/7510
     final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     for (final PointerEvent event in interruptedVelocityEventData) {
-      if (event is PointerDownEvent || event is PointerMoveEvent) tracker.addPosition(event.timeStamp, event.position);
+      if (event is PointerDownEvent || event is PointerMoveEvent)
+        tracker.addPosition(event.timeStamp, event.position);
       if (event is PointerUpEvent) {
         _checkVelocity(tracker.getVelocity(), const Offset(649.5, 3890.3));
       }
@@ -110,7 +112,7 @@ void main() {
     const Duration durationDelta = Duration(seconds: 1);
     AssertionError? exception;
 
-    for (int i = 0; i < 5; i += 1) {
+    for (int i = 0; i < 5; i+=1) {
       position += positionDelta;
       time += durationDelta;
       tracker.addPosition(time, position);
@@ -131,7 +133,7 @@ void main() {
     const Offset positionDelta = Offset(0, -1);
     const Duration durationDelta = Duration(seconds: 1);
 
-    for (int i = 0; i < 10; i += 1) {
+    for (int i = 0; i < 10; i+=1) {
       position += positionDelta;
       time += durationDelta;
       tracker.addPosition(time, position);

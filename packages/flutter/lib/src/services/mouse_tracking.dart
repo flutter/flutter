@@ -108,7 +108,7 @@ class MouseTrackerAnnotation with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(FlagsSummary<Function?>(
       'callbacks',
-      <String, Function?>{
+      <String, Function?> {
         'enter': onEnter,
         'exit': onExit,
       },

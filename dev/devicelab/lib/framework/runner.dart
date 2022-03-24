@@ -67,7 +67,7 @@ Future<void> runTasks(
       } else {
         section('Flaky status for "$taskName"');
         if (retry > 0) {
-          print('Total ${retry + 1} executions: $retry failures and 1 false positive.');
+          print('Total ${retry+1} executions: $retry failures and 1 false positive.');
           print('flaky: true');
           // TODO(ianh): stop ignoring this failure. We should set exitCode=1, and quit
           // if exitOnFirstTestFailure is true.
@@ -157,7 +157,8 @@ Future<TaskResult> runTask(
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
-  if (!file(taskExecutable).existsSync()) throw 'Executable Dart file not found: $taskExecutable';
+  if (!file(taskExecutable).existsSync())
+    throw 'Executable Dart file not found: $taskExecutable';
 
   final Process runner = await startProcess(
     dartBin,
@@ -171,7 +172,8 @@ Future<TaskResult> runTask(
       ...?taskArgs,
     ],
     environment: <String, String>{
-      if (deviceId != null) DeviceIdEnvName: deviceId,
+      if (deviceId != null)
+        DeviceIdEnvName: deviceId,
     },
   );
 
@@ -188,9 +190,9 @@ Future<TaskResult> runTask(
       .transform<String>(const LineSplitter())
       .listen((String line) {
     if (!uri.isCompleted) {
-      final Uri? serviceUri =
-          parseServiceUri(line, prefix: RegExp('(Observatory|The Dart VM service is) listening on '));
-      if (serviceUri != null) uri.complete(serviceUri);
+      final Uri? serviceUri = parseServiceUri(line, prefix: RegExp('(Observatory|The Dart VM service is) listening on '));
+      if (serviceUri != null)
+        uri.complete(serviceUri);
     }
     if (!silent) {
       stdout.writeln('[$taskName] [STDOUT] $line');
@@ -213,8 +215,7 @@ Future<TaskResult> runTask(
       'ext.cocoonRunTask',
       args: isolateParams,
       isolateId: result.isolate.id,
-    ))
-        .json!;
+    )).json!;
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     final int exitCode = await runner.exitCode;
     print('[$taskName] Process terminated with exit code $exitCode.');
@@ -255,7 +256,8 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
       }
       final IsolateRef isolate = vm.isolates!.first;
       final Response response = await client.callServiceExtension('ext.cocoonRunnerReady', isolateId: isolate.id);
-      if (response.json!['response'] != 'ready') throw 'not ready yet';
+      if (response.json!['response'] != 'ready')
+        throw 'not ready yet';
       return ConnectionResult(client, isolate);
     } catch (error) {
       if (stopwatch.elapsed > const Duration(seconds: 10))
@@ -279,7 +281,7 @@ Future<VmService> vmServiceConnectUri(String wsUri, {Log? log}) async {
   final Completer<dynamic> streamClosedCompleter = Completer<dynamic>();
   socket.listen(
     (dynamic data) {
-      final Map<String, dynamic> rawData = json.decode(data as String) as Map<String, dynamic>;
+      final Map<String, dynamic> rawData = json.decode(data as String) as Map<String, dynamic> ;
       if (rawData['result'] == 'ready') {
         rawData['result'] = <String, dynamic>{'response': 'ready'};
         controller.add(json.encode(rawData));

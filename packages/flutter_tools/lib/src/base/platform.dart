@@ -208,7 +208,8 @@ class FakePlatform extends Platform {
         executable = platform.executable,
         resolvedExecutable = platform.resolvedExecutable,
         script = platform.script,
-        executableArguments = List<String>.from(platform.executableArguments),
+        executableArguments =
+            List<String>.from(platform.executableArguments),
         packageConfig = platform.packageConfig,
         version = platform.version,
         stdinSupportsAnsi = platform.stdinSupportsAnsi,

@@ -23,6 +23,7 @@ class SectorApp extends StatefulWidget {
 }
 
 class SectorAppState extends State<SectorApp> {
+
   final RenderBoxToRenderSectorAdapter sectors = initCircle();
   final math.Random rand = math.Random(1);
 
@@ -52,9 +53,8 @@ class SectorAppState extends State<SectorApp> {
 
   void doUpdates() {
     int index = 0;
-    while (index < actualSectorSizes.length &&
-        index < wantedSectorSizes.length &&
-        actualSectorSizes[index] == wantedSectorSizes[index]) index += 1;
+    while (index < actualSectorSizes.length && index < wantedSectorSizes.length && actualSectorSizes[index] == wantedSectorSizes[index])
+      index += 1;
     final RenderSectorRing ring = sectors.child! as RenderSectorRing;
     while (index < actualSectorSizes.length) {
       ring.remove(ring.lastChild!);
@@ -78,7 +78,6 @@ class SectorAppState extends State<SectorApp> {
       child: ring,
     );
   }
-
   RenderBoxToRenderSectorAdapter sectorAddIcon = initSector(const Color(0xFF00DD00));
   RenderBoxToRenderSectorAdapter sectorRemoveIcon = initSector(const Color(0xFFDD0000));
 

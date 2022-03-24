@@ -48,6 +48,7 @@ enum SnackBarBehavior {
 ///    application.
 @immutable
 class SnackBarThemeData with Diagnosticable {
+
   /// Creates a theme that can be used for [ThemeData.snackBarTheme].
   ///
   /// The [elevation] must be null or non-negative.
@@ -145,27 +146,29 @@ class SnackBarThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-        backgroundColor,
-        actionTextColor,
-        disabledActionTextColor,
-        contentTextStyle,
-        elevation,
-        shape,
-        behavior,
-      );
+    backgroundColor,
+    actionTextColor,
+    disabledActionTextColor,
+    contentTextStyle,
+    elevation,
+    shape,
+    behavior,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is SnackBarThemeData &&
-        other.backgroundColor == backgroundColor &&
-        other.actionTextColor == actionTextColor &&
-        other.disabledActionTextColor == disabledActionTextColor &&
-        other.contentTextStyle == contentTextStyle &&
-        other.elevation == elevation &&
-        other.shape == shape &&
-        other.behavior == behavior;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is SnackBarThemeData
+        && other.backgroundColor == backgroundColor
+        && other.actionTextColor == actionTextColor
+        && other.disabledActionTextColor == disabledActionTextColor
+        && other.contentTextStyle == contentTextStyle
+        && other.elevation == elevation
+        && other.shape == shape
+        && other.behavior == behavior;
   }
 
   @override

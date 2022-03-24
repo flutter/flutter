@@ -34,16 +34,23 @@ class WebMemoryFS {
     final Uint8List codeBytes = codeFile.readAsBytesSync();
     final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
     final Uint8List metadataBytes = metadataFile.readAsBytesSync();
-    final Map<String, dynamic> manifest = castStringKeyedMap(json.decode(manifestFile.readAsStringSync()))!;
+    final Map<String, dynamic> manifest =
+        castStringKeyedMap(json.decode(manifestFile.readAsStringSync()))!;
     for (final String filePath in manifest.keys) {
       if (filePath == null) {
         continue;
       }
-      final Map<String, dynamic> offsets = castStringKeyedMap(manifest[filePath])!;
-      final List<int> codeOffsets = (offsets['code'] as List<dynamic>).cast<int>();
-      final List<int> sourcemapOffsets = (offsets['sourcemap'] as List<dynamic>).cast<int>();
-      final List<int> metadataOffsets = (offsets['metadata'] as List<dynamic>).cast<int>();
-      if (codeOffsets.length != 2 || sourcemapOffsets.length != 2 || metadataOffsets.length != 2) {
+      final Map<String, dynamic> offsets =
+          castStringKeyedMap(manifest[filePath])!;
+      final List<int> codeOffsets =
+          (offsets['code'] as List<dynamic>).cast<int>();
+      final List<int> sourcemapOffsets =
+          (offsets['sourcemap'] as List<dynamic>).cast<int>();
+      final List<int> metadataOffsets =
+          (offsets['metadata'] as List<dynamic>).cast<int>();
+      if (codeOffsets.length != 2 ||
+          sourcemapOffsets.length != 2 ||
+          metadataOffsets.length != 2) {
         continue;
       }
 
@@ -57,7 +64,8 @@ class WebMemoryFS {
         codeStart,
         codeEnd - codeStart,
       );
-      final String fileName = filePath.startsWith('/') ? filePath.substring(1) : filePath;
+      final String fileName =
+          filePath.startsWith('/') ? filePath.substring(1) : filePath;
       files[fileName] = byteView;
 
       final int sourcemapStart = sourcemapOffsets[0];
@@ -89,7 +97,9 @@ class WebMemoryFS {
       modules.add(fileName);
     }
 
-    _mergedMetadata = metadataFiles.values.map((Uint8List encoded) => utf8.decode(encoded)).join('\n');
+    _mergedMetadata = metadataFiles.values
+      .map((Uint8List encoded) => utf8.decode(encoded))
+      .join('\n');
 
     return modules;
   }

@@ -64,7 +64,8 @@ const List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  const TravelDestinationItem({Key? key, required this.destination, this.shape}) : super(key: key);
+  const TravelDestinationItem({ Key? key, required this.destination, this.shape })
+    : super(key: key);
 
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 338.0;
@@ -98,7 +99,8 @@ class TravelDestinationItem extends StatelessWidget {
 }
 
 class TappableTravelDestinationItem extends StatelessWidget {
-  const TappableTravelDestinationItem({Key? key, required this.destination, this.shape}) : super(key: key);
+  const TappableTravelDestinationItem({ Key? key, required this.destination, this.shape })
+    : super(key: key);
 
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 298.0;
@@ -141,7 +143,8 @@ class TappableTravelDestinationItem extends StatelessWidget {
 }
 
 class SelectableTravelDestinationItem extends StatefulWidget {
-  const SelectableTravelDestinationItem({Key? key, required this.destination, this.shape}) : super(key: key);
+  const SelectableTravelDestinationItem({ Key? key, required this.destination, this.shape })
+    : super(key: key);
 
   final TravelDestination destination;
   final ShapeBorder? shape;
@@ -151,6 +154,7 @@ class SelectableTravelDestinationItem extends StatefulWidget {
 }
 
 class _SelectableTravelDestinationItemState extends State<SelectableTravelDestinationItem> {
+
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 298.0;
   bool _isSelected = false;
@@ -188,10 +192,10 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
                     children: <Widget>[
                       Container(
                         color: _isSelected
-                            // Generally, material cards use primary with 8% opacity for the selected state.
-                            // See: https://material.io/design/interaction/states.html#anatomy
-                            ? colorScheme.primary.withOpacity(0.08)
-                            : Colors.transparent,
+                          // Generally, material cards use primary with 8% opacity for the selected state.
+                          // See: https://material.io/design/interaction/states.html#anatomy
+                          ? colorScheme.primary.withOpacity(0.08)
+                          : Colors.transparent,
                       ),
                       TravelDestinationContent(destination: widget.destination),
                       Align(
@@ -237,7 +241,8 @@ class SectionTitle extends StatelessWidget {
 }
 
 class TravelDestinationContent extends StatelessWidget {
-  const TravelDestinationContent({Key? key, required this.destination}) : super(key: key);
+  const TravelDestinationContent({ Key? key, required this.destination })
+    : super(key: key);
 
   final TravelDestination destination;
 
@@ -317,16 +322,12 @@ class TravelDestinationContent extends StatelessWidget {
               children: <Widget>[
                 TextButton(
                   style: textButtonStyle,
-                  onPressed: () {
-                    print('pressed');
-                  },
+                  onPressed: () { print('pressed'); },
                   child: Text('SHARE', semanticsLabel: 'Share ${destination.title}'),
                 ),
                 TextButton(
                   style: textButtonStyle,
-                  onPressed: () {
-                    print('pressed');
-                  },
+                  onPressed: () { print('pressed'); },
                   child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
                 ),
               ],
@@ -363,16 +364,14 @@ class _CardsDemoState extends State<CardsDemo> {
             ),
             onPressed: () {
               setState(() {
-                _shape = _shape != null
-                    ? null
-                    : const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16.0),
-                          topRight: Radius.circular(16.0),
-                          bottomLeft: Radius.circular(2.0),
-                          bottomRight: Radius.circular(2.0),
-                        ),
-                      );
+                _shape = _shape != null ? null : const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0),
+                    bottomLeft: Radius.circular(2.0),
+                    bottomRight: Radius.circular(2.0),
+                  ),
+                );
               });
             },
           ),

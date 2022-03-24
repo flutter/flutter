@@ -87,6 +87,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(ConstrainedBox)).getMaxIntrinsicHeight(double.infinity), 30.0);
   });
 
+
   testWidgets('ConstrainedBox intrinsics - minHeight - with infinite width', (WidgetTester tester) async {
     await tester.pumpWidget(
       ConstrainedBox(

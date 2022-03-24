@@ -19,12 +19,11 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    expect(
-        () => androidPlugin.toMap(),
-        throwsToolExit(
-            message: "The plugin `pluginA` doesn't have a main class defined in "
-                '.pub_cache/plugin_a/android/src/main/java/com/company/PluginA.java '
-                'or .pub_cache/plugin_a/android/src/main/kotlin/com/company/PluginA.kt'));
+    expect(() => androidPlugin.toMap(), throwsToolExit(
+      message: "The plugin `pluginA` doesn't have a main class defined in "
+      '.pub_cache/plugin_a/android/src/main/java/com/company/PluginA.java '
+      'or .pub_cache/plugin_a/android/src/main/kotlin/com/company/PluginA.kt'
+    ));
   });
 
   testWithoutContext('AndroidPlugin does not validate the main class for Dart-only plugins', () {

@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
+
 void main() {
   test('BottomNavigationBarThemeData copyWith, ==, hashCode basics', () {
     expect(const BottomNavigationBarThemeData(), const BottomNavigationBarThemeData().copyWith());
@@ -31,8 +32,7 @@ void main() {
     expect(themeData.landscapeLayout, null);
     expect(themeData.mouseCursor, null);
 
-    const BottomNavigationBarTheme theme =
-        BottomNavigationBarTheme(data: BottomNavigationBarThemeData(), child: SizedBox());
+    const BottomNavigationBarTheme theme = BottomNavigationBarTheme(data: BottomNavigationBarThemeData(), child: SizedBox());
     expect(theme.data.backgroundColor, null);
     expect(theme.data.elevation, null);
     expect(theme.data.selectedIconTheme, null);
@@ -179,10 +179,14 @@ void main() {
     expect(_material(tester).elevation, equals(elevation));
     expect(_material(tester).color, equals(backgroundColor));
 
-    final Offset selectedBarItem =
-        tester.getCenter(find.ancestor(of: find.text('AC'), matching: find.byType(Transform)));
-    final Offset unselectedBarItem =
-        tester.getCenter(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)));
+    final Offset selectedBarItem = tester.getCenter(
+      find.ancestor(of: find.text('AC'),
+      matching: find.byType(Transform))
+    );
+    final Offset unselectedBarItem = tester.getCenter(
+      find.ancestor(of: find.text('Alarm'),
+      matching: find.byType(Transform))
+    );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
@@ -294,7 +298,10 @@ void main() {
     expect(_material(tester).elevation, equals(elevation));
     expect(_material(tester).color, equals(backgroundColor));
 
-    final Offset barItem = tester.getCenter(find.ancestor(of: find.text('AC'), matching: find.byType(Transform)));
+    final Offset barItem = tester.getCenter(
+      find.ancestor(of: find.text('AC'),
+      matching: find.byType(Transform))
+    );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
@@ -329,6 +336,7 @@ void main() {
         ),
       ),
     );
+
 
     final Finder findOpacity = find.descendant(
       of: find.byType(BottomNavigationBar),
@@ -367,6 +375,7 @@ void main() {
       ),
     );
 
+
     final Finder findFadeTransition = find.descendant(
       of: find.byType(BottomNavigationBar),
       matching: find.byType(FadeTransition),
@@ -402,6 +411,7 @@ void main() {
         ),
       ),
     );
+
 
     final Finder findFadeTransition = find.descendant(
       of: find.byType(BottomNavigationBar),

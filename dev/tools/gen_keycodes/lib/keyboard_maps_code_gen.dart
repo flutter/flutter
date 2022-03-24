@@ -12,18 +12,21 @@ import 'physical_key_data.dart';
 import 'utils.dart';
 
 bool _isAsciiLetter(String? char) {
-  if (char == null) return false;
+  if (char == null)
+    return false;
   const int charUpperA = 0x41;
   const int charUpperZ = 0x5A;
   const int charLowerA = 0x61;
   const int charLowerZ = 0x7A;
   assert(char.length == 1);
   final int charCode = char.codeUnitAt(0);
-  return (charCode >= charUpperA && charCode <= charUpperZ) || (charCode >= charLowerA && charCode <= charLowerZ);
+  return (charCode >= charUpperA && charCode <= charUpperZ)
+      || (charCode >= charLowerA && charCode <= charLowerZ);
 }
 
 bool _isDigit(String? char) {
-  if (char == null) return false;
+  if (char == null)
+    return false;
   final int charDigit0 = '0'.codeUnitAt(0);
   final int charDigit9 = '9'.codeUnitAt(0);
   assert(char.length == 1);
@@ -34,7 +37,8 @@ bool _isDigit(String? char) {
 /// Generates the keyboard_maps.dart files, based on the information in the key
 /// data structure given to it.
 class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
-  KeyboardMapsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData) : super(keyData, logicalData);
+  KeyboardMapsCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
+    : super(keyData, logicalData);
 
   List<PhysicalKeyEntry> get _numpadKeyData {
     return keyData.entries.where((PhysicalKeyEntry entry) {
@@ -105,7 +109,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('GTK scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.xKbScanCode != null) {
-        lines.add(entry.xKbScanCode!, '  ${toHex(entry.xKbScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
+        lines.add(entry.xKbScanCode!,
+            '  ${toHex(entry.xKbScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -175,12 +180,10 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       // Letter keys on Windows are not recorded in logical_key_data.json,
       // because they are not used by the embedding. Add them manually.
       final List<int>? keyCodes = entry.windowsValues.isNotEmpty
-          ? entry.windowsValues
-          : (_isAsciiLetter(entry.keyLabel)
-              ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)]
-              : _isDigit(entry.keyLabel)
-                  ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)]
-                  : null);
+        ? entry.windowsValues
+        : (_isAsciiLetter(entry.keyLabel) ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)] :
+           _isDigit(entry.keyLabel)       ? <int>[entry.keyLabel!.toUpperCase().codeUnitAt(0)] :
+           null);
       if (keyCodes != null) {
         for (final int code in keyCodes) {
           lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
@@ -249,7 +252,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('iOS numpad map');
     for (final PhysicalKeyEntry entry in _numpadKeyData) {
       if (entry.iOSScanCode != null) {
-        lines.add(entry.iOSScanCode!, '  ${toHex(entry.iOSScanCode)}: LogicalKeyboardKey.${entry.constantName},');
+        lines.add(entry.iOSScanCode!,'  ${toHex(entry.iOSScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();

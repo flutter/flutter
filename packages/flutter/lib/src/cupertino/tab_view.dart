@@ -50,8 +50,8 @@ class CupertinoTabView extends StatefulWidget {
     this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.restorationScopeId,
-  })  : assert(navigatorObservers != null),
-        super(key: key);
+  }) : assert(navigatorObservers != null),
+       super(key: key);
 
   /// The widget builder for the default route of the tab view
   /// ([Navigator.defaultRouteName], which is `/`).
@@ -151,13 +151,16 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   @override
   void didUpdateWidget(CupertinoTabView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.navigatorKey != oldWidget.navigatorKey || widget.navigatorObservers != oldWidget.navigatorObservers) {
+    if (widget.navigatorKey != oldWidget.navigatorKey
+        || widget.navigatorObservers != oldWidget.navigatorObservers) {
       _updateObservers();
     }
   }
 
   void _updateObservers() {
-    _navigatorObservers = List<NavigatorObserver>.of(widget.navigatorObservers)..add(_heroController);
+    _navigatorObservers =
+        List<NavigatorObserver>.of(widget.navigatorObservers)
+          ..add(_heroController);
   }
 
   @override
@@ -188,7 +191,8 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
         settings: settings,
       );
     }
-    if (widget.onGenerateRoute != null) return widget.onGenerateRoute!(settings);
+    if (widget.onGenerateRoute != null)
+      return widget.onGenerateRoute!(settings);
     return null;
   }
 

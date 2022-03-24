@@ -49,7 +49,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         rows: List<DataRow>.generate(
           numItems,
           (int index) => DataRow(
-            color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+            color: MaterialStateProperty.resolveWith<Color?>(
+                (Set<MaterialState> states) {
               // All rows will have the same selected color.
               if (states.contains(MaterialState.selected)) {
                 return Theme.of(context).colorScheme.primary.withOpacity(0.08);

@@ -14,17 +14,22 @@ import '../../src/common.dart';
 
 void main() {
   setUp(() {
-    setNetworkInterfaceLister(({
-      bool includeLoopback = true,
-      bool includeLinkLocal = true,
-      InternetAddressType type = InternetAddressType.any,
-    }) async {
-      final List<FakeNetworkInterface> interfaces = <FakeNetworkInterface>[
-        FakeNetworkInterface(<FakeInternetAddress>[const FakeInternetAddress('127.0.0.1')]),
-        FakeNetworkInterface(<FakeInternetAddress>[const FakeInternetAddress('::1')])
-      ];
+    setNetworkInterfaceLister(
+      ({
+        bool includeLoopback = true,
+        bool includeLinkLocal = true,
+        InternetAddressType type = InternetAddressType.any,
+      }) async {
+        final List<FakeNetworkInterface> interfaces = <FakeNetworkInterface>[
+          FakeNetworkInterface(<FakeInternetAddress>[
+            const FakeInternetAddress('127.0.0.1')
+          ]),
+          FakeNetworkInterface(<FakeInternetAddress>[
+            const FakeInternetAddress('::1')
+          ])
+        ];
 
-      return Future<List<NetworkInterface>>.value(interfaces);
+        return Future<List<NetworkInterface>>.value(interfaces);
     });
   });
 
@@ -111,7 +116,7 @@ void main() {
   });
 
   testWithoutContext('ProxyValidator reports issues when NO_PROXY is missing 127.0.0.1', () async {
-    final Platform platform = FakePlatform(environment: <String, String>{
+    final Platform platform =  FakePlatform(environment: <String, String>{
       'HTTP_PROXY': 'fakeproxy.local',
       'NO_PROXY': 'localhost,::1',
     });
@@ -127,7 +132,7 @@ void main() {
   });
 
   testWithoutContext('ProxyValidator reports issues when NO_PROXY is missing ::1', () async {
-    final Platform platform = FakePlatform(environment: <String, String>{
+    final Platform platform =  FakePlatform(environment: <String, String>{
       'HTTP_PROXY': 'fakeproxy.local',
       'NO_PROXY': 'localhost,127.0.0.1',
     });
@@ -198,7 +203,8 @@ void main() {
 }
 
 class FakeNetworkInterface extends NetworkInterface {
-  FakeNetworkInterface(List<FakeInternetAddress> addresses) : super(FakeNetworkInterfaceDelegate(addresses));
+  FakeNetworkInterface(List<FakeInternetAddress> addresses):
+        super(FakeNetworkInterfaceDelegate(addresses));
 
   @override
   String get name => 'FakeNetworkInterface$index';
@@ -243,7 +249,8 @@ class FakeInternetAddress implements io.InternetAddress {
   Uint8List get rawAddress => throw UnimplementedError();
 
   @override
-  Future<io.InternetAddress> reverse() => throw UnimplementedError();
+  Future<io.InternetAddress> reverse() =>
+    throw UnimplementedError();
 
   @override
   io.InternetAddressType get type => throw UnimplementedError();

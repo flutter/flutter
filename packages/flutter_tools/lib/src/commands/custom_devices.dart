@@ -42,37 +42,40 @@ class CustomDevicesCommand extends FlutterCommand {
     @required FeatureFlags featureFlags,
   }) {
     return CustomDevicesCommand._common(
-        customDevicesConfig: customDevicesConfig,
-        operatingSystemUtils: operatingSystemUtils,
-        terminal: terminal,
-        platform: platform,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        logger: logger,
-        featureFlags: featureFlags);
+      customDevicesConfig: customDevicesConfig,
+      operatingSystemUtils: operatingSystemUtils,
+      terminal: terminal,
+      platform: platform,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+      featureFlags: featureFlags
+    );
   }
 
   @visibleForTesting
-  factory CustomDevicesCommand.test(
-      {@required CustomDevicesConfig customDevicesConfig,
-      @required OperatingSystemUtils operatingSystemUtils,
-      @required Terminal terminal,
-      @required Platform platform,
-      @required ProcessManager processManager,
-      @required FileSystem fileSystem,
-      @required Logger logger,
-      @required FeatureFlags featureFlags,
-      PrintFn usagePrintFn = print}) {
+  factory CustomDevicesCommand.test({
+    @required CustomDevicesConfig customDevicesConfig,
+    @required OperatingSystemUtils operatingSystemUtils,
+    @required Terminal terminal,
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required FeatureFlags featureFlags,
+    PrintFn usagePrintFn = print
+  }) {
     return CustomDevicesCommand._common(
-        customDevicesConfig: customDevicesConfig,
-        operatingSystemUtils: operatingSystemUtils,
-        terminal: terminal,
-        platform: platform,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        logger: logger,
-        featureFlags: featureFlags,
-        usagePrintFn: usagePrintFn);
+      customDevicesConfig: customDevicesConfig,
+      operatingSystemUtils: operatingSystemUtils,
+      terminal: terminal,
+      platform: platform,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+      featureFlags: featureFlags,
+      usagePrintFn: usagePrintFn
+    );
   }
 
   CustomDevicesCommand._common({
@@ -85,18 +88,19 @@ class CustomDevicesCommand extends FlutterCommand {
     @required Logger logger,
     @required FeatureFlags featureFlags,
     PrintFn usagePrintFn = print,
-  })  : assert(customDevicesConfig != null),
-        assert(operatingSystemUtils != null),
-        assert(terminal != null),
-        assert(platform != null),
-        assert(processManager != null),
-        assert(fileSystem != null),
-        assert(logger != null),
-        assert(featureFlags != null),
-        assert(usagePrintFn != null),
-        _customDevicesConfig = customDevicesConfig,
-        _featureFlags = featureFlags,
-        _usagePrintFn = usagePrintFn {
+  }) : assert(customDevicesConfig != null),
+       assert(operatingSystemUtils != null),
+       assert(terminal != null),
+       assert(platform != null),
+       assert(processManager != null),
+       assert(fileSystem != null),
+       assert(logger != null),
+       assert(featureFlags != null),
+       assert(usagePrintFn != null),
+       _customDevicesConfig = customDevicesConfig,
+       _featureFlags = featureFlags,
+       _usagePrintFn = usagePrintFn
+  {
     addSubcommand(CustomDevicesListCommand(
       customDevicesConfig: customDevicesConfig,
       featureFlags: featureFlags,
@@ -177,14 +181,10 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
     @required this.logger,
   });
 
-  @protected
-  final CustomDevicesConfig customDevicesConfig;
-  @protected
-  final FeatureFlags featureFlags;
-  @protected
-  final FileSystem fileSystem;
-  @protected
-  final Logger logger;
+  @protected final CustomDevicesConfig customDevicesConfig;
+  @protected final FeatureFlags featureFlags;
+  @protected final FileSystem fileSystem;
+  @protected final Logger logger;
 
   /// The path to the (potentially non-existing) backup of the config file.
   @protected
@@ -209,8 +209,10 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
   @protected
   void checkFeatureEnabled() {
     if (!featureFlags.areCustomDevicesEnabled) {
-      throwToolExit('Custom devices feature must be enabled. '
-          'Enable using `flutter config --enable-custom-devices`.');
+      throwToolExit(
+        'Custom devices feature must be enabled. '
+        'Enable using `flutter config --enable-custom-devices`.'
+      );
     }
   }
 }
@@ -220,7 +222,12 @@ class CustomDevicesListCommand extends CustomDevicesCommandBase {
     @required CustomDevicesConfig customDevicesConfig,
     @required FeatureFlags featureFlags,
     @required Logger logger,
-  }) : super(customDevicesConfig: customDevicesConfig, featureFlags: featureFlags, fileSystem: null, logger: logger);
+  }) : super(
+         customDevicesConfig: customDevicesConfig,
+         featureFlags: featureFlags,
+         fileSystem: null,
+         logger: logger
+       );
 
   @override
   String get description => '''
@@ -246,8 +253,7 @@ List the currently configured custom devices, both enabled and disabled, reachab
     } else {
       logger.printStatus('List of custom devices in "${customDevicesConfig.configPath}":');
       for (final CustomDeviceConfig device in devices) {
-        logger.printStatus('id: ${device.id}, label: ${device.label}, enabled: ${device.enabled}',
-            indent: 2, hangingIndent: 2);
+        logger.printStatus('id: ${device.id}, label: ${device.label}, enabled: ${device.enabled}', indent: 2, hangingIndent: 2);
       }
     }
 
@@ -262,10 +268,11 @@ class CustomDevicesResetCommand extends CustomDevicesCommandBase {
     @required FileSystem fileSystem,
     @required Logger logger,
   }) : super(
-            customDevicesConfig: customDevicesConfig,
-            featureFlags: featureFlags,
-            fileSystem: fileSystem,
-            logger: logger);
+         customDevicesConfig: customDevicesConfig,
+         featureFlags: featureFlags,
+         fileSystem: fileSystem,
+         logger: logger
+       );
 
   @override
   String get description => '''
@@ -287,10 +294,12 @@ If a file already exists at the backup location, it will be overwritten.
     ErrorHandlingFileSystem.deleteIfExists(fileSystem.file(customDevicesConfig.configPath));
     customDevicesConfig.ensureFileExists();
 
-    logger.printStatus(wasBackedUp
+    logger.printStatus(
+        wasBackedUp
         ? 'Successfully resetted the custom devices config file and created a '
-            'backup at "$configBackupPath".'
-        : 'Successfully resetted the custom devices config file.');
+          'backup at "$configBackupPath".'
+        : 'Successfully resetted the custom devices config file.'
+    );
     return FlutterCommandResult.success();
   }
 }
@@ -305,44 +314,55 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     @required ProcessManager processManager,
     @required FileSystem fileSystem,
     @required Logger logger,
-  })  : _operatingSystemUtils = operatingSystemUtils,
-        _terminal = terminal,
-        _platform = platform,
-        _processManager = processManager,
-        super(
-            customDevicesConfig: customDevicesConfig,
-            featureFlags: featureFlags,
-            fileSystem: fileSystem,
-            logger: logger) {
-    argParser.addFlag(_kCheck,
-        help: 'Make sure the config actually works. This will execute some of the '
-            'commands in the config (if necessary with dummy arguments). This '
-            'flag is enabled by default when "--json" is not specified. If '
-            '"--json" is given, it is disabled by default.\n'
-            'For example, a config with "null" as the "runDebug" command is '
-            'invalid. If the "runDebug" command is valid (so it is an array of '
-            'strings) but the command is not found (because you have a typo, for '
-            'example), the config won\'t work and "--check" will spot that.');
+  }) : _operatingSystemUtils = operatingSystemUtils,
+       _terminal = terminal,
+       _platform = platform,
+       _processManager = processManager,
+       super(
+         customDevicesConfig: customDevicesConfig,
+         featureFlags: featureFlags,
+         fileSystem: fileSystem,
+         logger: logger
+       )
+  {
+    argParser.addFlag(
+      _kCheck,
+      help:
+        'Make sure the config actually works. This will execute some of the '
+        'commands in the config (if necessary with dummy arguments). This '
+        'flag is enabled by default when "--json" is not specified. If '
+        '"--json" is given, it is disabled by default.\n'
+        'For example, a config with "null" as the "runDebug" command is '
+        'invalid. If the "runDebug" command is valid (so it is an array of '
+        'strings) but the command is not found (because you have a typo, for '
+        'example), the config won\'t work and "--check" will spot that.'
+    );
 
-    argParser.addOption(_kJson,
-        help: 'Add the custom device described by this JSON-encoded string to the '
-            'list of custom-devices instead of using the normal, interactive way '
-            'of configuring. Useful if you want to use the "flutter custom-devices '
-            'add" command from a script, or use it non-interactively for some '
-            'other reason.\n'
-            "By default, this won't check whether the passed in config actually "
-            'works. For more info see the "--check" option.',
-        valueHelp: '{"id": "pi", ...}',
-        aliases: _kJsonAliases);
+    argParser.addOption(
+      _kJson,
+      help:
+        'Add the custom device described by this JSON-encoded string to the '
+        'list of custom-devices instead of using the normal, interactive way '
+        'of configuring. Useful if you want to use the "flutter custom-devices '
+        'add" command from a script, or use it non-interactively for some '
+        'other reason.\n'
+        "By default, this won't check whether the passed in config actually "
+        'works. For more info see the "--check" option.',
+      valueHelp: '{"id": "pi", ...}',
+      aliases: _kJsonAliases
+    );
 
-    argParser.addFlag(_kSsh,
-        help: 'Add a ssh-device. This will automatically fill out some of the config '
-            'options for you with good defaults, and in other cases save you some '
-            "typing. So you'll only need to enter some things like hostname and "
-            'username of the remote device instead of entering each individual '
-            'command.',
-        defaultsTo: true,
-        negatable: false);
+    argParser.addFlag(
+      _kSsh,
+      help:
+        'Add a ssh-device. This will automatically fill out some of the config '
+        'options for you with good defaults, and in other cases save you some '
+        "typing. So you'll only need to enter some things like hostname and "
+        'username of the remote device instead of entering each individual '
+        'command.',
+      defaultsTo: true,
+      negatable: false
+    );
   }
 
   static const String _kJson = 'json';
@@ -353,8 +373,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   // A hostname consists of one or more "names", separated by a dot.
   // A name may consist of alpha-numeric characters. Hyphens are also allowed,
   // but not as the first or last character of the name.
-  static final RegExp _hostnameRegex = RegExp(
-      r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$');
+  static final RegExp _hostnameRegex = RegExp(r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$');
 
   final OperatingSystemUtils _operatingSystemUtils;
   final Terminal _terminal;
@@ -375,7 +394,11 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Check this config by executing some of the commands, see if they run
   /// fine.
   Future<bool> _checkConfigWithLogging(final CustomDeviceConfig config) async {
-    final CustomDevice device = CustomDevice(config: config, logger: logger, processManager: _processManager);
+    final CustomDevice device = CustomDevice(
+      config: config,
+      logger: logger,
+      processManager: _processManager
+    );
 
     bool result = true;
 
@@ -393,7 +416,10 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     final Directory temp = await fileSystem.systemTempDirectory.createTemp();
 
     try {
-      final bool ok = await device.tryInstall(localPath: temp.path, appName: temp.basename);
+      final bool ok = await device.tryInstall(
+        localPath: temp.path,
+        appName: temp.basename
+      );
       if (!ok) {
         _printConfigCheckingError("Couldn't install test app on device.");
         result = false;
@@ -431,9 +457,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
         final ForwardedPort forwardedPort = await portForwarder.tryForward(port, port);
         if (forwardedPort == null) {
-          _printConfigCheckingError(
-            "Couldn't forward test port $port from device.",
-          );
+          _printConfigCheckingError("Couldn't forward test port $port from device.",);
           result = false;
         }
 
@@ -503,8 +527,10 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   }) async {
     String msg = description ?? name;
 
-    final String exampleOrDefault =
-        <String>[if (example != null) 'example: $example', if (defaultsTo != null) 'empty for $defaultsTo'].join(', ');
+    final String exampleOrDefault = <String>[
+      if (example != null) 'example: $example',
+      if (defaultsTo != null) 'empty for $defaultsTo'
+    ].join(', ');
 
     if (exampleOrDefault.isNotEmpty) {
       msg += ' ($exampleOrDefault)';
@@ -552,12 +578,14 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Ask the user if he wants to apply the config.
   /// Shows a different prompt if errors or warnings exist in the config.
   Future<bool> askApplyConfig({bool hasErrorsOrWarnings = false}) {
-    return askForBool('apply',
-        description: hasErrorsOrWarnings
-            ? 'Warnings or errors exist in custom device. '
-                'Would you like to add the custom device to the config anyway?'
-            : 'Would you like to add the custom device to the config now?',
-        defaultsTo: !hasErrorsOrWarnings);
+    return askForBool(
+      'apply',
+      description: hasErrorsOrWarnings
+        ? 'Warnings or errors exist in custom device. '
+          'Would you like to add the custom device to the config anyway?'
+        : 'Would you like to add the custom device to the config now?',
+      defaultsTo: !hasErrorsOrWarnings
+    );
   }
 
   /// Run interactively (with user prompts), the target device should be
@@ -575,23 +603,27 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     // So instead, we add the keystrokes stream events to a new single-subscription
     // stream and listen to that instead.
     final StreamController<String> nonClosingKeystrokes = StreamController<String>();
-    final StreamSubscription<String> keystrokesSubscription =
-        _terminal.keystrokes.listen((String s) => nonClosingKeystrokes.add(s.trim()), cancelOnError: true);
+    final StreamSubscription<String> keystrokesSubscription = _terminal.keystrokes.listen(
+      (String s) => nonClosingKeystrokes.add(s.trim()),
+      cancelOnError: true
+    );
 
     inputs = StreamQueue<String>(nonClosingKeystrokes.stream);
 
     final String id = await askForString(
       'id',
-      description: 'Please enter the id you want to device to have. Must contain only '
-          'alphanumeric or underscore characters.',
+      description:
+        'Please enter the id you want to device to have. Must contain only '
+        'alphanumeric or underscore characters.',
       example: 'pi',
       validator: (String s) async => RegExp(r'^\w+$').hasMatch(s),
     );
 
     final String label = await askForString(
       'label',
-      description: 'Please enter the label of the device, which is a slightly more verbose '
-          'name for the device.',
+      description:
+        'Please enter the label of the device, which is a slightly more verbose '
+        'name for the device.',
       example: 'Raspberry Pi',
     );
 
@@ -605,15 +637,19 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       description: 'Should the device be enabled?',
     );
 
-    final String targetStr = await askForString('target',
-        description: 'Please enter the hostname or IPv4/v6 address of the device.',
-        example: 'raspberrypi',
-        validator: (String s) async => _isValidHostname(s) || _isValidIpAddr(s));
+    final String targetStr = await askForString(
+      'target',
+      description: 'Please enter the hostname or IPv4/v6 address of the device.',
+      example: 'raspberrypi',
+      validator: (String s) async => _isValidHostname(s) || _isValidIpAddr(s)
+    );
 
     final InternetAddress targetIp = InternetAddress.tryParse(targetStr);
     final bool useIp = targetIp != null;
     final bool ipv6 = useIp && targetIp.type == InternetAddressType.IPv6;
-    final InternetAddress loopbackIp = ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
+    final InternetAddress loopbackIp = ipv6
+      ? InternetAddress.loopbackIPv6
+      : InternetAddress.loopbackIPv4;
 
     final String username = await askForString(
       'username',
@@ -622,18 +658,21 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       defaultsTo: 'no username',
     );
 
-    final String remoteRunDebugCommand = await askForString('run command',
-        description: 'Please enter the command executed on the remote device for starting '
-            r'the app. "/tmp/${appName}" is the path to the asset bundle.',
-        example: r'flutter-pi /tmp/${appName}');
+    final String remoteRunDebugCommand = await askForString(
+      'run command',
+      description:
+        'Please enter the command executed on the remote device for starting '
+        r'the app. "/tmp/${appName}" is the path to the asset bundle.',
+      example: r'flutter-pi /tmp/${appName}'
+    );
 
     final bool usePortForwarding = await askForBool(
       'use port forwarding',
       description: 'Should the device use port forwarding? '
-          'Using port forwarding is the default because it works in all cases, however if your '
-          'remote device has a static IP address and you have a way of '
-          'specifying the "--observatory-host=<ip>" engine option, you might prefer '
-          'not using port forwarding.',
+        'Using port forwarding is the default because it works in all cases, however if your '
+        'remote device has a static IP address and you have a way of '
+        'specifying the "--observatory-host=<ip>" engine option, you might prefer '
+        'not using port forwarding.',
     );
 
     final String screenshotCommand = await askForString(
@@ -645,74 +684,109 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
     // SSH expects IPv6 addresses to use the bracket syntax like URIs do too,
     // but the IPv6 the user enters is a raw IPv6 address, so we need to wrap it.
-    final String sshTarget = (username.isNotEmpty ? '$username@' : '') + (ipv6 ? '[${targetIp.address}]' : targetStr);
+    final String sshTarget =
+      (username.isNotEmpty ? '$username@' : '')
+      + (ipv6 ? '[${targetIp.address}]' : targetStr);
 
-    final String formattedLoopbackIp = ipv6 ? '[${loopbackIp.address}]' : loopbackIp.address;
+    final String formattedLoopbackIp = ipv6
+      ? '[${loopbackIp.address}]'
+      : loopbackIp.address;
 
     CustomDeviceConfig config = CustomDeviceConfig(
-        id: id,
-        label: label,
-        sdkNameAndVersion: sdkNameAndVersion,
-        enabled: enabled,
+      id: id,
+      label: label,
+      sdkNameAndVersion: sdkNameAndVersion,
+      enabled: enabled,
 
-        // host-platform specific, filled out later
-        pingCommand: const <String>[],
-        postBuildCommand: const <String>[],
+      // host-platform specific, filled out later
+      pingCommand: const <String>[],
 
-        // just install to /tmp/${appName} by default
-        installCommand: <String>[
-          'scp',
-          '-r',
-          '-o',
-          'BatchMode=yes',
-          if (ipv6) '-6',
-          r'${localPath}',
-          '$sshTarget:/tmp/\${appName}'
-        ],
-        uninstallCommand: <String>[
+      postBuildCommand: const <String>[],
+
+      // just install to /tmp/${appName} by default
+      installCommand: <String>[
+        'scp',
+        '-r',
+        '-o', 'BatchMode=yes',
+        if (ipv6) '-6',
+        r'${localPath}',
+        '$sshTarget:/tmp/\${appName}'
+      ],
+
+      uninstallCommand: <String>[
+        'ssh',
+        '-o', 'BatchMode=yes',
+        if (ipv6) '-6',
+        sshTarget,
+        r'rm -rf "/tmp/${appName}"'
+      ],
+
+      runDebugCommand: <String>[
+        'ssh',
+        '-o', 'BatchMode=yes',
+        if (ipv6) '-6',
+        sshTarget,
+        remoteRunDebugCommand
+      ],
+
+      forwardPortCommand: usePortForwarding
+        ? <String>[
           'ssh',
-          '-o',
-          'BatchMode=yes',
+          '-o', 'BatchMode=yes',
+          '-o', 'ExitOnForwardFailure=yes',
+          if (ipv6) '-6',
+          '-L', '$formattedLoopbackIp:\${hostPort}:$formattedLoopbackIp:\${devicePort}',
+          sshTarget,
+          "echo 'Port forwarding success'; read"
+        ]
+        : null,
+      forwardPortSuccessRegex: usePortForwarding
+        ? RegExp('Port forwarding success')
+        : null,
+
+      screenshotCommand: screenshotCommand.isNotEmpty
+        ? <String>[
+          'ssh',
+          '-o', 'BatchMode=yes',
           if (ipv6) '-6',
           sshTarget,
-          r'rm -rf "/tmp/${appName}"'
-        ],
-        runDebugCommand: <String>['ssh', '-o', 'BatchMode=yes', if (ipv6) '-6', sshTarget, remoteRunDebugCommand],
-        forwardPortCommand: usePortForwarding
-            ? <String>[
-                'ssh',
-                '-o',
-                'BatchMode=yes',
-                '-o',
-                'ExitOnForwardFailure=yes',
-                if (ipv6) '-6',
-                '-L',
-                '$formattedLoopbackIp:\${hostPort}:$formattedLoopbackIp:\${devicePort}',
-                sshTarget,
-                "echo 'Port forwarding success'; read"
-              ]
-            : null,
-        forwardPortSuccessRegex: usePortForwarding ? RegExp('Port forwarding success') : null,
-        screenshotCommand: screenshotCommand.isNotEmpty
-            ? <String>['ssh', '-o', 'BatchMode=yes', if (ipv6) '-6', sshTarget, screenshotCommand]
-            : null);
+          screenshotCommand
+        ]
+        : null
+    );
 
     if (_platform.isWindows) {
       config = config.copyWith(
-          pingCommand: <String>['ping', if (ipv6) '-6', '-n', '1', '-w', '500', targetStr],
-          explicitPingSuccessRegex: true,
-          pingSuccessRegex: RegExp(r'[<=]\d+ms'));
+        pingCommand: <String>[
+          'ping',
+          if (ipv6) '-6',
+          '-n', '1',
+          '-w', '500',
+          targetStr
+        ],
+        explicitPingSuccessRegex: true,
+        pingSuccessRegex: RegExp(r'[<=]\d+ms')
+      );
     } else if (_platform.isLinux || _platform.isMacOS) {
       config = config.copyWith(
-          pingCommand: <String>['ping', if (ipv6) '-6', '-c', '1', '-w', '1', targetStr],
-          explicitPingSuccessRegex: true,
-          pingSuccessRegex: null);
+        pingCommand: <String>[
+          'ping',
+          if (ipv6) '-6',
+          '-c', '1',
+          '-w', '1',
+          targetStr
+        ],
+        explicitPingSuccessRegex: true,
+        pingSuccessRegex: null
+      );
     } else {
       throw FallThroughError();
     }
 
-    final bool apply =
-        await askApplyConfig(hasErrorsOrWarnings: shouldCheck && !(await _checkConfigWithLogging(config)));
+    final bool apply = await askApplyConfig(
+      hasErrorsOrWarnings:
+        shouldCheck && !(await _checkConfigWithLogging(config))
+    );
 
     unawaited(keystrokesSubscription.cancel());
     unawaited(nonClosingKeystrokes.close());
@@ -746,10 +820,11 @@ class CustomDevicesDeleteCommand extends CustomDevicesCommandBase {
     @required FileSystem fileSystem,
     @required Logger logger,
   }) : super(
-            customDevicesConfig: customDevicesConfig,
-            featureFlags: featureFlags,
-            fileSystem: fileSystem,
-            logger: logger);
+         customDevicesConfig: customDevicesConfig,
+         featureFlags: featureFlags,
+         fileSystem: fileSystem,
+         logger: logger
+       );
 
   @override
   String get description => '''

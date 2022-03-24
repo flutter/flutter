@@ -135,12 +135,12 @@ class IconButton extends StatelessWidget {
     this.enableFeedback = true,
     this.constraints,
     required this.icon,
-  })  : assert(padding != null),
-        assert(alignment != null),
-        assert(splashRadius == null || splashRadius > 0),
-        assert(autofocus != null),
-        assert(icon != null),
-        super(key: key);
+  }) : assert(padding != null),
+       assert(alignment != null),
+       assert(splashRadius == null || splashRadius > 0),
+       assert(autofocus != null),
+       assert(icon != null),
+       super(key: key);
 
   /// The size of the icon inside the button.
   ///
@@ -314,11 +314,10 @@ class IconButton extends StatelessWidget {
 
     final VisualDensity effectiveVisualDensity = visualDensity ?? theme.visualDensity;
 
-    final BoxConstraints unadjustedConstraints = constraints ??
-        const BoxConstraints(
-          minWidth: _kMinButtonSize,
-          minHeight: _kMinButtonSize,
-        );
+    final BoxConstraints unadjustedConstraints = constraints ?? const BoxConstraints(
+      minWidth: _kMinButtonSize,
+      minHeight: _kMinButtonSize,
+    );
     final BoxConstraints adjustedConstraints = effectiveVisualDensity.effectiveConstraints(unadjustedConstraints);
     final double effectiveIconSize = iconSize ?? IconTheme.of(context).size ?? 24.0;
 
@@ -364,12 +363,11 @@ class IconButton extends StatelessWidget {
         hoverColor: hoverColor ?? theme.hoverColor,
         highlightColor: highlightColor ?? theme.highlightColor,
         splashColor: splashColor ?? theme.splashColor,
-        radius: splashRadius ??
-            math.max(
-              Material.defaultSplashRadius,
-              (effectiveIconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
-              // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
-            ),
+        radius: splashRadius ?? math.max(
+          Material.defaultSplashRadius,
+          (effectiveIconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+          // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
+        ),
         child: result,
       ),
     );

@@ -17,7 +17,8 @@ Future<bool> runTests({
   int shardIndex = 0,
   required List<File> files,
 }) async {
-  if (verbose) print('Starting run_tests.dart...');
+  if (verbose)
+    print('Starting run_tests.dart...');
 
   // Best attempt at evenly splitting tests among the shards
   final List<File> shardedFiles = <File>[];
@@ -32,8 +33,7 @@ Future<bool> runTests({
     final String s = files.length == 1 ? '' : 's';
     if (numberShards > 1) {
       final String ss = shardedFiles.length == 1 ? '' : 's';
-      print(
-          '${files.length} file$s specified. ${shardedFiles.length} test$ss in shard #$shardIndex ($numberShards shards total).');
+      print('${files.length} file$s specified. ${shardedFiles.length} test$ss in shard #$shardIndex ($numberShards shards total).');
     } else {
       print('${files.length} file$s specified.');
     }
@@ -46,15 +46,18 @@ Future<bool> runTests({
     } else {
       print('Tests:');
     }
-    for (final File file in shardedFiles) print(file.path);
+    for (final File file in shardedFiles)
+      print(file.path);
   }
   print('');
 
   for (final File file in shardedFiles) {
-    if (verbose) print('Processing ${file.path}...');
+    if (verbose)
+      print('Processing ${file.path}...');
 
     void printHeader() {
-      if (!verbose) print('Processing ${file.path}...');
+      if (!verbose)
+        print('Processing ${file.path}...');
     }
 
     void failure(String message) {
@@ -78,14 +81,13 @@ Future<bool> runTests({
 
     bool success = true;
 
-    final Directory checkout =
-        Directory.systemTemp.createTempSync('flutter_customer_testing.${path.basenameWithoutExtension(file.path)}.');
-    if (verbose) print('Created temporary directory: ${checkout.path}');
+    final Directory checkout = Directory.systemTemp.createTempSync('flutter_customer_testing.${path.basenameWithoutExtension(file.path)}.');
+    if (verbose)
+      print('Created temporary directory: ${checkout.path}');
     try {
       assert(instructions.fetch.isNotEmpty);
       for (final String fetchCommand in instructions.fetch) {
-        success = await shell(fetchCommand, checkout,
-            verbose: verbose, silentFailure: skipOnFetchFailure, failedCallback: printHeader);
+        success = await shell(fetchCommand, checkout, verbose: verbose, silentFailure: skipOnFetchFailure, failedCallback: printHeader);
         if (!success) {
           if (skipOnFetchFailure) {
             if (verbose) {
@@ -103,31 +105,30 @@ Future<bool> runTests({
         final Directory customerRepo = Directory(path.join(checkout.path, 'tests'));
         for (final Directory updateDirectory in instructions.update) {
           final Directory resolvedUpdateDirectory = Directory(path.join(customerRepo.path, updateDirectory.path));
-          if (verbose) print('Updating code in ${resolvedUpdateDirectory.path}...');
+          if (verbose)
+            print('Updating code in ${resolvedUpdateDirectory.path}...');
           if (!File(path.join(resolvedUpdateDirectory.path, 'pubspec.yaml')).existsSync()) {
-            failure(
-                'The directory ${updateDirectory.path}, which was specified as an update directory, does not contain a "pubspec.yaml" file.');
+            failure('The directory ${updateDirectory.path}, which was specified as an update directory, does not contain a "pubspec.yaml" file.');
             success = false;
             break;
           }
-          success = await shell('flutter packages get', resolvedUpdateDirectory,
-              verbose: verbose, failedCallback: printHeader);
+          success = await shell('flutter packages get', resolvedUpdateDirectory, verbose: verbose, failedCallback: printHeader);
           if (!success) {
-            failure(
-                'Could not run "flutter pub get" in ${updateDirectory.path}, which was specified as an update directory.');
+            failure('Could not run "flutter pub get" in ${updateDirectory.path}, which was specified as an update directory.');
             break;
           }
-          success =
-              await shell('dart fix --apply', resolvedUpdateDirectory, verbose: verbose, failedCallback: printHeader);
+          success = await shell('dart fix --apply', resolvedUpdateDirectory, verbose: verbose, failedCallback: printHeader);
           if (!success) {
             failure('Could not run "dart fix" in ${updateDirectory.path}, which was specified as an update directory.');
             break;
           }
         }
         if (success) {
-          if (verbose) print('Running tests...');
+          if (verbose)
+            print('Running tests...');
           for (int iteration = 0; iteration < repeat; iteration += 1) {
-            if (verbose && repeat > 1) print('Round ${iteration + 1} of $repeat.');
+            if (verbose && repeat > 1)
+              print('Round ${iteration + 1} of $repeat.');
             for (final String testCommand in instructions.tests) {
               testCount += 1;
               success = await shell(testCommand, customerRepo, verbose: verbose, failedCallback: printHeader);
@@ -137,11 +138,13 @@ Future<bool> runTests({
               }
             }
           }
-          if (verbose && success) print('Tests finished.');
+          if (verbose && success)
+            print('Tests finished.');
         }
       }
     } finally {
-      if (verbose) print('Deleting temporary directory...');
+      if (verbose)
+        print('Deleting temporary directory...');
       try {
         checkout.deleteSync(recursive: true);
       } on FileSystemException {
@@ -152,7 +155,8 @@ Future<bool> runTests({
       final String s = instructions.contacts.length == 1 ? '' : 's';
       print('Contact$s: ${instructions.contacts.join(", ")}');
     }
-    if (verbose || !success) print('');
+    if (verbose || !success)
+      print('');
   }
   if (failures > 0) {
     final String s = failures == 1 ? '' : 's';
@@ -165,9 +169,9 @@ Future<bool> runTests({
 
 final RegExp _spaces = RegExp(r' +');
 
-Future<bool> shell(String command, Directory directory,
-    {bool verbose = false, bool silentFailure = false, void Function()? failedCallback}) async {
-  if (verbose) print('>> $command');
+Future<bool> shell(String command, Directory directory, { bool verbose = false, bool silentFailure = false, void Function()? failedCallback }) async {
+  if (verbose)
+    print('>> $command');
   Process process;
   if (Platform.isWindows) {
     process = await Process.start('CMD.EXE', <String>['/S', '/C', command], workingDirectory: directory.path);
@@ -179,9 +183,11 @@ Future<bool> shell(String command, Directory directory,
   utf8.decoder.bind(process.stdout).transform(const LineSplitter()).listen(verbose ? printLog : output.add);
   utf8.decoder.bind(process.stderr).transform(const LineSplitter()).listen(verbose ? printLog : output.add);
   final bool success = await process.exitCode == 0;
-  if (success || silentFailure) return success;
+  if (success || silentFailure)
+    return success;
   if (!verbose) {
-    if (failedCallback != null) failedCallback();
+    if (failedCallback != null)
+      failedCallback();
     print('>> $command');
     output.forEach(printLog);
   }

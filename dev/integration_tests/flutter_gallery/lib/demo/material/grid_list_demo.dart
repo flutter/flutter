@@ -6,7 +6,11 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-enum GridDemoTileStyle { imageOnly, oneLine, twoLine }
+enum GridDemoTileStyle {
+  imageOnly,
+  oneLine,
+  twoLine
+}
 
 typedef BannerTapCallback = void Function(Photo photo);
 
@@ -34,7 +38,7 @@ class Photo {
 }
 
 class GridPhotoViewer extends StatefulWidget {
-  const GridPhotoViewer({Key? key, this.photo}) : super(key: key);
+  const GridPhotoViewer({ Key? key, this.photo }) : super(key: key);
 
   final Photo? photo;
 
@@ -68,7 +72,8 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this)..addListener(_handleFlingAnimation);
+    _controller = AnimationController(vsync: this)
+      ..addListener(_handleFlingAnimation);
   }
 
   @override
@@ -113,7 +118,8 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
 
   void _handleOnScaleEnd(ScaleEndDetails details) {
     final double magnitude = details.velocity.pixelsPerSecond.distance;
-    if (magnitude < _kMinFlingVelocity) return;
+    if (magnitude < _kMinFlingVelocity)
+      return;
     final Offset direction = details.velocity.pixelsPerSecond / magnitude;
     final double distance = (Offset.zero & context.size!).shortestSide;
     _flingAnimation = _controller.drive(Tween<Offset>(
@@ -153,27 +159,29 @@ class GridDemoPhotoItem extends StatelessWidget {
     required this.photo,
     required this.tileStyle,
     required this.onBannerTap,
-  })  : assert(photo.isValid),
-        super(key: key);
+  }) : assert(photo.isValid),
+       super(key: key);
 
   final Photo photo;
   final GridDemoTileStyle tileStyle;
   final BannerTapCallback onBannerTap; // User taps on the photo's header or footer.
 
   void showPhoto(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute<void>(builder: (BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(photo.title!),
-        ),
-        body: SizedBox.expand(
-          child: Hero(
-            tag: photo.tag!,
-            child: GridPhotoViewer(photo: photo),
+    Navigator.push(context, MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(photo.title!),
           ),
-        ),
-      );
-    }));
+          body: SizedBox.expand(
+            child: Hero(
+              tag: photo.tag!,
+              child: GridPhotoViewer(photo: photo),
+            ),
+          ),
+        );
+      }
+    ));
   }
 
   @override
@@ -181,9 +189,7 @@ class GridDemoPhotoItem extends StatelessWidget {
     final Widget image = Semantics(
       label: '${photo.title} - ${photo.caption}',
       child: GestureDetector(
-        onTap: () {
-          showPhoto(context);
-        },
+        onTap: () { showPhoto(context); },
         child: Hero(
           key: Key(photo.assetName!),
           tag: photo.tag!,
@@ -205,9 +211,7 @@ class GridDemoPhotoItem extends StatelessWidget {
       case GridDemoTileStyle.oneLine:
         return GridTile(
           header: GestureDetector(
-            onTap: () {
-              onBannerTap(photo);
-            },
+            onTap: () { onBannerTap(photo); },
             child: GridTileBar(
               title: _GridTitleText(photo.title),
               backgroundColor: Colors.black45,
@@ -223,9 +227,7 @@ class GridDemoPhotoItem extends StatelessWidget {
       case GridDemoTileStyle.twoLine:
         return GridTile(
           footer: GestureDetector(
-            onTap: () {
-              onBannerTap(photo);
-            },
+            onTap: () { onBannerTap(photo); },
             child: GridTileBar(
               backgroundColor: Colors.black45,
               title: _GridTitleText(photo.title),
@@ -243,7 +245,7 @@ class GridDemoPhotoItem extends StatelessWidget {
 }
 
 class GridListDemo extends StatefulWidget {
-  const GridListDemo({Key? key}) : super(key: key);
+  const GridListDemo({ Key? key }) : super(key: key);
 
   static const String routeName = '/material/grid-list';
 

@@ -35,8 +35,7 @@ void main() {
     expect(find.text('Action Sheet'), findsNothing);
   });
 
-  testWidgets('Verify that a tap on title section (not buttons) does not dismiss an action sheet',
-      (WidgetTester tester) async {
+  testWidgets('Verify that a tap on title section (not buttons) does not dismiss an action sheet', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -62,21 +61,19 @@ void main() {
         CupertinoActionSheetAction(
           isDestructiveAction: true,
           child: const Text('Ok'),
-          onPressed: () {},
+          onPressed: () { },
         ),
       ),
     );
 
     final DefaultTextStyle widget = tester.widget(find.widgetWithText(DefaultTextStyle, 'Ok'));
 
-    expect(
-        widget.style.color,
-        const CupertinoDynamicColor.withBrightnessAndContrast(
-          color: Color.fromARGB(255, 255, 59, 48),
-          darkColor: Color.fromARGB(255, 255, 69, 58),
-          highContrastColor: Color.fromARGB(255, 215, 0, 21),
-          darkHighContrastColor: Color.fromARGB(255, 255, 105, 97),
-        ));
+    expect(widget.style.color, const CupertinoDynamicColor.withBrightnessAndContrast(
+      color: Color.fromARGB(255, 255, 59, 48),
+      darkColor: Color.fromARGB(255, 255, 69, 58),
+      highContrastColor: Color.fromARGB(255, 215, 0, 21),
+      darkHighContrastColor: Color.fromARGB(255, 255, 105, 97),
+    ));
   });
 
   testWidgets('Action sheet dark mode', (WidgetTester tester) async {
@@ -89,14 +86,12 @@ void main() {
     late StateSetter stateSetter;
 
     TextStyle actionTextStyle(String text) {
-      return tester
-          .widget<DefaultTextStyle>(
-            find.descendant(
-              of: find.widgetWithText(CupertinoActionSheetAction, text),
-              matching: find.byType(DefaultTextStyle),
-            ),
-          )
-          .style;
+      return tester.widget<DefaultTextStyle>(
+        find.descendant(
+          of: find.widgetWithText(CupertinoActionSheetAction, text),
+          matching: find.byType(DefaultTextStyle),
+        ),
+      ).style;
     }
 
     await tester.pumpWidget(
@@ -129,9 +124,7 @@ void main() {
       const Color.fromARGB(255, 0, 122, 255).value,
     );
 
-    stateSetter(() {
-      brightness = Brightness.dark;
-    });
+    stateSetter(() { brightness = Brightness.dark; });
     await tester.pump();
 
     expect(
@@ -146,7 +139,7 @@ void main() {
         CupertinoActionSheetAction(
           isDefaultAction: true,
           child: const Text('Ok'),
-          onPressed: () {},
+          onPressed: () { },
         ),
       ),
     );
@@ -156,8 +149,7 @@ void main() {
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
-  testWidgets('Action sheet text styles are correct when both title and message are included',
-      (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when both title and message are included', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -177,8 +169,7 @@ void main() {
     expect(messageStyle.style.fontWeight, FontWeight.w400);
   });
 
-  testWidgets('Action sheet text styles are correct when title but no message is included',
-      (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when title but no message is included', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -195,8 +186,7 @@ void main() {
     expect(titleStyle.style.fontWeight, FontWeight.w400);
   });
 
-  testWidgets('Action sheet text styles are correct when message but no title is included',
-      (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when message but no title is included', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -241,7 +231,7 @@ void main() {
     // (minus padding).
     expect(
       tester.getSize(find.byType(ClipRRect)).height,
-      tester.getSize(find.byType(CupertinoActionSheet)).height - 20.0,
+      tester.getSize(find.byType(CupertinoActionSheet)).height  - 20.0,
     );
 
     expect(
@@ -258,11 +248,11 @@ void main() {
           actions: <Widget>[
             CupertinoActionSheetAction(
               child: const Text('One'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Two'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
           actionScrollController: actionScrollController,
@@ -311,23 +301,23 @@ void main() {
               actions: <Widget>[
                 CupertinoActionSheetAction(
                   child: const Text('One'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
                   child: const Text('Two'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
                   child: const Text('Three'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
                   child: const Text('Four'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
                   child: const Text('Five'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
               ],
               actionScrollController: actionScrollController,
@@ -378,11 +368,11 @@ void main() {
               actions: <Widget>[
                 CupertinoActionSheetAction(
                   child: const Text('One'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
                   child: const Text('Two'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
               ],
               messageScrollController: messageScrollController,
@@ -408,29 +398,28 @@ void main() {
   testWidgets('CupertinoActionSheet scrollbars controllers should be different', (WidgetTester tester) async {
     // https://github.com/flutter/flutter/pull/81278
     await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(CupertinoActionSheet(
-        title: const Text('The title'),
-        message: Text('Very long content' * 200),
-        actions: <Widget>[
-          CupertinoActionSheetAction(
-            child: const Text('One'),
-            onPressed: () {},
-          ),
-        ],
-      )),
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+            title: const Text('The title'),
+            message: Text('Very long content' * 200),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                child: const Text('One'),
+                onPressed: () { },
+              ),
+            ],
+          )
+        ),
     );
 
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    final List<CupertinoScrollbar> scrollbars = find
-        .descendant(
-          of: find.byType(CupertinoActionSheet),
-          matching: find.byType(CupertinoScrollbar),
-        )
-        .evaluate()
-        .map((Element e) => e.widget as CupertinoScrollbar)
-        .toList();
+    final List<CupertinoScrollbar> scrollbars =
+      find.descendant(
+        of: find.byType(CupertinoActionSheet),
+        matching: find.byType(CupertinoScrollbar),
+      ).evaluate().map((Element e) => e.widget as CupertinoScrollbar).toList();
 
     expect(scrollbars.length, 2);
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
@@ -482,11 +471,11 @@ void main() {
               actions: <Widget>[
                 CupertinoActionSheetAction(
                   child: const Text('One'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
                   child: const Text('Two'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
               ],
             ),
@@ -510,11 +499,11 @@ void main() {
               actions: <Widget>[
                 CupertinoActionSheetAction(
                   child: const Text('One'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
                   child: const Text('Two'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
               ],
             ),
@@ -538,12 +527,12 @@ void main() {
           actions: <Widget>[
             CupertinoActionSheetAction(
               child: const Text('One'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),
@@ -565,16 +554,16 @@ void main() {
           actions: <Widget>[
             CupertinoActionSheetAction(
               child: const Text('One'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Two'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),
@@ -595,20 +584,20 @@ void main() {
           actions: <Widget>[
             CupertinoActionSheetAction(
               child: const Text('One'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Two'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Three'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),
@@ -629,24 +618,24 @@ void main() {
           actions: <Widget>[
             CupertinoActionSheetAction(
               child: const Text('One'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Two'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Three'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Four'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),
@@ -667,7 +656,7 @@ void main() {
           actions: <Widget>[
             CupertinoActionSheetAction(
               child: const Text('One'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -689,11 +678,11 @@ void main() {
           actions: <Widget>[
             CupertinoActionSheetAction(
               child: const Text('One'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Two'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
@@ -712,7 +701,7 @@ void main() {
         CupertinoActionSheet(
           cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),
@@ -770,16 +759,16 @@ void main() {
           actions: <Widget>[
             CupertinoActionSheetAction(
               child: const Text('One'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Two'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),
@@ -807,16 +796,16 @@ void main() {
           actions: <Widget>[
             CupertinoActionSheetAction(
               child: const Text('One'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Two'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),
@@ -884,16 +873,16 @@ void main() {
           actions: <Widget>[
             CupertinoActionSheetAction(
               child: const Text('One'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Two'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),
@@ -932,6 +921,7 @@ void main() {
     expect(find.byType(CupertinoActionSheet), findsNothing);
   });
 
+
   testWidgets('Action sheet semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -943,16 +933,16 @@ void main() {
           actions: <Widget>[
             CupertinoActionSheetAction(
               child: const Text('One'),
-              onPressed: () {},
+              onPressed: () { },
             ),
             CupertinoActionSheetAction(
               child: const Text('Two'),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             child: const Text('Cancel'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ),
@@ -1041,8 +1031,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoActionSheet',
-      (WidgetTester tester) async {
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoActionSheet', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83819
     final ScrollController actionScrollController = ScrollController();
     await tester.pumpWidget(
@@ -1056,11 +1045,11 @@ void main() {
               actions: <Widget>[
                 CupertinoActionSheetAction(
                   child: const Text('One'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
                 CupertinoActionSheetAction(
                   child: const Text('Two'),
-                  onPressed: () {},
+                  onPressed: () { },
                 ),
               ],
               actionScrollController: actionScrollController,

@@ -24,7 +24,6 @@ void main() {
         );
         await Future<void>.delayed(const Duration(milliseconds: 500));
       }
-
       for (int i = 0; i < 3; i += 1) {
         await _scrollOnce(-300.0);
         await _scrollOnce(-300.0);

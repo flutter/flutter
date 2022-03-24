@@ -94,12 +94,12 @@ class BoxDecoration extends Decoration {
     this.gradient,
     this.backgroundBlendMode,
     this.shape = BoxShape.rectangle,
-  })  : assert(shape != null),
-        assert(
-          backgroundBlendMode == null || color != null || gradient != null,
-          "backgroundBlendMode applies to BoxDecoration's background color or "
-          'gradient, but no color or gradient was provided.',
-        );
+  }) : assert(shape != null),
+       assert(
+         backgroundBlendMode == null || color != null || gradient != null,
+         "backgroundBlendMode applies to BoxDecoration's background color or "
+         'gradient, but no color or gradient was provided.',
+       );
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -221,7 +221,8 @@ class BoxDecoration extends Decoration {
         final Rect square = Rect.fromCircle(center: center, radius: radius);
         return Path()..addOval(square);
       case BoxShape.rectangle:
-        if (borderRadius != null) return Path()..addRRect(borderRadius!.resolve(textDirection).toRRect(rect));
+        if (borderRadius != null)
+          return Path()..addRRect(borderRadius!.resolve(textDirection).toRRect(rect));
         return Path()..addRect(rect);
     }
   }
@@ -244,15 +245,19 @@ class BoxDecoration extends Decoration {
 
   @override
   BoxDecoration? lerpFrom(Decoration? a, double t) {
-    if (a == null) return scale(t);
-    if (a is BoxDecoration) return BoxDecoration.lerp(a, this, t);
+    if (a == null)
+      return scale(t);
+    if (a is BoxDecoration)
+      return BoxDecoration.lerp(a, this, t);
     return super.lerpFrom(a, t) as BoxDecoration?;
   }
 
   @override
   BoxDecoration? lerpTo(Decoration? b, double t) {
-    if (b == null) return scale(1.0 - t);
-    if (b is BoxDecoration) return BoxDecoration.lerp(this, b, t);
+    if (b == null)
+      return scale(1.0 - t);
+    if (b is BoxDecoration)
+      return BoxDecoration.lerp(this, b, t);
     return super.lerpTo(b, t) as BoxDecoration?;
   }
 
@@ -281,11 +286,16 @@ class BoxDecoration extends Decoration {
   ///    [BoxDecoration]s or a [BoxDecoration] to or from null.
   static BoxDecoration? lerp(BoxDecoration? a, BoxDecoration? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return b!.scale(t);
-    if (b == null) return a.scale(1.0 - t);
-    if (t == 0.0) return a;
-    if (t == 1.0) return b;
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b!.scale(t);
+    if (b == null)
+      return a.scale(1.0 - t);
+    if (t == 0.0)
+      return a;
+    if (t == 1.0)
+      return b;
     return BoxDecoration(
       color: Color.lerp(a.color, b.color, t),
       image: t < 0.5 ? a.image : b.image, // TODO(ianh): cross-fade the image
@@ -299,28 +309,30 @@ class BoxDecoration extends Decoration {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is BoxDecoration &&
-        other.color == color &&
-        other.image == image &&
-        other.border == border &&
-        other.borderRadius == borderRadius &&
-        listEquals<BoxShadow>(other.boxShadow, boxShadow) &&
-        other.gradient == gradient &&
-        other.shape == shape;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is BoxDecoration
+        && other.color == color
+        && other.image == image
+        && other.border == border
+        && other.borderRadius == borderRadius
+        && listEquals<BoxShadow>(other.boxShadow, boxShadow)
+        && other.gradient == gradient
+        && other.shape == shape;
   }
 
   @override
   int get hashCode => Object.hash(
-        color,
-        image,
-        border,
-        borderRadius,
-        boxShadow == null ? null : Object.hashAll(boxShadow!),
-        gradient,
-        shape,
-      );
+    color,
+    image,
+    border,
+    borderRadius,
+    boxShadow == null ? null : Object.hashAll(boxShadow!),
+    gradient,
+    shape,
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -333,14 +345,13 @@ class BoxDecoration extends Decoration {
     properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxBorder>('border', border, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null));
-    properties.add(IterableProperty<BoxShadow>('boxShadow', boxShadow,
-        defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
+    properties.add(IterableProperty<BoxShadow>('boxShadow', boxShadow, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
     properties.add(DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
     properties.add(EnumProperty<BoxShape>('shape', shape, defaultValue: BoxShape.rectangle));
   }
 
   @override
-  bool hitTest(Size size, Offset position, {TextDirection? textDirection}) {
+  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) {
     assert(shape != null);
     assert((Offset.zero & size).contains(position));
     switch (shape) {
@@ -359,7 +370,7 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
+  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
     assert(onChanged != null || image == null);
     return _BoxDecorationPainter(this, onChanged);
   }
@@ -368,8 +379,8 @@ class BoxDecoration extends Decoration {
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
   _BoxDecorationPainter(this._decoration, VoidCallback? onChanged)
-      : assert(_decoration != null),
-        super(onChanged);
+    : assert(_decoration != null),
+      super(onChanged);
 
   final BoxDecoration _decoration;
 
@@ -379,10 +390,13 @@ class _BoxDecorationPainter extends BoxPainter {
     assert(rect != null);
     assert(_decoration.gradient != null || _rectForCachedBackgroundPaint == null);
 
-    if (_cachedBackgroundPaint == null || (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
+    if (_cachedBackgroundPaint == null ||
+        (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
       final Paint paint = Paint();
-      if (_decoration.backgroundBlendMode != null) paint.blendMode = _decoration.backgroundBlendMode!;
-      if (_decoration.color != null) paint.color = _decoration.color!;
+      if (_decoration.backgroundBlendMode != null)
+        paint.blendMode = _decoration.backgroundBlendMode!;
+      if (_decoration.color != null)
+        paint.color = _decoration.color!;
       if (_decoration.gradient != null) {
         paint.shader = _decoration.gradient!.createShader(rect, textDirection: textDirection);
         _rectForCachedBackgroundPaint = rect;
@@ -412,7 +426,8 @@ class _BoxDecorationPainter extends BoxPainter {
   }
 
   void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
-    if (_decoration.boxShadow == null) return;
+    if (_decoration.boxShadow == null)
+      return;
     for (final BoxShadow boxShadow in _decoration.boxShadow!) {
       final Paint paint = boxShadow.toPaint();
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
@@ -427,7 +442,8 @@ class _BoxDecorationPainter extends BoxPainter {
 
   DecorationImagePainter? _imagePainter;
   void _paintBackgroundImage(Canvas canvas, Rect rect, ImageConfiguration configuration) {
-    if (_decoration.image == null) return;
+    if (_decoration.image == null)
+      return;
     _imagePainter ??= _decoration.image!.createPainter(onChanged!);
     Path? clipPath;
     switch (_decoration.shape) {

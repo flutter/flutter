@@ -112,8 +112,8 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     // everything has already been selected.
     final TextEditingValue value = delegate.textEditingValue;
     return delegate.selectAllEnabled &&
-        value.text.isNotEmpty &&
-        !(value.selection.start == 0 && value.selection.end == value.text.length);
+           value.text.isNotEmpty &&
+           !(value.selection.start == 0 && value.selection.end == value.text.length);
   }
 }
 
@@ -190,29 +190,26 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
   @override
   Widget build(BuildContext context) {
     // If there are no buttons to be shown, don't render anything.
-    if (widget.handleCut == null &&
-        widget.handleCopy == null &&
-        widget.handlePaste == null &&
-        widget.handleSelectAll == null) {
+    if (widget.handleCut == null && widget.handleCopy == null
+        && widget.handlePaste == null && widget.handleSelectAll == null) {
       return const SizedBox.shrink();
     }
     // If the paste button is desired, don't render anything until the state of
     // the clipboard is known, since it's used to determine if paste is shown.
-    if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
+    if (widget.handlePaste != null
+        && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox.shrink();
     }
 
     // Calculate the positioning of the menu. It is placed above the selection
     // if there is enough room, or otherwise below.
     final TextSelectionPoint startTextSelectionPoint = widget.endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint =
-        widget.endpoints.length > 1 ? widget.endpoints[1] : widget.endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = widget.endpoints.length > 1
+      ? widget.endpoints[1]
+      : widget.endpoints[0];
     final Offset anchorAbove = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
-      widget.globalEditableRegion.top +
-          startTextSelectionPoint.point.dy -
-          widget.textLineHeight -
-          _kToolbarContentDistance,
+      widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance,
     );
     final Offset anchorBelow = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
@@ -235,7 +232,8 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
           label: localizations.copyButtonLabel,
           onPressed: widget.handleCopy!,
         ),
-      if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.pasteable)
+      if (widget.handlePaste != null
+          && widget.clipboardStatus?.value == ClipboardStatus.pasteable)
         _TextSelectionToolbarItemData(
           label: localizations.pasteButtonLabel,
           onPressed: widget.handlePaste!,
@@ -268,19 +266,17 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
 
 /// Draws a single text selection handle which points up and to the left.
 class _TextSelectionHandlePainter extends CustomPainter {
-  _TextSelectionHandlePainter({required this.color});
+  _TextSelectionHandlePainter({ required this.color });
 
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()..color = color;
-    final double radius = size.width / 2.0;
+    final double radius = size.width/2.0;
     final Rect circle = Rect.fromCircle(center: Offset(radius, radius), radius: radius);
     final Rect point = Rect.fromLTWH(0.0, 0.0, radius, radius);
-    final Path path = Path()
-      ..addOval(circle)
-      ..addRect(point);
+    final Path path = Path()..addOval(circle)..addRect(point);
     canvas.drawPath(path, paint);
   }
 

@@ -17880,7 +17880,8 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
 
 /// The subset of date patterns supported by the intl package which are also
 /// supported by flutter_localizations.
-const Map<String, Map<String, String>> datePatterns = <String, Map<String, String>>{
+const Map<String, Map<String, String>> datePatterns =
+    <String, Map<String, String>>{
   'af': <String, String>{
     'd': 'd',
     'E': 'ccc',

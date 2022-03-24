@@ -22,7 +22,6 @@ class TestIconState extends State<TestIcon> {
     return const Icon(Icons.expand_more);
   }
 }
-
 class TestText extends StatefulWidget {
   const TestText(this.text, {Key? key}) : super(key: key);
 
@@ -144,12 +143,10 @@ void main() {
       ),
     );
 
-    final BoxDecoration boxDecoration = tester
-        .firstWidget<Container>(find.descendant(
-          of: find.byKey(tileKey),
-          matching: find.byType(Container),
-        ))
-        .decoration! as BoxDecoration;
+    final BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(tileKey),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
     // Check the tile's collapsed background color when collapsedBackgroundColor is applied.
     expect(boxDecoration.color, collapsedBackgroundColor);
 
@@ -216,12 +213,10 @@ void main() {
       ),
     );
 
-    final BoxDecoration boxDecoration = tester
-        .firstWidget<Container>(find.descendant(
-          of: find.byKey(tileKey),
-          matching: find.byType(Container),
-        ))
-        .decoration! as BoxDecoration;
+    final BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(tileKey),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
     // Check the tile's background color when backgroundColor is applied.
     expect(boxDecoration.color, backgroundColor);
 

@@ -26,9 +26,7 @@ Widget buildFrame({
 }) {
   final PageView child = PageView(
     reverse: reverse,
-    onPageChanged: (int page) {
-      currentPage = page;
-    },
+    onPageChanged: (int page) { currentPage = page; },
     children: pages.map<Widget>(buildPage).toList(),
   );
 
@@ -38,9 +36,7 @@ Widget buildFrame({
     textDirection: textDirection,
     child: Center(
       child: SizedBox(
-        width: pageSize.width,
-        height: pageSize.height,
-        child: child,
+        width: pageSize.width, height: pageSize.height, child: child,
       ),
     ),
   );

@@ -18,7 +18,8 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null) driver.close();
+      if (driver != null)
+        driver.close();
     });
 
     Future<void> testScrollPerf(String listKey, String summaryName) async {

@@ -38,11 +38,11 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.productId = 0,
     this.deviceId = 0,
     this.repeatCount = 0,
-  })  : assert(flags != null),
-        assert(codePoint != null),
-        assert(keyCode != null),
-        assert(scanCode != null),
-        assert(metaState != null);
+  }) : assert(flags != null),
+       assert(codePoint != null),
+       assert(keyCode != null),
+       assert(scanCode != null),
+       assert(metaState != null);
 
   /// The current set of additional flags for this event.
   ///
@@ -222,7 +222,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
+  bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
     assert(side != null);
     switch (key) {
       case ModifierKey.controlModifier:
@@ -297,27 +297,29 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    return other is RawKeyEventDataAndroid &&
-        other.flags == flags &&
-        other.codePoint == codePoint &&
-        other.plainCodePoint == plainCodePoint &&
-        other.keyCode == keyCode &&
-        other.scanCode == scanCode &&
-        other.metaState == metaState;
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is RawKeyEventDataAndroid
+        && other.flags == flags
+        && other.codePoint == codePoint
+        && other.plainCodePoint == plainCodePoint
+        && other.keyCode == keyCode
+        && other.scanCode == scanCode
+        && other.metaState == metaState;
   }
 
   @override
   int get hashCode => Object.hash(
-        flags,
-        codePoint,
-        plainCodePoint,
-        keyCode,
-        scanCode,
-        metaState,
-      );
+    flags,
+    codePoint,
+    plainCodePoint,
+    keyCode,
+    scanCode,
+    metaState,
+  );
 
   // Modifier key masks.
 

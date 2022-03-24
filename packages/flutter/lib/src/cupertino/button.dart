@@ -49,11 +49,11 @@ class CupertinoButton extends StatefulWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     this.alignment = Alignment.center,
     required this.onPressed,
-  })  : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-        assert(disabledColor != null),
-        assert(alignment != null),
-        _filled = false,
-        super(key: key);
+  }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
+       assert(disabledColor != null),
+       assert(alignment != null),
+       _filled = false,
+       super(key: key);
 
   /// Creates an iOS-style button with a filled background.
   ///
@@ -71,12 +71,12 @@ class CupertinoButton extends StatefulWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     this.alignment = Alignment.center,
     required this.onPressed,
-  })  : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-        assert(disabledColor != null),
-        assert(alignment != null),
-        color = null,
-        _filled = true,
-        super(key: key);
+  }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
+       assert(disabledColor != null),
+       assert(alignment != null),
+       color = null,
+       _filled = true,
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -170,7 +170,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       value: 0.0,
       vsync: this,
     );
-    _opacityAnimation = _animationController.drive(CurveTween(curve: Curves.decelerate)).drive(_opacityTween);
+    _opacityAnimation = _animationController
+      .drive(CurveTween(curve: Curves.decelerate))
+      .drive(_opacityTween);
     _setTween();
   }
 
@@ -214,13 +216,15 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _animate() {
-    if (_animationController.isAnimating) return;
+    if (_animationController.isAnimating)
+      return;
     final bool wasHeldDown = _buttonHeldDown;
     final TickerFuture ticker = _buttonHeldDown
         ? _animationController.animateTo(1.0, duration: kFadeOutDuration, curve: Curves.easeInOutCubicEmphasized)
         : _animationController.animateTo(0.0, duration: kFadeInDuration, curve: Curves.easeOutCubic);
     ticker.then<void>((void value) {
-      if (mounted && wasHeldDown != _buttonHeldDown) _animate();
+      if (mounted && wasHeldDown != _buttonHeldDown)
+        _animate();
     });
   }
 
@@ -230,14 +234,14 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     final Color primaryColor = themeData.primaryColor;
     final Color? backgroundColor = widget.color == null
-        ? (widget._filled ? primaryColor : null)
-        : CupertinoDynamicColor.maybeResolve(widget.color, context);
+      ? (widget._filled ? primaryColor : null)
+      : CupertinoDynamicColor.maybeResolve(widget.color, context);
 
     final Color foregroundColor = backgroundColor != null
-        ? themeData.primaryContrastingColor
-        : enabled
-            ? primaryColor
-            : CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context);
+      ? themeData.primaryContrastingColor
+      : enabled
+        ? primaryColor
+        : CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context);
 
     final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
 
@@ -253,22 +257,24 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
           button: true,
           child: ConstrainedBox(
             constraints: widget.minSize == null
-                ? const BoxConstraints()
-                : BoxConstraints(
-                    minWidth: widget.minSize!,
-                    minHeight: widget.minSize!,
-                  ),
+              ? const BoxConstraints()
+              : BoxConstraints(
+                  minWidth: widget.minSize!,
+                  minHeight: widget.minSize!,
+                ),
             child: FadeTransition(
               opacity: _opacityAnimation,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: widget.borderRadius,
                   color: backgroundColor != null && !enabled
-                      ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
-                      : backgroundColor,
+                    ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
+                    : backgroundColor,
                 ),
                 child: Padding(
-                  padding: widget.padding ?? (backgroundColor != null ? _kBackgroundButtonPadding : _kButtonPadding),
+                  padding: widget.padding ?? (backgroundColor != null
+                    ? _kBackgroundButtonPadding
+                    : _kButtonPadding),
                   child: Align(
                     alignment: widget.alignment,
                     widthFactor: 1.0,

@@ -7,19 +7,23 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 
 // Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultHeaderMargin = EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kDefaultHeaderMargin =
+    EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
 
 // Standard footer margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultFooterMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kDefaultFooterMargin =
+    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 // Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin =
+    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 // Used for iOS "Inset Grouped" border radius, estimated from SwiftUI's Forms in
 // iOS 14.2 SDK.
 // TODO(edrisian): This should be a rounded rectangle once that shape is added.
-const BorderRadius _kDefaultInsetGroupedBorderRadius = BorderRadius.all(Radius.circular(10.0));
+const BorderRadius _kDefaultInsetGroupedBorderRadius =
+    BorderRadius.all(Radius.circular(10.0));
 
 // Used to differentiate the edge-to-edge section with the centered section.
 enum _CupertinoFormSectionType { base, insetGrouped }
@@ -255,14 +259,13 @@ class CupertinoFormSection extends StatelessWidget {
     // Refactored the decorate children group in one place to avoid repeating it
     // twice down bellow in the returned widget.
     final DecoratedBox decoratedChildrenGroup = DecoratedBox(
-      decoration: decoration ??
-          BoxDecoration(
-            color: CupertinoDynamicColor.resolve(
-              decoration?.color ?? CupertinoColors.secondarySystemGroupedBackground,
-              context,
-            ),
-            borderRadius: childrenGroupBorderRadius,
-          ),
+      decoration: decoration ?? BoxDecoration(
+        color: CupertinoDynamicColor.resolve(
+          decoration?.color ?? CupertinoColors.secondarySystemGroupedBackground,
+          context,
+        ),
+        borderRadius: childrenGroupBorderRadius,
+      ),
       child: Column(
         children: childrenWithDividers,
       ),

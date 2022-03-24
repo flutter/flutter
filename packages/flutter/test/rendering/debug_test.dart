@@ -69,15 +69,10 @@ void main() {
       debugPaintPadding(canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), null);
     }, paints..rect(color: const Color(0x90909090)));
     expect((Canvas canvas) {
-      debugPaintPadding(
-          canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), const Rect.fromLTRB(11.0, 11.0, 19.0, 19.0));
-    },
-        paints
-          ..path(color: const Color(0x900090FF))
-          ..path(color: const Color(0xFF0090FF)));
+      debugPaintPadding(canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), const Rect.fromLTRB(11.0, 11.0, 19.0, 19.0));
+    }, paints..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
     expect((Canvas canvas) {
-      debugPaintPadding(
-          canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), const Rect.fromLTRB(15.0, 15.0, 15.0, 15.0));
+      debugPaintPadding(canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), const Rect.fromLTRB(15.0, 15.0, 15.0, 15.0));
     }, paints..rect(rect: const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), color: const Color(0x90909090)));
   });
 
@@ -100,11 +95,7 @@ void main() {
       ],
     );
     layout(root);
-    expect(
-        b.debugPaint,
-        paints
-          ..rect(color: const Color(0xFF00FFFF))
-          ..rect(color: const Color(0x90909090)));
+    expect(b.debugPaint, paints..rect(color: const Color(0xFF00FFFF))..rect(color: const Color(0x90909090)));
     expect(b.debugPaint, isNot(paints..path()));
     expect(
       s.debugPaint,
@@ -149,12 +140,7 @@ void main() {
           ..path(color: const Color(0xFF0090FF)),
       ),
     );
-    expect(
-        b.debugPaint,
-        paints
-          ..rect(color: const Color(0xFF00FFFF))
-          ..path(color: const Color(0x900090FF))
-          ..path(color: const Color(0xFF0090FF)));
+    expect(b.debugPaint, paints..rect(color: const Color(0xFF00FFFF))..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
     expect(b.debugPaint, isNot(paints..rect(color: const Color(0x90909090))));
     debugPaintSizeEnabled = false;
   });

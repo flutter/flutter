@@ -42,9 +42,9 @@ class AnimatedIcon extends StatelessWidget {
     this.size,
     this.semanticLabel,
     this.textDirection,
-  })  : assert(progress != null),
-        assert(icon != null),
-        super(key: key);
+  }) : assert(progress != null),
+       assert(icon != null),
+       super(key: key);
 
   /// The animation progress for the animated icon.
   ///
@@ -111,7 +111,8 @@ class AnimatedIcon extends StatelessWidget {
     final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
     final double iconOpacity = iconTheme.opacity!;
     Color iconColor = color ?? iconTheme.color!;
-    if (iconOpacity != 1.0) iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
+    if (iconOpacity != 1.0)
+      iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
     return Semantics(
       label: semanticLabel,
       child: CustomPaint(
@@ -147,7 +148,6 @@ class _AnimatedIconPainter extends CustomPainter {
   final Animation<double> progress;
   final Color color;
   final double scale;
-
   /// If this is true the image will be mirrored horizontally.
   final bool shouldMirror;
   final _UiPathFactory uiPathFactory;
@@ -163,19 +163,20 @@ class _AnimatedIconPainter extends CustomPainter {
     canvas.scale(scale, scale);
 
     final double clampedProgress = progress.value.clamp(0.0, 1.0);
-    for (final _PathFrames path in paths) path.paint(canvas, color, uiPathFactory, clampedProgress);
+    for (final _PathFrames path in paths)
+      path.paint(canvas, color, uiPathFactory, clampedProgress);
   }
+
 
   @override
   bool shouldRepaint(_AnimatedIconPainter oldDelegate) {
-    return oldDelegate.progress.value != progress.value ||
-        oldDelegate.color != color
+    return oldDelegate.progress.value != progress.value
+        || oldDelegate.color != color
         // We are comparing the paths list by reference, assuming the list is
         // treated as immutable to be more efficient.
-        ||
-        oldDelegate.paths != paths ||
-        oldDelegate.scale != scale ||
-        oldDelegate.uiPathFactory != uiPathFactory;
+        || oldDelegate.paths != paths
+        || oldDelegate.scale != scale
+        || oldDelegate.uiPathFactory != uiPathFactory;
   }
 
   @override
@@ -203,7 +204,8 @@ class _PathFrames {
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
     final ui.Path path = uiPathFactory();
-    for (final _PathCommand command in commands) command.apply(path, progress);
+    for (final _PathCommand command in commands)
+      command.apply(path, progress);
     canvas.drawPath(path, paint);
   }
 }
@@ -247,12 +249,9 @@ class _PathCubicTo extends _PathCommand {
     final Offset controlPoint2 = _interpolate<Offset?>(controlPoints2, progress, Offset.lerp)!;
     final Offset targetPoint = _interpolate<Offset?>(targetPoints, progress, Offset.lerp)!;
     path.cubicTo(
-      controlPoint1.dx,
-      controlPoint1.dy,
-      controlPoint2.dx,
-      controlPoint2.dy,
-      targetPoint.dx,
-      targetPoint.dy,
+      controlPoint1.dx, controlPoint1.dy,
+      controlPoint2.dx, controlPoint2.dy,
+      targetPoint.dx, targetPoint.dy,
     );
   }
 }
@@ -293,8 +292,9 @@ class _PathClose extends _PathCommand {
 T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
   assert(progress <= 1.0);
   assert(progress >= 0.0);
-  if (values.length == 1) return values[0];
-  final double targetIdx = lerpDouble(0, values.length - 1, progress)!;
+  if (values.length == 1)
+    return values[0];
+  final double targetIdx = lerpDouble(0, values.length -1, progress)!;
   final int lowIdx = targetIdx.floor();
   final int highIdx = targetIdx.ceil();
   final double t = targetIdx - lowIdx;

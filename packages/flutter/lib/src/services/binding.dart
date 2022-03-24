@@ -162,13 +162,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
           // The compressed version doesn't have a more common .gz extension
           // because gradle for Android non-transparently manipulates .gz files.
           final ByteData licenseBytes = await rootBundle.load('NOTICES.Z');
-          final List<int> unzippedBytes = await compute<List<int>, List<int>>(
-              gzip.decode, licenseBytes.buffer.asUint8List(),
-              debugLabel: 'decompressLicenses');
+          final List<int> unzippedBytes = await compute<List<int>, List<int>>(gzip.decode, licenseBytes.buffer.asUint8List(), debugLabel: 'decompressLicenses');
           rawLicenses = await compute<List<int>, String>(utf8.decode, unzippedBytes, debugLabel: 'utf8DecodeLicenses');
         }
-        final List<LicenseEntry> licenses =
-            await compute<String, List<LicenseEntry>>(_parseLicenses, rawLicenses, debugLabel: 'parseLicenses');
+        final List<LicenseEntry> licenses = await compute<String, List<LicenseEntry>>(_parseLicenses, rawLicenses, debugLabel: 'parseLicenses');
         licenses.forEach(controller.add);
         await controller.close();
       },
@@ -317,6 +314,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
   }
+
 }
 
 /// Signature for listening to changes in the [SystemUiMode].
@@ -339,7 +337,8 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
     ui.PlatformMessageResponseCallback? callback,
   ) async {
     ui.channelBuffers.push(channel, message, (ByteData? data) {
-      if (callback != null) callback(data);
+      if (callback != null)
+        callback(data);
     });
   }
 

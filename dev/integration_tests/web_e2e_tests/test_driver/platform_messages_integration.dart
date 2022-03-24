@@ -15,7 +15,8 @@ import 'package:web_e2e_tests/platform_messages_main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('platform message for Clipboard.setData reply with future', (WidgetTester tester) async {
+  testWidgets('platform message for Clipboard.setData reply with future',
+      (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
 
@@ -31,7 +32,8 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'sample text'));
   }, skip: true); // https://github.com/flutter/flutter/issues/54296
 
-  testWidgets('Should create and dispose view embedder', (WidgetTester tester) async {
+  testWidgets('Should create and dispose view embedder',
+      (WidgetTester tester) async {
     int viewInstanceCount = 0;
 
     platformViewsRegistry.getNextPlatformViewId();

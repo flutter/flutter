@@ -153,7 +153,8 @@ String wrapString(String input, {required String prefix}) {
 ///
 /// An null list is considered a list with length 0.
 void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1, T2) fn) {
-  if (list1 == null && list2 == null) return;
+  if (list1 == null && list2 == null)
+    return;
   assert(list1.length == list2.length);
   final Iterator<T1> it1 = list1.iterator;
   final Iterator<T2> it2 = list2.iterator;
@@ -170,24 +171,21 @@ Map<String, String> parseMapOfString(String jsonString) {
 
 /// Read a Map<String, List<String>> out of its string representation in JSON.
 Map<String, List<String>> parseMapOfListOfString(String jsonString) {
-  final Map<String, List<dynamic>> dynamicMap =
-      (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
+  final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
   return dynamicMap.map<String, List<String>>((String key, List<dynamic> value) {
     return MapEntry<String, List<String>>(key, value.cast<String>());
   });
 }
 
 Map<String, List<String?>> parseMapOfListOfNullableString(String jsonString) {
-  final Map<String, List<dynamic>> dynamicMap =
-      (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
+  final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
   return dynamicMap.map<String, List<String?>>((String key, List<dynamic> value) {
     return MapEntry<String, List<String?>>(key, value.cast<String?>());
   });
 }
 
 /// Reverse the map of { fromValue -> list of toValue } to { toValue -> fromValue } and return.
-Map<String, String> reverseMapOfListOfString(
-    Map<String, List<String>> inMap, void Function(String fromValue, String newToValue) onDuplicate) {
+Map<String, String> reverseMapOfListOfString(Map<String, List<String>> inMap, void Function(String fromValue, String newToValue) onDuplicate) {
   final Map<String, String> result = <String, String>{};
   inMap.forEach((String fromValue, List<String> toValues) {
     for (final String toValue in toValues) {
@@ -205,18 +203,18 @@ Map<String, String> reverseMapOfListOfString(
 ///
 /// Will modify the input map.
 Map<String, dynamic> removeEmptyValues(Map<String, dynamic> map) {
-  return map
-    ..removeWhere((String key, dynamic value) {
-      if (value == null) return true;
-      if (value is Map<String, dynamic>) {
-        final Map<String, dynamic> regularizedMap = removeEmptyValues(value);
-        return regularizedMap.isEmpty;
-      }
-      if (value is Iterable<dynamic>) {
-        return value.isEmpty;
-      }
-      return false;
-    });
+  return map..removeWhere((String key, dynamic value) {
+    if (value == null)
+      return true;
+    if (value is Map<String, dynamic>) {
+      final Map<String, dynamic> regularizedMap = removeEmptyValues(value);
+      return regularizedMap.isEmpty;
+    }
+    if (value is Iterable<dynamic>) {
+      return value.isEmpty;
+    }
+    return false;
+  });
 }
 
 void addNameValue(List<String> names, List<int> values, String name, int value) {
@@ -264,8 +262,7 @@ class OutputLines<T extends Comparable<Object>> {
     if (checkDuplicate) {
       if (keys.contains(code)) {
         final OutputLine<T> existing = lines.firstWhere((OutputLine<T> line) => line.key == code);
-        print(
-            'Warn: $mapName is requested to add line $code as:\n    $line\n  but it already exists as:\n    ${existing.value}');
+        print('Warn: $mapName is requested to add line $code as:\n    $line\n  but it already exists as:\n    ${existing.value}');
         return;
       }
       keys.add(code);
@@ -278,9 +275,10 @@ class OutputLines<T extends Comparable<Object>> {
   }
 
   String sortedJoin() {
-    return (lines.sublist(0)..sort((OutputLine<T> a, OutputLine<T> b) => a.key.compareTo(b.key)))
-        .map((OutputLine<T> line) => line.value)
-        .join('\n');
+    return (lines.sublist(0)
+      ..sort((OutputLine<T> a, OutputLine<T> b) => a.key.compareTo(b.key)))
+      .map((OutputLine<T> line) => line.value)
+      .join('\n');
   }
 }
 

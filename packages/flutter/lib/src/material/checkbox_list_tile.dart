@@ -143,14 +143,14 @@ class CheckboxListTile extends StatelessWidget {
     this.visualDensity,
     this.focusNode,
     this.enableFeedback,
-  })  : assert(tristate != null),
-        assert(tristate || value != null),
-        assert(isThreeLine != null),
-        assert(!isThreeLine || subtitle != null),
-        assert(selected != null),
-        assert(controlAffinity != null),
-        assert(autofocus != null),
-        super(key: key);
+  }) : assert(tristate != null),
+       assert(tristate || value != null),
+       assert(isThreeLine != null),
+       assert(!isThreeLine || subtitle != null),
+       assert(selected != null),
+       assert(controlAffinity != null),
+       assert(autofocus != null),
+       super(key: key);
 
   /// Whether this checkbox is checked.
   final bool? value;

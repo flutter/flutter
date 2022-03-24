@@ -29,10 +29,9 @@ void main() {
 }
 
 class TestRenderBinding extends BindingBase
-    with
-        SchedulerBinding,
-        ServicesBinding,
-        GestureBinding,
-        SemanticsBinding,
-        RendererBinding,
-        TestDefaultBinaryMessengerBinding {}
+  with SchedulerBinding,
+       ServicesBinding,
+       GestureBinding,
+       SemanticsBinding,
+       RendererBinding,
+       TestDefaultBinaryMessengerBinding { }

@@ -58,8 +58,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
       step = TestStep.buildingFlutterTool;
     } else if (step == TestStep.testPassed && entry.contains('Collecting coverage information...')) {
       // ignore this line
-    } else if (step.index < TestStep.runningPubGet.index &&
-        entry == 'Running "flutter pub get" in automated_tests...') {
+    } else if (step.index < TestStep.runningPubGet.index && entry == 'Running "flutter pub get" in automated_tests...') {
       // ignore this line
       step = TestStep.runningPubGet;
     } else if (step.index <= TestStep.testWritesFirstCarriageReturn.index && entry.trim() == '') {
@@ -70,9 +69,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
       if (match == null) {
         badLines += 1;
       } else {
-        if (step.index >= TestStep.testWritesFirstCarriageReturn.index &&
-            step.index <= TestStep.testLoading.index &&
-            match.group(1)!.startsWith('loading ')) {
+        if (step.index >= TestStep.testWritesFirstCarriageReturn.index && step.index <= TestStep.testLoading.index && match.group(1)!.startsWith('loading ')) {
           // first the test loads
           step = TestStep.testLoading;
         } else if (step.index <= TestStep.testRunning.index && match.group(1) == 'A trivial widget test') {
@@ -93,9 +90,12 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
   });
   final int result = await analysis.exitCode;
   clock.stop();
-  if (result != 0) throw Exception('flutter test failed with exit code $result');
-  if (badLines > 0) throw Exception('flutter test rendered unexpected output ($badLines bad lines)');
-  if (step != TestStep.testPassed) throw Exception('flutter test did not finish (only reached step $step)');
+  if (result != 0)
+    throw Exception('flutter test failed with exit code $result');
+  if (badLines > 0)
+    throw Exception('flutter test rendered unexpected output ($badLines bad lines)');
+  if (step != TestStep.testPassed)
+    throw Exception('flutter test did not finish (only reached step $step)');
   print('elapsed time: ${clock.elapsedMilliseconds}ms');
   return clock.elapsedMilliseconds;
 }
@@ -111,27 +111,24 @@ Future<void> pubGetDependencies(List<Directory> directories) async {
 void main() {
   task(() async {
     final File nodeSourceFile = File(path.join(
-      flutterDirectory.path,
-      'packages',
-      'flutter',
-      'lib',
-      'src',
-      'foundation',
-      'node.dart',
+      flutterDirectory.path, 'packages', 'flutter', 'lib', 'src', 'foundation', 'node.dart',
     ));
-    await pubGetDependencies(<Directory>[
-      Directory(path.join(flutterDirectory.path, 'dev', 'automated_tests')),
-    ]);
+    await pubGetDependencies(<Directory>[Directory(path.join(flutterDirectory.path, 'dev', 'automated_tests')),]);
     final String originalSource = await nodeSourceFile.readAsString();
     try {
-      await runTest(
-          noPub: true); // first number is meaningless; could have had to build the tool, run pub get, have a cache, etc
+      await runTest(noPub: true); // first number is meaningless; could have had to build the tool, run pub get, have a cache, etc
       final int withoutChange = await runTest(noPub: true); // run test again with no change
-      await nodeSourceFile.writeAsString(// only change implementation
-          originalSource.replaceAll('_owner', '_xyzzy'));
+      await nodeSourceFile.writeAsString( // only change implementation
+        originalSource
+          .replaceAll('_owner', '_xyzzy')
+      );
       final int implementationChange = await runTest(noPub: true); // run test again with implementation changed
-      await nodeSourceFile.writeAsString(// change interface as well
-          originalSource.replaceAll('_owner', '_xyzzy').replaceAll('owner', '_owner').replaceAll('_xyzzy', 'owner'));
+      await nodeSourceFile.writeAsString( // change interface as well
+        originalSource
+          .replaceAll('_owner', '_xyzzy')
+          .replaceAll('owner', '_owner')
+          .replaceAll('_xyzzy', 'owner')
+      );
       final int interfaceChange = await runTest(noPub: true); // run test again with interface changed
       // run test with coverage enabled.
       final int withCoverage = await runTest(coverage: true, noPub: true);

@@ -48,7 +48,12 @@ abstract class EdgeInsetsGeometry {
 
   /// Whether every dimension is non-negative.
   bool get isNonNegative {
-    return _left >= 0.0 && _right >= 0.0 && _start >= 0.0 && _end >= 0.0 && _top >= 0.0 && _bottom >= 0.0;
+    return _left >= 0.0
+        && _right >= 0.0
+        && _start >= 0.0
+        && _end >= 0.0
+        && _top >= 0.0
+        && _bottom >= 0.0;
   }
 
   /// The total offset in the horizontal direction.
@@ -212,11 +217,16 @@ abstract class EdgeInsetsGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsetsGeometry? lerp(EdgeInsetsGeometry? a, EdgeInsetsGeometry? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return b! * t;
-    if (b == null) return a * (1.0 - t);
-    if (a is EdgeInsets && b is EdgeInsets) return EdgeInsets.lerp(a, b, t);
-    if (a is EdgeInsetsDirectional && b is EdgeInsetsDirectional) return EdgeInsetsDirectional.lerp(a, b, t);
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b! * t;
+    if (b == null)
+      return a * (1.0 - t);
+    if (a is EdgeInsets && b is EdgeInsets)
+      return EdgeInsets.lerp(a, b, t);
+    if (a is EdgeInsetsDirectional && b is EdgeInsetsDirectional)
+      return EdgeInsetsDirectional.lerp(a, b, t);
     return _MixedEdgeInsets.fromLRSETB(
       ui.lerpDouble(a._left, b._left, t)!,
       ui.lerpDouble(a._right, b._right, t)!,
@@ -241,39 +251,41 @@ abstract class EdgeInsetsGeometry {
   @override
   String toString() {
     if (_start == 0.0 && _end == 0.0) {
-      if (_left == 0.0 && _right == 0.0 && _top == 0.0 && _bottom == 0.0) return 'EdgeInsets.zero';
-      if (_left == _right && _right == _top && _top == _bottom) return 'EdgeInsets.all(${_left.toStringAsFixed(1)})';
+      if (_left == 0.0 && _right == 0.0 && _top == 0.0 && _bottom == 0.0)
+        return 'EdgeInsets.zero';
+      if (_left == _right && _right == _top && _top == _bottom)
+        return 'EdgeInsets.all(${_left.toStringAsFixed(1)})';
       return 'EdgeInsets(${_left.toStringAsFixed(1)}, '
-          '${_top.toStringAsFixed(1)}, '
-          '${_right.toStringAsFixed(1)}, '
-          '${_bottom.toStringAsFixed(1)})';
+                        '${_top.toStringAsFixed(1)}, '
+                        '${_right.toStringAsFixed(1)}, '
+                        '${_bottom.toStringAsFixed(1)})';
     }
     if (_left == 0.0 && _right == 0.0) {
       return 'EdgeInsetsDirectional(${_start.toStringAsFixed(1)}, '
-          '${_top.toStringAsFixed(1)}, '
-          '${_end.toStringAsFixed(1)}, '
-          '${_bottom.toStringAsFixed(1)})';
+                                   '${_top.toStringAsFixed(1)}, '
+                                   '${_end.toStringAsFixed(1)}, '
+                                   '${_bottom.toStringAsFixed(1)})';
     }
     return 'EdgeInsets(${_left.toStringAsFixed(1)}, '
-        '${_top.toStringAsFixed(1)}, '
-        '${_right.toStringAsFixed(1)}, '
-        '${_bottom.toStringAsFixed(1)})'
-        ' + '
-        'EdgeInsetsDirectional(${_start.toStringAsFixed(1)}, '
-        '0.0, '
-        '${_end.toStringAsFixed(1)}, '
-        '0.0)';
+                      '${_top.toStringAsFixed(1)}, '
+                      '${_right.toStringAsFixed(1)}, '
+                      '${_bottom.toStringAsFixed(1)})'
+           ' + '
+           'EdgeInsetsDirectional(${_start.toStringAsFixed(1)}, '
+                                 '0.0, '
+                                 '${_end.toStringAsFixed(1)}, '
+                                 '0.0)';
   }
 
   @override
   bool operator ==(Object other) {
-    return other is EdgeInsetsGeometry &&
-        other._left == _left &&
-        other._right == _right &&
-        other._start == _start &&
-        other._end == _end &&
-        other._top == _top &&
-        other._bottom == _bottom;
+    return other is EdgeInsetsGeometry
+        && other._left == _left
+        && other._right == _right
+        && other._start == _start
+        && other._end == _end
+        && other._top == _top
+        && other._bottom == _bottom;
   }
 
   @override
@@ -340,10 +352,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// ```
   /// {@end-tool}
   const EdgeInsets.all(double value)
-      : left = value,
-        top = value,
-        right = value,
-        bottom = value;
+    : left = value,
+      top = value,
+      right = value,
+      bottom = value;
 
   /// Creates insets with only the given values non-zero.
   ///
@@ -375,10 +387,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   const EdgeInsets.symmetric({
     double vertical = 0.0,
     double horizontal = 0.0,
-  })  : left = horizontal,
-        top = vertical,
-        right = horizontal,
-        bottom = vertical;
+  }) : left = horizontal,
+       top = vertical,
+       right = horizontal,
+       bottom = vertical;
 
   /// Creates insets that match the given window padding.
   ///
@@ -387,10 +399,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// using the value from [dart:ui.window], so that you get notified of
   /// changes.
   EdgeInsets.fromWindowPadding(ui.WindowPadding padding, double devicePixelRatio)
-      : left = padding.left / devicePixelRatio,
-        top = padding.top / devicePixelRatio,
-        right = padding.right / devicePixelRatio,
-        bottom = padding.bottom / devicePixelRatio;
+    : left = padding.left / devicePixelRatio,
+      top = padding.top / devicePixelRatio,
+      right = padding.right / devicePixelRatio,
+      bottom = padding.bottom / devicePixelRatio;
 
   /// An [EdgeInsets] with zero offsets in each direction.
   static const EdgeInsets zero = EdgeInsets.only();
@@ -478,13 +490,15 @@ class EdgeInsets extends EdgeInsetsGeometry {
 
   @override
   EdgeInsetsGeometry subtract(EdgeInsetsGeometry other) {
-    if (other is EdgeInsets) return this - other;
+    if (other is EdgeInsets)
+      return this - other;
     return super.subtract(other);
   }
 
   @override
   EdgeInsetsGeometry add(EdgeInsetsGeometry other) {
-    if (other is EdgeInsets) return this + other;
+    if (other is EdgeInsets)
+      return this + other;
     return super.add(other);
   }
 
@@ -582,9 +596,12 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsets? lerp(EdgeInsets? a, EdgeInsets? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return b! * t;
-    if (b == null) return a * (1.0 - t);
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b! * t;
+    if (b == null)
+      return a * (1.0 - t);
     return EdgeInsets.fromLTRB(
       ui.lerpDouble(a.left, b.left, t)!,
       ui.lerpDouble(a.top, b.top, t)!,
@@ -656,10 +673,10 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// ```
   /// {@end-tool}
   const EdgeInsetsDirectional.all(double value)
-      : start = value,
-        top = value,
-        end = value,
-        bottom = value;
+    : start = value,
+      top = value,
+      end = value,
+      bottom = value;
 
   /// An [EdgeInsetsDirectional] with zero offsets in each direction.
   ///
@@ -720,13 +737,15 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
 
   @override
   EdgeInsetsGeometry subtract(EdgeInsetsGeometry other) {
-    if (other is EdgeInsetsDirectional) return this - other;
+    if (other is EdgeInsetsDirectional)
+      return this - other;
     return super.subtract(other);
   }
 
   @override
   EdgeInsetsGeometry add(EdgeInsetsGeometry other) {
-    if (other is EdgeInsetsDirectional) return this + other;
+    if (other is EdgeInsetsDirectional)
+      return this + other;
     return super.add(other);
   }
 
@@ -818,9 +837,12 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// {@macro dart.ui.shadow.lerp}
   static EdgeInsetsDirectional? lerp(EdgeInsetsDirectional? a, EdgeInsetsDirectional? b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return b! * t;
-    if (b == null) return a * (1.0 - t);
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b! * t;
+    if (b == null)
+      return a * (1.0 - t);
     return EdgeInsetsDirectional.fromSTEB(
       ui.lerpDouble(a.start, b.start, t)!,
       ui.lerpDouble(a.top, b.top, t)!,
@@ -864,7 +886,12 @@ class _MixedEdgeInsets extends EdgeInsetsGeometry {
 
   @override
   bool get isNonNegative {
-    return _left >= 0.0 && _right >= 0.0 && _start >= 0.0 && _end >= 0.0 && _top >= 0.0 && _bottom >= 0.0;
+    return _left >= 0.0
+        && _right >= 0.0
+        && _start >= 0.0
+        && _end >= 0.0
+        && _top >= 0.0
+        && _bottom >= 0.0;
   }
 
   @override
