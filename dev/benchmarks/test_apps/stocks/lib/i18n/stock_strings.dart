@@ -94,11 +94,7 @@ abstract class StockStrings {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
-    Locale('en', 'US'),
-    Locale('es')
-  ];
+  static const List<Locale> supportedLocales = <Locale>[Locale('en'), Locale('en', 'US'), Locale('es')];
 
   /// Title for the Stocks application
   ///
@@ -135,27 +131,28 @@ class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
 }
 
 StockStrings _lookupStockStrings(Locale locale) {
-
   // Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {
-    case 'en': {
-      switch (locale.countryCode) {
-        case 'US': return StockStringsEnUs();
+    case 'en':
+      {
+        switch (locale.countryCode) {
+          case 'US':
+            return StockStringsEnUs();
+        }
+        break;
       }
-      break;
-    }
   }
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return StockStringsEn();
-    case 'es': return StockStringsEs();
+    case 'en':
+      return StockStringsEn();
+    case 'es':
+      return StockStringsEs();
   }
 
-  throw FlutterError(
-    'StockStrings.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+  throw FlutterError('StockStrings.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

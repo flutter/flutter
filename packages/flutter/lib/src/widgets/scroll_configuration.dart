@@ -62,12 +62,10 @@ enum AndroidOverscrollIndicator {
 class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
   const ScrollBehavior({
-    @Deprecated(
-      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-      'This feature was deprecated after v2.13.0-0.0.pre.'
-    )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
-  }): _androidOverscrollIndicator = androidOverscrollIndicator;
+    @Deprecated('Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+        'This feature was deprecated after v2.13.0-0.0.pre.')
+        AndroidOverscrollIndicator? androidOverscrollIndicator,
+  }) : _androidOverscrollIndicator = androidOverscrollIndicator;
 
   /// Specifies which overscroll indicator to use on [TargetPlatform.android].
   ///
@@ -77,11 +75,10 @@ class ScrollBehavior {
   ///
   ///   * [MaterialScrollBehavior], which supports setting this property
   ///     using [ThemeData].
-  @Deprecated(
-    'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-    'This feature was deprecated after v2.13.0-0.0.pre.'
-  )
-  AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? _kDefaultAndroidOverscrollIndicator;
+  @Deprecated('Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.')
+  AndroidOverscrollIndicator get androidOverscrollIndicator =>
+      _androidOverscrollIndicator ?? _kDefaultAndroidOverscrollIndicator;
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
   /// Creates a copy of this ScrollBehavior, making it possible to
@@ -98,21 +95,18 @@ class ScrollBehavior {
     Set<PointerDeviceKind>? dragDevices,
     ScrollPhysics? physics,
     TargetPlatform? platform,
-    @Deprecated(
-      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-      'This feature was deprecated after v2.13.0-0.0.pre.'
-    )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
+    @Deprecated('Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+        'This feature was deprecated after v2.13.0-0.0.pre.')
+        AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     return _WrappedScrollBehavior(
-      delegate: this,
-      scrollbars: scrollbars ?? true,
-      overscroll: overscroll ?? true,
-      physics: physics,
-      platform: platform,
-      dragDevices: dragDevices,
-      androidOverscrollIndicator: androidOverscrollIndicator
-    );
+        delegate: this,
+        scrollbars: scrollbars ?? true,
+        overscroll: overscroll ?? true,
+        physics: physics,
+        platform: platform,
+        dragDevices: dragDevices,
+        androidOverscrollIndicator: androidOverscrollIndicator);
   }
 
   /// The platform whose scroll physics should be implemented.
@@ -159,11 +153,11 @@ class ScrollBehavior {
         }
       glow:
       case TargetPlatform.fuchsia:
-      return GlowingOverscrollIndicator(
-        axisDirection: axisDirection,
-        color: _kDefaultGlowColor,
-        child: child,
-      );
+        return GlowingOverscrollIndicator(
+          axisDirection: axisDirection,
+          color: _kDefaultGlowColor,
+          child: child,
+        );
     }
   }
 
@@ -271,8 +265,8 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     this.platform,
     Set<PointerDeviceKind>? dragDevices,
     AndroidOverscrollIndicator? androidOverscrollIndicator,
-  }) : _androidOverscrollIndicator = androidOverscrollIndicator,
-       _dragDevices = dragDevices;
+  })  : _androidOverscrollIndicator = androidOverscrollIndicator,
+        _dragDevices = dragDevices;
 
   final ScrollBehavior delegate;
   final bool scrollbars;
@@ -287,19 +281,18 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
 
   @override
-  AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? delegate.androidOverscrollIndicator;
+  AndroidOverscrollIndicator get androidOverscrollIndicator =>
+      _androidOverscrollIndicator ?? delegate.androidOverscrollIndicator;
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
-    if (overscroll)
-      return delegate.buildOverscrollIndicator(context, child, details);
+    if (overscroll) return delegate.buildOverscrollIndicator(context, child, details);
     return child;
   }
 
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
-    if (scrollbars)
-      return delegate.buildScrollbar(context, child, details);
+    if (scrollbars) return delegate.buildScrollbar(context, child, details);
     return child;
   }
 
@@ -309,14 +302,13 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   }
 
   @override
-  ScrollBehavior copyWith({
-    bool? scrollbars,
-    bool? overscroll,
-    ScrollPhysics? physics,
-    TargetPlatform? platform,
-    Set<PointerDeviceKind>? dragDevices,
-    AndroidOverscrollIndicator? androidOverscrollIndicator
-  }) {
+  ScrollBehavior copyWith(
+      {bool? scrollbars,
+      bool? overscroll,
+      ScrollPhysics? physics,
+      TargetPlatform? platform,
+      Set<PointerDeviceKind>? dragDevices,
+      AndroidOverscrollIndicator? androidOverscrollIndicator}) {
     return delegate.copyWith(
       scrollbars: scrollbars ?? this.scrollbars,
       overscroll: overscroll ?? this.overscroll,
@@ -339,13 +331,13 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 
   @override
   bool shouldNotify(_WrappedScrollBehavior oldDelegate) {
-    return oldDelegate.delegate.runtimeType != delegate.runtimeType
-        || oldDelegate.scrollbars != scrollbars
-        || oldDelegate.overscroll != overscroll
-        || oldDelegate.physics != physics
-        || oldDelegate.platform != platform
-        || setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
-        || delegate.shouldNotify(oldDelegate.delegate);
+    return oldDelegate.delegate.runtimeType != delegate.runtimeType ||
+        oldDelegate.scrollbars != scrollbars ||
+        oldDelegate.overscroll != overscroll ||
+        oldDelegate.physics != physics ||
+        oldDelegate.platform != platform ||
+        setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices) ||
+        delegate.shouldNotify(oldDelegate.delegate);
   }
 
   @override
@@ -386,8 +378,8 @@ class ScrollConfiguration extends InheritedWidget {
   @override
   bool updateShouldNotify(ScrollConfiguration oldWidget) {
     assert(behavior != null);
-    return behavior.runtimeType != oldWidget.behavior.runtimeType
-        || (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
+    return behavior.runtimeType != oldWidget.behavior.runtimeType ||
+        (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
   }
 
   @override

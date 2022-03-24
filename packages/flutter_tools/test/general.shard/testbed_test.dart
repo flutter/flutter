@@ -20,7 +20,6 @@ import '../src/testbed.dart';
 
 void main() {
   group('Testbed', () {
-
     test('Can provide default interfaces', () async {
       final Testbed testbed = Testbed();
 
@@ -30,8 +29,7 @@ void main() {
       });
 
       expect(localFileSystem, isA<ErrorHandlingFileSystem>());
-      expect((localFileSystem as ErrorHandlingFileSystem).fileSystem,
-             isA<MemoryFileSystem>());
+      expect((localFileSystem as ErrorHandlingFileSystem).fileSystem, isA<MemoryFileSystem>());
     });
 
     test('Can provide setup interfaces', () async {
@@ -78,7 +76,7 @@ void main() {
       final Testbed testbed = Testbed();
 
       expect(testbed.run(() async {
-        Timer.periodic(const Duration(seconds: 1), (Timer timer) { });
+        Timer.periodic(const Duration(seconds: 1), (Timer timer) {});
       }), throwsStateError);
     });
 
@@ -86,12 +84,12 @@ void main() {
       final Testbed testbed = Testbed();
 
       await testbed.run(() async {
-        final Timer timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) { });
+        final Timer timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {});
         timer.cancel();
       });
     });
 
-    test('Throws if ProcessUtils is injected',() {
+    test('Throws if ProcessUtils is injected', () {
       final Testbed testbed = Testbed(overrides: <Type, Generator>{
         ProcessUtils: () => null,
       });
@@ -101,6 +99,6 @@ void main() {
   });
 }
 
-class A { }
+class A {}
 
-class B extends A { }
+class B extends A {}

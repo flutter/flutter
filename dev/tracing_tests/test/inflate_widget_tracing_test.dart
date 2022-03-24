@@ -21,7 +21,9 @@ void main() {
   test('Children of MultiChildRenderObjectElement show up in tracing', () async {
     // We don't have expectations around the first frame because there's a race around
     // the warm-up frame that we don't want to get involved in here.
-    await runFrame(() { runApp(const TestRoot()); });
+    await runFrame(() {
+      runApp(const TestRoot());
+    });
     await SchedulerBinding.instance.endOfFrame;
     await fetchInterestingEvents(interestingLabels);
 
@@ -65,13 +67,13 @@ class TestRootState extends State<TestRoot> {
   @override
   Widget build(BuildContext context) {
     return _showRow
-      ? Row(
-          children: const <Widget>[
-            TestChildWidget(),
-            TestChildWidget(),
-          ],
-        )
-      : Container();
+        ? Row(
+            children: const <Widget>[
+              TestChildWidget(),
+              TestChildWidget(),
+            ],
+          )
+        : Container();
   }
 }
 

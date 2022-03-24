@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 const Color kSelectedColor = Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
-Widget buildFrame(TabController tabController, { Color? color, Color? selectedColor, double indicatorSize = 12.0, BorderStyle? borderStyle }) {
+Widget buildFrame(TabController tabController,
+    {Color? color, Color? selectedColor, double indicatorSize = 12.0, BorderStyle? borderStyle}) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -184,7 +185,6 @@ void main() {
     await tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 1000.0);
     await tester.pumpAndSettle();
     expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
-
   });
 
   testWidgets('PageSelector indicatorColors', (WidgetTester tester) async {
@@ -214,19 +214,20 @@ void main() {
     );
     await tester.pumpWidget(buildFrame(tabController, indicatorSize: 16.0));
 
-    final Iterable<Element> indicatorElements = find.descendant(
-      of: find.byType(TabPageSelector),
-      matching: find.byType(TabPageSelectorIndicator),
-    ).evaluate();
+    final Iterable<Element> indicatorElements = find
+        .descendant(
+          of: find.byType(TabPageSelector),
+          matching: find.byType(TabPageSelectorIndicator),
+        )
+        .evaluate();
 
     // Indicators get an 8 pixel margin, 16 + 8 = 24.
-    for (final Element indicatorElement in indicatorElements)
-      expect(indicatorElement.size, const Size(24.0, 24.0));
+    for (final Element indicatorElement in indicatorElements) expect(indicatorElement.size, const Size(24.0, 24.0));
 
     expect(tester.getSize(find.byType(TabPageSelector)).height, 24.0);
   });
 
-    testWidgets('PageSelector circle border', (WidgetTester tester) async {
+  testWidgets('PageSelector circle border', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
@@ -243,8 +244,7 @@ void main() {
         matching: find.byType(TabPageSelectorIndicator),
       ),
     );
-    for (final TabPageSelectorIndicator indicator in indicators)
-      expect(indicator.borderStyle, BorderStyle.solid);
+    for (final TabPageSelectorIndicator indicator in indicators) expect(indicator.borderStyle, BorderStyle.solid);
 
     // No border
     await tester.pumpWidget(buildFrame(tabController, borderStyle: BorderStyle.none));
@@ -254,8 +254,7 @@ void main() {
         matching: find.byType(TabPageSelectorIndicator),
       ),
     );
-    for (final TabPageSelectorIndicator indicator in indicators)
-      expect(indicator.borderStyle, BorderStyle.none);
+    for (final TabPageSelectorIndicator indicator in indicators) expect(indicator.borderStyle, BorderStyle.none);
 
     // Solid border
     await tester.pumpWidget(buildFrame(tabController, borderStyle: BorderStyle.solid));
@@ -265,7 +264,6 @@ void main() {
         matching: find.byType(TabPageSelectorIndicator),
       ),
     );
-    for (final TabPageSelectorIndicator indicator in indicators)
-      expect(indicator.borderStyle, BorderStyle.solid);
+    for (final TabPageSelectorIndicator indicator in indicators) expect(indicator.borderStyle, BorderStyle.solid);
   });
 }

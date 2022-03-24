@@ -73,7 +73,8 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 600.0));
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(padding: EdgeInsets.only(
+          data: MediaQueryData(
+              padding: EdgeInsets.only(
             left: 100.0,
             top: 30.0,
             bottom: 40.0,
@@ -94,10 +95,17 @@ void main() {
       final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
       child.debugFillProperties(properties);
 
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
+      expect(
+          properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'),
+          true);
+      expect(
+          properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'),
+          false);
+      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'),
+          true);
+      expect(
+          properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'),
+          false);
     });
 
     group('SafeArea maintains bottom viewPadding when specified for consumed bottom padding', () {
@@ -388,9 +396,14 @@ void main() {
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
     child.debugFillProperties(properties);
 
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
+    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'),
+        true);
+    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'),
+        false);
+    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'),
+        true);
+    expect(
+        properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'),
+        false);
   });
 }

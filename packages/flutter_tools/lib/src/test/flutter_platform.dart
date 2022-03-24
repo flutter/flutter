@@ -132,9 +132,7 @@ String generateTestBootstrap({
   assert(host != null);
   assert(updateGoldens != null);
 
-  final String websocketUrl = host.type == InternetAddressType.IPv4
-      ? 'ws://${host.address}'
-      : 'ws://[${host.address}]';
+  final String websocketUrl = host.type == InternetAddressType.IPv4 ? 'ws://${host.address}' : 'ws://[${host.address}]';
   final String encodedWebsocketUrl = Uri.encodeComponent(websocketUrl);
 
   final StringBuffer buffer = StringBuffer();
@@ -340,8 +338,8 @@ class FlutterPlatform extends PlatformPlugin {
     // Except for the Declarer error, which is a specific test incompatibility
     // error we need to catch.
     final StreamChannel<dynamic> channel = loadChannel(path, platform);
-    final RunnerSuiteController controller = deserializeSuite(path, platform,
-      suiteConfig, const PluginEnvironment(), channel, message);
+    final RunnerSuiteController controller =
+        deserializeSuite(path, platform, suiteConfig, const PluginEnvironment(), channel, message);
     return controller.suite;
   }
 
@@ -349,11 +347,13 @@ class FlutterPlatform extends PlatformPlugin {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
       if (debuggingOptions.hostVmServicePort != null) {
-        throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
+        throwToolExit(
+            'installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
       }
       // Fail if we're passing in a precompiled entry-point.
       if (precompiledDillPath != null) {
-        throwToolExit('installHook() was called with a precompiled test entry-point, but then more than one test suite was run.');
+        throwToolExit(
+            'installHook() was called with a precompiled test entry-point, but then more than one test suite was run.');
       }
     }
 
@@ -390,9 +390,8 @@ class FlutterPlatform extends PlatformPlugin {
     if (compiler == null || compiler.compiler == null) {
       throw Exception('Compiler is not set up properly to compile $expression');
     }
-    final CompilerOutput compilerOutput =
-      await compiler.compiler.compileExpression(expression, definitions,
-        typeDefinitions, libraryUri, klass, isStatic);
+    final CompilerOutput compilerOutput = await compiler.compiler
+        .compileExpression(expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
     if (compilerOutput != null && compilerOutput.expressionData != null) {
       return base64.encode(compilerOutput.expressionData);
     }
@@ -409,22 +408,21 @@ class FlutterPlatform extends PlatformPlugin {
       );
     }
     return FlutterTesterTestDevice(
-      id: ourTestCount,
-      platform: globals.platform,
-      fileSystem: globals.fs,
-      processManager: globals.processManager,
-      logger: globals.logger,
-      shellPath: shellPath,
-      enableObservatory: enableObservatory,
-      machine: machine,
-      debuggingOptions: debuggingOptions,
-      host: host,
-      buildTestAssets: buildTestAssets,
-      flutterProject: flutterProject,
-      icudtlPath: icudtlPath,
-      compileExpression: _compileExpressionService,
-      fontConfigManager: _fontConfigManager
-    );
+        id: ourTestCount,
+        platform: globals.platform,
+        fileSystem: globals.fs,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        shellPath: shellPath,
+        enableObservatory: enableObservatory,
+        machine: machine,
+        debuggingOptions: debuggingOptions,
+        host: host,
+        buildTestAssets: buildTestAssets,
+        flutterProject: flutterProject,
+        icudtlPath: icudtlPath,
+        compileExpression: _compileExpressionService,
+        fontConfigManager: _fontConfigManager);
   }
 
   Future<_AsyncError> _startTest(
@@ -454,7 +452,8 @@ class FlutterPlatform extends PlatformPlugin {
         // running this with a debugger attached. Initialize the resident
         // compiler in this case.
         if (debuggingOptions.startPaused) {
-          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath);
+          compiler ??=
+              TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath);
           final Uri testUri = globals.fs.file(testPath).uri;
           // Trigger a compilation to initialize the resident compiler.
           unawaited(compiler.compile(testUri));
@@ -523,7 +522,8 @@ class FlutterPlatform extends PlatformPlugin {
         reportedStackTrace = error.stackTrace;
       }
 
-      globals.printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
+      globals.printTrace(
+          'test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
       if (!controllerSinkClosed) {
         testHarnessChannel.sink.addError(reportedError, reportedStackTrace);
       } else {
@@ -537,7 +537,8 @@ class FlutterPlatform extends PlatformPlugin {
         try {
           await finalizer();
         } on Exception catch (error, stack) {
-          globals.printTrace('test $ourTestCount: error while cleaning up; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
+          globals.printTrace(
+              'test $ourTestCount: error while cleaning up; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
           if (!controllerSinkClosed) {
             testHarnessChannel.sink.addError(error, stack);
           } else {
@@ -664,7 +665,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   @override
   void add(S event) => _parent.add(event);
   @override
-  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) => _parent.addError(errorEvent, stackTrace);
+  void addError(dynamic errorEvent, [StackTrace stackTrace]) => _parent.addError(errorEvent, stackTrace);
   @override
   Future<dynamic> addStream(Stream<S> stream) => _parent.addStream(stream);
 }
@@ -688,17 +689,11 @@ Future<void> _pipeHarnessToRemote({
   globals.printTrace('test $id: Waiting for test harness or tests to finish');
 
   await Future.any<void>(<Future<void>>[
-    harnessChannel.stream
-      .map<String>(json.encode)
-      .pipe(remoteChannel.sink)
-      .then<void>((void value) {
-        globals.printTrace('test $id: Test process is no longer needed by test harness');
-      }),
-    remoteChannel.stream
-      .map<dynamic>(json.decode)
-      .pipe(harnessChannel.sink)
-      .then<void>((void value) {
-        globals.printTrace('test $id: Test harness is no longer needed by test process');
-      }),
+    harnessChannel.stream.map<String>(json.encode).pipe(remoteChannel.sink).then<void>((void value) {
+      globals.printTrace('test $id: Test process is no longer needed by test harness');
+    }),
+    remoteChannel.stream.map<dynamic>(json.decode).pipe(harnessChannel.sink).then<void>((void value) {
+      globals.printTrace('test $id: Test harness is no longer needed by test process');
+    }),
   ]);
 }

@@ -105,8 +105,7 @@ void main() {
       userMessages: UserMessages(),
     );
 
-    expect(androidDevices.pollingGetDevices(),
-      throwsToolExit(message: RegExp('Unable to run "adb"')));
+    expect(androidDevices.pollingGetDevices(), throwsToolExit(message: RegExp('Unable to run "adb"')));
   });
 
   testWithoutContext('AndroidDevices is disabled if feature is disabled', () {

@@ -41,18 +41,14 @@ void main() {
 
     expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
-    expect(
-        testLogger.traceText,
-        contains(
-            'Xcode project not found, skipping framework link and embedding migration'));
+    expect(testLogger.traceText, contains('Xcode project not found, skipping framework link and embedding migration'));
     expect(testLogger.statusText, isEmpty);
   });
 
   testWithoutContext('skipped if nothing to upgrade', () {
     const String contents = 'Nothing to upgrade';
     xcodeProjectInfoFile.writeAsStringSync(contents);
-    final DateTime projectLastModified =
-        xcodeProjectInfoFile.lastModifiedSync();
+    final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
     final RemoveMacOSFrameworkLinkAndEmbeddingMigration macosProjectMigration =
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
@@ -115,8 +111,7 @@ keep this 2
     expect(testLogger.statusText, contains('Upgrading project.pbxproj'));
   });
 
-  testWithoutContext('migration fails with leftover App.framework reference',
-      () {
+  testWithoutContext('migration fails with leftover App.framework reference', () {
     xcodeProjectInfoFile.writeAsStringSync('''
 		D73912F022F37F9bogus /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D73912F022F37F9bogus /* App.framework */; };
 ''');
@@ -128,15 +123,15 @@ keep this 2
       testUsage,
     );
 
-    expect(macosProjectMigration.migrate,
-        throwsToolExit(message: 'Your Xcode project requires migration'));
-    expect(testUsage.events, contains(
-      const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
-    ));
+    expect(macosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
+    expect(
+        testUsage.events,
+        contains(
+          const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
+        ));
   });
 
-  testWithoutContext(
-      'migration fails with leftover FlutterMacOS.framework reference', () {
+  testWithoutContext('migration fails with leftover FlutterMacOS.framework reference', () {
     xcodeProjectInfoFile.writeAsStringSync('''
 				33D1A10522148B93bogus /* FlutterMacOS.framework in Bundle Framework */,
 ''');
@@ -147,11 +142,12 @@ keep this 2
       testLogger,
       testUsage,
     );
-    expect(macosProjectMigration.migrate,
-        throwsToolExit(message: 'Your Xcode project requires migration'));
-    expect(testUsage.events, contains(
-      const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
-    ));
+    expect(macosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
+    expect(
+        testUsage.events,
+        contains(
+          const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
+        ));
   });
 }
 

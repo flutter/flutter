@@ -28,22 +28,23 @@ Future<ui.Image> createTestImage({
   int width = 1,
   int height = 1,
   bool cache = true,
-}) => TestAsyncUtils.guard(() async {
-  assert(width != null && width > 0);
-  assert(height != null && height > 0);
-  assert(cache != null);
+}) =>
+    TestAsyncUtils.guard(() async {
+      assert(width != null && width > 0);
+      assert(height != null && height > 0);
+      assert(cache != null);
 
-  final int cacheKey = Object.hash(width, height);
-  if (cache && _cache.containsKey(cacheKey)) {
-    return _cache[cacheKey]!.clone();
-  }
+      final int cacheKey = Object.hash(width, height);
+      if (cache && _cache.containsKey(cacheKey)) {
+        return _cache[cacheKey]!.clone();
+      }
 
-  final ui.Image image = await _createImage(width, height);
-  if (cache) {
-    _cache[cacheKey] = image.clone();
-  }
-  return image;
-});
+      final ui.Image image = await _createImage(width, height);
+      if (cache) {
+        _cache[cacheKey] = image.clone();
+      }
+      return image;
+    });
 
 Future<ui.Image> _createImage(int width, int height) async {
   final Completer<ui.Image> completer = Completer<ui.Image>();

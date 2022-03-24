@@ -23,8 +23,7 @@ void main() {
   });
 
   testWithoutContext('Can parse and output summaries for code coverage', () async {
-    final File coverageFile = tempDir.childFile('info.lcov')
-      ..writeAsStringSync('''
+    final File coverageFile = tempDir.childFile('info.lcov')..writeAsStringSync('''
 SF:lib/src/artifacts.dart
 DA:15,10
 DA:17,7
@@ -53,7 +52,8 @@ end_of_record
 ''');
 
     final String dartScript = fileSystem.path.join(getFlutterRoot(), 'bin', 'dart');
-    final String coverageScript = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'tool', 'unit_coverage.dart');
+    final String coverageScript =
+        fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'tool', 'unit_coverage.dart');
     final ProcessResult result = await const LocalProcessManager().run(<String>[
       dartScript,
       coverageScript,
@@ -61,9 +61,11 @@ end_of_record
     ]);
 
     // May contain other output if building flutter tool.
-    expect(result.stdout.toString().split('\n'), containsAll(<Matcher>[
-      contains('lib/src/artifacts.dart: 81.82%'),
-      contains('lib/src/base/common.dart: 100.00%'),
-    ]));
+    expect(
+        result.stdout.toString().split('\n'),
+        containsAll(<Matcher>[
+          contains('lib/src/artifacts.dart: 81.82%'),
+          contains('lib/src/base/common.dart: 100.00%'),
+        ]));
   });
 }

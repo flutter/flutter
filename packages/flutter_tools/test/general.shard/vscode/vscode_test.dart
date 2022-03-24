@@ -73,10 +73,18 @@ void main() {
     );
     fileSystem.directory(fileSystem.path.join(randomInsidersLocation, 'Contents')).createSync(recursive: true);
 
-    fileSystem.directory(fileSystem.path.join('/', 'Applications', 'Visual Studio Code.app', 'Contents')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join('/', 'Applications', 'Visual Studio Code - Insiders.app', 'Contents')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join(home, 'Applications', 'Visual Studio Code.app', 'Contents')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join(home, 'Applications', 'Visual Studio Code - Insiders.app', 'Contents')).createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path.join('/', 'Applications', 'Visual Studio Code.app', 'Contents'))
+        .createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path.join('/', 'Applications', 'Visual Studio Code - Insiders.app', 'Contents'))
+        .createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path.join(home, 'Applications', 'Visual Studio Code.app', 'Contents'))
+        .createSync(recursive: true);
+    fileSystem
+        .directory(fileSystem.path.join(home, 'Applications', 'Visual Studio Code - Insiders.app', 'Contents'))
+        .createSync(recursive: true);
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(

@@ -34,6 +34,7 @@ For more information, please visit:
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
+
 /// User message when there are no provisioning profile for the current app bundle identifier.
 ///
 /// The user did iOS development but never on this project and/or device.
@@ -52,6 +53,7 @@ For more information, please visit:
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
+
 /// Fallback error message for signing issues.
 ///
 /// Couldn't auto sign the app but can likely solved by retracing the signing flow in Xcode.
@@ -79,9 +81,7 @@ const String fixWithDevelopmentTeamInstruction = '''
          - Let Xcode automatically provision a profile for your app
   4- Build or run your project again''';
 
-
-final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern =
-    RegExp(r'^\s*\d+\).+"(.+Develop(ment|er).+)"$');
+final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern = RegExp(r'^\s*\d+\).+"(.+Develop(ment|er).+)"$');
 final RegExp _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-Z0-9]+)\)');
 final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
 
@@ -109,10 +109,8 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
   // If the user already has it set in the project build settings itself,
   // continue with that.
   if (_isNotEmpty(buildSettings[_developmentTeamBuildSettingName])) {
-    logger.printStatus(
-      'Automatically signing iOS for device deployment using specified development '
-      'team in Xcode project: ${buildSettings[_developmentTeamBuildSettingName]}'
-    );
+    logger.printStatus('Automatically signing iOS for device deployment using specified development '
+        'team in Xcode project: ${buildSettings[_developmentTeamBuildSettingName]}');
     return null;
   }
 
@@ -174,15 +172,16 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
     return null;
   }
 
-  const List<String> findIdentityCommand =
-      <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
+  const List<String> findIdentityCommand = <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
 
   String findIdentityStdout;
   try {
     findIdentityStdout = (await processUtils.run(
       findIdentityCommand,
       throwOnError: true,
-    )).stdout.trim();
+    ))
+        .stdout
+        .trim();
   } on ProcessException catch (error) {
     logger.printTrace('Unexpected failure from find-identity: $error.');
     return null;
@@ -191,9 +190,7 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
   final List<String> validCodeSigningIdentities = findIdentityStdout
       .split('\n')
       .map<String?>((String outputLine) {
-        return _securityFindIdentityDeveloperIdentityExtractionPattern
-            .firstMatch(outputLine)
-            ?.group(1);
+        return _securityFindIdentityDeveloperIdentityExtractionPattern.firstMatch(outputLine)?.group(1);
       })
       .where(_isNotEmpty)
       .whereType<String>()
@@ -211,9 +208,7 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
   logger.printStatus('Signing iOS app for device deployment using developer identity: "$signingIdentity"');
 
   final String? signingCertificateId =
-      _securityFindIdentityCertificateCnExtractionPattern
-          .firstMatch(signingIdentity)
-          ?.group(1);
+      _securityFindIdentityCertificateCnExtractionPattern.firstMatch(signingIdentity)?.group(1);
 
   // If `security`'s output format changes, we'd have to update the above regex.
   if (signingCertificateId == null) {
@@ -225,14 +220,15 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
     signingCertificateStdout = (await processUtils.run(
       <String>['security', 'find-certificate', '-c', signingCertificateId, '-p'],
       throwOnError: true,
-    )).stdout.trim();
+    ))
+        .stdout
+        .trim();
   } on ProcessException catch (error) {
     logger.printTrace("Couldn't find the certificate: $error.");
     return null;
   }
 
-  final Process opensslProcess = await processUtils.start(
-    const <String>['openssl', 'x509', '-subject']);
+  final Process opensslProcess = await processUtils.start(const <String>['openssl', 'x509', '-subject']);
   await (opensslProcess.stdin..write(signingCertificateStdout)).close();
 
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
@@ -292,14 +288,13 @@ Future<String?> _chooseSigningIdentity(
       'Multiple valid development certificates available (your choice will be saved):',
       emphasis: true,
     );
-    for (int i=0; i<count; i++) {
-      logger.printStatus('  ${i+1}) ${validCodeSigningIdentities[i]}', emphasis: true);
+    for (int i = 0; i < count; i++) {
+      logger.printStatus('  ${i + 1}) ${validCodeSigningIdentities[i]}', emphasis: true);
     }
     logger.printStatus('  a) Abort', emphasis: true);
 
     final String choice = await terminal.promptForCharInput(
-      List<String>.generate(count, (int number) => '${number + 1}')
-          ..add('a'),
+      List<String>.generate(count, (int number) => '${number + 1}')..add('a'),
       prompt: 'Please select a certificate for code signing',
       defaultChoiceIndex: 0, // Just pressing enter chooses the first one.
       logger: logger,

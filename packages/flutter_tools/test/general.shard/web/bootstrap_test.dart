@@ -21,7 +21,7 @@ void main() {
     expect(result, contains('requireEl.setAttribute("data-main", "main_module.bootstrap");'));
   });
 
-test('generateBootstrapScript includes loading indicator', () {
+  test('generateBootstrapScript includes loading indicator', () {
     final String result = generateBootstrapScript(
       requireUrl: 'require.js',
       mapperUrl: 'mapper.js',
@@ -37,8 +37,10 @@ test('generateBootstrapScript includes loading indicator', () {
       nativeNullAssertions: false,
     );
     // bootstrap main module has correct defined module.
-    expect(result, contains('define("main_module.bootstrap", ["foo/bar/main.js", "dart_sdk"], '
-      'function(app, dart_sdk) {'));
+    expect(
+        result,
+        contains('define("main_module.bootstrap", ["foo/bar/main.js", "dart_sdk"], '
+            'function(app, dart_sdk) {'));
   });
 
   test('generateMainModule can set bootstrap name', () {
@@ -49,8 +51,10 @@ test('generateBootstrapScript includes loading indicator', () {
       bootstrapModule: 'foo_module.bootstrap',
     );
     // bootstrap main module has correct defined module.
-    expect(result, contains('define("foo_module.bootstrap", ["foo/bar/main.js", "dart_sdk"], '
-      'function(app, dart_sdk) {'));
+    expect(
+        result,
+        contains('define("foo_module.bootstrap", ["foo/bar/main.js", "dart_sdk"], '
+            'function(app, dart_sdk) {'));
   });
 
   test('generateMainModule includes null safety switches', () {

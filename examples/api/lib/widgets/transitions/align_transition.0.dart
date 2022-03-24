@@ -30,8 +30,7 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 /// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with TickerProviderStateMixin {
+class _MyStatefulWidgetState extends State<MyStatefulWidget> with TickerProviderStateMixin {
 // Using `late final` for [lazy initialization](https://dart.dev/null-safety/understanding-null-safety#lazy-initialization).
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),

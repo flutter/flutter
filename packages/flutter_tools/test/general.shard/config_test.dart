@@ -65,8 +65,7 @@ void main() {
 
   testWithoutContext('Config does not error on a file with a deprecated field', () {
     final BufferLogger bufferLogger = BufferLogger.test();
-    final File file = memoryFileSystem.file('.flutter_example')
-      ..writeAsStringSync('''
+    final File file = memoryFileSystem.file('.flutter_example')..writeAsStringSync('''
 {
   "is-bot": false,
   "license-hash": "3e8c85e63b26ce223cda96a9a8fbb410",
@@ -88,8 +87,7 @@ void main() {
 
   testWithoutContext('Config parse error', () {
     final BufferLogger bufferLogger = BufferLogger.test();
-    final File file = memoryFileSystem.file('.flutter_example')
-      ..writeAsStringSync('{"hello":"bar');
+    final File file = memoryFileSystem.file('.flutter_example')..writeAsStringSync('{"hello":"bar');
     config = Config(
       'example',
       fileSystem: memoryFileSystem,

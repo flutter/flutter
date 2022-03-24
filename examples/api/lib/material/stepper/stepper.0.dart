@@ -63,9 +63,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       steps: <Step>[
         Step(
           title: const Text('Step 1 title'),
-          content: Container(
-              alignment: Alignment.centerLeft,
-              child: const Text('Content for Step 1')),
+          content: Container(alignment: Alignment.centerLeft, child: const Text('Content for Step 1')),
         ),
         const Step(
           title: Text('Step 2 title'),

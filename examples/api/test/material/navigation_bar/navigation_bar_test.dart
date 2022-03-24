@@ -3,18 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/navigation_bar/navigation_bar.dart'
-    as example;
+import 'package:flutter_api_samples/material/navigation_bar/navigation_bar.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Navigation bar updates destination on tap',
-      (WidgetTester tester) async {
+  testWidgets('Navigation bar updates destination on tap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MyApp(),
     );
-    final NavigationBar navigationBarWidget =
-        tester.firstWidget(find.byType(NavigationBar));
+    final NavigationBar navigationBarWidget = tester.firstWidget(find.byType(NavigationBar));
 
     /// NavigationDestinations must be rendered
     expect(find.text('Explore'), findsOneWidget);

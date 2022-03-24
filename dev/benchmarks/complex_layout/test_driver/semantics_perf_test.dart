@@ -19,8 +19,7 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        driver.close();
+      if (driver != null) driver.close();
     });
 
     test('initial tree creation', () async {
@@ -33,12 +32,15 @@ void main() {
         expect(await driver.setSemantics(true), isTrue);
       });
 
-      final Iterable<TimelineEvent>? semanticsEvents = timeline.events?.where((TimelineEvent event) => event.name == 'SEMANTICS');
+      final Iterable<TimelineEvent>? semanticsEvents =
+          timeline.events?.where((TimelineEvent event) => event.name == 'SEMANTICS');
       if (semanticsEvents?.length != 2)
         fail('Expected exactly two "SEMANTICS" events, got ${semanticsEvents?.length}:\n$semanticsEvents');
-      final Duration semanticsTreeCreation = Duration(microseconds: semanticsEvents!.last.timestampMicros! - semanticsEvents.first.timestampMicros!);
+      final Duration semanticsTreeCreation =
+          Duration(microseconds: semanticsEvents!.last.timestampMicros! - semanticsEvents.first.timestampMicros!);
 
-      final String jsonEncoded = json.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});
+      final String jsonEncoded =
+          json.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});
       File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(jsonEncoded);
     }, timeout: Timeout.none);
   });

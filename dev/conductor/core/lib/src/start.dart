@@ -98,7 +98,7 @@ class StartCommand extends Command<void> {
     argParser.addOption(
       kVersionOverrideOption,
       help: 'Explicitly set the desired version. This should only be used if '
-        'the version computed by the tool is not correct.',
+          'the version computed by the tool is not correct.',
     );
   }
 
@@ -231,34 +231,35 @@ class StartContext extends Context {
     required File stateFile,
     this.force = false,
     this.versionOverride,
-  }) : git = Git(processManager),
-  engine = EngineRepository(
-    checkouts,
-    initialRef: 'upstream/$candidateBranch',
-    upstreamRemote: Remote(
-      name: RemoteName.upstream,
-      url: engineUpstream,
-    ),
-    mirrorRemote: Remote(
-      name: RemoteName.mirror,
-      url: engineMirror,
-    ),
-  ), framework = FrameworkRepository(
-    checkouts,
-    initialRef: 'upstream/$candidateBranch',
-    upstreamRemote: Remote(
-      name: RemoteName.upstream,
-      url: frameworkUpstream,
-    ),
-    mirrorRemote: Remote(
-      name: RemoteName.mirror,
-      url: frameworkMirror,
-    ),
-  ),
-  super(
-    checkouts: checkouts,
-    stateFile: stateFile,
-  );
+  })  : git = Git(processManager),
+        engine = EngineRepository(
+          checkouts,
+          initialRef: 'upstream/$candidateBranch',
+          upstreamRemote: Remote(
+            name: RemoteName.upstream,
+            url: engineUpstream,
+          ),
+          mirrorRemote: Remote(
+            name: RemoteName.mirror,
+            url: engineMirror,
+          ),
+        ),
+        framework = FrameworkRepository(
+          checkouts,
+          initialRef: 'upstream/$candidateBranch',
+          upstreamRemote: Remote(
+            name: RemoteName.upstream,
+            url: frameworkUpstream,
+          ),
+          mirrorRemote: Remote(
+            name: RemoteName.mirror,
+            url: frameworkMirror,
+          ),
+        ),
+        super(
+          checkouts: checkouts,
+          stateFile: stateFile,
+        );
 
   final String candidateBranch;
   final String? dartRevision;
@@ -333,10 +334,12 @@ class StartContext extends Context {
       cherrypicks: engineCherrypickRevisions,
       upstreamRef: EngineRepository.defaultBranch,
       releaseRef: candidateBranch,
-    )).map((String revision) => pb.Cherrypick(
-      trunkRevision: revision,
-      state: pb.CherrypickState.PENDING,
-    )).toList();
+    ))
+        .map((String revision) => pb.Cherrypick(
+              trunkRevision: revision,
+              state: pb.CherrypickState.PENDING,
+            ))
+        .toList();
 
     for (final pb.Cherrypick cherrypick in engineCherrypicks) {
       final String revision = cherrypick.trunkRevision;
@@ -370,10 +373,12 @@ class StartContext extends Context {
       cherrypicks: frameworkCherrypickRevisions,
       upstreamRef: FrameworkRepository.defaultBranch,
       releaseRef: candidateBranch,
-    )).map((String revision) => pb.Cherrypick(
-      trunkRevision: revision,
-      state: pb.CherrypickState.PENDING,
-    )).toList();
+    ))
+        .map((String revision) => pb.Cherrypick(
+              trunkRevision: revision,
+              state: pb.CherrypickState.PENDING,
+            ))
+        .toList();
 
     for (final pb.Cherrypick cherrypick in frameworkCherrypicks) {
       final String revision = cherrypick.trunkRevision;
@@ -455,10 +460,10 @@ class StartContext extends Context {
     switch (releaseType) {
       case ReleaseType.STABLE_INITIAL:
         nextVersion = Version(
-            x: lastVersion.x,
-            y: lastVersion.y,
-            z: 0,
-            type: VersionType.stable,
+          x: lastVersion.x,
+          y: lastVersion.y,
+          z: 0,
+          type: VersionType.stable,
         );
         break;
       case ReleaseType.STABLE_HOTFIX:
@@ -553,7 +558,9 @@ class StartContext extends Context {
     final List<String> upstreamRevlist = (await repository.revList(<String>[
       '--ancestry-path',
       '$branchPoint..$upstreamRef',
-    ])).reversed.toList();
+    ]))
+        .reversed
+        .toList();
 
     stdio.printStatus('upstreamRevList:\n${upstreamRevlist.join('\n')}\n');
     stdio.printStatus('validatedCherrypicks:\n${validatedCherrypicks.join('\n')}\n');

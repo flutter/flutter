@@ -20,10 +20,13 @@ class FakeVmServiceHost {
     Uri? httpAddress,
     Uri? wsAddress,
   }) : _requests = requests {
-    _vmService = FlutterVmService(vm_service.VmService(
-      _input.stream,
-      _output.add,
-    ), httpAddress: httpAddress, wsAddress: wsAddress);
+    _vmService = FlutterVmService(
+        vm_service.VmService(
+          _input.stream,
+          _output.add,
+        ),
+        httpAddress: httpAddress,
+        wsAddress: wsAddress);
     _applyStreamListen();
     _output.stream.listen((String data) {
       final Map<String, Object?> request = json.decode(data) as Map<String, Object?>;
@@ -31,10 +34,11 @@ class FakeVmServiceHost {
         throw Exception('Unexpected request: $request');
       }
       final FakeVmServiceRequest fakeRequest = _requests.removeAt(0) as FakeVmServiceRequest;
-      expect(request, isA<Map<String, Object?>>()
-        .having((Map<String, Object?> request) => request['method'], 'method', fakeRequest.method)
-        .having((Map<String, Object?> request) => request['params'], 'args', fakeRequest.args)
-      );
+      expect(
+          request,
+          isA<Map<String, Object?>>()
+              .having((Map<String, Object?> request) => request['method'], 'method', fakeRequest.method)
+              .having((Map<String, Object?> request) => request['params'], 'args', fakeRequest.args));
       if (fakeRequest.close) {
         unawaited(_vmService.dispose());
         expect(_requests, isEmpty);
@@ -66,7 +70,6 @@ class FakeVmServiceHost {
 
   FlutterVmService get vmService => _vmService;
   late final FlutterVmService _vmService;
-
 
   bool get hasRemainingExpectations => _requests.isNotEmpty;
 

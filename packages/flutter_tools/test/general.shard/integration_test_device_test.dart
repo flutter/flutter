@@ -36,10 +36,7 @@ final Map<String, Object> vm = <String, dynamic>{
 
 final vm_service.Isolate isolate = vm_service.Isolate(
   id: '1',
-  pauseEvent: vm_service.Event(
-      kind: vm_service.EventKind.kResume,
-      timestamp: 0
-  ),
+  pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
   breakpoints: <vm_service.Breakpoint>[],
   exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[
@@ -145,16 +142,18 @@ void main() {
     expect(testDevice.finished, doesNotComplete);
   }, overrides: <Type, Generator>{
     ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
-      Logger logger,
-    }) async => fakeVmServiceHost.vmService,
+    VMServiceConnector: () => (
+          Uri httpUri, {
+          ReloadSources reloadSources,
+          Restart restart,
+          CompileExpression compileExpression,
+          GetSkSLMethod getSkSLMethod,
+          PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+          io.CompressionOptions compression,
+          Device device,
+          Logger logger,
+        }) async =>
+            fakeVmServiceHost.vmService,
   });
 
   testUsingContext('Can kill the started device', () async {
@@ -164,16 +163,18 @@ void main() {
     expect(testDevice.finished, completes);
   }, overrides: <Type, Generator>{
     ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
-      Logger logger,
-    }) async => fakeVmServiceHost.vmService,
+    VMServiceConnector: () => (
+          Uri httpUri, {
+          ReloadSources reloadSources,
+          Restart restart,
+          CompileExpression compileExpression,
+          GetSkSLMethod getSkSLMethod,
+          PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+          io.CompressionOptions compression,
+          Device device,
+          Logger logger,
+        }) async =>
+            fakeVmServiceHost.vmService,
   });
 
   testUsingContext('when the device starts without providing an observatory URI', () async {
@@ -193,15 +194,17 @@ void main() {
 
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
-    }) async => fakeVmServiceHost.vmService,
+    VMServiceConnector: () => (
+          Uri httpUri, {
+          ReloadSources reloadSources,
+          Restart restart,
+          CompileExpression compileExpression,
+          GetSkSLMethod getSkSLMethod,
+          PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+          io.CompressionOptions compression,
+          Device device,
+        }) async =>
+            fakeVmServiceHost.vmService,
   });
 
   testUsingContext('when the device fails to start', () async {
@@ -221,15 +224,17 @@ void main() {
 
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
-    }) async => fakeVmServiceHost.vmService,
+    VMServiceConnector: () => (
+          Uri httpUri, {
+          ReloadSources reloadSources,
+          Restart restart,
+          CompileExpression compileExpression,
+          GetSkSLMethod getSkSLMethod,
+          PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+          io.CompressionOptions compression,
+          Device device,
+        }) async =>
+            fakeVmServiceHost.vmService,
   });
 
   testUsingContext('Can handle closing of the VM service', () async {
@@ -238,16 +243,18 @@ void main() {
     expect(await channel.stream.isEmpty, true);
   }, overrides: <Type, Generator>{
     ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device device,
-      Logger logger,
-    }) async => fakeVmServiceHost.vmService,
+    VMServiceConnector: () => (
+          Uri httpUri, {
+          ReloadSources reloadSources,
+          Restart restart,
+          CompileExpression compileExpression,
+          GetSkSLMethod getSkSLMethod,
+          PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+          io.CompressionOptions compression,
+          Device device,
+          Logger logger,
+        }) async =>
+            fakeVmServiceHost.vmService,
   });
 }
 
@@ -257,7 +264,8 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
     TargetPlatform platform, {
     BuildInfo buildInfo,
     File applicationBinary,
-  }) async => FakeApplicationPackage();
+  }) async =>
+      FakeApplicationPackage();
 }
 
-class FakeApplicationPackage extends Fake implements ApplicationPackage { }
+class FakeApplicationPackage extends Fake implements ApplicationPackage {}

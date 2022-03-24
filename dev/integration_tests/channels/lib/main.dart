@@ -72,8 +72,7 @@ class _TestAppState extends State<TestApp> {
     double.maxFinite,
     double.infinity,
   ]);
-  static final Float64List someFloat64s =
-      Float64List.fromList(<double>[
+  static final Float64List someFloat64s = Float64List.fromList(<double>[
     double.nan,
     double.negativeInfinity,
     -double.maxFinite,

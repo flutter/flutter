@@ -45,9 +45,8 @@ bool _isTaskRegistered = false;
 ///
 /// If no `processManager` is provided, a default [LocalProcessManager] is created
 /// for the task.
-Future<TaskResult> task(TaskFunction task, { ProcessManager? processManager }) async {
-  if (_isTaskRegistered)
-    throw StateError('A task is already registered');
+Future<TaskResult> task(TaskFunction task, {ProcessManager? processManager}) async {
+  if (_isTaskRegistered) throw StateError('A task is already registered');
   _isTaskRegistered = true;
 
   processManager ??= const LocalProcessManager();
@@ -65,12 +64,12 @@ Future<TaskResult> task(TaskFunction task, { ProcessManager? processManager }) a
 
 class _TaskRunner {
   _TaskRunner(this.task, this.processManager) {
-    registerExtension('ext.cocoonRunTask',
-        (String method, Map<String, String> parameters) async {
+    registerExtension('ext.cocoonRunTask', (String method, Map<String, String> parameters) async {
       final Duration? taskTimeout = parameters.containsKey('timeoutInMinutes')
-        ? Duration(minutes: int.parse(parameters['timeoutInMinutes']!))
-        : null;
-      final bool runFlutterConfig = parameters['runFlutterConfig'] != 'false'; // used by tests to avoid changing the configuration
+          ? Duration(minutes: int.parse(parameters['timeoutInMinutes']!))
+          : null;
+      final bool runFlutterConfig =
+          parameters['runFlutterConfig'] != 'false'; // used by tests to avoid changing the configuration
       final bool runProcessCleanup = parameters['runProcessCleanup'] != 'false';
       final String? localEngine = parameters['localEngine'];
       final TaskResult result = await run(
@@ -81,8 +80,7 @@ class _TaskRunner {
       );
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
-    registerExtension('ext.cocoonRunnerReady',
-        (String method, Map<String, String> parameters) async {
+    registerExtension('ext.cocoonRunnerReady', (String method, Map<String, String> parameters) async {
       return ServiceExtensionResponse.result('"ready"');
     });
   }
@@ -110,7 +108,8 @@ class _TaskRunner {
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
 
-  Future<TaskResult> run(Duration? taskTimeout, {
+  Future<TaskResult> run(
+    Duration? taskTimeout, {
     bool runFlutterConfig = true,
     bool runProcessCleanup = true,
     required String? localEngine,
@@ -137,15 +136,18 @@ class _TaskRunner {
 
       if (runFlutterConfig) {
         print('Enabling configs for macOS, Linux, Windows, and Web...');
-        final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
-          'config',
-          '-v',
-          '--enable-macos-desktop',
-          '--enable-windows-desktop',
-          '--enable-linux-desktop',
-          '--enable-web',
-          if (localEngine != null) ...<String>['--local-engine', localEngine],
-        ], canFail: true);
+        final int configResult = await exec(
+            path.join(flutterDirectory.path, 'bin', 'flutter'),
+            <String>[
+              'config',
+              '-v',
+              '--enable-macos-desktop',
+              '--enable-windows-desktop',
+              '--enable-linux-desktop',
+              '--enable-web',
+              if (localEngine != null) ...<String>['--local-engine', localEngine],
+            ],
+            canFail: true);
         if (configResult != 0) {
           print('Failed to enable configuration, tasks may not run.');
         }
@@ -165,8 +167,7 @@ class _TaskRunner {
         }
 
         Future<TaskResult> futureResult = _performTask();
-        if (taskTimeout != null)
-          futureResult = futureResult.timeout(taskTimeout);
+        if (taskTimeout != null) futureResult = futureResult.timeout(taskTimeout);
 
         result = await futureResult;
       } finally {
@@ -243,8 +244,7 @@ class _TaskRunner {
   /// Causes the Dart VM to stay alive until a request to run the task is
   /// received via the VM service protocol.
   void keepVmAliveUntilTaskRunRequested() {
-    if (_taskStarted)
-      throw StateError('Task already started.');
+    if (_taskStarted) throw StateError('Task already started.');
 
     // Merely creating this port object will cause the VM to stay alive and keep
     // the VM service server running until the port is disposed of.
@@ -282,8 +282,7 @@ class _TaskRunner {
       // are catching errors coming from arbitrary (and untrustworthy) task
       // code. Our goal is to convert the failure into a readable message.
       // Propagating it further is not useful.
-      if (!completer.isCompleted)
-        completer.complete(TaskResult.failure(message));
+      if (!completer.isCompleted) completer.complete(TaskResult.failure(message));
     });
     return completer.future;
   }

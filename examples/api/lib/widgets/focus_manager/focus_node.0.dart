@@ -106,8 +106,7 @@ class _ColorfulButtonState extends State<ColorfulButton> {
           height: 100,
           color: _focused ? _color : Colors.white,
           alignment: Alignment.center,
-          child:
-              Text(_focused ? "I'm in color! Press R,G,B!" : 'Press to focus'),
+          child: Text(_focused ? "I'm in color! Press R,G,B!" : 'Press to focus'),
         ),
       ),
     );

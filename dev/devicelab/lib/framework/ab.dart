@@ -48,9 +48,8 @@ class ABTest {
 
   static Map<String, List<double>> _convertFrom(dynamic results) {
     final Map<String, dynamic> resultMap = results as Map<String, dynamic>;
-    return <String, List<double>> {
-      for (String key in resultMap.keys)
-        key: (resultMap[key] as List<dynamic>).cast<double>()
+    return <String, List<double>>{
+      for (String key in resultMap.keys) key: (resultMap[key] as List<dynamic>).cast<double>()
     };
   }
 
@@ -83,15 +82,15 @@ class ABTest {
   }
 
   Map<String, dynamic> get jsonMap => <String, dynamic>{
-    kBenchmarkTypeKeyName:     kBenchmarkResultsType,
-    kBenchmarkVersionKeyName:  kBenchmarkABVersion,
-    kLocalEngineKeyName:       localEngine,
-    kTaskNameKeyName:          taskName,
-    kRunStartKeyName:          runStart.toIso8601String(),
-    kRunEndKeyName:            runEnd!.toIso8601String(),
-    kAResultsKeyName:          _aResults,
-    kBResultsKeyName:          _bResults,
-  };
+        kBenchmarkTypeKeyName: kBenchmarkResultsType,
+        kBenchmarkVersionKeyName: kBenchmarkABVersion,
+        kLocalEngineKeyName: localEngine,
+        kTaskNameKeyName: taskName,
+        kRunStartKeyName: runStart.toIso8601String(),
+        kRunEndKeyName: runEnd!.toIso8601String(),
+        kAResultsKeyName: _aResults,
+        kBResultsKeyName: _bResults,
+      };
 
   static void updateColumnLengths(List<int> lengths, List<String?> results) {
     for (int column = 0; column < lengths.length; column++) {
@@ -101,10 +100,8 @@ class ABTest {
     }
   }
 
-  static void formatResult(StringBuffer buffer,
-                           List<int> lengths,
-                           List<FieldJustification> aligns,
-                           List<String?> values) {
+  static void formatResult(
+      StringBuffer buffer, List<int> lengths, List<FieldJustification> aligns, List<String?> values) {
     for (int column = 0; column < lengths.length; column++) {
       final int len = lengths[column];
       String? value = values[column];
@@ -119,13 +116,13 @@ class ABTest {
             value = value.padLeft(len);
             break;
           case FieldJustification.CENTER:
-            value = value.padLeft((len + value.length) ~/2);
+            value = value.padLeft((len + value.length) ~/ 2);
             value = value.padRight(len);
             break;
         }
       }
       if (column > 0) {
-        value = value.padLeft(len+1);
+        value = value.padLeft(len + 1);
       }
       buffer.write(value);
     }
@@ -143,22 +140,21 @@ class ABTest {
       for (final String scoreKey in <String>{...summariesA.keys, ...summariesB.keys})
         <String?>[
           scoreKey,
-          summariesA[scoreKey]?.averageString, summariesA[scoreKey]?.noiseString,
-          summariesB[scoreKey]?.averageString, summariesB[scoreKey]?.noiseString,
+          summariesA[scoreKey]?.averageString,
+          summariesA[scoreKey]?.noiseString,
+          summariesB[scoreKey]?.averageString,
+          summariesB[scoreKey]?.noiseString,
           summariesA[scoreKey]?.improvementOver(summariesB[scoreKey]),
         ],
     ];
 
-    final List<String> titles = <String>[
-      'Score',
-      'Average A', '(noise)',
-      'Average B', '(noise)',
-      'Speed-up'
-    ];
+    final List<String> titles = <String>['Score', 'Average A', '(noise)', 'Average B', '(noise)', 'Speed-up'];
     final List<FieldJustification> alignments = <FieldJustification>[
       FieldJustification.LEFT,
-      FieldJustification.RIGHT, FieldJustification.LEFT,
-      FieldJustification.RIGHT, FieldJustification.LEFT,
+      FieldJustification.RIGHT,
+      FieldJustification.LEFT,
+      FieldJustification.RIGHT,
+      FieldJustification.LEFT,
       FieldJustification.CENTER
     ];
 
@@ -169,11 +165,14 @@ class ABTest {
     }
 
     final StringBuffer buffer = StringBuffer();
-    formatResult(buffer, lengths,
+    formatResult(
+        buffer,
+        lengths,
         <FieldJustification>[
           FieldJustification.CENTER,
           ...alignments.skip(1),
-        ], titles);
+        ],
+        titles);
     for (final List<String?> row in tableRows) {
       formatResult(buffer, lengths, alignments, row);
     }
@@ -287,13 +286,13 @@ void _addResult(TaskResult result, Map<String, List<double>> results) {
 Map<String, _ScoreSummary> _summarize(Map<String, List<double>> results) {
   return results.map<String, _ScoreSummary>((String scoreKey, List<double> values) {
     final double average = _computeAverage(values);
-    return MapEntry<String, _ScoreSummary>(scoreKey, _ScoreSummary(
-      average: average,
-      // If the average is zero, the benchmark got the perfect score with no noise.
-      noise: average > 0
-        ? _computeStandardDeviationForPopulation(values) / average
-        : 0.0,
-    ));
+    return MapEntry<String, _ScoreSummary>(
+        scoreKey,
+        _ScoreSummary(
+          average: average,
+          // If the average is zero, the benchmark got the perfect score with no noise.
+          noise: average > 0 ? _computeStandardDeviationForPopulation(values) / average : 0.0,
+        ));
   });
 }
 

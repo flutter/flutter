@@ -66,17 +66,66 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
   SyntaxHighlighterStyle? _style;
 
   static const List<String> _keywords = <String>[
-    'abstract', 'as', 'assert', 'async', 'await', 'break', 'case', 'catch',
-    'class', 'const', 'continue', 'default', 'deferred', 'do', 'dynamic', 'else',
-    'enum', 'export', 'external', 'extends', 'factory', 'false', 'final',
-    'finally', 'for', 'get', 'if', 'implements', 'import', 'in', 'is', 'library',
-    'new', 'null', 'operator', 'part', 'rethrow', 'return', 'set', 'static',
-    'super', 'switch', 'sync', 'this', 'throw', 'true', 'try', 'typedef', 'var',
-    'void', 'while', 'with', 'yield',
+    'abstract',
+    'as',
+    'assert',
+    'async',
+    'await',
+    'break',
+    'case',
+    'catch',
+    'class',
+    'const',
+    'continue',
+    'default',
+    'deferred',
+    'do',
+    'dynamic',
+    'else',
+    'enum',
+    'export',
+    'external',
+    'extends',
+    'factory',
+    'false',
+    'final',
+    'finally',
+    'for',
+    'get',
+    'if',
+    'implements',
+    'import',
+    'in',
+    'is',
+    'library',
+    'new',
+    'null',
+    'operator',
+    'part',
+    'rethrow',
+    'return',
+    'set',
+    'static',
+    'super',
+    'switch',
+    'sync',
+    'this',
+    'throw',
+    'true',
+    'try',
+    'typedef',
+    'var',
+    'void',
+    'while',
+    'with',
+    'yield',
   ];
 
   static const List<String> _builtInTypes = <String>[
-    'int', 'double', 'num', 'bool',
+    'int',
+    'double',
+    'num',
+    'bool',
   ];
 
   String? _src;
@@ -149,8 +198,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
           endComment,
         ));
 
-        if (eof)
-          break;
+        if (eof) break;
 
         continue;
       }
@@ -227,11 +275,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
       // Integer
       if (_scanner.scan(RegExp(r'\d+'))) {
-        _spans.add(_HighlightSpan(
-          _HighlightType.number,
-          _scanner.lastMatch!.start,
-          _scanner.lastMatch!.end)
-        );
+        _spans.add(_HighlightSpan(_HighlightType.number, _scanner.lastMatch!.start, _scanner.lastMatch!.end));
         continue;
       }
 
@@ -260,8 +304,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _HighlightType? type;
 
         String word = _scanner.lastMatch![0]!;
-        if (word.startsWith('_'))
-          word = word.substring(1);
+        if (word.startsWith('_')) word = word.substring(1);
 
         if (_keywords.contains(word))
           type = _HighlightType.keyword;
@@ -315,15 +358,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
   }
 }
 
-enum _HighlightType {
-  number,
-  comment,
-  keyword,
-  string,
-  punctuation,
-  klass,
-  constant
-}
+enum _HighlightType { number, comment, keyword, string, punctuation, klass, constant }
 
 class _HighlightSpan {
   _HighlightSpan(this.type, this.start, this.end);

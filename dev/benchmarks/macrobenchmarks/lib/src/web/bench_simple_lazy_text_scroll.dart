@@ -84,9 +84,7 @@ class _TestScrollingWidgetState extends State<_TestScrollingWidget> {
       bool forward = true;
       while (true) {
         await scrollController.animateTo(
-          forward
-              ? widget.initialScrollOffset + widget.scrollDistance
-              : widget.initialScrollOffset,
+          forward ? widget.initialScrollOffset + widget.scrollDistance : widget.initialScrollOffset,
           curve: Curves.linear,
           duration: widget.scrollDuration,
         );

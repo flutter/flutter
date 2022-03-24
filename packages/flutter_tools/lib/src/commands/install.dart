@@ -15,7 +15,8 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     requiresPubspecYaml();
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
-    argParser.addFlag('uninstall-only',
+    argParser.addFlag(
+      'uninstall-only',
       help: 'Uninstall the app if already on the device. Skip install.',
     );
   }
@@ -84,12 +85,8 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   }
 }
 
-Future<bool> installApp(
-  Device device,
-  ApplicationPackage package, {
-  String? userIdentifier,
-  bool uninstall = true
-}) async {
+Future<bool> installApp(Device device, ApplicationPackage package,
+    {String? userIdentifier, bool uninstall = true}) async {
   if (package == null) {
     return false;
   }

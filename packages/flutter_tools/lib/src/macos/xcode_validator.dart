@@ -10,9 +10,9 @@ class XcodeValidator extends DoctorValidator {
   XcodeValidator({
     required Xcode xcode,
     required UserMessages userMessages,
-  }) : _xcode = xcode,
-      _userMessages = userMessages,
-      super('Xcode - develop for iOS and macOS');
+  })  : _xcode = xcode,
+        _userMessages = userMessages,
+        super('Xcode - develop for iOS and macOS');
 
   final Xcode _xcode;
   final UserMessages _userMessages;
@@ -53,7 +53,6 @@ class XcodeValidator extends DoctorValidator {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(_userMessages.xcodeMissingSimct));
       }
-
     } else {
       xcodeStatus = ValidationType.missing;
       if (xcodeSelectPath == null || xcodeSelectPath.isEmpty) {

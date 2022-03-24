@@ -80,11 +80,12 @@ BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector
 final BotDetector _defaultBotDetector = BotDetector(
   httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
   platform: platform,
-  persistentToolState: persistentToolState ?? PersistentToolState(
-    fileSystem: fs,
-    logger: logger,
-    platform: platform,
-  ),
+  persistentToolState: persistentToolState ??
+      PersistentToolState(
+        fileSystem: fs,
+        logger: logger,
+        platform: platform,
+      ),
 );
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
@@ -93,14 +94,16 @@ Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
 FileSystem get fs => ErrorHandlingFileSystem(
-  delegate: context.get<FileSystem>() ?? localFileSystem,
-  platform: platform,
-);
+      delegate: context.get<FileSystem>() ?? localFileSystem,
+      platform: platform,
+    );
 
-FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? FileSystemUtils(
-  fileSystem: fs,
-  platform: platform,
-);
+FileSystemUtils get fsUtils =>
+    context.get<FileSystemUtils>() ??
+    FileSystemUtils(
+      fileSystem: fs,
+      platform: platform,
+    );
 
 const ProcessManager _kLocalProcessManager = LocalProcessManager();
 
@@ -115,7 +118,7 @@ UserMessages get userMessages => context.get<UserMessages>()!;
 
 final OutputPreferences _default = OutputPreferences(
   wrapText: stdio.hasTerminal,
-  showColor:  platform.stdoutSupportsAnsi,
+  showColor: platform.stdoutSupportsAnsi,
   stdio: stdio,
 );
 OutputPreferences get outputPreferences => context.get<OutputPreferences>() ?? _default;
@@ -133,14 +136,14 @@ ProcessInfo get processInfo => context.get<ProcessInfo>()!;
 /// Set [color] to a [TerminalColor] to color the output, if the logger
 /// supports it. The [color] defaults to [TerminalColor.red].
 void printError(
-    String message, {
-      StackTrace? stackTrace,
-      bool? emphasis,
-      TerminalColor? color,
-      int? indent,
-      int? hangingIndent,
-      bool? wrap,
-    }) {
+  String message, {
+  StackTrace? stackTrace,
+  bool? emphasis,
+  TerminalColor? color,
+  int? indent,
+  int? hangingIndent,
+  bool? wrap,
+}) {
   logger.printError(
     message,
     stackTrace: stackTrace,
@@ -159,13 +162,13 @@ void printError(
 /// Set [color] to a [TerminalColor] to color the output, if the logger
 /// supports it. The [color] defaults to [TerminalColor.cyan].
 void printWarning(
-    String message, {
-      bool? emphasis,
-      TerminalColor? color,
-      int? indent,
-      int? hangingIndent,
-      bool? wrap,
-    }) {
+  String message, {
+  bool? emphasis,
+  TerminalColor? color,
+  int? indent,
+  int? hangingIndent,
+  bool? wrap,
+}) {
   logger.printWarning(
     message,
     emphasis: emphasis ?? false,
@@ -186,14 +189,14 @@ void printWarning(
 /// If `indent` is provided, each line of the message will be prepended by the
 /// specified number of whitespaces.
 void printStatus(
-    String message, {
-      bool? emphasis,
-      bool? newline,
-      TerminalColor? color,
-      int? indent,
-      int? hangingIndent,
-      bool? wrap,
-    }) {
+  String message, {
+  bool? emphasis,
+  bool? newline,
+  TerminalColor? color,
+  int? indent,
+  int? hangingIndent,
+  bool? wrap,
+}) {
   logger.printStatus(
     message,
     emphasis: emphasis ?? false,
@@ -205,7 +208,6 @@ void printStatus(
   );
 }
 
-
 /// Display the [message] inside a box.
 ///
 /// For example, this is the generated output:
@@ -216,7 +218,8 @@ void printStatus(
 ///
 /// If a terminal is attached, the lines in [message] are automatically wrapped based on
 /// the available columns.
-void printBox(String message, {
+void printBox(
+  String message, {
   String? title,
 }) {
   logger.printBox(message, title: title);
@@ -240,8 +243,9 @@ final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
 Stdio get stdio => context.get<Stdio>() ?? (_stdioInstance ??= Stdio());
 Stdio? _stdioInstance;
 
-PlistParser get plistParser => context.get<PlistParser>() ?? (
-    _plistInstance ??= PlistParser(
+PlistParser get plistParser =>
+    context.get<PlistParser>() ??
+    (_plistInstance ??= PlistParser(
       fileSystem: fs,
       processManager: processManager,
       logger: logger,
@@ -258,10 +262,10 @@ ShutdownHooks? get shutdownHooks => context.get<ShutdownHooks>();
 // and the catchable signals it considers to be fatal.
 LocalFileSystem? _instance;
 LocalFileSystem get localFileSystem => _instance ??= LocalFileSystem(
-  LocalSignals.instance,
-  Signals.defaultExitSignals,
-  shutdownHooks,
-);
+      LocalSignals.instance,
+      Signals.defaultExitSignals,
+      shutdownHooks,
+    );
 
 /// Gradle utils in the current [AppContext].
 GradleUtils? get gradleUtils => context.get<GradleUtils>();
@@ -269,10 +273,11 @@ GradleUtils? get gradleUtils => context.get<GradleUtils>();
 CocoaPods? get cocoaPods => context.get<CocoaPods>();
 
 FlutterProjectFactory get projectFactory {
-  return context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(
-    logger: logger,
-    fileSystem: fs,
-  );
+  return context.get<FlutterProjectFactory>() ??
+      FlutterProjectFactory(
+        logger: logger,
+        fileSystem: fs,
+      );
 }
 
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
@@ -284,4 +289,5 @@ const String kDefaultFrameworkChannel = 'master';
 
 // Used to build RegExp instances which can detect the VM service message.
 const String kServicePrefixRegExp = '(?:Observatory|The Dart VM service is)';
-final RegExp kVMServiceMessageRegExp = RegExp(kServicePrefixRegExp + r' listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+final RegExp kVMServiceMessageRegExp =
+    RegExp(kServicePrefixRegExp + r' listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');

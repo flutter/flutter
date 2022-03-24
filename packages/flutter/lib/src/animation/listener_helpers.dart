@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
@@ -26,8 +25,7 @@ mixin AnimationLazyListenerMixin {
   @protected
   void didRegisterListener() {
     assert(_listenerCounter >= 0);
-    if (_listenerCounter == 0)
-      didStartListening();
+    if (_listenerCounter == 0) didStartListening();
     _listenerCounter += 1;
   }
 
@@ -41,8 +39,7 @@ mixin AnimationLazyListenerMixin {
   void didUnregisterListener() {
     assert(_listenerCounter >= 1);
     _listenerCounter -= 1;
-    if (_listenerCounter == 0)
-      didStopListening();
+    if (_listenerCounter == 0) didStopListening();
   }
 
   /// Called when the number of listeners changes from zero to one.
@@ -66,16 +63,16 @@ mixin AnimationLazyListenerMixin {
 mixin AnimationEagerListenerMixin {
   /// This implementation ignores listener registrations.
   @protected
-  void didRegisterListener() { }
+  void didRegisterListener() {}
 
   /// This implementation ignores listener registrations.
   @protected
-  void didUnregisterListener() { }
+  void didUnregisterListener() {}
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
   @mustCallSuper
-  void dispose() { }
+  void dispose() {}
 }
 
 /// A mixin that implements the [addListener]/[removeListener] protocol and notifies
@@ -142,17 +139,16 @@ mixin AnimationLocalListenersMixin {
       InformationCollector? collector;
       assert(() {
         collector = () => <DiagnosticsNode>[
-          DiagnosticsProperty<AnimationLocalListenersMixin>(
-            'The $runtimeType notifying listeners was',
-            this,
-            style: DiagnosticsTreeStyle.errorProperty,
-          ),
-        ];
+              DiagnosticsProperty<AnimationLocalListenersMixin>(
+                'The $runtimeType notifying listeners was',
+                this,
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+            ];
         return true;
       }());
       try {
-        if (_listeners.contains(listener))
-          listener();
+        if (_listeners.contains(listener)) listener();
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -229,18 +225,17 @@ mixin AnimationLocalStatusListenersMixin {
     final List<AnimationStatusListener> localListeners = List<AnimationStatusListener>.of(_statusListeners);
     for (final AnimationStatusListener listener in localListeners) {
       try {
-        if (_statusListeners.contains(listener))
-          listener(status);
+        if (_statusListeners.contains(listener)) listener(status);
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
           collector = () => <DiagnosticsNode>[
-            DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
-              'The $runtimeType notifying status listeners was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ];
+                DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
+                  'The $runtimeType notifying status listeners was',
+                  this,
+                  style: DiagnosticsTreeStyle.errorProperty,
+                ),
+              ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(

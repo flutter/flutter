@@ -39,8 +39,7 @@ class MyStatelessWidget extends StatelessWidget {
       // BouncingScrollPhysics is combined with AlwaysScrollableScrollPhysics
       // to allow for the overscroll, regardless of the depth of the
       // scrollable.
-      physics:
-          const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       slivers: <Widget>[
         SliverToBoxAdapter(
           child: Container(

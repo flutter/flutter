@@ -58,11 +58,13 @@ class BenchClippedOutPictures extends SceneBuilderRecorder {
       final Canvas canvas = Canvas(pictureRecorder);
       canvas.save();
       canvas.drawCircle(Offset(pictureSize.width / 2, pictureSize.height / 2), 5.0, paint);
-      canvas.drawRect(Rect.fromCenter(
-        center: Offset(pictureSize.width / 2, pictureSize.height / 2),
-        width: pictureSize.width / 6,
-        height: pictureSize.height / 6,
-      ), paint);
+      canvas.drawRect(
+          Rect.fromCenter(
+            center: Offset(pictureSize.width / 2, pictureSize.height / 2),
+            width: pictureSize.width / 6,
+            height: pictureSize.height / 6,
+          ),
+          paint);
       canvas.restore();
       final Picture picture = pictureRecorder.endRecording();
       sceneBuilder.addPicture(Offset.zero, picture);

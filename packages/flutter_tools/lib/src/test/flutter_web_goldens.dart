@@ -28,15 +28,17 @@ import 'test_config.dart';
 /// of golden files.
 class TestGoldenComparator {
   /// Creates a [TestGoldenComparator] instance.
-  TestGoldenComparator(this.shellPath, this.compilerFactory, {
+  TestGoldenComparator(
+    this.shellPath,
+    this.compilerFactory, {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required ProcessManager processManager,
     @required this.webRenderer,
-  }) : tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _processManager = processManager;
+  })  : tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
+        _logger = logger,
+        _fileSystem = fileSystem,
+        _processManager = processManager;
 
   final String shellPath;
   final Directory tempDir;
@@ -63,7 +65,8 @@ class TestGoldenComparator {
       return _previousComparator;
     }
 
-    final String bootstrap = TestGoldenComparatorProcess.generateBootstrap(_fileSystem.file(testUri), testUri, logger: _logger);
+    final String bootstrap =
+        TestGoldenComparatorProcess.generateBootstrap(_fileSystem.file(testUri), testUri, logger: _logger);
     final Process process = await _startProcess(bootstrap);
     unawaited(_previousComparator?.close());
     _previousComparator = TestGoldenComparatorProcess(process, logger: _logger);
@@ -118,8 +121,7 @@ class TestGoldenComparatorProcess {
   TestGoldenComparatorProcess(this.process, {@required Logger logger}) : _logger = logger {
     // Pipe stdout and stderr to printTrace and printError.
     // Also parse stdout as a stream of JSON objects.
-    streamIterator = StreamIterator<Map<String, dynamic>>(
-      process.stdout
+    streamIterator = StreamIterator<Map<String, dynamic>>(process.stdout
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
         .where((String line) {
@@ -129,12 +131,9 @@ class TestGoldenComparatorProcess {
         .map<dynamic>(jsonDecode)
         .cast<Map<String, dynamic>>());
 
-    process.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .forEach((String line) {
-          logger.printError('<<< $line');
-        });
+    process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).forEach((String line) {
+      logger.printError('<<< $line');
+    });
   }
 
   final Logger _logger;

@@ -21,11 +21,12 @@ void main() {
       void frameCounter(Duration elapsed) {
         frameCount += 1;
       }
+
       tester.binding.addPersistentFrameCallback(frameCounter);
 
       const int timeInSecond = 1;
       const Duration totalTime = Duration(seconds: timeInSecond);
-      const int moveEventNumber = timeInSecond * 120;  // 120Hz
+      const int moveEventNumber = timeInSecond * 120; // 120Hz
       const Offset movePerRun = Offset(0.0, -200.0 / moveEventNumber);
       final List<PointerEventRecord> records = <PointerEventRecord>[
         PointerEventRecord(Duration.zero, <PointerEvent>[
@@ -38,7 +39,7 @@ void main() {
           ),
         ]),
         ...<PointerEventRecord>[
-          for (int t=0; t < moveEventNumber; t++)
+          for (int t = 0; t < moveEventNumber; t++)
             PointerEventRecord(totalTime * (t / moveEventNumber), <PointerEvent>[
               PointerMoveEvent(
                 timeStamp: totalTime * (t / moveEventNumber),
@@ -82,9 +83,11 @@ Map<String, dynamic> _summarizeResult(
   final List<Duration> delays,
 ) {
   assert(delays.length > 1);
-  final List<int> delayedInMicro = delays.map<int>(
-    (Duration delay) => delay.inMicroseconds,
-  ).toList();
+  final List<int> delayedInMicro = delays
+      .map<int>(
+        (Duration delay) => delay.inMicroseconds,
+      )
+      .toList();
   final List<int> delayedInMicroSorted = List<int>.from(delayedInMicro)..sort();
   final int index90th = (delayedInMicroSorted.length * 0.90).round();
   final int percentile90th = delayedInMicroSorted[index90th];
@@ -94,7 +97,6 @@ Map<String, dynamic> _summarizeResult(
     'frame_count': frameCount,
     'average_delay_millis': averageDelay / 1E3,
     '90th_percentile_delay_millis': percentile90th / 1E3,
-    if (kDebugMode)
-    'delaysInMicro': delayedInMicro,
+    if (kDebugMode) 'delaysInMicro': delayedInMicro,
   };
 }

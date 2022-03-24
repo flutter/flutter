@@ -43,8 +43,8 @@ class PluginEventChannel<T> {
     this.name, [
     this.codec = const StandardMethodCodec(),
     this.binaryMessenger,
-  ]) : assert(name != null),
-       assert(codec != null);
+  ])  : assert(name != null),
+        assert(codec != null);
 
   /// The logical channel on which communication happens.
   ///
@@ -67,11 +67,10 @@ class PluginEventChannel<T> {
   ///
   /// This setter is deprecated because it has no corresponding getter,
   /// and providing a getter would require making this class non-const.
-  @Deprecated(
-    'Replace calls to the "controller" setter with calls to the "setController" method. '
-    'This feature was deprecated after v1.23.0-7.0.pre.'
-  )
-  set controller(StreamController<T> controller) { // ignore: avoid_setters_without_getters
+  @Deprecated('Replace calls to the "controller" setter with calls to the "setController" method. '
+      'This feature was deprecated after v1.23.0-7.0.pre.')
+  set controller(StreamController<T> controller) {
+    // ignore: avoid_setters_without_getters
     setController(controller);
   }
 

@@ -11,10 +11,12 @@ void main() {
 
     late IconThemeData retrieved;
     await tester.pumpWidget(
-      IconTheme(data: data, child: Builder(builder: (BuildContext context) {
-        retrieved = IconTheme.of(context);
-        return const SizedBox();
-      })),
+      IconTheme(
+          data: data,
+          child: Builder(builder: (BuildContext context) {
+            retrieved = IconTheme.of(context);
+            return const SizedBox();
+          })),
     );
 
     expect(retrieved, data);
@@ -24,7 +26,8 @@ void main() {
         data: const CupertinoIconThemeData(color: CupertinoColors.systemBlue),
         child: MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: Builder(builder: (BuildContext context) {
+          child: Builder(
+            builder: (BuildContext context) {
               retrieved = IconTheme.of(context);
               return const SizedBox();
             },

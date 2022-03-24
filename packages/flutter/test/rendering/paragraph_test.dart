@@ -96,7 +96,7 @@ void main() {
 
   test('getFullHeightForCaret control test', () {
     final RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(text: _kText,style: TextStyle(fontSize: 10.0)),
+      const TextSpan(text: _kText, style: TextStyle(fontSize: 10.0)),
       textDirection: TextDirection.ltr,
     );
     layout(paragraph);
@@ -251,7 +251,7 @@ void main() {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
-              'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
+            'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
         style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
@@ -330,8 +330,8 @@ void main() {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: "How do you write like you're running out of time? Write day and night like you're running out of time?",
-            // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
-            // 0          1          2       3       4      5     6         7         8    9       10      11     12
+        // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
+        // 0          1          2       3       4      5     6         7         8    9       10      11     12
         style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
@@ -408,9 +408,9 @@ void main() {
       ],
     );
     final RenderParagraph paragraph = RenderParagraph(
-        testSpan,
-        textDirection: TextDirection.ltr,
-        textScaleFactor: 1.3,
+      testSpan,
+      textDirection: TextDirection.ltr,
+      textScaleFactor: 1.3,
     );
     paragraph.layout(const BoxConstraints());
     // anyOf is needed here because Linux and Mac have different text
@@ -573,7 +573,7 @@ void main() {
     ];
     RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
-        children: <InlineSpan> [
+        children: <InlineSpan>[
           WidgetSpan(child: Text(sentence)),
         ],
       ),
@@ -590,7 +590,7 @@ void main() {
     ];
     paragraph = RenderParagraph(
       const TextSpan(
-        children: <InlineSpan> [
+        children: <InlineSpan>[
           WidgetSpan(child: Text(sentence)),
         ],
       ),
@@ -617,7 +617,7 @@ void main() {
     ];
     RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
-        children: <InlineSpan> [
+        children: <InlineSpan>[
           WidgetSpan(child: Text(sentence)),
         ],
       ),
@@ -634,7 +634,7 @@ void main() {
     ];
     paragraph = RenderParagraph(
       const TextSpan(
-        children: <InlineSpan> [
+        children: <InlineSpan>[
           WidgetSpan(child: Text(sentence)),
         ],
       ),
@@ -693,12 +693,12 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
     expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
     // Wraps
-    expect(boxes[4], const TextBox.fromLTRBD(0.0, 14.0, 14.0, 28.0 , TextDirection.ltr));
+    expect(boxes[4], const TextBox.fromLTRBD(0.0, 14.0, 14.0, 28.0, TextDirection.ltr));
     expect(boxes[5], const TextBox.fromLTRBD(14.0, 14.0, 28.0, 28.0, TextDirection.ltr));
     expect(boxes[6], const TextBox.fromLTRBD(28.0, 14.0, 42.0, 28.0, TextDirection.ltr));
     // Wraps
     expect(boxes[7], const TextBox.fromLTRBD(0.0, 28.0, 14.0, 42.0, TextDirection.ltr));
-    expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
+    expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0, TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
   test('Does not include the semantics node of truncated rendering children', () {
@@ -706,8 +706,7 @@ void main() {
     const double screenWidth = 100;
     const String sentence = 'truncated';
     final List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(
-          const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
     ];
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
@@ -733,7 +732,7 @@ void main() {
     });
   });
 
-    test('Supports gesture recognizer semantics', () {
+  test('Supports gesture recognizer semantics', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[
         TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),

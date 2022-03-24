@@ -25,9 +25,9 @@ class GitHubTemplateCreator {
     required FileSystem fileSystem,
     required Logger logger,
     required FlutterProjectFactory flutterProjectFactory,
-  }) : _fileSystem = fileSystem,
-      _logger = logger,
-      _flutterProjectFactory = flutterProjectFactory;
+  })  : _fileSystem = fileSystem,
+        _logger = logger,
+        _flutterProjectFactory = flutterProjectFactory;
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -51,15 +51,15 @@ class GitHubTemplateCreator {
     } else if (error is DevFSException) {
       // Suppress underlying error.
       return 'DevFSException: ${error.message}';
-    } else if (error is NoSuchMethodError
-      || error is ArgumentError
-      || error is VersionCheckError
-      || error is MissingDefineException
-      || error is UnsupportedError
-      || error is UnimplementedError
-      || error is StateError
-      || error is ProcessExit
-      || error is OSError) {
+    } else if (error is NoSuchMethodError ||
+        error is ArgumentError ||
+        error is VersionCheckError ||
+        error is MissingDefineException ||
+        error is UnsupportedError ||
+        error is UnimplementedError ||
+        error is StateError ||
+        error is ProcessExit ||
+        error is OSError) {
       // These exception objects only reference tool internals, print the whole error.
       return '${error.runtimeType}: $error';
     } else if (error is Error) {
@@ -76,11 +76,7 @@ class GitHubTemplateCreator {
   ///
   /// Shorten the URL, if possible.
   Future<String> toolCrashIssueTemplateGitHubURL(
-      String command,
-      Object error,
-      StackTrace stackTrace,
-      String doctorText
-    ) async {
+      String command, Object error, StackTrace stackTrace, String doctorText) async {
     final String errorString = sanitizedCrashException(error);
     final String title = '[tool_crash] $errorString';
     final String body = '''
@@ -108,10 +104,10 @@ ${_projectMetadataInformation()}
 ''';
 
     return 'https://github.com/flutter/flutter/issues'
-      '/new' // We split this here to appease our lint that looks for bad "new bug" links.
-      '?title=${Uri.encodeQueryComponent(title)}'
-      '&body=${Uri.encodeQueryComponent(body)}'
-      '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}';
+        '/new' // We split this here to appease our lint that looks for bad "new bug" links.
+        '?title=${Uri.encodeQueryComponent(title)}'
+        '&body=${Uri.encodeQueryComponent(body)}'
+        '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}';
   }
 
   /// Provide information about the Flutter project in the working directory, if present.

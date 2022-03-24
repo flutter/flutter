@@ -65,8 +65,7 @@ class HashUrlStrategy extends UrlStrategy {
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
   /// interactions.
-  const HashUrlStrategy(
-      [this._platformLocation = const BrowserPlatformLocation()]);
+  const HashUrlStrategy([this._platformLocation = const BrowserPlatformLocation()]);
 
   final PlatformLocation _platformLocation;
 
@@ -100,9 +99,7 @@ class HashUrlStrategy extends UrlStrategy {
     // if the empty URL is pushed it won't replace any existing fragment. So
     // when the hash path is empty, we instead return the location's path and
     // query.
-    return internalUrl.isEmpty
-        ? '${_platformLocation.pathname}${_platformLocation.search}'
-        : '#$internalUrl';
+    return internalUrl.isEmpty ? '${_platformLocation.pathname}${_platformLocation.search}' : '#$internalUrl';
   }
 
   @override

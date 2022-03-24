@@ -43,8 +43,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       child: GridView.builder(
         controller: _controllerOne,
         itemCount: 120,
-        gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
         itemBuilder: (BuildContext context, int index) {
           return Center(
             child: Text('item $index'),

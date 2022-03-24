@@ -34,12 +34,12 @@ void writeFile(String path, String content, {bool writeFutureModifiedDate = fals
   final File file = fileSystem.file(path)
     ..createSync(recursive: true)
     ..writeAsStringSync(content, flush: true);
-    // Some integration tests on Windows to not see this file as being modified
-    // recently enough for the hot reload to pick this change up unless the
-    // modified time is written in the future.
-    if (writeFutureModifiedDate) {
-      file.setLastModifiedSync(DateTime.now().add(const Duration(seconds: 5)));
-    }
+  // Some integration tests on Windows to not see this file as being modified
+  // recently enough for the hot reload to pick this change up unless the
+  // modified time is written in the future.
+  if (writeFutureModifiedDate) {
+    file.setLastModifiedSync(DateTime.now().add(const Duration(seconds: 5)));
+  }
 }
 
 void writeBytesFile(String path, List<int> content) {

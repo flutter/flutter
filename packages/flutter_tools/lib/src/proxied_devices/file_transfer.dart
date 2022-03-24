@@ -40,12 +40,12 @@ class BlockHashes {
   final String fileMd5;
 
   Map<String, Object> toJson() => <String, Object>{
-    'blockSize': blockSize,
-    'totalSize': totalSize,
-    'adler32': base64.encode(Uint8List.view(Uint32List.fromList(adler32).buffer)),
-    'md5': md5,
-    'fileMd5': fileMd5,
-  };
+        'blockSize': blockSize,
+        'totalSize': totalSize,
+        'adler32': base64.encode(Uint8List.view(Uint32List.fromList(adler32).buffer)),
+        'md5': md5,
+        'fileMd5': fileMd5,
+      };
 
   static BlockHashes fromJson(Map<String, Object?> obj) {
     return BlockHashes(
@@ -134,7 +134,7 @@ int adler32Hash(List<int> binary) {
 /// Helper to calculate rolling Adler32 hash of a file.
 @visibleForTesting
 class RollingAdler32 {
-  RollingAdler32(this.blockSize): _buffer = Uint8List(blockSize);
+  RollingAdler32(this.blockSize) : _buffer = Uint8List(blockSize);
 
   /// Block size of the rolling hash calculation.
   final int blockSize;
@@ -183,7 +183,7 @@ class RollingAdler32 {
     } else if (_cur == 0) {
       return _buffer;
     } else {
-      final BytesBuilder builder = BytesBuilder(copy:false)
+      final BytesBuilder builder = BytesBuilder(copy: false)
         ..add(Uint8List.sublistView(_buffer, _cur))
         ..add(Uint8List.sublistView(_buffer, 0, _cur));
       return builder.takeBytes();
@@ -222,7 +222,7 @@ class RollingAdler32 {
 /// given instructions.
 class FileTransfer {
   /// Calculate hashes of blocks in the file.
-  Future<BlockHashes> calculateBlockHashesOfFile(File file, { int? blockSize }) async {
+  Future<BlockHashes> calculateBlockHashesOfFile(File file, {int? blockSize}) async {
     final int totalSize = await file.length();
     blockSize ??= max(sqrt(totalSize).ceil(), 2560);
 
@@ -410,8 +410,8 @@ class FileTransfer {
 /// Represents a single line of instruction on how to generate the target file.
 @immutable
 class FileDeltaBlock {
-  const FileDeltaBlock.fromSource({required this.start, required this.size}): copyFromDestination = false;
-  const FileDeltaBlock.fromDestination({required this.start, required this.size}): copyFromDestination = true;
+  const FileDeltaBlock.fromSource({required this.start, required this.size}) : copyFromDestination = false;
+  const FileDeltaBlock.fromDestination({required this.start, required this.size}) : copyFromDestination = true;
 
   /// If true, this block should be read from the destination file.
   final bool copyFromDestination;
@@ -422,11 +422,10 @@ class FileDeltaBlock {
   /// Byte offset in the destination file from which the block should be read.
   final int start;
 
-  Map<String, Object> toJson() => <String, Object> {
-    if (copyFromDestination)
-      'start': start,
-    'size': size,
-  };
+  Map<String, Object> toJson() => <String, Object>{
+        if (copyFromDestination) 'start': start,
+        'size': size,
+      };
 
   static List<FileDeltaBlock> fromJsonList(List<Map<String, Object?>> jsonList) {
     return jsonList.map((Map<String, Object?> json) {

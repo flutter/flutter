@@ -118,9 +118,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   onPressed: () => debugPrint('You pressed the other button!'),
                   child: const Text('ANOTHER BUTTON TO FOCUS'),
                 ),
-                DefaultTextStyle(
-                    style: Theme.of(context).textTheme.headline2!,
-                    child: const Text('BACKDROP')),
+                DefaultTextStyle(style: Theme.of(context).textTheme.headline2!, child: const Text('BACKDROP')),
               ],
             ),
           ),
@@ -144,12 +142,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             // TRY THIS: Try changing this to Colors.green.withOpacity(0.8) to see for
             // yourself that the hidden components do/don't get focus.
             backgroundColor: Colors.green,
-            onPressed: backdropIsVisible
-                ? null
-                : () => setState(() => backdropIsVisible = true),
-            child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.headline2!,
-                child: const Text('FOREGROUND')),
+            onPressed: backdropIsVisible ? null : () => setState(() => backdropIsVisible = true),
+            child: DefaultTextStyle(style: Theme.of(context).textTheme.headline2!, child: const Text('FOREGROUND')),
           ),
         ),
       ],

@@ -56,9 +56,9 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('Physical Key Definition');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       final String firstComment = _wrapString('Represents the location of the '
-        '"${entry.commentName}" key on a generalized keyboard.');
+          '"${entry.commentName}" key on a generalized keyboard.');
       final String otherComments = _wrapString('See the function '
-        '[RawKeyEvent.physicalKey] for more information.');
+          '[RawKeyEvent.physicalKey] for more information.');
       lines.add(entry.usbHidCode, '''
 $firstComment  ///
 $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode)});
@@ -101,11 +101,10 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   String? _otherComments(String name) {
     if (synonyms.containsKey(name)) {
-      final Set<String> unionNames = synonyms[name]!.keys.map(
-        (LogicalKeyEntry entry) => entry.constantName).toSet();
+      final Set<String> unionNames = synonyms[name]!.keys.map((LogicalKeyEntry entry) => entry.constantName).toSet();
       return _wrapString('This key represents the union of the keys '
-              '$unionNames when comparing keys. This key will never be generated '
-              'directly, its main use is in defining key maps.');
+          '$unionNames when comparing keys. This key will never be generated '
+          'directly, its main use is in defining key maps.');
     }
     return null;
   }
@@ -179,8 +178,8 @@ ${_wrapString(constant.description)}  ///
 
   late final Map<String, SynonymKeyInfo> synonyms = Map<String, SynonymKeyInfo>.fromEntries(
     LogicalKeyData.synonyms.entries.map((MapEntry<String, List<String>> synonymDefinition) {
-      final List<LogicalKeyEntry> entries = synonymDefinition.value.map(
-        (String name) => logicalData.entryByName(name)).toList();
+      final List<LogicalKeyEntry> entries =
+          synonymDefinition.value.map((String name) => logicalData.entryByName(name)).toList();
       return MapEntry<String, SynonymKeyInfo>(
         synonymDefinition.key,
         SynonymKeyInfo(

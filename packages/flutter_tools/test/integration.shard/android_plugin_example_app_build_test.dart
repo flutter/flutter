@@ -15,8 +15,7 @@ void main() {
 
   setUp(() async {
     tempDirPluginMethodChannels = createResolvedTempDirectorySync('flutter_plugin_test.');
-    tempDirPluginFfi =
-        createResolvedTempDirectorySync('flutter_ffi_plugin_test.');
+    tempDirPluginFfi = createResolvedTempDirectorySync('flutter_ffi_plugin_test.');
   });
 
   tearDown(() async {
@@ -48,19 +47,16 @@ void main() {
       throw Exception('flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
     }
 
-    final Directory exampleAppDir =
-        tempDir.childDirectory(testName).childDirectory('example');
+    final Directory exampleAppDir = tempDir.childDirectory(testName).childDirectory('example');
 
     final File buildGradleFile = exampleAppDir.childDirectory('android').childFile('build.gradle');
     expect(buildGradleFile, exists);
 
     final String buildGradle = buildGradleFile.readAsStringSync();
-    final RegExp androidPluginRegExp =
-        RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
+    final RegExp androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
     // Use AGP 4.1.0
-    final String newBuildGradle = buildGradle.replaceAll(
-        androidPluginRegExp, 'com.android.tools.build:gradle:4.1.0');
+    final String newBuildGradle = buildGradle.replaceAll(androidPluginRegExp, 'com.android.tools.build:gradle:4.1.0');
     buildGradleFile.writeAsStringSync(newBuildGradle);
 
     // Run flutter build apk using AGP 4.1.0
@@ -99,13 +95,11 @@ void main() {
 
     // Remove Gradle wrapper
     fileSystem
-        .directory(fileSystem.path
-            .join(exampleAppDir.path, 'android', 'gradle', 'wrapper'))
+        .directory(fileSystem.path.join(exampleAppDir.path, 'android', 'gradle', 'wrapper'))
         .deleteSync(recursive: true);
 
     // Enable R8 in gradle.properties
-    final File gradleProperties =
-        exampleAppDir.childDirectory('android').childFile('gradle.properties');
+    final File gradleProperties = exampleAppDir.childDirectory('android').childFile('gradle.properties');
     expect(gradleProperties, exists);
 
     gradleProperties.writeAsStringSync('''
@@ -125,16 +119,14 @@ android.enableR8=true''');
     expect(exampleApk, exists);
   }
 
-  test('plugin example can be built using current Flutter Gradle plugin',
-      () async {
+  test('plugin example can be built using current Flutter Gradle plugin', () async {
     await testPlugin(
       template: 'plugin',
       tempDir: tempDirPluginMethodChannels,
     );
   });
 
-  test('FFI plugin example can be built using current Flutter Gradle plugin',
-      () async {
+  test('FFI plugin example can be built using current Flutter Gradle plugin', () async {
     await testPlugin(
       template: 'plugin_ffi',
       tempDir: tempDirPluginFfi,

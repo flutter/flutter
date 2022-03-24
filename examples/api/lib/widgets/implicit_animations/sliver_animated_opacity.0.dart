@@ -34,8 +34,7 @@ class MyStatefulWidget extends StatefulWidget {
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with SingleTickerProviderStateMixin {
+class _MyStatefulWidgetState extends State<MyStatefulWidget> with SingleTickerProviderStateMixin {
   bool _visible = true;
 
   @override

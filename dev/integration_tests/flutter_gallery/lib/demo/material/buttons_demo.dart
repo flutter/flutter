@@ -6,8 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-const String _elevatedText =
-    'Elevated buttons add dimension to mostly flat layouts. They emphasize '
+const String _elevatedText = 'Elevated buttons add dimension to mostly flat layouts. They emphasize '
     'functions on busy or wide spaces.';
 
 const String _elevatedCode = 'buttons_elevated';
@@ -18,27 +17,23 @@ const String _textText = 'A text button displays an ink splash on press '
 
 const String _textCode = 'buttons_text';
 
-const String _outlinedText =
-    'Outlined buttons become opaque and elevate when pressed. They are often '
+const String _outlinedText = 'Outlined buttons become opaque and elevate when pressed. They are often '
     'paired with elevated buttons to indicate an alternative, secondary action.';
 
 const String _outlinedCode = 'buttons_outlined';
 
-const String _dropdownText =
-    "A dropdown button displays a menu that's used to select a value from a "
+const String _dropdownText = "A dropdown button displays a menu that's used to select a value from a "
     'small set of values. The button displays the current value and a down '
     'arrow.';
 
 const String _dropdownCode = 'buttons_dropdown';
 
-const String _iconText =
-    'IconButtons are appropriate for toggle buttons that allow a single choice '
+const String _iconText = 'IconButtons are appropriate for toggle buttons that allow a single choice '
     "to be selected or deselected, such as adding or removing an item's star.";
 
 const String _iconCode = 'buttons_icon';
 
-const String _actionText =
-    'Floating action buttons are used for a promoted action. They are '
+const String _actionText = 'Floating action buttons are used for a promoted action. They are '
     'distinguished by a circled icon floating above the UI and can have motion '
     'behaviors that include morphing, launching, and a transferring anchor '
     'point.';
@@ -189,7 +184,10 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               ),
               const TextButton(
                 onPressed: null,
-                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3',),
+                child: Text(
+                  'DISABLED',
+                  semanticsLabel: 'DISABLED BUTTON 3',
+                ),
               ),
             ],
           ),
@@ -327,17 +325,30 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 });
               },
               items: <String>[
-                  'One', 'Two', 'Free', 'Four', 'Can', 'I', 'Have', 'A', 'Little',
-                  'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
-                 ]
-                .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                })
-                .toList(),
-             ),
+                'One',
+                'Two',
+                'Free',
+                'Four',
+                'Can',
+                'I',
+                'Have',
+                'A',
+                'Little',
+                'Bit',
+                'More',
+                'Five',
+                'Six',
+                'Seven',
+                'Eight',
+                'Nine',
+                'Ten',
+              ].map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),
@@ -369,9 +380,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             ),
             onPressed: null,
           ),
-        ]
-        .map<Widget>((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button))
-        .toList(),
+        ].map<Widget>((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button)).toList(),
       ),
     );
   }

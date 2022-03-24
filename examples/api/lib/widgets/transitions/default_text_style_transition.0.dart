@@ -30,8 +30,7 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 /// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with TickerProviderStateMixin {
+class _MyStatefulWidgetState extends State<MyStatefulWidget> with TickerProviderStateMixin {
   late AnimationController _controller;
   late TextStyleTween _styleTween;
   late CurvedAnimation _curvedAnimation;
@@ -44,10 +43,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       vsync: this,
     )..repeat(reverse: true);
     _styleTween = TextStyleTween(
-      begin: const TextStyle(
-          fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
-      end: const TextStyle(
-          fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
+      begin: const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
+      end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
     );
     _curvedAnimation = CurvedAnimation(
       parent: _controller,

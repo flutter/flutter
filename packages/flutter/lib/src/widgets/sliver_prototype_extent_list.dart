@@ -38,8 +38,8 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
     Key? key,
     required SliverChildDelegate delegate,
     required this.prototypeItem,
-  }) : assert(prototypeItem != null),
-       super(key: key, delegate: delegate);
+  })  : assert(prototypeItem != null),
+        super(key: key, delegate: delegate);
 
   /// Defines the main axis extent of all of this sliver's children.
   ///
@@ -80,8 +80,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
 
   @override
   void didAdoptChild(RenderBox child) {
-    if (child != renderObject.child)
-      super.didAdoptChild(child);
+    if (child != renderObject.child) super.didAdoptChild(child);
   }
 
   @override
@@ -102,8 +101,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (_prototype != null)
-      visitor(_prototype!);
+    if (_prototype != null) visitor(_prototype!);
     super.visitChildren(visitor);
   }
 
@@ -129,11 +127,9 @@ class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor
   RenderBox? _child;
   RenderBox? get child => _child;
   set child(RenderBox? value) {
-    if (_child != null)
-      dropChild(_child!);
+    if (_child != null) dropChild(_child!);
     _child = value;
-    if (_child != null)
-      adoptChild(_child!);
+    if (_child != null) adoptChild(_child!);
     markNeedsLayout();
   }
 
@@ -146,28 +142,24 @@ class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    if (_child != null)
-      _child!.attach(owner);
+    if (_child != null) _child!.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    if (_child != null)
-      _child!.detach();
+    if (_child != null) _child!.detach();
   }
 
   @override
   void redepthChildren() {
-    if (_child != null)
-      redepthChild(_child!);
+    if (_child != null) redepthChild(_child!);
     super.redepthChildren();
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    if (_child != null)
-      visitor(_child!);
+    if (_child != null) visitor(_child!);
     super.visitChildren(visitor);
   }
 

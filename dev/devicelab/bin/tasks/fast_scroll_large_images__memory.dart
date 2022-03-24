@@ -14,7 +14,8 @@ class FastScrollLargeImagesMemoryTest extends MemoryTest {
   FastScrollLargeImagesMemoryTest()
       : super(
           '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-          'test_memory/large_images.dart', kPackageName,
+          'test_memory/large_images.dart',
+          kPackageName,
         );
 
   @override

@@ -107,6 +107,7 @@ class BuildSystemConfig {
 /// and meets any additional contracts present in the target.
 abstract class Target {
   const Target();
+
   /// The user-readable name of the target.
   ///
   /// This information is surfaced in the assemble commands and used as an
@@ -204,8 +205,7 @@ abstract class Target {
 
   /// Performs a fold across this target and its dependencies.
   T fold<T>(T initialValue, T Function(T previousValue, Target target) combine) {
-    final T dependencyResult = dependencies.fold(
-        initialValue, (T prev, Target t) => t.fold(prev, combine));
+    final T dependencyResult = dependencies.fold(initialValue, (T prev, Target t) => t.fold(prev, combine));
     return combine(dependencyResult, this);
   }
 
@@ -265,7 +265,7 @@ class CompositeTarget extends Target {
   String get name => '_composite';
 
   @override
-  Future<void> build(Environment environment) async { }
+  Future<void> build(Environment environment) async {}
 
   @override
   List<Source> get inputs => <Source>[];
@@ -382,7 +382,8 @@ class Environment {
   ///
   /// Any directories not provided will fallback to a [testDirectory]
   @visibleForTesting
-  factory Environment.test(Directory testDirectory, {
+  factory Environment.test(
+    Directory testDirectory, {
     Directory? projectDir,
     Directory? outputDir,
     Directory? cacheDir,
@@ -565,9 +566,9 @@ class FlutterBuildSystem extends BuildSystem {
     required FileSystem fileSystem,
     required Platform platform,
     required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _logger = logger;
+  })  : _fileSystem = fileSystem,
+        _platform = platform,
+        _logger = logger;
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -617,30 +618,27 @@ class FlutterBuildSystem extends BuildSystem {
     // and don't need to be tracked by external systems.
     {
       buildInstance.inputFiles.removeWhere((String path, File file) {
-        return path.contains('.flutter-plugins') ||
-                       path.contains('xcconfig') ||
-                     path.contains('.dart_tool');
+        return path.contains('.flutter-plugins') || path.contains('xcconfig') || path.contains('.dart_tool');
       });
       buildInstance.outputFiles.removeWhere((String path, File file) {
-        return path.contains('.flutter-plugins') ||
-                       path.contains('xcconfig') ||
-                     path.contains('.dart_tool');
+        return path.contains('.flutter-plugins') || path.contains('xcconfig') || path.contains('.dart_tool');
       });
     }
     trackSharedBuildDirectory(
-      environment, _fileSystem, buildInstance.outputFiles,
+      environment,
+      _fileSystem,
+      buildInstance.outputFiles,
     );
-    environment.buildDir.childFile('outputs.json')
-      .writeAsStringSync(json.encode(buildInstance.outputFiles.keys.toList()));
+    environment.buildDir
+        .childFile('outputs.json')
+        .writeAsStringSync(json.encode(buildInstance.outputFiles.keys.toList()));
 
     return BuildResult(
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
       performance: buildInstance.stepTimings,
-      inputFiles: buildInstance.inputFiles.values.toList()
-          ..sort((File a, File b) => a.path.compareTo(b.path)),
-      outputFiles: buildInstance.outputFiles.values.toList()
-          ..sort((File a, File b) => a.path.compareTo(b.path)),
+      inputFiles: buildInstance.inputFiles.values.toList()..sort((File a, File b) => a.path.compareTo(b.path)),
+      outputFiles: buildInstance.outputFiles.values.toList()..sort((File a, File b) => a.path.compareTo(b.path)),
     );
   }
 
@@ -724,18 +722,14 @@ class FlutterBuildSystem extends BuildSystem {
     lastBuildIdFile
       ..createSync()
       ..writeAsStringSync(currentBuildId);
-    final File outputsFile = environment.buildDir
-      .parent
-      .childDirectory(lastBuildId)
-      .childFile('outputs.json');
+    final File outputsFile = environment.buildDir.parent.childDirectory(lastBuildId).childFile('outputs.json');
 
     if (!outputsFile.existsSync()) {
       // There is no output list. This could happen if the user manually
       // edited .last_config or deleted .dart_tool.
       return;
     }
-    final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object?>)
-      .cast<String>();
+    final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object?>).cast<String>();
     for (final String lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
@@ -754,8 +748,7 @@ class _BuildInstance {
     required this.logger,
     required this.fileSystem,
     Platform? platform,
-  })
-    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
+  }) : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
 
   final Logger logger;
   final FileSystem fileSystem;
@@ -814,8 +807,7 @@ class _BuildInstance {
     try {
       // If we're missing a depfile, wait until after evaluating the target to
       // compute changes.
-      final bool canSkip = !node.missingDepfile &&
-        node.computeChanges(environment, fileCache, fileSystem, logger);
+      final bool canSkip = !node.missingDepfile && node.computeChanges(environment, fileCache, fileSystem, logger);
 
       if (canSkip) {
         skipped = true;
@@ -868,8 +860,7 @@ class _BuildInstance {
       node.target.clearStamp(environment);
       succeeded = false;
       skipped = false;
-      exceptionMeasurements[node.target.name] = ExceptionMeasurement(
-          node.target.name, exception, stackTrace);
+      exceptionMeasurements[node.target.name] = ExceptionMeasurement(node.target.name, exception, stackTrace);
     } finally {
       resource.release();
       stopwatch.stop();
@@ -935,6 +926,7 @@ void checkCycles(Target initial) {
     }
     stack.remove(target);
   }
+
   checkInternal(initial, <Target>{}, <Target>{});
 }
 
@@ -1143,6 +1135,7 @@ class InvalidatedReason {
   InvalidatedReason(this.kind);
 
   final InvalidatedReasonKind kind;
+
   /// Absolute file paths of inputs or outputs, depending on [kind].
   final List<String> data = <String>[];
 

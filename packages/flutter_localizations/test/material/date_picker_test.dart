@@ -58,12 +58,16 @@ void main() {
         final TextDirection textDirection = testLocales[locale]!['textDirection'] as TextDirection;
         final DateTime baseDate = DateTime(2017, 9, 27);
 
-        await _pumpBoilerplate(tester, CalendarDatePicker(
-          initialDate: baseDate,
-          firstDate: baseDate.subtract(const Duration(days: 90)),
-          lastDate: baseDate.add(const Duration(days: 90)),
-          onDateChanged: (DateTime newValue) {},
-        ), locale: locale, textDirection: textDirection);
+        await _pumpBoilerplate(
+            tester,
+            CalendarDatePicker(
+              initialDate: baseDate,
+              firstDate: baseDate.subtract(const Duration(days: 90)),
+              lastDate: baseDate.add(const Duration(days: 90)),
+              onDateChanged: (DateTime newValue) {},
+            ),
+            locale: locale,
+            textDirection: textDirection);
 
         expect(find.text(expectedMonthYearHeader), findsOneWidget);
 
@@ -81,9 +85,15 @@ void main() {
           final Offset offset = tester.getCenter(dayCell);
           if (previousCellOffset != null) {
             if (textDirection == TextDirection.ltr) {
-              expect(offset.dx > previousCellOffset.dx && offset.dy == previousCellOffset.dy || offset.dy > previousCellOffset.dy, true);
+              expect(
+                  offset.dx > previousCellOffset.dx && offset.dy == previousCellOffset.dy ||
+                      offset.dy > previousCellOffset.dy,
+                  true);
             } else {
-              expect(offset.dx < previousCellOffset.dx && offset.dy == previousCellOffset.dy || offset.dy > previousCellOffset.dy, true);
+              expect(
+                  offset.dx < previousCellOffset.dx && offset.dy == previousCellOffset.dy ||
+                      offset.dy > previousCellOffset.dy,
+                  true);
             }
           }
           previousCellOffset = offset;
@@ -231,29 +241,27 @@ void main() {
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
       tester.binding.window.devicePixelRatioTestValue = 1.0;
       addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (BuildContext context) {
-              return Localizations(
-                locale: locale,
-                delegates: GlobalMaterialLocalizations.delegates,
-                child: TextButton(
-                  child: const Text('X'),
-                  onPressed: () {
-                    showDatePicker(
-                      context: context,
-                      initialDate: initialDate,
-                      firstDate: firstDate,
-                      lastDate: lastDate,
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        )
-      );
+      await tester.pumpWidget(MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Localizations(
+              locale: locale,
+              delegates: GlobalMaterialLocalizations.delegates,
+              child: TextButton(
+                child: const Text('X'),
+                onPressed: () {
+                  showDatePicker(
+                    context: context,
+                    initialDate: initialDate,
+                    firstDate: firstDate,
+                    lastDate: lastDate,
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ));
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle();
     }
@@ -279,7 +287,6 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
-
 }
 
 Future<void> _pumpBoilerplate(

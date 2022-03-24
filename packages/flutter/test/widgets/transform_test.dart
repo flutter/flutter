@@ -252,8 +252,7 @@ void main() {
       ),
     );
 
-    final List<Layer> layers = tester.layers
-      ..retainWhere((Layer layer) => layer is TransformLayer);
+    final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
     final TransformLayer layer = layers[1] as TransformLayer;
@@ -269,17 +268,28 @@ void main() {
       ),
     );
 
-    final List<Layer> layers = tester.layers
-      ..retainWhere((Layer layer) => layer is TransformLayer);
+    final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
     final TransformLayer layer = layers[1] as TransformLayer;
     final Matrix4 transform = layer.transform!;
     expect(transform.storage, <dynamic>[
-      moreOrLessEquals(0.0), 1.0, 0.0, 0.0,
-      -1.0, moreOrLessEquals(0.0), 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      700.0, -100.0, 0.0, 1.0,
+      moreOrLessEquals(0.0),
+      1.0,
+      0.0,
+      0.0,
+      -1.0,
+      moreOrLessEquals(0.0),
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      700.0,
+      -100.0,
+      0.0,
+      1.0,
     ]);
   });
 
@@ -310,8 +320,7 @@ void main() {
     );
 
     // This should not cause a transform layer to be inserted.
-    final List<Layer> layers = tester.layers
-      ..retainWhere((Layer layer) => layer is TransformLayer);
+    final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 1); // only the render view
     expect(tester.getTopLeft(find.byType(Container)), const Offset(100.0, 50.0));
   });
@@ -324,8 +333,7 @@ void main() {
       ),
     );
 
-    final List<Layer> layers = tester.layers
-      ..retainWhere((Layer layer) => layer is TransformLayer);
+    final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
     final TransformLayer layer = layers[1] as TransformLayer;
@@ -380,7 +388,7 @@ void main() {
   testWidgets(
     '3D transform renders the same with or without needsCompositing',
     (WidgetTester tester) async {
-      for (double angle = 0; angle <= math.pi/4; angle += 0.01) {
+      for (double angle = 0; angle <= math.pi / 4; angle += 0.01) {
         await tester.pumpWidget(RepaintBoundary(child: _generateTransform(true, angle)));
         final RenderBox renderBox = tester.binding.renderView.child!;
         final OffsetLayer layer = renderBox.debugLayer! as OffsetLayer;
@@ -408,12 +416,8 @@ void main() {
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
     final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
-    expect(extractMatrix(layer.imageFilter), <double>[
-      1.0, 0.0, 0.0, 0.0,
-      0.0, 1.0, 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      25.0, 25.0, 0.0, 1.0]
-    );
+    expect(extractMatrix(layer.imageFilter),
+        <double>[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 25.0, 25.0, 0.0, 1.0]);
   });
 
   testWidgets('Transform.scale with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -426,12 +430,8 @@ void main() {
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
     final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
-    expect(extractMatrix(layer.imageFilter), <double>[
-      3.14159, 0.0, 0.0, 0.0,
-      0.0, 3.14159, 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      -856.636, -642.477, 0.0, 1.0]
-    );
+    expect(extractMatrix(layer.imageFilter),
+        <double>[3.14159, 0.0, 0.0, 0.0, 0.0, 3.14159, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -856.636, -642.477, 0.0, 1.0]);
   });
 
   testWidgets('Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -445,16 +445,30 @@ void main() {
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
     final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
     expect(extractMatrix(layer.imageFilter), <dynamic>[
-      moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
-      moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
-    );
+      moreOrLessEquals(0.7071067811865476),
+      moreOrLessEquals(0.7071067811865475),
+      0.0,
+      0.0,
+      moreOrLessEquals(-0.7071067811865475),
+      moreOrLessEquals(0.7071067811865476),
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      moreOrLessEquals(329.28932188134524),
+      moreOrLessEquals(-194.97474683058329),
+      0.0,
+      1.0
+    ]);
   });
 
   testWidgets('Offset Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
     await tester.pumpWidget(
-      SizedBox(width: 400, height: 400,
+      SizedBox(
+        width: 400,
+        height: 400,
         child: Center(
           child: Transform.rotate(
             angle: math.pi / 4,
@@ -467,11 +481,23 @@ void main() {
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
     final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
     expect(extractMatrix(layer.imageFilter), <dynamic>[
-      moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
-      moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
-    );
+      moreOrLessEquals(0.7071067811865476),
+      moreOrLessEquals(0.7071067811865475),
+      0.0,
+      0.0,
+      moreOrLessEquals(-0.7071067811865475),
+      moreOrLessEquals(0.7071067811865476),
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      moreOrLessEquals(329.28932188134524),
+      moreOrLessEquals(-194.97474683058329),
+      0.0,
+      1.0
+    ]);
   });
 
   testWidgets('Transform layers update to match child and filterQuality', (WidgetTester tester) async {
@@ -554,7 +580,8 @@ void main() {
     );
   });
 
-  testWidgets("Transform.scale() does not accept all three 'scale', 'scaleX' and 'scaleY' parameters to be non-null", (WidgetTester tester) async {
+  testWidgets("Transform.scale() does not accept all three 'scale', 'scaleX' and 'scaleY' parameters to be non-null",
+      (WidgetTester tester) async {
     await expectLater(() {
       tester.pumpWidget(Directionality(
           textDirection: TextDirection.ltr,
@@ -572,7 +599,9 @@ void main() {
     }, throwsAssertionError);
   });
 
-  testWidgets("Transform.scale() needs at least one of 'scale', 'scaleX' and 'scaleY' to be non-null, otherwise throws AssertionError", (WidgetTester tester) async {
+  testWidgets(
+      "Transform.scale() needs at least one of 'scale', 'scaleX' and 'scaleY' to be non-null, otherwise throws AssertionError",
+      (WidgetTester tester) async {
     await expectLater(() {
       tester.pumpWidget(Directionality(
           textDirection: TextDirection.ltr,
@@ -610,7 +639,8 @@ void main() {
 
     const Size target = Size(width * scale, height * scale);
 
-    expect(tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
+    expect(
+        tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
 
   testWidgets("Transform.scale() scales widget according to 'scaleX' and 'scaleY'", (WidgetTester tester) async {
@@ -638,7 +668,8 @@ void main() {
 
     const Size target = Size(width * scaleX, height * scaleY);
 
-    expect(tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
+    expect(
+        tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
 }
 
@@ -650,6 +681,7 @@ class TestRectPainter extends CustomPainter {
       Paint()..color = const Color(0xFFFF0000),
     );
   }
+
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 }

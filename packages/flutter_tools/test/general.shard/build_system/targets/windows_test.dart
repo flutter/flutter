@@ -45,8 +45,10 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
 
-    final String windowsDesktopPath = artifacts.getArtifactPath(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
-    final String windowsCppClientWrapper = artifacts.getArtifactPath(Artifact.windowsCppClientWrapper, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
+    final String windowsDesktopPath = artifacts.getArtifactPath(Artifact.windowsDesktopPath,
+        platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
+    final String windowsCppClientWrapper = artifacts.getArtifactPath(Artifact.windowsCppClientWrapper,
+        platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
     final String icuData = artifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.windows_x64);
     final List<String> requiredFiles = <String>[
       '$windowsDesktopPath\\flutter_export.h',
@@ -85,44 +87,45 @@ void main() {
     expect(fileSystem.file('C:\\windows\\flutter\\ephemeral\\$icuData'), exists);
     expect(fileSystem.file('C:\\windows\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo'), exists);
 
-    final File outputDepfile = environment.buildDir
-      .childFile('windows_engine_sources.d');
+    final File outputDepfile = environment.buildDir.childFile('windows_engine_sources.d');
 
     // Depfile is created correctly.
     expect(outputDepfile, exists);
 
-    final List<String> inputPaths = depfileService.parse(outputDepfile)
-      .inputs.map((File file) => file.path).toList();
-    final List<String> outputPaths = depfileService.parse(outputDepfile)
-      .outputs.map((File file) => file.path).toList();
+    final List<String> inputPaths = depfileService.parse(outputDepfile).inputs.map((File file) => file.path).toList();
+    final List<String> outputPaths = depfileService.parse(outputDepfile).outputs.map((File file) => file.path).toList();
 
     // Depfile has expected sources.
-    expect(inputPaths, unorderedEquals(<String>[
-      '$windowsDesktopPath\\flutter_export.h',
-      '$windowsDesktopPath\\flutter_messenger.h',
-      '$windowsDesktopPath\\flutter_windows.dll',
-      '$windowsDesktopPath\\flutter_windows.dll.exp',
-      '$windowsDesktopPath\\flutter_windows.dll.lib',
-      '$windowsDesktopPath\\flutter_windows.dll.pdb',
-      '$windowsDesktopPath\\flutter_plugin_registrar.h',
-      '$windowsDesktopPath\\flutter_texture_registrar.h',
-      '$windowsDesktopPath\\flutter_windows.h',
-      icuData,
-      '$windowsCppClientWrapper\\foo',
-    ]));
-    expect(outputPaths, unorderedEquals(<String>[
-      r'C:\windows\flutter\ephemeral\flutter_export.h',
-      r'C:\windows\flutter\ephemeral\flutter_messenger.h',
-      r'C:\windows\flutter\ephemeral\flutter_windows.dll',
-      r'C:\windows\flutter\ephemeral\flutter_windows.dll.exp',
-      r'C:\windows\flutter\ephemeral\flutter_windows.dll.lib',
-      r'C:\windows\flutter\ephemeral\flutter_windows.dll.pdb',
-      r'C:\windows\flutter\ephemeral\flutter_plugin_registrar.h',
-      r'C:\windows\flutter\ephemeral\flutter_texture_registrar.h',
-      r'C:\windows\flutter\ephemeral\flutter_windows.h',
-      'C:\\windows\\flutter\\ephemeral\\$icuData',
-      'C:\\windows\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo',
-    ]));
+    expect(
+        inputPaths,
+        unorderedEquals(<String>[
+          '$windowsDesktopPath\\flutter_export.h',
+          '$windowsDesktopPath\\flutter_messenger.h',
+          '$windowsDesktopPath\\flutter_windows.dll',
+          '$windowsDesktopPath\\flutter_windows.dll.exp',
+          '$windowsDesktopPath\\flutter_windows.dll.lib',
+          '$windowsDesktopPath\\flutter_windows.dll.pdb',
+          '$windowsDesktopPath\\flutter_plugin_registrar.h',
+          '$windowsDesktopPath\\flutter_texture_registrar.h',
+          '$windowsDesktopPath\\flutter_windows.h',
+          icuData,
+          '$windowsCppClientWrapper\\foo',
+        ]));
+    expect(
+        outputPaths,
+        unorderedEquals(<String>[
+          r'C:\windows\flutter\ephemeral\flutter_export.h',
+          r'C:\windows\flutter\ephemeral\flutter_messenger.h',
+          r'C:\windows\flutter\ephemeral\flutter_windows.dll',
+          r'C:\windows\flutter\ephemeral\flutter_windows.dll.exp',
+          r'C:\windows\flutter\ephemeral\flutter_windows.dll.lib',
+          r'C:\windows\flutter\ephemeral\flutter_windows.dll.pdb',
+          r'C:\windows\flutter\ephemeral\flutter_plugin_registrar.h',
+          r'C:\windows\flutter\ephemeral\flutter_texture_registrar.h',
+          r'C:\windows\flutter\ephemeral\flutter_windows.h',
+          'C:\\windows\\flutter\\ephemeral\\$icuData',
+          'C:\\windows\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo',
+        ]));
   });
 
   testWithoutContext('UnpackWindowsUwp copies files to the correct winuwp/ cache directory', () async {
@@ -144,8 +147,10 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
 
-    final String windowsDesktopPath = artifacts.getArtifactPath(Artifact.windowsUwpDesktopPath, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
-    final String windowsCppClientWrapper = artifacts.getArtifactPath(Artifact.windowsUwpCppClientWrapper, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
+    final String windowsDesktopPath = artifacts.getArtifactPath(Artifact.windowsUwpDesktopPath,
+        platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
+    final String windowsCppClientWrapper = artifacts.getArtifactPath(Artifact.windowsUwpCppClientWrapper,
+        platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
     final String icuData = artifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.windows_x64);
     final List<String> requiredFiles = <String>[
       '$windowsDesktopPath\\flutter_export.h',
@@ -185,45 +190,46 @@ void main() {
     expect(fileSystem.file('C:\\winuwp\\flutter\\ephemeral\\$icuData'), exists);
     expect(fileSystem.file('C:\\winuwp\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo'), exists);
 
-    final File outputDepfile = environment.buildDir
-      .childFile('windows_uwp_engine_sources.d');
+    final File outputDepfile = environment.buildDir.childFile('windows_uwp_engine_sources.d');
 
     // Depfile is created correctly.
     expect(outputDepfile, exists);
 
-    final List<String> inputPaths = depfileService.parse(outputDepfile)
-      .inputs.map((File file) => file.path).toList();
-    final List<String> outputPaths = depfileService.parse(outputDepfile)
-      .outputs.map((File file) => file.path).toList();
+    final List<String> inputPaths = depfileService.parse(outputDepfile).inputs.map((File file) => file.path).toList();
+    final List<String> outputPaths = depfileService.parse(outputDepfile).outputs.map((File file) => file.path).toList();
 
     // Depfile has expected sources.
-    expect(inputPaths, unorderedEquals(<String>[
-      '$windowsDesktopPath\\flutter_export.h',
-      '$windowsDesktopPath\\flutter_messenger.h',
-      '$windowsDesktopPath\\flutter_windows_winuwp.dll',
-      '$windowsDesktopPath\\flutter_windows_winuwp.dll.exp',
-      '$windowsDesktopPath\\flutter_windows_winuwp.dll.lib',
-      '$windowsDesktopPath\\flutter_windows_winuwp.dll.pdb',
-      '$windowsDesktopPath\\flutter_plugin_registrar.h',
-      '$windowsDesktopPath\\flutter_texture_registrar.h',
-      '$windowsDesktopPath\\flutter_windows.h',
-      icuData,
-      '$windowsCppClientWrapper\\foo',
-    ]));
-    expect(outputPaths, unorderedEquals(<String>[
-      r'C:\winuwp\flutter\ephemeral\flutter_export.h',
-      r'C:\winuwp\flutter\ephemeral\flutter_messenger.h',
-      r'C:\winuwp\flutter\ephemeral\flutter_windows_winuwp.dll',
-      r'C:\winuwp\flutter\ephemeral\flutter_windows_winuwp.dll.exp',
-      r'C:\winuwp\flutter\ephemeral\flutter_windows_winuwp.dll.lib',
-      r'C:\winuwp\flutter\ephemeral\flutter_windows_winuwp.dll.pdb',
-      r'C:\winuwp\flutter\ephemeral\flutter_plugin_registrar.h',
-      r'C:\winuwp\flutter\ephemeral\flutter_texture_registrar.h',
-      r'C:\winuwp\flutter\ephemeral\flutter_windows.h',
-      r'C:\winuwp\flutter\flutter_windows.h',
-      'C:\\winuwp\\flutter\\ephemeral\\$icuData',
-      'C:\\winuwp\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo',
-    ]));
+    expect(
+        inputPaths,
+        unorderedEquals(<String>[
+          '$windowsDesktopPath\\flutter_export.h',
+          '$windowsDesktopPath\\flutter_messenger.h',
+          '$windowsDesktopPath\\flutter_windows_winuwp.dll',
+          '$windowsDesktopPath\\flutter_windows_winuwp.dll.exp',
+          '$windowsDesktopPath\\flutter_windows_winuwp.dll.lib',
+          '$windowsDesktopPath\\flutter_windows_winuwp.dll.pdb',
+          '$windowsDesktopPath\\flutter_plugin_registrar.h',
+          '$windowsDesktopPath\\flutter_texture_registrar.h',
+          '$windowsDesktopPath\\flutter_windows.h',
+          icuData,
+          '$windowsCppClientWrapper\\foo',
+        ]));
+    expect(
+        outputPaths,
+        unorderedEquals(<String>[
+          r'C:\winuwp\flutter\ephemeral\flutter_export.h',
+          r'C:\winuwp\flutter\ephemeral\flutter_messenger.h',
+          r'C:\winuwp\flutter\ephemeral\flutter_windows_winuwp.dll',
+          r'C:\winuwp\flutter\ephemeral\flutter_windows_winuwp.dll.exp',
+          r'C:\winuwp\flutter\ephemeral\flutter_windows_winuwp.dll.lib',
+          r'C:\winuwp\flutter\ephemeral\flutter_windows_winuwp.dll.pdb',
+          r'C:\winuwp\flutter\ephemeral\flutter_plugin_registrar.h',
+          r'C:\winuwp\flutter\ephemeral\flutter_texture_registrar.h',
+          r'C:\winuwp\flutter\ephemeral\flutter_windows.h',
+          r'C:\winuwp\flutter\flutter_windows.h',
+          'C:\\winuwp\\flutter\\ephemeral\\$icuData',
+          'C:\\winuwp\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo',
+        ]));
   });
 
   // AssetBundleFactory still uses context injection
@@ -251,15 +257,13 @@ void main() {
 
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
     // sksl bundle
-    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
-      <String, Object>{
-        'engineRevision': '2',
-        'platform': 'ios',
-        'data': <String, Object>{
-          'A': 'B',
-        }
-      }
-    ));
+    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(<String, Object>{
+          'engineRevision': '2',
+          'platform': 'ios',
+          'data': <String, Object>{
+            'A': 'B',
+          }
+        }));
 
     await const DebugBundleWindowsAssets().build(environment);
 
@@ -275,16 +279,14 @@ void main() {
   });
 
   testUsingContext('ProfileBundleWindowsAssets creates correct bundle structure', () async {
-    final Environment environment = Environment.test(
-      fileSystem.currentDirectory,
-      artifacts: Artifacts.test(),
-      processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      defines: <String, String>{
-        kBuildMode: 'profile',
-      }
-    );
+    final Environment environment = Environment.test(fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        defines: <String, String>{
+          kBuildMode: 'profile',
+        });
 
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 
@@ -302,16 +304,14 @@ void main() {
   });
 
   testUsingContext('ReleaseBundleWindowsAssets creates correct bundle structure with UWP', () async {
-    final Environment environment = Environment.test(
-      fileSystem.currentDirectory,
-      artifacts: Artifacts.test(),
-      processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      defines: <String, String>{
-        kBuildMode: 'release',
-      }
-    );
+    final Environment environment = Environment.test(fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        defines: <String, String>{
+          kBuildMode: 'release',
+        });
 
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 
@@ -329,16 +329,14 @@ void main() {
   });
 
   testUsingContext('ProfileBundleWindowsAssets creates correct bundle structure with UWP', () async {
-    final Environment environment = Environment.test(
-      fileSystem.currentDirectory,
-      artifacts: Artifacts.test(),
-      processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      defines: <String, String>{
-        kBuildMode: 'profile',
-      }
-    );
+    final Environment environment = Environment.test(fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        defines: <String, String>{
+          kBuildMode: 'profile',
+        });
 
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 
@@ -356,16 +354,14 @@ void main() {
   });
 
   testUsingContext('ReleaseBundleWindowsAssets creates correct bundle structure', () async {
-    final Environment environment = Environment.test(
-      fileSystem.currentDirectory,
-      artifacts: Artifacts.test(),
-      processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      defines: <String, String>{
-        kBuildMode: 'release',
-      }
-    );
+    final Environment environment = Environment.test(fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        defines: <String, String>{
+          kBuildMode: 'release',
+        });
 
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 

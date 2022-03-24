@@ -19,11 +19,7 @@ import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 /// Matches a doctor validation result.
-Matcher _matchDoctorValidation({
-  ValidationType validationType,
-  String statusInfo,
-  dynamic messages
-}) {
+Matcher _matchDoctorValidation({ValidationType validationType, String statusInfo, dynamic messages}) {
   return const TypeMatcher<ValidationResult>()
       .having((ValidationResult result) => result.type, 'type', validationType)
       .having((ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
@@ -31,51 +27,53 @@ Matcher _matchDoctorValidation({
 }
 
 void main() {
-  testWithoutContext('FlutterValidator shows an error message if gen_snapshot is '
-    'downloaded and exits with code 1', () async {
+  testWithoutContext(
+      'FlutterValidator shows an error message if gen_snapshot is '
+      'downloaded and exits with code 1', () async {
     final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
       frameworkVersion: '1.0.0',
     );
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Artifacts artifacts = Artifacts.test();
     final FlutterValidator flutterValidator = FlutterValidator(
-      platform: FakePlatform(
-        localeName: 'en_US.UTF-8',
-        environment: <String, String>{},
-      ),
-      flutterVersion: () => flutterVersion,
+        platform: FakePlatform(
+          localeName: 'en_US.UTF-8',
+          environment: <String, String>{},
+        ),
+        flutterVersion: () => flutterVersion,
         devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
-      artifacts: artifacts,
-      fileSystem: fileSystem,
-      flutterRoot: () => 'sdk/flutter',
-      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
-      processManager: FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>['Artifact.genSnapshot'],
-          exitCode: 1,
-        )
-      ])
-    );
+        userMessages: UserMessages(),
+        artifacts: artifacts,
+        fileSystem: fileSystem,
+        flutterRoot: () => 'sdk/flutter',
+        operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['Artifact.genSnapshot'],
+            exitCode: 1,
+          )
+        ]));
     fileSystem.file(artifacts.getArtifactPath(Artifact.genSnapshot)).createSync(recursive: true);
 
-
-    expect(await flutterValidator.validate(), _matchDoctorValidation(
-      validationType: ValidationType.partial,
-      statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
-      messages: containsAll(const <ValidationMessage>[
-        ValidationMessage.error(
-          'Downloaded executables cannot execute on host.\n'
-          'See https://github.com/flutter/flutter/issues/6207 for more information\n'
-          'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
-          'On Fedora: dnf install libstdc++.i686\n'
-          'On Arch: pacman -S lib32-gcc-libs\n',
-        ),
-      ])),
+    expect(
+      await flutterValidator.validate(),
+      _matchDoctorValidation(
+          validationType: ValidationType.partial,
+          statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
+          messages: containsAll(const <ValidationMessage>[
+            ValidationMessage.error(
+              'Downloaded executables cannot execute on host.\n'
+              'See https://github.com/flutter/flutter/issues/6207 for more information\n'
+              'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
+              'On Fedora: dnf install libstdc++.i686\n'
+              'On Arch: pacman -S lib32-gcc-libs\n',
+            ),
+          ])),
     );
   });
 
-  testWithoutContext('FlutterValidator does not run gen_snapshot binary check if it is not already downloaded', () async {
+  testWithoutContext('FlutterValidator does not run gen_snapshot binary check if it is not already downloaded',
+      () async {
     final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
       frameworkVersion: '1.0.0',
     );
@@ -97,11 +95,13 @@ void main() {
 
     // gen_snapshot is downloaded on demand, and the doctor should not
     // fail if the gen_snapshot binary is not present.
-    expect(await flutterValidator.validate(), _matchDoctorValidation(
-      validationType: ValidationType.installed,
-      statusInfo: 'Channel unknown, 1.0.0, on Windows, locale en_US.UTF-8',
-      messages: anything,
-    ));
+    expect(
+        await flutterValidator.validate(),
+        _matchDoctorValidation(
+          validationType: ValidationType.installed,
+          statusInfo: 'Channel unknown, 1.0.0, on Windows, locale en_US.UTF-8',
+          messages: anything,
+        ));
   });
 
   testWithoutContext('FlutterValidator handles exception thrown by version checking', () async {
@@ -117,14 +117,16 @@ void main() {
       flutterRoot: () => 'sdk/flutter',
     );
 
-    expect(await flutterValidator.validate(), _matchDoctorValidation(
-      validationType: ValidationType.partial,
-      statusInfo: 'Channel unknown, 0.0.0, on Windows, locale en_US.UTF-8',
-      messages: containsAll(const <ValidationMessage>[
-        ValidationMessage('Flutter version 0.0.0 at sdk/flutter'),
-        ValidationMessage.error('version error'),
-      ]),
-    ));
+    expect(
+        await flutterValidator.validate(),
+        _matchDoctorValidation(
+          validationType: ValidationType.partial,
+          statusInfo: 'Channel unknown, 0.0.0, on Windows, locale en_US.UTF-8',
+          messages: containsAll(const <ValidationMessage>[
+            ValidationMessage('Flutter version 0.0.0 at sdk/flutter'),
+            ValidationMessage.error('version error'),
+          ]),
+        ));
   });
 
   testWithoutContext('FlutterValidator shows mirrors on pub and flutter cloud storage', () async {
@@ -142,32 +144,32 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Artifacts artifacts = Artifacts.test();
     final FlutterValidator flutterValidator = FlutterValidator(
-      platform: platform,
-      flutterVersion: () => flutterVersion,
+        platform: platform,
+        flutterVersion: () => flutterVersion,
         devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
-      artifacts: artifacts,
-      fileSystem: fileSystem,
-      processManager: FakeProcessManager.any(),
-      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
-      flutterRoot: () => 'sdk/flutter'
-    );
+        userMessages: UserMessages(),
+        artifacts: artifacts,
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.any(),
+        operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
+        flutterRoot: () => 'sdk/flutter');
 
-    expect(await flutterValidator.validate(), _matchDoctorValidation(
-      validationType: ValidationType.installed,
-      statusInfo: 'Channel unknown, 1.0.0, on Windows, locale en_US.UTF-8',
-      messages: containsAll(const <ValidationMessage>[
-        ValidationMessage('Pub download mirror https://example.com/pub'),
-        ValidationMessage('Flutter download mirror https://example.com/flutter'),
-      ])
-    ));
+    expect(
+        await flutterValidator.validate(),
+        _matchDoctorValidation(
+            validationType: ValidationType.installed,
+            statusInfo: 'Channel unknown, 1.0.0, on Windows, locale en_US.UTF-8',
+            messages: containsAll(const <ValidationMessage>[
+              ValidationMessage('Pub download mirror https://example.com/pub'),
+              ValidationMessage('Flutter download mirror https://example.com/flutter'),
+            ])));
   });
 
   testWithoutContext('FlutterValidator shows FLUTTER_GIT_URL environment variable when set', () async {
     final FlutterValidator flutterValidator = FlutterValidator(
       platform: FakePlatform(
         localeName: 'en_US.UTF-8',
-        environment: <String, String> {
+        environment: <String, String>{
           'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter.git',
         },
       ),
@@ -181,11 +183,13 @@ void main() {
       flutterRoot: () => 'sdk/flutter',
     );
 
-    expect(await flutterValidator.validate(), _matchDoctorValidation(
-      validationType: ValidationType.installed,
-      statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
-      messages: contains(const ValidationMessage('FLUTTER_GIT_URL = https://githubmirror.com/flutter.git')),
-    ));
+    expect(
+        await flutterValidator.validate(),
+        _matchDoctorValidation(
+          validationType: ValidationType.installed,
+          statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
+          messages: contains(const ValidationMessage('FLUTTER_GIT_URL = https://githubmirror.com/flutter.git')),
+        ));
   });
 
   group('FlutterValidator shows flutter upstream remote', () {
@@ -202,11 +206,13 @@ void main() {
         flutterRoot: () => 'sdk/flutter',
       );
 
-      expect(await flutterValidator.validate(), _matchDoctorValidation(
-        validationType: ValidationType.installed,
-        statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
-        messages: contains(const ValidationMessage('Upstream repository https://github.com/flutter/flutter.git')),
-      ));
+      expect(
+          await flutterValidator.validate(),
+          _matchDoctorValidation(
+            validationType: ValidationType.installed,
+            statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
+            messages: contains(const ValidationMessage('Upstream repository https://github.com/flutter/flutter.git')),
+          ));
     });
 
     testWithoutContext('unknown url if upstream is null', () async {
@@ -225,11 +231,13 @@ void main() {
         flutterRoot: () => 'sdk/flutter',
       );
 
-      expect(await flutterValidator.validate(), _matchDoctorValidation(
-        validationType: ValidationType.installed,
-        statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
-        messages: contains(const ValidationMessage('Upstream repository unknown')),
-      ));
+      expect(
+          await flutterValidator.validate(),
+          _matchDoctorValidation(
+            validationType: ValidationType.installed,
+            statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
+            messages: contains(const ValidationMessage('Upstream repository unknown')),
+          ));
     });
   });
 }

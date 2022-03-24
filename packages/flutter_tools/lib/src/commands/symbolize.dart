@@ -25,26 +25,16 @@ class SymbolizeCommand extends FlutterCommand {
     required Stdio stdio,
     required FileSystem fileSystem,
     DwarfSymbolizationService dwarfSymbolizationService = const DwarfSymbolizationService(),
-  }) : _stdio = stdio,
-       _fileSystem = fileSystem,
-       _dwarfSymbolizationService = dwarfSymbolizationService {
-    argParser.addOption(
-      'debug-info',
-      abbr: 'd',
-      valueHelp: '/out/android/app.arm64.symbols',
-      help: 'A path to the symbols file generated with "--split-debug-info".'
-    );
-    argParser.addOption(
-      'input',
-      abbr: 'i',
-      valueHelp: '/crashes/stack_trace.err',
-      help: 'A file path containing a Dart stack trace.'
-    );
-    argParser.addOption(
-      'output',
-      abbr: 'o',
-      help: 'A file path for a symbolized stack trace to be written to.'
-    );
+  })  : _stdio = stdio,
+        _fileSystem = fileSystem,
+        _dwarfSymbolizationService = dwarfSymbolizationService {
+    argParser.addOption('debug-info',
+        abbr: 'd',
+        valueHelp: '/out/android/app.arm64.symbols',
+        help: 'A path to the symbols file generated with "--split-debug-info".');
+    argParser.addOption('input',
+        abbr: 'i', valueHelp: '/crashes/stack_trace.err', help: 'A file path containing a Dart stack trace.');
+    argParser.addOption('output', abbr: 'o', help: 'A file path for a symbolized stack trace to be written to.');
   }
 
   final Stdio _stdio;
@@ -91,10 +81,7 @@ class SymbolizeCommand extends FlutterCommand {
       output = outputFile.openWrite();
     } else {
       final StreamController<List<int>> outputController = StreamController<List<int>>();
-      outputController
-        .stream
-        .transform(utf8.decoder)
-        .listen(_stdio.stdoutWrite);
+      outputController.stream.transform(utf8.decoder).listen(_stdio.stdoutWrite);
       output = IOSink(outputController);
     }
 
@@ -128,17 +115,13 @@ StreamTransformer<String, String> _defaultTransformer(Uint8List symbols) {
 
 // A no-op transformer for `DwarfSymbolizationService.test`
 StreamTransformer<String, String> _testTransformer(Uint8List buffer) {
-  return StreamTransformer<String, String>.fromHandlers(
-    handleData: (String data, EventSink<String> sink) {
-      sink.add(data);
-    },
-    handleDone: (EventSink<String> sink) {
-      sink.close();
-    },
-    handleError: (Object error, StackTrace stackTrace, EventSink<String> sink) {
-      sink.addError(error, stackTrace);
-    }
-  );
+  return StreamTransformer<String, String>.fromHandlers(handleData: (String data, EventSink<String> sink) {
+    sink.add(data);
+  }, handleDone: (EventSink<String> sink) {
+    sink.close();
+  }, handleError: (Object error, StackTrace stackTrace, EventSink<String> sink) {
+    sink.addError(error, stackTrace);
+  });
 }
 
 /// A service which decodes stack traces from Dart applications.
@@ -150,9 +133,7 @@ class DwarfSymbolizationService {
   /// Create a DwarfSymbolizationService with a no-op transformer for testing.
   @visibleForTesting
   factory DwarfSymbolizationService.test() {
-    return const DwarfSymbolizationService(
-      symbolsTransformer: _testTransformer
-    );
+    return const DwarfSymbolizationService(symbolsTransformer: _testTransformer);
   }
 
   final SymbolsTransformer _transformer;
@@ -172,21 +153,21 @@ class DwarfSymbolizationService {
     final Completer<void> onDone = Completer<void>();
     StreamSubscription<void>? subscription;
     subscription = input
-      .cast<List<int>>()
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
-      .transform(_transformer(symbols))
-      .listen((String line) {
-        try {
-          output.writeln(line);
-        } on Exception catch(e, s) {
-          subscription?.cancel().whenComplete(() {
-            if (!onDone.isCompleted) {
-              onDone.completeError(e, s);
-            }
-          });
-        }
-      }, onDone: onDone.complete, onError: onDone.completeError);
+        .cast<List<int>>()
+        .transform(const Utf8Decoder())
+        .transform(const LineSplitter())
+        .transform(_transformer(symbols))
+        .listen((String line) {
+      try {
+        output.writeln(line);
+      } on Exception catch (e, s) {
+        subscription?.cancel().whenComplete(() {
+          if (!onDone.isCompleted) {
+            onDone.completeError(e, s);
+          }
+        });
+      }
+    }, onDone: onDone.complete, onError: onDone.completeError);
 
     try {
       await onDone.future;

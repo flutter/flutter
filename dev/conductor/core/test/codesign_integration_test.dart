@@ -15,9 +15,7 @@ import './common.dart';
 
 /// Verify all binaries in the Flutter cache are expected by Conductor.
 void main() {
-  test(
-      'validate the expected binaries from the conductor codesign command are present in the cache',
-      () async {
+  test('validate the expected binaries from the conductor codesign command are present in the cache', () async {
     const Platform platform = LocalPlatform();
     const FileSystem fileSystem = LocalFileSystem();
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_integration_test.');
@@ -38,7 +36,8 @@ void main() {
     final String currentHead = (processManager.runSync(
       <String>['git', 'rev-parse', 'HEAD'],
       workingDirectory: flutterRoot.path,
-    ).stdout as String).trim();
+    ).stdout as String)
+        .trim();
 
     final FrameworkRepository framework = FrameworkRepository.localRepoAsUpstream(
       checkouts,

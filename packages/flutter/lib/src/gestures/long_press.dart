@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
@@ -111,8 +110,8 @@ class LongPressDownDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.kind,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  })  : assert(globalPosition != null),
+        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
@@ -138,8 +137,8 @@ class LongPressStartDetails {
   const LongPressStartDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  })  : assert(globalPosition != null),
+        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer initially contacted the screen.
   final Offset globalPosition;
@@ -164,10 +163,10 @@ class LongPressMoveUpdateDetails {
     Offset? localPosition,
     this.offsetFromOrigin = Offset.zero,
     Offset? localOffsetFromOrigin,
-  }) : assert(globalPosition != null),
-       assert(offsetFromOrigin != null),
-       localPosition = localPosition ?? globalPosition,
-       localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
+  })  : assert(globalPosition != null),
+        assert(offsetFromOrigin != null),
+        localPosition = localPosition ?? globalPosition,
+        localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
 
   /// The global position of the pointer when it triggered this update.
   final Offset globalPosition;
@@ -201,8 +200,8 @@ class LongPressEndDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.velocity = Velocity.zero,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  })  : assert(globalPosition != null),
+        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer lifted from the screen.
   final Offset globalPosition;
@@ -251,16 +250,16 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    PointerDeviceKind? kind,
+        PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
     Object? debugOwner,
   }) : super(
-         deadline: duration ?? kLongPressTimeout,
-         postAcceptSlopTolerance: postAcceptSlopTolerance,
-         kind: kind,
-         supportedDevices: supportedDevices,
-         debugOwner: debugOwner,
-       );
+          deadline: duration ?? kLongPressTimeout,
+          postAcceptSlopTolerance: postAcceptSlopTolerance,
+          kind: kind,
+          supportedDevices: supportedDevices,
+          debugOwner: debugOwner,
+        );
 
   bool _longPressAccepted = false;
   OffsetPair? _longPressOrigin;
@@ -577,8 +576,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onLongPress == null &&
             onLongPressMoveUpdate == null &&
             onLongPressEnd == null &&
-            onLongPressUp == null)
-          return false;
+            onLongPressUp == null) return false;
         break;
       case kSecondaryButton:
         if (onSecondaryLongPressDown == null &&
@@ -587,8 +585,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onSecondaryLongPress == null &&
             onSecondaryLongPressMoveUpdate == null &&
             onSecondaryLongPressEnd == null &&
-            onSecondaryLongPressUp == null)
-          return false;
+            onSecondaryLongPressUp == null) return false;
         break;
       case kTertiaryButton:
         if (onTertiaryLongPressDown == null &&
@@ -597,8 +594,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onTertiaryLongPress == null &&
             onTertiaryLongPressMoveUpdate == null &&
             onTertiaryLongPressEnd == null &&
-            onTertiaryLongPressUp == null)
-          return false;
+            onTertiaryLongPressUp == null) return false;
         break;
       default:
         return false;
@@ -663,8 +659,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     );
     switch (_initialButtons) {
       case kPrimaryButton:
-        if (onLongPressDown != null)
-          invokeCallback<void>('onLongPressDown', () => onLongPressDown!(details));
+        if (onLongPressDown != null) invokeCallback<void>('onLongPressDown', () => onLongPressDown!(details));
         break;
       case kSecondaryButton:
         if (onSecondaryLongPressDown != null)
@@ -683,8 +678,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (state == GestureRecognizerState.possible) {
       switch (_initialButtons) {
         case kPrimaryButton:
-          if (onLongPressCancel != null)
-            invokeCallback<void>('onLongPressCancel', onLongPressCancel!);
+          if (onLongPressCancel != null) invokeCallback<void>('onLongPressCancel', onLongPressCancel!);
           break;
         case kSecondaryButton:
           if (onSecondaryLongPressCancel != null)
@@ -773,9 +767,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   void _checkLongPressEnd(PointerEvent event) {
     final VelocityEstimate? estimate = _velocityTracker!.getVelocityEstimate();
-    final Velocity velocity = estimate == null
-        ? Velocity.zero
-        : Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
+    final Velocity velocity = estimate == null ? Velocity.zero : Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
     final LongPressEndDetails details = LongPressEndDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,

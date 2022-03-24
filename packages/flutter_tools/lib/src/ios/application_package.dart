@@ -19,8 +19,7 @@ abstract class IOSApp extends ApplicationPackage {
   static IOSApp? fromPrebuiltApp(FileSystemEntity applicationBinary) {
     final FileSystemEntityType entityType = globals.fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
-      globals.printError(
-          'File "${applicationBinary.path}" does not exist. Use an app bundle or an ipa.');
+      globals.printError('File "${applicationBinary.path}" does not exist. Use an app bundle or an ipa.');
       return null;
     }
     Directory uncompressedBundle;
@@ -39,15 +38,13 @@ abstract class IOSApp extends ApplicationPackage {
         globals.fs.path.join(tempDir.path, 'Payload'),
       );
       if (!payloadDir.existsSync()) {
-        globals.printError(
-            'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
+        globals.printError('Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
         return null;
       }
       try {
         uncompressedBundle = payloadDir.listSync().whereType<Directory>().singleWhere(_isBundleDirectory);
       } on StateError {
-        globals.printError(
-            'Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
+        globals.printError('Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
         return null;
       }
     }
@@ -107,8 +104,8 @@ abstract class IOSApp extends ApplicationPackage {
 
 class BuildableIOSApp extends IOSApp {
   BuildableIOSApp(this.project, String projectBundleId, String? hostAppBundleName)
-    : _hostAppBundleName = hostAppBundleName,
-      super(projectBundleId: projectBundleId);
+      : _hostAppBundleName = hostAppBundleName,
+        super(projectBundleId: projectBundleId);
 
   static Future<BuildableIOSApp?> fromProject(IosProject project, BuildInfo? buildInfo) async {
     final String? hostAppBundleName = await project.hostAppBundleName(buildInfo);
@@ -142,11 +139,9 @@ class BuildableIOSApp extends IOSApp {
       _hostAppBundleName == null ? 'Runner' : globals.fs.path.withoutExtension(_hostAppBundleName!));
 
   // The output xcarchive bundle path `build/ios/archive/Runner.xcarchive`.
-  String get archiveBundleOutputPath =>
-      globals.fs.path.setExtension(archiveBundlePath, '.xcarchive');
+  String get archiveBundleOutputPath => globals.fs.path.setExtension(archiveBundlePath, '.xcarchive');
 
-  String get ipaOutputPath =>
-      globals.fs.path.join(getIosBuildDirectory(), 'ipa');
+  String get ipaOutputPath => globals.fs.path.join(getIosBuildDirectory(), 'ipa');
 
   String _buildAppPath(String type) {
     return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);

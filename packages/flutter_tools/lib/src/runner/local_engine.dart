@@ -33,10 +33,10 @@ class LocalEngineLocator {
     required FileSystem fileSystem,
     required String flutterRoot,
     required UserMessages userMessages,
-  }) : _platform = platform,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _flutterRoot = flutterRoot,
+  })  : _platform = platform,
+        _logger = logger,
+        _fileSystem = fileSystem,
+        _flutterRoot = flutterRoot,
         _userMessages = userMessages;
 
   final Platform _platform;
@@ -113,7 +113,8 @@ class LocalEngineLocator {
     );
     // Skip if sky_engine is the version in bin/cache.
     Uri? engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
-    final String cachedPath = _fileSystem.path.join(_flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib');
+    final String cachedPath =
+        _fileSystem.path.join(_flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib');
     if (engineUri != null && _fileSystem.identicalSync(cachedPath, engineUri.path)) {
       _logger.printTrace('Local engine auto-detection sky_engine in $packagePath is the same version in bin/cache.');
       engineUri = null;
@@ -125,15 +126,9 @@ class LocalEngineLocator {
     String? engineSourcePath;
     final String? engineUriPath = engineUri?.path;
     if (engineUriPath != null) {
-      engineSourcePath = _fileSystem.directory(engineUriPath)
-        .parent
-        .parent
-        .parent
-        .parent
-        .parent
-        .parent
-        .path;
-      if (engineSourcePath != null && (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) || engineSourcePath.isEmpty)) {
+      engineSourcePath = _fileSystem.directory(engineUriPath).parent.parent.parent.parent.parent.parent.path;
+      if (engineSourcePath != null &&
+          (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) || engineSourcePath.isEmpty)) {
         engineSourcePath = null;
         throwToolExit(
           _userMessages.runnerNoEngineSrcDir(

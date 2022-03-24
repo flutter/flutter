@@ -31,13 +31,13 @@ void macroPerfTestE2E(
 }
 
 void macroPerfTestMultiPageE2E(
-    String testName,
-    List<ScrollableButtonRoute> routes, {
-      Duration? pageDelay,
-      Duration duration = const Duration(seconds: 3),
-      ControlCallback? body,
-      ControlCallback? setup,
-    }) {
+  String testName,
+  List<ScrollableButtonRoute> routes, {
+  Duration? pageDelay,
+  Duration duration = const Duration(seconds: 3),
+  ControlCallback? body,
+  ControlCallback? setup,
+}) {
   final WidgetsBinding widgetsBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   assert(widgetsBinding is IntegrationTestWidgetsFlutterBinding);
   final IntegrationTestWidgetsFlutterBinding binding = widgetsBinding as IntegrationTestWidgetsFlutterBinding;

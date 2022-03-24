@@ -117,14 +117,14 @@ class OutOfProcessDapTestServer extends DapTestServer {
     // having to rebuild the flutter_tools snapshot.
     // runFromSource=false will run "flutter ..."
 
-    final String flutterToolPath = globals.fs.path.join(Cache.flutterRoot!, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
-    final String flutterToolsEntryScript = globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'bin', 'flutter_tools.dart');
+    final String flutterToolPath =
+        globals.fs.path.join(Cache.flutterRoot!, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String flutterToolsEntryScript =
+        globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'bin', 'flutter_tools.dart');
 
     // When running from source, run "dart bin/flutter_tools.dart debug_adapter"
     // instead of directly using "flutter debug_adapter".
-    final String executable = _runFromSource
-      ? Platform.resolvedExecutable
-      : flutterToolPath;
+    final String executable = _runFromSource ? Platform.resolvedExecutable : flutterToolPath;
     final List<String> args = <String>[
       if (_runFromSource) flutterToolsEntryScript,
       'debug-adapter',

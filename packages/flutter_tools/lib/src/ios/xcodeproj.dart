@@ -47,7 +47,7 @@ class XcodeProjectInterpreter {
     required FileSystem fileSystem,
     required Usage usage,
     Version? version,
-  }) : _platform = platform,
+  })  : _platform = platform,
         _fileSystem = fileSystem,
         _logger = logger,
         _processUtils = ProcessUtils(logger: logger, processManager: processManager),
@@ -179,12 +179,9 @@ class XcodeProjectInterpreter {
       'xcodebuild',
       '-project',
       _fileSystem.path.absolute(projectPath),
-      if (scheme != null)
-        ...<String>['-scheme', scheme],
-      if (configuration != null)
-        ...<String>['-configuration', configuration],
-      if (buildContext.environmentType == EnvironmentType.simulator)
-        ...<String>['-sdk', 'iphonesimulator'],
+      if (scheme != null) ...<String>['-scheme', scheme],
+      if (configuration != null) ...<String>['-configuration', configuration],
+      if (buildContext.environmentType == EnvironmentType.simulator) ...<String>['-sdk', 'iphonesimulator'],
       '-destination',
       if (deviceId != null)
         'id=$deviceId'
@@ -211,7 +208,8 @@ class XcodeProjectInterpreter {
       return parseXcodeBuildSettings(out);
     } on Exception catch (error) {
       if (error is ProcessException && error.toString().contains('timed out')) {
-        BuildEvent('xcode-show-build-settings-timeout',
+        BuildEvent(
+          'xcode-show-build-settings-timeout',
           type: 'ios',
           command: showBuildSettingsCommand.join(' '),
           flutterUsage: _usage,
@@ -228,9 +226,9 @@ class XcodeProjectInterpreter {
   ///
   /// Returns the stdout of the Xcode command.
   Future<String?> pluginsBuildSettingsOutput(
-      Directory podXcodeProject, {
-        Duration timeout = const Duration(minutes: 1),
-      }) async {
+    Directory podXcodeProject, {
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
     if (!podXcodeProject.existsSync()) {
       // No plugins.
       return null;
@@ -266,7 +264,8 @@ class XcodeProjectInterpreter {
       return result.stdout.trim();
     } on Exception catch (error) {
       if (error is ProcessException && error.toString().contains('timed out')) {
-        BuildEvent('xcode-show-build-settings-timeout',
+        BuildEvent(
+          'xcode-show-build-settings-timeout',
           type: 'ios',
           command: showBuildSettingsCommand.join(' '),
           flutterUsage: _usage,
@@ -279,7 +278,7 @@ class XcodeProjectInterpreter {
     }
   }
 
-  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async {
+  Future<void> cleanWorkspace(String workspacePath, String scheme, {bool verbose = false}) async {
     await _processUtils.run(<String>[
       ...xcrunCommand(),
       'xcodebuild',
@@ -287,8 +286,7 @@ class XcodeProjectInterpreter {
       workspacePath,
       '-scheme',
       scheme,
-      if (!verbose)
-        '-quiet',
+      if (!verbose) '-quiet',
       'clean',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ], workingDirectory: _fileSystem.currentDirectory.path);
@@ -391,12 +389,7 @@ class XcodeProjectBuildContext {
 ///
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
-  const XcodeProjectInfo(
-    this.targets,
-    this.buildConfigurations,
-    this.schemes,
-    Logger logger
-  ) : _logger = logger;
+  const XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes, Logger logger) : _logger = logger;
 
   factory XcodeProjectInfo.fromXcodeBuildOutput(String output, Logger logger) {
     final List<String> targets = <String>[];
@@ -458,6 +451,7 @@ class XcodeProjectInfo {
     }
     return false;
   }
+
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
   String? schemeFor(BuildInfo? buildInfo) {

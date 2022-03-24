@@ -33,6 +33,7 @@ Future<String> dataHandler(String message) async {
       });
       completer.complete(json.encode(result));
     }
+
     if (SchedulerBinding.instance.hasScheduledFrame)
       SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
     else
@@ -43,9 +44,9 @@ Future<String> dataHandler(String message) async {
 }
 
 Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-  selectionControlsRoute : (BuildContext context) => const SelectionControlsPage(),
-  popupControlsRoute : (BuildContext context) => const PopupControlsPage(),
-  textFieldRoute : (BuildContext context) => const TextFieldPage(),
+  selectionControlsRoute: (BuildContext context) => const SelectionControlsPage(),
+  popupControlsRoute: (BuildContext context) => const PopupControlsPage(),
+  textFieldRoute: (BuildContext context) => const TextFieldPage(),
   headingsRoute: (BuildContext context) => const HeadingsPage(),
 };
 
@@ -56,22 +57,20 @@ class TestApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       routes: routes,
-      home: Builder(
-        builder: (BuildContext context) {
-          return Scaffold(
-            body: ListView(
-              children: routes.keys.map<Widget>((String value) {
-                return MaterialButton(
-                  child: Text(value),
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(value);
-                  },
-                );
-              }).toList(),
-            ),
-          );
-        }
-      ),
+      home: Builder(builder: (BuildContext context) {
+        return Scaffold(
+          body: ListView(
+            children: routes.keys.map<Widget>((String value) {
+              return MaterialButton(
+                child: Text(value),
+                onPressed: () {
+                  Navigator.of(context).pushNamed(value);
+                },
+              );
+            }).toList(),
+          ),
+        );
+      }),
     );
   }
 }

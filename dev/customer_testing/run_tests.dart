@@ -82,18 +82,22 @@ Future<bool> run(List<String> arguments) async {
   final bool help = parsedArguments['help'] as bool;
   final int? numberShards = int.tryParse(parsedArguments['shards'] as String);
   final int? shardIndex = int.tryParse(parsedArguments['shard-index'] as String);
-  final List<File> files = parsedArguments
-    .rest
-    .expand((String path) => Glob(path).listFileSystemSync(const LocalFileSystem()))
-    .whereType<File>()
-    .where((File file) => !skipTemplate || path.basename(file.path) != 'template.test')
-    .toList();
+  final List<File> files = parsedArguments.rest
+      .expand((String path) => Glob(path).listFileSystemSync(const LocalFileSystem()))
+      .whereType<File>()
+      .where((File file) => !skipTemplate || path.basename(file.path) != 'template.test')
+      .toList();
 
-  if (help || repeat == null || files.isEmpty || numberShards == null || numberShards <= 0 || shardIndex == null || shardIndex < 0) {
+  if (help ||
+      repeat == null ||
+      files.isEmpty ||
+      numberShards == null ||
+      numberShards <= 0 ||
+      shardIndex == null ||
+      shardIndex < 0) {
     printHelp();
     if (verbose) {
-      if (repeat == null)
-        print('Error: Could not parse repeat count ("${parsedArguments['repeat']}")');
+      if (repeat == null) print('Error: Could not parse repeat count ("${parsedArguments['repeat']}")');
       if (numberShards == null) {
         print('Error: Could not parse shards count ("${parsedArguments['shards']}")');
       } else if (numberShards < 1) {
@@ -114,10 +118,8 @@ Future<bool> run(List<String> arguments) async {
   }
 
   if (shardIndex > numberShards - 1) {
-    print(
-      'Error: The specified shard index ($shardIndex) is more than the specified number of shards ($numberShards). '
-      'It must be in the range [0 .. shards - 1].'
-    );
+    print('Error: The specified shard index ($shardIndex) is more than the specified number of shards ($numberShards). '
+        'It must be in the range [0 .. shards - 1].');
     return false;
   }
 

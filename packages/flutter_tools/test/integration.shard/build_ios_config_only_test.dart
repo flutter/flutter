@@ -16,7 +16,7 @@ void main() {
 
     await processManager.run(<String>[
       flutterBin,
-       ...getLocalEngineArguments(),
+      ...getLocalEngineArguments(),
       'clean',
     ], workingDirectory: workingDirectory);
     final ProcessResult result = await processManager.run(<String>[
@@ -37,8 +37,8 @@ void main() {
 
     expect(result.exitCode, 0);
 
-    final File generatedConfig = fileSystem.file(
-      fileSystem.path.join(workingDirectory, 'ios', 'Flutter', 'Generated.xcconfig'));
+    final File generatedConfig =
+        fileSystem.file(fileSystem.path.join(workingDirectory, 'ios', 'Flutter', 'Generated.xcconfig'));
 
     // Config is updated if command succeeded.
     expect(generatedConfig, exists);
@@ -46,7 +46,7 @@ void main() {
 
     // file that only exists if app was fully built.
     final File frameworkPlist = fileSystem.file(
-      fileSystem.path.join(workingDirectory, 'build', 'ios', 'iphoneos', 'Runner.app', 'AppFrameworkInfo.plist'));
+        fileSystem.path.join(workingDirectory, 'build', 'ios', 'iphoneos', 'Runner.app', 'AppFrameworkInfo.plist'));
 
     expect(frameworkPlist, isNot(exists));
   }, skip: !platform.isMacOS); // [intended] iOS builds only work on macos.

@@ -49,8 +49,7 @@ class _MarkerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_MarkerPainter oldPainter) {
-    return oldPainter.size != size
-        || oldPainter.type != type;
+    return oldPainter.size != size || oldPainter.type != type;
   }
 }
 
@@ -95,22 +94,22 @@ class OverlayGeometryApp extends StatefulWidget {
 typedef CardTapCallback = void Function(GlobalKey targetKey, Offset globalPosition);
 
 class CardBuilder extends SliverChildDelegate {
-  CardBuilder({List<CardModel>? cardModels, this.onTapUp }) : cardModels = cardModels ?? <CardModel>[];
+  CardBuilder({List<CardModel>? cardModels, this.onTapUp}) : cardModels = cardModels ?? <CardModel>[];
 
   final List<CardModel> cardModels;
   final CardTapCallback? onTapUp;
 
-  static const TextStyle cardLabelStyle =
-    TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
+  static const TextStyle cardLabelStyle = TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   @override
   Widget? build(BuildContext context, int index) {
-    if (index >= cardModels.length)
-      return null;
+    if (index >= cardModels.length) return null;
     final CardModel cardModel = cardModels[index];
     return GestureDetector(
       key: cardModel.key,
-      onTapUp: (TapUpDetails details) { onTapUp!(cardModel.targetKey, details.globalPosition); },
+      onTapUp: (TapUpDetails details) {
+        onTapUp!(cardModel.targetKey, details.globalPosition);
+      },
       child: Card(
         key: cardModel.targetKey,
         color: cardModel.color,
@@ -141,9 +140,33 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   void initState() {
     super.initState();
     final List<double> cardHeights = <double>[
-      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
+      48.0,
+      63.0,
+      82.0,
+      146.0,
+      60.0,
+      55.0,
+      84.0,
+      96.0,
+      50.0,
+      48.0,
+      63.0,
+      82.0,
+      146.0,
+      60.0,
+      55.0,
+      84.0,
+      96.0,
+      50.0,
+      48.0,
+      63.0,
+      82.0,
+      146.0,
+      60.0,
+      55.0,
+      84.0,
+      96.0,
+      50.0,
     ];
     cardModels = List<CardModel>.generate(cardHeights.length, (int i) {
       final Color? color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardHeights.length);
@@ -195,8 +218,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
             ),
           ),
         ),
-        for (final MarkerType type in markers.keys)
-          Marker(type: type, position: markers[type]),
+        for (final MarkerType type in markers.keys) Marker(type: type, position: markers[type]),
       ],
     );
   }

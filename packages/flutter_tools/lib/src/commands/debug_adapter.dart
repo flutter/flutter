@@ -23,15 +23,14 @@ import '../runner/flutter_command.dart';
 /// The DAP specification can be found at
 /// https://microsoft.github.io/debug-adapter-protocol/.
 class DebugAdapterCommand extends FlutterCommand {
-  DebugAdapterCommand({ bool verboseHelp = false}) : hidden = !verboseHelp {
+  DebugAdapterCommand({bool verboseHelp = false}) : hidden = !verboseHelp {
     usesIpv6Flag(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
-    argParser
-      .addFlag(
-        'test',
-        help: 'Whether to use the "flutter test" debug adapter to run tests'
-            ' and emit custom events for test progress/results.',
-      );
+    argParser.addFlag(
+      'test',
+      help: 'Whether to use the "flutter test" debug adapter to run tests'
+          ' and emit custom events for test progress/results.',
+    );
   }
 
   @override

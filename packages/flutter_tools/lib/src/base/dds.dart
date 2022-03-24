@@ -48,11 +48,11 @@ class DartDevelopmentService {
     );
     try {
       _ddsInstance = await ddsLauncherCallback(
-          observatoryUri,
-          serviceUri: ddsUri,
-          enableAuthCodes: disableServiceAuthCodes != true,
-          ipv6: ipv6 ?? false,
-        );
+        observatoryUri,
+        serviceUri: ddsUri,
+        enableAuthCodes: disableServiceAuthCodes != true,
+        ipv6: ipv6 ?? false,
+      );
       unawaited(_ddsInstance?.done.whenComplete(() {
         if (!_completer.isCompleted) {
           _completer.complete();
@@ -63,18 +63,14 @@ class DartDevelopmentService {
       logger.printTrace('Warning: Failed to start DDS: ${e.message}');
       if (e.errorCode == dds.DartDevelopmentServiceException.existingDdsInstanceError) {
         try {
-          _existingDdsUri = Uri.parse(
-            e.message.split(' ').firstWhere((String e) => e.startsWith('http'))
-          );
+          _existingDdsUri = Uri.parse(e.message.split(' ').firstWhere((String e) => e.startsWith('http')));
         } on StateError {
           if (e.message.contains('Existing VM service clients prevent DDS from taking control.')) {
             throwToolExit('${e.message}. Please rebuild your application with a newer version of Flutter.');
           }
-          logger.printError(
-            'DDS has failed to start and there is not an existing DDS instance '
-            'available to connect to. Please file an issue at https://github.com/flutter/flutter/issues '
-            'with the following error message:\n\n ${e.message}.'
-          );
+          logger.printError('DDS has failed to start and there is not an existing DDS instance '
+              'available to connect to. Please file an issue at https://github.com/flutter/flutter/issues '
+              'with the following error message:\n\n ${e.message}.');
           // DDS was unable to start for an unknown reason. Raise a StateError
           // so it can be reported by the crash reporter.
           throw StateError(e.message);

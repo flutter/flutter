@@ -43,21 +43,21 @@ abstract class DirectionalTextEditingIntent extends Intent {
 /// caret ([TextSelection.isValid] is false for the current selection).
 class DeleteCharacterIntent extends DirectionalTextEditingIntent {
   /// Creates a [DeleteCharacterIntent].
-  const DeleteCharacterIntent({ required bool forward }) : super(forward);
+  const DeleteCharacterIntent({required bool forward}) : super(forward);
 }
 
 /// Deletes from the current caret location to the previous or next word
 /// boundary, based on whether `forward` is true.
 class DeleteToNextWordBoundaryIntent extends DirectionalTextEditingIntent {
   /// Creates a [DeleteToNextWordBoundaryIntent].
-  const DeleteToNextWordBoundaryIntent({ required bool forward }) : super(forward);
+  const DeleteToNextWordBoundaryIntent({required bool forward}) : super(forward);
 }
 
 /// Deletes from the current caret location to the previous or next soft or hard
 /// line break, based on whether `forward` is true.
 class DeleteToLineBreakIntent extends DirectionalTextEditingIntent {
   /// Creates a [DeleteToLineBreakIntent].
-  const DeleteToLineBreakIntent({ required bool forward }) : super(forward);
+  const DeleteToLineBreakIntent({required bool forward}) : super(forward);
 }
 
 /// A [DirectionalTextEditingIntent] that moves the caret or the selection to a
@@ -66,13 +66,11 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   /// Creates a [DirectionalCaretMovementIntent].
   const DirectionalCaretMovementIntent(
     bool forward,
-    this.collapseSelection,
-    [
-      this.collapseAtReversal = false,
-      this.continuesAtWrap = false,
-    ]
-  ) : assert(!collapseSelection || !collapseAtReversal),
-      super(forward);
+    this.collapseSelection, [
+    this.collapseAtReversal = false,
+    this.continuesAtWrap = false,
+  ])  : assert(!collapseSelection || !collapseAtReversal),
+        super(forward);
 
   /// Whether this [Intent] should make the selection collapsed (so it becomes a
   /// caret), after the movement.
@@ -196,8 +194,8 @@ class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
     required bool collapseSelection,
     bool collapseAtReversal = false,
     bool continuesAtWrap = false,
-  }) : assert(!collapseSelection || !collapseAtReversal),
-       super(forward, collapseSelection, collapseAtReversal, continuesAtWrap);
+  })  : assert(!collapseSelection || !collapseAtReversal),
+        super(forward, collapseSelection, collapseAtReversal, continuesAtWrap);
 }
 
 /// Extends, or moves the current selection from the current

@@ -35,7 +35,8 @@ class _InputDropdown extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(valueText!, style: valueStyle),
-            Icon(Icons.arrow_drop_down,
+            Icon(
+              Icons.arrow_drop_down,
               color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70,
             ),
           ],
@@ -68,8 +69,7 @@ class _DateTimePicker extends StatelessWidget {
       firstDate: DateTime(2015, 8),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedDate)
-      selectDate!(picked);
+    if (picked != null && picked != selectedDate) selectDate!(picked);
   }
 
   Future<void> _selectTime(BuildContext context) async {
@@ -77,8 +77,7 @@ class _DateTimePicker extends StatelessWidget {
       context: context,
       initialTime: selectedTime!,
     );
-    if (picked != null && picked != selectedTime)
-      selectTime!(picked);
+    if (picked != null && picked != selectedTime) selectTime!(picked);
   }
 
   @override
@@ -93,7 +92,9 @@ class _DateTimePicker extends StatelessWidget {
             labelText: labelText,
             valueText: DateFormat.yMMMd().format(selectedDate!),
             valueStyle: valueStyle,
-            onPressed: () { _selectDate(context); },
+            onPressed: () {
+              _selectDate(context);
+            },
           ),
         ),
         const SizedBox(width: 12.0),
@@ -102,7 +103,9 @@ class _DateTimePicker extends StatelessWidget {
           child: _InputDropdown(
             valueText: selectedTime!.format(context),
             valueStyle: valueStyle,
-            onPressed: () { _selectTime(context); },
+            onPressed: () {
+              _selectTime(context);
+            },
           ),
         ),
       ],

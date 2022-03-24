@@ -43,8 +43,7 @@ void main() {
       final int expectedLine = project.lineForStep(i);
 
       expect(actualLine, equals(expectedLine),
-        reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
-      );
+          reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine');
     }
 
     await flutter.stop();

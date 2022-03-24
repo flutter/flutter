@@ -119,46 +119,70 @@ void main() {
   });
 
   test('spring_types', () {
-    SpringSimulation crit = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-    ), 0.0, 300.0, 0.0);
+    SpringSimulation crit = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+        ),
+        0.0,
+        300.0,
+        0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
-    crit = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-    ), 0.0, 300.0, 0.0);
+    crit = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+        ),
+        0.0,
+        300.0,
+        0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
-    final SpringSimulation under = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-      ratio: 0.75,
-    ), 0.0, 300.0, 0.0);
+    final SpringSimulation under = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+          ratio: 0.75,
+        ),
+        0.0,
+        300.0,
+        0.0);
     expect(under.type, SpringType.underDamped);
 
-    final SpringSimulation over = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-      ratio: 1.25,
-    ), 0.0, 300.0, 0.0);
+    final SpringSimulation over = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+          ratio: 1.25,
+        ),
+        0.0,
+        300.0,
+        0.0);
     expect(over.type, SpringType.overDamped);
 
     // Just so we don't forget how to create a desc without the ratio.
-    final SpringSimulation other = SpringSimulation(const SpringDescription(
-      mass: 1.0,
-      stiffness: 100.0,
-      damping: 20.0,
-    ), 0.0, 20.0, 20.0);
+    final SpringSimulation other = SpringSimulation(
+        const SpringDescription(
+          mass: 1.0,
+          stiffness: 100.0,
+          damping: 20.0,
+        ),
+        0.0,
+        20.0,
+        20.0);
     expect(other.type, SpringType.criticallyDamped);
   });
 
   test('crit_spring', () {
-    final SpringSimulation crit = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-    ), 0.0, 500.0, 0.0);
+    final SpringSimulation crit = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+        ),
+        0.0,
+        500.0,
+        0.0);
 
     crit.tolerance = const Tolerance(distance: 0.01, velocity: 0.01);
 
@@ -182,11 +206,15 @@ void main() {
   });
 
   test('overdamped_spring', () {
-    final SpringSimulation over = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-      ratio: 1.25,
-    ), 0.0, 500.0, 0.0);
+    final SpringSimulation over = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+          ratio: 1.25,
+        ),
+        0.0,
+        500.0,
+        0.0);
 
     over.tolerance = const Tolerance(distance: 0.01, velocity: 0.01);
 
@@ -207,11 +235,15 @@ void main() {
   });
 
   test('underdamped_spring', () {
-    final SpringSimulation under = SpringSimulation(SpringDescription.withDampingRatio(
-      mass: 1.0,
-      stiffness: 100.0,
-      ratio: 0.25,
-    ), 0.0, 300.0, 0.0);
+    final SpringSimulation under = SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: 1.0,
+          stiffness: 100.0,
+          ratio: 0.25,
+        ),
+        0.0,
+        300.0,
+        0.0);
     expect(under.type, SpringType.underDamped);
 
     expect(under.isDone(0.0), false);

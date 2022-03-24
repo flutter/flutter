@@ -61,11 +61,9 @@ class TestAsyncUtils {
   /// This method first calls [guardSync].
   static Future<T> guard<T>(Future<T> Function() body) {
     guardSync();
-    final Zone zone = Zone.current.fork(
-      zoneValues: <dynamic, dynamic>{
-        _scopeStack: true, // so we can recognize this as our own zone
-      }
-    );
+    final Zone zone = Zone.current.fork(zoneValues: <dynamic, dynamic>{
+      _scopeStack: true, // so we can recognize this as our own zone
+    });
     final _AsyncScope scope = _AsyncScope(StackTrace.current, zone);
     _scopeStack.add(scope);
     final Future<T> result = scope.zone.run<Future<T>>(body);
@@ -78,8 +76,7 @@ class TestAsyncUtils {
       final List<DiagnosticsNode> information = <DiagnosticsNode>[];
       while (_scopeStack.isNotEmpty) {
         closedScope = _scopeStack.removeLast();
-        if (closedScope == scope)
-          break;
+        if (closedScope == scope) break;
         if (!leaked) {
           information.add(ErrorSummary('Asynchronous call to guarded function leaked.'));
           information.add(ErrorHint('You must use "await" with all Future-returning test APIs.'));
@@ -87,13 +84,11 @@ class TestAsyncUtils {
         }
         final _StackEntry? originalGuarder = _findResponsibleMethod(closedScope.creationStack, 'guard', information);
         if (originalGuarder != null) {
-          information.add(ErrorDescription(
-            'The test API method "${originalGuarder.methodName}" '
-            'from class ${originalGuarder.className} '
-            'was called from ${originalGuarder.callerFile} '
-            'on line ${originalGuarder.callerLine}, '
-            'but never completed before its parent scope closed.'
-          ));
+          information.add(ErrorDescription('The test API method "${originalGuarder.methodName}" '
+              'from class ${originalGuarder.className} '
+              'was called from ${originalGuarder.callerFile} '
+              'on line ${originalGuarder.callerLine}, '
+              'but never completed before its parent scope closed.'));
         }
       }
       if (leaked) {
@@ -107,10 +102,10 @@ class TestAsyncUtils {
         }
         throw FlutterError.fromParts(information);
       }
-      if (error != null)
-        return Future<T>.error(error! as Object, stack);
+      if (error != null) return Future<T>.error(error! as Object, stack);
       return Future<T>.value(resultValue);
     }
+
     return result.then<T>(
       (T value) {
         resultValue = value;
@@ -123,8 +118,7 @@ class TestAsyncUtils {
   static Zone? get _currentScopeZone {
     Zone? zone = Zone.current;
     while (zone != null) {
-      if (zone[_scopeStack] == true)
-        return zone;
+      if (zone[_scopeStack] == true) return zone;
       zone = zone.parent;
     }
     return null;
@@ -174,8 +168,7 @@ class TestAsyncUtils {
       skipCount += 1;
       scope = candidateScope;
       if (skipCount >= _scopeStack.length) {
-        if (zone == null)
-          break;
+        if (zone == null) break;
         // Some people have reported reaching this point, but it's not clear
         // why. For now, just silently return.
         // TODO(ianh): If we ever get a test case that shows how we reach
@@ -198,66 +191,52 @@ class TestAsyncUtils {
       String originalName;
       if (originalGuarder.className == null) {
         originalName = '$originalKind (${originalGuarder.methodName})';
-        information.add(ErrorDescription(
-          'The guarded "${originalGuarder.methodName}" function '
-          'was called from ${originalGuarder.callerFile} '
-          'on line ${originalGuarder.callerLine}.'
-        ));
+        information.add(ErrorDescription('The guarded "${originalGuarder.methodName}" function '
+            'was called from ${originalGuarder.callerFile} '
+            'on line ${originalGuarder.callerLine}.'));
       } else {
         originalName = '$originalKind (${originalGuarder.className}.${originalGuarder.methodName})';
-        information.add(ErrorDescription(
-          'The guarded method "${originalGuarder.methodName}" '
-          'from class ${originalGuarder.className} '
-          'was called from ${originalGuarder.callerFile} '
-          'on line ${originalGuarder.callerLine}.'
-        ));
+        information.add(ErrorDescription('The guarded method "${originalGuarder.methodName}" '
+            'from class ${originalGuarder.className} '
+            'was called from ${originalGuarder.callerFile} '
+            'on line ${originalGuarder.callerLine}.'));
       }
       final String again = (originalGuarder.callerFile == collidingGuarder.callerFile) &&
-                           (originalGuarder.callerLine == collidingGuarder.callerLine) ?
-                           'again ' : '';
+              (originalGuarder.callerLine == collidingGuarder.callerLine)
+          ? 'again '
+          : '';
       final String collidingKind = collidingGuarder.className == null ? 'function' : 'method';
       String collidingName;
       if ((originalGuarder.className == collidingGuarder.className) &&
           (originalGuarder.methodName == collidingGuarder.methodName)) {
         originalName = originalKind;
         collidingName = collidingKind;
-        information.add(ErrorDescription(
-          'Then, it '
-          'was called ${again}from ${collidingGuarder.callerFile} '
-          'on line ${collidingGuarder.callerLine}.'
-        ));
+        information.add(ErrorDescription('Then, it '
+            'was called ${again}from ${collidingGuarder.callerFile} '
+            'on line ${collidingGuarder.callerLine}.'));
       } else if (collidingGuarder.className == null) {
         collidingName = '$collidingKind (${collidingGuarder.methodName})';
-        information.add(ErrorDescription(
-          'Then, the "${collidingGuarder.methodName}" function '
-          'was called ${again}from ${collidingGuarder.callerFile} '
-          'on line ${collidingGuarder.callerLine}.'
-        ));
+        information.add(ErrorDescription('Then, the "${collidingGuarder.methodName}" function '
+            'was called ${again}from ${collidingGuarder.callerFile} '
+            'on line ${collidingGuarder.callerLine}.'));
       } else {
         collidingName = '$collidingKind (${collidingGuarder.className}.${collidingGuarder.methodName})';
-        information.add(ErrorDescription(
-          'Then, the "${collidingGuarder.methodName}" method '
-          '${originalGuarder.className == collidingGuarder.className ? "(also from class ${collidingGuarder.className})"
-                                                                     : "from class ${collidingGuarder.className}"} '
-          'was called ${again}from ${collidingGuarder.callerFile} '
-          'on line ${collidingGuarder.callerLine}.'
-        ));
+        information.add(ErrorDescription('Then, the "${collidingGuarder.methodName}" method '
+            '${originalGuarder.className == collidingGuarder.className ? "(also from class ${collidingGuarder.className})" : "from class ${collidingGuarder.className}"} '
+            'was called ${again}from ${collidingGuarder.callerFile} '
+            'on line ${collidingGuarder.callerLine}.'));
       }
-      information.add(ErrorDescription(
-        'The first $originalName '
-        'had not yet finished executing at the time that '
-        'the second $collidingName '
-        'was called. Since both are guarded, and the second was not a nested call inside the first, the '
-        'first must complete its execution before the second can be called. Typically, this is achieved by '
-        'putting an "await" statement in front of the call to the first.'
-      ));
+      information.add(ErrorDescription('The first $originalName '
+          'had not yet finished executing at the time that '
+          'the second $collidingName '
+          'was called. Since both are guarded, and the second was not a nested call inside the first, the '
+          'first must complete its execution before the second can be called. Typically, this is achieved by '
+          'putting an "await" statement in front of the call to the first.'));
       if (collidingGuarder.className == null && collidingGuarder.methodName == 'expect') {
-        information.add(ErrorHint(
-          'If you are confident that all test APIs are being called using "await", and '
-          'this expect() call is not being called at the top level but is itself being '
-          'called from some sort of callback registered before the ${originalGuarder.methodName} '
-          'method was called, then consider using expectSync() instead.'
-        ));
+        information.add(ErrorHint('If you are confident that all test APIs are being called using "await", and '
+            'this expect() call is not being called at the top level but is itself being '
+            'called from some sort of callback registered before the ${originalGuarder.methodName} '
+            'method was called, then consider using expectSync() instead.'));
       }
       information.add(DiagnosticsStackTrace(
         '\nWhen the first $originalName was called, this was the stack',
@@ -279,13 +258,11 @@ class TestAsyncUtils {
       for (final _AsyncScope scope in _scopeStack) {
         final _StackEntry? guarder = _findResponsibleMethod(scope.creationStack, 'guard', information);
         if (guarder != null) {
-          information.add(ErrorDescription(
-            'The guarded method "${guarder.methodName}" '
-            '${guarder.className != null ? "from class ${guarder.className} " : ""}'
-            'was called from ${guarder.callerFile} '
-            'on line ${guarder.callerLine}, '
-            'but never completed before its parent scope closed.'
-          ));
+          information.add(ErrorDescription('The guarded method "${guarder.methodName}" '
+              '${guarder.className != null ? "from class ${guarder.className} " : ""}'
+              'was called from ${guarder.callerFile} '
+              'on line ${guarder.callerLine}, '
+              'but never completed before its parent scope closed.'));
         }
       }
       throw FlutterError.fromParts(information);
@@ -304,7 +281,8 @@ class TestAsyncUtils {
     final RegExp getClassPattern = RegExp(r'^#[0-9]+ +([^. ]+)');
     Match? lineMatch;
     int index = -1;
-    do { // skip past frames that are from this class
+    do {
+      // skip past frames that are from this class
       index += 1;
       assert(index < stack.length);
       lineMatch = getClassPattern.matchAsPrefix(stack[index]);
@@ -320,7 +298,8 @@ class TestAsyncUtils {
         assert(guardMatch.groupCount == 2);
         final String? guardClass = guardMatch.group(1); // might be null
         final String? guardMethod = guardMatch.group(2);
-        while (index < stack.length) { // find the last stack frame that called the class that called us
+        while (index < stack.length) {
+          // find the last stack frame that called the class that called us
           lineMatch = getClassPattern.matchAsPrefix(stack[index]);
           if (lineMatch != null) {
             assert(lineMatch.groupCount == 1);
@@ -343,18 +322,22 @@ class TestAsyncUtils {
             // One reason you might get here is if the guarding method was called directly from
             // a 'dart:' API, like from the Future/microtask mechanism, because dart: URLs in the
             // stack trace don't have a column number and so don't match the regexp above.
-            information.add(ErrorSummary('(Unable to parse the stack frame of the method that called the method that called $_className.$method(). The stack may be incomplete or bogus.)'));
+            information.add(ErrorSummary(
+                '(Unable to parse the stack frame of the method that called the method that called $_className.$method(). The stack may be incomplete or bogus.)'));
             information.add(ErrorDescription(stack[index]));
           }
         } else {
-          information.add(ErrorSummary('(Unable to find the stack frame of the method that called the method that called $_className.$method(). The stack may be incomplete or bogus.)'));
+          information.add(ErrorSummary(
+              '(Unable to find the stack frame of the method that called the method that called $_className.$method(). The stack may be incomplete or bogus.)'));
         }
       } else {
-        information.add(ErrorSummary('(Unable to parse the stack frame of the method that called $_className.$method(). The stack may be incomplete or bogus.)'));
+        information.add(ErrorSummary(
+            '(Unable to parse the stack frame of the method that called $_className.$method(). The stack may be incomplete or bogus.)'));
         information.add(ErrorDescription(stack[index]));
       }
     } else {
-      information.add(ErrorSummary('(Unable to find the method that called $_className.$method(). The stack may be incomplete or bogus.)'));
+      information.add(ErrorSummary(
+          '(Unable to find the method that called $_className.$method(). The stack may be incomplete or bogus.)'));
     }
     return null;
   }

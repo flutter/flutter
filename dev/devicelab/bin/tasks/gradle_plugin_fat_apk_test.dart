@@ -77,11 +77,7 @@ Future<void> main() async {
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
             'build',
-            options: <String>[
-              'apk',
-              '--release',
-              '--target-platform=android-arm,android-arm64'
-            ],
+            options: <String>['apk', '--release', '--target-platform=android-arm,android-arm64'],
           );
         });
 
@@ -99,7 +95,7 @@ Future<void> main() async {
         checkCollectionDoesNotContain<String>(debugAssets, apkFiles);
 
         section('APK content for task assembleRelease with '
-                'target platform = android-arm, android-arm64 and split per ABI');
+            'target platform = android-arm, android-arm64 and split per ABI');
 
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(

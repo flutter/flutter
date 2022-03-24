@@ -34,11 +34,9 @@ class _MyHomePageState extends State<MyHomePage> {
   // Controller with no initial value;
   final TextEditingController _emptyController = TextEditingController();
 
-  final TextEditingController _controller =
-      TextEditingController(text: 'Text1');
+  final TextEditingController _controller = TextEditingController(text: 'Text1');
 
-  final TextEditingController _controller2 =
-      TextEditingController(text: 'Text2');
+  final TextEditingController _controller2 = TextEditingController(text: 'Text2');
 
   @override
   Widget build(BuildContext context) {

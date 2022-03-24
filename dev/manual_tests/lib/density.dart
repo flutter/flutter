@@ -446,23 +446,20 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               ListTile(
                 title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
-                subtitle:
-                    Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
+                subtitle: Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
                 trailing: const Icon(Icons.check_box),
                 onTap: () {},
               ),
               ListTile(
                 title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
-                subtitle:
-                    Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
+                subtitle: Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
                 leading: const Icon(Icons.check_box),
                 dense: true,
                 onTap: () {},
               ),
               ListTile(
                 title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
-                subtitle:
-                    Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
+                subtitle: Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
                 dense: true,
                 leading: const Icon(Icons.add_box),
                 trailing: const Icon(Icons.check_box),
@@ -470,8 +467,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               ListTile(
                 title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
-                subtitle:
-                    Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
+                subtitle: Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
                 isThreeLine: true,
                 leading: const Icon(Icons.add_box),
                 trailing: const Icon(Icons.check_box),
@@ -534,10 +530,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _ControlTile(
         label: _model.rtl ? 'زر مسطح' : 'Text Button',
         child: TextButton(
-          style: TextButton.styleFrom(
-            primary: Colors.white,
-            backgroundColor: m2Swatch[200]
-          ),
+          style: TextButton.styleFrom(primary: Colors.white, backgroundColor: m2Swatch[200]),
           onPressed: _model.enable ? () {} : null,
           child: label,
         ),

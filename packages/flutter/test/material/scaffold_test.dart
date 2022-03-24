@@ -99,7 +99,9 @@ void main() {
         ),
       );
     }
-    await tester.pumpWidget(boilerplate(Scaffold(
+
+    await tester.pumpWidget(boilerplate(
+      Scaffold(
         appBar: AppBar(title: const Text('Title')),
         body: Container(key: bodyKey),
       ),
@@ -115,7 +117,8 @@ void main() {
     RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
 
-    await tester.pumpWidget(boilerplate(MediaQuery(
+    await tester.pumpWidget(boilerplate(
+      MediaQuery(
         data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
         child: Scaffold(
           appBar: AppBar(title: const Text('Title')),
@@ -169,7 +172,8 @@ void main() {
     final RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
 
-    await tester.pumpWidget(boilerplate(MediaQuery(
+    await tester.pumpWidget(boilerplate(
+      MediaQuery(
         data: const MediaQueryData(
           viewInsets: EdgeInsets.only(bottom: 500.0),
         ),
@@ -181,7 +185,8 @@ void main() {
 
     expect(bodyBox.size, equals(const Size(800.0, 100.0)));
 
-    await tester.pumpWidget(boilerplate(MediaQuery(
+    await tester.pumpWidget(boilerplate(
+      MediaQuery(
         data: const MediaQueryData(
           viewInsets: EdgeInsets.only(bottom: 580.0),
         ),
@@ -198,7 +203,8 @@ void main() {
   });
 
   testWidgets('Floating action entrance/exit animation', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(
+    await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
       floatingActionButton: FloatingActionButton(
         key: Key('one'),
         onPressed: null,
@@ -208,7 +214,8 @@ void main() {
 
     expect(tester.binding.transientCallbackCount, 0);
 
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(
+    await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
       floatingActionButton: FloatingActionButton(
         key: Key('two'),
         onPressed: null,
@@ -224,7 +231,8 @@ void main() {
 
     expect(tester.binding.transientCallbackCount, 0);
 
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(
+    await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
       floatingActionButton: FloatingActionButton(
         key: Key('one'),
         onPressed: null,
@@ -310,7 +318,8 @@ void main() {
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
               controller: scrollOffset,
-              children: List<Widget>.generate(10,
+              children: List<Widget>.generate(
+                10,
                 (int index) => SizedBox(height: 100.0, child: Text('D$index')),
               ),
             ),
@@ -327,7 +336,8 @@ void main() {
                 padding: const EdgeInsets.only(top: appBarHeight),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(List<Widget>.generate(
-                    10, (int index) => SizedBox(height: 100.0, child: Text('B$index')),
+                    10,
+                    (int index) => SizedBox(height: 100.0, child: Text('B$index')),
                   )),
                 ),
               ),
@@ -369,7 +379,8 @@ void main() {
               ),
               SliverList(
                 delegate: SliverChildListDelegate(List<Widget>.generate(
-                  20, (int index) => SizedBox(height: 100.0, child: Text('$index')),
+                  20,
+                  (int index) => SizedBox(height: 100.0, child: Text('$index')),
                 )),
               ),
             ],
@@ -387,7 +398,7 @@ void main() {
     await tester.tapAt(const Offset(100.0, 10.0));
     await tester.pumpAndSettle();
     expect(scrollable.position.pixels, equals(0.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Tapping the status bar scrolls to top with ease out curve animation', (WidgetTester tester) async {
     const int duration = 1000;
@@ -403,20 +414,15 @@ void main() {
     expect(scrollable.position.pixels, equals(scrollOffset));
 
     for (int i = 0; i < stops.length; i++) {
-      await tester.pump( Duration(milliseconds: duration ~/ stops.length));
+      await tester.pump(Duration(milliseconds: duration ~/ stops.length));
       // Scroll pixel position is very long double, compare with floored int
       // pixel position
-      expect(
-        scrollable.position.pixels.toInt(),
-        equals(
-         (scrollOffset * (1 - stops[i])).toInt()
-        )
-      );
+      expect(scrollable.position.pixels.toInt(), equals((scrollOffset * (1 - stops[i])).toInt()));
     }
 
     // Finally stops at the top.
     expect(scrollable.position.pixels, equals(0.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Tapping the status bar does not scroll to top', (WidgetTester tester) async {
     await tester.pumpWidget(_buildStatusBarTestApp(TargetPlatform.android));
@@ -427,7 +433,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(scrollable.position.pixels, equals(500.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}));
 
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
     final Key sheetKey = UniqueKey();
@@ -648,9 +654,9 @@ void main() {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (_) => Container(key: rootKey, child: const Text('Home')),
         '/scaffold': (_) => Scaffold(
-            appBar: AppBar(),
-            body: const Text('Scaffold'),
-        ),
+              appBar: AppBar(),
+              body: const Text('Scaffold'),
+            ),
       };
       await tester.pumpWidget(MaterialApp(routes: routes));
 
@@ -664,11 +670,11 @@ void main() {
 
     testWidgets('Back arrow uses correct default', (WidgetTester tester) async {
       await expectBackIcon(tester, Icons.arrow_back);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android, TargetPlatform.fuchsia}));
 
     testWidgets('Back arrow uses correct default', (WidgetTester tester) async {
       await expectBackIcon(tester, Icons.arrow_back_ios);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
   });
 
   group('close button', () {
@@ -794,7 +800,7 @@ void main() {
           child: Scaffold(
             body: TextButton(
               key: testKey,
-              onPressed: () { },
+              onPressed: () {},
               child: const Text(''),
             ),
           ),
@@ -808,7 +814,7 @@ void main() {
       final Key bodyKey = UniqueKey();
       late double mediaQueryBottom;
 
-      Widget buildFrame({ required bool extendBody, bool? resizeToAvoidBottomInset, double viewInsetBottom = 0.0 }) {
+      Widget buildFrame({required bool extendBody, bool? resizeToAvoidBottomInset, double viewInsetBottom = 0.0}) {
         return Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
@@ -870,7 +876,7 @@ void main() {
       late bool fixedHeightAppBar;
       late double mediaQueryTop;
 
-      Widget buildFrame({ required bool extendBodyBehindAppBar, required bool hasAppBar }) {
+      Widget buildFrame({required bool extendBodyBehindAppBar, required bool hasAppBar}) {
         return Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
@@ -881,16 +887,18 @@ void main() {
               builder: (BuildContext context) {
                 return Scaffold(
                   extendBodyBehindAppBar: extendBodyBehindAppBar,
-                  appBar: !hasAppBar ? null : PreferredSize(
-                    key: appBarKey,
-                    preferredSize: const Size.fromHeight(appBarHeight),
-                    child: Container(
-                      constraints: BoxConstraints(
-                        minHeight: appBarHeight,
-                        maxHeight: fixedHeightAppBar ? appBarHeight : double.infinity,
-                      ),
-                    ),
-                  ),
+                  appBar: !hasAppBar
+                      ? null
+                      : PreferredSize(
+                          key: appBarKey,
+                          preferredSize: const Size.fromHeight(appBarHeight),
+                          child: Container(
+                            constraints: BoxConstraints(
+                              minHeight: appBarHeight,
+                              maxHeight: fixedHeightAppBar ? appBarHeight : double.infinity,
+                            ),
+                          ),
+                        ),
                   body: Builder(
                     builder: (BuildContext context) {
                       mediaQueryTop = MediaQuery.of(context).padding.top;
@@ -966,7 +974,8 @@ void main() {
     const String drawerLabel = 'I am the reason for this test';
 
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(
+    await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
       body: Text(bodyLabel),
       persistentFooterButtons: <Widget>[Text(persistentFooterButtonLabel)],
       bottomNavigationBar: Text(bottomNavigationBarLabel),
@@ -1087,13 +1096,16 @@ void main() {
 
     expect(tester.getRect(find.byKey(appBar)), const Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
     expect(tester.getRect(find.byKey(body)), const Rect.fromLTRB(0.0, 43.0, 800.0, 400.0));
-    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
-    expect(tester.getRect(find.byKey(persistentFooterButton)),const  Rect.fromLTRB(28.0, 417.0, 128.0, 507.0)); // Note: has 8px each top/bottom padding.
+    expect(tester.getRect(find.byKey(floatingActionButton)),
+        rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
+    expect(tester.getRect(find.byKey(persistentFooterButton)),
+        const Rect.fromLTRB(28.0, 417.0, 128.0, 507.0)); // Note: has 8px each top/bottom padding.
     expect(tester.getRect(find.byKey(drawer)), const Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
     expect(tester.getRect(find.byKey(bottomNavigationBar)), const Rect.fromLTRB(0.0, 515.0, 800.0, 600.0));
     expect(tester.getRect(find.byKey(insideAppBar)), const Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
     expect(tester.getRect(find.byKey(insideBody)), const Rect.fromLTRB(20.0, 43.0, 750.0, 400.0));
-    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
+    expect(tester.getRect(find.byKey(insideFloatingActionButton)),
+        rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
     expect(tester.getRect(find.byKey(insidePersistentFooterButton)), const Rect.fromLTRB(28.0, 417.0, 128.0, 507.0));
     expect(tester.getRect(find.byKey(insideDrawer)), const Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
     expect(tester.getRect(find.byKey(insideBottomNavigationBar)), const Rect.fromLTRB(20.0, 515.0, 750.0, 540.0));
@@ -1182,27 +1194,30 @@ void main() {
 
     expect(tester.getRect(find.byKey(appBar)), const Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
     expect(tester.getRect(find.byKey(body)), const Rect.fromLTRB(0.0, 43.0, 800.0, 400.0));
-    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
-    expect(tester.getRect(find.byKey(persistentFooterButton)), const Rect.fromLTRB(28.0, 442.0, 128.0, 532.0)); // Note: has 8px each top/bottom padding.
+    expect(tester.getRect(find.byKey(floatingActionButton)),
+        rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
+    expect(tester.getRect(find.byKey(persistentFooterButton)),
+        const Rect.fromLTRB(28.0, 442.0, 128.0, 532.0)); // Note: has 8px each top/bottom padding.
     expect(tester.getRect(find.byKey(drawer)), const Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
     expect(tester.getRect(find.byKey(insideAppBar)), const Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
     expect(tester.getRect(find.byKey(insideBody)), const Rect.fromLTRB(20.0, 43.0, 750.0, 400.0));
-    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
+    expect(tester.getRect(find.byKey(insideFloatingActionButton)),
+        rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
     expect(tester.getRect(find.byKey(insidePersistentFooterButton)), const Rect.fromLTRB(28.0, 442.0, 128.0, 532.0));
     expect(tester.getRect(find.byKey(insideDrawer)), const Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
   });
 
-
   group('ScaffoldGeometry', () {
     testWidgets('bottomNavigationBar', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: Container(),
-            bottomNavigationBar: ConstrainedBox(
-              key: key,
-              constraints: const BoxConstraints.expand(height: 80.0),
-              child: _GeometryListener(),
-            ),
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+        body: Container(),
+        bottomNavigationBar: ConstrainedBox(
+          key: key,
+          constraints: const BoxConstraints.expand(height: 80.0),
+          child: _GeometryListener(),
+        ),
       )));
 
       final RenderBox navigationBox = tester.renderObject(find.byKey(key));
@@ -1217,11 +1232,12 @@ void main() {
     });
 
     testWidgets('no bottomNavigationBar', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: ConstrainedBox(
-              constraints: const BoxConstraints.expand(height: 80.0),
-              child: _GeometryListener(),
-            ),
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+        body: ConstrainedBox(
+          constraints: const BoxConstraints.expand(height: 80.0),
+          child: _GeometryListener(),
+        ),
       )));
 
       final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
@@ -1233,7 +1249,8 @@ void main() {
       );
     });
 
-    testWidgets('Scaffold BottomNavigationBar bottom padding is not consumed by viewInsets.', (WidgetTester tester) async {
+    testWidgets('Scaffold BottomNavigationBar bottom padding is not consumed by viewInsets.',
+        (WidgetTester tester) async {
       Widget boilerplate(Widget child) {
         return Localizations(
           locale: const Locale('en', 'us'),
@@ -1298,13 +1315,14 @@ void main() {
 
     testWidgets('floatingActionButton', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: Container(),
-            floatingActionButton: FloatingActionButton(
-              key: key,
-              child: _GeometryListener(),
-              onPressed: () { },
-            ),
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+        body: Container(),
+        floatingActionButton: FloatingActionButton(
+          key: key,
+          child: _GeometryListener(),
+          onPressed: () {},
+        ),
       )));
 
       final RenderBox floatingActionButtonBox = tester.renderObject(find.byKey(key));
@@ -1320,38 +1338,41 @@ void main() {
     });
 
     testWidgets('no floatingActionButton', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: ConstrainedBox(
-              constraints: const BoxConstraints.expand(height: 80.0),
-              child: _GeometryListener(),
-            ),
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+        body: ConstrainedBox(
+          constraints: const BoxConstraints.expand(height: 80.0),
+          child: _GeometryListener(),
+        ),
       )));
 
       final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
       final ScaffoldGeometry geometry = listenerState.cache.value;
 
       expect(
-          geometry.floatingActionButtonArea,
-          null,
+        geometry.floatingActionButtonArea,
+        null,
       );
     });
 
     testWidgets('floatingActionButton entrance/exit animation', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: ConstrainedBox(
-              constraints: const BoxConstraints.expand(height: 80.0),
-              child: _GeometryListener(),
-            ),
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+        body: ConstrainedBox(
+          constraints: const BoxConstraints.expand(height: 80.0),
+          child: _GeometryListener(),
+        ),
       )));
 
-      await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: Container(),
-            floatingActionButton: FloatingActionButton(
-              key: key,
-              child: _GeometryListener(),
-              onPressed: () { },
-            ),
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+        body: Container(),
+        floatingActionButton: FloatingActionButton(
+          key: key,
+          child: _GeometryListener(),
+          onPressed: () {},
+        ),
       )));
 
       final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
@@ -1360,18 +1381,24 @@ void main() {
       ScaffoldGeometry geometry = listenerState.cache.value;
       final Rect transitioningFabRect = geometry.floatingActionButtonArea!;
 
-      final double transitioningRotation = tester.widget<RotationTransition>(
-        find.byType(RotationTransition),
-      ).turns.value;
+      final double transitioningRotation = tester
+          .widget<RotationTransition>(
+            find.byType(RotationTransition),
+          )
+          .turns
+          .value;
 
       await tester.pump(const Duration(seconds: 3));
       geometry = listenerState.cache.value;
       final RenderBox floatingActionButtonBox = tester.renderObject(find.byKey(key));
       final Rect fabRect = floatingActionButtonBox.localToGlobal(Offset.zero) & floatingActionButtonBox.size;
 
-      final double completedRotation = tester.widget<RotationTransition>(
-        find.byType(RotationTransition),
-      ).turns.value;
+      final double completedRotation = tester
+          .widget<RotationTransition>(
+            find.byType(RotationTransition),
+          )
+          .turns
+          .value;
 
       expect(transitioningRotation, lessThan(1.0));
 
@@ -1401,11 +1428,12 @@ void main() {
     testWidgets('change notifications', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       int numNotificationsAtLastFrame = 0;
-      await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: ConstrainedBox(
-              constraints: const BoxConstraints.expand(height: 80.0),
-              child: _GeometryListener(),
-            ),
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+        body: ConstrainedBox(
+          constraints: const BoxConstraints.expand(height: 80.0),
+          child: _GeometryListener(),
+        ),
       )));
 
       final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
@@ -1413,13 +1441,14 @@ void main() {
       expect(listenerState.numNotifications, greaterThan(numNotificationsAtLastFrame));
       numNotificationsAtLastFrame = listenerState.numNotifications;
 
-      await tester.pumpWidget(MaterialApp(home: Scaffold(
-            body: Container(),
-            floatingActionButton: FloatingActionButton(
-              key: key,
-              child: _GeometryListener(),
-              onPressed: () { },
-            ),
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+        body: Container(),
+        floatingActionButton: FloatingActionButton(
+          key: key,
+          child: _GeometryListener(),
+          onPressed: () {},
+        ),
       )));
 
       expect(listenerState.numNotifications, greaterThan(numNotificationsAtLastFrame));
@@ -1442,7 +1471,8 @@ void main() {
       const String endDrawerLabel = 'I am the label on end side';
 
       final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(
+      await tester.pumpWidget(const MaterialApp(
+          home: Scaffold(
         body: Text(bodyLabel),
         drawer: Drawer(child: Text(drawerLabel)),
         endDrawer: Drawer(child: Text(endDrawerLabel)),
@@ -1649,9 +1679,12 @@ void main() {
         ),
       );
 
-      final double scaffoldWidth = tester.renderObject<RenderBox>(
-        find.byType(Scaffold),
-      ).size.width;
+      final double scaffoldWidth = tester
+          .renderObject<RenderBox>(
+            find.byType(Scaffold),
+          )
+          .size
+          .width;
       ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
       expect(scaffoldState.isDrawerOpen, false);
 
@@ -1917,7 +1950,7 @@ void main() {
     await tester.pumpWidget(buildFrame(false, false));
     expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
 
-    await tester.pumpWidget(buildFrame(null, null));  // resizeToAvoidBottomInset default  is true
+    await tester.pumpWidget(buildFrame(null, null)); // resizeToAvoidBottomInset default  is true
     expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
 
     await tester.pumpWidget(buildFrame(null, false));
@@ -1928,7 +1961,8 @@ void main() {
   });
 
   group('FlutterError control test', () {
-    testWidgets('showBottomSheet() while Scaffold has bottom sheet',
+    testWidgets(
+      'showBottomSheet() while Scaffold has bottom sheet',
       (WidgetTester tester) async {
         final GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
         await tester.pumpWidget(
@@ -1952,7 +1986,8 @@ void main() {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(32.0),
-                child: Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
+                child: Text(
+                  'This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: themeData.colorScheme.secondary,
@@ -1966,13 +2001,15 @@ void main() {
           error = e;
         } finally {
           expect(error, isNotNull);
-          expect(error.toStringDeep(), equalsIgnoringHashCodes(
-            'FlutterError\n'
-            '   Scaffold.bottomSheet cannot be specified while a bottom sheet\n'
-            '   displayed with showBottomSheet() is still visible.\n'
-            '   Rebuild the Scaffold with a null bottomSheet before calling\n'
-            '   showBottomSheet().\n',
-          ));
+          expect(
+              error.toStringDeep(),
+              equalsIgnoringHashCodes(
+                'FlutterError\n'
+                '   Scaffold.bottomSheet cannot be specified while a bottom sheet\n'
+                '   displayed with showBottomSheet() is still visible.\n'
+                '   Rebuild the Scaffold with a null bottomSheet before calling\n'
+                '   showBottomSheet().\n',
+              ));
         }
       },
     );
@@ -2171,7 +2208,8 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('FloatingActionButton always keeps the same position regardless of extendBodyBehindAppBar', (WidgetTester tester) async {
+    testWidgets('FloatingActionButton always keeps the same position regardless of extendBodyBehindAppBar',
+        (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           appBar: AppBar(),
@@ -2282,37 +2320,39 @@ void main() {
         'MaterialApp at the top of your application widget tree.\n',
       ),
     );
-    expect(error.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   No ScaffoldMessenger widget found.\n'
-      '   Builder widgets require a ScaffoldMessenger widget ancestor.\n'
-      '   The specific widget that could not find a ScaffoldMessenger\n'
-      '   ancestor was:\n'
-      '     Builder\n'
-      '   The ancestors of this widget were:\n'
-      '     _BodyBuilder\n'
-      '     MediaQuery\n'
-      '     LayoutId-[<_ScaffoldSlot.body>]\n'
-      '     CustomMultiChildLayout\n'
-      '     AnimatedBuilder\n'
-      '     DefaultTextStyle\n'
-      '     AnimatedDefaultTextStyle\n'
-      '     _InkFeatures-[GlobalKey#00000 ink renderer]\n'
-      '     NotificationListener<LayoutChangedNotification>\n'
-      '     PhysicalModel\n'
-      '     AnimatedPhysicalModel\n'
-      '     Material\n'
-      '     _ScrollNotificationObserverScope\n'
-      '     NotificationListener<ScrollNotification>\n'
-      '     ScrollNotificationObserver\n'
-      '     _ScaffoldScope\n'
-      '     Scaffold\n'
-      '     MediaQuery\n'
-      '     Directionality\n'
-      '     [root]\n'
-      '   Typically, the ScaffoldMessenger widget is introduced by the\n'
-      '   MaterialApp at the top of your application widget tree.\n',
-    ));
+    expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   No ScaffoldMessenger widget found.\n'
+          '   Builder widgets require a ScaffoldMessenger widget ancestor.\n'
+          '   The specific widget that could not find a ScaffoldMessenger\n'
+          '   ancestor was:\n'
+          '     Builder\n'
+          '   The ancestors of this widget were:\n'
+          '     _BodyBuilder\n'
+          '     MediaQuery\n'
+          '     LayoutId-[<_ScaffoldSlot.body>]\n'
+          '     CustomMultiChildLayout\n'
+          '     AnimatedBuilder\n'
+          '     DefaultTextStyle\n'
+          '     AnimatedDefaultTextStyle\n'
+          '     _InkFeatures-[GlobalKey#00000 ink renderer]\n'
+          '     NotificationListener<LayoutChangedNotification>\n'
+          '     PhysicalModel\n'
+          '     AnimatedPhysicalModel\n'
+          '     Material\n'
+          '     _ScrollNotificationObserverScope\n'
+          '     NotificationListener<ScrollNotification>\n'
+          '     ScrollNotificationObserver\n'
+          '     _ScaffoldScope\n'
+          '     Scaffold\n'
+          '     MediaQuery\n'
+          '     Directionality\n'
+          '     [root]\n'
+          '   Typically, the ScaffoldMessenger widget is introduced by the\n'
+          '   MaterialApp at the top of your application widget tree.\n',
+        ));
   });
 
   testWidgets('ScaffoldMessenger checks for nesting when a new Scaffold is registered', (WidgetTester tester) async {
@@ -2408,11 +2448,9 @@ class _GeometryListenerState extends State<_GeometryListener> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ValueListenable<ScaffoldGeometry> newListenable = Scaffold.geometryOf(context);
-    if (geometryListenable == newListenable)
-      return;
+    if (geometryListenable == newListenable) return;
 
-    if (geometryListenable != null)
-      geometryListenable!.removeListener(onGeometryChanged);
+    if (geometryListenable != null) geometryListenable!.removeListener(onGeometryChanged);
 
     geometryListenable = newListenable;
     geometryListenable!.addListener(onGeometryChanged);
@@ -2450,8 +2488,8 @@ class _CustomPageRoute<T> extends PageRoute<T> {
     RouteSettings settings = const RouteSettings(),
     this.maintainState = true,
     bool fullscreenDialog = false,
-  }) : assert(builder != null),
-       super(settings: settings, fullscreenDialog: fullscreenDialog);
+  })  : assert(builder != null),
+        super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   final WidgetBuilder builder;
 
@@ -2473,7 +2511,8 @@ class _CustomPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return child;
   }
 }

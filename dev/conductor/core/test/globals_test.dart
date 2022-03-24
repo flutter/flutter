@@ -22,8 +22,7 @@ void main() {
     const String dartRevision = 'fe9708ab688dcda9923f584ba370a66fcbc3811f';
     const String engineCherrypick1 = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
     const String engineCherrypick2 = '94d06a2e1d01a3b0c693b94d70c5e1df9d78d249';
-    const String frameworkCherrypick =
-        'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
+    const String frameworkCherrypick = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
 
     final RegExp titlePattern = RegExp(r'&title=(.*)&');
     final RegExp bodyPattern = RegExp(r'&body=(.*)$');
@@ -80,9 +79,7 @@ void main() {
         link,
         contains('$candidateBranch...$userName:$workingBranch?expand=1'),
       );
-      expect(
-          Uri.decodeQueryComponent(
-              titlePattern.firstMatch(link)?.group(1) ?? ''),
+      expect(Uri.decodeQueryComponent(titlePattern.firstMatch(link)?.group(1) ?? ''),
           '[flutter_releases] Flutter $releaseChannel $releaseVersion Engine Cherrypicks');
       final String expectedBody = '''
 # Flutter $releaseChannel $releaseVersion Engine
@@ -113,9 +110,7 @@ void main() {
         link,
         contains('$candidateBranch...$userName:$workingBranch?expand=1'),
       );
-      expect(
-          Uri.decodeQueryComponent(
-              titlePattern.firstMatch(link)?.group(1) ?? ''),
+      expect(Uri.decodeQueryComponent(titlePattern.firstMatch(link)?.group(1) ?? ''),
           '[flutter_releases] Flutter $releaseChannel $releaseVersion Framework Cherrypicks');
       final String expectedBody = '''
 # Flutter $releaseChannel $releaseVersion Framework
@@ -192,7 +187,7 @@ class FakeArgs implements ArgResults {
   }
 
   @override
-  Object? operator[](String name) {
+  Object? operator [](String name) {
     return results[name];
   }
 }

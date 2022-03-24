@@ -25,8 +25,8 @@ class GridTile extends StatelessWidget {
     this.header,
     this.footer,
     required this.child,
-  }) : assert(child != null),
-       super(key: key);
+  })  : assert(child != null),
+        super(key: key);
 
   /// The widget to show over the top of this grid tile.
   ///
@@ -45,8 +45,7 @@ class GridTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (header == null && footer == null)
-      return child;
+    if (header == null && footer == null) return child;
 
     return Stack(
       children: <Widget>[

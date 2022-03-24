@@ -45,9 +45,9 @@ void main() {
     const DataTableThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -65,7 +65,7 @@ void main() {
         (Set<MaterialState> states) => const Color(0xfffffff2),
       ),
       headingRowHeight: 52.0,
-      headingTextStyle:  const TextStyle(fontSize: 14.0),
+      headingTextStyle: const TextStyle(fontSize: 14.0),
       horizontalMargin: 3.0,
       columnSpacing: 4.0,
       dividerThickness: 5.0,
@@ -73,9 +73,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description[0], 'decoration: BoxDecoration(color: Color(0xfffffff0))');
     expect(description[1], "dataRowColor: Instance of '_MaterialStatePropertyWith<Color>'");

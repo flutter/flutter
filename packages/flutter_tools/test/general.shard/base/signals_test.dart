@@ -54,7 +54,9 @@ void main() {
       await completer.future;
     });
 
-    testWithoutContext('signal handlers do not cause concurrent modification errors when removing handlers in a signal callback', () async {
+    testWithoutContext(
+        'signal handlers do not cause concurrent modification errors when removing handlers in a signal callback',
+        () async {
       final Completer<void> completer = Completer<void>();
       late Object token;
       Future<void> handle(ProcessSignal s) async {

@@ -59,7 +59,6 @@ enum BottomNavigationBarLandscapeLayout {
   linear,
 }
 
-
 /// A material widget that's displayed at the bottom of an app for selecting
 /// among a small number of views, typically between three and five.
 ///
@@ -183,23 +182,23 @@ class BottomNavigationBar extends StatefulWidget {
     this.mouseCursor,
     this.enableFeedback,
     this.landscapeLayout,
-  }) : assert(items != null),
-       assert(items.length >= 2),
-       assert(
-        items.every((BottomNavigationBarItem item) => item.label != null),
-        'Every item must have a non-null label',
-       ),
-       assert(0 <= currentIndex && currentIndex < items.length),
-       assert(elevation == null || elevation >= 0.0),
-       assert(iconSize != null && iconSize >= 0.0),
-       assert(
-         selectedItemColor == null || fixedColor == null,
-         'Either selectedItemColor or fixedColor can be specified, but not both',
-       ),
-       assert(selectedFontSize != null && selectedFontSize >= 0.0),
-       assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
-       selectedItemColor = selectedItemColor ?? fixedColor,
-       super(key: key);
+  })  : assert(items != null),
+        assert(items.length >= 2),
+        assert(
+          items.every((BottomNavigationBarItem item) => item.label != null),
+          'Every item must have a non-null label',
+        ),
+        assert(0 <= currentIndex && currentIndex < items.length),
+        assert(elevation == null || elevation >= 0.0),
+        assert(iconSize != null && iconSize >= 0.0),
+        assert(
+          selectedItemColor == null || fixedColor == null,
+          'Either selectedItemColor or fixedColor can be specified, but not both',
+        ),
+        assert(selectedFontSize != null && selectedFontSize >= 0.0),
+        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
+        selectedItemColor = selectedItemColor ?? fixedColor,
+        super(key: key);
 
   /// Defines the appearance of the button items that are arrayed within the
   /// bottom navigation bar.
@@ -398,13 +397,13 @@ class _BottomNavigationTile extends StatelessWidget {
     required this.mouseCursor,
     required this.enableFeedback,
     required this.layout,
-  }) : assert(type != null),
-       assert(item != null),
-       assert(animation != null),
-       assert(selected != null),
-       assert(selectedLabelStyle != null),
-       assert(unselectedLabelStyle != null),
-       assert(mouseCursor != null);
+  })  : assert(type != null),
+        assert(item != null),
+        assert(animation != null),
+        assert(selected != null),
+        assert(selectedLabelStyle != null),
+        assert(unselectedLabelStyle != null),
+        assert(mouseCursor != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -565,18 +564,12 @@ class _BottomNavigationTile extends StatelessWidget {
   }
 }
 
-
 // If the orientation is landscape and layout is
 // BottomNavigationBarLandscapeLayout.linear then return a
 // icon-space-label row, where space is 8 pixels. Otherwise return a
 // icon-label column.
 class _Tile extends StatelessWidget {
- const  _Tile({
-    Key? key,
-    required this.layout,
-    required this.icon,
-    required this.label
-  }) : super(key: key);
+  const _Tile({Key? key, required this.layout, required this.icon, required this.label}) : super(key: key);
 
   final BottomNavigationBarLandscapeLayout layout;
   final Widget icon;
@@ -612,9 +605,9 @@ class _TileIcon extends StatelessWidget {
     required this.item,
     required this.selectedIconTheme,
     required this.unselectedIconTheme,
-  }) : assert(selected != null),
-       assert(item != null),
-       super(key: key);
+  })  : assert(selected != null),
+        assert(item != null),
+        super(key: key);
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -658,14 +651,14 @@ class _Label extends StatelessWidget {
     required this.unselectedLabelStyle,
     required this.showSelectedLabels,
     required this.showUnselectedLabels,
-  }) : assert(colorTween != null),
-       assert(animation != null),
-       assert(item != null),
-       assert(selectedLabelStyle != null),
-       assert(unselectedLabelStyle != null),
-       assert(showSelectedLabels != null),
-       assert(showUnselectedLabels != null),
-       super(key: key);
+  })  : assert(colorTween != null),
+        assert(animation != null),
+        assert(item != null),
+        assert(selectedLabelStyle != null),
+        assert(unselectedLabelStyle != null),
+        assert(showSelectedLabels != null),
+        assert(showUnselectedLabels != null),
+        super(key: key);
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -766,10 +759,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   static final Animatable<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
 
   void _resetState() {
-    for (final AnimationController controller in _controllers)
-      controller.dispose();
-    for (final _Circle circle in _circles)
-      circle.dispose();
+    for (final AnimationController controller in _controllers) controller.dispose();
+    for (final _Circle circle in _circles) circle.dispose();
     _circles.clear();
 
     _controllers = List<AnimationController>.generate(widget.items.length, (int index) {
@@ -796,9 +787,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // [BottomNavigationBarType.fixed] for 3 or fewer items, and
   // [BottomNavigationBarType.shifting] is used for 4+ items.
   BottomNavigationBarType get _effectiveType {
-    return widget.type
-      ?? BottomNavigationBarTheme.of(context).type
-      ?? (widget.items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting);
+    return widget.type ??
+        BottomNavigationBarTheme.of(context).type ??
+        (widget.items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting);
   }
 
   // Computes the default value for the [showUnselected] parameter.
@@ -829,10 +820,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   @override
   void dispose() {
-    for (final AnimationController controller in _controllers)
-      controller.dispose();
-    for (final _Circle circle in _circles)
-      circle.dispose();
+    for (final AnimationController controller in _controllers) controller.dispose();
+    for (final _Circle circle in _circles) circle.dispose();
     super.dispose();
   }
 
@@ -847,22 +836,22 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           color: widget.items[index].backgroundColor!,
           vsync: this,
         )..controller.addStatusListener(
-          (AnimationStatus status) {
-            switch (status) {
-              case AnimationStatus.completed:
-                setState(() {
-                  final _Circle circle = _circles.removeFirst();
-                  _backgroundColor = circle.color;
-                  circle.dispose();
-                });
-                break;
-              case AnimationStatus.dismissed:
-              case AnimationStatus.forward:
-              case AnimationStatus.reverse:
-                break;
-            }
-          },
-        ),
+            (AnimationStatus status) {
+              switch (status) {
+                case AnimationStatus.completed:
+                  setState(() {
+                    final _Circle circle = _circles.removeFirst();
+                    _backgroundColor = circle.color;
+                    circle.dispose();
+                  });
+                  break;
+                case AnimationStatus.dismissed:
+                case AnimationStatus.forward:
+                case AnimationStatus.reverse:
+                  break;
+              }
+            },
+          ),
       );
     }
   }
@@ -908,16 +897,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final ThemeData themeData = Theme.of(context);
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
-    final TextStyle effectiveSelectedLabelStyle =
-      _effectiveTextStyle(
-        widget.selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
-        widget.selectedFontSize,
-      );
-    final TextStyle effectiveUnselectedLabelStyle =
-      _effectiveTextStyle(
-        widget.unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
-        widget.unselectedFontSize,
-      );
+    final TextStyle effectiveSelectedLabelStyle = _effectiveTextStyle(
+      widget.selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
+      widget.selectedFontSize,
+    );
+    final TextStyle effectiveUnselectedLabelStyle = _effectiveTextStyle(
+      widget.unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
+      widget.unselectedFontSize,
+    );
 
     final Color themeColor;
     switch (themeData.brightness) {
@@ -933,23 +920,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
         colorTween = ColorTween(
-          begin: widget.unselectedItemColor
-            ?? bottomTheme.unselectedItemColor
-            ?? themeData.unselectedWidgetColor,
-          end: widget.selectedItemColor
-            ?? bottomTheme.selectedItemColor
-            ?? widget.fixedColor
-            ?? themeColor,
+          begin: widget.unselectedItemColor ?? bottomTheme.unselectedItemColor ?? themeData.unselectedWidgetColor,
+          end: widget.selectedItemColor ?? bottomTheme.selectedItemColor ?? widget.fixedColor ?? themeColor,
         );
         break;
       case BottomNavigationBarType.shifting:
         colorTween = ColorTween(
-          begin: widget.unselectedItemColor
-            ?? bottomTheme.unselectedItemColor
-            ?? themeData.colorScheme.surface,
-          end: widget.selectedItemColor
-            ?? bottomTheme.selectedItemColor
-            ?? themeData.colorScheme.surface,
+          begin: widget.unselectedItemColor ?? bottomTheme.unselectedItemColor ?? themeData.colorScheme.surface,
+          end: widget.selectedItemColor ?? bottomTheme.selectedItemColor ?? themeData.colorScheme.surface,
         );
         break;
     }
@@ -960,9 +938,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         if (i == widget.currentIndex) MaterialState.selected,
       };
 
-      final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-        ?? bottomTheme.mouseCursor?.resolve(states)
-        ?? MaterialStateMouseCursor.clickable.resolve(states);
+      final MouseCursor effectiveMouseCursor =
+          MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+              bottomTheme.mouseCursor?.resolve(states) ??
+              MaterialStateMouseCursor.clickable.resolve(states);
 
       tiles.add(_BottomNavigationTile(
         _effectiveType,
@@ -998,9 +977,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
-    final BottomNavigationBarLandscapeLayout layout = widget.landscapeLayout
-      ?? bottomTheme.landscapeLayout
-      ?? BottomNavigationBarLandscapeLayout.spread;
+    final BottomNavigationBarLandscapeLayout layout =
+        widget.landscapeLayout ?? bottomTheme.landscapeLayout ?? BottomNavigationBarLandscapeLayout.spread;
     final double additionalBottomPadding = MediaQuery.of(context).padding.bottom;
 
     Color? backgroundColor;
@@ -1026,7 +1004,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
               circles: _circles.toList(),
               textDirection: Directionality.of(context),
             ),
-            child: Material( // Splashes.
+            child: Material(
+              // Splashes.
               type: MaterialType.transparency,
               child: Padding(
                 padding: EdgeInsets.only(bottom: additionalBottomPadding),
@@ -1035,7 +1014,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                   removeBottom: true,
                   child: DefaultTextStyle.merge(
                     overflow: TextOverflow.ellipsis,
-                    child:  Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: _createTiles(layout),
                     ),
@@ -1095,9 +1074,9 @@ class _Circle {
     required this.index,
     required this.color,
     required TickerProvider vsync,
-  }) : assert(state != null),
-       assert(index != null),
-       assert(color != null) {
+  })  : assert(state != null),
+        assert(index != null),
+        assert(color != null) {
     controller = AnimationController(
       duration: kThemeAnimationDuration,
       vsync: vsync,
@@ -1140,8 +1119,8 @@ class _RadialPainter extends CustomPainter {
   _RadialPainter({
     required this.circles,
     required this.textDirection,
-  }) : assert(circles != null),
-       assert(textDirection != null);
+  })  : assert(circles != null),
+        assert(textDirection != null);
 
   final List<_Circle> circles;
   final TextDirection textDirection;
@@ -1158,15 +1137,10 @@ class _RadialPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RadialPainter oldPainter) {
-    if (textDirection != oldPainter.textDirection)
-      return true;
-    if (circles == oldPainter.circles)
-      return false;
-    if (circles.length != oldPainter.circles.length)
-      return true;
-    for (int i = 0; i < circles.length; i += 1)
-      if (circles[i] != oldPainter.circles[i])
-        return true;
+    if (textDirection != oldPainter.textDirection) return true;
+    if (circles == oldPainter.circles) return false;
+    if (circles.length != oldPainter.circles.length) return true;
+    for (int i = 0; i < circles.length; i += 1) if (circles[i] != oldPainter.circles[i]) return true;
     return false;
   }
 

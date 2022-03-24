@@ -15,17 +15,19 @@ void main() {
     final Map<String, Object> manifest = json.decode(
       fileSystem.file('templates/template_manifest.json').readAsStringSync(),
     ) as Map<String, Object>;
-    final Set<Uri> declaredFileList = Set<Uri>.from(
-      (manifest['files'] as List<Object>).cast<String>().map<Uri>(fileSystem.path.toUri));
+    final Set<Uri> declaredFileList =
+        Set<Uri>.from((manifest['files'] as List<Object>).cast<String>().map<Uri>(fileSystem.path.toUri));
 
-    final Set<Uri> activeTemplateList = fileSystem.directory('templates')
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((File file) => fileSystem.path.basename(file.path) != 'template_manifest.json' &&
-        fileSystem.path.basename(file.path) != 'README.md' &&
-        fileSystem.path.basename(file.path) != '.DS_Store')
-      .map((File file) => file.uri)
-      .toSet();
+    final Set<Uri> activeTemplateList = fileSystem
+        .directory('templates')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((File file) =>
+            fileSystem.path.basename(file.path) != 'template_manifest.json' &&
+            fileSystem.path.basename(file.path) != 'README.md' &&
+            fileSystem.path.basename(file.path) != '.DS_Store')
+        .map((File file) => file.uri)
+        .toSet();
 
     final Set<Uri> difference = activeTemplateList.difference(declaredFileList);
 

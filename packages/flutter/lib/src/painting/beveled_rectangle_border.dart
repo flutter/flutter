@@ -26,9 +26,9 @@ class BeveledRectangleBorder extends OutlinedBorder {
   const BeveledRectangleBorder({
     BorderSide side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
-  }) : assert(side != null),
-       assert(borderRadius != null),
-       super(side: side);
+  })  : assert(side != null),
+        assert(borderRadius != null),
+        super(side: side);
 
   /// The radii for each corner.
   ///
@@ -81,7 +81,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
   /// Returns a copy of this RoundedRectangleBorder with the given fields
   /// replaced with the new values.
   @override
-  BeveledRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
+  BeveledRectangleBorder copyWith({BorderSide? side, BorderRadiusGeometry? borderRadius}) {
     return BeveledRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
@@ -106,31 +106,30 @@ class BeveledRectangleBorder extends OutlinedBorder {
     final List<Offset> vertices = <Offset>[
       Offset(rrect.left, math.min(centerLeft.dy, rrect.top + tlRadiusY)),
       Offset(math.min(centerTop.dx, rrect.left + tlRadiusX), rrect.top),
-      Offset(math.max(centerTop.dx, rrect.right -trRadiusX), rrect.top),
+      Offset(math.max(centerTop.dx, rrect.right - trRadiusX), rrect.top),
       Offset(rrect.right, math.min(centerRight.dy, rrect.top + trRadiusY)),
       Offset(rrect.right, math.max(centerRight.dy, rrect.bottom - brRadiusY)),
       Offset(math.max(centerBottom.dx, rrect.right - brRadiusX), rrect.bottom),
       Offset(math.min(centerBottom.dx, rrect.left + blRadiusX), rrect.bottom),
-      Offset(rrect.left, math.max(centerLeft.dy, rrect.bottom  - blRadiusY)),
+      Offset(rrect.left, math.max(centerLeft.dy, rrect.bottom - blRadiusY)),
     ];
 
     return Path()..addPolygon(vertices, true);
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
-    if (rect.isEmpty)
-      return;
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (rect.isEmpty) return;
     switch (side.style) {
       case BorderStyle.none:
         break;
@@ -144,11 +143,8 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is BeveledRectangleBorder
-        && other.side == side
-        && other.borderRadius == borderRadius;
+    if (other.runtimeType != runtimeType) return false;
+    return other is BeveledRectangleBorder && other.side == side && other.borderRadius == borderRadius;
   }
 
   @override

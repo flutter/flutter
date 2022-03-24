@@ -20,9 +20,9 @@ class VisualStudio {
     required ProcessManager processManager,
     required Platform platform,
     required Logger logger,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+  })  : _platform = platform,
+        _fileSystem = fileSystem,
+        _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -245,7 +245,7 @@ class VisualStudio {
   }
 
   /// The minimum supported major version.
-  static const int _minimumSupportedVersion = 16;  // '16' is VS 2019.
+  static const int _minimumSupportedVersion = 16; // '16' is VS 2019.
 
   /// vswhere argument to specify the minimum version.
   static const String _vswhereMinVersionArgument = '-version';
@@ -281,7 +281,8 @@ class VisualStudio {
   static const String _catalogDisplayVersionKey = 'productDisplayVersion';
 
   /// The registry path for Windows 10 SDK installation details.
-  static const String _windows10SdkRegistryPath = r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
+  static const String _windows10SdkRegistryPath =
+      r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
 
   /// The registry key in _windows10SdkRegistryPath for the folder where the
   /// SDKs are installed.
@@ -290,11 +291,8 @@ class VisualStudio {
   /// Returns the details dictionary for the newest version of Visual Studio.
   /// If [validateRequirements] is set, the search will be limited to versions
   /// that have all of the required workloads and components.
-  Map<String, dynamic>? _visualStudioDetails({
-      bool validateRequirements = false,
-      List<String>? additionalArguments,
-      String? requiredWorkload
-    }) {
+  Map<String, dynamic>? _visualStudioDetails(
+      {bool validateRequirements = false, List<String>? additionalArguments, String? requiredWorkload}) {
     final List<String> requirementArguments = validateRequirements
         ? <String>[
             if (requiredWorkload != null) ...<String>[
@@ -306,8 +304,10 @@ class VisualStudio {
         : <String>[];
     try {
       final List<String> defaultArguments = <String>[
-        '-format', 'json',
-        '-products', '*',
+        '-format',
+        'json',
+        '-products',
+        '*',
         '-utf8',
         '-latest',
       ];
@@ -338,7 +338,7 @@ class VisualStudio {
   ///
   /// Returns false if the required information is missing since older versions
   /// of Visual Studio might not include them.
-  bool installationHasIssues(Map<String, dynamic>installationDetails) {
+  bool installationHasIssues(Map<String, dynamic> installationDetails) {
     assert(installationDetails != null);
     if (installationDetails[_isCompleteKey] != null && !(installationDetails[_isCompleteKey] as bool)) {
       return true;
@@ -361,7 +361,7 @@ class VisualStudio {
   ///
   /// If no installation is found, the cached VS details are set to an empty map
   /// to avoid repeating vswhere queries that have already not found an installation.
-  late final Map<String, dynamic> _usableVisualStudioDetails = (){
+  late final Map<String, dynamic> _usableVisualStudioDetails = () {
     final List<String> minimumVersionArguments = <String>[
       _vswhereMinVersionArgument,
       _minimumSupportedVersion.toString(),
@@ -371,11 +371,11 @@ class VisualStudio {
     for (final bool checkForPrerelease in <bool>[false, true]) {
       for (final String requiredWorkload in _requiredWorkloads) {
         visualStudioDetails ??= _visualStudioDetails(
-          validateRequirements: true,
-          additionalArguments: checkForPrerelease
-              ? <String>[...minimumVersionArguments, _vswherePrereleaseArgument]
-              : minimumVersionArguments,
-          requiredWorkload: requiredWorkload);
+            validateRequirements: true,
+            additionalArguments: checkForPrerelease
+                ? <String>[...minimumVersionArguments, _vswherePrereleaseArgument]
+                : minimumVersionArguments,
+            requiredWorkload: requiredWorkload);
       }
     }
 
@@ -400,8 +400,8 @@ class VisualStudio {
   Map<String, dynamic>? _cachedAnyVisualStudioDetails;
   Map<String, dynamic> get _anyVisualStudioDetails {
     // Search for all types of installations.
-    _cachedAnyVisualStudioDetails ??= _visualStudioDetails(
-        additionalArguments: <String>[_vswherePrereleaseArgument, '-all']);
+    _cachedAnyVisualStudioDetails ??=
+        _visualStudioDetails(additionalArguments: <String>[_vswherePrereleaseArgument, '-all']);
     // Add a sentinel empty value to avoid querying vswhere again.
     _cachedAnyVisualStudioDetails ??= <String, dynamic>{};
     return _cachedAnyVisualStudioDetails!;

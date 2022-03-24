@@ -94,9 +94,9 @@ class FileStore {
     required File cacheFile,
     required Logger logger,
     FileStoreStrategy strategy = FileStoreStrategy.hash,
-  }) : _logger = logger,
-       _strategy = strategy,
-       _cacheFile = cacheFile;
+  })  : _logger = logger,
+        _strategy = strategy,
+        _cacheFile = cacheFile;
 
   final File _cacheFile;
   final Logger _logger;

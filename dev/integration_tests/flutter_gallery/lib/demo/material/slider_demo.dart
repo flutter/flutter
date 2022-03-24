@@ -17,7 +17,7 @@ class SliderDemo extends StatefulWidget {
   State<SliderDemo> createState() => _SliderDemoState();
 }
 
-Path _downTriangle(double size, Offset thumbCenter, { bool invert = false }) {
+Path _downTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final Path thumbPath = Path();
   final double height = math.sqrt(3.0) / 2.0;
   final double centerHeight = size * height / 3.0;
@@ -30,7 +30,7 @@ Path _downTriangle(double size, Offset thumbCenter, { bool invert = false }) {
   return thumbPath;
 }
 
-Path _rightTriangle(double size, Offset thumbCenter, { bool invert = false }) {
+Path _rightTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final Path thumbPath = Path();
   final double halfSize = size / 2.0;
   final double sign = invert ? -1.0 : 1.0;
@@ -195,7 +195,8 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     final double size = _indicatorSize * sizeTween.evaluate(enableAnimation);
     final Offset slideUpOffset = Offset(0.0, -slideUpTween.evaluate(activationAnimation));
     final Path thumbPath = _upTriangle(size, thumbCenter + slideUpOffset);
-    final Color paintColor = enableColor.evaluate(enableAnimation)!.withAlpha((255.0 * activationAnimation.value).round());
+    final Color paintColor =
+        enableColor.evaluate(enableAnimation)!.withAlpha((255.0 * activationAnimation.value).round());
     canvas.drawPath(
       thumbPath,
       Paint()..color = paintColor,
@@ -207,7 +208,8 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
           ..color = paintColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0);
-    labelPainter.paint(canvas, thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
+    labelPainter.paint(
+        canvas, thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
   }
 }
 

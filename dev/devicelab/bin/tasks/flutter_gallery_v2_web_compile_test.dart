@@ -24,10 +24,8 @@ class NewGalleryWebCompileTest {
 
   /// Runs the test.
   Future<TaskResult> run() async {
-    final Directory galleryParentDir =
-        Directory.systemTemp.createTempSync('flutter_gallery_v2_web_compile.');
-    final Directory galleryDir =
-        Directory(path.join(galleryParentDir.path, 'gallery'));
+    final Directory galleryParentDir = Directory.systemTemp.createTempSync('flutter_gallery_v2_web_compile.');
+    final Directory galleryDir = Directory(path.join(galleryParentDir.path, 'gallery'));
 
     await getNewGallery(galleryVersion, galleryDir);
 

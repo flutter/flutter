@@ -18,11 +18,11 @@ class TestScrollPosition extends ScrollPositionWithSingleContext {
     double initialPixels = 0.0,
     ScrollPosition? oldPosition,
   }) : super(
-    physics: physics,
-    context: state,
-    initialPixels: initialPixels,
-    oldPosition: oldPosition,
-  );
+          physics: physics,
+          context: state,
+          initialPixels: initialPixels,
+          oldPosition: oldPosition,
+        );
 }
 
 class TestScrollController extends ScrollController {
@@ -50,7 +50,9 @@ void main() {
     );
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
+    final dynamic renderObject = tester.allRenderObjects
+        .where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport')
+        .first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge)); // ignore: avoid_dynamic_calls
 
     // 2nd, height == widow.height test: check that the painting context does not call pushClipRect .
@@ -103,7 +105,9 @@ void main() {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
+    final dynamic renderObject = tester.allRenderObjects
+        .where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport')
+        .first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge)); // ignore: avoid_dynamic_calls
 
     // 2nd, check that the painting context has received the default clip behavior.
@@ -174,7 +178,6 @@ void main() {
     final Scrollable scrollable = tester.widget(find.byType(Scrollable));
     expect(scrollable.controller, primaryScrollController);
   });
-
 
   testWidgets('Changing scroll controller inside dirty layout builder does not assert', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -279,157 +282,170 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics(
-        children: <TestSemantics>[
+    expect(
+        semantics,
+        hasSemantics(
           TestSemantics(
-            flags: <SemanticsFlag>[
-              SemanticsFlag.hasImplicitScrolling,
-            ],
-            actions: <SemanticsAction>[
-              SemanticsAction.scrollUp,
-            ],
             children: <TestSemantics>[
               TestSemantics(
-                label: r'Tile 0',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 1',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 2',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
                 flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
+                  SemanticsFlag.hasImplicitScrolling,
                 ],
-                label: r'Tile 3',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,],
-                label: r'Tile 4',
-                textDirection: TextDirection.ltr,
+                actions: <SemanticsAction>[
+                  SemanticsAction.scrollUp,
+                ],
+                children: <TestSemantics>[
+                  TestSemantics(
+                    label: r'Tile 0',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    label: r'Tile 1',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    label: r'Tile 2',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isHidden,
+                    ],
+                    label: r'Tile 3',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isHidden,
+                    ],
+                    label: r'Tile 4',
+                    textDirection: TextDirection.ltr,
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-      ignoreRect: true, ignoreTransform: true, ignoreId: true,
-    ));
+          ignoreRect: true,
+          ignoreTransform: true,
+          ignoreId: true,
+        ));
 
     controller.jumpTo(3000.0);
     await tester.pumpAndSettle();
 
-    expect(semantics, hasSemantics(
-      TestSemantics(
-        children: <TestSemantics>[
+    expect(
+        semantics,
+        hasSemantics(
           TestSemantics(
-            flags: <SemanticsFlag>[
-              SemanticsFlag.hasImplicitScrolling,
-            ],
-            actions: <SemanticsAction>[
-              SemanticsAction.scrollUp,
-              SemanticsAction.scrollDown,
-            ],
             children: <TestSemantics>[
               TestSemantics(
                 flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
+                  SemanticsFlag.hasImplicitScrolling,
                 ],
-                label: r'Tile 13',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
+                actions: <SemanticsAction>[
+                  SemanticsAction.scrollUp,
+                  SemanticsAction.scrollDown,
                 ],
-                label: r'Tile 14',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 15',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 16',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 17',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isHidden,
+                    ],
+                    label: r'Tile 13',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isHidden,
+                    ],
+                    label: r'Tile 14',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    label: r'Tile 15',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    label: r'Tile 16',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    label: r'Tile 17',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isHidden,
+                    ],
+                    label: r'Tile 18',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isHidden,
+                    ],
+                    label: r'Tile 19',
+                    textDirection: TextDirection.ltr,
+                  ),
                 ],
-                label: r'Tile 18',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 19',
-                textDirection: TextDirection.ltr,
               ),
             ],
           ),
-        ],
-      ),
-      ignoreRect: true, ignoreTransform: true, ignoreId: true,
-    ));
+          ignoreRect: true,
+          ignoreTransform: true,
+          ignoreId: true,
+        ));
 
     controller.jumpTo(6000.0);
     await tester.pumpAndSettle();
 
-    expect(semantics, hasSemantics(
-      TestSemantics(
-        children: <TestSemantics>[
+    expect(
+        semantics,
+        hasSemantics(
           TestSemantics(
-            flags: <SemanticsFlag>[
-              SemanticsFlag.hasImplicitScrolling,
-            ],
-            actions: <SemanticsAction>[
-              SemanticsAction.scrollDown,
-            ],
             children: <TestSemantics>[
               TestSemantics(
                 flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
+                  SemanticsFlag.hasImplicitScrolling,
                 ],
-                label: r'Tile 25',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
+                actions: <SemanticsAction>[
+                  SemanticsAction.scrollDown,
                 ],
-                label: r'Tile 26',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 27',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 28',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 29',
-                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isHidden,
+                    ],
+                    label: r'Tile 25',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isHidden,
+                    ],
+                    label: r'Tile 26',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    label: r'Tile 27',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    label: r'Tile 28',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
+                    label: r'Tile 29',
+                    textDirection: TextDirection.ltr,
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-      ignoreRect: true, ignoreTransform: true, ignoreId: true,
-    ));
+          ignoreRect: true,
+          ignoreTransform: true,
+          ignoreId: true,
+        ));
 
     semantics.dispose();
   });
@@ -791,7 +807,7 @@ void main() {
   group('Nested SingleChildScrollView (same orientation) showOnScreen', () {
     late List<Widget> children;
 
-    Future<void> buildNestedScroller({ required WidgetTester tester, ScrollController? inner, ScrollController? outer }) {
+    Future<void> buildNestedScroller({required WidgetTester tester, ScrollController? inner, ScrollController? outer}) {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

@@ -160,7 +160,7 @@ class DraggableScrollableController extends ChangeNotifier {
     assert(
       _attachedController != null,
       'DraggableScrollableController is not attached to a sheet. A DraggableScrollableController '
-        'must be used in a DraggableScrollableSheet before any of its methods are called.',
+      'must be used in a DraggableScrollableSheet before any of its methods are called.',
     );
   }
 
@@ -393,17 +393,17 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
     required this.maxExtent,
     required this.initialExtent,
     required this.context,
-  }) : assert(extent != null),
-       assert(initialExtent != null),
-       assert(minExtent != null),
-       assert(maxExtent != null),
-       assert(0.0 <= minExtent),
-       assert(maxExtent <= 1.0),
-       assert(minExtent <= extent),
-       assert(minExtent <= initialExtent),
-       assert(extent <= maxExtent),
-       assert(initialExtent <= maxExtent),
-       assert(context != null);
+  })  : assert(extent != null),
+        assert(initialExtent != null),
+        assert(minExtent != null),
+        assert(maxExtent != null),
+        assert(0.0 <= minExtent),
+        assert(maxExtent <= 1.0),
+        assert(minExtent <= extent),
+        assert(minExtent <= initialExtent),
+        assert(extent <= maxExtent),
+        assert(initialExtent <= maxExtent),
+        assert(context != null);
 
   /// The current value of the extent, between [minExtent] and [maxExtent].
   final double extent;
@@ -459,8 +459,7 @@ class _DraggableSheetExtent {
         assert(maxSize <= 1),
         assert(minSize <= initialSize),
         assert(initialSize <= maxSize),
-        _currentSize = (currentSize ?? ValueNotifier<double>(initialSize))
-          ..addListener(onSizeChanged),
+        _currentSize = (currentSize ?? ValueNotifier<double>(initialSize))..addListener(onSizeChanged),
         availablePixels = double.infinity,
         hasDragged = hasDragged ?? false;
 
@@ -563,9 +562,7 @@ class _DraggableSheetExtent {
       initialSize: initialSize,
       onSizeChanged: onSizeChanged,
       // Use the possibly updated initialSize if the user hasn't dragged yet.
-      currentSize: ValueNotifier<double>(hasDragged
-          ? _currentSize.value.clamp(minSize, maxSize)
-          : initialSize),
+      currentSize: ValueNotifier<double>(hasDragged ? _currentSize.value.clamp(minSize, maxSize) : initialSize),
       hasDragged: hasDragged,
     );
   }
@@ -594,9 +591,9 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     for (int index = 0; index < (widget.snapSizes?.length ?? 0); index += 1) {
       final double snapSize = widget.snapSizes![index];
       assert(snapSize >= widget.minChildSize && snapSize <= widget.maxChildSize,
-        '${_snapSizeErrorMessage(index)}\nSnap sizes must be between `minChildSize` and `maxChildSize`. ');
+          '${_snapSizeErrorMessage(index)}\nSnap sizes must be between `minChildSize` and `maxChildSize`. ');
       assert(index == 0 || snapSize > widget.snapSizes![index - 1],
-        '${_snapSizeErrorMessage(index)}\nSnap sizes must be in ascending order. ');
+          '${_snapSizeErrorMessage(index)}\nSnap sizes must be in ascending order. ');
     }
     // Ensure the snap sizes start and end with the min and max child sizes.
     if (widget.snapSizes == null || widget.snapSizes!.isEmpty) {
@@ -717,11 +714,11 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     double initialScrollOffset = 0.0,
     String? debugLabel,
     required this.extent,
-  }) : assert(extent != null),
-       super(
-         debugLabel: debugLabel,
-         initialScrollOffset: initialScrollOffset,
-       );
+  })  : assert(extent != null),
+        super(
+          debugLabel: debugLabel,
+          initialScrollOffset: initialScrollOffset,
+        );
 
   _DraggableSheetExtent extent;
 
@@ -746,8 +743,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
   }
 
   @override
-  _DraggableScrollableSheetScrollPosition get position =>
-      super.position as _DraggableScrollableSheetScrollPosition;
+  _DraggableScrollableSheetScrollPosition get position => super.position as _DraggableScrollableSheetScrollPosition;
 
   void reset() {
     extent._cancelActivity?.call();
@@ -778,8 +774,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
 /// See also:
 ///
 ///  * [_DraggableScrollableSheetScrollController], which uses this as its [ScrollPosition].
-class _DraggableScrollableSheetScrollPosition
-    extends ScrollPositionWithSingleContext {
+class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleContext {
   _DraggableScrollableSheetScrollPosition({
     required ScrollPhysics physics,
     required ScrollContext context,
@@ -788,7 +783,7 @@ class _DraggableScrollableSheetScrollPosition
     ScrollPosition? oldPosition,
     String? debugLabel,
     required this.getExtent,
-  })  : super(
+  }) : super(
           physics: physics,
           context: context,
           initialPixels: initialPixels,
@@ -825,9 +820,7 @@ class _DraggableScrollableSheetScrollPosition
   @override
   void applyUserOffset(double delta) {
     if (!listShouldScroll &&
-        (!(extent.isAtMin || extent.isAtMax) ||
-          (extent.isAtMin && delta < 0) ||
-          (extent.isAtMax && delta > 0))) {
+        (!(extent.isAtMin || extent.isAtMax) || (extent.isAtMin && delta < 0) || (extent.isAtMax && delta > 0))) {
       extent.addPixelDelta(-delta, context.notificationContext!);
     } else {
       super.applyUserOffset(delta);
@@ -841,6 +834,7 @@ class _DraggableScrollableSheetScrollPosition
       },
     );
   }
+
   bool get _shouldSnap => extent.snap && extent.hasDragged && !_isAtSnapSize;
 
   @override
@@ -1068,8 +1062,7 @@ class _SnappingSimulation extends Simulation {
   @override
   double x(double time) {
     final double newPosition = position + velocity * time;
-    if ((velocity >= 0 && newPosition > _pixelSnapSize) ||
-        (velocity < 0 && newPosition < _pixelSnapSize)) {
+    if ((velocity >= 0 && newPosition > _pixelSnapSize) || (velocity < 0 && newPosition < _pixelSnapSize)) {
       // We're passed the snap size, return it instead.
       return _pixelSnapSize;
     }
@@ -1080,8 +1073,7 @@ class _SnappingSimulation extends Simulation {
   // non-zero, select the size in the velocity's direction. Otherwise,
   // the nearest snap size.
   double _getSnapSize(double initialVelocity, List<double> pixelSnapSizes) {
-    final int indexOfNextSize = pixelSnapSizes
-        .indexWhere((double size) => size >= position);
+    final int indexOfNextSize = pixelSnapSizes.indexWhere((double size) => size >= position);
     if (indexOfNextSize == 0) {
       return pixelSnapSizes.first;
     }

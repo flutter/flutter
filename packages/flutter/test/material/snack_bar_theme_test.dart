@@ -221,7 +221,8 @@ void main() {
     final RenderBox floatingActionButtonBox = tester.firstRenderObject(find.byType(FloatingActionButton));
 
     final Offset snackBarBottomCenter = snackBarBox.localToGlobal(snackBarBox.size.bottomCenter(Offset.zero));
-    final Offset floatingActionButtonTopCenter = floatingActionButtonBox.localToGlobal(floatingActionButtonBox.size.topCenter(Offset.zero));
+    final Offset floatingActionButtonTopCenter =
+        floatingActionButtonBox.localToGlobal(floatingActionButtonBox.size.topCenter(Offset.zero));
 
     // Since padding and margin is handled inside snackBarBox,
     // the bottom offset of snackbar should equal with top offset of FAB
@@ -255,8 +256,9 @@ void main() {
       ),
     ));
 
-    final RenderBox floatingActionButtonOriginBox= tester.firstRenderObject(find.byType(FloatingActionButton));
-    final Offset floatingActionButtonOriginBottomCenter = floatingActionButtonOriginBox.localToGlobal(floatingActionButtonOriginBox.size.bottomCenter(Offset.zero));
+    final RenderBox floatingActionButtonOriginBox = tester.firstRenderObject(find.byType(FloatingActionButton));
+    final Offset floatingActionButtonOriginBottomCenter =
+        floatingActionButtonOriginBox.localToGlobal(floatingActionButtonOriginBox.size.bottomCenter(Offset.zero));
 
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
@@ -266,7 +268,8 @@ void main() {
     final RenderBox floatingActionButtonBox = tester.firstRenderObject(find.byType(FloatingActionButton));
 
     final Offset snackBarTopCenter = snackBarBox.localToGlobal(snackBarBox.size.topCenter(Offset.zero));
-    final Offset floatingActionButtonBottomCenter = floatingActionButtonBox.localToGlobal(floatingActionButtonBox.size.bottomCenter(Offset.zero));
+    final Offset floatingActionButtonBottomCenter =
+        floatingActionButtonBox.localToGlobal(floatingActionButtonBox.size.bottomCenter(Offset.zero));
 
     expect(floatingActionButtonOriginBottomCenter.dy > floatingActionButtonBottomCenter.dy, true);
     expect(snackBarTopCenter.dy > floatingActionButtonBottomCenter.dy, true);
@@ -331,7 +334,7 @@ void main() {
     expect(
       exception.message,
       'Margin can only be used with floating behavior. SnackBarBehavior.fixed '
-          'was set by the inherited SnackBarThemeData.',
+      'was set by the inherited SnackBarThemeData.',
     );
   });
 
@@ -376,10 +379,12 @@ SnackBarThemeData _snackBarTheme() {
 
 Material _getSnackBarMaterial(WidgetTester tester) {
   return tester.widget<Material>(
-    find.descendant(
-      of: find.byType(SnackBar),
-      matching: find.byType(Material),
-    ).first,
+    find
+        .descendant(
+          of: find.byType(SnackBar),
+          matching: find.byType(Material),
+        )
+        .first,
   );
 }
 

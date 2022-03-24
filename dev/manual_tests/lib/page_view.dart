@@ -38,8 +38,7 @@ class PageViewAppState extends State<PageViewApp> {
     });
   }
 
-  static const TextStyle cardLabelStyle =
-    TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
+  static const TextStyle cardLabelStyle = TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   List<CardModel> cardModels = <CardModel>[];
   Size pageSize = const Size(200.0, 200.0);
@@ -58,8 +57,8 @@ class PageViewAppState extends State<PageViewApp> {
     );
 
     final BoxConstraints constraints = (scrollDirection == Axis.vertical)
-      ? BoxConstraints.tightFor(height: pageSize.height)
-      : BoxConstraints.tightFor(width: pageSize.width);
+        ? BoxConstraints.tightFor(height: pageSize.height)
+        : BoxConstraints.tightFor(width: pageSize.width);
 
     return Container(
       key: cardModel.key,
@@ -70,9 +69,7 @@ class PageViewAppState extends State<PageViewApp> {
 
   void switchScrollDirection() {
     setState(() {
-      scrollDirection = (scrollDirection == Axis.vertical)
-        ? Axis.horizontal
-        : Axis.vertical;
+      scrollDirection = (scrollDirection == Axis.vertical) ? Axis.horizontal : Axis.vertical;
     });
   }
 

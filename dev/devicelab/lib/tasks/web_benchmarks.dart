@@ -21,7 +21,7 @@ import '../framework/utils.dart';
 const int benchmarkServerPort = 9999;
 const int chromeDebugPort = 10000;
 
-Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
+Future<TaskResult> runWebBenchmark({required bool useCanvasKit}) async {
   // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
   Logger.root.level = Level.INFO;
   final String macrobenchmarksDirectory = path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks');
@@ -106,8 +106,7 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
           print('[APP] $message');
           return Response.ok('Reported.');
         } else {
-          return Response.notFound(
-              'This request is not handled by the profile-data handler.');
+          return Response.notFound('This request is not handled by the profile-data handler.');
         }
       } catch (error, stackTrace) {
         profileData.completeError(error, stackTrace);

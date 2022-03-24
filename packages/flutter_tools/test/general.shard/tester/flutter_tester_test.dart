@@ -91,7 +91,8 @@ void main() {
     setUp(() {
       buildSystem = TestBuildSystem.all(BuildResult(success: true));
       fakeProcessManager = FakeProcessManager.empty();
-      device = FlutterTesterDevice('flutter-tester',
+      device = FlutterTesterDevice(
+        'flutter-tester',
         fileSystem: fileSystem,
         processManager: fakeProcessManager,
         artifacts: Artifacts.test(),
@@ -119,15 +120,18 @@ void main() {
     });
 
     testWithoutContext('does not accept profile, release, or jit-release builds', () async {
-      final LaunchResult releaseResult = await device.startApp(null,
+      final LaunchResult releaseResult = await device.startApp(
+        null,
         mainPath: mainPath,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       );
-      final LaunchResult profileResult = await device.startApp(null,
+      final LaunchResult profileResult = await device.startApp(
+        null,
         mainPath: mainPath,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.profile),
       );
-      final LaunchResult jitReleaseResult = await device.startApp(null,
+      final LaunchResult jitReleaseResult = await device.startApp(
+        null,
         mainPath: mainPath,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.jitRelease),
       );
@@ -152,14 +156,14 @@ void main() {
           '/.tmp_rand0/flutter_tester.rand0/flutter-tester-app.dill',
         ],
         completer: completer,
-        stdout:
-        '''
+        stdout: '''
 The Dart VM service is listening on $observatoryUri
 Hello!
 ''',
       ));
 
-      final LaunchResult result = await device.startApp(app,
+      final LaunchResult result = await device.startApp(
+        app,
         mainPath: mainPath,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );

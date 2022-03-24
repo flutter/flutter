@@ -19,11 +19,7 @@ Future<void> main() async {
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
             'build',
-            options: <String>[
-              'apk',
-              '--debug',
-              '--target-platform=android-arm'
-            ],
+            options: <String>['apk', '--debug', '--target-platform=android-arm'],
           );
         });
 
@@ -51,11 +47,7 @@ Future<void> main() async {
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
             'build',
-            options: <String>[
-              'apk',
-              '--debug',
-              '--target-platform=android-x86'
-            ],
+            options: <String>['apk', '--debug', '--target-platform=android-x86'],
           );
         });
 
@@ -82,11 +74,7 @@ Future<void> main() async {
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
             'build',
-            options: <String>[
-              'apk',
-              '--debug',
-              '--target-platform=android-x64'
-            ],
+            options: <String>['apk', '--debug', '--target-platform=android-x64'],
           );
         });
 
@@ -112,11 +100,7 @@ Future<void> main() async {
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
             'build',
-            options: <String>[
-              'apk',
-              '--release',
-              '--target-platform=android-arm'
-            ],
+            options: <String>['apk', '--release', '--target-platform=android-arm'],
           );
         });
 
@@ -140,11 +124,7 @@ Future<void> main() async {
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
             'build',
-            options: <String>[
-              'apk',
-              '--release',
-              '--target-platform=android-arm64'
-            ],
+            options: <String>['apk', '--release', '--target-platform=android-arm64'],
           );
         });
 
@@ -217,8 +197,7 @@ Future<void> main() async {
         });
 
         section('Configure');
-        project.addPlugin('plugin_under_test',
-            value: '$platformLineSep    path: ${pluginDir.path}');
+        project.addPlugin('plugin_under_test', value: '$platformLineSep    path: ${pluginDir.path}');
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.getPackages();
 
@@ -259,19 +238,13 @@ Future<void> main() async {
           ]);
         });
 
-        if (result.exitCode == 0)
-          throw failure(
-              'Gradle did not exit with error as expected', result);
+        if (result.exitCode == 0) throw failure('Gradle did not exit with error as expected', result);
         String output = '${result.stdout}\n${result.stderr}';
         if (output.contains('GradleException') ||
             output.contains('Failed to notify') ||
-            output.contains('at org.gradle'))
-          throw failure(
-              'Gradle output should not contain stacktrace', result);
+            output.contains('at org.gradle')) throw failure('Gradle output should not contain stacktrace', result);
         if (!output.contains('Build failed'))
-          throw failure(
-              'Gradle output should contain a readable error message',
-              result);
+          throw failure('Gradle output should contain a readable error message', result);
 
         section('flutter build apk on build script with error');
         await project.introduceError();
@@ -281,18 +254,12 @@ Future<void> main() async {
             '--release',
           ]);
         });
-        if (result.exitCode == 0)
-          throw failure(
-              'flutter build apk should fail when Gradle does', result);
+        if (result.exitCode == 0) throw failure('flutter build apk should fail when Gradle does', result);
         output = '${result.stdout}\n${result.stderr}';
         if (!output.contains('Build failed'))
-          throw failure(
-              'flutter build apk output should contain a readable Gradle error message',
-              result);
+          throw failure('flutter build apk output should contain a readable Gradle error message', result);
         if (hasMultipleOccurrences(output, 'Build failed'))
-          throw failure(
-              'flutter build apk should not invoke Gradle repeatedly on error',
-              result);
+          throw failure('flutter build apk should not invoke Gradle repeatedly on error', result);
       });
 
       await runProjectTest((FlutterProject project) async {
@@ -304,9 +271,7 @@ Future<void> main() async {
             '--release',
           ]);
         });
-        if (result.exitCode == 0)
-          throw failure(
-              'Gradle did not exit with error as expected', result);
+        if (result.exitCode == 0) throw failure('Gradle did not exit with error as expected', result);
         final String output = '${result.stdout}\n${result.stderr}';
         if (!output.contains('No file or variants found for asset: lib/gallery/example_code.dart.'))
           throw failure(output, result);

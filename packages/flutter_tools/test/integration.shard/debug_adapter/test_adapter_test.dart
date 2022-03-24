@@ -48,10 +48,7 @@ void main() {
     final String output = outputEvents.output.map((OutputEventBody e) => e.output).join();
     expectLines(
       output,
-      <Object>[
-        startsWith('Connecting to VM Service at'),
-        ..._testsProjectExpectedOutput
-      ],
+      <Object>[startsWith('Connecting to VM Service at'), ..._testsProjectExpectedOutput],
       allowExtras: true, // Allow for printed call stack etc.
     );
 
@@ -137,8 +134,7 @@ final List<Object> _testsProjectExpectedOutput = <Object>[
 void _expectStandardTestsProjectResults(TestEvents events) {
   // Check we received all expected test events passed through from
   // package:test.
-  final List<Object> eventNames =
-      events.testNotifications.map((Map<String, Object?> e) => e['type']!).toList();
+  final List<Object> eventNames = events.testNotifications.map((Map<String, Object?> e) => e['type']!).toList();
 
   // start/done should always be first/last.
   expect(eventNames.first, equals('start'));

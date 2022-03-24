@@ -38,8 +38,7 @@ flutter:
   module: {}
   ''');
     fileSystem.file('.packages').writeAsStringSync('\n');
-    final FlutterProject flutterProject =
-      FlutterProject.fromDirectory(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final IOSDevice device = setUpIOSDevice(fileSystem);
 
     expect(device.isSupportedForProject(flutterProject), true);
@@ -53,8 +52,7 @@ flutter:
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').writeAsStringSync('\n');
     fileSystem.directory('ios').createSync();
-    final FlutterProject flutterProject =
-      FlutterProject.fromDirectory(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final IOSDevice device = setUpIOSDevice(fileSystem);
 
     expect(device.isSupportedForProject(flutterProject), true);
@@ -63,13 +61,11 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').writeAsStringSync('\n');
-    final FlutterProject flutterProject =
-      FlutterProject.fromDirectory(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final IOSDevice device = setUpIOSDevice(fileSystem);
 
     expect(device.isSupportedForProject(flutterProject), false);

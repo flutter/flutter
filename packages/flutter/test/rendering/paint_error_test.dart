@@ -25,7 +25,7 @@ void main() {
     expect(errorDetails, isNotNull);
     expect(errorDetails.stack, isNotNull);
     // Check the ErrorDetails without the stack trace
-    final List<String> lines =  errorDetails.toString().split('\n');
+    final List<String> lines = errorDetails.toString().split('\n');
     // The lines in the middle of the error message contain the stack trace
     // which will change depending on where the test is run.
     expect(lines.length, greaterThan(12));

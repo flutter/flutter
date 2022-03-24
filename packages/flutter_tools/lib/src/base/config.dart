@@ -28,18 +28,8 @@ class Config {
   /// - deletes the file if it's not valid JSON
   /// - reports an empty config in that case
   /// - logs and catches any exceptions
-  factory Config(
-    String name, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform
-  }) {
-    return Config._common(
-      name,
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform
-    );
+  factory Config(String name, {required FileSystem fileSystem, required Logger logger, required Platform platform}) {
+    return Config._common(name, fileSystem: fileSystem, logger: logger, platform: platform);
   }
 
   /// Similar to the default config constructor, but with some different
@@ -49,28 +39,13 @@ class Config {
   ///   you can actually detect whether something went wrong
   ///
   /// Useful if you want some more control.
-  factory Config.managed(
-    String name, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform
-  }) {
-    return Config._common(
-      name,
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      managed: true
-    );
+  factory Config.managed(String name,
+      {required FileSystem fileSystem, required Logger logger, required Platform platform}) {
+    return Config._common(name, fileSystem: fileSystem, logger: logger, platform: platform, managed: true);
   }
 
-  factory Config._common(
-    String name, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    bool managed = false
-  }) {
+  factory Config._common(String name,
+      {required FileSystem fileSystem, required Logger logger, required Platform platform, bool managed = false}) {
     final String filePath = _configPath(platform, fileSystem, name);
     final File file = fileSystem.file(filePath);
     file.parent.createSync(recursive: true);
@@ -81,23 +56,17 @@ class Config {
   /// the given [Directory].
   ///
   /// Defaults to [BufferLogger], [MemoryFileSystem], and [name]=test.
-  factory Config.test({
-    String name = 'test',
-    Directory? directory,
-    Logger? logger,
-    bool managed = false
-  }) {
+  factory Config.test({String name = 'test', Directory? directory, Logger? logger, bool managed = false}) {
     directory ??= MemoryFileSystem.test().directory('/');
-    return Config.createForTesting(
-      directory.childFile('.${kConfigDir}_$name'),
-      logger ?? BufferLogger.test(),
-      managed: managed
-    );
+    return Config.createForTesting(directory.childFile('.${kConfigDir}_$name'), logger ?? BufferLogger.test(),
+        managed: managed);
   }
 
   /// Test only access to the Config constructor.
   @visibleForTesting
-  Config.createForTesting(File file, Logger logger, {bool managed = false}) : _file = file, _logger = logger {
+  Config.createForTesting(File file, Logger logger, {bool managed = false})
+      : _file = file,
+        _logger = logger {
     if (!_file.existsSync()) {
       return;
     }
@@ -191,16 +160,14 @@ class Config {
     return platform.environment[envKey] ?? '.';
   }
 
-  static String _configPath(
-      Platform platform, FileSystem fileSystem, String name) {
-    final String homeDirFile =
-        fileSystem.path.join(_userHomePath(platform), '.${kConfigDir}_$name');
+  static String _configPath(Platform platform, FileSystem fileSystem, String name) {
+    final String homeDirFile = fileSystem.path.join(_userHomePath(platform), '.${kConfigDir}_$name');
     if (platform.isLinux || platform.isMacOS) {
       if (fileSystem.isFileSync(homeDirFile)) {
         return homeDirFile;
       }
-      final String configDir = platform.environment[kXdgConfigHome] ??
-          fileSystem.path.join(_userHomePath(platform), '.config', kConfigDir);
+      final String configDir =
+          platform.environment[kXdgConfigHome] ?? fileSystem.path.join(_userHomePath(platform), '.config', kConfigDir);
       return fileSystem.path.join(configDir, name);
     }
     return homeDirFile;

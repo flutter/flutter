@@ -32,10 +32,7 @@ void main() {
     // Verify that platform is retrieved.
     expect(
       find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is Text &&
-            widget.data!
-                .startsWith('Platform: ${html.window.navigator.platform}\n'),
+        (Widget widget) => widget is Text && widget.data!.startsWith('Platform: ${html.window.navigator.platform}\n'),
       ),
       findsOneWidget,
     );

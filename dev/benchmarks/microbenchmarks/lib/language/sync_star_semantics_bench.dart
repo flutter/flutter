@@ -11,10 +11,11 @@ const int _kNumWarmUp = 100;
 
 void main() {
   final List<String> words = 'Lorem Ipsum is simply dummy text of the printing and'
-    " typesetting industry. Lorem Ipsum has been the industry's"
-    ' standard dummy text ever since the 1500s, when an unknown'
-    ' printer took a galley of type and scrambled it to make a'
-    ' type specimen book'.split(' ');
+          " typesetting industry. Lorem Ipsum has been the industry's"
+          ' standard dummy text ever since the 1500s, when an unknown'
+          ' printer took a galley of type and scrambled it to make a'
+          ' type specimen book'
+      .split(' ');
   final List<InlineSpanSemanticsInformation> data = <InlineSpanSemanticsInformation>[];
   for (int i = 0; i < words.length; i++) {
     if (i.isEven) {
@@ -77,8 +78,8 @@ String consumeSpan(Iterable<InlineSpanSemanticsInformation> items) {
   return result;
 }
 
-
-Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<InlineSpanSemanticsInformation> inputs) sync* {
+Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(
+    List<InlineSpanSemanticsInformation> inputs) sync* {
   String workingText = '';
   String? workingLabel;
   for (final InlineSpanSemanticsInformation info in inputs) {

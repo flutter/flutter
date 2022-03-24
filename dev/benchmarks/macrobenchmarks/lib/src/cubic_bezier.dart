@@ -47,8 +47,7 @@ class Bezier extends StatelessWidget {
     bezier2Path.cubicTo(0.0, 70.55, 42.0, 31.55, 69.91, 14.77);
     bezier2Path.cubicTo(97.82, -2.01, 149.24, -20.93, 104.37, 59.39);
 
-    paths.add(PathDetail(bezier2Path,
-        translate: <double>[29.45, 151.0], rotation: -1.5708));
+    paths.add(PathDetail(bezier2Path, translate: <double>[29.45, 151.0], rotation: -1.5708));
 
     // Path 3
     final Path bezier3Path = Path();
@@ -56,8 +55,7 @@ class Bezier extends StatelessWidget {
     bezier3Path.cubicTo(0.0, 69.48, 44.82, 27.92, 69.91, 13.7);
     bezier3Path.cubicTo(95.0, -0.52, 149.24, -22.0, 104.37, 58.32);
 
-    paths.add(PathDetail(bezier3Path,
-        translate: <double>[53.0, 200.48], rotation: -3.14159));
+    paths.add(PathDetail(bezier3Path, translate: <double>[53.0, 200.48], rotation: -3.14159));
 
     // Path 4
     final Path bezier4Path = Path();
@@ -65,8 +63,7 @@ class Bezier extends StatelessWidget {
     bezier4Path.cubicTo(0.0, 69.48, 43.82, 27.92, 69.91, 13.7);
     bezier4Path.cubicTo(96.0, -0.52, 149.24, -22.0, 104.37, 58.32);
 
-    paths.add(PathDetail(bezier4Path,
-        translate: <double>[122.48, 77.0], rotation: -4.71239));
+    paths.add(PathDetail(bezier4Path, translate: <double>[122.48, 77.0], rotation: -4.71239));
 
     return paths;
   }
@@ -75,8 +72,7 @@ class Bezier extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(children: <Widget>[
       CustomPaint(
-        foregroundPainter:
-        BezierPainter(Colors.grey, 0.0, _getLogoPath(), false),
+        foregroundPainter: BezierPainter(Colors.grey, 0.0, _getLogoPath(), false),
         size: const Size(100.0, 100.0),
       ),
       AnimatedBezier(color, scale, blur: blur),
@@ -110,8 +106,7 @@ class Point {
   double y;
 }
 
-class AnimatedBezierState extends State<AnimatedBezier>
-    with SingleTickerProviderStateMixin {
+class AnimatedBezierState extends State<AnimatedBezier> with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late CurvedAnimation curve;
   bool isPlaying = false;
@@ -169,8 +164,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
       bezier2Path.lineTo(p.x, p.y);
     }
 
-    paths.add(PathDetail(bezier2Path,
-        translate: <double>[29.45, 151.0], rotation: -1.5708));
+    paths.add(PathDetail(bezier2Path, translate: <double>[29.45, 151.0], rotation: -1.5708));
 
     // Path 3
     final Path bezier3Path = Path();
@@ -190,8 +184,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
       bezier3Path.lineTo(p.x, p.y);
     }
 
-    paths.add(PathDetail(bezier3Path,
-        translate: <double>[53.0, 200.48], rotation: -3.14159));
+    paths.add(PathDetail(bezier3Path, translate: <double>[53.0, 200.48], rotation: -3.14159));
 
     // Path 4
     final Path bezier4Path = Path();
@@ -212,8 +205,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
       bezier4Path.lineTo(p.x, p.y);
     }
 
-    paths.add(PathDetail(bezier4Path,
-        translate: <double>[122.48, 77.0], rotation: -4.71239));
+    paths.add(PathDetail(bezier4Path, translate: <double>[122.48, 77.0], rotation: -4.71239));
 
     return paths;
   }
@@ -260,8 +252,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
     return <PathDetail>[
       PathDetail(path),
       PathDetail(bezier2Path, translate: <double>[29.45, 151.0], rotation: -1.5708),
-      PathDetail(bezier3Path,
-          translate: <double>[53.0, 200.48], rotation: -3.14159),
+      PathDetail(bezier3Path, translate: <double>[53.0, 200.48], rotation: -3.14159),
       PathDetail(bezier4Path, translate: <double>[122.48, 77.0], rotation: -4.71239),
     ];
   }
@@ -276,10 +267,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
 
   //From http://wiki.roblox.com/index.php?title=File:Beziereq4.png
   double _getCubicPoint(double t, double p0, double p1, double p2, double p3) {
-    return (pow(1 - t, 3) as double) * p0 +
-        3 * pow(1 - t, 2) * t * p1 +
-        3 * (1 - t) * pow(t, 2) * p2 +
-        pow(t, 3) * p3;
+    return (pow(1 - t, 3) as double) * p0 + 3 * pow(1 - t, 2) * t * p1 + 3 * (1 - t) * pow(t, 2) * p2 + pow(t, 3) * p3;
   }
 
   void playAnimation() {
@@ -308,8 +296,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1000));
+    controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
     // Animations are typically implemented using the AnimatedBuilder widget.
     // This code uses a manual listener for historical reasons and will remain
     // in order to preserve compatibility with the history of measurements for
@@ -338,8 +325,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-        foregroundPainter: BezierPainter(widget.color,
-            curve.value * widget.blur, _getLogoPath(), isPlaying),
+        foregroundPainter: BezierPainter(widget.color, curve.value * widget.blur, _getLogoPath(), isPlaying),
         size: const Size(100.0, 100.0));
   }
 }

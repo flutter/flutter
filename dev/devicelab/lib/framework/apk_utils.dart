@@ -24,7 +24,7 @@ final List<String> debugAssets = <String>[
   'assets/flutter_assets/vm_snapshot_data',
 ];
 
-final List<String> baseApkFiles = <String> [
+final List<String> baseApkFiles = <String>[
   'classes.dex',
   'AndroidManifest.xml',
 ];
@@ -68,18 +68,16 @@ Future<void> runModuleProjectTest(Future<void> Function(FlutterModuleProject mod
 /// Returns the list of files inside an Android Package Kit.
 Future<Iterable<String>> getFilesInApk(String apk) async {
   if (!File(apk).existsSync()) {
-    throw TaskResult.failure(
-        'Gradle did not produce an output artifact file at: $apk');
+    throw TaskResult.failure('Gradle did not produce an output artifact file at: $apk');
   }
-  final String files = await _evalApkAnalyzer(
-    <String>[
-      'files',
-      'list',
-      apk,
-    ]
-  );
+  final String files = await _evalApkAnalyzer(<String>[
+    'files',
+    'list',
+    apk,
+  ]);
   return files.split('\n').map((String file) => file.substring(1).trim());
 }
+
 /// Returns the list of files inside an Android App Bundle.
 Future<Iterable<String>> getFilesInAppBundle(String bundle) {
   return getFilesInApk(bundle);
@@ -104,8 +102,7 @@ bool hasMultipleOccurrences(String text, Pattern pattern) {
 
 /// The Android home directory.
 String get _androidHome {
-  final String? androidHome = Platform.environment['ANDROID_HOME'] ??
-      Platform.environment['ANDROID_SDK_ROOT'];
+  final String? androidHome = Platform.environment['ANDROID_HOME'] ?? Platform.environment['ANDROID_SDK_ROOT'];
   if (androidHome == null || androidHome.isEmpty) {
     throw Exception('Environment variable `ANDROID_SDK_ROOT` is not set.');
   }
@@ -122,19 +119,19 @@ Future<String> _evalApkAnalyzer(
   if (javaHome == null || javaHome.isEmpty) {
     throw Exception('No JAVA_HOME set.');
   }
-  final String apkAnalyzer = path
-     .join(_androidHome, 'cmdline-tools', 'latest', 'bin', Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer');
-   if (canRun(apkAnalyzer)) {
-     return eval(
-       apkAnalyzer,
-       args,
-       printStdout: printStdout,
-       workingDirectory: workingDirectory,
-       environment: <String, String>{
-         'JAVA_HOME': javaHome,
-       },
-     );
-   }
+  final String apkAnalyzer =
+      path.join(_androidHome, 'cmdline-tools', 'latest', 'bin', Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer');
+  if (canRun(apkAnalyzer)) {
+    return eval(
+      apkAnalyzer,
+      args,
+      printStdout: printStdout,
+      workingDirectory: workingDirectory,
+      environment: <String, String>{
+        'JAVA_HOME': javaHome,
+      },
+    );
+  }
 
   final String javaBinary = path.join(javaHome, 'bin', 'java');
   assert(canRun(javaBinary));
@@ -142,7 +139,7 @@ Future<String> _evalApkAnalyzer(
   final String libs = path.join(androidTools, 'lib');
   assert(Directory(libs).existsSync());
 
-  final String classSeparator =  Platform.isWindows ? ';' : ':';
+  final String classSeparator = Platform.isWindows ? ';' : ':';
   return eval(
     javaBinary,
     <String>[
@@ -182,14 +179,11 @@ class ApkExtractor {
     );
     final List<String> lines = packages.split('\n');
     _classes = Set<String>.from(
-      lines.where((String line) => line.startsWith('C'))
-           .map<String>((String line) => line.split('\t').last),
+      lines.where((String line) => line.startsWith('C')).map<String>((String line) => line.split('\t').last),
     );
     assert(_classes.isNotEmpty);
     _methods = Set<String>.from(
-      lines.where((String line) => line.startsWith('M'))
-           .map<String>((String line) => line.split('\t').last)
-    );
+        lines.where((String line) => line.startsWith('M')).map<String>((String line) => line.split('\t').last));
     assert(_methods.isNotEmpty);
     _extracted = true;
   }
@@ -297,7 +291,7 @@ subprojects {
   /// Adds a plugin to the pubspec.
   /// In pubspec, each dependency is expressed as key, value pair joined by a colon `:`.
   /// such as `plugin_a`:`^0.0.1` or `plugin_a`:`\npath: /some/path`.
-  void addPlugin(String plugin, { String value = '' }) {
+  void addPlugin(String plugin, {String value = ''}) {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = pubspec.readAsStringSync();
     content = content.replaceFirst(
@@ -345,9 +339,7 @@ android {
   }
 
   Future<void> introducePubspecError() async {
-    final File pubspec = File(
-      path.join(parent.path, 'hello', 'pubspec.yaml')
-    );
+    final File pubspec = File(path.join(parent.path, 'hello', 'pubspec.yaml'));
     final String contents = pubspec.readAsStringSync();
     final String newContents = contents.replaceFirst('${platformLineSep}flutter:$platformLineSep', '''
 
@@ -394,8 +386,10 @@ class FlutterPluginProject {
   String get exampleAndroidPath => path.join(examplePath, 'android');
   String get debugApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-debug.apk');
   String get releaseApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-release.apk');
-  String get releaseArmApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk','app-armeabi-v7a-release.apk');
-  String get releaseArm64ApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-arm64-v8a-release.apk');
+  String get releaseArmApkPath =>
+      path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-armeabi-v7a-release.apk');
+  String get releaseArm64ApkPath =>
+      path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-arm64-v8a-release.apk');
   String get releaseBundlePath => path.join(examplePath, 'build', 'app', 'outputs', 'bundle', 'release', 'app.aab');
 }
 
@@ -420,18 +414,15 @@ Future<void> _runGradleTask({
   required String task,
   List<String>? options,
 }) async {
-  final ProcessResult result = await _resultOfGradleTask(
-      workingDirectory: workingDirectory,
-      task: task,
-      options: options);
+  final ProcessResult result =
+      await _resultOfGradleTask(workingDirectory: workingDirectory, task: task, options: options);
   if (result.exitCode != 0) {
     print('stdout:');
     print(result.stdout);
     print('stderr:');
     print(result.stderr);
   }
-  if (result.exitCode != 0)
-    throw 'Gradle exited with error';
+  if (result.exitCode != 0) throw 'Gradle exited with error';
 }
 
 Future<ProcessResult> _resultOfGradleTask({
@@ -442,8 +433,7 @@ Future<ProcessResult> _resultOfGradleTask({
   section('Find Java');
   final String? javaHome = await findJavaHome();
 
-  if (javaHome == null)
-    throw TaskResult.failure('Could not find Java');
+  if (javaHome == null) throw TaskResult.failure('Could not find Java');
 
   print('\nUsing JAVA_HOME=$javaHome');
 
@@ -455,29 +445,27 @@ Future<ProcessResult> _resultOfGradleTask({
   print('┌── $gradle');
   print(File(path.join(workingDirectory, gradle)).readAsLinesSync().map((String line) => '| $line').join('\n'));
   print('└─────────────────────────────────────────────────────────────────────────────────────');
-  print(
-    'Running Gradle:\n'
-    '  Executable: $gradle\n'
-    '  Arguments: ${args.join(' ')}\n'
-    '  Working directory: $workingDirectory\n'
-    '  JAVA_HOME: $javaHome\n'
-  );
+  print('Running Gradle:\n'
+      '  Executable: $gradle\n'
+      '  Arguments: ${args.join(' ')}\n'
+      '  Working directory: $workingDirectory\n'
+      '  JAVA_HOME: $javaHome\n');
   return Process.run(
     gradle,
     args,
     workingDirectory: workingDirectory,
-    environment: <String, String>{ 'JAVA_HOME': javaHome },
+    environment: <String, String>{'JAVA_HOME': javaHome},
   );
 }
 
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
 String? validateSnapshotDependency(FlutterProject project, String expectedTarget) {
-  final File snapshotBlob = File(
-      path.join(project.rootPath, 'build', 'app', 'intermediates',
-          'flutter', 'debug', 'flutter_build.d'));
+  final File snapshotBlob =
+      File(path.join(project.rootPath, 'build', 'app', 'intermediates', 'flutter', 'debug', 'flutter_build.d'));
 
   assert(snapshotBlob.existsSync());
   final String contentSnapshot = snapshotBlob.readAsStringSync();
   return contentSnapshot.contains('$expectedTarget ')
-    ? null : 'Dependency file should have $expectedTarget as target. Instead found $contentSnapshot';
+      ? null
+      : 'Dependency file should have $expectedTarget as target. Instead found $contentSnapshot';
 }

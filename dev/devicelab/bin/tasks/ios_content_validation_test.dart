@@ -53,8 +53,7 @@ Future<void> main() async {
           'Flutter',
         );
         // Exits 0 only if codesigned.
-        final Future<String> flutterCodesign =
-            eval('xcrun', <String>['codesign', '--verify', flutterFramework]);
+        final Future<String> flutterCodesign = eval('xcrun', <String>['codesign', '--verify', flutterFramework]);
 
         final String appFramework = path.join(
           appBundle.path,
@@ -62,8 +61,7 @@ Future<void> main() async {
           'App.framework',
           'App',
         );
-        final Future<String> appCodesign =
-            eval('xcrun', <String>['codesign', '--verify', appFramework]);
+        final Future<String> appCodesign = eval('xcrun', <String>['codesign', '--verify', appFramework]);
         await flutterCodesign;
         await appCodesign;
       });

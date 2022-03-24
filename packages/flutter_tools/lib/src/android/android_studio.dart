@@ -24,8 +24,7 @@ import 'android_studio_validator.dart';
 
 // Match Android Studio >= 4.1 base folder (AndroidStudio*.*)
 // and < 4.1 (.AndroidStudio*.*)
-final RegExp _dotHomeStudioVersionMatcher =
-    RegExp(r'^\.?(AndroidStudio[^\d]*)([\d.]+)');
+final RegExp _dotHomeStudioVersionMatcher = RegExp(r'^\.?(AndroidStudio[^\d]*)([\d.]+)');
 
 String? get javaPath => globals.androidStudio?.javaPath;
 
@@ -91,8 +90,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   }
 
   static AndroidStudio? fromHomeDot(Directory homeDotDir) {
-    final Match? versionMatch =
-        _dotHomeStudioVersionMatcher.firstMatch(homeDotDir.basename);
+    final Match? versionMatch = _dotHomeStudioVersionMatcher.firstMatch(homeDotDir.basename);
     if (versionMatch?.groupCount != 2) {
       return null;
     }
@@ -113,8 +111,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (major != null && major >= 4 && minor != null && minor >= 1) {
       dotHomeFilePath = globals.fs.path.join(homeDotDir.path, '.home');
     } else {
-      dotHomeFilePath =
-          globals.fs.path.join(homeDotDir.path, 'system', '.home');
+      dotHomeFilePath = globals.fs.path.join(homeDotDir.path, 'system', '.home');
     }
 
     String? installPath;
@@ -127,9 +124,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     if (installPath != null && globals.fs.isDirectorySync(installPath)) {
       return AndroidStudio(
-          installPath,
-          version: version,
-          studioAppName: studioAppName,
+        installPath,
+        version: version,
+        studioAppName: studioAppName,
       );
     }
     return null;
@@ -185,8 +182,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         return toolboxPluginsPath;
       }
 
-      if (major != null && major >= 4 && minor != null && minor >= 1 &&
-          globals.platform.isLinux) {
+      if (major != null && major >= 4 && minor != null && minor >= 1 && globals.platform.isLinux) {
         return globals.fs.path.join(
           homeDirPath,
           '.local',
@@ -224,8 +220,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       if (globals.platform.isMacOS && !configuredStudioPath.endsWith('Contents')) {
         configuredStudioPath = globals.fs.path.join(configuredStudioPath, 'Contents');
       }
-      return AndroidStudio(configuredStudioPath,
-          configured: configuredStudio);
+      return AndroidStudio(configuredStudioPath, configured: configuredStudio);
     }
 
     // Find all available Studio installations.
@@ -243,8 +238,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     return newest;
   }
 
-  static List<AndroidStudio> allInstalled() =>
-      globals.platform.isMacOS ? _allMacOS() : _allLinuxOrWindows();
+  static List<AndroidStudio> allInstalled() => globals.platform.isMacOS ? _allMacOS() : _allLinuxOrWindows();
 
   static List<AndroidStudio> _allMacOS() {
     final List<FileSystemEntity> candidatePaths = <FileSystemEntity>[];
@@ -254,10 +248,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         return;
       }
       try {
-        final Iterable<Directory> directories = globals.fs
-            .directory(path)
-            .listSync(followLinks: false)
-            .whereType<Directory>();
+        final Iterable<Directory> directories =
+            globals.fs.directory(path).listSync(followLinks: false).whereType<Directory>();
         for (final Directory directory in directories) {
           final String name = directory.basename;
           // An exact match, or something like 'Android Studio 3.0 Preview.app'.
@@ -287,8 +279,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       if (configuredStudio.basename == 'Contents') {
         configuredStudio = configuredStudio.parent;
       }
-      if (!candidatePaths
-          .any((FileSystemEntity e) => e.path == configuredStudio.path)) {
+      if (!candidatePaths.any((FileSystemEntity e) => e.path == configuredStudio.path)) {
         candidatePaths.add(configuredStudio);
       }
     }
@@ -321,7 +312,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   static List<AndroidStudio> _allLinuxOrWindows() {
     final List<AndroidStudio> studios = <AndroidStudio>[];
 
-    bool _hasStudioAt(String path, { Version? newerThan }) {
+    bool _hasStudioAt(String path, {Version? newerThan}) {
       return studios.any((AndroidStudio studio) {
         if (studio.directory != path) {
           return false;
@@ -345,8 +336,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       final List<Directory> directoriesToSearch = <Directory>[homeDir];
 
       // >=4.1 has new install location at $HOME/.cache/Google
-      final String cacheDirPath =
-          globals.fs.path.join(homeDirPath, '.cache', 'Google');
+      final String cacheDirPath = globals.fs.path.join(homeDirPath, '.cache', 'Google');
 
       if (globals.fs.isDirectorySync(cacheDirPath)) {
         directoriesToSearch.add(globals.fs.directory(cacheDirPath));
@@ -355,10 +345,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       final List<Directory> entities = <Directory>[];
 
       for (final Directory baseDir in directoriesToSearch) {
-        final Iterable<Directory> directories =
-            baseDir.listSync(followLinks: false).whereType<Directory>();
-        entities.addAll(directories.where((Directory directory) =>
-            _dotHomeStudioVersionMatcher.hasMatch(directory.basename)));
+        final Iterable<Directory> directories = baseDir.listSync(followLinks: false).whereType<Directory>();
+        entities.addAll(
+            directories.where((Directory directory) => _dotHomeStudioVersionMatcher.hasMatch(directory.basename)));
       }
 
       for (final Directory entity in entities) {
@@ -372,12 +361,13 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     // Discover Android Studio > 4.1
     if (globals.platform.isWindows && globals.platform.environment.containsKey('LOCALAPPDATA')) {
-      final Directory cacheDir = globals.fs.directory(globals.fs.path.join(globals.platform.environment['LOCALAPPDATA']!, 'Google'));
+      final Directory cacheDir =
+          globals.fs.directory(globals.fs.path.join(globals.platform.environment['LOCALAPPDATA']!, 'Google'));
       if (!cacheDir.existsSync()) {
         return studios;
       }
       for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
-        final String name  = globals.fs.path.basename(dir.path);
+        final String name = globals.fs.path.basename(dir.path);
         AndroidStudioValidator.idToTitle.forEach((String id, String title) {
           if (name.startsWith(id)) {
             final String version = name.substring(id.length);
@@ -406,8 +396,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudioDir != null && !_hasStudioAt(configuredStudioDir)) {
-      studios.add(AndroidStudio(configuredStudioDir,
-          configured: configuredStudioDir));
+      studios.add(AndroidStudio(configuredStudioDir, configured: configuredStudioDir));
     }
 
     if (globals.platform.isLinux) {
@@ -444,11 +433,11 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       return;
     }
 
-    final String javaPath = globals.platform.isMacOS ?
-        version != null && version.major >= 2020 ?
-        globals.fs.path.join(directory, 'jre', 'Contents', 'Home') :
-        globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home') :
-        globals.fs.path.join(directory, 'jre');
+    final String javaPath = globals.platform.isMacOS
+        ? version != null && version.major >= 2020
+            ? globals.fs.path.join(directory, 'jre', 'Contents', 'Home')
+            : globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home')
+        : globals.fs.path.join(directory, 'jre');
     final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');
     if (!globals.processManager.canRun(javaExecutable)) {
       _validationMessages.add('Unable to find bundled Java version.');

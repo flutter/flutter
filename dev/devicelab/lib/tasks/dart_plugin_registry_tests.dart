@@ -17,8 +17,7 @@ TaskFunction dartPluginRegistryTest({
   String? deviceIdOverride,
   Map<String, String>? environment,
 }) {
-  final Directory tempDir = Directory.systemTemp
-      .createTempSync('flutter_devicelab_dart_plugin_test.');
+  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_dart_plugin_test.');
   return () async {
     try {
       section('Create implementation plugin');
@@ -72,8 +71,7 @@ class ApluginPlatformInterfaceMacOS {
           '    platforms:\n',
           '    implements: aplugin_platform_interface\n'
               '    platforms:\n');
-      await pluginImplPubspec.writeAsString(pluginImplPubspecContent,
-          flush: true);
+      await pluginImplPubspec.writeAsString(pluginImplPubspecContent, flush: true);
 
       section('Create interface plugin');
       await inDirectory(tempDir, () async {
@@ -95,20 +93,16 @@ class ApluginPlatformInterfaceMacOS {
         'aplugin_platform_interface',
         'pubspec.yaml',
       ));
-      String pluginInterfacePubspecContent =
-          await pluginInterfacePubspec.readAsString();
-      pluginInterfacePubspecContent =
-          pluginInterfacePubspecContent.replaceFirst(
-              '        pluginClass: ApluginPlatformInterfacePlugin',
-              '        default_package: aplugin_platform_implementation\n');
-      pluginInterfacePubspecContent =
-          pluginInterfacePubspecContent.replaceFirst(
-              'dependencies:',
-              'dependencies:\n'
-                  '  aplugin_platform_implementation:\n'
-                  '    path: ../aplugin_platform_implementation\n');
-      await pluginInterfacePubspec.writeAsString(pluginInterfacePubspecContent,
-          flush: true);
+      String pluginInterfacePubspecContent = await pluginInterfacePubspec.readAsString();
+      pluginInterfacePubspecContent = pluginInterfacePubspecContent.replaceFirst(
+          '        pluginClass: ApluginPlatformInterfacePlugin',
+          '        default_package: aplugin_platform_implementation\n');
+      pluginInterfacePubspecContent = pluginInterfacePubspecContent.replaceFirst(
+          'dependencies:',
+          'dependencies:\n'
+              '  aplugin_platform_implementation:\n'
+              '    path: ../aplugin_platform_implementation\n');
+      await pluginInterfacePubspec.writeAsString(pluginInterfacePubspecContent, flush: true);
 
       section('Create app');
 
@@ -151,22 +145,18 @@ class ApluginPlatformInterfaceMacOS {
       });
 
       Completer<void> registryExecutedCompleter = Completer<void>();
-      final StreamSubscription<void> stdoutSub = run.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          if (line.contains('ApluginPlatformInterfaceMacOS.registerWith() was called')) {
-            registryExecutedCompleter.complete();
-          }
-          print('stdout: $line');
-        });
+      final StreamSubscription<void> stdoutSub =
+          run.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+        if (line.contains('ApluginPlatformInterfaceMacOS.registerWith() was called')) {
+          registryExecutedCompleter.complete();
+        }
+        print('stdout: $line');
+      });
 
-      final StreamSubscription<void> stderrSub = run.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          print('stderr: $line');
-        });
+      final StreamSubscription<void> stderrSub =
+          run.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+        print('stderr: $line');
+      });
 
       final Future<void> stdoutDone = stdoutSub.asFuture<void>();
       final Future<void> stderrDone = stderrSub.asFuture<void>();

@@ -29,8 +29,7 @@ Future<void> main() async {
 
   group('Nested View Event', () {
     setUpAll(() async {
-      final SerializableFinder wmListTile =
-      find.byValueKey('NestedViewEventTile');
+      final SerializableFinder wmListTile = find.byValueKey('NestedViewEventTile');
       await driver.tap(wmListTile);
     });
 
@@ -53,8 +52,7 @@ Future<void> main() async {
       await driver.tap(addChildView);
       final SerializableFinder tapChildView = find.byValueKey('TapChildView');
       await driver.tap(tapChildView);
-      final String nestedViewClickCount =
-        await driver.getText(find.byValueKey('NestedViewClickCount'));
+      final String nestedViewClickCount = await driver.getText(find.byValueKey('NestedViewClickCount'));
       expect(nestedViewClickCount, 'Click count: 1');
     }, timeout: Timeout.none);
   });
@@ -74,12 +72,11 @@ Future<void> main() async {
       await driver.waitFor(find.byValueKey('PlatformView'));
 
       expect(
-        await driver.requestData('hierarchy'),
-        '|-FlutterView\n'
-        '  |-FlutterSurfaceView\n' // Flutter UI
-        '  |-ViewGroup\n'  // Platform View
-        '    |-ViewGroup\n'
-      );
+          await driver.requestData('hierarchy'),
+          '|-FlutterView\n'
+          '  |-FlutterSurfaceView\n' // Flutter UI
+          '  |-ViewGroup\n' // Platform View
+          '    |-ViewGroup\n');
 
       // Hide platform view.
       final SerializableFinder togglePlatformView = find.byValueKey('TogglePlatformView');
@@ -87,22 +84,21 @@ Future<void> main() async {
       await driver.waitForAbsent(find.byValueKey('PlatformView'));
 
       expect(
-        await driver.requestData('hierarchy'),
-        '|-FlutterView\n'
-        '  |-FlutterSurfaceView\n' // Just the Flutter UI
-      );
+          await driver.requestData('hierarchy'),
+          '|-FlutterView\n'
+          '  |-FlutterSurfaceView\n' // Just the Flutter UI
+          );
 
       // Show platform view again.
       await driver.tap(togglePlatformView);
       await driver.waitFor(find.byValueKey('PlatformView'));
 
       expect(
-        await driver.requestData('hierarchy'),
-        '|-FlutterView\n'
-        '  |-FlutterSurfaceView\n' // Flutter UI
-        '  |-ViewGroup\n' // Platform View
-        '    |-ViewGroup\n'
-      );
+          await driver.requestData('hierarchy'),
+          '|-FlutterView\n'
+          '  |-FlutterSurfaceView\n' // Flutter UI
+          '  |-ViewGroup\n' // Platform View
+          '    |-ViewGroup\n');
     }, timeout: Timeout.none);
   });
 }

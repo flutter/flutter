@@ -21,7 +21,7 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
 }
 
 class Alive extends StatefulWidget {
-  const Alive(this.alive, this.index, { Key? key }) : super(key: key);
+  const Alive(this.alive, this.index, {Key? key}) : super(key: key);
   final bool alive;
   final int index;
 
@@ -29,7 +29,7 @@ class Alive extends StatefulWidget {
   AliveState createState() => AliveState();
 
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) => '$index $alive';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) => '$index $alive';
 }
 
 class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
@@ -44,6 +44,7 @@ class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
 }
 
 typedef WhetherToKeepAlive = bool Function(int);
+
 class _StatefulListView extends StatefulWidget {
   const _StatefulListView(this.aliveCallback);
 
@@ -177,7 +178,7 @@ void main() {
   });
 
   testWidgets('ListView large scroll jump and keepAlive first child not keepAlive', (WidgetTester tester) async {
-    Future<void> checkAndScroll([ String zero = '0:false' ]) async {
+    Future<void> checkAndScroll([String zero = '0:false']) async {
       expect(find.text(zero), findsOneWidget);
       expect(find.text('1:false'), findsOneWidget);
       expect(find.text('2:false'), findsOneWidget);
@@ -574,15 +575,17 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSemantics(find.byType(Scrollable)), matchesSemantics(
-      children: <Matcher>[
+    expect(
+        tester.getSemantics(find.byType(Scrollable)),
         matchesSemantics(
           children: <Matcher>[
-            matchesSemantics(hasImplicitScrolling: true),
+            matchesSemantics(
+              children: <Matcher>[
+                matchesSemantics(hasImplicitScrolling: true),
+              ],
+            ),
           ],
-        ),
-      ],
-    ));
+        ));
     handle.dispose();
   });
 
@@ -590,7 +593,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/43380.
     final ScrollController controller = ScrollController();
 
-    Widget buildListView({ required Axis scrollDirection }) {
+    Widget buildListView({required Axis scrollDirection}) {
       assert(scrollDirection != null);
       return Directionality(
         textDirection: TextDirection.ltr,

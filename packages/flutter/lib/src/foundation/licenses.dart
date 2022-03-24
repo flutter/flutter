@@ -188,8 +188,9 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               if (lines.isNotEmpty) {
                 result.add(getParagraph());
               }
-              if (text[currentPosition] == '\r' && currentPosition < text.length - 1
-                  && text[currentPosition + 1] == '\n') {
+              if (text[currentPosition] == '\r' &&
+                  currentPosition < text.length - 1 &&
+                  text[currentPosition + 1] == '\n') {
                 currentPosition += 1;
               }
               lastLineIndent = 0;
@@ -264,7 +265,6 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
   }
 }
 
-
 /// A registry for packages to add licenses to, so that they can be displayed
 /// together in an interface such as the [LicensePage].
 ///
@@ -313,14 +313,12 @@ class LicenseRegistry {
   ///
   /// Generating the list of licenses is expensive.
   static Stream<LicenseEntry> get licenses {
-    if (_collectors == null)
-      return const Stream<LicenseEntry>.empty();
+    if (_collectors == null) return const Stream<LicenseEntry>.empty();
 
     late final StreamController<LicenseEntry> controller;
     controller = StreamController<LicenseEntry>(
       onListen: () async {
-        for (final LicenseEntryCollector collector in _collectors!)
-          await controller.addStream(collector());
+        for (final LicenseEntryCollector collector in _collectors!) await controller.addStream(collector());
         await controller.close();
       },
     );

@@ -172,6 +172,7 @@ class _Tester {
       kind: PointerDeviceKind.mouse,
     );
   }
+
   TestGesture? _gesture;
 
   Duration currentTime = Duration.zero;
@@ -181,8 +182,7 @@ class _Tester {
     final Stopwatch stopwatch = Stopwatch()..start();
     await gesture.moveTo(location, timeStamp: currentTime);
     stopwatch.stop();
-    if (onDataPoint != null)
-      onDataPoint(stopwatch.elapsed);
+    if (onDataPoint != null) onDataPoint(stopwatch.elapsed);
     await _UntilNextFrame.wait();
   }
 

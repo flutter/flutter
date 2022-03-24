@@ -52,7 +52,8 @@ void main() {
   testWithoutContext('iOS workflow applies on macOS, no Xcode', () {
     final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macos'),
-      xcode: Xcode.test(processManager: FakeProcessManager.any(),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
           processManager: FakeProcessManager.any(),
           version: null,
@@ -70,10 +71,8 @@ void main() {
   testWithoutContext('iOS workflow can launch and list devices when Xcode is set up', () {
     final Xcode xcode = Xcode.test(
       processManager: FakeProcessManager.any(),
-      xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: FakeProcessManager.any(),
-        version: Version(1000, 0, 0)
-      ),
+      xcodeProjectInterpreter:
+          XcodeProjectInterpreter.test(processManager: FakeProcessManager.any(), version: Version(1000, 0, 0)),
     );
 
     final IOSWorkflow iosWorkflow = IOSWorkflow(

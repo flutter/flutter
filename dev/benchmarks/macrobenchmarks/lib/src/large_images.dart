@@ -34,9 +34,7 @@ class DummyImage extends StatelessWidget {
       builder: (BuildContext context, AsyncSnapshot<ByteData> snapshot) {
         // Use Image.memory instead of Image.asset to make sure that we're
         // creating many copies of the image to trigger the memory issue.
-        return snapshot.data == null
-            ? Container()
-            : Image.memory(snapshot.data!.buffer.asUint8List());
+        return snapshot.data == null ? Container() : Image.memory(snapshot.data!.buffer.asUint8List());
       },
     );
   }

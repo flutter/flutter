@@ -32,7 +32,7 @@ class CoverageCollector extends TestWatcher {
     await collectCoverage(testDevice);
   }
 
-  void _logMessage(String line, { bool error = false }) {
+  void _logMessage(String line, {bool error = false}) {
     if (!verbose) {
       return;
     }
@@ -87,26 +87,23 @@ class CoverageCollector extends TestWatcher {
     Map<String, dynamic> data;
 
     final Future<void> processComplete = testDevice.finished.catchError(
-      (Object error) => throw Exception(
-          'Failed to collect coverage, test device terminated prematurely with '
+      (Object error) => throw Exception('Failed to collect coverage, test device terminated prematurely with '
           'error: ${(error as TestDeviceException).message}.'),
       test: (Object error) => error is TestDeviceException,
     );
 
-    final Future<void> collectionComplete = testDevice.observatoryUri
-      .then((Uri observatoryUri) {
-        _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
-        return collect(observatoryUri, libraryPredicate)
-          .then<void>((Map<String, dynamic> result) {
-            if (result == null) {
-              throw Exception('Failed to collect coverage.');
-            }
-            _logMessage('Collected coverage data.');
-            data = result;
-          });
+    final Future<void> collectionComplete = testDevice.observatoryUri.then((Uri observatoryUri) {
+      _logMessage('collecting coverage data from $testDevice at $observatoryUri...');
+      return collect(observatoryUri, libraryPredicate).then<void>((Map<String, dynamic> result) {
+        if (result == null) {
+          throw Exception('Failed to collect coverage.');
+        }
+        _logMessage('Collected coverage data.');
+        data = result;
       });
+    });
 
-    await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
+    await Future.any<void>(<Future<void>>[processComplete, collectionComplete]);
     assert(data != null);
 
     _logMessage('Merging coverage data...');
@@ -136,15 +133,15 @@ class CoverageCollector extends TestWatcher {
       final List<String> reportOn = coverageDirectory == null
           ? <String>[globals.fs.path.join(packagePath, 'lib')]
           : <String>[coverageDirectory.path];
-      formatter = (Map<String, coverage.HitMap> hitmap) => hitmap
-          .formatLcov(resolver, reportOn: reportOn, basePath: packagePath);
+      formatter = (Map<String, coverage.HitMap> hitmap) =>
+          hitmap.formatLcov(resolver, reportOn: reportOn, basePath: packagePath);
     }
     final String result = formatter(_globalHitmap);
     _globalHitmap = null;
     return result;
   }
 
-  bool collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) {
+  bool collectCoverageData(String coveragePath, {bool mergeCoverageData = false, Directory coverageDirectory}) {
     final String coverageData = finalizeCoverage(
       coverageDirectory: coverageDirectory,
     );
@@ -181,9 +178,12 @@ class CoverageCollector extends TestWatcher {
         final File sourceFile = coverageFile.copySync(globals.fs.path.join(tempDir.path, 'lcov.source.info'));
         final RunResult result = globals.processUtils.runSync(<String>[
           'lcov',
-          '--add-tracefile', baseCoverageData,
-          '--add-tracefile', sourceFile.path,
-          '--output-file', coverageFile.path,
+          '--add-tracefile',
+          baseCoverageData,
+          '--add-tracefile',
+          sourceFile.path,
+          '--output-file',
+          coverageFile.path,
         ]);
         if (result.exitCode != 0) {
           return false;
@@ -196,18 +196,23 @@ class CoverageCollector extends TestWatcher {
   }
 
   @override
-  Future<void> handleTestCrashed(TestDevice testDevice) async { }
+  Future<void> handleTestCrashed(TestDevice testDevice) async {}
 
   @override
-  Future<void> handleTestTimedOut(TestDevice testDevice) async { }
+  Future<void> handleTestTimedOut(TestDevice testDevice) async {}
 }
 
 Future<FlutterVmService> _defaultConnect(Uri serviceUri) {
   return connectToVmService(
-      serviceUri, compression: CompressionOptions.compressionOff, logger: globals.logger,);
+    serviceUri,
+    compression: CompressionOptions.compressionOff,
+    logger: globals.logger,
+  );
 }
 
-Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
+Future<Map<String, dynamic>> collect(
+  Uri serviceUri,
+  bool Function(String) libraryPredicate, {
   bool waitPaused = false,
   String debugName,
   Future<FlutterVmService> Function(Uri) connector = _defaultConnect,
@@ -251,14 +256,15 @@ Future<Map<String, dynamic>> _getAllCoverage(
         continue;
       }
       final String scriptId = script.id;
-      final Future<void> getSourceReport = service.getSourceReport(
+      final Future<void> getSourceReport = service
+          .getSourceReport(
         isolateRef.id,
         <String>['Coverage'],
         scriptId: scriptId,
         forceCompile: true,
         reportLines: reportLines ? true : null,
       )
-      .then((vm_service.SourceReport report) {
+          .then((vm_service.SourceReport report) {
         sourceReports[scriptId] = report;
       });
       if (forceSequential) {
@@ -268,12 +274,10 @@ Future<Map<String, dynamic>> _getAllCoverage(
       if (reportLines) {
         continue;
       }
-      final Future<void> getObject = service
-        .getObject(isolateRef.id, scriptId)
-        .then((vm_service.Obj response) {
-          final vm_service.Script script = response as vm_service.Script;
-          scripts[scriptId] = script;
-        });
+      final Future<void> getObject = service.getObject(isolateRef.id, scriptId).then((vm_service.Obj response) {
+        final vm_service.Script script = response as vm_service.Script;
+        scripts[scriptId] = script;
+      });
       futures.add(getObject);
     }
     await Future.wait(futures);
@@ -313,16 +317,14 @@ void _buildCoverageMap(
       }
       if (hits != null) {
         for (final int hit in hits) {
-          final int line =
-              reportLines ? hit : _lineAndColumn(hit, tokenPositions)[0];
+          final int line = reportLines ? hit : _lineAndColumn(hit, tokenPositions)[0];
           final int current = hitMap[line] ?? 0;
           hitMap[line] = current + 1;
         }
       }
       if (misses != null) {
         for (final int miss in misses) {
-          final int line =
-              reportLines ? miss : _lineAndColumn(miss, tokenPositions)[0];
+          final int line = reportLines ? miss : _lineAndColumn(miss, tokenPositions)[0];
           hitMap[line] ??= 0;
         }
       }

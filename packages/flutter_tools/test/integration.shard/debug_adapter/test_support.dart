@@ -33,8 +33,10 @@ final bool useInProcessDap = Platform.environment['DAP_TEST_INTERNAL'] == 'true'
 /// Service traffic (wrapped in a custom 'dart.log' event).
 final bool verboseLogging = Platform.environment['DAP_TEST_VERBOSE'] == 'true';
 
-const String startOfErrorOutputMarker = '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════';
-const String endOfErrorOutputMarker = '════════════════════════════════════════════════════════════════════════════════════════════════════';
+const String startOfErrorOutputMarker =
+    '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════';
+const String endOfErrorOutputMarker =
+    '════════════════════════════════════════════════════════════════════════════════════════════════════';
 
 /// Expects the lines in [actual] to match the relevant matcher in [expected],
 /// ignoring differences in line endings and trailing whitespace.
@@ -66,10 +68,10 @@ class SimpleFlutterRunner {
   }
 
   void _handleExitCode(int code) {
-      if (!_vmServiceUriCompleter.isCompleted) {
-        _vmServiceUriCompleter.completeError('Flutter process ended without producing a VM Service URI');
-      }
+    if (!_vmServiceUriCompleter.isCompleted) {
+      _vmServiceUriCompleter.completeError('Flutter process ended without producing a VM Service URI');
     }
+  }
 
   void _handleStderr(String err) {
     if (!_vmServiceUriCompleter.isCompleted) {
@@ -100,10 +102,11 @@ class SimpleFlutterRunner {
 
   final Process process;
   final Completer<Uri> _vmServiceUriCompleter = Completer<Uri>();
-   Future<Uri> get vmServiceUri => _vmServiceUriCompleter.future;
+  Future<Uri> get vmServiceUri => _vmServiceUriCompleter.future;
 
   static Future<SimpleFlutterRunner> start(Directory projectDirectory) async {
-    final String flutterToolPath = globals.fs.path.join(Cache.flutterRoot!, 'bin', globals.platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String flutterToolPath =
+        globals.fs.path.join(Cache.flutterRoot!, 'bin', globals.platform.isWindows ? 'flutter.bat' : 'flutter');
 
     final List<String> args = <String>[
       'run',

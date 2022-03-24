@@ -46,8 +46,7 @@ void main() {
       final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
         clientDaemonConnection,
         logger: bufferLogger,
-        createSocketServer: (Logger logger, int? hostPort) async =>
-            fakeServerSocket,
+        createSocketServer: (Logger logger, int? hostPort) async => fakeServerSocket,
       );
       final int result = await portForwarder.forward(100);
       expect(result, 200);
@@ -73,7 +72,9 @@ void main() {
       expect(message.data['params'], <String, Object?>{'id': id});
       expect(message.binary, isNotNull);
       final List<List<int>> binary = await message.binary!.toList();
-      expect(binary, <List<int>>[<int>[1, 2, 3]]);
+      expect(binary, <List<int>>[
+        <int>[1, 2, 3]
+      ]);
 
       // Forwards data received as event to socket.
       expect(fakeSocket.addedData.isEmpty, true);
@@ -95,8 +96,7 @@ void main() {
         clientDaemonConnection,
         deviceId: 'device_id',
         logger: bufferLogger,
-        createSocketServer: (Logger logger, int? hostPort) async =>
-            fakeServerSocket,
+        createSocketServer: (Logger logger, int? hostPort) async => fakeServerSocket,
       );
 
       final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
@@ -178,8 +178,7 @@ class FakeServerSocket extends Fake implements ServerSocket {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    return controller.stream.listen(onData,
-        onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    return controller.stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override
@@ -202,8 +201,7 @@ class FakeSocket extends Fake implements Socket {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    return controller.stream.listen(onData,
-        onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    return controller.stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override

@@ -20,7 +20,7 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+              IconButton(icon: const Icon(Icons.share), onPressed: () {}),
             ],
           ),
         ),
@@ -41,7 +41,8 @@ void main() {
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionIconText.text.style!.color, Colors.white);
-    expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2));
+    expect(
+        text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2));
     expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
     expect(tester.getSize(find.byType(AppBar)).width, 800);
   });
@@ -56,7 +57,7 @@ void main() {
           appBar: AppBar(
             title: const Text('App Bar Title'),
             actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+              IconButton(icon: const Icon(Icons.share), onPressed: () {}),
             ],
           ),
         ),
@@ -91,19 +92,20 @@ void main() {
     );
 
     Widget _buildWithBackwardsCompatibility([bool? enabled]) => MaterialApp(
-      theme: ThemeData(appBarTheme: appBarTheme),
-      home: Scaffold(body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            title: const Text('App Bar Title'),
-            backwardsCompatibility: enabled,
-            actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+          theme: ThemeData(appBarTheme: appBarTheme),
+          home: Scaffold(
+              body: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                title: const Text('App Bar Title'),
+                backwardsCompatibility: enabled,
+                actions: <Widget>[
+                  IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+                ],
+              ),
             ],
-          ),
-        ],
-      )),
-    );
+          )),
+        );
 
     // Backwards compatibility enabled, AppBar should be built with true.
     await tester.pumpWidget(_buildWithBackwardsCompatibility(true));
@@ -157,7 +159,7 @@ void main() {
             toolbarTextStyle: toolbarTextStyle,
             titleTextStyle: titleTextStyle,
             actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+              IconButton(icon: const Icon(Icons.share), onPressed: () {}),
             ],
           ),
         ),
@@ -188,11 +190,12 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData.from(colorScheme: const ColorScheme.light()),
-      home: Scaffold(appBar: AppBar(
+      home: Scaffold(
+          appBar: AppBar(
         iconTheme: iconThemeData,
         actionsIconTheme: actionsIconThemeData,
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), color: color, onPressed: () { }),
+          IconButton(icon: const Icon(Icons.share), color: color, onPressed: () {}),
         ],
       )),
     ));
@@ -206,12 +209,11 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light())
-          .copyWith(appBarTheme: _appBarTheme()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()).copyWith(appBarTheme: _appBarTheme()),
         home: Scaffold(
           appBar: AppBar(
             actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+              IconButton(icon: const Icon(Icons.share), onPressed: () {}),
             ],
           ),
         ),
@@ -247,7 +249,7 @@ void main() {
             return Scaffold(
               appBar: AppBar(
                 actions: <Widget>[
-                  IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+                  IconButton(icon: const Icon(Icons.share), onPressed: () {}),
                 ],
               ),
             );
@@ -279,7 +281,8 @@ void main() {
       expect(iconTheme.data.color, theme.colorScheme.onPrimary);
       expect(actionsIconTheme.data.color, theme.colorScheme.onPrimary);
       expect(actionIconText.text.style!.color, theme.colorScheme.onPrimary);
-      expect(text.style.compareTo(theme.textTheme.bodyText2!.copyWith(color: theme.colorScheme.onPrimary)), RenderComparison.identical);
+      expect(text.style.compareTo(theme.textTheme.bodyText2!.copyWith(color: theme.colorScheme.onPrimary)),
+          RenderComparison.identical);
     }
 
     // AppBar defaults for dark themes:
@@ -306,14 +309,15 @@ void main() {
       expect(iconTheme.data.color, theme.colorScheme.onSurface);
       expect(actionsIconTheme.data.color, theme.colorScheme.onSurface);
       expect(actionIconText.text.style!.color, theme.colorScheme.onSurface);
-      expect(text.style.compareTo(theme.textTheme.bodyText2!.copyWith(color: theme.colorScheme.onSurface)), RenderComparison.identical);
+      expect(text.style.compareTo(theme.textTheme.bodyText2!.copyWith(color: theme.colorScheme.onSurface)),
+          RenderComparison.identical);
     }
   });
 
   testWidgets('AppBar iconTheme with color=null defers to outer IconTheme', (WidgetTester tester) async {
     // Verify claim made in https://github.com/flutter/flutter/pull/71184#issuecomment-737419215
 
-    Widget buildFrame({ Color? appIconColor, Color? appBarIconColor }) {
+    Widget buildFrame({Color? appIconColor, Color? appBarIconColor}) {
       return MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: IconTheme(
@@ -324,7 +328,7 @@ void main() {
                 appBar: AppBar(
                   iconTheme: IconThemeData(color: appBarIconColor),
                   actions: <Widget>[
-                    IconButton(icon: const Icon(Icons.share), onPressed: () { }),
+                    IconButton(icon: const Icon(Icons.share), onPressed: () {}),
                   ],
                 ),
               );
@@ -353,7 +357,8 @@ void main() {
   testWidgets('AppBar uses AppBarTheme.centerTitle when centerTitle is null', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
-      home: Scaffold(appBar: AppBar(
+      home: Scaffold(
+          appBar: AppBar(
         title: const Text('Title'),
       )),
     ));
@@ -378,10 +383,12 @@ void main() {
     expect(navToolBar.centerMiddle, false);
   });
 
-  testWidgets('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null', (WidgetTester tester) async{
+  testWidgets('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null',
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
-      home: Scaffold(appBar: AppBar(
+      home: Scaffold(
+          appBar: AppBar(
         title: const Text('Title'),
       )),
     ));
@@ -479,9 +486,9 @@ void main() {
     const AppBarTheme().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -498,9 +505,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'brightness: Brightness.dark',
@@ -551,36 +558,44 @@ Material _getAppBarMaterial(WidgetTester tester) {
 
 IconTheme _getAppBarIconTheme(WidgetTester tester) {
   return tester.widget<IconTheme>(
-    find.descendant(
-      of: find.byType(AppBar),
-      matching: find.byType(IconTheme),
-    ).first,
+    find
+        .descendant(
+          of: find.byType(AppBar),
+          matching: find.byType(IconTheme),
+        )
+        .first,
   );
 }
 
 IconTheme _getAppBarActionsIconTheme(WidgetTester tester) {
   return tester.widget<IconTheme>(
-    find.descendant(
-      of: find.byType(NavigationToolbar),
-      matching: find.byType(IconTheme),
-    ).first,
+    find
+        .descendant(
+          of: find.byType(NavigationToolbar),
+          matching: find.byType(IconTheme),
+        )
+        .first,
   );
 }
 
 RichText _getAppBarIconRichText(WidgetTester tester) {
   return tester.widget<RichText>(
-    find.descendant(
-      of: find.byType(Icon),
-      matching: find.byType(RichText),
-    ).first,
+    find
+        .descendant(
+          of: find.byType(Icon),
+          matching: find.byType(RichText),
+        )
+        .first,
   );
 }
 
 DefaultTextStyle _getAppBarText(WidgetTester tester) {
   return tester.widget<DefaultTextStyle>(
-    find.descendant(
-      of: find.byType(CustomSingleChildLayout),
-      matching: find.byType(DefaultTextStyle),
-    ).first,
+    find
+        .descendant(
+          of: find.byType(CustomSingleChildLayout),
+          matching: find.byType(DefaultTextStyle),
+        )
+        .first,
   );
 }

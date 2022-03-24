@@ -566,7 +566,8 @@ void main() {
       doubleTap.dispose();
     });
 
-    testGesture('A primary double tap recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
+    testGesture('A primary double tap recognizer does not form competition with a secondary tap recognizer',
+        (GestureTester tester) {
       doubleTap.addPointer(down6);
       tapSecondary.addPointer(down6);
       tester.closeArena(down6.pointer);
@@ -575,7 +576,8 @@ void main() {
       expect(recognized, <String>['tapSecondary']);
     });
 
-    testGesture('A primary double tap recognizer forms competition with a primary tap recognizer', (GestureTester tester) {
+    testGesture('A primary double tap recognizer forms competition with a primary tap recognizer',
+        (GestureTester tester) {
       doubleTap.addPointer(down1);
       tapPrimary.addPointer(down1);
       tester.closeArena(down1.pointer);
@@ -627,10 +629,8 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/73667
   testGesture('Unfinished DoubleTap does not prevent competing Tap', (GestureTester tester) {
     int tapCount = 0;
-    final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer()
-      ..onDoubleTap = () {};
-    final TapGestureRecognizer tap = TapGestureRecognizer()
-      ..onTap = () => tapCount++;
+    final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer()..onDoubleTap = () {};
+    final TapGestureRecognizer tap = TapGestureRecognizer()..onTap = () => tapCount++;
 
     // Open a arena with 2 members and holding.
     doubleTap.addPointer(down1);

@@ -8,8 +8,7 @@ import '../build_system/targets/web.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../web/compile.dart';
 import 'build.dart';
 
@@ -27,18 +26,16 @@ class BuildWebCommand extends BuildSubCommand {
     addNullSafetyModeOptions(hide: !verboseHelp);
     addNativeNullAssertions();
     argParser.addFlag('csp',
-      negatable: false,
-      help: 'Disable dynamic generation of code in the generated output. '
-            'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
-    );
-    argParser.addFlag(
-      'source-maps',
-      help: 'Generate a sourcemap file. These can be used by browsers '
+        negatable: false,
+        help: 'Disable dynamic generation of code in the generated output. '
+            'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).');
+    argParser.addFlag('source-maps',
+        help: 'Generate a sourcemap file. These can be used by browsers '
             'to view and debug the original source code of a compiled and minified Dart '
-            'application.'
-    );
+            'application.');
 
-    argParser.addOption('pwa-strategy',
+    argParser.addOption(
+      'pwa-strategy',
       defaultsTo: kOfflineFirst,
       help: 'The caching strategy to be used by the PWA service worker.',
       allowed: <String>[
@@ -47,26 +44,23 @@ class BuildWebCommand extends BuildSubCommand {
       ],
       allowedHelp: <String, String>{
         kOfflineFirst: 'Attempt to cache the application shell eagerly and '
-                       'then lazily cache all subsequent assets as they are loaded. When '
-                       'making a network request for an asset, the offline cache will be '
-                       'preferred.',
-        kNoneWorker:   'Generate a service worker with no body. This is useful for '
-                       'local testing or in cases where the service worker caching functionality '
-                       'is not desirable',
+            'then lazily cache all subsequent assets as they are loaded. When '
+            'making a network request for an asset, the offline cache will be '
+            'preferred.',
+        kNoneWorker: 'Generate a service worker with no body. This is useful for '
+            'local testing or in cases where the service worker caching functionality '
+            'is not desirable',
       },
     );
     argParser.addOption('base-href',
-      help: 'Overrides the href attribute of the <base> tag in web/index.html. '
-          'No change is done to web/index.html file if this flag is not provided. '
-          'The value has to start and end with a slash "/". '
-          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base'
-    );
-
+        help: 'Overrides the href attribute of the <base> tag in web/index.html. '
+            'No change is done to web/index.html file if this flag is not provided. '
+            'The value has to start and end with a slash "/". '
+            'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base');
   }
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
         DevelopmentArtifact.web,
       };
 
@@ -98,15 +92,13 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('Missing index.html.');
     }
     if (!globals.fs.currentDirectory
-        .childDirectory('web')
-        .childFile('index.html')
-        .readAsStringSync()
-        .contains(kBaseHrefPlaceholder) &&
+            .childDirectory('web')
+            .childFile('index.html')
+            .readAsStringSync()
+            .contains(kBaseHrefPlaceholder) &&
         baseHref != null) {
-      throwToolExit(
-        "Couldn't find the placeholder for base href. "
-        r'Please add `<base href="$FLUTTER_BASE_HREF">` to web/index.html'
-      );
+      throwToolExit("Couldn't find the placeholder for base href. "
+          r'Please add `<base href="$FLUTTER_BASE_HREF">` to web/index.html');
     }
     displayNullSafetyMode(buildInfo);
     await buildWeb(

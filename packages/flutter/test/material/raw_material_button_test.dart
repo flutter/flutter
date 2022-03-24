@@ -22,7 +22,9 @@ void main() {
         child: Center(
           child: RawMaterialButton(
             splashColor: splashColor,
-            onPressed: () { pressed = true; },
+            onPressed: () {
+              pressed = true;
+            },
             child: const Text('BUTTON'),
           ),
         ),
@@ -56,7 +58,9 @@ void main() {
             child: RawMaterialButton(
               splashColor: splashColor,
               focusNode: focusNode,
-              onPressed: () { pressed = true; },
+              onPressed: () {
+                pressed = true;
+              },
               child: const Text('BUTTON'),
             ),
           ),
@@ -133,7 +137,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: RawMaterialButton(
-            onPressed: () { },
+            onPressed: () {},
             constraints: BoxConstraints.tight(const Size(10.0, 10.0)),
             materialTapTargetSize: MaterialTapTargetSize.padded,
             child: const Text('+'),
@@ -142,29 +146,31 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            flags: <SemanticsFlag>[
-              SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isButton,
-              SemanticsFlag.isEnabled,
-              SemanticsFlag.isFocusable,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
+                actions: <SemanticsAction>[
+                  SemanticsAction.tap,
+                ],
+                label: '+',
+                textDirection: TextDirection.ltr,
+                rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+                children: <TestSemantics>[],
+              ),
             ],
-            actions: <SemanticsAction>[
-              SemanticsAction.tap,
-            ],
-            label: '+',
-            textDirection: TextDirection.ltr,
-            rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-            children: <TestSemantics>[],
           ),
-        ],
-      ),
-      ignoreTransform: true,
-    ));
+          ignoreTransform: true,
+        ));
 
     semantics.dispose();
   });
@@ -180,7 +186,7 @@ void main() {
         child: Center(
           child: RawMaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () { },
+            onPressed: () {},
             fillColor: fillColor,
             highlightColor: highlightColor,
             splashColor: splashColor,
@@ -212,7 +218,7 @@ void main() {
         child: Center(
           child: RawMaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () { },
+            onPressed: () {},
             fillColor: fillColor,
             highlightColor: highlightColor,
             splashColor: splashColor,
@@ -239,7 +245,7 @@ void main() {
           children: <Widget>[
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              onPressed: () { },
+              onPressed: () {},
               child: SizedBox(
                 width: 400.0,
                 height: 400.0,
@@ -270,7 +276,7 @@ void main() {
           children: <Widget>[
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              onPressed: () { },
+              onPressed: () {},
               child: SizedBox(
                 key: key,
                 width: 8.0,
@@ -296,7 +302,7 @@ void main() {
           children: <Widget>[
             RawMaterialButton(
               key: key,
-              onPressed: () { },
+              onPressed: () {},
               child: const SizedBox(),
             ),
           ],
@@ -437,12 +443,12 @@ void main() {
     expect(box, paints..rect(color: hoverColor));
   });
 
-  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
-
+  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null',
+      (WidgetTester tester) async {
     bool wasPressed;
     Finder rawMaterialButton;
 
-    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
+    Widget buildFrame({VoidCallback? onPressed, VoidCallback? onLongPress}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RawMaterialButton(
@@ -456,7 +462,9 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }),
+      buildFrame(onPressed: () {
+        wasPressed = true;
+      }),
     );
     rawMaterialButton = find.byType(RawMaterialButton);
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
@@ -466,7 +474,9 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onLongPress: () { wasPressed = true; }),
+      buildFrame(onLongPress: () {
+        wasPressed = true;
+      }),
     );
     rawMaterialButton = find.byType(RawMaterialButton);
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
@@ -481,7 +491,8 @@ void main() {
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, false);
   });
 
-  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized',
+      (WidgetTester tester) async {
     bool didPressButton = false;
     bool didLongPressButton = false;
 
@@ -526,7 +537,9 @@ void main() {
                 visualDensity: visualDensity,
                 key: key,
                 onPressed: () {},
-                child: useText ? const Text('Text', key: childKey) : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
+                child: useText
+                    ? const Text('Text', key: childKey)
+                    : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
               ),
             ),
           ),

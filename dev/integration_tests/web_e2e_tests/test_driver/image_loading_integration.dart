@@ -11,8 +11,7 @@ import 'package:web_e2e_tests/image_loading_main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Image loads asset variant based on device pixel ratio',
-          (WidgetTester tester) async {
+  testWidgets('Image loads asset variant based on device pixel ratio', (WidgetTester tester) async {
     await app.main();
     await tester.pumpAndSettle();
 

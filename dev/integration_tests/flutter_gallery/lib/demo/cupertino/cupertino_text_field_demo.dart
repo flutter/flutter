@@ -56,7 +56,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       ),
       autofocus: true,
       suffixMode: OverlayVisibilityMode.editing,
-      onSubmitted: (String text)=> setState(()=> _chatTextController!.clear()),
+      onSubmitted: (String text) => setState(() => _chatTextController!.clear()),
     );
   }
 

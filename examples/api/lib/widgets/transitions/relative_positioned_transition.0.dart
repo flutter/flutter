@@ -30,8 +30,7 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 /// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with TickerProviderStateMixin {
+class _MyStatefulWidgetState extends State<MyStatefulWidget> with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),
     vsync: this,
@@ -57,14 +56,12 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
               size: biggest,
               rect: RectTween(
                 begin: const Rect.fromLTWH(0, 0, bigLogo, bigLogo),
-                end: Rect.fromLTWH(biggest.width - smallLogo,
-                    biggest.height - smallLogo, smallLogo, smallLogo),
+                end: Rect.fromLTWH(biggest.width - smallLogo, biggest.height - smallLogo, smallLogo, smallLogo),
               ).animate(CurvedAnimation(
                 parent: _controller,
                 curve: Curves.elasticInOut,
               )),
-              child: const Padding(
-                  padding: EdgeInsets.all(8), child: FlutterLogo()),
+              child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
             ),
           ],
         );

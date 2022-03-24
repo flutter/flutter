@@ -91,11 +91,12 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(anchorPoint != null || debugCheckHasDirectionality(
-        context,
-        why: 'to determine which sub-screen DisplayFeatureSubScreen uses',
-        alternative: "Alternatively, consider specifying the 'anchorPoint' argument on the DisplayFeatureSubScreen.",
-    ));
+    assert(anchorPoint != null ||
+        debugCheckHasDirectionality(
+          context,
+          why: 'to determine which sub-screen DisplayFeatureSubScreen uses',
+          alternative: "Alternatively, consider specifying the 'anchorPoint' argument on the DisplayFeatureSubScreen.",
+        ));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Size parentSize = mediaQuery.size;
     final Rect wantedBounds = Offset.zero & parentSize;
@@ -128,8 +129,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   }
 
   static Iterable<Rect> _avoidBounds(MediaQueryData mediaQuery) {
-    return mediaQuery.displayFeatures.map((DisplayFeature d) => d.bounds)
-        .where((Rect r) => r.shortestSide > 0);
+    return mediaQuery.displayFeatures.map((DisplayFeature d) => d.bounds).where((Rect r) => r.shortestSide > 0);
   }
 
   /// Returns the closest sub-screen to the [anchorPoint].
@@ -244,8 +244,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   }
 
   static Offset _capOffset(Offset offset, Size maximum) {
-    if (offset.dx >= 0 && offset.dx <= maximum.width
-        && offset.dy >=0 && offset.dy <= maximum.height) {
+    if (offset.dx >= 0 && offset.dx <= maximum.width && offset.dy >= 0 && offset.dy <= maximum.height) {
       return offset;
     } else {
       return Offset(

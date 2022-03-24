@@ -208,7 +208,7 @@ void main() {
       expect(devices, hasLength(1));
       final Device device = devices[0];
 
-      final List<int> screenshot = <int>[1,2,3,4,5];
+      final List<int> screenshot = <int>[1, 2, 3, 4, 5];
       fakeDevice.screenshot = screenshot;
 
       final File screenshotOutputFile = memoryFileSystem.file('screenshot_file');
@@ -232,7 +232,7 @@ class FakeDaemonStreams implements DaemonStreams {
   }
 
   @override
-  void send(Map<String, dynamic> message, [ List<int> binary ]) {
+  void send(Map<String, dynamic> message, [List<int> binary]) {
     outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
   }
 
@@ -308,7 +308,8 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   FutureOr<DeviceLogReader> getLogReader({
     covariant ApplicationPackage app,
     bool includePastLogs = false,
-  }) => logReader;
+  }) =>
+      logReader;
 
   ApplicationPackage startAppPackage;
   LaunchResult launchResult;
@@ -364,7 +365,6 @@ class FakeDeviceLogReader implements DeviceLogReader {
 
   @override
   String get name => 'device';
-
 }
 
 class FakeApplicationPackageFactory implements ApplicationPackageFactory {
@@ -373,7 +373,8 @@ class FakeApplicationPackageFactory implements ApplicationPackageFactory {
   ApplicationPackage applicationPackage;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform,
+      {BuildInfo buildInfo, File applicationBinary}) async {
     platformRequested = platform;
     applicationBinaryRequested = applicationBinary;
     return applicationPackage;

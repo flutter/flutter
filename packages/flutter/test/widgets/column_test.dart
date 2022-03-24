@@ -389,7 +389,6 @@ void main() {
     expect(renderBox.size.height, equals(100.0));
   });
 
-
   // UP
 
   testWidgets('Column with one flexible child', (WidgetTester tester) async {

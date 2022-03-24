@@ -96,5 +96,4 @@ void main() {
     expect(tester.getSize(find.byKey(target)), const Size(800.0, 600.0));
     expect(tester.getTopRight(find.byKey(target)), const Offset(800.0, 0.0));
   });
-
 }

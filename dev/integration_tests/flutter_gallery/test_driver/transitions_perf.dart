@@ -17,16 +17,18 @@ import 'run_demos.dart';
 //
 // These names are reported by the test app, see _handleMessages()
 // in transitions_perf.dart.
-List<String> _allDemos = kAllGalleryDemos.map(
-  (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
-).toList();
+List<String> _allDemos = kAllGalleryDemos
+    .map(
+      (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
+    )
+    .toList();
 
 Set<String> _unTestedDemos = Set<String>.from(_allDemos);
 
 class _MessageHandler {
   static LiveWidgetController? controller;
   Future<String> call(String message) async {
-    switch(message) {
+    switch (message) {
       case 'demoNames':
         return const JsonEncoder.withIndent('  ').convert(_allDemos);
       case 'profileDemos':
@@ -36,7 +38,7 @@ class _MessageHandler {
         return const JsonEncoder.withIndent('  ').convert(kProfiledDemos);
       case 'restDemos':
         controller ??= LiveWidgetController(WidgetsBinding.instance);
-        final List<String> restDemos =  _unTestedDemos.toList();
+        final List<String> restDemos = _unTestedDemos.toList();
         await runDemos(restDemos, controller!);
         return const JsonEncoder.withIndent('  ').convert(restDemos);
       default:

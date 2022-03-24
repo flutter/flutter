@@ -80,9 +80,7 @@ class FuchsiaSdk {
         }
         process = newProcess;
         process?.exitCode.whenComplete(controller.close);
-        controller.addStream(process!.stdout
-            .transform(utf8.decoder)
-            .transform(const LineSplitter()));
+        controller.addStream(process!.stdout.transform(utf8.decoder).transform(const LineSplitter()));
       });
       return controller.stream;
     } on Exception catch (exception) {
@@ -117,8 +115,8 @@ class FuchsiaArtifacts {
     // TODO(zanderso): Consider passing the ssh config path in with a flag.
     File? sshConfig;
     if (globals.platform.environment.containsKey(_kFuchsiaBuildDir)) {
-      sshConfig = globals.fs.file(globals.fs.path.join(
-          globals.platform.environment[_kFuchsiaBuildDir]!, 'ssh-keys', 'ssh_config'));
+      sshConfig = globals.fs
+          .file(globals.fs.path.join(globals.platform.environment[_kFuchsiaBuildDir]!, 'ssh-keys', 'ssh_config'));
     } else if (globals.platform.environment.containsKey(_kFuchsiaSshConfig)) {
       sshConfig = globals.fs.file(globals.platform.environment[_kFuchsiaSshConfig]);
     }

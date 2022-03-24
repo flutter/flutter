@@ -18,25 +18,12 @@ const FakeCommand kAdbVersionCommand = FakeCommand(
   command: <String>['adb', 'version'],
   stdout: 'Android Debug Bridge version 1.0.39',
 );
-const FakeCommand kAdbStartServerCommand = FakeCommand(
-  command: <String>['adb', 'start-server']
-);
+const FakeCommand kAdbStartServerCommand = FakeCommand(command: <String>['adb', 'start-server']);
 const FakeCommand kInstallCommand = FakeCommand(
-  command: <String>[
-    'adb',
-    '-s',
-    '1234',
-    'install',
-    '-t',
-    '-r',
-    '--user',
-    '10',
-    'app.apk'
-  ],
+  command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', 'app.apk'],
 );
-const FakeCommand kStoreShaCommand = FakeCommand(
-  command: <String>['adb', '-s', '1234', 'shell', 'echo', '-n', '', '>', '/data/local/tmp/sky.app.sha1']
-);
+const FakeCommand kStoreShaCommand =
+    FakeCommand(command: <String>['adb', '-s', '1234', 'shell', 'echo', '-n', '', '>', '/data/local/tmp/sky.app.sha1']);
 
 void main() {
   late FileSystem fileSystem;
@@ -52,7 +39,8 @@ void main() {
     ProcessManager? processManager,
   }) {
     androidSdk ??= FakeAndroidSdk();
-    return AndroidDevice('1234',
+    return AndroidDevice(
+      '1234',
       modelID: 'TestModel',
       logger: logger,
       platform: FakePlatform(),
@@ -94,8 +82,7 @@ void main() {
       versionCode: 22,
       launchActivity: 'Main',
     );
-    final AndroidDevice androidDevice = setUpAndroidDevice(
-    );
+    final AndroidDevice androidDevice = setUpAndroidDevice();
 
     expect(await androidDevice.installApp(androidApk), false);
   });
@@ -109,9 +96,8 @@ void main() {
         stdout: '[ro.build.version.sdk]: [16]',
       ),
       const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
-        stdout: '\n'
-      ),
+          command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
+          stdout: '\n'),
       kInstallCommand,
       kStoreShaCommand,
     ]);
@@ -131,16 +117,15 @@ void main() {
   });
 
   testWithoutContext('Defaults to API level 16 if adb returns a null response', () async {
-    final FakeProcessManager processManager =  FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kAdbVersionCommand,
       kAdbStartServerCommand,
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
       ),
       const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
-        stdout: '\n'
-      ),
+          command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
+          stdout: '\n'),
       kInstallCommand,
       kStoreShaCommand,
     ]);
@@ -160,7 +145,7 @@ void main() {
   });
 
   testWithoutContext('displays error if user not found', () async {
-    final FakeProcessManager processManager =  FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kAdbVersionCommand,
       kAdbStartServerCommand,
       const FakeCommand(
@@ -173,17 +158,7 @@ void main() {
         exitCode: 1,
       ),
       const FakeCommand(
-        command: <String>[
-          'adb',
-          '-s',
-          '1234',
-          'install',
-          '-t',
-          '-r',
-          '--user',
-          'jane',
-          'app.apk'
-        ],
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', 'jane', 'app.apk'],
         exitCode: 1,
         stderr: 'Exception occurred while executing: java.lang.IllegalArgumentException: Bad user number: jane',
       ),
@@ -200,7 +175,8 @@ void main() {
     );
 
     expect(await androidDevice.installApp(androidApk, userIdentifier: 'jane'), false);
-    expect(logger.errorText, contains('Error: User "jane" not found. Run "adb shell pm list users" to see list of available identifiers.'));
+    expect(logger.errorText,
+        contains('Error: User "jane" not found. Run "adb shell pm list users" to see list of available identifiers.'));
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -213,9 +189,8 @@ void main() {
         stdout: '[ro.build.version.sdk]: [16]',
       ),
       const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
-        stdout: 'package:app\n'
-      ),
+          command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
+          stdout: 'package:app\n'),
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', 'cat', '/data/local/tmp/sky.app.sha1'],
         stdout: 'example_sha',
@@ -247,8 +222,7 @@ void main() {
       ),
       const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
-          stdout: 'package:app\n'
-      ),
+          stdout: 'package:app\n'),
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', 'cat', '/data/local/tmp/sky.app.sha1'],
         stdout: 'different_example_sha',
@@ -260,7 +234,17 @@ void main() {
       ),
       const FakeCommand(command: <String>['adb', '-s', '1234', 'uninstall', '--user', '10', 'app']),
       kInstallCommand,
-      const FakeCommand(command: <String>['adb', '-s', '1234', 'shell', 'echo', '-n', 'example_sha', '>', '/data/local/tmp/sky.app.sha1']),
+      const FakeCommand(command: <String>[
+        'adb',
+        '-s',
+        '1234',
+        'shell',
+        'echo',
+        '-n',
+        'example_sha',
+        '>',
+        '/data/local/tmp/sky.app.sha1'
+      ]),
     ]);
     final File apk = fileSystem.file('app.apk')..createSync();
     fileSystem.file('app.apk.sha1').writeAsStringSync('example_sha');
@@ -288,8 +272,7 @@ void main() {
       ),
       const FakeCommand(
           command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
-          stdout: '\n'
-      ),
+          stdout: '\n'),
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', 'app.apk'],
         exitCode: 1,

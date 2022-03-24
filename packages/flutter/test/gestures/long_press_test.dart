@@ -584,7 +584,8 @@ void main() {
       longPress.dispose();
     });
 
-    testGesture('A primary long press recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
+    testGesture('A primary long press recognizer does not form competition with a secondary tap recognizer',
+        (GestureTester tester) {
       longPress.addPointer(down3);
       tapSecondary.addPointer(down3);
       tester.closeArena(down3.pointer);
@@ -593,7 +594,8 @@ void main() {
       expect(recognized, <String>['tapSecondary']);
     });
 
-    testGesture('A primary long press recognizer forms competition with a primary tap recognizer', (GestureTester tester) {
+    testGesture('A primary long press recognizer forms competition with a primary tap recognizer',
+        (GestureTester tester) {
       longPress.addPointer(down);
       tapPrimary.addPointer(down);
       tester.closeArena(down.pointer);
@@ -715,17 +717,18 @@ void main() {
     recognized.clear();
   });
 
-  testWidgets('LongPressGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
+  testWidgets('LongPressGestureRecognizer asserts when kind and supportedDevices are both set',
+      (WidgetTester tester) async {
     expect(
       () {
         LongPressGestureRecognizer(
           kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+          supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch},
         );
       },
       throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
+        isA<AssertionError>().having((AssertionError error) => error.toString(), 'description',
+            contains('kind == null || supportedDevices == null')),
       ),
     );
   });

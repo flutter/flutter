@@ -43,13 +43,13 @@ void main() {
     List<String> dartEntrypointArgs = const <String>[],
     bool enableObservatory = false,
   }) =>
-    TestFlutterTesterDevice(
-      platform: platform,
-      fileSystem: fileSystem,
-      processManager: processManager,
-      enableObservatory: enableObservatory,
-      dartEntrypointArgs: dartEntrypointArgs,
-    );
+      TestFlutterTesterDevice(
+        platform: platform,
+        fileSystem: fileSystem,
+        processManager: processManager,
+        enableObservatory: enableObservatory,
+        dartEntrypointArgs: dartEntrypointArgs,
+      );
 
   testUsingContext('runs in Rosetta on arm64 Mac', () async {
     final FakeProcessManager processManager = FakeProcessManager.empty();
@@ -113,8 +113,7 @@ void main() {
       ]);
       device = createDevice();
 
-      fileSystem
-          .file('.dart_tool/package_config.json')
+      fileSystem.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
         ..writeAsStringSync('{"configVersion":2,"packages":[]}');
     });
@@ -275,31 +274,31 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     @required bool enableObservatory,
     @required List<String> dartEntrypointArgs,
   }) : super(
-    id: 999,
-    shellPath: '/',
-    platform: platform,
-    fileSystem: fileSystem,
-    processManager: processManager,
-    logger: BufferLogger.test(),
-    debuggingOptions: DebuggingOptions.enabled(
-      const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        packagesPath: '.dart_tool/package_config.json',
-      ),
-      hostVmServicePort: 1234,
-      dartEntrypointArgs: dartEntrypointArgs,
-    ),
-    enableObservatory: enableObservatory,
-    machine: false,
-    host: InternetAddress.loopbackIPv6,
-    buildTestAssets: false,
-    flutterProject: null,
-    icudtlPath: null,
-    compileExpression: null,
-    fontConfigManager: FontConfigManager(),
-  );
+          id: 999,
+          shellPath: '/',
+          platform: platform,
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: BufferLogger.test(),
+          debuggingOptions: DebuggingOptions.enabled(
+            const BuildInfo(
+              BuildMode.debug,
+              '',
+              treeShakeIcons: false,
+              packagesPath: '.dart_tool/package_config.json',
+            ),
+            hostVmServicePort: 1234,
+            dartEntrypointArgs: dartEntrypointArgs,
+          ),
+          enableObservatory: enableObservatory,
+          machine: false,
+          host: InternetAddress.loopbackIPv6,
+          buildTestAssets: false,
+          flutterProject: null,
+          icudtlPath: null,
+          compileExpression: null,
+          fontConfigManager: FontConfigManager(),
+        );
 
   final Completer<Uri> _ddsServiceUriCompleter = Completer<Uri>();
 
@@ -308,7 +307,8 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   @override
   Future<DartDevelopmentService> startDds(Uri uri) async {
     _ddsServiceUriCompleter.complete(uri);
-    return FakeDartDevelopmentService(Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'), Uri.parse('http://localhost:8080'));
+    return FakeDartDevelopmentService(
+        Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'), Uri.parse('http://localhost:8080'));
   }
 
   @override
@@ -329,6 +329,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Uri get remoteVmServiceUri => original;
 }
+
 class FakeHttpServer extends Fake implements HttpServer {
   @override
   int get port => 0;

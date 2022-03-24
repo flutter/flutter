@@ -17,7 +17,6 @@ final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradle
 /// it has custom build types and flavors.
 Future<void> main() async {
   await task(() async {
-
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
@@ -80,7 +79,8 @@ Future<void> main() async {
       Future<void> clean() async {
         section('Clean');
         await inDirectory(hostAppDir, () async {
-          await exec(gradlewExecutable,
+          await exec(
+            gradlewExecutable,
             <String>['clean'],
             environment: <String, String>{
               'JAVA_HOME': javaHome,
@@ -101,7 +101,8 @@ Future<void> main() async {
       section('Run app:assembleDemoDebug');
 
       await inDirectory(hostAppDir, () async {
-        await exec(gradlewExecutable,
+        await exec(
+          gradlewExecutable,
           <String>['app:assembleDemoDebug'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
@@ -138,7 +139,8 @@ Future<void> main() async {
       section('Run app:assembleDemoDebug - Merge assets before processing manifest');
 
       await inDirectory(hostAppDir, () async {
-        await exec(gradlewExecutable,
+        await exec(
+          gradlewExecutable,
           <String>[
             // Normally, `app:processDemoDebugManifest` runs before `app:mergeDemoDebugAssets`.
             // In this case, we run `app:mergeDemoDebugAssets` first.
@@ -179,7 +181,8 @@ Future<void> main() async {
       section('Run app:assembleDemoStaging');
 
       await inDirectory(hostAppDir, () async {
-        await exec(gradlewExecutable,
+        await exec(
+          gradlewExecutable,
           <String>['app:assembleDemoStaging'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
@@ -216,7 +219,8 @@ Future<void> main() async {
       section('Run app:assembleDemoRelease');
 
       await inDirectory(hostAppDir, () async {
-        await exec(gradlewExecutable,
+        await exec(
+          gradlewExecutable,
           <String>['app:assembleDemoRelease'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
@@ -253,8 +257,9 @@ Future<void> main() async {
 
       section('Run app:assembleDemoProd');
 
-       await inDirectory(hostAppDir, () async {
-        await exec(gradlewExecutable,
+      await inDirectory(hostAppDir, () async {
+        await exec(
+          gradlewExecutable,
           <String>['app:assembleDemoProd'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,

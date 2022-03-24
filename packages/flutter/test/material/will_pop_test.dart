@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 bool willPopValue = false;
 
 class SamplePage extends StatefulWidget {
-  const SamplePage({ Key? key }) : super(key: key);
+  const SamplePage({Key? key}) : super(key: key);
   @override
   SamplePageState createState() => SamplePageState();
 }
@@ -43,7 +43,7 @@ class SamplePageState extends State<SamplePage> {
 int willPopCount = 0;
 
 class SampleForm extends StatelessWidget {
-  const SampleForm({ Key? key, required this.callback }) : super(key: key);
+  const SampleForm({Key? key, required this.callback}) : super(key: key);
 
   final WillPopCallback callback;
 
@@ -250,14 +250,18 @@ void main() {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            actions: <Widget> [
+            actions: <Widget>[
               TextButton(
                 child: const Text('YES'),
-                onPressed: () { Navigator.of(context).pop(true); },
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
               ),
               TextButton(
                 child: const Text('NO'),
-                onPressed: () { Navigator.of(context).pop(false); },
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
               ),
             ],
           );
@@ -381,16 +385,16 @@ void main() {
     expect(route.hasCallback, isTrue);
 
     // Rebuild the route's SampleForm child an additional 3x for good measure.
-    contentsSetState(() { });
+    contentsSetState(() {});
     await tester.pump();
-    contentsSetState(() { });
+    contentsSetState(() {});
     await tester.pump();
-    contentsSetState(() { });
+    contentsSetState(() {});
     await tester.pump();
 
     // Now build the route's contents without the sample form.
     contentsEmpty = true;
-    contentsSetState(() { });
+    contentsSetState(() {});
     await tester.pump();
 
     expect(route.hasCallback, isFalse);
@@ -441,13 +445,15 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
     await tester.pump();
-    final _TestPageRoute<dynamic> route1 = ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
+    final _TestPageRoute<dynamic> route1 =
+        ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
     expect(route1.hasCallback, isTrue);
     moveToAnotherNavigator = true;
     contentsSetState(() {});
 
     await tester.pump();
-    final _TestPageRoute<dynamic> route2 = ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
+    final _TestPageRoute<dynamic> route2 =
+        ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
 
     expect(route1.hasCallback, isFalse);
     expect(route2.hasCallback, isTrue);

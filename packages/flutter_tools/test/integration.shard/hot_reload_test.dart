@@ -40,10 +40,8 @@ void main() {
     await flutter.run();
     // Capture how many *real* hot reloads occur.
     int numReloads = 0;
-    final StreamSubscription<void> subscription = flutter.stdout
-        .map(parseFlutterResponse)
-        .where(_isHotReloadCompletionEvent)
-        .listen((_) => numReloads++);
+    final StreamSubscription<void> subscription =
+        flutter.stdout.map(parseFlutterResponse).where(_isHotReloadCompletionEvent).listen((_) => numReloads++);
 
     // To reduce tests flaking, override the debounce timer to something higher than
     // the default to ensure the hot reloads that are supposed to arrive within the
@@ -131,7 +129,9 @@ void main() {
       project.buildBreakpointLine,
     );
     bool reloaded = false;
-    final Future<void> reloadFuture = flutter.hotReload().then((void value) { reloaded = true; });
+    final Future<void> reloadFuture = flutter.hotReload().then((void value) {
+      reloaded = true;
+    });
     printOnFailure('waiting for pause...');
     isolate = await flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
@@ -178,11 +178,14 @@ void main() {
     );
     bool reloaded = false;
     await Future<void>.delayed(const Duration(seconds: 1));
-    final Future<void> reloadFuture = flutter.hotReload().then((void value) { reloaded = true; });
+    final Future<void> reloadFuture = flutter.hotReload().then((void value) {
+      reloaded = true;
+    });
     final Isolate isolate = await flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
     expect(reloaded, isFalse);
-    await sawDebuggerPausedMessage1.future; // this is the one where it say "uh, you broke into the debugger while reloading"
+    await sawDebuggerPausedMessage1
+        .future; // this is the one where it say "uh, you broke into the debugger while reloading"
     await reloadFuture; // this is the one where it times out because you're in the debugger
     expect(reloaded, isTrue);
     await flutter.hotReload(); // now we're already paused

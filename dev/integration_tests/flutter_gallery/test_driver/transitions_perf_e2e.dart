@@ -16,9 +16,11 @@ import 'run_demos.dart';
 //
 // These names are reported by the test app, see _handleMessages()
 // in transitions_perf.dart.
-List<String> _allDemos = kAllGalleryDemos.map(
-  (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
-).toList();
+List<String> _allDemos = kAllGalleryDemos
+    .map(
+      (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
+    )
+    .toList();
 
 void main([List<String> args = const <String>[]]) {
   final bool withSemantics = args.contains('--with_semantics');
@@ -43,8 +45,7 @@ void main([List<String> args = const <String>[]]) {
         });
 
         // Execute the remaining tests.
-        final Set<String> unprofiledDemos = Set<String>.from(_allDemos)
-          ..removeAll(kProfiledDemos);
+        final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
         await runDemos(unprofiledDemos.toList(), tester);
       },
       semanticsEnabled: withSemantics,

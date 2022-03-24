@@ -13,19 +13,19 @@ class NavigationIconView {
     String? title,
     Color? color,
     required TickerProvider vsync,
-  }) : _icon = icon,
-       _color = color,
-       _title = title,
-       item = BottomNavigationBarItem(
-         icon: icon,
-         activeIcon: activeIcon,
-         label: title,
-         backgroundColor: color,
-       ),
-       controller = AnimationController(
-         duration: kThemeAnimationDuration,
-         vsync: vsync,
-       ) {
+  })  : _icon = icon,
+        _color = color,
+        _title = title,
+        item = BottomNavigationBarItem(
+          icon: icon,
+          activeIcon: activeIcon,
+          label: title,
+          backgroundColor: color,
+        ),
+        controller = AnimationController(
+          duration: kThemeAnimationDuration,
+          vsync: vsync,
+        ) {
     _animation = controller.drive(CurveTween(
       curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
     ));
@@ -45,9 +45,7 @@ class NavigationIconView {
     } else {
       final ThemeData theme = Theme.of(context);
       final ColorScheme colorScheme = theme.colorScheme;
-      iconColor = theme.brightness == Brightness.light
-          ? colorScheme.primary
-          : colorScheme.secondary;
+      iconColor = theme.brightness == Brightness.light ? colorScheme.primary : colorScheme.secondary;
     }
 
     return FadeTransition(
@@ -115,8 +113,7 @@ class BottomNavigationDemo extends StatefulWidget {
   State<BottomNavigationDemo> createState() => _BottomNavigationDemoState();
 }
 
-class _BottomNavigationDemoState extends State<BottomNavigationDemo>
-    with TickerProviderStateMixin {
+class _BottomNavigationDemoState extends State<BottomNavigationDemo> with TickerProviderStateMixin {
   int _currentIndex = 0;
   BottomNavigationBarType _type = BottomNavigationBarType.shifting;
   late List<NavigationIconView> _navigationViews;
@@ -165,8 +162,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
 
   @override
   void dispose() {
-    for (final NavigationIconView view in _navigationViews)
-      view.controller.dispose();
+    for (final NavigationIconView view in _navigationViews) view.controller.dispose();
     super.dispose();
   }
 

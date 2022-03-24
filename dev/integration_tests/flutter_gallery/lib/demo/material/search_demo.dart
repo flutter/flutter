@@ -58,11 +58,9 @@ class _SearchDemoState extends State<SearchDemo> {
           IconButton(
             tooltip: 'More (not implemented)',
             icon: Icon(
-              Theme.of(context).platform == TargetPlatform.iOS
-                  ? Icons.more_horiz
-                  : Icons.more_vert,
+              Theme.of(context).platform == TargetPlatform.iOS ? Icons.more_horiz : Icons.more_vert,
             ),
-            onPressed: () { },
+            onPressed: () {},
           ),
         ],
       ),
@@ -93,7 +91,7 @@ class _SearchDemoState extends State<SearchDemo> {
               ),
             ),
             const SizedBox(height: 64.0),
-            Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE' }.'),
+            Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE'}.'),
           ],
         ),
       ),
@@ -155,10 +153,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-
-    final Iterable<int> suggestions = query.isEmpty
-        ? _history
-        : _data.where((int i) => '$i'.startsWith(query));
+    final Iterable<int> suggestions = query.isEmpty ? _history : _data.where((int i) => '$i'.startsWith(query));
 
     return _SuggestionList(
       query: query,
@@ -228,9 +223,9 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
 
   @override
   PreferredSizeWidget buildBottom(BuildContext context) => const PreferredSize(
-    preferredSize: Size.fromHeight(56.0),
-    child: Text('Numbers'),
-  );
+        preferredSize: Size.fromHeight(56.0),
+        child: Text('Numbers'),
+      );
 }
 
 class _ResultCard extends StatelessWidget {

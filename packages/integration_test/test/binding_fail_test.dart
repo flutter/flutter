@@ -35,7 +35,8 @@ Future<void> main() async {
     });
 
     test('when one test passes, then another fails', () async {
-      final Map<String, dynamic>? results = await _runTest(path.join('test', 'data', 'pass_then_fail_test_script.dart'));
+      final Map<String, dynamic>? results =
+          await _runTest(path.join('test', 'data', 'pass_then_fail_test_script.dart'));
 
       expect(results, hasLength(2));
       expect(results, containsPair('passing test', equals('success')));
@@ -43,7 +44,8 @@ Future<void> main() async {
     });
 
     test('when one test fails, then another passes', () async {
-      final Map<String, dynamic>? results = await _runTest(path.join('test', 'data', 'fail_then_pass_test_script.dart'));
+      final Map<String, dynamic>? results =
+          await _runTest(path.join('test', 'data', 'fail_then_pass_test_script.dart'));
 
       expect(results, hasLength(2));
       expect(results, containsPair('failing test', contains(_failureExcerpt)));
@@ -56,8 +58,7 @@ Future<void> main() async {
 ///
 /// [scriptPath] is relative to the package root.
 Future<Map<String, dynamic>?> _runTest(String scriptPath) async {
-  final Process process =
-      await Process.start(_flutterBin, <String>['test', '--machine', scriptPath]);
+  final Process process = await Process.start(_flutterBin, <String>['test', '--machine', scriptPath]);
 
   /// In the test [tearDownAll] block, the test results are encoded into JSON and
   /// are printed with the [_integrationResultsPrefix] prefix.
@@ -78,10 +79,7 @@ Future<Map<String, dynamic>?> _runTest(String scriptPath) async {
             if (json is List<dynamic>) {
               return json.cast();
             }
-            return <Map<String, dynamic>>[
-              if (json != null)
-                json as Map<String, dynamic>
-            ];
+            return <Map<String, dynamic>>[if (json != null) json as Map<String, dynamic>];
           })
           .where((Map<String, dynamic> testEvent) => testEvent['type'] == 'print')
           .map((Map<String, dynamic> printEvent) => printEvent['message'] as String)

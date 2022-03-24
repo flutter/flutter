@@ -11,7 +11,7 @@ import '../../gallery/demo.dart';
 enum IndicatorType { overscroll, refresh }
 
 class OverscrollDemo extends StatefulWidget {
-  const OverscrollDemo({ Key? key }) : super(key: key);
+  const OverscrollDemo({Key? key}) : super(key: key);
 
   static const String routeName = '/material/overscroll';
 
@@ -22,15 +22,27 @@ class OverscrollDemo extends StatefulWidget {
 class OverscrollDemoState extends State<OverscrollDemo> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   static final List<String> _items = <String>[
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N',
   ];
 
   Future<void> _handleRefresh() {
     final Completer<void> completer = Completer<void>();
     Timer(const Duration(seconds: 3), () => completer.complete());
     return completer.future.then((_) {
-      if (!mounted)
-        return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text('Refresh complete'),
         action: SnackBarAction(

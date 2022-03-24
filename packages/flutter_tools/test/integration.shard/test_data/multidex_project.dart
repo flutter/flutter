@@ -12,7 +12,8 @@ class MultidexProject extends Project {
   MultidexProject(this.includeFlutterMultiDexApplication);
 
   @override
-  Future<void> setUpIn(Directory dir, {
+  Future<void> setUpIn(
+    Directory dir, {
     bool useDeferredLoading = false,
     bool useSyntheticPackage = false,
   }) {
@@ -36,16 +37,23 @@ class MultidexProject extends Project {
       writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), appManifest);
     }
     if (appStrings != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml'), appStrings);
+      writeFile(
+          fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml'), appStrings);
     }
     if (appStyles != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'styles.xml'), appStyles);
+      writeFile(
+          fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'styles.xml'), appStyles);
     }
     if (appLaunchBackground != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'), appLaunchBackground);
+      writeFile(
+          fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'),
+          appLaunchBackground);
     }
     if (includeFlutterMultiDexApplication && appMultidexApplication != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'java', fileSystem.path.join('io', 'flutter', 'app', 'FlutterMultiDexApplication.java')), appMultidexApplication);
+      writeFile(
+          fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'java',
+              fileSystem.path.join('io', 'flutter', 'app', 'FlutterMultiDexApplication.java')),
+          appMultidexApplication);
     }
     return super.setUpIn(dir);
   }

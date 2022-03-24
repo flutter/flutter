@@ -62,7 +62,8 @@ project_type: plugin
     expect(projectMetadata.versionChannel, isNull);
     expect(projectMetadata.versionRevision, isNull);
 
-    expect(logger.traceText, contains('The value of key `version` in .metadata was expected to be YamlMap but was String'));
+    expect(logger.traceText,
+        contains('The value of key `version` in .metadata was expected to be YamlMap but was String'));
   });
 
   testWithoutContext('version is populated when projectType is malformed', () {
@@ -79,7 +80,8 @@ project_type: {}
     expect(projectMetadata.versionChannel, 'stable');
     expect(projectMetadata.versionRevision, 'b59b226a49391949247e3d6122e34bb001049ae4');
 
-    expect(logger.traceText, contains('The value of key `project_type` in .metadata was expected to be String but was YamlMap'));
+    expect(logger.traceText,
+        contains('The value of key `project_type` in .metadata was expected to be String but was YamlMap'));
   });
 
   testWithoutContext('migrate config is populated when version is malformed', () {
@@ -104,8 +106,10 @@ migration:
     expect(projectMetadata.migrateConfig.platformConfigs[SupportedPlatform.root]?.baseRevision, 'baserevision');
     expect(projectMetadata.migrateConfig.unmanagedFiles[0], 'file1');
 
-    expect(logger.traceText, contains('The value of key `version` in .metadata was expected to be YamlMap but was String'));
-    expect(logger.traceText, contains('The value of key `project_type` in .metadata was expected to be String but was YamlMap'));
+    expect(logger.traceText,
+        contains('The value of key `version` in .metadata was expected to be YamlMap but was String'));
+    expect(logger.traceText,
+        contains('The value of key `project_type` in .metadata was expected to be String but was YamlMap'));
   });
 
   testWithoutContext('migrate config is populated when unmanaged_files is malformed', () {
@@ -132,7 +136,8 @@ migration:
     // Tool uses default unamanged files list when malformed.
     expect(projectMetadata.migrateConfig.unmanagedFiles[0], 'lib/main.dart');
 
-    expect(logger.traceText, contains('The value of key `unmanaged_files` in .metadata was expected to be YamlList but was YamlMap'));
+    expect(logger.traceText,
+        contains('The value of key `unmanaged_files` in .metadata was expected to be YamlList but was YamlMap'));
   });
 
   testWithoutContext('platforms is populated with a malformed entry', () {

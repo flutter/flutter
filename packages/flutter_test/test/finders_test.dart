@@ -11,8 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('image', () {
     testWidgets('finds Image widgets', (WidgetTester tester) async {
-      await tester
-          .pumpWidget(_boilerplate(Image(image: FileImage(File('test')))));
+      await tester.pumpWidget(_boilerplate(Image(image: FileImage(File('test')))));
       expect(find.image(FileImage(File('test'))), findsOneWidget);
     });
 
@@ -21,8 +20,7 @@ void main() {
         onPressed: null,
         child: Image(image: FileImage(File('test'))),
       )));
-      expect(find.widgetWithImage(ElevatedButton, FileImage(File('test'))),
-          findsOneWidget);
+      expect(find.widgetWithImage(ElevatedButton, FileImage(File('test'))), findsOneWidget);
     });
   });
 
@@ -49,8 +47,7 @@ void main() {
     });
 
     group('findRichText', () {
-      testWidgets('finds RichText widgets when enabled',
-          (WidgetTester tester) async {
+      testWidgets('finds RichText widgets when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(RichText(
           text: const TextSpan(
             text: 't',
@@ -63,15 +60,13 @@ void main() {
         expect(find.text('test', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('finds Text widgets once when enabled',
-          (WidgetTester tester) async {
+      testWidgets('finds Text widgets once when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(const Text('test2')));
 
         expect(find.text('test2', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('does not find RichText widgets when disabled',
-          (WidgetTester tester) async {
+      testWidgets('does not find RichText widgets when disabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(RichText(
           text: const TextSpan(
             text: 't',
@@ -84,9 +79,7 @@ void main() {
         expect(find.text('test'), findsNothing);
       });
 
-      testWidgets(
-          'does not find Text and RichText separated by semantics widgets twice',
-          (WidgetTester tester) async {
+      testWidgets('does not find Text and RichText separated by semantics widgets twice', (WidgetTester tester) async {
         // If rich: true found both Text and RichText, this would find two widgets.
         await tester.pumpWidget(_boilerplate(
           const Text('test', semanticsLabel: 'foo'),
@@ -95,8 +88,7 @@ void main() {
         expect(find.text('test'), findsOneWidget);
       });
 
-      testWidgets('finds Text.rich widgets when enabled',
-          (WidgetTester tester) async {
+      testWidgets('finds Text.rich widgets when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(const Text.rich(
           TextSpan(
             text: 't',
@@ -110,8 +102,7 @@ void main() {
         expect(find.text('test3', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('finds Text.rich widgets when disabled',
-          (WidgetTester tester) async {
+      testWidgets('finds Text.rich widgets when disabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(const Text.rich(
           TextSpan(
             text: 't',
@@ -168,8 +159,7 @@ void main() {
     });
 
     group('findRichText', () {
-      testWidgets('finds RichText widgets when enabled',
-          (WidgetTester tester) async {
+      testWidgets('finds RichText widgets when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(RichText(
           text: const TextSpan(
             text: 't',
@@ -182,15 +172,13 @@ void main() {
         expect(find.textContaining('te', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('finds Text widgets once when enabled',
-          (WidgetTester tester) async {
+      testWidgets('finds Text widgets once when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(const Text('test2')));
 
         expect(find.textContaining('tes', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('does not find RichText widgets when disabled',
-          (WidgetTester tester) async {
+      testWidgets('does not find RichText widgets when disabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(RichText(
           text: const TextSpan(
             text: 't',
@@ -203,9 +191,7 @@ void main() {
         expect(find.textContaining('te'), findsNothing);
       });
 
-      testWidgets(
-          'does not find Text and RichText separated by semantics widgets twice',
-          (WidgetTester tester) async {
+      testWidgets('does not find Text and RichText separated by semantics widgets twice', (WidgetTester tester) async {
         // If rich: true found both Text and RichText, this would find two widgets.
         await tester.pumpWidget(_boilerplate(
           const Text('test', semanticsLabel: 'foo'),
@@ -214,8 +200,7 @@ void main() {
         expect(find.textContaining('tes'), findsOneWidget);
       });
 
-      testWidgets('finds Text.rich widgets when enabled',
-          (WidgetTester tester) async {
+      testWidgets('finds Text.rich widgets when enabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(const Text.rich(
           TextSpan(
             text: 't',
@@ -229,8 +214,7 @@ void main() {
         expect(find.textContaining('t3', findRichText: true), findsOneWidget);
       });
 
-      testWidgets('finds Text.rich widgets when disabled',
-          (WidgetTester tester) async {
+      testWidgets('finds Text.rich widgets when disabled', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(const Text.rich(
           TextSpan(
             text: 't',
@@ -247,13 +231,11 @@ void main() {
   });
 
   group('semantics', () {
-    testWidgets('Throws StateError if semantics are not enabled',
-        (WidgetTester tester) async {
+    testWidgets('Throws StateError if semantics are not enabled', (WidgetTester tester) async {
       expect(() => find.bySemanticsLabel('Add'), throwsStateError);
     }, semanticsEnabled: false);
 
-    testWidgets('finds Semantically labeled widgets',
-        (WidgetTester tester) async {
+    testWidgets('finds Semantically labeled widgets', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         Semantics(
@@ -269,8 +251,7 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testWidgets('finds Semantically labeled widgets by RegExp',
-        (WidgetTester tester) async {
+    testWidgets('finds Semantically labeled widgets by RegExp', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         Semantics(
@@ -286,19 +267,16 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testWidgets('finds Semantically labeled widgets without explicit Semantics',
-        (WidgetTester tester) async {
+    testWidgets('finds Semantically labeled widgets without explicit Semantics', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
-      await tester
-          .pumpWidget(_boilerplate(const SimpleCustomSemanticsWidget('Foo')));
+      await tester.pumpWidget(_boilerplate(const SimpleCustomSemanticsWidget('Foo')));
       expect(find.bySemanticsLabel('Foo'), findsOneWidget);
       semanticsHandle.dispose();
     });
   });
 
   group('hitTestable', () {
-    testWidgets('excludes non-hit-testable widgets',
-        (WidgetTester tester) async {
+    testWidgets('excludes non-hit-testable widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
         _boilerplate(IndexedStack(
           sizing: StackFit.expand,
@@ -385,8 +363,7 @@ void main() {
     expect(find.bySubtype<SimpleGenericWidget<Object>>(), findsNWidgets(3));
 
     // Finds all widgets.
-    final int totalWidgetCount =
-        find.byWidgetPredicate((_) => true).evaluate().length;
+    final int totalWidgetCount = find.byWidgetPredicate((_) => true).evaluate().length;
     expect(find.bySubtype<Widget>(), findsNWidgets(totalWidgetCount));
   });
 }
@@ -404,8 +381,7 @@ class SimpleCustomSemanticsWidget extends LeafRenderObjectWidget {
   final String label;
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      SimpleCustomSemanticsRenderObject(label);
+  RenderObject createRenderObject(BuildContext context) => SimpleCustomSemanticsRenderObject(label);
 }
 
 class SimpleCustomSemanticsRenderObject extends RenderBox {

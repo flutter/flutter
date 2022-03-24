@@ -92,8 +92,7 @@ class FuchsiaTilesCtl {
   ///     fuchsia-pkg://fuchsia.com/flutter_gallery#meta/flutter_gallery.cmx
   /// Returns true on success and false on failure.
   Future<bool> add(FuchsiaDevice device, String url, List<String> args) async {
-    final RunResult result = await device.shell(
-        'tiles_ctl add $url ${args.join(" ")}');
+    final RunResult result = await device.shell('tiles_ctl add $url ${args.join(" ")}');
     return result.exitCode == 0;
   }
 

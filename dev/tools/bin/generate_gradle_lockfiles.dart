@@ -12,11 +12,9 @@ import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) {
-  print(
-    "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n"
-    'If you would rather enter the files manually, just run `dart dev/tools/bin/generate_gradle_lockfiles.dart`,\n'
-    "enter the absolute paths to the app's android directory, then press CTRL-D.\n"
-  );
+  print("Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n"
+      'If you would rather enter the files manually, just run `dart dev/tools/bin/generate_gradle_lockfiles.dart`,\n'
+      "enter the absolute paths to the app's android directory, then press CTRL-D.\n");
 
   const FileSystem fileSystem = LocalFileSystem();
   final List<String> androidDirectories = getFilesFromStdin();
@@ -24,8 +22,7 @@ void main(List<String> arguments) {
   for (final String androidDirectoryPath in androidDirectories) {
     final Directory androidDirectory = fileSystem.directory(path.normalize(androidDirectoryPath));
 
-    if (!androidDirectory.existsSync())
-      throw '$androidDirectory does not exist';
+    if (!androidDirectory.existsSync()) throw '$androidDirectory does not exist';
 
     final File rootBuildGradle = androidDirectory.childFile('build.gradle');
     if (!rootBuildGradle.existsSync()) {
@@ -59,10 +56,7 @@ void main(List<String> arguments) {
       continue;
     }
 
-    if (!androidDirectory.parent
-        .childDirectory('lib')
-        .childFile('main.dart')
-        .existsSync()) {
+    if (!androidDirectory.parent.childDirectory('lib').childFile('main.dart').existsSync()) {
       print('${rootBuildGradle.path} no main.dart under lib - skipping');
       continue;
     }
@@ -125,9 +119,7 @@ void exec(
   String? workingDirectory,
 }) {
   final ProcessResult result = Process.runSync(cmd, args, workingDirectory: workingDirectory);
-  if (result.exitCode != 0)
-    throw ProcessException(
-        cmd, args, '${result.stdout}${result.stderr}', result.exitCode);
+  if (result.exitCode != 0) throw ProcessException(cmd, args, '${result.stdout}${result.stderr}', result.exitCode);
 }
 
 const String rootGradleFileContent = r'''

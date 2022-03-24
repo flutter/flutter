@@ -22,8 +22,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class SelectedBorder extends RoundedRectangleBorder
-    implements MaterialStateOutlinedBorder {
+class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
   @override
   OutlinedBorder? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.selected)) {

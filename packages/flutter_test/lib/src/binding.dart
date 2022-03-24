@@ -138,15 +138,15 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
 /// Positions can be transformed between coordinate spaces with [localToGlobal]
 /// and [globalToLocal].
 abstract class TestWidgetsFlutterBinding extends BindingBase
-  with SchedulerBinding,
-       ServicesBinding,
-       GestureBinding,
-       SemanticsBinding,
-       RendererBinding,
-       PaintingBinding,
-       WidgetsBinding,
-       TestDefaultBinaryMessengerBinding {
-
+    with
+        SchedulerBinding,
+        ServicesBinding,
+        GestureBinding,
+        SemanticsBinding,
+        RendererBinding,
+        PaintingBinding,
+        WidgetsBinding,
+        TestDefaultBinaryMessengerBinding {
   /// Constructor for [TestWidgetsFlutterBinding].
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
@@ -168,6 +168,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _restorationManager ??= createRestorationManager();
     return _restorationManager!;
   }
+
   TestRestorationManager? _restorationManager;
 
   /// Called by the test framework at the beginning of a widget test to
@@ -179,8 +180,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _restorationManager = null;
     resetGestureBinding();
     testTextInput.reset();
-    if (registerTestTextInput)
-      _testTextInput.register();
+    if (registerTestTextInput) _testTextInput.register();
   }
 
   @override
@@ -252,11 +252,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// primarily being a cause flakes rather than helping debug tests.
   ///
   /// For this reason, this method has been deprecated.
-  @Deprecated(
-    'This method has no effect. '
-    'This feature was deprecated after v2.6.0-1.0.pre.'
-  )
-  void addTime(Duration duration) { }
+  @Deprecated('This method has no effect. '
+      'This feature was deprecated after v2.6.0-1.0.pre.')
+  void addTime(Duration duration) {}
 
   /// Delay for `duration` of time.
   ///
@@ -306,8 +304,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This is called automatically by [testWidgets].
   static TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
-    if (_instance != null)
-      return _instance!;
+    if (_instance != null) return _instance!;
     return binding.ensureInitialized(environment);
   }
 
@@ -364,7 +361,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
-  Future<void> pump([ Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]);
+  Future<void> pump([Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate]);
 
   /// Runs a `callback` that performs real asynchronous work.
   ///
@@ -391,11 +388,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [AutomatedTestWidgetsFlutterBinding.addTime] but now has no effect.
   Future<T?> runAsync<T>(
     Future<T> Function() callback, {
-    @Deprecated(
-      'This parameter has no effect. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration additionalTime = const Duration(milliseconds: 1000),
+    @Deprecated('This parameter has no effect. '
+        'This feature was deprecated after v2.6.0-1.0.pre.')
+        Duration additionalTime = const Duration(milliseconds: 1000),
   });
 
   /// Artificially calls dispatchLocalesChanged on the Widget binding,
@@ -435,8 +430,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
-      if (_surfaceSize == size)
-        return;
+      if (_surfaceSize == size) return;
       _surfaceSize = size;
       handleMetricsChanged();
     });
@@ -588,6 +582,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pendingExceptionDetails = null;
     return result;
   }
+
   FlutterExceptionHandler? _oldExceptionHandler;
   late StackTraceDemangler _oldStackTraceDemangler;
   FlutterErrorDetails? _pendingExceptionDetails;
@@ -635,11 +630,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration? timeout,
+    @Deprecated('This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+        'This feature was deprecated after v2.6.0-1.0.pre.')
+        Duration? timeout,
   });
 
   /// This is called during test execution before and after the body has been
@@ -663,8 +656,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         reportTestException(_pendingExceptionDetails!, testDescription);
         _pendingExceptionDetails = null;
       }
-      if (!completer.isCompleted)
-        completer.complete();
+      if (!completer.isCompleted) completer.complete();
     };
   }
 
@@ -701,7 +693,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         }
         FlutterError.dumpErrorToConsole(details, forceReport: true);
         _pendingExceptionDetails = FlutterErrorDetails(
-          exception: 'Multiple exceptions ($exceptionCount) were detected during the running of the current test, and at least one was unexpected.',
+          exception:
+              'Multiple exceptions ($exceptionCount) were detected during the running of the current test, and at least one was unexpected.',
           library: 'Flutter test framework',
         );
       } else {
@@ -714,10 +707,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // information to stack traces, in this case the Trace and Chain classes
       // can be present. Because these StackTrace implementations do not follow
       // the format the framework expects, we covert them to a vm trace here.
-      if (stack is stack_trace.Trace)
-        return stack.vmTrace;
-      if (stack is stack_trace.Chain)
-        return stack.toTrace().vmTrace;
+      if (stack is stack_trace.Trace) return stack.vmTrace;
+      if (stack is stack_trace.Chain) return stack.toTrace().vmTrace;
       return stack;
     };
     final Completer<void> testCompleter = Completer<void>();
@@ -731,12 +722,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // we report them to the console. They don't cause test failures, but hopefully someone
         // will see them in the logs at some point.
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
-        FlutterError.dumpErrorToConsole(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          context: ErrorDescription('running a test (but after the test had completed)'),
-          library: 'Flutter test framework',
-        ), forceReport: true);
+        FlutterError.dumpErrorToConsole(
+            FlutterErrorDetails(
+              exception: exception,
+              stack: stack,
+              context: ErrorDescription('running a test (but after the test had completed)'),
+              library: 'Flutter test framework',
+            ),
+            forceReport: true);
         return;
       }
       // This is where test failures, e.g. those in expect(), will end up.
@@ -776,7 +769,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // by side-effects of the underlying issues causing the tree dumping code to flail.
         treeDump.toStringDeep();
       } catch (exception) {
-        treeDump = DiagnosticsNode.message('<additional error caught while dumping tree: $exception>', level: DiagnosticLevel.error);
+        treeDump = DiagnosticsNode.message('<additional error caught while dumping tree: $exception>',
+            level: DiagnosticLevel.error);
       }
       final List<DiagnosticsNode> omittedFrames = <DiagnosticsNode>[];
       final int stackLinesToOmit = reportExpectCall(stack, omittedFrames);
@@ -789,28 +783,32 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
         },
         informationCollector: () sync* {
-          if (stackLinesToOmit > 0)
-            yield* omittedFrames;
+          if (stackLinesToOmit > 0) yield* omittedFrames;
           if (showAppDumpInErrors) {
-            yield DiagnosticsProperty<DiagnosticsNode>('At the time of the failure, the widget tree looked as follows', treeDump, linePrefix: '# ', style: DiagnosticsTreeStyle.flat);
+            yield DiagnosticsProperty<DiagnosticsNode>(
+                'At the time of the failure, the widget tree looked as follows', treeDump,
+                linePrefix: '# ', style: DiagnosticsTreeStyle.flat);
           }
           if (description.isNotEmpty)
-            yield DiagnosticsProperty<String>('The test description was', description, style: DiagnosticsTreeStyle.errorProperty);
+            yield DiagnosticsProperty<String>('The test description was', description,
+                style: DiagnosticsTreeStyle.errorProperty);
         },
       ));
       assert(_parentZone != null);
-      assert(_pendingExceptionDetails != null, 'A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.');
+      assert(_pendingExceptionDetails != null,
+          'A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.');
       _parentZone!.run<void>(testCompletionHandler);
     }
+
     final ZoneSpecification errorHandlingZoneSpecification = ZoneSpecification(
-      handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone, Object exception, StackTrace stack) {
-        handleUncaughtError(exception, stack);
-      }
-    );
+        handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone, Object exception, StackTrace stack) {
+      handleUncaughtError(exception, stack);
+    });
     _parentZone = Zone.current;
     final Zone testZone = _parentZone!.fork(specification: errorHandlingZoneSpecification);
-    testZone.runBinary<Future<void>, Future<void> Function(), VoidCallback>(_runTestBody, testBody, invariantTester)
-      .whenComplete(testCompletionHandler);
+    testZone
+        .runBinary<Future<void>, Future<void> Function(), VoidCallback>(_runTestBody, testBody, invariantTester)
+        .whenComplete(testCompletionHandler);
     return testCompleter.future;
   }
 
@@ -839,8 +837,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // alone so that we don't cause more spurious errors.
       runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
       await pump();
-      if (registerTestTextInput)
-        _testTextInput.unregister();
+      if (registerTestTextInput) _testTextInput.unregister();
       invariantTester();
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
@@ -855,9 +852,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   late bool _beforeTestCheckIntrinsicSizes;
 
   void _verifyInvariants() {
-    assert(debugAssertNoTransientCallbacks(
-      'An animation is still running even after the widget tree was disposed.'
-    ));
+    assert(debugAssertNoTransientCallbacks('An animation is still running even after the widget tree was disposed.'));
     assert(debugAssertAllFoundationVarsUnset(
       'The value of a foundation debug variable was changed by the test.',
       debugPrintOverride: debugPrintOverride,
@@ -889,7 +884,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       if (autoUpdateGoldenFiles != valueBeforeTest) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: FlutterError(
-              'The value of autoUpdateGoldenFiles was changed by the test.',
+            'The value of autoUpdateGoldenFiles was changed by the test.',
           ),
           stack: StackTrace.current,
           library: 'Flutter test framework',
@@ -924,7 +919,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       if (ErrorWidget.builder != valueBeforeTest) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: FlutterError(
-              'The value of ErrorWidget.builder was changed by the test.',
+            'The value of ErrorWidget.builder was changed by the test.',
           ),
           stack: StackTrace.current,
           library: 'Flutter test framework',
@@ -952,7 +947,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     HardwareKeyboard.instance.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     keyEventManager.clearState();
-    assert(!RendererBinding.instance.mouseTracker.mouseIsConnected,
+    assert(
+        !RendererBinding.instance.mouseTracker.mouseIsConnected,
         'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
         'test has not removed the mouse pointer which it added. Call removePointer on the '
         'active mouse gesture to remove the mouse pointer.');
@@ -999,8 +995,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// will select the correct test binding implementation
   /// automatically.
   static AutomatedTestWidgetsFlutterBinding ensureInitialized() {
-    if (AutomatedTestWidgetsFlutterBinding._instance == null)
-      AutomatedTestWidgetsFlutterBinding();
+    if (AutomatedTestWidgetsFlutterBinding._instance == null) AutomatedTestWidgetsFlutterBinding();
     return AutomatedTestWidgetsFlutterBinding.instance;
   }
 
@@ -1012,6 +1007,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(inTest);
     return _clock!;
   }
+
   Clock? _clock;
 
   @override
@@ -1033,12 +1029,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   int get microtaskCount => _currentFakeAsync!.microtaskCount;
 
   @override
-  Future<void> pump([ Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
+  Future<void> pump([Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate]) {
     return TestAsyncUtils.guard<void>(() {
       assert(inTest);
       assert(_clock != null);
-      if (duration != null)
-        _currentFakeAsync!.elapse(duration);
+      if (duration != null) _currentFakeAsync!.elapse(duration);
       _phase = newPhase;
       if (hasScheduledFrame) {
         addTime(const Duration(milliseconds: 500));
@@ -1061,14 +1056,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }) {
     assert(additionalTime != null);
     assert(() {
-      if (_pendingAsyncTasks == null)
-        return true;
-      fail(
-        'Reentrant call to runAsync() denied.\n'
-        'runAsync() was called, then before its future completed, it '
-        'was called again. You must wait for the first returned future '
-        'to complete before calling runAsync() again.'
-      );
+      if (_pendingAsyncTasks == null) return true;
+      fail('Reentrant call to runAsync() denied.\n'
+          'runAsync() was called, then before its future completed, it '
+          'was called again. You must wait for the first returned future '
+          'to complete before calling runAsync() again.');
     }());
 
     final Zone realAsyncZone = Zone.current.fork(
@@ -1079,7 +1071,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
           return Zone.root.createTimer(duration, f);
         },
-        createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void Function(Timer timer) f) {
+        createPeriodicTimer:
+            (Zone self, ZoneDelegate parent, Zone zone, Duration period, void Function(Timer timer) f) {
           return Zone.root.createPeriodicTimer(period, f);
         },
       ),
@@ -1193,8 +1186,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
               renderView.compositeFrame(); // this sends the bits to the GPU
               if (_phase != EnginePhase.composite) {
                 pipelineOwner.flushSemantics();
-                assert(_phase == EnginePhase.flushSemantics ||
-                       _phase == EnginePhase.sendSemanticsUpdate);
+                assert(_phase == EnginePhase.flushSemantics || _phase == EnginePhase.sendSemanticsUpdate);
               }
             }
           }
@@ -1218,11 +1210,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration? timeout,
+    @Deprecated('This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+        'This feature was deprecated after v2.6.0-1.0.pre.')
+        Duration? timeout,
   }) {
     assert(description != null);
     assert(!inTest);
@@ -1276,17 +1266,15 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(inTest);
 
     bool timersPending = false;
-    if (_currentFakeAsync!.periodicTimerCount != 0 ||
-        _currentFakeAsync!.nonPeriodicTimerCount != 0) {
-        debugPrint('Pending timers:');
-        for (final FakeTimer timer in _currentFakeAsync!.pendingTimers) {
-          debugPrint(
-            'Timer (duration: ${timer.duration}, '
+    if (_currentFakeAsync!.periodicTimerCount != 0 || _currentFakeAsync!.nonPeriodicTimerCount != 0) {
+      debugPrint('Pending timers:');
+      for (final FakeTimer timer in _currentFakeAsync!.pendingTimers) {
+        debugPrint('Timer (duration: ${timer.duration}, '
             'periodic: ${timer.isPeriodic}), created:');
-          debugPrintStack(stackTrace: timer.creationStackTrace);
-          debugPrint('');
-        }
-        timersPending = true;
+        debugPrintStack(stackTrace: timer.creationStackTrace);
+        debugPrint('');
+      }
+      timersPending = true;
     }
     assert(!timersPending, 'A Timer is still pending even after the widget tree was disposed.');
     assert(_currentFakeAsync!.microtaskCount == 0); // Shouldn't be possible.
@@ -1455,8 +1443,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// will select the correct test binding implementation
   /// automatically.
   static LiveTestWidgetsFlutterBinding ensureInitialized() {
-    if (LiveTestWidgetsFlutterBinding._instance == null)
-      LiveTestWidgetsFlutterBinding();
+    if (LiveTestWidgetsFlutterBinding._instance == null) LiveTestWidgetsFlutterBinding();
     return LiveTestWidgetsFlutterBinding.instance;
   }
 
@@ -1542,12 +1529,12 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void handleDrawFrame() {
     assert(_doDrawThisFrame != null);
-    if (_doDrawThisFrame!)
-      super.handleDrawFrame();
+    if (_doDrawThisFrame!) super.handleDrawFrame();
     _doDrawThisFrame = null;
     _viewNeedsPaint = false;
     _expectingFrameToReassemble = false;
-    if (_expectingFrame) { // set during pump
+    if (_expectingFrame) {
+      // set during pump
       assert(_pendingFrame != null);
       _pendingFrame!.complete(); // unlocks the test API
       _pendingFrame = null;
@@ -1599,8 +1586,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         final _LiveTestPointerRecord? record = _liveTestRenderView._pointers[event.pointer];
         if (record != null) {
           record.position = event.position;
-          if (!event.down)
-            record.decay = _kPointerDecay;
+          if (!event.down) record.decay = _kPointerDecay;
           _handleViewNeedsPaint();
         } else if (event.down) {
           _liveTestRenderView._pointers[event.pointer] = _LiveTestPointerRecord(
@@ -1617,9 +1603,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           // (see [handlePointerEventForSource]). Transform it to the local
           // coordinate space used by the testing widgets.
           final PointerEvent localEvent = event.copyWith(position: globalToLocal(event.position));
-          withPointerEventSource(TestBindingEventSource.device,
-            () => super.handlePointerEvent(localEvent)
-          );
+          withPointerEventSource(TestBindingEventSource.device, () => super.handlePointerEvent(localEvent));
         }
         break;
     }
@@ -1634,14 +1618,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       case TestBindingEventSource.device:
         assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
         assert(deviceEventDispatcher != null);
-        if (hitTestResult != null)
-          deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
+        if (hitTestResult != null) deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
         break;
     }
   }
 
   @override
-  Future<void> pump([ Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
+  Future<void> pump([Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate]) {
     assert(newPhase == EnginePhase.sendSemanticsUpdate);
     assert(inTest);
     assert(!_expectingFrame);
@@ -1671,14 +1654,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) async {
     assert(() {
-      if (!_runningAsyncTasks)
-        return true;
-      fail(
-        'Reentrant call to runAsync() denied.\n'
-        'runAsync() was called, then before its future completed, it '
-        'was called again. You must wait for the first returned future '
-        'to complete before calling runAsync() again.'
-      );
+      if (!_runningAsyncTasks) return true;
+      fail('Reentrant call to runAsync() denied.\n'
+          'runAsync() was called, then before its future completed, it '
+          'was called again. You must wait for the first returned future '
+          'to complete before calling runAsync() again.');
     }());
 
     _runningAsyncTasks = true;
@@ -1702,11 +1682,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration? timeout,
+    @Deprecated('This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+        'This feature was deprecated after v2.6.0-1.0.pre.')
+        Duration? timeout,
   }) {
     assert(description != null);
     assert(!inTest);
@@ -1721,12 +1699,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     debugPrint = debugPrintOverride;
     debugPrint('(The following exception is now available via WidgetTester.takeException:)');
     FlutterError.dumpErrorToConsole(exception, forceReport: true);
-    debugPrint(
-      '(If WidgetTester.takeException is called, the above exception will be ignored. '
-      'If it is not, then the above exception will be dumped when another exception is '
-      'caught by the framework or when the test ends, whichever happens first, and then '
-      'the test will fail due to having not caught or expected the exception.)'
-    );
+    debugPrint('(If WidgetTester.takeException is called, the above exception will be ignored. '
+        'If it is not, then the above exception will be dumped when another exception is '
+        'caught by the framework or when the test ends, whichever happens first, and then '
+        'the test will fail due to having not caught or expected the exception.)');
     debugPrint = testPrint;
   }
 
@@ -1777,9 +1753,9 @@ class TestViewConfiguration extends ViewConfiguration {
   }
 
   TestViewConfiguration._(Size size, ui.FlutterView window)
-    : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
-      _hitTestMatrix = _getMatrix(size, 1.0, window),
-      super(size: size);
+      : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
+        _hitTestMatrix = _getMatrix(size, 1.0, window),
+        super(size: size);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
@@ -1831,8 +1807,8 @@ class _LiveTestPointerRecord {
   _LiveTestPointerRecord(
     this.pointer,
     this.position,
-  ) : color = HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
-      decay = 1;
+  )   : color = HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
+        decay = 1;
   final int pointer;
   final Color color;
   Offset position;
@@ -1849,7 +1825,9 @@ class _LiveTestRenderView extends RenderView {
   @override
   TestViewConfiguration get configuration => super.configuration as TestViewConfiguration;
   @override
-  set configuration(covariant TestViewConfiguration value) { super.configuration = value; }
+  set configuration(covariant TestViewConfiguration value) {
+    super.configuration = value;
+  }
 
   final VoidCallback onNeedPaint;
 
@@ -1894,17 +1872,11 @@ class _LiveTestRenderView extends RenderView {
         final _LiveTestPointerRecord record = _pointers[pointer]!;
         paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
         canvas.drawPath(path.shift(record.position), paint);
-        if (record.decay < 0)
-          dirty = true;
+        if (record.decay < 0) dirty = true;
         record.decay += 1;
       }
-      _pointers
-        .keys
-        .where((int pointer) => _pointers[pointer]!.decay == 0)
-        .toList()
-        .forEach(_pointers.remove);
-      if (dirty && onNeedPaint != null)
-        scheduleMicrotask(onNeedPaint);
+      _pointers.keys.where((int pointer) => _pointers[pointer]!.decay == 0).toList().forEach(_pointers.remove);
+      if (dirty && onNeedPaint != null) scheduleMicrotask(onNeedPaint);
     }
     _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }

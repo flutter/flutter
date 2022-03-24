@@ -149,5 +149,4 @@ void main() {
 
     expect(find.byType(Scrollbar), isNot(paints..rect()));
   });
-
 }

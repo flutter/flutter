@@ -121,9 +121,10 @@ class _GalleryAppState extends State<GalleryApp> {
       optionsPage: GalleryOptionsPage(
         options: _options,
         onOptionsChanged: _handleOptionsChanged,
-        onSendFeedback: widget.onSendFeedback ?? () {
-          launch('https://github.com/flutter/flutter/issues/new/choose', forceSafariVC: false);
-        },
+        onSendFeedback: widget.onSendFeedback ??
+            () {
+              launch('https://github.com/flutter/flutter/issues/new/choose', forceSafariVC: false);
+            },
       ),
     );
 
@@ -142,8 +143,10 @@ class _GalleryAppState extends State<GalleryApp> {
         // PrimaryScrollController. The gallery needs to be migrated before
         // enabling this. https://github.com/flutter/gallery/issues/523
         scrollBehavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
-        theme: kLightGalleryTheme.copyWith(platform: _options!.platform, visualDensity: _options!.visualDensity!.visualDensity),
-        darkTheme: kDarkGalleryTheme.copyWith(platform: _options!.platform, visualDensity: _options!.visualDensity!.visualDensity),
+        theme: kLightGalleryTheme.copyWith(
+            platform: _options!.platform, visualDensity: _options!.visualDensity!.visualDensity),
+        darkTheme: kDarkGalleryTheme.copyWith(
+            platform: _options!.platform, visualDensity: _options!.visualDensity!.visualDensity),
         themeMode: _options!.themeMode,
         title: 'Flutter Gallery',
         color: Colors.grey,

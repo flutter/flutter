@@ -61,9 +61,8 @@ class TimelineSummary {
 
   /// The number of frames that missed the [kBuildBudget] and therefore are
   /// in the danger of missing frames.
-  int computeMissedFrameBuildBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractFrameDurations()
-    .where((Duration duration) => duration > kBuildBudget)
-    .length;
+  int computeMissedFrameBuildBudgetCount([Duration frameBuildBudget = kBuildBudget]) =>
+      _extractFrameDurations().where((Duration duration) => duration > kBuildBudget).length;
 
   /// Average amount of time spent per frame in the engine rasterizer.
   ///
@@ -88,9 +87,8 @@ class TimelineSummary {
 
   /// The number of frames that missed the [kBuildBudget] on the raster thread
   /// and therefore are in the danger of missing frames.
-  int computeMissedFrameRasterizerBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractGpuRasterizerDrawDurations()
-      .where((Duration duration) => duration > kBuildBudget)
-      .length;
+  int computeMissedFrameRasterizerBudgetCount([Duration frameBuildBudget = kBuildBudget]) =>
+      _extractGpuRasterizerDrawDurations().where((Duration duration) => duration > kBuildBudget).length;
 
   /// The total number of frames recorded in the timeline.
   int countFrames() => _extractFrameDurations().length;
@@ -221,7 +219,8 @@ class TimelineSummary {
     final Map<String, dynamic> profilingSummary = _profilingSummarizer().summarize();
     final RasterCacheSummarizer rasterCacheSummarizer = _rasterCacheSummarizer();
     final GCSummarizer gcSummarizer = _gcSummarizer();
-    final RefreshRateSummary refreshRateSummary = RefreshRateSummary(vsyncEvents: _extractNamedEvents(kUIThreadVsyncProcessEvent));
+    final RefreshRateSummary refreshRateSummary =
+        RefreshRateSummary(vsyncEvents: _extractNamedEvents(kUIThreadVsyncProcessEvent));
 
     final Map<String, dynamic> timelineSummary = <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
@@ -238,12 +237,9 @@ class TimelineSummary {
       'frame_rasterizer_count': countRasterizations(),
       'new_gen_gc_count': newGenerationGarbageCollections(),
       'old_gen_gc_count': oldGenerationGarbageCollections(),
-      'frame_build_times': _extractFrameDurations()
-          .map<int>((Duration duration) => duration.inMicroseconds)
-          .toList(),
-      'frame_rasterizer_times': _extractGpuRasterizerDrawDurations()
-          .map<int>((Duration duration) => duration.inMicroseconds)
-          .toList(),
+      'frame_build_times': _extractFrameDurations().map<int>((Duration duration) => duration.inMicroseconds).toList(),
+      'frame_rasterizer_times':
+          _extractGpuRasterizerDrawDurations().map<int>((Duration duration) => duration.inMicroseconds).toList(),
       'frame_begin_times': _extractBeginTimestamps(kBuildFrameEventName)
           .map<int>((Duration duration) => duration.inMicroseconds)
           .toList(),
@@ -251,8 +247,10 @@ class TimelineSummary {
           .map<int>((Duration duration) => duration.inMicroseconds)
           .toList(),
       'average_vsync_transitions_missed': sceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed(),
-      '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(90.0),
-      '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0),
+      '90th_percentile_vsync_transitions_missed':
+          sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(90.0),
+      '99th_percentile_vsync_transitions_missed':
+          sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0),
       'average_vsync_frame_lag': vsyncFrameLagSummarizer.computeAverageVsyncFrameLag(),
       '90th_percentile_vsync_frame_lag': vsyncFrameLagSummarizer.computePercentileVsyncFrameLag(90.0),
       '99th_percentile_vsync_frame_lag': vsyncFrameLagSummarizer.computePercentileVsyncFrameLag(99.0),
@@ -311,10 +309,8 @@ class TimelineSummary {
   }
 
   /// Writes [summaryJson] to a file.
-  @Deprecated(
-    'Use TimelineSummary.writeTimelineToFile. '
-    'This feature was deprecated after v2.1.0-13.0.pre.'
-  )
+  @Deprecated('Use TimelineSummary.writeTimelineToFile. '
+      'This feature was deprecated after v2.1.0-13.0.pre.')
   Future<void> writeSummaryToFile(
     String traceName, {
     String? destinationDirectory,
@@ -335,21 +331,15 @@ class TimelineSummary {
   }
 
   String _encodeJson(Map<String, dynamic> jsonObject, bool pretty) {
-    return pretty
-      ? _prettyEncoder.convert(jsonObject)
-      : json.encode(jsonObject);
+    return pretty ? _prettyEncoder.convert(jsonObject) : json.encode(jsonObject);
   }
 
   List<TimelineEvent> _extractNamedEvents(String name) {
-    return _timeline.events!
-      .where((TimelineEvent event) => event.name == name)
-      .toList();
+    return _timeline.events!.where((TimelineEvent event) => event.name == name).toList();
   }
 
   List<TimelineEvent> _extractEventsWithNames(Set<String> names) {
-    return _timeline.events!
-      .where((TimelineEvent event) => names.contains(event.name))
-      .toList();
+    return _timeline.events!.where((TimelineEvent event) => names.contains(event.name)).toList();
   }
 
   List<Duration> _extractDurations(
@@ -410,37 +400,37 @@ class TimelineSummary {
   }
 
   double _averageInMillis(Iterable<Duration> durations) {
-    if (durations.isEmpty)
-      throw ArgumentError('durations is empty!');
-    final double total = durations.fold<double>(0.0, (double t, Duration duration) => t + duration.inMicroseconds.toDouble() / 1000.0);
+    if (durations.isEmpty) throw ArgumentError('durations is empty!');
+    final double total =
+        durations.fold<double>(0.0, (double t, Duration duration) => t + duration.inMicroseconds.toDouble() / 1000.0);
     return total / durations.length;
   }
 
   double _percentileInMillis(Iterable<Duration> durations, double percentile) {
-    if (durations.isEmpty)
-      throw ArgumentError('durations is empty!');
+    if (durations.isEmpty) throw ArgumentError('durations is empty!');
     assert(percentile >= 0.0 && percentile <= 100.0);
-    final List<double> doubles = durations.map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0).toList();
+    final List<double> doubles =
+        durations.map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0).toList();
     return findPercentile(doubles, percentile);
   }
 
   double _maxInMillis(Iterable<Duration> durations) {
-    if (durations.isEmpty)
-      throw ArgumentError('durations is empty!');
-    return durations
-        .map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0)
-        .reduce(math.max);
+    if (durations.isEmpty) throw ArgumentError('durations is empty!');
+    return durations.map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0).reduce(math.max);
   }
 
-  SceneDisplayLagSummarizer _sceneDisplayLagSummarizer() => SceneDisplayLagSummarizer(_extractNamedEvents(kSceneDisplayLagEvent));
+  SceneDisplayLagSummarizer _sceneDisplayLagSummarizer() =>
+      SceneDisplayLagSummarizer(_extractNamedEvents(kSceneDisplayLagEvent));
 
   List<Duration> _extractGpuRasterizerDrawDurations() => _extractBeginEndEvents(kRasterizeFrameEventName);
 
-  ProfilingSummarizer _profilingSummarizer() => ProfilingSummarizer.fromEvents(_extractEventsWithNames(kProfilingEvents));
+  ProfilingSummarizer _profilingSummarizer() =>
+      ProfilingSummarizer.fromEvents(_extractEventsWithNames(kProfilingEvents));
 
   List<Duration> _extractFrameDurations() => _extractBeginEndEvents(kBuildFrameEventName);
 
-  VsyncFrameLagSummarizer _vsyncFrameLagSummarizer() => VsyncFrameLagSummarizer(_extractEventsWithNames(kVsyncTimelineEventNames));
+  VsyncFrameLagSummarizer _vsyncFrameLagSummarizer() =>
+      VsyncFrameLagSummarizer(_extractEventsWithNames(kVsyncTimelineEventNames));
 
   RasterCacheSummarizer _rasterCacheSummarizer() => RasterCacheSummarizer(_extractNamedEvents(kRasterCacheEvent));
 

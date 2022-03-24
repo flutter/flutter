@@ -90,14 +90,16 @@ class DrawerHeader extends StatelessWidget {
         decoration: decoration,
         duration: duration,
         curve: curve,
-        child: child == null ? null : DefaultTextStyle(
-          style: theme.textTheme.bodyText1!,
-          child: MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            child: child!,
-          ),
-        ),
+        child: child == null
+            ? null
+            : DefaultTextStyle(
+                style: theme.textTheme.bodyText1!,
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  child: child!,
+                ),
+              ),
       ),
     );
   }

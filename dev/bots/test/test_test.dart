@@ -74,7 +74,7 @@ void main() {
 
   group('flutter/plugins version', () {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-    final fs.File pluginsVersionFile = memoryFileSystem.file(path.join('bin','internal','flutter_plugins.version'));
+    final fs.File pluginsVersionFile = memoryFileSystem.file(path.join('bin', 'internal', 'flutter_plugins.version'));
     const String kSampleHash = '592b5b27431689336fa4c721a099eedf787aeb56';
     setUpAll(() {
       pluginsVersionFile.createSync(recursive: true);
@@ -82,13 +82,15 @@ void main() {
 
     test('commit hash', () async {
       pluginsVersionFile.writeAsStringSync(kSampleHash);
-      final String actualHash = await getFlutterPluginsVersion(fileSystem: memoryFileSystem, pluginsVersionFile: pluginsVersionFile.path);
+      final String actualHash =
+          await getFlutterPluginsVersion(fileSystem: memoryFileSystem, pluginsVersionFile: pluginsVersionFile.path);
       expect(actualHash, kSampleHash);
     });
 
     test('commit hash with newlines', () async {
       pluginsVersionFile.writeAsStringSync('\n$kSampleHash\n');
-      final String actualHash = await getFlutterPluginsVersion(fileSystem: memoryFileSystem, pluginsVersionFile: pluginsVersionFile.path);
+      final String actualHash =
+          await getFlutterPluginsVersion(fileSystem: memoryFileSystem, pluginsVersionFile: pluginsVersionFile.path);
       expect(actualHash, kSampleHash);
     });
   });
@@ -98,8 +100,7 @@ void main() {
 
     Future<ProcessResult> runScript(
         [Map<String, String>? environment, List<String> otherArgs = const <String>[]]) async {
-      final String dart = path.absolute(
-          path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
+      final String dart = path.absolute(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
       final ProcessResult scriptProcess = processManager.runSync(<String>[
         dart,
         'test.dart',

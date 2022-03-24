@@ -21,17 +21,18 @@ import 'scroll_aware_image_provider.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/painting.dart' show
-  AssetImage,
-  ExactAssetImage,
-  FileImage,
-  FilterQuality,
-  ImageConfiguration,
-  ImageInfo,
-  ImageStream,
-  ImageProvider,
-  MemoryImage,
-  NetworkImage;
+export 'package:flutter/painting.dart'
+    show
+        AssetImage,
+        ExactAssetImage,
+        FileImage,
+        FilterQuality,
+        ImageConfiguration,
+        ImageInfo,
+        ImageStream,
+        ImageProvider,
+        MemoryImage,
+        NetworkImage;
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
@@ -47,7 +48,7 @@ export 'package:flutter/painting.dart' show
 /// See also:
 ///
 ///  * [ImageProvider], which has an example showing how this might be used.
-ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? size }) {
+ImageConfiguration createLocalImageConfiguration(BuildContext context, {Size? size}) {
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
     devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
@@ -339,13 +340,13 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
-  }) : assert(image != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(filterQuality != null),
-       assert(matchTextDirection != null),
-       assert(isAntiAlias != null),
-       super(key: key);
+  })  : assert(image != null),
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(filterQuality != null),
+        assert(matchTextDirection != null),
+        assert(isAntiAlias != null),
+        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
@@ -402,14 +403,14 @@ class Image extends StatefulWidget {
     Map<String, String>? headers,
     int? cacheWidth,
     int? cacheHeight,
-  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       assert(cacheWidth == null || cacheWidth > 0),
-       assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null),
-       super(key: key);
+  })  : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(matchTextDirection != null),
+        assert(cacheWidth == null || cacheWidth > 0),
+        assert(cacheHeight == null || cacheHeight > 0),
+        assert(isAntiAlias != null),
+        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
   ///
@@ -464,23 +465,23 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
-  }) :
-       // FileImage is not supported on Flutter Web therefore neither this method.
-       assert(
-         !kIsWeb,
-         'Image.file is not supported on Flutter Web. '
-         'Consider using either Image.asset or Image.network instead.',
+  })  :
+        // FileImage is not supported on Flutter Web therefore neither this method.
+        assert(
+          !kIsWeb,
+          'Image.file is not supported on Flutter Web. '
+          'Consider using either Image.asset or Image.network instead.',
         ),
-       image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
-       loadingBuilder = null,
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(filterQuality != null),
-       assert(matchTextDirection != null),
-       assert(cacheWidth == null || cacheWidth > 0),
-       assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null),
-       super(key: key);
+        image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
+        loadingBuilder = null,
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(filterQuality != null),
+        assert(matchTextDirection != null),
+        assert(cacheWidth == null || cacheWidth > 0),
+        assert(cacheHeight == null || cacheHeight > 0),
+        assert(isAntiAlias != null),
+        super(key: key);
 
   // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
   //
@@ -634,21 +635,21 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
-  }) : image = ResizeImage.resizeIfNeeded(
-         cacheWidth,
-         cacheHeight,
-         scale != null
-           ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-           : AssetImage(name, bundle: bundle, package: package),
-       ),
-       loadingBuilder = null,
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       assert(cacheWidth == null || cacheWidth > 0),
-       assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null),
-       super(key: key);
+  })  : image = ResizeImage.resizeIfNeeded(
+          cacheWidth,
+          cacheHeight,
+          scale != null
+              ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
+              : AssetImage(name, bundle: bundle, package: package),
+        ),
+        loadingBuilder = null,
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(matchTextDirection != null),
+        assert(cacheWidth == null || cacheWidth > 0),
+        assert(cacheHeight == null || cacheHeight > 0),
+        assert(isAntiAlias != null),
+        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
@@ -703,15 +704,15 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
-  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
-       loadingBuilder = null,
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       assert(cacheWidth == null || cacheWidth > 0),
-       assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null),
-       super(key: key);
+  })  : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
+        loadingBuilder = null,
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(matchTextDirection != null),
+        assert(cacheWidth == null || cacheWidth > 0),
+        assert(cacheHeight == null || cacheHeight > 0),
+        assert(isAntiAlias != null),
+        super(key: key);
 
   /// The image to display.
   final ImageProvider image;
@@ -1081,14 +1082,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   @override
   void didUpdateWidget(Image oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_isListeningToStream &&
-        (widget.loadingBuilder == null) != (oldWidget.loadingBuilder == null)) {
+    if (_isListeningToStream && (widget.loadingBuilder == null) != (oldWidget.loadingBuilder == null)) {
       final ImageStreamListener oldListener = _getListener();
       _imageStream!.addListener(_getListener(recreateListener: true));
       _imageStream!.removeListener(oldListener);
     }
-    if (widget.image != oldWidget.image)
-      _resolveImage();
+    if (widget.image != oldWidget.image) _resolveImage();
   }
 
   @override
@@ -1106,8 +1105,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _updateInvertColors() {
-    _invertColors = MediaQuery.maybeOf(context)?.invertColors
-        ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
+    _invertColors =
+        MediaQuery.maybeOf(context)?.invertColors ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
   }
 
   void _resolveImage() {
@@ -1115,18 +1114,17 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       context: _scrollAwareContext,
       imageProvider: widget.image,
     );
-    final ImageStream newStream =
-      provider.resolve(createLocalImageConfiguration(
-        context,
-        size: widget.width != null && widget.height != null ? Size(widget.width!, widget.height!) : null,
-      ));
+    final ImageStream newStream = provider.resolve(createLocalImageConfiguration(
+      context,
+      size: widget.width != null && widget.height != null ? Size(widget.width!, widget.height!) : null,
+    ));
     assert(newStream != null);
     _updateSourceStream(newStream);
   }
 
   ImageStreamListener? _imageStreamListener;
   ImageStreamListener _getListener({bool recreateListener = false}) {
-    if(_imageStreamListener == null || recreateListener) {
+    if (_imageStreamListener == null || recreateListener) {
       _lastException = null;
       _lastStack = null;
       _imageStreamListener = ImageStreamListener(
@@ -1181,14 +1179,14 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   // registration from the old stream to the new stream (if a listener was
   // registered).
   void _updateSourceStream(ImageStream newStream) {
-    if (_imageStream?.key == newStream.key)
-      return;
+    if (_imageStream?.key == newStream.key) return;
 
-    if (_isListeningToStream)
-      _imageStream!.removeListener(_getListener());
+    if (_isListeningToStream) _imageStream!.removeListener(_getListener());
 
     if (!widget.gaplessPlayback)
-      setState(() { _replaceImage(info: null); });
+      setState(() {
+        _replaceImage(info: null);
+      });
 
     setState(() {
       _loadingProgress = null;
@@ -1197,13 +1195,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     });
 
     _imageStream = newStream;
-    if (_isListeningToStream)
-      _imageStream!.addListener(_getListener());
+    if (_isListeningToStream) _imageStream!.addListener(_getListener());
   }
 
   void _listenToStream() {
-    if (_isListeningToStream)
-      return;
+    if (_isListeningToStream) return;
 
     _imageStream!.addListener(_getListener());
     _completerHandle?.dispose();
@@ -1220,8 +1216,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   /// to true, which create [ImageStreamCompleterHandle] to keep the completer
   /// alive and is compatible with the [TickerMode] being off.
   void _stopListeningToStream({bool keepStreamAlive = false}) {
-    if (!_isListeningToStream)
-      return;
+    if (!_isListeningToStream) return;
 
     if (keepStreamAlive && _completerHandle == null && _imageStream?.completer != null) {
       _completerHandle = _imageStream!.completer!.keepAlive();
@@ -1262,10 +1257,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     if (_lastException != null) {
-      if (widget.errorBuilder != null)
-        return widget.errorBuilder!(context, _lastException!, _lastStack);
-      if (kDebugMode)
-        return _debugBuildErrorWidget(context, _lastException!);
+      if (widget.errorBuilder != null) return widget.errorBuilder!(context, _lastException!, _lastStack);
+      if (kDebugMode) return _debugBuildErrorWidget(context, _lastException!);
     }
 
     Widget result = RawImage(
@@ -1303,8 +1296,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     if (widget.frameBuilder != null)
       result = widget.frameBuilder!(context, result, _frameNumber, _wasSynchronouslyLoaded);
 
-    if (widget.loadingBuilder != null)
-      result = widget.loadingBuilder!(context, result, _loadingProgress);
+    if (widget.loadingBuilder != null) result = widget.loadingBuilder!(context, result, _loadingProgress);
 
     return result;
   }

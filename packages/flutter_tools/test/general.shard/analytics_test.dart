@@ -56,7 +56,7 @@ void main() {
       globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
       final FlutterCommand command = FakeFlutterCommand();
-      final CommandRunner<void>runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
       globals.flutterUsage.enabled = false;
       await runner.run(<String>['fake']);
@@ -77,10 +77,10 @@ void main() {
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(),
       Usage: () => Usage(
-        configDirOverride: tempDir.path,
-        logFile: tempDir.childFile('analytics.log').path,
-        runningOnBot: true,
-      ),
+            configDirOverride: tempDir.path,
+            logFile: tempDir.childFile('analytics.log').path,
+            runningOnBot: true,
+          ),
     });
 
     // Ensure we don't send for the 'flutter config' command.
@@ -101,10 +101,10 @@ void main() {
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(),
       Usage: () => Usage(
-        configDirOverride: tempDir.path,
-        logFile: tempDir.childFile('analytics.log').path,
-        runningOnBot: true,
-      ),
+            configDirOverride: tempDir.path,
+            logFile: tempDir.childFile('analytics.log').path,
+            runningOnBot: true,
+          ),
     });
 
     testUsingContext('Usage records one feature in experiment setting', () async {
@@ -119,8 +119,8 @@ void main() {
       FlutterVersion: () => FlutterVersion(),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
-        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-      }),
+            'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+          }),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -142,8 +142,8 @@ void main() {
       FlutterVersion: () => FlutterVersion(),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
-        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-      }),
+            'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+          }),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -171,11 +171,16 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
-      expect(testUsage.timings, contains(
-        const TestTimingEvent(
-            'flutter', 'doctor', Duration(milliseconds: 1000), label: 'success',
-        ),
-      ));
+      expect(
+          testUsage.timings,
+          contains(
+            const TestTimingEvent(
+              'flutter',
+              'doctor',
+              Duration(milliseconds: 1000),
+              label: 'success',
+            ),
+          ));
     }, overrides: <Type, Generator>{
       SystemClock: () => fakeClock,
       Doctor: () => doctor,
@@ -189,12 +194,16 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
-
-      expect(testUsage.timings, contains(
-        const TestTimingEvent(
-          'flutter', 'doctor', Duration(milliseconds: 1000), label: 'warning',
-        ),
-      ));
+      expect(
+          testUsage.timings,
+          contains(
+            const TestTimingEvent(
+              'flutter',
+              'doctor',
+              Duration(milliseconds: 1000),
+              label: 'warning',
+            ),
+          ));
     }, overrides: <Type, Generator>{
       SystemClock: () => fakeClock,
       Doctor: () => doctor,
@@ -241,10 +250,10 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => fakeClock,
       Platform: () => FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
-        },
-      ),
+            environment: <String, String>{
+              'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
+            },
+          ),
       Stdio: () => fakeStdio,
     });
 
@@ -271,10 +280,10 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => fakeClock,
       Platform: () => FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
-        },
-      ),
+            environment: <String, String>{
+              'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
+            },
+          ),
       Stdio: () => fakeStdio,
     });
   });
@@ -298,11 +307,11 @@ void main() {
       expect(count, 0);
     }, overrides: <Type, Generator>{
       Usage: () => Usage(
-        settingsName: 'flutter_bot_test',
-        versionOverride: 'dev/unknown',
-        configDirOverride: tempDir.path,
-        runningOnBot: false,
-      ),
+            settingsName: 'flutter_bot_test',
+            versionOverride: 'dev/unknown',
+            configDirOverride: tempDir.path,
+            runningOnBot: false,
+          ),
     });
 
     testUsingContext("don't send on bots even when opted in", () async {
@@ -314,11 +323,11 @@ void main() {
       expect(count, 0);
     }, overrides: <Type, Generator>{
       Usage: () => Usage(
-        settingsName: 'flutter_bot_test',
-        versionOverride: 'dev/unknown',
-        configDirOverride: tempDir.path,
-        runningOnBot: false,
-      ),
+            settingsName: 'flutter_bot_test',
+            versionOverride: 'dev/unknown',
+            configDirOverride: tempDir.path,
+            runningOnBot: false,
+          ),
     });
 
     testUsingContext('Uses AnalyticsMock when .flutter cannot be created', () async {

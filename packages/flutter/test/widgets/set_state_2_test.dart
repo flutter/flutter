@@ -42,15 +42,17 @@ void main() {
     await tester.tap(find.text('inner'));
     await tester.pump();
     log.add('---');
-    expect(log, equals(<String>[
-      'outer',
-      'stateful',
-      'middle 0',
-      'inner',
-      '---',
-      'stateful',
-      'middle 1',
-      '---',
-    ]));
+    expect(
+        log,
+        equals(<String>[
+          'outer',
+          'stateful',
+          'middle 0',
+          'inner',
+          '---',
+          'stateful',
+          'middle 1',
+          '---',
+        ]));
   });
 }

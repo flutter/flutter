@@ -29,7 +29,8 @@ Future<void> main(List<String> args) async {
     final int slash = forbiddenType.indexOf('/');
     final int doubleColons = forbiddenType.indexOf('::');
     if (slash == -1 || doubleColons < 2) {
-      print('Invalid forbidden type "$forbiddenType". The format must be <package_uri>::<type_name>, e.g. package:flutter/src/widgets/framework.dart::Widget');
+      print(
+          'Invalid forbidden type "$forbiddenType". The format must be <package_uri>::<type_name>, e.g. package:flutter/src/widgets/framework.dart::Widget');
       fail = true;
       continue;
     }
@@ -121,7 +122,8 @@ class Options {
     );
     argParser.addMultiOption(
       'forbidden-type',
-      help: 'Type name(s) to forbid from release compilation, e.g. "package:flutter/src/widgets/framework.dart::Widget".',
+      help:
+          'Type name(s) to forbid from release compilation, e.g. "package:flutter/src/widgets/framework.dart::Widget".',
       valueHelp: '<package_uri>::<type_name>',
     );
 

@@ -42,9 +42,7 @@ const String _kFlutterFirstRunMessage = '''
 /// The first run messenger determines whether the first run license terms
 /// need to be displayed.
 class FirstRunMessenger {
-  FirstRunMessenger({
-    required PersistentToolState persistentToolState
-  }) : _persistentToolState = persistentToolState;
+  FirstRunMessenger({required PersistentToolState persistentToolState}) : _persistentToolState = persistentToolState;
 
   final PersistentToolState _persistentToolState;
 
@@ -71,7 +69,7 @@ class FirstRunMessenger {
   }
 
   /// The hash of the current license representation.
-  String get _currentHash =>  hex.encode(md5.convert(utf8.encode(licenseTerms)).bytes);
+  String get _currentHash => hex.encode(md5.convert(utf8.encode(licenseTerms)).bytes);
 
   /// The current license terms.
   String get licenseTerms => _kFlutterFirstRunMessage;

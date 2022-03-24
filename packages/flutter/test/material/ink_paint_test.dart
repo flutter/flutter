@@ -22,7 +22,8 @@ void main() {
     const double width = 200.0;
     await tester.pumpWidget(
       Material(
-        child: Center( // used to constrain to child's size
+        child: Center(
+          // used to constrain to child's size
           child: Ink(
             height: height,
             width: width,
@@ -52,7 +53,7 @@ void main() {
                 borderRadius: borderRadius,
                 highlightColor: highlightColor,
                 splashColor: splashColor,
-                onTap: () { },
+                onTap: () {},
               ),
             ),
           ),
@@ -101,7 +102,7 @@ void main() {
                 borderRadius: borderRadius,
                 highlightColor: highlightColor,
                 splashColor: splashColor,
-                onTap: () { },
+                onTap: () {},
                 radius: 100.0,
                 splashFactory: InkRipple.splashFactory,
               ),
@@ -127,18 +128,17 @@ void main() {
         ..translate(x: 0.0, y: 0.0)
         ..translate(x: tapDownOffset.dx, y: tapDownOffset.dy)
         ..something((Symbol method, List<dynamic> arguments) {
-          if (method != #drawCircle)
-            return false;
+          if (method != #drawCircle) return false;
           final Offset center = arguments[0] as Offset;
           final double radius = arguments[1] as double;
           final Paint paint = arguments[2] as Paint;
-          if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == expectedAlpha)
-            return true;
+          if (offsetsAreClose(center, expectedCenter) &&
+              radiiAreClose(radius, expectedRadius) &&
+              paint.color.alpha == expectedAlpha) return true;
           throw '''
             Expected: center == $expectedCenter, radius == $expectedRadius, alpha == $expectedAlpha
             Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
-        }
-      );
+        });
     }
 
     // Initially the ripple's center is where the tap occurred;
@@ -180,7 +180,7 @@ void main() {
               height: 200.0,
               child: InkWell(
                 splashColor: Colors.green,
-                onTap: () { },
+                onTap: () {},
               ),
             ),
           ),
@@ -212,7 +212,7 @@ void main() {
               height: 200.0,
               child: InkWell(
                 splashColor: Colors.green,
-                onTap: () { },
+                onTap: () {},
               ),
             ),
           ),
@@ -234,9 +234,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: InkWell( // this is at a different depth in the tree so it's now a new InkWell
+            child: InkWell(
+              // this is at a different depth in the tree so it's now a new InkWell
               splashColor: Colors.green,
-              onTap: () { },
+              onTap: () {},
             ),
           ),
         ),
@@ -251,7 +252,8 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
+  testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple',
+      (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
@@ -275,7 +277,7 @@ void main() {
                     highlightColor: highlightColor,
                     splashColor: splashColor,
                     focusNode: focusNode,
-                    onTap: () { },
+                    onTap: () {},
                     radius: 100.0,
                     splashFactory: InkRipple.splashFactory,
                   ),
@@ -301,22 +303,23 @@ void main() {
       return paints
         ..translate(x: 0.0, y: 0.0)
         ..translate(x: topLeft.dx, y: topLeft.dy)
-        ..something((Symbol method, List<dynamic> arguments) {
-          if (method != #drawCircle) {
-            return false;
-          }
-          final Offset center = arguments[0] as Offset;
-          final double radius = arguments[1] as double;
-          final Paint paint = arguments[2] as Paint;
-          if (offsetsAreClose(center, inkWellCenter) &&
-              radiiAreClose(radius, expectedRadius) &&
-              paint.color.alpha == expectedAlpha) {
-            return true;
-          }
-          throw '''
+        ..something(
+          (Symbol method, List<dynamic> arguments) {
+            if (method != #drawCircle) {
+              return false;
+            }
+            final Offset center = arguments[0] as Offset;
+            final double radius = arguments[1] as double;
+            final Paint paint = arguments[2] as Paint;
+            if (offsetsAreClose(center, inkWellCenter) &&
+                radiiAreClose(radius, expectedRadius) &&
+                paint.color.alpha == expectedAlpha) {
+              return true;
+            }
+            throw '''
             Expected: center == $inkWellCenter, radius == $expectedRadius, alpha == $expectedAlpha
             Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
-        },
+          },
         );
     }
 
@@ -362,7 +365,7 @@ void main() {
               width: 100.0,
               height: 100.0,
               child: InkWell(
-                onTap: () { },
+                onTap: () {},
                 radius: 100.0,
                 splashFactory: InkRipple.splashFactory,
               ),
@@ -400,7 +403,7 @@ void main() {
               child: InkWell(
                 splashColor: splashColor,
                 highlightColor: highlightColor,
-                onTap: () { },
+                onTap: () {},
                 radius: 100.0,
                 splashFactory: InkRipple.splashFactory,
               ),
@@ -422,13 +425,14 @@ void main() {
     await gesture.up(); // generates a tap cancel
 
     final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
-    expect(box, paints..everything((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
-        return true;
-      final Paint paint = arguments[2] as Paint;
-      if (paint.color.alpha == 0)
-        return true;
-      throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';
-    }));
+    expect(
+        box,
+        paints
+          ..everything((Symbol method, List<dynamic> arguments) {
+            if (method != #drawCircle) return true;
+            final Paint paint = arguments[2] as Paint;
+            if (paint.color.alpha == 0) return true;
+            throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';
+          }));
   });
 }

@@ -32,8 +32,8 @@ class BuildWindowsCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.windows,
-  };
+        DevelopmentArtifact.windows,
+      };
 
   @override
   String get description => 'Build a Windows desktop application.';
@@ -46,7 +46,8 @@ class BuildWindowsCommand extends BuildSubCommand {
     final FlutterProject flutterProject = FlutterProject.current();
     final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isWindowsEnabled) {
-      throwToolExit('"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".');
+      throwToolExit(
+          '"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".');
     }
     if (!globals.platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');

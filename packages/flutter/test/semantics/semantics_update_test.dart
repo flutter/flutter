@@ -142,7 +142,8 @@ void main() {
     expect(SemanticsUpdateBuilderSpy.observations[1]!.value, 'value');
     expect(SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes!.length, 1);
     expect(SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes![0] is LocaleStringAttribute, isTrue);
-    final LocaleStringAttribute localeAttribute = SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes![0] as LocaleStringAttribute;
+    final LocaleStringAttribute localeAttribute =
+        SemanticsUpdateBuilderSpy.observations[1]!.valueAttributes![0] as LocaleStringAttribute;
     expect(localeAttribute.range, const TextRange(start: 0, end: 5));
     expect(localeAttribute.locale, const Locale('en', 'MX'));
 
@@ -154,11 +155,11 @@ void main() {
     expect(
       tester.widget(find.byType(Semantics)).toString(),
       'Semantics('
-        'container: false, '
-        'properties: SemanticsProperties, '
-        'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
-        'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
-        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))]' // ignore: missing_whitespace_between_adjacent_strings
+      'container: false, '
+      'properties: SemanticsProperties, '
+      'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
+      'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
+      'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))]' // ignore: missing_whitespace_between_adjacent_strings
       ')',
     );
 

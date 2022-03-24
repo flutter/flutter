@@ -81,8 +81,7 @@ void main() {
         'c',
         '-arch',
         'x86_64',
-        fileSystem.path.absolute(fileSystem.path.join(
-            '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
+        fileSystem.path.absolute(fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         '-dynamiclib',
         '-fembed-bitcode-marker',
         '-miphonesimulator-version-min=9.0',
@@ -132,8 +131,7 @@ void main() {
         // iphone only gets 64 bit arch based on kIosArchs
         '-arch',
         'arm64',
-        fileSystem.path.absolute(fileSystem.path.join(
-            '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
+        fileSystem.path.absolute(fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         ..._kSharedConfig,
         '-o',
         appFrameworkPath,
@@ -162,33 +160,25 @@ void main() {
     environment.defines[kCodesignIdentity] = 'ABC123';
     // Precompiled dart data
 
-    fileSystem.file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
-      .createSync();
-    fileSystem.file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
-      .createSync();
+    fileSystem.file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug)).createSync();
+    fileSystem.file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug)).createSync();
     // Project info
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
     fileSystem.file('.packages').writeAsStringSync('\n');
     // Plist file
-    fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-      .createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist')).createSync(recursive: true);
     // App kernel
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
     // Stub framework
-    environment.buildDir
-        .childDirectory('App.framework')
-      .childFile('App')
-      .createSync(recursive: true);
+    environment.buildDir.childDirectory('App.framework').childFile('App').createSync(recursive: true);
     // sksl bundle
-    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
-      <String, Object>{
-        'engineRevision': '2',
-        'platform': 'ios',
-        'data': <String, Object>{
-          'A': 'B',
-        }
-      }
-    ));
+    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(<String, Object>{
+          'engineRevision': '2',
+          'platform': 'ios',
+          'data': <String, Object>{
+            'A': 'B',
+          }
+        }));
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
@@ -226,15 +216,10 @@ void main() {
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
     fileSystem.file('.packages').writeAsStringSync('\n');
     // Plist file
-    fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-      .createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist')).createSync(recursive: true);
 
     // Real framework
-    environment.buildDir
-      .childDirectory('App.framework')
-      .childFile('App')
-      .createSync(recursive: true);
-
+    environment.buildDir.childDirectory('App.framework').childFile('App').createSync(recursive: true);
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
@@ -281,13 +266,13 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    expect(const AotAssemblyRelease().build(environment), throwsA(isException
-      .having(
-        (Exception exception) => exception.toString(),
-        'description',
-        contains('release/profile builds are only supported for physical devices.'),
-      )
-    ));
+    expect(
+        const AotAssemblyRelease().build(environment),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('release/profile builds are only supported for physical devices.'),
+        )));
     expect(processManager.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -310,11 +295,13 @@ void main() {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kIosArchs] = 'x86_64';
 
-    expect(const AotAssemblyRelease().build(environment), throwsA(isException.having(
-      (Exception exception) => exception.toString(),
-      'description',
-      contains('required define SdkRoot but it was not provided'),
-    )));
+    expect(
+        const AotAssemblyRelease().build(environment),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('required define SdkRoot but it was not provided'),
+        )));
     expect(processManager.hasRemainingExpectations, isFalse);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -393,14 +380,15 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'rsync',
-          '-av',
-          '--delete',
-          '--filter',
-          '- .DS_Store/',
-          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
-          outputDir.path,
+        FakeCommand(
+          command: <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            '--filter',
+            '- .DS_Store/',
+            'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+            outputDir.path,
           ],
           onRun: () => binary.createSync(recursive: true),
         ),
@@ -435,12 +423,12 @@ void main() {
       );
       processManager.addCommand(copyPhysicalFrameworkCommand);
       await expectLater(
-        const DebugUnpackIOS().build(environment),
-        throwsA(isException.having(
-          (Exception exception) => exception.toString(),
-          'description',
-          contains('Flutter.framework/Flutter does not exist, cannot thin'),
-        )));
+          const DebugUnpackIOS().build(environment),
+          throwsA(isException.having(
+            (Exception exception) => exception.toString(),
+            'description',
+            contains('Flutter.framework/Flutter does not exist, cannot thin'),
+          )));
     });
 
     testWithoutContext('fails when requested archs missing from framework', () async {
@@ -526,8 +514,7 @@ void main() {
           '-extract',
           'armv7',
           binary.path,
-        ], exitCode: 1,
-        stderr: 'lipo error'),
+        ], exitCode: 1, stderr: 'lipo error'),
       ]);
 
       await expectLater(
@@ -535,7 +522,8 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('Failed to extract arm64 armv7 for output/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
+          contains(
+              'Failed to extract arm64 armv7 for output/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
         )),
       );
     });

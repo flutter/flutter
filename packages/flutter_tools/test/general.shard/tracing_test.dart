@@ -19,10 +19,7 @@ import '../src/fake_vm_services.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kResume,
-    timestamp: 0
-  ),
+  pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
   breakpoints: <vm_service.Breakpoint>[],
   exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[
@@ -57,12 +54,9 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 );
 
 final List<FakeVmServiceRequest> vmServiceSetup = <FakeVmServiceRequest>[
-  const FakeVmServiceRequest(
-    method: 'streamListen',
-    args: <String, Object>{
-      'streamId': vm_service.EventKind.kExtension,
-    }
-  ),
+  const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+    'streamId': vm_service.EventKind.kExtension,
+  }),
   listViews,
   // Satisfies didAwaitFirstFrame
   const FakeVmServiceRequest(
@@ -70,9 +64,7 @@ final List<FakeVmServiceRequest> vmServiceSetup = <FakeVmServiceRequest>[
     args: <String, Object>{
       'isolateId': '1',
     },
-    jsonResponse: <String, Object>{
-      'enabled': 'true'
-    },
+    jsonResponse: <String, Object>{'enabled': 'true'},
   ),
 ];
 
@@ -116,10 +108,10 @@ void main() {
     ]);
 
     // Validate that old tracing data is deleted.
-    final File outFile = fileSystem.currentDirectory.childFile('start_up_info.json')
-      ..writeAsStringSync('stale');
+    final File outFile = fileSystem.currentDirectory.childFile('start_up_info.json')..writeAsStringSync('stale');
 
-    await downloadStartupTrace(fakeVmServiceHost.vmService,
+    await downloadStartupTrace(
+      fakeVmServiceHost.vmService,
       output: fileSystem.currentDirectory,
       logger: logger,
     );
@@ -151,10 +143,13 @@ void main() {
       ),
     ]);
 
-    await expectLater(() async => downloadStartupTrace(fakeVmServiceHost.vmService,
-      output: fileSystem.currentDirectory,
-      logger: logger,
-    ), throwsToolExit(message: 'The device disconnected before the timeline could be retrieved.'));
+    await expectLater(
+        () async => downloadStartupTrace(
+              fakeVmServiceHost.vmService,
+              output: fileSystem.currentDirectory,
+              logger: logger,
+            ),
+        throwsToolExit(message: 'The device disconnected before the timeline could be retrieved.'));
   });
 
   testWithoutContext('throws tool exit if timeline is missing the engine start event', () async {
@@ -178,10 +173,13 @@ void main() {
       ),
     ]);
 
-    await expectLater(() async => downloadStartupTrace(fakeVmServiceHost.vmService,
-      output: fileSystem.currentDirectory,
-      logger: logger,
-    ), throwsToolExit(message: 'Engine start event is missing in the timeline'));
+    await expectLater(
+        () async => downloadStartupTrace(
+              fakeVmServiceHost.vmService,
+              output: fileSystem.currentDirectory,
+              logger: logger,
+            ),
+        throwsToolExit(message: 'Engine start event is missing in the timeline'));
   });
 
   testWithoutContext('prints when first frame is taking a long time', () async {
@@ -194,20 +192,17 @@ void main() {
         'renderedErrorText': 'error text',
       };
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: 'streamListen',
-          args: <String, Object>{
-            'streamId': vm_service.EventKind.kExtension,
-          }
-        ),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': vm_service.EventKind.kExtension,
+        }),
         const FakeVmServiceRequest(
           method: kListViewsMethod,
           jsonResponse: <String, Object>{
             'views': <Object>[
               <String, Object?>{
-              'id': '1',
-              // No isolate, no views.
-              'isolate': null,
+                'id': '1',
+                // No isolate, no views.
+                'isolate': null,
               }
             ],
           },
@@ -222,7 +217,8 @@ void main() {
           ),
         ),
       ]);
-      unawaited(downloadStartupTrace(fakeVmServiceHost.vmService,
+      unawaited(downloadStartupTrace(
+        fakeVmServiceHost.vmService,
         output: fileSystem.currentDirectory,
         logger: logger,
       ));
@@ -267,10 +263,13 @@ void main() {
       ),
     ]);
 
-    await expectLater(() async => downloadStartupTrace(fakeVmServiceHost.vmService,
-      output: fileSystem.currentDirectory,
-      logger: logger,
-    ), throwsToolExit(message: 'First frame events are missing in the timeline'));
+    await expectLater(
+        () async => downloadStartupTrace(
+              fakeVmServiceHost.vmService,
+              output: fileSystem.currentDirectory,
+              logger: logger,
+            ),
+        throwsToolExit(message: 'First frame events are missing in the timeline'));
   });
 
   testWithoutContext('Can trace application startup without awaiting for first frame', () async {
@@ -304,7 +303,8 @@ void main() {
 
     final File outFile = fileSystem.currentDirectory.childFile('start_up_info.json');
 
-    await downloadStartupTrace(fakeVmServiceHost.vmService,
+    await downloadStartupTrace(
+      fakeVmServiceHost.vmService,
       output: fileSystem.currentDirectory,
       logger: logger,
       awaitFirstFrame: false,
@@ -359,7 +359,8 @@ void main() {
     final File timelineFile = fileSystem.currentDirectory.childFile('start_up_timeline.json')
       ..writeAsStringSync('stale');
 
-    await downloadStartupTrace(fakeVmServiceHost.vmService,
+    await downloadStartupTrace(
+      fakeVmServiceHost.vmService,
       output: fileSystem.currentDirectory,
       logger: logger,
     );

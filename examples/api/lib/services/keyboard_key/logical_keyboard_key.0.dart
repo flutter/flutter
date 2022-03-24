@@ -55,8 +55,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         _message = 'Pressed the "Q" key!';
       } else {
         if (kReleaseMode) {
-          _message =
-              'Not a Q: Pressed 0x${event.logicalKey.keyId.toRadixString(16)}';
+          _message = 'Not a Q: Pressed 0x${event.logicalKey.keyId.toRadixString(16)}';
         } else {
           // The debugName will only print useful information in debug mode.
           _message = 'Not a Q: Pressed ${event.logicalKey.debugName}';

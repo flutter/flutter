@@ -63,9 +63,9 @@ void main() {
     const ToggleButtonsThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -141,18 +141,22 @@ void main() {
     );
 
     TextStyle textStyle;
-    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(RawMaterialButton, 'First child'),
-        matching: find.byType(DefaultTextStyle),
-    )).style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(find.descendant(
+          of: find.widgetWithText(RawMaterialButton, 'First child'),
+          matching: find.byType(DefaultTextStyle),
+        ))
+        .style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
 
-    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(RawMaterialButton, 'Second child'),
-        matching: find.byType(DefaultTextStyle),
-    )).style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(find.descendant(
+          of: find.widgetWithText(RawMaterialButton, 'Second child'),
+          matching: find.byType(DefaultTextStyle),
+        ))
+        .style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
@@ -234,17 +238,21 @@ void main() {
     'Theme text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
-        return tester.widget<DefaultTextStyle>(find.descendant(
-          of: find.widgetWithText(RawMaterialButton, text),
-          matching: find.byType(DefaultTextStyle),
-        )).style;
+        return tester
+            .widget<DefaultTextStyle>(find.descendant(
+              of: find.widgetWithText(RawMaterialButton, text),
+              matching: find.byType(DefaultTextStyle),
+            ))
+            .style;
       }
+
       IconTheme iconTheme(IconData icon) {
         return tester.widget(find.descendant(
           of: find.widgetWithIcon(RawMaterialButton, icon),
           matching: find.byType(IconTheme),
         ));
       }
+
       final ThemeData theme = ThemeData();
       const Color enabledColor = Colors.lime;
       const Color selectedColor = Colors.green;
@@ -394,7 +402,7 @@ void main() {
             child: ToggleButtons(
               isSelected: const <bool>[true, false],
               onPressed: (int index) {},
-              children: const <Widget> [
+              children: const <Widget>[
                 Text('First child'),
                 Text('Second child'),
               ],
@@ -506,7 +514,6 @@ void main() {
 
     await hoverGesture.removePointer();
   });
-
 
   testWidgets(
     'Theme border width and border colors for enabled, selected and disabled states',

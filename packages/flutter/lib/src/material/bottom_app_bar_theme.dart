@@ -80,21 +80,16 @@ class BottomAppBarTheme with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    color,
-    elevation,
-    shape,
-  );
+        color,
+        elevation,
+        shape,
+      );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is BottomAppBarTheme
-        && other.color == color
-        && other.elevation == elevation
-        && other.shape == shape;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is BottomAppBarTheme && other.color == color && other.elevation == elevation && other.shape == shape;
   }
 
   @override

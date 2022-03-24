@@ -6,14 +6,13 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-const String _explanatoryText =
-  "When the Scaffold's floating action button changes, the new button fades and "
-  'turns into view. In this demo, changing tabs can cause the app to be rebuilt '
-  'with a FloatingActionButton that the Scaffold distinguishes from the others '
-  'by its key.';
+const String _explanatoryText = "When the Scaffold's floating action button changes, the new button fades and "
+    'turns into view. In this demo, changing tabs can cause the app to be rebuilt '
+    'with a FloatingActionButton that the Scaffold distinguishes from the others '
+    'by its key.';
 
 class _Page {
-  _Page({ this.label, this.colors, this.icon });
+  _Page({this.label, this.colors, this.icon});
 
   final String? label;
   final MaterialColor? colors;
@@ -73,9 +72,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   void _showExplanatoryText() {
     _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Theme.of(context).dividerColor))
-        ),
+        decoration: BoxDecoration(border: Border(top: BorderSide(color: Theme.of(context).dividerColor))),
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: Text(_explanatoryText, style: Theme.of(context).textTheme.subtitle1),
@@ -85,30 +82,28 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   }
 
   Widget buildTabView(_Page page) {
-    return Builder(
-      builder: (BuildContext context) {
-        return Container(
-          key: ValueKey<String?>(page.label),
-          padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
-          child: Card(
-            child: Center(
-              child: Text(page.label!,
-                style: TextStyle(
-                  color: page.labelColor,
-                  fontSize: 32.0,
-                ),
-                textAlign: TextAlign.center,
+    return Builder(builder: (BuildContext context) {
+      return Container(
+        key: ValueKey<String?>(page.label),
+        padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
+        child: Card(
+          child: Center(
+            child: Text(
+              page.label!,
+              style: TextStyle(
+                color: page.labelColor,
+                fontSize: 32.0,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
-        );
-      }
-    );
+        ),
+      );
+    });
   }
 
   Widget? buildFloatingActionButton(_Page page) {
-    if (!page.fabDefined)
-      return null;
+    if (!page.fabDefined) return null;
 
     if (_extendedButtons) {
       return FloatingActionButton.extended(

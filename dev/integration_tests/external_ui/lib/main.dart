@@ -101,7 +101,8 @@ Widget builds: $_widgetBuilds''';
     Ticker? ticker;
     ticker = createTicker((Duration time) {
       tickCount += 1;
-      if (tickCount == calibrationTickCount) { // about 10 seconds
+      if (tickCount == calibrationTickCount) {
+        // about 10 seconds
         final Duration elapsed = DateTime.now().difference(startTime);
         ticker?.stop();
         ticker?.dispose();
@@ -155,11 +156,13 @@ Press play to produce texture frames.''';
             ],
           ),
         ),
-        floatingActionButton: _icon == null ? null : FloatingActionButton(
-          key: const ValueKey<String>('fab'),
-          onPressed: _nextState,
-          child: Icon(_icon),
-        ),
+        floatingActionButton: _icon == null
+            ? null
+            : FloatingActionButton(
+                key: const ValueKey<String>('fab'),
+                onPressed: _nextState,
+                child: Icon(_icon),
+              ),
       ),
     );
   }

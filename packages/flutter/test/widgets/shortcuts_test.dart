@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
+typedef PostInvokeCallback = void Function(
+    {Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
 
 class TestAction extends CallbackAction<Intent> {
   TestAction({
@@ -45,8 +46,7 @@ class DumbLogicalActivator extends ShortcutActivator {
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
-    return event is RawKeyDownEvent
-        && event.logicalKey == key;
+    return event is RawKeyDownEvent && event.logicalKey == key;
   }
 
   /// Returns a short and readable description of the key combination.
@@ -103,14 +103,13 @@ Widget activatorTester(
       if (hasSecond)
         TestIntent2: TestAction(onInvoke: (Intent intent) {
           onInvoke2(intent);
-	  return null;
+          return null;
         }),
     },
     child: Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
         activator: const TestIntent(),
-        if (hasSecond)
-          activator2: const TestIntent2(),
+        if (hasSecond) activator2: const TestIntent2(),
       },
       child: const Focus(
         autofocus: true,
@@ -213,13 +212,13 @@ void main() {
       expect(map.containsKey(set1), isTrue);
       expect(map.containsKey(LogicalKeySet(LogicalKeyboardKey.keyA)), isTrue);
       expect(
-          set2,
-          equals(LogicalKeySet.fromSet(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.keyA,
-            LogicalKeyboardKey.keyB,
-            LogicalKeyboardKey.keyC,
-            LogicalKeyboardKey.keyD,
-          })),
+        set2,
+        equals(LogicalKeySet.fromSet(<LogicalKeyboardKey>{
+          LogicalKeyboardKey.keyA,
+          LogicalKeyboardKey.keyB,
+          LogicalKeyboardKey.keyC,
+          LogicalKeyboardKey.keyD,
+        })),
       );
     });
     testWidgets('handles two keys', (WidgetTester tester) async {
@@ -229,7 +228,9 @@ void main() {
           LogicalKeyboardKey.keyC,
           LogicalKeyboardKey.control,
         ),
-        (Intent intent) { invoked += 1; },
+        (Intent intent) {
+          invoked += 1;
+        },
       ));
       await tester.pump();
 
@@ -295,10 +296,12 @@ void main() {
       final LogicalKeySet set2 = LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB);
       expect(set2.hashCode, set2.hashCode);
 
-      final LogicalKeySet set3 = LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyC);
+      final LogicalKeySet set3 =
+          LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyC);
       expect(set3.hashCode, set3.hashCode);
 
-      final LogicalKeySet set4 = LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyD);
+      final LogicalKeySet set4 = LogicalKeySet(
+          LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyD);
       expect(set4.hashCode, set4.hashCode);
     });
 
@@ -316,8 +319,12 @@ void main() {
         LogicalKeySet(LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyA).hashCode,
       );
       expect(
-        LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyD).hashCode,
-        LogicalKeySet(LogicalKeyboardKey.keyD, LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyA).hashCode,
+        LogicalKeySet(
+                LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyD)
+            .hashCode,
+        LogicalKeySet(
+                LogicalKeyboardKey.keyD, LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyA)
+            .hashCode,
       );
     });
 
@@ -329,9 +336,12 @@ void main() {
         LogicalKeyboardKey.keyB,
       ).debugFillProperties(builder);
 
-      final List<String> description = builder.properties.where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      }).map((DiagnosticsNode node) => node.toString()).toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(1));
       expect(description[0], equals('keys: Key A + Key B'));
@@ -346,7 +356,9 @@ void main() {
           LogicalKeyboardKey.keyC,
           control: true,
         ),
-        (Intent intent) { invoked += 1; },
+        (Intent intent) {
+          invoked += 1;
+        },
       ));
       await tester.pump();
 
@@ -445,7 +457,9 @@ void main() {
           LogicalKeyboardKey.keyC,
           control: true,
         ),
-        (Intent intent) { invoked += 1; },
+        (Intent intent) {
+          invoked += 1;
+        },
       ));
       await tester.pump();
 
@@ -472,7 +486,9 @@ void main() {
           control: true,
           includeRepeats: false,
         ),
-        (Intent intent) { invoked += 1; },
+        (Intent intent) {
+          invoked += 1;
+        },
       ));
       await tester.pump();
 
@@ -499,7 +515,9 @@ void main() {
           shift: true,
           control: true,
         ),
-        (Intent intent) { invoked += 1; },
+        (Intent intent) {
+          invoked += 1;
+        },
       ));
       await tester.pump();
 
@@ -549,9 +567,12 @@ void main() {
           LogicalKeyboardKey.keyA,
         ).debugFillProperties(builder);
 
-        final List<String> description = builder.properties.where((DiagnosticsNode node) {
-          return !node.isFiltered(DiagnosticLevel.info);
-        }).map((DiagnosticsNode node) => node.toString()).toList();
+        final List<String> description = builder.properties
+            .where((DiagnosticsNode node) {
+              return !node.isFiltered(DiagnosticLevel.info);
+            })
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
 
         expect(description.length, equals(1));
         expect(description[0], equals('keys: Key A'));
@@ -565,9 +586,12 @@ void main() {
           includeRepeats: false,
         ).debugFillProperties(builder);
 
-        final List<String> description = builder.properties.where((DiagnosticsNode node) {
-          return !node.isFiltered(DiagnosticLevel.info);
-        }).map((DiagnosticsNode node) => node.toString()).toList();
+        final List<String> description = builder.properties
+            .where((DiagnosticsNode node) {
+              return !node.isFiltered(DiagnosticLevel.info);
+            })
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
 
         expect(description.length, equals(2));
         expect(description[0], equals('keys: Key A'));
@@ -585,9 +609,12 @@ void main() {
           meta: true,
         ).debugFillProperties(builder);
 
-        final List<String> description = builder.properties.where((DiagnosticsNode node) {
-          return !node.isFiltered(DiagnosticLevel.info);
-        }).map((DiagnosticsNode node) => node.toString()).toList();
+        final List<String> description = builder.properties
+            .where((DiagnosticsNode node) {
+              return !node.isFiltered(DiagnosticLevel.info);
+            })
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
 
         expect(description.length, equals(1));
         expect(description[0], equals('keys: Control + Alt + Meta + Shift + Key A'));
@@ -644,16 +671,18 @@ void main() {
           'No Shortcuts ancestor could be found starting from the context\n'
           'that was passed to Shortcuts.of().\n',
         );
-        expect(error.toStringDeep(), equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   Unable to find a Shortcuts widget in the context.\n'
-          '   Shortcuts.of() was called with a context that does not contain a\n'
-          '   Shortcuts widget.\n'
-          '   No Shortcuts ancestor could be found starting from the context\n'
-          '   that was passed to Shortcuts.of().\n'
-          '   The context used was:\n'
-          '     Container-[GlobalKey#00000]\n',
-        ));
+        expect(
+            error.toStringDeep(),
+            equalsIgnoringHashCodes(
+              'FlutterError\n'
+              '   Unable to find a Shortcuts widget in the context.\n'
+              '   Shortcuts.of() was called with a context that does not contain a\n'
+              '   Shortcuts widget.\n'
+              '   No Shortcuts ancestor could be found starting from the context\n'
+              '   that was passed to Shortcuts.of().\n'
+              '   The context used was:\n'
+              '     Container-[GlobalKey#00000]\n',
+            ));
       }
     });
     testWidgets('ShortcutManager handles shortcuts', (WidgetTester tester) async {
@@ -798,7 +827,8 @@ void main() {
       expect(invoked, isFalse);
       expect(pressedKeys, isEmpty);
     });
-    testWidgets("Shortcuts that aren't bound to an action don't absorb keys meant for text fields", (WidgetTester tester) async {
+    testWidgets("Shortcuts that aren't bound to an action don't absorb keys meant for text fields",
+        (WidgetTester tester) async {
       final GlobalKey textFieldKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
       final TestShortcutManager testManager = TestShortcutManager(pressedKeys);
@@ -895,7 +925,8 @@ void main() {
       expect(result, isFalse);
       expect(invoked, isFalse);
     });
-    testWidgets('Shortcuts can override intents that apply to text fields with DoNothingAndStopPropagationIntent', (WidgetTester tester) async {
+    testWidgets('Shortcuts can override intents that apply to text fields with DoNothingAndStopPropagationIntent',
+        (WidgetTester tester) async {
       final GlobalKey textFieldKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
       final TestShortcutManager testManager = TestShortcutManager(pressedKeys);
@@ -951,9 +982,12 @@ void main() {
         child: const SizedBox(),
       ).debugFillProperties(builder);
 
-      final List<String> description = builder.properties.where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      }).map((DiagnosticsNode node) => node.toString()).toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(1));
       expect(
@@ -977,9 +1011,12 @@ void main() {
         child: const SizedBox(),
       ).debugFillProperties(builder);
 
-      final List<String> description = builder.properties.where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      }).map((DiagnosticsNode node) => node.toString()).toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(1));
       expect(description[0], equals('shortcuts: <Debug Label>'));
@@ -998,9 +1035,12 @@ void main() {
         child: const SizedBox(),
       ).debugFillProperties(builder);
 
-      final List<String> description = builder.properties.where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      }).map((DiagnosticsNode node) => node.toString()).toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description.length, equals(2));
       expect(description[0], equalsIgnoringHashCodes('manager: ShortcutManager#00000(shortcuts: {})'));
@@ -1020,18 +1060,21 @@ void main() {
               ],
             ),
             LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
-            LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+            LogicalKeySet(LogicalKeyboardKey.pageUp):
+                const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
           },
           home: Material(
             child: Center(
               child: ListView(
                 primary: true,
-                children: <Widget> [
+                children: <Widget>[
                   StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
                       return Checkbox(
                         value: value,
-                        onChanged: (bool? newValue) => setState(() { value = newValue; }),
+                        onChanged: (bool? newValue) => setState(() {
+                          value = newValue;
+                        }),
                         focusColor: Colors.orange[500],
                       );
                     },
@@ -1046,6 +1089,7 @@ void main() {
           ),
         );
       }
+
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
       expect(
@@ -1092,9 +1136,13 @@ void main() {
       int invoked = 0;
       await tester.pumpWidget(activatorTester(
         const DumbLogicalActivator(LogicalKeyboardKey.keyC),
-        (Intent intent) { invoked += 1; },
+        (Intent intent) {
+          invoked += 1;
+        },
         const SingleActivator(LogicalKeyboardKey.keyC, control: true),
-        (Intent intent) { invoked += 10; },
+        (Intent intent) {
+          invoked += 10;
+        },
       ));
       await tester.pump();
 
@@ -1134,7 +1182,9 @@ void main() {
       int invoked = 0;
       await tester.pumpWidget(activatorTester(
         const CharacterActivator('?'),
-        (Intent intent) { invoked += 1; },
+        (Intent intent) {
+          invoked += 1;
+        },
       ));
       await tester.pump();
 
@@ -1152,7 +1202,9 @@ void main() {
       int invoked = 0;
       await tester.pumpWidget(activatorTester(
         const CharacterActivator('?'),
-        (Intent intent) { invoked += 1; },
+        (Intent intent) {
+          invoked += 1;
+        },
       ));
       await tester.pump();
 

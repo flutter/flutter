@@ -46,7 +46,8 @@ void main() {
 
     final FlutterCommandResult result = await command.runCommand();
     expect(result.exitStatus, ExitStatus.success);
-    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    final Directory outputDirectory =
+        fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), true);
     expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
     expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
@@ -144,7 +145,8 @@ void main() {
     final FlutterCommandResult result = await command.runCommand();
     expect(result.exitStatus, ExitStatus.success);
     expect(logger.statusText, contains('Because l10n.yaml exists, the options defined there will be used instead.'));
-    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    final Directory outputDirectory =
+        fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), true);
     expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
     expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);

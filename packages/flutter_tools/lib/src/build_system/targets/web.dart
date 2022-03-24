@@ -54,6 +54,7 @@ enum ServiceWorkerStrategy {
   /// Download the app shell eagerly and all other assets lazily.
   /// Prefer the offline cached version.
   offlineFirst,
+
   /// Do not generate a service worker,
   none,
 }
@@ -85,13 +86,13 @@ class WebEntrypointTarget extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
-  ];
+        Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
+      ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/main.dart'),
-  ];
+        Source.pattern('{BUILD_DIR}/main.dart'),
+      ];
 
   @override
   Future<void> build(Environment environment) async {
@@ -120,18 +121,13 @@ class WebEntrypointTarget extends Target {
     // By construction, this will only be null if the .packages file does not
     // have an entry for the user's application or if the main file is
     // outside of the lib/ directory.
-    final String mainImport = packageConfig.toPackageUri(importUri)?.toString()
-      ?? importUri.toString();
+    final String mainImport = packageConfig.toPackageUri(importUri)?.toString() ?? importUri.toString();
 
     String contents;
     if (hasPlugins) {
-      final Uri generatedUri = environment.projectDir
-        .childDirectory('lib')
-        .childFile('generated_plugin_registrant.dart')
-        .absolute
-        .uri;
-      final String generatedImport = packageConfig.toPackageUri(generatedUri)?.toString()
-        ?? generatedUri.toString();
+      final Uri generatedUri =
+          environment.projectDir.childDirectory('lib').childFile('generated_plugin_registrant.dart').absolute.uri;
+      final String generatedImport = packageConfig.toPackageUri(generatedUri)?.toString() ?? generatedUri.toString();
       contents = '''
 // @dart=${languageVersion.major}.${languageVersion.minor}
 
@@ -162,8 +158,7 @@ Future<void> main() async {
 }
 ''';
     }
-    environment.buildDir.childFile('main.dart')
-      .writeAsStringSync(contents);
+    environment.buildDir.childFile('main.dart').writeAsStringSync(contents);
   }
 }
 
@@ -176,34 +171,32 @@ class Dart2JSTarget extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    WebEntrypointTarget(),
-    GenerateLocalizationsTarget(),
-  ];
+        WebEntrypointTarget(),
+        GenerateLocalizationsTarget(),
+      ];
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.hostArtifact(HostArtifact.flutterWebSdk),
-    Source.hostArtifact(HostArtifact.dart2jsSnapshot),
-    Source.hostArtifact(HostArtifact.engineDartBinary),
-    Source.pattern('{BUILD_DIR}/main.dart'),
-    Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
-  ];
+        Source.hostArtifact(HostArtifact.flutterWebSdk),
+        Source.hostArtifact(HostArtifact.dart2jsSnapshot),
+        Source.hostArtifact(HostArtifact.engineDartBinary),
+        Source.pattern('{BUILD_DIR}/main.dart'),
+        Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+      ];
 
   @override
   List<Source> get outputs => const <Source>[];
 
   @override
   List<String> get depfiles => const <String>[
-    'dart2js.d',
-  ];
+        'dart2js.d',
+      ];
 
   String _collectOutput(ProcessResult result) {
-    final String stdout = result.stdout is List<int>
-        ? utf8.decode(result.stdout as List<int>)
-        : result.stdout as String;
-    final String stderr = result.stderr is List<int>
-        ? utf8.decode(result.stderr as List<int>)
-        : result.stderr as String;
+    final String stdout =
+        result.stdout is List<int> ? utf8.decode(result.stdout as List<int>) : result.stdout as String;
+    final String stderr =
+        result.stderr is List<int> ? utf8.decode(result.stderr as List<int>) : result.stderr as String;
     return stdout + stderr;
   }
 
@@ -217,23 +210,18 @@ class Dart2JSTarget extends Target {
     final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
     final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
     final Artifacts artifacts = globals.artifacts!;
-    final String librariesSpec = (artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory).childFile('libraries.json').path;
+    final String librariesSpec =
+        (artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory).childFile('libraries.json').path;
     final List<String> sharedCommandOptions = <String>[
       artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
       '--disable-dart-dev',
       artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
       '--libraries-spec=$librariesSpec',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
-      if (nativeNullAssertions)
-        '--native-null-assertions',
-      if (buildMode == BuildMode.profile)
-        '-Ddart.vm.profile=true'
-      else
-        '-Ddart.vm.product=true',
-      for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
-        '-D$dartDefine',
-      if (!sourceMapsEnabled)
-        '--no-source-maps',
+      if (nativeNullAssertions) '--native-null-assertions',
+      if (buildMode == BuildMode.profile) '-Ddart.vm.profile=true' else '-Ddart.vm.product=true',
+      for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines)) '-D$dartDefine',
+      if (!sourceMapsEnabled) '--no-source-maps',
     ];
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
@@ -266,11 +254,10 @@ class Dart2JSTarget extends Target {
     if (javaScriptResult.exitCode != 0) {
       throw Exception(_collectOutput(javaScriptResult));
     }
-    final File dart2jsDeps = environment.buildDir
-      .childFile('app.dill.deps');
+    final File dart2jsDeps = environment.buildDir.childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
       globals.printWarning('Warning: dart2js did not produced expected deps list at '
-        '${dart2jsDeps.path}');
+          '${dart2jsDeps.path}');
       return;
     }
     final DepfileService depfileService = DepfileService(
@@ -297,26 +284,26 @@ class WebReleaseBundle extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    Dart2JSTarget(),
-  ];
+        Dart2JSTarget(),
+      ];
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/main.dart.js'),
-    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-  ];
+        Source.pattern('{BUILD_DIR}/main.dart.js'),
+        Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+      ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/main.dart.js'),
-  ];
+        Source.pattern('{OUTPUT_DIR}/main.dart.js'),
+      ];
 
   @override
   List<String> get depfiles => const <String>[
-    'dart2js.d',
-    'flutter_assets.d',
-    'web_resources.d',
-  ];
+        'dart2js.d',
+        'flutter_assets.d',
+        'web_resources.d',
+      ];
 
   @override
   Future<void> build(Environment environment) async {
@@ -329,15 +316,11 @@ class WebReleaseBundle extends Target {
       if (basename.endsWith('.deps')) {
         continue;
       }
-      outputFile.copySync(
-        environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
-      );
+      outputFile.copySync(environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path);
     }
 
     final String versionInfo = FlutterProject.current().getVersionInfo();
-    environment.outputDir
-        .childFile('version.json')
-        .writeAsStringSync(versionInfo);
+    environment.outputDir.childFile('version.json').writeAsStringSync(versionInfo);
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(
@@ -354,19 +337,14 @@ class WebReleaseBundle extends Target {
       environment.buildDir.childFile('flutter_assets.d'),
     );
 
-    final Directory webResources = environment.projectDir
-      .childDirectory('web');
-    final List<File> inputResourceFiles = webResources
-      .listSync(recursive: true)
-      .whereType<File>()
-      .toList();
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    final List<File> inputResourceFiles = webResources.listSync(recursive: true).whereType<File>().toList();
 
     // Copy other resource files out of web/ directory.
     final List<File> outputResourcesFiles = <File>[];
     for (final File inputFile in inputResourceFiles) {
-      final File outputFile = globals.fs.file(globals.fs.path.join(
-        environment.outputDir.path,
-        globals.fs.path.relative(inputFile.path, from: webResources.path)));
+      final File outputFile = globals.fs.file(globals.fs.path
+          .join(environment.outputDir.path, globals.fs.path.relative(inputFile.path, from: webResources.path)));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
@@ -376,17 +354,18 @@ class WebReleaseBundle extends Target {
       // in question.
       if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
         final String randomHash = Random().nextInt(4294967296).toString();
-        String resultString = inputFile.readAsStringSync()
-          .replaceFirst(
-            'var serviceWorkerVersion = null',
-            "var serviceWorkerVersion = '$randomHash'",
-          )
-          // This is for legacy index.html that still use the old service
-          // worker loading mechanism.
-          .replaceFirst(
-            "navigator.serviceWorker.register('flutter_service_worker.js')",
-            "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
-          );
+        String resultString = inputFile
+            .readAsStringSync()
+            .replaceFirst(
+              'var serviceWorkerVersion = null',
+              "var serviceWorkerVersion = '$randomHash'",
+            )
+            // This is for legacy index.html that still use the old service
+            // worker loading mechanism.
+            .replaceFirst(
+              "navigator.serviceWorker.register('flutter_service_worker.js')",
+              "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
+            );
         final String? baseHref = environment.defines[kBaseHref];
         if (resultString.contains(kBaseHrefPlaceholder) && baseHref == null) {
           resultString = resultString.replaceAll(kBaseHrefPlaceholder, '/');
@@ -464,15 +443,15 @@ class WebServiceWorker extends Target {
 
   @override
   List<Target> get dependencies => <Target>[
-    const Dart2JSTarget(),
-    const WebReleaseBundle(),
-    WebBuiltInAssets(fileSystem, cache),
-  ];
+        const Dart2JSTarget(),
+        const WebReleaseBundle(),
+        WebBuiltInAssets(fileSystem, cache),
+      ];
 
   @override
   List<String> get depfiles => const <String>[
-    'service_worker.d',
-  ];
+        'service_worker.d',
+      ];
 
   @override
   List<Source> get inputs => const <Source>[];
@@ -483,24 +462,23 @@ class WebServiceWorker extends Target {
   @override
   Future<void> build(Environment environment) async {
     final List<File> contents = environment.outputDir
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((File file) => !file.path.endsWith('flutter_service_worker.js')
-        && !globals.fs.path.basename(file.path).startsWith('.'))
-      .toList();
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((File file) =>
+            !file.path.endsWith('flutter_service_worker.js') && !globals.fs.path.basename(file.path).startsWith('.'))
+        .toList();
 
     final Map<String, String> urlToHash = <String, String>{};
     for (final File file in contents) {
       // Do not force caching of source maps.
-      if (file.path.endsWith('main.dart.js.map') ||
-        file.path.endsWith('.part.js.map')) {
+      if (file.path.endsWith('main.dart.js.map') || file.path.endsWith('.part.js.map')) {
         continue;
       }
-      final String url = globals.fs.path.toUri(
-        globals.fs.path.relative(
-          file.path,
-          from: environment.outputDir.path),
-        ).toString();
+      final String url = globals.fs.path
+          .toUri(
+            globals.fs.path.relative(file.path, from: environment.outputDir.path),
+          )
+          .toString();
       final String hash = md5.convert(await file.readAsBytes()).toString();
       urlToHash[url] = hash;
       // Add an additional entry for the base URL.
@@ -509,8 +487,7 @@ class WebServiceWorker extends Target {
       }
     }
 
-    final File serviceWorkerFile = environment.outputDir
-      .childFile('flutter_service_worker.js');
+    final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
     final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyFromString(
       environment.defines[kServiceWorkerStrategy],
@@ -521,15 +498,12 @@ class WebServiceWorker extends Target {
         'main.dart.js',
         'index.html',
         'assets/NOTICES',
-        if (urlToHash.containsKey('assets/AssetManifest.json'))
-          'assets/AssetManifest.json',
-        if (urlToHash.containsKey('assets/FontManifest.json'))
-          'assets/FontManifest.json',
+        if (urlToHash.containsKey('assets/AssetManifest.json')) 'assets/AssetManifest.json',
+        if (urlToHash.containsKey('assets/FontManifest.json')) 'assets/FontManifest.json',
       ],
       serviceWorkerStrategy: serviceWorkerStrategy,
     );
-    serviceWorkerFile
-      .writeAsStringSync(serviceWorker);
+    serviceWorkerFile.writeAsStringSync(serviceWorker);
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,

@@ -23,8 +23,9 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  testUsingContext('Exits with code 2 when HttpException is thrown '
-    'during VM service connection', () async {
+  testUsingContext(
+      'Exits with code 2 when HttpException is thrown '
+      'during VM service connection', () async {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     final FakeDevice device = FakeDevice()
       ..supportsHotReload = true
@@ -39,7 +40,8 @@ void main() {
       ),
     ];
 
-    final int exitCode = await ColdRunner(devices,
+    final int exitCode = await ColdRunner(
+      devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
     ).attach();
@@ -55,7 +57,8 @@ void main() {
 
       final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
 
-      await ColdRunner(devices,
+      await ColdRunner(
+        devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
       ).cleanupAtFinish();
@@ -77,8 +80,7 @@ void main() {
 
     testUsingContext('calls runCold on attached device', () async {
       final FakeDevice device = FakeDevice();
-      final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device)
-        ..runColdCode = 1;
+      final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device)..runColdCode = 1;
       final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
       final int result = await ColdRunner(
@@ -164,7 +166,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   }
 
   @override
-  Future<void> initLogReader() async { }
+  Future<void> initLogReader() async {}
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -226,14 +228,15 @@ class TestFlutterDevice extends FlutterDevice {
   }
 }
 
-class FakeResidentCompiler extends Fake implements ResidentCompiler { }
+class FakeResidentCompiler extends Fake implements ResidentCompiler {}
 
 class FakeFlutterVmService extends Fake implements FlutterVmService {
   @override
   VmService get service => FakeVmService();
 
   @override
-  Future<List<FlutterView>> getFlutterViews({bool returnEarly = false, Duration delay = const Duration(milliseconds: 50)}) async {
+  Future<List<FlutterView>> getFlutterViews(
+      {bool returnEarly = false, Duration delay = const Duration(milliseconds: 50)}) async {
     return <FlutterView>[];
   }
 

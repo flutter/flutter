@@ -21,18 +21,19 @@ import 'build.dart';
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({ required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
+  BuildIOSCommand({required bool verboseHelp}) : super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag('config-only',
-        help: 'Update the project configuration without performing a build. '
-          'This can be used in CI/CD process that create an archive to avoid '
-          'performing duplicate work.'
-      )
-      ..addFlag('simulator',
+          help: 'Update the project configuration without performing a build. '
+              'This can be used in CI/CD process that create an archive to avoid '
+              'performing duplicate work.')
+      ..addFlag(
+        'simulator',
         help: 'Build for the iOS simulator instead of the device. This changes '
-          'the default build mode to debug if otherwise unspecified.',
+            'the default build mode to debug if otherwise unspecified.',
       )
-      ..addFlag('codesign',
+      ..addFlag(
+        'codesign',
         defaultsTo: true,
         help: 'Codesign the application bundle (only available on device builds).',
       );
@@ -65,8 +66,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 ///
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({required bool verboseHelp})
-      : super(verboseHelp: verboseHelp) {
+  BuildIOSArchiveCommand({required bool verboseHelp}) : super(verboseHelp: verboseHelp) {
     argParser.addOption(
       'export-method',
       defaultsTo: 'app-store',
@@ -75,7 +75,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       allowedHelp: <String, String>{
         'app-store': 'Upload to the App Store.',
         'ad-hoc': 'Test on designated devices that do not need to be registered with the Apple developer account. '
-                  'Requires a distribution certificate.',
+            'Requires a distribution certificate.',
         'development': 'Test only on development devices registered with the Apple developer account.',
         'enterprise': 'Distribute an app registered with the Apple Developer Enterprise Program.',
       },
@@ -83,8 +83,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     argParser.addOption(
       'export-options-plist',
       valueHelp: 'ExportOptions.plist',
-      help:
-          'Export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
+      help: 'Export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
     );
   }
 
@@ -112,10 +111,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   String? get exportOptionsPlist => stringArg('export-options-plist');
 
   @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
-      .directory(xcodeResultOutput)
-      .childDirectory('Products')
-      .childDirectory('Applications');
+  Directory _outputAppDirectory(String xcodeResultOutput) =>
+      globals.fs.directory(xcodeResultOutput).childDirectory('Products').childDirectory('Applications');
 
   @override
   Future<void> validateCommand() async {
@@ -123,18 +120,15 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     if (exportOptions != null) {
       if (argResults?.wasParsed('export-method') ?? false) {
         throwToolExit(
-          '"--export-options-plist" is not compatible with "--export-method". Either use "--export-options-plist" and '
-          'a plist describing how the IPA should be exported by Xcode, or use "--export-method" to create a new plist.\n'
-          'See "xcodebuild -h" for available exportOptionsPlist keys.'
-        );
+            '"--export-options-plist" is not compatible with "--export-method". Either use "--export-options-plist" and '
+            'a plist describing how the IPA should be exported by Xcode, or use "--export-method" to create a new plist.\n'
+            'See "xcodebuild -h" for available exportOptionsPlist keys.');
       }
       final FileSystemEntityType type = globals.fs.typeSync(exportOptions);
       if (type == FileSystemEntityType.notFound) {
-        throwToolExit(
-            '"$exportOptions" property list does not exist.');
+        throwToolExit('"$exportOptions" property list does not exist.');
       } else if (type != FileSystemEntityType.file) {
-        throwToolExit(
-            '"$exportOptions" is not a file. See "xcodebuild -h" for available keys.');
+        throwToolExit('"$exportOptions" is not a file. See "xcodebuild -h" for available keys.');
       }
     }
     return super.validateCommand();
@@ -160,7 +154,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
     final String absoluteArchivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
     final String exportMethod = stringArg('export-method')!;
-    final bool isAppStoreUpload = exportMethod  == 'app-store';
+    final bool isAppStoreUpload = exportMethod == 'app-store';
     File? generatedExportPlist;
     try {
       final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
@@ -201,9 +195,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       // Example:
       // error: exportArchive: exportOptionsPlist error for key 'method': expected one of {app-store, ad-hoc, enterprise, development, validation}, but found developmentasdasd
       // Error Domain=IDEFoundationErrorDomain Code=1 "exportOptionsPlist error for key 'method': expected one of {app-store, ad-hoc, enterprise, development, validation}, but found developmentasdasd" ...
-      LineSplitter.split(result.stderr)
-          .where((String line) => line.contains('error: '))
-          .forEach(errorMessage.writeln);
+      LineSplitter.split(result.stderr).where((String line) => line.contains('error: ')).forEach(errorMessage.writeln);
 
       globals.printError('Encountered error while creating the IPA:');
       globals.printError(errorMessage.toString());
@@ -264,8 +256,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 ''');
     }
 
-    final File tempPlist = globals.fs.systemTempDirectory
-        .createTempSync('flutter_build_ios.').childFile('ExportOptions.plist');
+    final File tempPlist =
+        globals.fs.systemTempDirectory.createTempSync('flutter_build_ios.').childFile('ExportOptions.plist');
     tempPlist.writeAsStringSync(plistContents.toString());
 
     return tempPlist;
@@ -273,9 +265,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 }
 
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
-  _BuildIOSSubCommand({
-    required bool verboseHelp
-  }) : super(verboseHelp: verboseHelp) {
+  _BuildIOSSubCommand({required bool verboseHelp}) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -296,8 +286,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.iOS,
-  };
+        DevelopmentArtifact.iOS,
+      };
 
   XcodeBuildAction get xcodeBuildAction;
 
@@ -377,17 +367,14 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     if (buildInfo.codeSizeDirectory != null) {
       final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        flutterUsage: globals.flutterUsage,
-        appFilenamePattern: 'App'
-      );
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          flutterUsage: globals.flutterUsage,
+          appFilenamePattern: 'App');
       // Only support 64bit iOS code size analysis.
       final String arch = getNameForDarwinArch(DarwinArch.arm64);
-      final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
-        .childFile('snapshot.$arch.json');
-      final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
-        .childFile('trace.$arch.json');
+      final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory).childFile('snapshot.$arch.json');
+      final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory).childFile('trace.$arch.json');
 
       final String? resultOutput = result.output;
       if (resultOutput == null) {
@@ -397,9 +384,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
       Directory? appDirectory;
       if (outputAppDirectoryCandidate.existsSync()) {
-        appDirectory = outputAppDirectoryCandidate.listSync()
-            .whereType<Directory>()
-            .where((Directory directory) {
+        appDirectory = outputAppDirectoryCandidate.listSync().whereType<Directory>().where((Directory directory) {
           return globals.fs.path.extension(directory.path) == '.app';
         }).first;
       }
@@ -413,9 +398,9 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         type: 'ios',
       );
       final File outputFile = globals.fsUtils.getUniqueFile(
-        globals.fs
-          .directory(globals.fsUtils.homeDirPath)
-          .childDirectory('.flutter-devtools'), 'ios-code-size-analysis', 'json',
+        globals.fs.directory(globals.fsUtils.homeDirPath).childDirectory('.flutter-devtools'),
+        'ios-code-size-analysis',
+        'json',
       )..writeAsStringSync(jsonEncode(output));
       // This message is used as a sentinel in analyze_apk_size_test.dart
       globals.printStatus(
@@ -424,11 +409,9 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
       // DevTools expects a file path relative to the .flutter-devtools/ dir.
       final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
-      globals.printStatus(
-        '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-        'flutter pub global activate devtools; flutter pub global run devtools '
-        '--appSizeBase=$relativeAppSizePath'
-      );
+      globals.printStatus('\nTo analyze your app size in Dart DevTools, run the following command:\n'
+          'flutter pub global activate devtools; flutter pub global run devtools '
+          '--appSizeBase=$relativeAppSizePath');
     }
 
     if (result.output != null) {

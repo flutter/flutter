@@ -30,12 +30,11 @@ const List<Emulator> emulators = <Emulator>[
 
 // We have to send a command that fails in order to get the list of valid
 // system images paths. This is an example of the output to use in the fake.
-const String fakeCreateFailureOutput =
-  'Error: Package path (-k) not specified. Valid system image paths are:\n'
-  'system-images;android-27;google_apis;x86\n'
-  'system-images;android-P;google_apis;x86\n'
-  'system-images;android-27;google_apis_playstore;x86\n'
-  'null\n'; // Yep, these really end with null (on dantup's machine at least)
+const String fakeCreateFailureOutput = 'Error: Package path (-k) not specified. Valid system image paths are:\n'
+    'system-images;android-27;google_apis;x86\n'
+    'system-images;android-P;google_apis;x86\n'
+    'system-images;android-27;google_apis_playstore;x86\n'
+    'null\n'; // Yep, these really end with null (on dantup's machine at least)
 
 const FakeCommand kListEmulatorsCommand = FakeCommand(
   command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
@@ -82,8 +81,7 @@ void main() {
         ),
       );
 
-      await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
-        returnsNormally);
+      await expectLater(() async => emulatorManager.getAllAvailableEmulators(), returnsNormally);
     });
 
     testUsingContext('getEmulators with no Android SDK', () async {
@@ -104,8 +102,7 @@ void main() {
         ),
       );
 
-      await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
-        returnsNormally);
+      await expectLater(() async => emulatorManager.getAllAvailableEmulators(), returnsNormally);
     });
 
     testWithoutContext('getEmulatorsById', () async {
@@ -113,10 +110,10 @@ void main() {
 
       expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5'), <Emulator>[emulator1]);
       expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X'), <Emulator>[emulator2]);
-      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X_API_27_x86'),  <Emulator>[emulator2]);
+      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X_API_27_x86'), <Emulator>[emulator2]);
       expect(await testEmulatorManager.getEmulatorsMatching('Nexus'), <Emulator>[emulator1, emulator2]);
       expect(await testEmulatorManager.getEmulatorsMatching('iOS Simulator'), <Emulator>[emulator3]);
-      expect(await testEmulatorManager.getEmulatorsMatching('ios'),  <Emulator>[emulator3]);
+      expect(await testEmulatorManager.getEmulatorsMatching('ios'), <Emulator>[emulator3]);
     });
 
     testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
@@ -232,21 +229,20 @@ void main() {
           ),
           kListEmulatorsCommand,
           const FakeCommand(
-            command: <String>[
-              'avdmanager',
-              'create',
-              'avd',
-              '-n',
-              'existing-avd-1',
-              '-k',
-              'system-images;android-27;google_apis_playstore;x86',
-              '-d',
-              'pixel',
-            ],
-            exitCode: 1,
-            stderr: "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
-              'Use --force if you want to replace it.'
-          )
+              command: <String>[
+                'avdmanager',
+                'create',
+                'avd',
+                '-n',
+                'existing-avd-1',
+                '-k',
+                'system-images;android-27;google_apis_playstore;x86',
+                '-d',
+                'pixel',
+              ],
+              exitCode: 1,
+              stderr: "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
+                  'Use --force if you want to replace it.')
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
@@ -350,8 +346,7 @@ class TestEmulatorManager extends EmulatorManager {
 }
 
 class FakeEmulator extends Emulator {
-  const FakeEmulator(String id, this.name, this.manufacturer)
-    : super(id, true);
+  const FakeEmulator(String id, this.name, this.manufacturer) : super(id, true);
 
   @override
   final String name;

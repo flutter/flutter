@@ -31,9 +31,9 @@ class WebDriverService extends DriverService {
     @required ProcessUtils processUtils,
     @required String dartSdkPath,
     @required Logger logger,
-  }) : _processUtils = processUtils,
-       _dartSdkPath = dartSdkPath,
-       _logger = logger;
+  })  : _processUtils = processUtils,
+        _dartSdkPath = dartSdkPath,
+        _logger = logger;
 
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
@@ -71,16 +71,16 @@ class WebDriverService extends DriverService {
       flutterDevice,
       target: mainPath,
       ipv6: ipv6,
-      debuggingOptions: buildInfo.isRelease ?
-        DebuggingOptions.disabled(
-          buildInfo,
-          port: debuggingOptions.port,
-        )
-        : DebuggingOptions.enabled(
-          buildInfo,
-          port: debuggingOptions.port,
-          disablePortPublication: debuggingOptions.disablePortPublication,
-        ),
+      debuggingOptions: buildInfo.isRelease
+          ? DebuggingOptions.disabled(
+              buildInfo,
+              port: debuggingOptions.port,
+            )
+          : DebuggingOptions.enabled(
+              buildInfo,
+              port: debuggingOptions.port,
+              disablePortPublication: debuggingOptions.disablePortPublication,
+            ),
       stayResident: true,
       urlTunneller: null,
       flutterProject: FlutterProject.current(),
@@ -108,10 +108,8 @@ class WebDriverService extends DriverService {
     ]);
 
     if (_runResult != null) {
-      throw ToolExit(
-        'Application exited before the test started. Check web driver logs '
-        'for possible application-side errors.'
-      );
+      throw ToolExit('Application exited before the test started. Check web driver logs '
+          'for possible application-side errors.');
     }
 
     if (!isAppStarted) {
@@ -126,7 +124,11 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<int> startTest(String testFile, List<String> arguments, Map<String, String> environment, PackageConfig packageConfig, {
+  Future<int> startTest(
+    String testFile,
+    List<String> arguments,
+    Map<String, String> environment,
+    PackageConfig packageConfig, {
     @required bool headless,
     String chromeBinary,
     @required String browserName,
@@ -139,18 +141,15 @@ class WebDriverService extends DriverService {
     final Browser browser = _browserNameToEnum(browserName);
     try {
       webDriver = await async_io.createDriver(
-        uri: Uri.parse('http://localhost:$driverPort/'),
-        desired: getDesiredCapabilities(browser, headless, chromeBinary),
-        spec: async_io.WebDriverSpec.Auto
-      );
+          uri: Uri.parse('http://localhost:$driverPort/'),
+          desired: getDesiredCapabilities(browser, headless, chromeBinary),
+          spec: async_io.WebDriverSpec.Auto);
     } on SocketException catch (error) {
       _logger.printTrace('$error');
-      throwToolExit(
-        'Unable to start a WebDriver session for web testing.\n'
-        'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
-        'For instructions on how to obtain and run a WebDriver server, see:\n'
-        'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser\n'
-      );
+      throwToolExit('Unable to start a WebDriver session for web testing.\n'
+          'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
+          'For instructions on how to obtain and run a WebDriver server, see:\n'
+          'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser\n');
     }
 
     final bool isAndroidChrome = browser == Browser.androidChrome;
@@ -190,14 +189,13 @@ class WebDriverService extends DriverService {
     await _residentRunner.cleanupAtFinish();
 
     if (appDidFinishPrematurely) {
-      throw ToolExit(
-        'Application exited before the test finished. Check web driver logs '
-        'for possible application-side errors.'
-      );
+      throw ToolExit('Application exited before the test finished. Check web driver logs '
+          'for possible application-side errors.');
     }
   }
 
-  Map<String, String> _additionalDriverEnvironment(async_io.WebDriver webDriver, String browserName, bool androidEmulator) {
+  Map<String, String> _additionalDriverEnvironment(
+      async_io.WebDriver webDriver, String browserName, bool androidEmulator) {
     return <String, String>{
       'DRIVER_SESSION_ID': webDriver.id,
       'DRIVER_SESSION_URI': webDriver.uri.toString(),
@@ -205,7 +203,8 @@ class WebDriverService extends DriverService {
       'DRIVER_SESSION_CAPABILITIES': json.encode(webDriver.capabilities),
       'SUPPORT_TIMELINE_ACTION': (_browserNameToEnum(browserName) == Browser.chrome).toString(),
       'FLUTTER_WEB_TEST': 'true',
-      'ANDROID_CHROME_ON_EMULATOR': (_browserNameToEnum(browserName) == Browser.androidChrome && androidEmulator).toString(),
+      'ANDROID_CHROME_ON_EMULATOR':
+          (_browserNameToEnum(browserName) == Browser.androidChrome && androidEmulator).toString(),
     };
   }
 
@@ -219,14 +218,19 @@ class WebDriverService extends DriverService {
 enum Browser {
   /// Chrome on Android: https://developer.chrome.com/multidevice/android/overview
   androidChrome,
+
   /// Chrome: https://www.google.com/chrome/
   chrome,
+
   /// Edge: https://www.microsoft.com/en-us/windows/microsoft-edge
   edge,
+
   /// Firefox: https://www.mozilla.org/en-US/firefox/
   firefox,
+
   /// Safari in iOS: https://www.apple.com/safari/
   iosSafari,
+
   /// Safari in macOS: https://www.apple.com/safari/
   safari,
 }
@@ -245,8 +249,7 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
           async_io.LogType.performance: 'ALL',
         },
         'chromeOptions': <String, dynamic>{
-          if (chromeBinary != null)
-            'binary': chromeBinary,
+          if (chromeBinary != null) 'binary': chromeBinary,
           'w3c': false,
           'args': <String>[
             '--bwsi',
@@ -261,8 +264,7 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
             if (headless) '--headless'
           ],
           'perfLoggingPrefs': <String, String>{
-            'traceCategories':
-            'devtools.timeline,'
+            'traceCategories': 'devtools.timeline,'
                 'v8,blink.console,benchmark,blink,'
                 'blink.user_timing'
           }
@@ -273,10 +275,8 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'firefox',
-        'moz:firefoxOptions' : <String, dynamic>{
-          'args': <String>[
-            if (headless) '-headless'
-          ],
+        'moz:firefoxOptions': <String, dynamic>{
+          'args': <String>[if (headless) '-headless'],
           'prefs': <String, dynamic>{
             'dom.file.createInChild': true,
             'dom.timeout.background_throttling_max_budget': -1,
@@ -303,11 +303,7 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
       };
       break;
     case Browser.iosSafari:
-      return <String, dynamic>{
-        'platformName': 'ios',
-        'browserName': 'safari',
-        'safari:useSimulator': true
-      };
+      return <String, dynamic>{'platformName': 'ios', 'browserName': 'safari', 'safari:useSimulator': true};
     case Browser.androidChrome:
       return <String, dynamic>{
         'browserName': 'chrome',
@@ -324,12 +320,18 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
 /// Converts [browserName] string to [Browser]
 Browser _browserNameToEnum(String browserName) {
   switch (browserName) {
-    case 'android-chrome': return Browser.androidChrome;
-    case 'chrome': return Browser.chrome;
-    case 'edge': return Browser.edge;
-    case 'firefox': return Browser.firefox;
-    case 'ios-safari': return Browser.iosSafari;
-    case 'safari': return Browser.safari;
+    case 'android-chrome':
+      return Browser.androidChrome;
+    case 'chrome':
+      return Browser.chrome;
+    case 'edge':
+      return Browser.edge;
+    case 'firefox':
+      return Browser.firefox;
+    case 'ios-safari':
+      return Browser.iosSafari;
+    case 'safari':
+      return Browser.safari;
   }
   throw UnsupportedError('Browser $browserName not supported');
 }

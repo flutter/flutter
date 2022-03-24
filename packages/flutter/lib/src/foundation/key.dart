@@ -70,10 +70,8 @@ class ValueKey<T> extends LocalKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is ValueKey<T>
-        && other.value == value;
+    if (other.runtimeType != runtimeType) return false;
+    return other is ValueKey<T> && other.value == value;
   }
 
   @override
@@ -84,8 +82,7 @@ class ValueKey<T> extends LocalKey {
     final String valueString = T == String ? "<'$value'>" : '<$value>';
     // The crazy on the next line is a workaround for
     // https://github.com/dart-lang/sdk/issues/33297
-    if (runtimeType == _TypeLiteral<ValueKey<T>>().type)
-      return '[$valueString]';
+    if (runtimeType == _TypeLiteral<ValueKey<T>>().type) return '[$valueString]';
     return '[$T $valueString]';
   }
 }

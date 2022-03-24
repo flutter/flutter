@@ -33,11 +33,11 @@ class AndroidDevices extends PollingDeviceDiscovery {
     required FileSystem fileSystem,
     required Platform platform,
     required UserMessages userMessages,
-  }) : _androidWorkflow = androidWorkflow,
-       _androidSdk = androidSdk,
-       _processUtils = ProcessUtils(
-         logger: logger,
-         processManager: processManager,
+  })  : _androidWorkflow = androidWorkflow,
+        _androidSdk = androidSdk,
+        _processUtils = ProcessUtils(
+          logger: logger,
+          processManager: processManager,
         ),
         _processManager = processManager,
         _logger = logger,
@@ -62,15 +62,18 @@ class AndroidDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _androidWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
     if (_doesNotHaveAdb()) {
       return <AndroidDevice>[];
     }
     String text;
     try {
-      text = (await _processUtils.run(<String>[_androidSdk!.adbPath!, 'devices', '-l'],
+      text = (await _processUtils.run(
+        <String>[_androidSdk!.adbPath!, 'devices', '-l'],
         throwOnError: true,
-      )).stdout.trim();
+      ))
+          .stdout
+          .trim();
     } on ProcessException catch (exception) {
       throwToolExit(
         'Unable to run "adb", check your Android SDK installation and '
@@ -104,9 +107,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   }
 
   bool _doesNotHaveAdb() {
-    return _androidSdk == null ||
-      _androidSdk?.adbPath == null ||
-      !_processManager.canRun(_androidSdk!.adbPath);
+    return _androidSdk == null || _androidSdk?.adbPath == null || !_processManager.canRun(_androidSdk!.adbPath);
   }
 
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
@@ -166,10 +167,8 @@ class AndroidDevices extends PollingDeviceDiscovery {
         }
 
         if (deviceState == 'unauthorized') {
-          diagnostics?.add(
-            'Device $deviceID is not authorized.\n'
-            'You might need to check your device for an authorization dialog.'
-          );
+          diagnostics?.add('Device $deviceID is not authorized.\n'
+              'You might need to check your device for an authorization dialog.');
         } else if (deviceState == 'offline') {
           diagnostics?.add('Device $deviceID is offline.');
         } else {
@@ -186,10 +185,9 @@ class AndroidDevices extends PollingDeviceDiscovery {
           ));
         }
       } else {
-        diagnostics?.add(
-          'Unexpected failure parsing device information from adb output:\n'
-          '$line\n'
-          '${_userMessages.flutterToolBugInstructions}');
+        diagnostics?.add('Unexpected failure parsing device information from adb output:\n'
+            '$line\n'
+            '${_userMessages.flutterToolBugInstructions}');
       }
     }
   }

@@ -23,10 +23,8 @@ void main() {
       featureFlags: TestFeatureFlags(),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(
-        environment: <String, String>{}
-      ),
-      processManager:  FakeProcessManager.any(),
+      platform: FakePlatform(environment: <String, String>{}),
+      processManager: FakeProcessManager.any(),
     );
 
     expect(await webDevices.pollingGetDevices(), isEmpty);
@@ -110,21 +108,18 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.profile), true);
     expect(device.supportsRuntimeMode(BuildMode.release), true);
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
-});
+  });
 
   testWithoutContext('Chrome device is listed when Chrome can be run', () async {
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(
-        environment: <String, String>{}
-      ),
-      processManager:  FakeProcessManager.any(),
+      platform: FakePlatform(environment: <String, String>{}),
+      processManager: FakeProcessManager.any(),
     );
 
-    expect(await webDevices.pollingGetDevices(),
-      contains(isA<GoogleChromeDevice>()));
+    expect(await webDevices.pollingGetDevices(), contains(isA<GoogleChromeDevice>()));
   });
 
   testWithoutContext('Has well known device ids chrome, edge, and web-server', () async {
@@ -132,10 +127,8 @@ void main() {
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(
-        environment: <String, String>{}
-      ),
-      processManager:  FakeProcessManager.any(),
+      platform: FakePlatform(environment: <String, String>{}),
+      processManager: FakeProcessManager.any(),
     );
 
     expect(webDevices.wellKnownIds, <String>['chrome', 'web-server', 'edge']);
@@ -148,14 +141,11 @@ void main() {
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(
-        environment: <String, String>{}
-      ),
+      platform: FakePlatform(environment: <String, String>{}),
       processManager: processManager,
     );
 
-    expect(await webDevices.pollingGetDevices(),
-      isNot(contains(isA<GoogleChromeDevice>())));
+    expect(await webDevices.pollingGetDevices(), isNot(contains(isA<GoogleChromeDevice>())));
   });
 
   testWithoutContext('Web Server device is listed if enabled via showWebServerDevice', () async {
@@ -164,14 +154,11 @@ void main() {
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(
-        environment: <String, String>{}
-      ),
+      platform: FakePlatform(environment: <String, String>{}),
       processManager: FakeProcessManager.any(),
     );
 
-    expect(await webDevices.pollingGetDevices(),
-      contains(isA<WebServerDevice>()));
+    expect(await webDevices.pollingGetDevices(), contains(isA<WebServerDevice>()));
   });
 
   testWithoutContext('Web Server device is not listed if disabled via showWebServerDevice', () async {
@@ -180,39 +167,30 @@ void main() {
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(
-        environment: <String, String>{}
-      ),
+      platform: FakePlatform(environment: <String, String>{}),
       processManager: FakeProcessManager.any(),
     );
 
-    expect(await webDevices.pollingGetDevices(),
-      isNot(contains(isA<WebServerDevice>())));
+    expect(await webDevices.pollingGetDevices(), isNot(contains(isA<WebServerDevice>())));
   });
 
   testWithoutContext('Chrome invokes version command on non-Windows platforms', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
-        command: <String>[
-          kLinuxExecutable,
-          '--version',
-        ],
-        stdout: 'ABC'
-      )
+      const FakeCommand(command: <String>[
+        kLinuxExecutable,
+        '--version',
+      ], stdout: 'ABC')
     ]);
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(
-        environment: <String, String>{}
-      ),
+      platform: FakePlatform(environment: <String, String>{}),
       processManager: processManager,
     );
 
-
-    final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
-      .whereType<GoogleChromeDevice>().first;
+    final GoogleChromeDevice chromeDevice =
+        (await webDevices.pollingGetDevices()).whereType<GoogleChromeDevice>().first;
 
     expect(chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'ABC');
@@ -249,16 +227,12 @@ void main() {
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(
-        operatingSystem: 'windows',
-        environment: <String, String>{}
-      ),
+      platform: FakePlatform(operatingSystem: 'windows', environment: <String, String>{}),
       processManager: processManager,
     );
 
-
-    final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
-      .whereType<GoogleChromeDevice>().first;
+    final GoogleChromeDevice chromeDevice =
+        (await webDevices.pollingGetDevices()).whereType<GoogleChromeDevice>().first;
 
     expect(chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');
@@ -272,8 +246,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.empty();
     processManager.excludedExecutables.add('reg');
 
-    final Platform platform = FakePlatform(
-        operatingSystem: 'windows', environment: <String, String>{});
+    final Platform platform = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
     final ChromiumLauncher chromeLauncher = ChromiumLauncher(
       fileSystem: MemoryFileSystem.test(),
       platform: platform,
@@ -321,10 +294,7 @@ void main() {
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(
-        operatingSystem: 'windows',
-        environment: <String, String>{}
-      ),
+      platform: FakePlatform(operatingSystem: 'windows', environment: <String, String>{}),
       processManager: processManager,
     );
 
@@ -336,9 +306,7 @@ void main() {
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(
-        environment: <String, String>{}
-      ),
+      platform: FakePlatform(environment: <String, String>{}),
       processManager: FakeProcessManager.empty(),
     );
 
@@ -348,10 +316,7 @@ void main() {
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      platform: FakePlatform(
-        operatingSystem: 'macos',
-        environment: <String, String>{}
-      ),
+      platform: FakePlatform(operatingSystem: 'macos', environment: <String, String>{}),
       processManager: FakeProcessManager.empty(),
     );
 
@@ -389,7 +354,8 @@ class TestChromiumLauncher implements ChromiumLauncher {
   bool get hasChromeInstance => _hasInstance;
 
   @override
-  Future<Chromium> launch(String url, {bool headless = false, int? debugPort, bool skipCheck = false, Directory? cacheDir}) async {
+  Future<Chromium> launch(String url,
+      {bool headless = false, int? debugPort, bool skipCheck = false, Directory? cacheDir}) async {
     return currentCompleter.future;
   }
 }

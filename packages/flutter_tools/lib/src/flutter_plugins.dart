@@ -27,8 +27,7 @@ import 'plugins.dart';
 import 'project.dart';
 
 void _renderTemplateToFile(String template, Object? context, File file, TemplateRenderer templateRenderer) {
-  final String renderedTemplate = templateRenderer
-    .renderString(template, context);
+  final String renderedTemplate = templateRenderer.renderString(template, context);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
 }
@@ -55,8 +54,8 @@ Plugin? _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependen
     return null;
   }
   final String? flutterConstraintText = (pubspec['environment'] as YamlMap?)?['flutter'] as String?;
-  final semver.VersionConstraint? flutterConstraint = flutterConstraintText == null ?
-    null : semver.VersionConstraint.parse(flutterConstraintText);
+  final semver.VersionConstraint? flutterConstraint =
+      flutterConstraintText == null ? null : semver.VersionConstraint.parse(flutterConstraintText);
   final String packageRootPath = fs.path.fromUri(packageRoot);
   final YamlMap? dependencies = pubspec['dependencies'] as YamlMap?;
   globals.printTrace('Found plugin $name at $packageRootPath');
@@ -71,7 +70,7 @@ Plugin? _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependen
   );
 }
 
-Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
+Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = true}) async {
   final List<Plugin> plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
   final String packagesFile = fs.path.join(
@@ -85,12 +84,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
   );
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');
-    final Plugin? plugin = _pluginFromPackage(
-      package.name,
-      packageRoot,
-      project.manifest.dependencies,
-      fileSystem: fs
-    );
+    final Plugin? plugin = _pluginFromPackage(package.name, packageRoot, project.manifest.dependencies, fileSystem: fs);
     if (plugin != null) {
       plugins.add(plugin);
     }
@@ -120,7 +114,8 @@ List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String 
       _kFlutterPluginsNameKey: plugin.name,
       _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
       if (platformPlugin is NativeOrDartPlugin)
-        _kFlutterPluginsHasNativeBuildKey: (platformPlugin as NativeOrDartPlugin).hasMethodChannel() || (platformPlugin as NativeOrDartPlugin).hasFfi(),
+        _kFlutterPluginsHasNativeBuildKey: (platformPlugin as NativeOrDartPlugin).hasMethodChannel() ||
+            (platformPlugin as NativeOrDartPlugin).hasFfi(),
       _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
     });
   }
@@ -196,10 +191,11 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   pluginsMap[windowsKey] = _filterPluginsByPlatform(plugins, windowsKey);
   pluginsMap[webKey] = _filterPluginsByPlatform(plugins, webKey);
 
-  final Map<String, Object> result = <String, Object> {};
+  final Map<String, Object> result = <String, Object>{};
 
-  result['info'] =  'This is a generated file; do not edit or check into version control.';
+  result['info'] = 'This is a generated file; do not edit or check into version control.';
   result[_kFlutterPluginsPluginListKey] = pluginsMap;
+
   /// The dependencyGraph object is kept for backwards compatibility, but
   /// should be removed once migration is complete.
   /// https://github.com/flutter/flutter/issues/48918
@@ -364,7 +360,8 @@ AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, AndroidPlugin.kConfigKey);
-  final List<Map<String, Object?>> androidPlugins = _extractPlatformMaps(methodChannelPlugins, AndroidPlugin.kConfigKey);
+  final List<Map<String, Object?>> androidPlugins =
+      _extractPlatformMaps(methodChannelPlugins, AndroidPlugin.kConfigKey);
 
   final Map<String, Object> templateContext = <String, Object>{
     'methodChannelPlugins': androidPlugins,
@@ -404,41 +401,35 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       }
       if (pluginsUsingV1.length > 1) {
         globals.printWarning(
-          'The plugins `${pluginsUsingV1.join(', ')}` use a deprecated version of the Android embedding.\n'
-          'To avoid unexpected runtime failures, or future build failures, try to see if these plugins '
-          'support the Android V2 embedding. Otherwise, consider removing them since a future release '
-          'of Flutter will remove these deprecated APIs.\n'
-          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
-          'https://flutter.dev/go/android-plugin-migration.'
-        );
+            'The plugins `${pluginsUsingV1.join(', ')}` use a deprecated version of the Android embedding.\n'
+            'To avoid unexpected runtime failures, or future build failures, try to see if these plugins '
+            'support the Android V2 embedding. Otherwise, consider removing them since a future release '
+            'of Flutter will remove these deprecated APIs.\n'
+            'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
+            'https://flutter.dev/go/android-plugin-migration.');
       } else if (pluginsUsingV1.isNotEmpty) {
-        globals.printWarning(
-          'The plugin `${pluginsUsingV1.first}` uses a deprecated version of the Android embedding.\n'
-          'To avoid unexpected runtime failures, or future build failures, try to see if this plugin '
-          'supports the Android V2 embedding. Otherwise, consider removing it since a future release '
-          'of Flutter will remove these deprecated APIs.\n'
-          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
-          'https://flutter.dev/go/android-plugin-migration.'
-        );
+        globals
+            .printWarning('The plugin `${pluginsUsingV1.first}` uses a deprecated version of the Android embedding.\n'
+                'To avoid unexpected runtime failures, or future build failures, try to see if this plugin '
+                'supports the Android V2 embedding. Otherwise, consider removing it since a future release '
+                'of Flutter will remove these deprecated APIs.\n'
+                'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
+                'https://flutter.dev/go/android-plugin-migration.');
       }
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
       break;
     case AndroidEmbeddingVersion.v1:
-      globals.printWarning(
-        'This app is using a deprecated version of the Android embedding.\n'
-        'To avoid unexpected runtime failures, or future build failures, try to migrate this '
-        'app to the V2 embedding.\n'
-        'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'
-      );
+      globals.printWarning('This app is using a deprecated version of the Android embedding.\n'
+          'To avoid unexpected runtime failures, or future build failures, try to migrate this '
+          'app to the V2 embedding.\n'
+          'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects');
       for (final Map<String, Object?> plugin in androidPlugins) {
         final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) ?? false;
         final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) ?? false;
         if (!supportsEmbeddingV1 && supportsEmbeddingV2) {
-          throwToolExit(
-            'The plugin `${plugin['name']}` requires your app to be migrated to '
-            'the Android embedding v2. Follow the steps on https://flutter.dev/go/android-project-migration '
-            'and re-run this command.'
-          );
+          throwToolExit('The plugin `${plugin['name']}` requires your app to be migrated to '
+              'the Android embedding v2. Follow the steps on https://flutter.dev/go/android-project-migration '
+              'and re-run this command.');
         }
       }
       templateContent = _androidPluginRegistryTemplateOldEmbedding;
@@ -822,8 +813,10 @@ String _cmakeRelativePluginSymlinkDirectoryPath(CmakeBasedProject project) {
 
 Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, LinuxPlugin.kConfigKey);
-  final List<Map<String, Object?>> linuxMethodChannelPlugins = _extractPlatformMaps(methodChannelPlugins, LinuxPlugin.kConfigKey);
-  final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, LinuxPlugin.kConfigKey)..removeWhere(methodChannelPlugins.contains);
+  final List<Map<String, Object?>> linuxMethodChannelPlugins =
+      _extractPlatformMaps(methodChannelPlugins, LinuxPlugin.kConfigKey);
+  final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, LinuxPlugin.kConfigKey)
+    ..removeWhere(methodChannelPlugins.contains);
   final List<Map<String, Object?>> linuxFfiPlugins = _extractPlatformMaps(ffiPlugins, LinuxPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'linux',
@@ -850,7 +843,8 @@ Future<void> _writeLinuxPluginRegistrant(Directory destination, Map<String, Obje
   );
 }
 
-Future<void> _writePluginCmakefile(File destinationFile, Map<String, Object> templateContext, TemplateRenderer templateRenderer) async {
+Future<void> _writePluginCmakefile(
+    File destinationFile, Map<String, Object> templateContext, TemplateRenderer templateRenderer) async {
   _renderTemplateToFile(
     _pluginCmakefileTemplate,
     templateContext,
@@ -861,7 +855,8 @@ Future<void> _writePluginCmakefile(File destinationFile, Map<String, Object> tem
 
 Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, MacOSPlugin.kConfigKey);
-  final List<Map<String, Object?>> macosMethodChannelPlugins = _extractPlatformMaps(methodChannelPlugins, MacOSPlugin.kConfigKey);
+  final List<Map<String, Object?>> macosMethodChannelPlugins =
+      _extractPlatformMaps(methodChannelPlugins, MacOSPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'macos',
     'framework': 'FlutterMacOS',
@@ -916,17 +911,20 @@ List<Plugin> _filterPluginsByVariant(List<Plugin> plugins, String platformKey, P
       return false;
     }
     assert(variant == null || platformPlugin is VariantPlatformPlugin);
-    return variant == null ||
-        (platformPlugin as VariantPlatformPlugin).supportedVariants.contains(variant);
+    return variant == null || (platformPlugin as VariantPlatformPlugin).supportedVariants.contains(variant);
   }).toList();
 }
 
 @visibleForTesting
-Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
+Future<void> writeWindowsPluginFiles(
+    FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, WindowsPlugin.kConfigKey);
-  final List<Plugin> win32Plugins = _filterPluginsByVariant(methodChannelPlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.win32);
-  final List<Map<String, Object?>> windowsMethodChannelPlugins = _extractPlatformMaps(win32Plugins, WindowsPlugin.kConfigKey);
-  final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, WindowsPlugin.kConfigKey)..removeWhere(methodChannelPlugins.contains);
+  final List<Plugin> win32Plugins =
+      _filterPluginsByVariant(methodChannelPlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.win32);
+  final List<Map<String, Object?>> windowsMethodChannelPlugins =
+      _extractPlatformMaps(win32Plugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, WindowsPlugin.kConfigKey)
+    ..removeWhere(methodChannelPlugins.contains);
   final List<Map<String, Object?>> windowsFfiPlugins = _extractPlatformMaps(ffiPlugins, WindowsPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'windows',
@@ -941,11 +939,15 @@ Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugin
 /// The tooling currently treats UWP and win32 as identical, other than variant
 /// filtering, for the purposes of tooling support and initial UWP bootstrap.
 @visibleForTesting
-Future<void> writeWindowsUwpPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
+Future<void> writeWindowsUwpPluginFiles(
+    FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, WindowsPlugin.kConfigKey);
-  final List<Plugin> uwpPlugins = _filterPluginsByVariant(methodChannelPlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.winuwp);
-  final List<Map<String, Object?>> windowsMethodChannelPlugins = _extractPlatformMaps(uwpPlugins, WindowsPlugin.kConfigKey);
-  final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, WindowsPlugin.kConfigKey)..removeWhere(methodChannelPlugins.contains);
+  final List<Plugin> uwpPlugins =
+      _filterPluginsByVariant(methodChannelPlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.winuwp);
+  final List<Map<String, Object?>> windowsMethodChannelPlugins =
+      _extractPlatformMaps(uwpPlugins, WindowsPlugin.kConfigKey);
+  final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, WindowsPlugin.kConfigKey)
+    ..removeWhere(methodChannelPlugins.contains);
   final List<Map<String, Object?>> windowsFfiPlugins = _extractPlatformMaps(ffiPlugins, WindowsPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'windows',
@@ -957,7 +959,8 @@ Future<void> writeWindowsUwpPluginFiles(FlutterProject project, List<Plugin> plu
   await _writePluginCmakefile(project.windowsUwp.generatedPluginCmakeFile, context, templateRenderer);
 }
 
-Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, Object> templateContext, TemplateRenderer templateRenderer) async {
+Future<void> _writeCppPluginRegistrant(
+    Directory destination, Map<String, Object> templateContext, TemplateRenderer templateRenderer) async {
   _renderTemplateToFile(
     _cppPluginRegistryHeaderTemplate,
     templateContext,
@@ -998,7 +1001,8 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 ///
 /// This uses [project.flutterPluginsDependenciesFile], so it should only be
 /// run after refreshPluginList has been run since the last plugin change.
-void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleForTesting FeatureFlags? featureFlagsOverride}) {
+void createPluginSymlinks(FlutterProject project,
+    {bool force = false, @visibleForTesting FeatureFlags? featureFlagsOverride}) {
   final FeatureFlags localFeatureFlags = featureFlagsOverride ?? featureFlags;
   Map<String, Object?>? platformPlugins;
   final String? pluginFileContent = _readFileContent(project.flutterPluginsDependenciesFile);
@@ -1034,7 +1038,8 @@ void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleF
 /// Handler for symlink failures which provides specific instructions for known
 /// failure cases.
 @visibleForTesting
-void handleSymlinkException(FileSystemException e, {
+void handleSymlinkException(
+  FileSystemException e, {
   required Platform platform,
   required OperatingSystemUtils os,
 }) {
@@ -1047,8 +1052,8 @@ void handleSymlinkException(FileSystemException e, {
     // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
     final String instructions = (version != null && version >= Version(10, 0, 14972))
         ? 'Please enable Developer Mode in your system settings. Run\n'
-          '  start ms-settings:developers\n'
-          'to open settings.'
+            '  start ms-settings:developers\n'
+            'to open settings.'
         : 'You must build from a terminal run as administrator.';
     throwToolExit('Building with plugins requires symlink support.\n\n$instructions');
   }
@@ -1153,6 +1158,7 @@ Future<void> injectPlugins(
       if (plugins.isNotEmpty) {
         await globals.cocoaPods?.setupPodfile(subproject);
       }
+
       /// The user may have a custom maintained Podfile that they're running `pod install`
       /// on themselves.
       else if (subproject.podfile.existsSync() && subproject.podfileLock.existsSync()) {
@@ -1197,48 +1203,43 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     MacOSPlugin.kConfigKey,
     WindowsPlugin.kConfigKey,
   ];
-  final Map<String, PluginInterfaceResolution> directDependencyResolutions
-      = <String, PluginInterfaceResolution>{};
+  final Map<String, PluginInterfaceResolution> directDependencyResolutions = <String, PluginInterfaceResolution>{};
   final Map<String, String> defaultImplementations = <String, String>{};
   bool didFindError = false;
 
   for (final Plugin plugin in plugins) {
     for (final String platform in platforms) {
-      if (plugin.platforms[platform] == null &&
-          plugin.defaultPackagePlatforms[platform] == null) {
+      if (plugin.platforms[platform] == null && plugin.defaultPackagePlatforms[platform] == null) {
         // The plugin doesn't implement this platform.
         continue;
       }
       String? implementsPackage = plugin.implementsPackage;
       if (implementsPackage == null || implementsPackage.isEmpty) {
         final String? defaultImplementation = plugin.defaultPackagePlatforms[platform];
-        final bool hasInlineDartImplementation =
-          plugin.pluginDartClassPlatforms[platform] != null;
+        final bool hasInlineDartImplementation = plugin.pluginDartClassPlatforms[platform] != null;
         if (defaultImplementation == null && !hasInlineDartImplementation) {
           if (throwOnPluginPubspecError) {
-            globals.printError(
-              "Plugin `${plugin.name}` doesn't implement a plugin interface, nor does "
-              'it specify an implementation in pubspec.yaml.\n\n'
-              'To set an inline implementation, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    platforms:\n'
-              '      $platform:\n'
-              '        $kDartPluginClass: <plugin-class>\n'
-              '\n'
-              'To set a default implementation, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    platforms:\n'
-              '      $platform:\n'
-              '        $kDefaultPackage: <plugin-implementation>\n'
-              '\n'
-              'To implement an interface, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    implements: <plugin-interface>'
-              '\n'
-            );
+            globals.printError("Plugin `${plugin.name}` doesn't implement a plugin interface, nor does "
+                'it specify an implementation in pubspec.yaml.\n\n'
+                'To set an inline implementation, use:\n'
+                'flutter:\n'
+                '  plugin:\n'
+                '    platforms:\n'
+                '      $platform:\n'
+                '        $kDartPluginClass: <plugin-class>\n'
+                '\n'
+                'To set a default implementation, use:\n'
+                'flutter:\n'
+                '  plugin:\n'
+                '    platforms:\n'
+                '      $platform:\n'
+                '        $kDefaultPackage: <plugin-implementation>\n'
+                '\n'
+                'To implement an interface, use:\n'
+                'flutter:\n'
+                '  plugin:\n'
+                '    implements: <plugin-interface>'
+                '\n');
           }
           didFindError = true;
           continue;
@@ -1258,18 +1259,17 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
           // See https://github.com/flutter/flutter/issues/87862 for details.
           final bool isDesktop = platform == 'linux' || platform == 'macos' || platform == 'windows';
           final semver.VersionConstraint? flutterConstraint = plugin.flutterConstraint;
-          final semver.Version? minFlutterVersion = flutterConstraint != null &&
-            flutterConstraint is semver.VersionRange ? flutterConstraint.min : null;
-          final bool hasMinVersionForImplementsRequirement = minFlutterVersion != null &&
-            minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
+          final semver.Version? minFlutterVersion =
+              flutterConstraint != null && flutterConstraint is semver.VersionRange ? flutterConstraint.min : null;
+          final bool hasMinVersionForImplementsRequirement =
+              minFlutterVersion != null && minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
           if (!isDesktop || hasMinVersionForImplementsRequirement) {
             implementsPackage = plugin.name;
             defaultImplementations['$platform/${plugin.name}'] = plugin.name;
           }
         }
       }
-      if (plugin.pluginDartClassPlatforms[platform] == null ||
-          plugin.pluginDartClassPlatforms[platform] == 'none') {
+      if (plugin.pluginDartClassPlatforms[platform] == null || plugin.pluginDartClassPlatforms[platform] == 'none') {
         continue;
       }
       final String resolutionKey = '$platform/$implementsPackage';
@@ -1278,12 +1278,10 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         if (currResolution != null && currResolution.plugin.isDirectDependency) {
           if (plugin.isDirectDependency) {
             if (throwOnPluginPubspecError) {
-              globals.printError(
-                'Plugin `${plugin.name}` implements an interface for `$platform`, which was already '
-                'implemented by plugin `${currResolution.plugin.name}`.\n'
-                'To fix this issue, remove either dependency from pubspec.yaml.'
-                '\n\n'
-              );
+              globals.printError('Plugin `${plugin.name}` implements an interface for `$platform`, which was already '
+                  'implemented by plugin `${currResolution.plugin.name}`.\n'
+                  'To fix this issue, remove either dependency from pubspec.yaml.'
+                  '\n\n');
             }
             didFindError = true;
           }
@@ -1361,10 +1359,8 @@ Future<void> generateMainDartWithPluginRegistrant(
         newMainDart.deleteSync();
       }
     } on FileSystemException catch (error) {
-      globals.printWarning(
-        'Unable to remove ${newMainDart.path}, received error: $error.\n'
-        'You might need to run flutter clean.'
-      );
+      globals.printWarning('Unable to remove ${newMainDart.path}, received error: $error.\n'
+          'You might need to run flutter clean.');
       rethrow;
     }
     return;

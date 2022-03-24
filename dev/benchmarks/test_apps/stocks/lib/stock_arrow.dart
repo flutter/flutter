@@ -50,13 +50,12 @@ class StockArrowPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(StockArrowPainter oldDelegate) {
-    return oldDelegate.color != color
-        || oldDelegate.percentChange != percentChange;
+    return oldDelegate.color != color || oldDelegate.percentChange != percentChange;
   }
 }
 
 class StockArrow extends StatelessWidget {
-  const StockArrow({ Key? key, required this.percentChange }) : super(key: key);
+  const StockArrow({Key? key, required this.percentChange}) : super(key: key);
 
   final double percentChange;
 
@@ -67,8 +66,7 @@ class StockArrow extends StatelessWidget {
   }
 
   Color _colorForPercentChange(double percentChange) {
-    if (percentChange > 0)
-      return Colors.green[_colorIndexForPercentChange(percentChange)]!;
+    if (percentChange > 0) return Colors.green[_colorIndexForPercentChange(percentChange)]!;
     return Colors.red[_colorIndexForPercentChange(percentChange)]!;
   }
 

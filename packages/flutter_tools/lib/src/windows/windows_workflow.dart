@@ -18,8 +18,8 @@ class WindowsWorkflow implements Workflow {
   const WindowsWorkflow({
     required Platform platform,
     required FeatureFlags featureFlags,
-  }) : _platform = platform,
-       _featureFlags = featureFlags;
+  })  : _platform = platform,
+        _featureFlags = featureFlags;
 
   final Platform _platform;
   final FeatureFlags _featureFlags;

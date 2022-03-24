@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'drag_details.dart';
 
 /// Interface for objects that receive updates about drags.
@@ -14,17 +13,17 @@ import 'drag_details.dart';
 /// scrollable.
 abstract class Drag {
   /// The pointer has moved.
-  void update(DragUpdateDetails details) { }
+  void update(DragUpdateDetails details) {}
 
   /// The pointer is no longer in contact with the screen.
   ///
   /// The velocity at which the pointer was moving when it stopped contacting
   /// the screen is available in the `details`.
-  void end(DragEndDetails details) { }
+  void end(DragEndDetails details) {}
 
   /// The input from the pointer is no longer directed towards this receiver.
   ///
   /// For example, the user might have been interrupted by a system-modal dialog
   /// in the middle of the drag.
-  void cancel() { }
+  void cancel() {}
 }

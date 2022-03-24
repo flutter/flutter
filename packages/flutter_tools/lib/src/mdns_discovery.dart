@@ -25,9 +25,9 @@ class MDnsObservatoryDiscovery {
     MDnsClient? mdnsClient,
     required Logger logger,
     required Usage flutterUsage,
-  }): _client = mdnsClient ?? MDnsClient(),
-      _logger = logger,
-      _flutterUsage = flutterUsage;
+  })  : _client = mdnsClient ?? MDnsClient(),
+        _logger = logger,
+        _flutterUsage = flutterUsage;
 
   final MDnsClient _client;
   final Logger _logger;
@@ -62,19 +62,18 @@ class MDnsObservatoryDiscovery {
     try {
       await _client.start();
       final List<PtrResourceRecord> pointerRecords = await _client
-        .lookup<PtrResourceRecord>(
-          ResourceRecordQuery.serverPointer(dartObservatoryName),
-        )
-        .toList();
+          .lookup<PtrResourceRecord>(
+            ResourceRecordQuery.serverPointer(dartObservatoryName),
+          )
+          .toList();
       if (pointerRecords.isEmpty) {
         _logger.printTrace('No pointer records found.');
         return null;
       }
       // We have no guarantee that we won't get multiple hits from the same
       // service on this.
-      final Set<String> uniqueDomainNames = pointerRecords
-        .map<String>((PtrResourceRecord record) => record.domainName)
-        .toSet();
+      final Set<String> uniqueDomainNames =
+          pointerRecords.map<String>((PtrResourceRecord record) => record.domainName).toSet();
 
       String? domainName;
       if (applicationId != null) {
@@ -102,23 +101,23 @@ class MDnsObservatoryDiscovery {
       _logger.printTrace('Checking for available port on $domainName');
       // Here, if we get more than one, it should just be a duplicate.
       final List<SrvResourceRecord> srv = await _client
-        .lookup<SrvResourceRecord>(
-          ResourceRecordQuery.service(domainName),
-        )
-        .toList();
+          .lookup<SrvResourceRecord>(
+            ResourceRecordQuery.service(domainName),
+          )
+          .toList();
       if (srv.isEmpty) {
         return null;
       }
       if (srv.length > 1) {
         _logger.printWarning('Unexpectedly found more than one observatory report for $domainName '
-                   '- using first one (${srv.first.port}).');
+            '- using first one (${srv.first.port}).');
       }
       _logger.printTrace('Checking for authentication code for $domainName');
       final List<TxtResourceRecord> txt = await _client
-        .lookup<TxtResourceRecord>(
+          .lookup<TxtResourceRecord>(
             ResourceRecordQuery.text(domainName),
-        )
-        .toList();
+          )
+          .toList();
       if (txt == null || txt.isEmpty) {
         return MDnsObservatoryDiscoveryResult(srv.first.port, '');
       }
@@ -145,7 +144,9 @@ class MDnsObservatoryDiscovery {
     }
   }
 
-  Future<Uri?> getObservatoryUri(String applicationId, Device device, {
+  Future<Uri?> getObservatoryUri(
+    String applicationId,
+    Device device, {
     bool usesIpv6 = false,
     int? hostVmservicePort,
     int? deviceVmservicePort,
@@ -159,9 +160,7 @@ class MDnsObservatoryDiscovery {
       return null;
     }
 
-    final String host = usesIpv6
-      ? InternetAddress.loopbackIPv6.address
-      : InternetAddress.loopbackIPv4.address;
+    final String host = usesIpv6 ? InternetAddress.loopbackIPv6.address : InternetAddress.loopbackIPv4.address;
     return buildObservatoryUri(
       device,
       host,
@@ -174,9 +173,7 @@ class MDnsObservatoryDiscovery {
   // If there's not an ipv4 link local address in `NetworkInterfaces.list`,
   // then request user interventions with a `printError()` if possible.
   Future<void> _checkForIPv4LinkLocal(Device device) async {
-    _logger.printTrace(
-      'mDNS query failed. Checking for an interface with a ipv4 link local address.'
-    );
+    _logger.printTrace('mDNS query failed. Checking for an interface with a ipv4 link local address.');
     final List<NetworkInterface> interfaces = await listNetworkInterfaces(
       includeLinkLocal: true,
       type: InternetAddressType.IPv4,
@@ -197,13 +194,11 @@ class MDnsObservatoryDiscovery {
     switch (targetPlatform) {
       case TargetPlatform.ios:
         UsageEvent('ios-mdns', 'no-ipv4-link-local', flutterUsage: _flutterUsage).send();
-        _logger.printError(
-          'The mDNS query for an attached iOS device failed. It may '
-          'be necessary to disable the "Personal Hotspot" on the device, and '
-          'to ensure that the "Disable unless needed" setting is unchecked '
-          'under System Preferences > Network > iPhone USB. '
-          'See https://github.com/flutter/flutter/issues/46698 for details.'
-        );
+        _logger.printError('The mDNS query for an attached iOS device failed. It may '
+            'be necessary to disable the "Personal Hotspot" on the device, and '
+            'to ensure that the "Disable unless needed" setting is unchecked '
+            'under System Preferences > Network > iPhone USB. '
+            'See https://github.com/flutter/flutter/issues/46698 for details.');
         break;
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
@@ -260,8 +255,7 @@ Future<Uri> buildObservatoryUri(
     path += '/';
   }
   hostVmservicePort ??= 0;
-  final int? actualHostPort = hostVmservicePort == 0 ?
-    await device.portForwarder?.forward(devicePort) :
-    hostVmservicePort;
+  final int? actualHostPort =
+      hostVmservicePort == 0 ? await device.portForwarder?.forward(devicePort) : hostVmservicePort;
   return Uri(scheme: 'http', host: host, port: actualHostPort, path: path);
 }

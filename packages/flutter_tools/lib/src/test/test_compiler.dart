@@ -40,20 +40,18 @@ class TestCompiler {
   ///
   /// If [precompiledDillPath] is passed, it will be used to initialize the
   /// compiler.
-  TestCompiler(
-    this.buildInfo,
-    this.flutterProject,
-    { String precompiledDillPath }
-  ) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
-        flutterProject.directory.path,
-        getBuildDirectory(),
-        'test_cache',
-        getDefaultCachedKernelPath(
-          trackWidgetCreation: buildInfo.trackWidgetCreation,
-          dartDefines: buildInfo.dartDefines,
-          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-        )),
-       shouldCopyDillFile = precompiledDillPath == null {
+  TestCompiler(this.buildInfo, this.flutterProject, {String precompiledDillPath})
+      : testFilePath = precompiledDillPath ??
+            globals.fs.path.join(
+                flutterProject.directory.path,
+                getBuildDirectory(),
+                'test_cache',
+                getDefaultCachedKernelPath(
+                  trackWidgetCreation: buildInfo.trackWidgetCreation,
+                  dartDefines: buildInfo.dartDefines,
+                  extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+                )),
+        shouldCopyDillFile = precompiledDillPath == null {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -73,7 +71,6 @@ class TestCompiler {
   final BuildInfo buildInfo;
   final String testFilePath;
   final bool shouldCopyDillFile;
-
 
   ResidentCompiler compiler;
   File outputDill;
@@ -148,8 +145,8 @@ class TestCompiler {
       final List<Uri> invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
         // Update the generated registrant to use the test target's main.
-        final String mainUriString = buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString()
-          ?? request.mainUri.toString();
+        final String mainUriString =
+            buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString() ?? request.mainUri.toString();
         await generateMainDartWithPluginRegistrant(
           flutterProject,
           buildInfo.packageConfig,

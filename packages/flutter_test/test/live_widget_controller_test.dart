@@ -36,8 +36,7 @@ class AnimateSample extends StatefulWidget {
   State<AnimateSample> createState() => _AnimateSampleState();
 }
 
-class _AnimateSampleState extends State<AnimateSample>
-    with SingleTickerProviderStateMixin {
+class _AnimateSampleState extends State<AnimateSample> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -69,8 +68,7 @@ void main() {
     runApp(const MaterialApp(home: Center(child: CountButton())));
 
     await SchedulerBinding.instance.endOfFrame;
-    final WidgetController controller =
-        LiveWidgetController(WidgetsBinding.instance);
+    final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
     await controller.tap(find.text('Counter 0'));
     expect(find.text('Counter 0'), findsOneWidget);
     expect(find.text('Counter 1'), findsNothing);
@@ -82,8 +80,7 @@ void main() {
   test('Test pumpAndSettle on LiveWidgetController', () async {
     runApp(const MaterialApp(home: Center(child: AnimateSample())));
     await SchedulerBinding.instance.endOfFrame;
-    final WidgetController controller =
-        LiveWidgetController(WidgetsBinding.instance);
+    final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
     expect(find.text('Value: 1.0'), findsNothing);
     await controller.pumpAndSettle();
     expect(find.text('Value: 1.0'), findsOneWidget);
@@ -102,8 +99,7 @@ void main() {
       ),
     );
     await SchedulerBinding.instance.endOfFrame;
-    final WidgetController controller =
-        LiveWidgetController(WidgetsBinding.instance);
+    final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
 
     final Offset location = controller.getCenter(find.text('test'));
     final List<PointerEventRecord> records = <PointerEventRecord>[
@@ -121,8 +117,8 @@ void main() {
       ]),
       ...<PointerEventRecord>[
         for (Duration t = const Duration(milliseconds: 5);
-             t < const Duration(milliseconds: 80);
-             t += const Duration(milliseconds: 16))
+            t < const Duration(milliseconds: 80);
+            t += const Duration(milliseconds: 16))
           PointerEventRecord(t, <PointerEvent>[
             PointerMoveEvent(
               timeStamp: t - const Duration(milliseconds: 1),
@@ -141,8 +137,7 @@ void main() {
         )
       ])
     ];
-    final List<Duration> timeDiffs =
-        await controller.handlePointerEventRecord(records);
+    final List<Duration> timeDiffs = await controller.handlePointerEventRecord(records);
 
     expect(timeDiffs.length, records.length);
     for (final Duration diff in timeDiffs) {

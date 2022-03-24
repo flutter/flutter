@@ -41,10 +41,10 @@ void main() {
     ]);
 
     // Development tools.
-    expect(result.stdout, contains(
-      'Run "flutter help <command>" for more information about a command.\n'
-      'Run "flutter help -v" for verbose help output, including less commonly used options.'
-    ));
+    expect(
+        result.stdout,
+        contains('Run "flutter help <command>" for more information about a command.\n'
+            'Run "flutter help -v" for verbose help output, including less commonly used options.'));
   });
 
   testWithoutContext('flutter doctor is not verbose', () async {
@@ -79,28 +79,22 @@ void main() {
     ]);
 
     // contains all of the experiments in features.dart
-    expect((result.stdout as String).split('\n'), containsAll(<Matcher>[
-      for (final Feature feature in allFeatures)
-        contains(feature.configSetting),
-    ]));
+    expect(
+        (result.stdout as String).split('\n'),
+        containsAll(<Matcher>[
+          for (final Feature feature in allFeatures) contains(feature.configSetting),
+        ]));
   });
 
   testWithoutContext('flutter run --machine uses AppRunLogger', () async {
     final Directory directory = createResolvedTempDirectorySync('flutter_run_test.')
-      .createTempSync('_flutter_run_test.')
+        .createTempSync('_flutter_run_test.')
       ..createSync(recursive: true);
 
     try {
-      directory
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('name: foo');
-      directory
-        .childFile('.packages')
-        .writeAsStringSync('\n');
-      directory
-        .childDirectory('lib')
-        .childFile('main.dart')
-        .createSync(recursive: true);
+      directory.childFile('pubspec.yaml').writeAsStringSync('name: foo');
+      directory.childFile('.packages').writeAsStringSync('\n');
+      directory.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
       final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
@@ -125,7 +119,8 @@ void main() {
       '-v',
     ]);
 
-    expect(result.stderr, contains('Target file')); // Target file not found, but different paths on Windows and Linux/macOS.
+    expect(result.stderr,
+        contains('Target file')); // Target file not found, but different paths on Windows and Linux/macOS.
   });
 
   testWithoutContext('flutter --version --machine outputs JSON with flutterRoot', () async {
@@ -137,10 +132,10 @@ void main() {
     ]);
 
     final Map<String, Object?> versionInfo = json.decode(result.stdout
-      .toString()
-      .replaceAll('Building flutter tool...', '')
-      .replaceAll('Waiting for another flutter command to release the startup lock...', '')
-      .trim()) as Map<String, Object?>;
+        .toString()
+        .replaceAll('Building flutter tool...', '')
+        .replaceAll('Waiting for another flutter command to release the startup lock...', '')
+        .trim()) as Map<String, Object?>;
 
     expect(versionInfo, containsPair('flutterRoot', isNotNull));
   });
@@ -182,11 +177,8 @@ void main() {
   testWithoutContext('will load bootstrap script before starting', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
-    final File bootstrap = fileSystem.file(fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'internal',
-      platform.isWindows ? 'bootstrap.bat' : 'bootstrap.sh'),
+    final File bootstrap = fileSystem.file(
+      fileSystem.path.join(getFlutterRoot(), 'bin', 'internal', platform.isWindows ? 'bootstrap.bat' : 'bootstrap.sh'),
     );
 
     try {
@@ -240,10 +232,12 @@ void main() {
     });
 
     expect(result.exitCode, isNot(0));
-    expect(result.stderr, contains(
-      'Oops; flutter has exited unexpectedly: "Bad state: test crash please ignore.".\n'
-      'A crash report has been written to',
-    ));
+    expect(
+        result.stderr,
+        contains(
+          'Oops; flutter has exited unexpectedly: "Bad state: test crash please ignore.".\n'
+          'A crash report has been written to',
+        ));
   });
 
   testWithoutContext('flutter supports trailing args', () async {

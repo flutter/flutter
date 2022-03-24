@@ -286,10 +286,8 @@ class Router<T> extends StatefulWidget {
     required this.routerDelegate,
     this.backButtonDispatcher,
     this.restorationScopeId,
-  })  : assert(
-          (routeInformationProvider == null && restorationScopeId == null) || routeInformationParser != null,
-          'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.'
-        ),
+  })  : assert((routeInformationProvider == null && restorationScopeId == null) || routeInformationParser != null,
+            'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.'),
         assert(routerDelegate != null),
         super(key: key);
 
@@ -426,9 +424,7 @@ class Router<T> extends StatefulWidget {
   ///  * [neglect]: which forces the [Router] to not create a new history entry
   ///    even if location does change.
   static void navigate(BuildContext context, VoidCallback callback) {
-    final _RouterScope scope = context
-      .getElementForInheritedWidgetOfExactType<_RouterScope>()!
-      .widget as _RouterScope;
+    final _RouterScope scope = context.getElementForInheritedWidgetOfExactType<_RouterScope>()!.widget as _RouterScope;
     scope.routerState._setStateWithExplicitReportStatus(RouteInformationReportingType.navigate, callback);
   }
 
@@ -455,9 +451,7 @@ class Router<T> extends StatefulWidget {
   ///  * [navigate]: which forces the [Router] to create a new history entry
   ///    even if location does not change.
   static void neglect(BuildContext context, VoidCallback callback) {
-    final _RouterScope scope = context
-      .getElementForInheritedWidgetOfExactType<_RouterScope>()!
-      .widget as _RouterScope;
+    final _RouterScope scope = context.getElementForInheritedWidgetOfExactType<_RouterScope>()!.widget as _RouterScope;
     scope.routerState._setStateWithExplicitReportStatus(RouteInformationReportingType.neglect, callback);
   }
 
@@ -483,9 +477,11 @@ enum RouteInformationReportingType {
   /// neither [Router.neglect] nor [Router.navigate] was used during the
   /// rebuild.
   none,
+
   /// The accompanying [RouteInformation] were generated during a
   /// [Router.neglect] call.
   neglect,
+
   /// The accompanying [RouteInformation] were generated during a
   /// [Router.navigate] call.
   navigate,
@@ -521,8 +517,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   bool _routeInformationReportingTaskScheduled = false;
 
   void _scheduleRouteInformationReportingTask() {
-    if (_routeInformationReportingTaskScheduled || widget.routeInformationProvider == null)
-      return;
+    if (_routeInformationReportingTaskScheduled || widget.routeInformationProvider == null) return;
     assert(_currentIntentionToReport != null);
     _routeInformationReportingTaskScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback(_reportRouteInformation);
@@ -535,15 +530,15 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     if (_routeInformation.value != null) {
       final RouteInformation currentRouteInformation = _routeInformation.value!;
       assert(_currentIntentionToReport != null);
-      widget.routeInformationProvider!.routerReportsNewRouteInformation(currentRouteInformation, type: _currentIntentionToReport!);
+      widget.routeInformationProvider!
+          .routerReportsNewRouteInformation(currentRouteInformation, type: _currentIntentionToReport!);
     }
     _currentIntentionToReport = RouteInformationReportingType.none;
   }
 
   RouteInformation? _retrieveNewRouteInformation() {
     final T? configuration = widget.routerDelegate.currentConfiguration;
-    if (configuration == null)
-      return null;
+    if (configuration == null) return null;
     return widget.routeInformationParser?.restoreRouteInformation(configuration);
   }
 
@@ -559,11 +554,10 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
           _currentIntentionToReport != status) {
         FlutterError.reportError(
           const FlutterErrorDetails(
-            exception:
-              'Both Router.navigate and Router.neglect have been called in this '
-              'build cycle, and the Router cannot decide whether to report the '
-              'route information. Please make sure only one of them is called '
-              'within the same build cycle.',
+            exception: 'Both Router.navigate and Router.neglect have been called in this '
+                'build cycle, and the Router cannot decide whether to report the '
+                'route information. Please make sure only one of them is called '
+                'within the same build cycle.',
           ),
         );
       }
@@ -624,15 +618,16 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     super.dispose();
   }
 
-  void _processRouteInformation(RouteInformation information, ValueGetter<_DelegateRouteSetter<T>> delegateRouteSetter) {
+  void _processRouteInformation(
+      RouteInformation information, ValueGetter<_DelegateRouteSetter<T>> delegateRouteSetter) {
     _currentRouteInformationParserTransaction = Object();
     _currentRouterDelegateTransaction = Object();
     widget.routeInformationParser!
-      .parseRouteInformation(information)
-      .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
-      .then<void>(delegateRouteSetter())
-      .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
-      .then<void>(_rebuild);
+        .parseRouteInformation(information)
+        .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
+        .then<void>(delegateRouteSetter())
+        .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
+        .then<void>(_rebuild);
   }
 
   void _handleRouteInformationProviderNotification() {
@@ -644,12 +639,12 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     _currentRouteInformationParserTransaction = Object();
     _currentRouterDelegateTransaction = Object();
     return widget.routerDelegate
-      .popRoute()
-      .then<bool>(_verifyRouterDelegatePopStillCurrent(_currentRouterDelegateTransaction, widget))
-      .then<bool>((bool data) {
-        _rebuild();
-        return SynchronousFuture<bool>(data);
-      });
+        .popRoute()
+        .then<bool>(_verifyRouterDelegatePopStillCurrent(_currentRouterDelegateTransaction, widget))
+        .then<bool>((bool data) {
+      _rebuild();
+      return SynchronousFuture<bool>(data);
+    });
   }
 
   static final Future<dynamic> _never = Completer<dynamic>().future; // won't ever complete
@@ -673,8 +668,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
           widget.routeInformationProvider == originalWidget.routeInformationProvider &&
           widget.backButtonDispatcher == originalWidget.backButtonDispatcher &&
           widget.routeInformationParser == originalWidget.routeInformationParser &&
-          widget.routerDelegate == originalWidget.routerDelegate)
-        return SynchronousFuture<void>(data);
+          widget.routerDelegate == originalWidget.routerDelegate) return SynchronousFuture<void>(data);
       return _never;
     };
   }
@@ -748,10 +742,10 @@ class _RouterScope extends InheritedWidget {
   @override
   bool updateShouldNotify(_RouterScope oldWidget) {
     return routeInformationProvider != oldWidget.routeInformationProvider ||
-           backButtonDispatcher != oldWidget.backButtonDispatcher ||
-           routeInformationParser != oldWidget.routeInformationParser ||
-           routerDelegate != oldWidget.routerDelegate ||
-           routerState != oldWidget.routerState;
+        backButtonDispatcher != oldWidget.backButtonDispatcher ||
+        routeInformationParser != oldWidget.routeInformationParser ||
+        routerDelegate != oldWidget.routerDelegate ||
+        routerState != oldWidget.routerState;
   }
 }
 
@@ -799,8 +793,7 @@ class _CallbackHookProvider<T> {
   @protected
   @pragma('vm:notify-debugger-on-exception')
   T invokeCallback(T defaultValue) {
-    if (_callbacks.isEmpty)
-      return defaultValue;
+    if (_callbacks.isEmpty) return defaultValue;
     try {
       return _callbacks.single();
     } catch (exception, stack) {
@@ -839,7 +832,7 @@ class _CallbackHookProvider<T> {
 /// the pop request, and a future that completes to false otherwise.
 abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> {
   late final LinkedHashSet<ChildBackButtonDispatcher> _children =
-    <ChildBackButtonDispatcher>{} as LinkedHashSet<ChildBackButtonDispatcher>;
+      <ChildBackButtonDispatcher>{} as LinkedHashSet<ChildBackButtonDispatcher>;
 
   @override
   bool get hasCallbacks => super.hasCallbacks || (_children.isNotEmpty);
@@ -868,23 +861,18 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
 
       Future<bool> notifyNextChild(bool result) {
         // If the previous child handles the callback, we return the result.
-        if (result)
-          return SynchronousFuture<bool>(result);
+        if (result) return SynchronousFuture<bool>(result);
         // If the previous child did not handle the callback, we ask the next
         // child to handle the it.
         if (childIndex > 0) {
           childIndex -= 1;
-          return children[childIndex]
-            .notifiedByParent(defaultValue)
-            .then<bool>(notifyNextChild);
+          return children[childIndex].notifiedByParent(defaultValue).then<bool>(notifyNextChild);
         }
         // If none of the child handles the callback, the parent will then handle it.
         return super.invokeCallback(defaultValue);
       }
 
-      return children[childIndex]
-        .notifiedByParent(defaultValue)
-        .then<bool>(notifyNextChild);
+      return children[childIndex].notifiedByParent(defaultValue).then<bool>(notifyNextChild);
     }
     return super.invokeCallback(defaultValue);
   }
@@ -966,16 +954,14 @@ class RootBackButtonDispatcher extends BackButtonDispatcher with WidgetsBindingO
 
   @override
   void addCallback(ValueGetter<Future<bool>> callback) {
-    if (!hasCallbacks)
-      WidgetsBinding.instance.addObserver(this);
+    if (!hasCallbacks) WidgetsBinding.instance.addObserver(this);
     super.addCallback(callback);
   }
 
   @override
   void removeCallback(ValueGetter<Future<bool>> callback) {
     super.removeCallback(callback);
-    if (!hasCallbacks)
-      WidgetsBinding.instance.removeObserver(this);
+    if (!hasCallbacks) WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
@@ -1031,8 +1017,7 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
   @override
   void removeCallback(ValueGetter<Future<bool>> callback) {
     super.removeCallback(callback);
-    if (!hasCallbacks)
-      parent.forget(this);
+    if (!hasCallbacks) parent.forget(this);
   }
 }
 
@@ -1326,7 +1311,8 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
   /// For more information on how [Router] determines a navigation event, see
   /// the "URL updates for web applications" section in the [Router]
   /// documentation.
-  void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {}
+  void routerReportsNewRouteInformation(RouteInformation routeInformation,
+      {RouteInformationReportingType type = RouteInformationReportingType.none}) {}
 }
 
 /// The route information provider that propagates the platform route information changes.
@@ -1349,11 +1335,10 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   }) : _value = initialRouteInformation;
 
   @override
-  void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
-    final bool replace =
-      type == RouteInformationReportingType.neglect ||
-      (type == RouteInformationReportingType.none &&
-       _valueInEngine.location == routeInformation.location);
+  void routerReportsNewRouteInformation(RouteInformation routeInformation,
+      {RouteInformationReportingType type = RouteInformationReportingType.none}) {
+    final bool replace = type == RouteInformationReportingType.neglect ||
+        (type == RouteInformationReportingType.none && _valueInEngine.location == routeInformation.location);
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       location: routeInformation.location!,
@@ -1368,11 +1353,11 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   RouteInformation get value => _value;
   RouteInformation _value;
 
-  RouteInformation _valueInEngine = RouteInformation(location: WidgetsBinding.instance.platformDispatcher.defaultRouteName);
+  RouteInformation _valueInEngine =
+      RouteInformation(location: WidgetsBinding.instance.platformDispatcher.defaultRouteName);
 
   void _platformReportsNewRouteInformation(RouteInformation routeInformation) {
-    if (_value == routeInformation)
-      return;
+    if (_value == routeInformation) return;
     _value = routeInformation;
     _valueInEngine = routeInformation;
     notifyListeners();
@@ -1380,16 +1365,14 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
 
   @override
   void addListener(VoidCallback listener) {
-    if (!hasListeners)
-      WidgetsBinding.instance.addObserver(this);
+    if (!hasListeners) WidgetsBinding.instance.addObserver(this);
     super.addListener(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
     super.removeListener(listener);
-    if (!hasListeners)
-      WidgetsBinding.instance.removeObserver(this);
+    if (!hasListeners) WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
@@ -1398,8 +1381,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
     // will be added and removed in a coherent fashion such that when the object
     // is no longer being used, there's no listener, and so it will get garbage
     // collected.
-    if (hasListeners)
-      WidgetsBinding.instance.removeObserver(this);
+    if (hasListeners) WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -1436,8 +1418,7 @@ mixin PopNavigatorRouterDelegateMixin<T> on RouterDelegate<T> {
   @override
   Future<bool> popRoute() {
     final NavigatorState? navigator = navigatorKey?.currentState;
-    if (navigator == null)
-      return SynchronousFuture<bool>(false);
+    if (navigator == null) return SynchronousFuture<bool>(false);
     return navigator.maybePop();
   }
 }

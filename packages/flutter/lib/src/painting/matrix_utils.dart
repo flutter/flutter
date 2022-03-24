@@ -64,7 +64,8 @@ class MatrixUtils {
         values[13] == 0.0 &&
         values[14] == 0.0 &&
         values[15] == 1.0 &&
-        values[0] == values[5]) { // uniform scale
+        values[0] == values[5]) {
+      // uniform scale
       return values[0];
     }
     return null;
@@ -73,51 +74,52 @@ class MatrixUtils {
   /// Returns true if the given matrices are exactly equal, and false
   /// otherwise. Null values are assumed to be the identity matrix.
   static bool matrixEquals(Matrix4? a, Matrix4? b) {
-    if (identical(a, b))
-      return true;
+    if (identical(a, b)) return true;
     assert(a != null || b != null);
-    if (a == null)
-      return isIdentity(b!);
-    if (b == null)
-      return isIdentity(a);
+    if (a == null) return isIdentity(b!);
+    if (b == null) return isIdentity(a);
     assert(a != null && b != null);
-    return a.storage[0] == b.storage[0]
-        && a.storage[1] == b.storage[1]
-        && a.storage[2] == b.storage[2]
-        && a.storage[3] == b.storage[3]
-        && a.storage[4] == b.storage[4]
-        && a.storage[5] == b.storage[5]
-        && a.storage[6] == b.storage[6]
-        && a.storage[7] == b.storage[7]
-        && a.storage[8] == b.storage[8]
-        && a.storage[9] == b.storage[9]
-        && a.storage[10] == b.storage[10]
-        && a.storage[11] == b.storage[11]
-        && a.storage[12] == b.storage[12]
-        && a.storage[13] == b.storage[13]
-        && a.storage[14] == b.storage[14]
-        && a.storage[15] == b.storage[15];
+    return a.storage[0] == b.storage[0] &&
+        a.storage[1] == b.storage[1] &&
+        a.storage[2] == b.storage[2] &&
+        a.storage[3] == b.storage[3] &&
+        a.storage[4] == b.storage[4] &&
+        a.storage[5] == b.storage[5] &&
+        a.storage[6] == b.storage[6] &&
+        a.storage[7] == b.storage[7] &&
+        a.storage[8] == b.storage[8] &&
+        a.storage[9] == b.storage[9] &&
+        a.storage[10] == b.storage[10] &&
+        a.storage[11] == b.storage[11] &&
+        a.storage[12] == b.storage[12] &&
+        a.storage[13] == b.storage[13] &&
+        a.storage[14] == b.storage[14] &&
+        a.storage[15] == b.storage[15];
   }
 
   /// Whether the given matrix is the identity matrix.
   static bool isIdentity(Matrix4 a) {
     assert(a != null);
     return a.storage[0] == 1.0 // col 1
-        && a.storage[1] == 0.0
-        && a.storage[2] == 0.0
-        && a.storage[3] == 0.0
-        && a.storage[4] == 0.0 // col 2
-        && a.storage[5] == 1.0
-        && a.storage[6] == 0.0
-        && a.storage[7] == 0.0
-        && a.storage[8] == 0.0 // col 3
-        && a.storage[9] == 0.0
-        && a.storage[10] == 1.0
-        && a.storage[11] == 0.0
-        && a.storage[12] == 0.0 // col 4
-        && a.storage[13] == 0.0
-        && a.storage[14] == 0.0
-        && a.storage[15] == 1.0;
+        &&
+        a.storage[1] == 0.0 &&
+        a.storage[2] == 0.0 &&
+        a.storage[3] == 0.0 &&
+        a.storage[4] == 0.0 // col 2
+        &&
+        a.storage[5] == 1.0 &&
+        a.storage[6] == 0.0 &&
+        a.storage[7] == 0.0 &&
+        a.storage[8] == 0.0 // col 3
+        &&
+        a.storage[9] == 0.0 &&
+        a.storage[10] == 1.0 &&
+        a.storage[11] == 0.0 &&
+        a.storage[12] == 0.0 // col 4
+        &&
+        a.storage[13] == 0.0 &&
+        a.storage[14] == 0.0 &&
+        a.storage[15] == 1.0;
   }
 
   /// Applies the given matrix as a perspective transform to the given point.
@@ -158,13 +160,11 @@ class MatrixUtils {
   /// if it can.
   static Rect _safeTransformRect(Matrix4 transform, Rect rect) {
     final Float64List storage = transform.storage;
-    final bool isAffine = storage[3] == 0.0 &&
-        storage[7] == 0.0 &&
-        storage[15] == 1.0;
+    final bool isAffine = storage[3] == 0.0 && storage[7] == 0.0 && storage[15] == 1.0;
 
-    _accumulate(storage, rect.left,  rect.top,    true,  isAffine);
-    _accumulate(storage, rect.right, rect.top,    false, isAffine);
-    _accumulate(storage, rect.left,  rect.bottom, false, isAffine);
+    _accumulate(storage, rect.left, rect.top, true, isAffine);
+    _accumulate(storage, rect.right, rect.top, false, isAffine);
+    _accumulate(storage, rect.left, rect.bottom, false, isAffine);
     _accumulate(storage, rect.right, rect.bottom, false, isAffine);
 
     return Rect.fromLTRB(_minMax[0], _minMax[1], _minMax[2], _minMax[3]);
@@ -368,28 +368,28 @@ class MatrixUtils {
     final double ry = storage[1] * x + storage[5] * y + storage[13];
 
     if (storage[3] == 0.0 && storage[7] == 0.0 && storage[15] == 1.0) {
-      double left  = rx;
+      double left = rx;
       double right = rx;
       if (wx < 0) {
-        left  += wx;
+        left += wx;
       } else {
         right += wx;
       }
       if (hx < 0) {
-        left  += hx;
+        left += hx;
       } else {
         right += hx;
       }
 
-      double top    = ry;
+      double top = ry;
       double bottom = ry;
       if (wy < 0) {
-        top    += wy;
+        top += wy;
       } else {
         bottom += wy;
       }
       if (hy < 0) {
-        top    += hy;
+        top += hy;
       } else {
         bottom += hy;
       }
@@ -400,12 +400,12 @@ class MatrixUtils {
       final double hw = storage[7] * h;
       final double rw = storage[3] * x + storage[7] * y + storage[15];
 
-      final double ulx =  rx            /  rw;
-      final double uly =  ry            /  rw;
-      final double urx = (rx + wx)      / (rw + ww);
-      final double ury = (ry + wy)      / (rw + ww);
-      final double llx = (rx      + hx) / (rw      + hw);
-      final double lly = (ry      + hy) / (rw      + hw);
+      final double ulx = rx / rw;
+      final double uly = ry / rw;
+      final double urx = (rx + wx) / (rw + ww);
+      final double ury = (ry + wy) / (rw + ww);
+      final double llx = (rx + hx) / (rw + hw);
+      final double lly = (ry + hy) / (rw + hw);
       final double lrx = (rx + wx + hx) / (rw + ww + hw);
       final double lry = (ry + wy + hy) / (rw + ww + hw);
 
@@ -423,6 +423,7 @@ class MatrixUtils {
     final double f = (c < d) ? c : d;
     return (e < f) ? e : f;
   }
+
   static double _max4(double a, double b, double c, double d) {
     final double e = (a > b) ? a : b;
     final double f = (c > d) ? c : d;
@@ -441,8 +442,7 @@ class MatrixUtils {
     // Fixing it introduces a bunch of runtime failures; for more context see:
     // https://github.com/flutter/flutter/pull/31568
     // assert(transform.determinant != 0.0);
-    if (isIdentity(transform))
-      return rect;
+    if (isIdentity(transform)) return rect;
     transform = Matrix4.copy(transform)..invert();
     return transformRect(transform, rect);
   }
@@ -508,17 +508,15 @@ class MatrixUtils {
     //  [0.0, 0.0, 1.0, -radius],
     //  [0.0, 0.0, 0.0, 1.0]]
     Matrix4 result = Matrix4.identity()
-        ..setEntry(3, 2, -perspective)
-        ..setEntry(2, 3, -radius)
-        ..setEntry(3, 3, perspective * radius + 1.0);
+      ..setEntry(3, 2, -perspective)
+      ..setEntry(2, 3, -radius)
+      ..setEntry(3, 3, perspective * radius + 1.0);
 
     // Model matrix by first translating the object from the origin of the world
     // by radius in the z axis and then rotating against the world.
-    result = result * ((
-        orientation == Axis.horizontal
-            ? Matrix4.rotationY(angle)
-            : Matrix4.rotationX(angle)
-    ) * Matrix4.translationValues(0.0, 0.0, radius)) as Matrix4;
+    result = result *
+        ((orientation == Axis.horizontal ? Matrix4.rotationY(angle) : Matrix4.rotationX(angle)) *
+            Matrix4.translationValues(0.0, 0.0, radius)) as Matrix4;
 
     // Essentially perspective * view * model.
     return result;
@@ -537,8 +535,7 @@ class MatrixUtils {
 ///
 /// If the argument is null, returns a list with the single string "null".
 List<String> debugDescribeTransform(Matrix4? transform) {
-  if (transform == null)
-    return const <String>['null'];
+  if (transform == null) return const <String>['null'];
   return <String>[
     '[0] ${debugFormatDouble(transform.entry(0, 0))},${debugFormatDouble(transform.entry(0, 1))},${debugFormatDouble(transform.entry(0, 2))},${debugFormatDouble(transform.entry(0, 3))}',
     '[1] ${debugFormatDouble(transform.entry(1, 0))},${debugFormatDouble(transform.entry(1, 1))},${debugFormatDouble(transform.entry(1, 2))},${debugFormatDouble(transform.entry(1, 3))}',
@@ -558,18 +555,18 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
     bool showName = true,
     Object? defaultValue = kNoDefaultValue,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(showName != null),
-       assert(level != null),
-       super(
-         name,
-         value,
-         showName: showName,
-         defaultValue: defaultValue,
-         level: level,
-       );
+  })  : assert(showName != null),
+        assert(level != null),
+        super(
+          name,
+          value,
+          showName: showName,
+          defaultValue: defaultValue,
+          level: level,
+        );
 
   @override
-  String valueToString({ TextTreeConfiguration? parentConfiguration }) {
+  String valueToString({TextTreeConfiguration? parentConfiguration}) {
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Format the value on a single line to be compatible with the parent's
       // style.

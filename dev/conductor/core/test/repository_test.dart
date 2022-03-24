@@ -41,8 +41,7 @@ void main() {
           'upstream',
           '--',
           FrameworkRepository.defaultUpstream,
-          fileSystem.path
-              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+          fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -94,8 +93,7 @@ void main() {
           'upstream',
           '--',
           FrameworkRepository.defaultUpstream,
-          fileSystem.path
-              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+          fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -151,8 +149,7 @@ void main() {
           'upstream',
           '--',
           FrameworkRepository.defaultUpstream,
-          fileSystem.path
-              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+          fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -241,8 +238,7 @@ vars = {
           'upstream',
           '--',
           EngineRepository.defaultUpstream,
-          fileSystem.path
-              .join(rootDir, 'flutter_conductor_checkouts', 'engine'),
+          fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'engine'),
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -298,8 +294,7 @@ vars = {
           'upstream',
           '--',
           EngineRepository.defaultUpstream,
-          fileSystem.path
-              .join(rootDir, 'flutter_conductor_checkouts', 'engine'),
+          fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'engine'),
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -352,8 +347,7 @@ vars = {
           'upstream',
           '--',
           FrameworkRepository.defaultUpstream,
-          fileSystem.path
-              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+          fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
         ]),
         const FakeCommand(command: <String>[
           'git',

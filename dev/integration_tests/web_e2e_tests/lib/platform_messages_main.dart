@@ -29,8 +29,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final TextEditingController _controller =
-  TextEditingController(text: 'Text1');
+  final TextEditingController _controller = TextEditingController(text: 'Text1');
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +41,8 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-              const Text('Hello World',
+            const Text(
+              'Hello World',
             ),
             // Create a text form field since we can't test clipboard unless
             // html document has focus.

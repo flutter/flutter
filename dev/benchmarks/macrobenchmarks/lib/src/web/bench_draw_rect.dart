@@ -13,14 +13,18 @@ class BenchDrawRect extends SceneBuilderRecorder {
   /// A variant of the benchmark that uses the same [Paint] object for all rectangles.
   ///
   /// This variant focuses on the performance of the `drawRect` method itself.
-  BenchDrawRect.staticPaint() : benchmarkPaint = false, super(name: benchmarkName);
+  BenchDrawRect.staticPaint()
+      : benchmarkPaint = false,
+        super(name: benchmarkName);
 
   /// A variant of the benchmark that creates a unique [Paint] for each rectangle.
   ///
   /// Does not cache the [Paint] objects across frames, but generates new
   /// objects every time. This variant of the benchmark focuses on construction
   /// and transfer of paint data to the renderer.
-  BenchDrawRect.variablePaint() : benchmarkPaint = true, super(name: variablePaintBenchmarkName);
+  BenchDrawRect.variablePaint()
+      : benchmarkPaint = true,
+        super(name: variablePaintBenchmarkName);
 
   static const String benchmarkName = 'draw_rect';
   static const String variablePaintBenchmarkName = 'draw_rect_variable_paint';

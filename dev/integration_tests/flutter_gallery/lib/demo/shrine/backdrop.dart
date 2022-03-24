@@ -13,11 +13,11 @@ const double _kPeakVelocityProgress = 0.379146;
 
 class _TappableWhileStatusIs extends StatefulWidget {
   const _TappableWhileStatusIs(
-      this.status, {
-        Key? key,
-        this.controller,
-        this.child,
-      }) : super(key: key);
+    this.status, {
+    Key? key,
+    this.controller,
+    this.child,
+  }) : super(key: key);
 
   final AnimationController? controller;
   final AnimationStatus status;

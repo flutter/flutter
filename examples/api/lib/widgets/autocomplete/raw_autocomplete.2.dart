@@ -63,8 +63,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                 _dropdownValue = newValue;
               });
             },
-            items: <String>['One', 'Two', 'Free', 'Four']
-                .map<DropdownMenuItem<String>>((String value) {
+            items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
                 child: Text(value),
@@ -100,9 +99,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                 _autocompleteSelection = selection;
               });
             },
-            fieldViewBuilder: (BuildContext context,
-                TextEditingController textEditingController,
-                FocusNode focusNode,
+            fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode,
                 VoidCallback onFieldSubmitted) {
               return TextFormField(
                 controller: textEditingController,
@@ -121,9 +118,8 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                 },
               );
             },
-            optionsViewBuilder: (BuildContext context,
-                AutocompleteOnSelected<String> onSelected,
-                Iterable<String> options) {
+            optionsViewBuilder:
+                (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
               return Align(
                 alignment: Alignment.topLeft,
                 child: Material(
@@ -165,8 +161,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                       child: ListBody(
                         children: <Widget>[
                           Text('DropdownButtonFormField: "$_dropdownValue"'),
-                          Text(
-                              'TextFormField: "${_textEditingController.text}"'),
+                          Text('TextFormField: "${_textEditingController.text}"'),
                           Text('RawAutocomplete: "$_autocompleteSelection"'),
                         ],
                       ),

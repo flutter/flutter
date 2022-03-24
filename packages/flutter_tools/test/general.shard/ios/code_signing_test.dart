@@ -61,9 +61,10 @@ void main() {
         terminal: testTerminal,
       );
       expect(signingConfigs, isNull);
-      expect(logger.statusText, equals(
-        'Automatically signing iOS for device deployment using specified development team in Xcode project: abc\n'
-      ));
+      expect(
+          logger.statusText,
+          equals(
+              'Automatically signing iOS for device deployment using specified development team in Xcode project: abc\n'));
     });
 
     testWithoutContext('No auto-sign if security or openssl not available', () async {
@@ -123,14 +124,16 @@ void main() {
         ),
       ]);
 
-      await expectLater(() => getCodeSigningIdentityDevelopmentTeamBuildSetting(
-        buildSettings: <String, String>{},
-        platform: macosPlatform,
-        processManager: processManager,
-        logger: logger,
-        config: testConfig,
-        terminal: testTerminal,
-      ), throwsToolExit(message: 'No development certificates available to code sign app for device deployment'));
+      await expectLater(
+          () => getCodeSigningIdentityDevelopmentTeamBuildSetting(
+                buildSettings: <String, String>{},
+                platform: macosPlatform,
+                processManager: processManager,
+                logger: logger,
+                config: testConfig,
+                terminal: testTerminal,
+              ),
+          throwsToolExit(message: 'No development certificates available to code sign app for device deployment'));
     });
 
     testWithoutContext('No valid code signing certificates on non-macOS platform', () async {
@@ -352,7 +355,8 @@ void main() {
       );
       expect(
         logger.statusText,
-        contains('Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 3 (3333CCCC33)"'),
+        contains(
+            'Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 3 (3333CCCC33)"'),
       );
       expect(logger.errorText, isEmpty);
       expect(stdin, 'This is a fake certificate');
@@ -405,7 +409,8 @@ void main() {
 
       expect(
         logger.statusText,
-        contains('Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 1 (1111AAAA11)"'),
+        contains(
+            'Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 1 (1111AAAA11)"'),
       );
       expect(logger.errorText, isEmpty);
       expect(stdin, 'This is a fake certificate');
@@ -457,11 +462,13 @@ void main() {
 
       expect(
         logger.statusText,
-        contains('Found saved certificate choice "iPhone Developer: Profile 3 (3333CCCC33)". To clear, use "flutter config"'),
+        contains(
+            'Found saved certificate choice "iPhone Developer: Profile 3 (3333CCCC33)". To clear, use "flutter config"'),
       );
       expect(
         logger.statusText,
-        contains('Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 3 (3333CCCC33)"'),
+        contains(
+            'Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 3 (3333CCCC33)"'),
       );
       expect(logger.errorText, isEmpty);
       expect(stdin, 'This is a fake certificate');
@@ -514,7 +521,8 @@ void main() {
 
       expect(
         logger.errorText,
-        containsIgnoringWhitespace('Saved signing certificate "iPhone Developer: Invalid Profile" is not a valid development certificate'),
+        containsIgnoringWhitespace(
+            'Saved signing certificate "iPhone Developer: Invalid Profile" is not a valid development certificate'),
       );
       expect(
         logger.statusText,

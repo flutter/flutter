@@ -61,7 +61,7 @@ class NavigationBar extends StatelessWidget {
     this.elevation,
     this.height,
     this.labelBehavior,
-  }) :  assert(destinations != null && destinations.length >= 2),
+  })  : assert(destinations != null && destinations.length >= 2),
         assert(0 <= selectedIndex && selectedIndex < destinations.length),
         super(key: key);
 
@@ -133,9 +133,7 @@ class NavigationBar extends StatelessWidget {
   final NavigationDestinationLabelBehavior? labelBehavior;
 
   VoidCallback _handleTap(int index) {
-    return onDestinationSelected != null
-        ? () => onDestinationSelected!(index)
-        : () {};
+    return onDestinationSelected != null ? () => onDestinationSelected!(index) : () {};
   }
 
   @override
@@ -144,15 +142,12 @@ class NavigationBar extends StatelessWidget {
 
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final double effectiveHeight = height ?? navigationBarTheme.height ?? defaults.height!;
-    final NavigationDestinationLabelBehavior effectiveLabelBehavior = labelBehavior
-      ?? navigationBarTheme.labelBehavior
-      ?? defaults.labelBehavior!;
+    final NavigationDestinationLabelBehavior effectiveLabelBehavior =
+        labelBehavior ?? navigationBarTheme.labelBehavior ?? defaults.labelBehavior!;
     final double additionalBottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Material(
-      color: backgroundColor
-        ?? navigationBarTheme.backgroundColor
-        ?? defaults.backgroundColor!,
+      color: backgroundColor ?? navigationBarTheme.backgroundColor ?? defaults.backgroundColor!,
       elevation: elevation ?? navigationBarTheme.elevation ?? defaults.elevation!,
       child: Padding(
         padding: EdgeInsets.only(bottom: additionalBottomPadding),
@@ -282,13 +277,11 @@ class NavigationDestination extends StatelessWidget {
       tooltip: tooltip,
       buildIcon: (BuildContext context) {
         final Widget selectedIconWidget = IconTheme.merge(
-          data: navigationBarTheme.iconTheme?.resolve(selectedState)
-            ?? defaults.iconTheme!.resolve(selectedState)!,
+          data: navigationBarTheme.iconTheme?.resolve(selectedState) ?? defaults.iconTheme!.resolve(selectedState)!,
           child: selectedIcon ?? icon,
         );
         final Widget unselectedIconWidget = IconTheme.merge(
-          data: navigationBarTheme.iconTheme?.resolve(unselectedState)
-            ?? defaults.iconTheme!.resolve(unselectedState)!,
+          data: navigationBarTheme.iconTheme?.resolve(unselectedState) ?? defaults.iconTheme!.resolve(unselectedState)!,
           child: icon,
         );
 
@@ -296,26 +289,24 @@ class NavigationDestination extends StatelessWidget {
           alignment: Alignment.center,
           children: <Widget>[
             NavigationIndicator(
-              animation: animation,
-              color: navigationBarTheme.indicatorColor ?? defaults.indicatorColor!,
-              shape: navigationBarTheme.indicatorShape ?? defaults.indicatorShape!
-            ),
+                animation: animation,
+                color: navigationBarTheme.indicatorColor ?? defaults.indicatorColor!,
+                shape: navigationBarTheme.indicatorShape ?? defaults.indicatorShape!),
             _StatusTransitionWidgetBuilder(
               animation: animation,
               builder: (BuildContext context, Widget? child) {
-                return _isForwardOrCompleted(animation)
-                  ? selectedIconWidget
-                  : unselectedIconWidget;
+                return _isForwardOrCompleted(animation) ? selectedIconWidget : unselectedIconWidget;
               },
             ),
           ],
         );
       },
       buildLabel: (BuildContext context) {
-        final TextStyle? effectiveSelectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(selectedState)
-          ?? defaults.labelTextStyle!.resolve(selectedState);
-        final TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
-          ?? defaults.labelTextStyle!.resolve(unselectedState);
+        final TextStyle? effectiveSelectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(selectedState) ??
+            defaults.labelTextStyle!.resolve(selectedState);
+        final TextStyle? effectiveUnselectedLabelTextStyle =
+            navigationBarTheme.labelTextStyle?.resolve(unselectedState) ??
+                defaults.labelTextStyle!.resolve(unselectedState);
         return Padding(
           padding: const EdgeInsets.only(top: 4),
           child: _ClampTextScaleFactor(
@@ -494,11 +485,11 @@ class _NavigationDestinationInfo extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_NavigationDestinationInfo oldWidget) {
-    return index != oldWidget.index
-        || totalNumberOfDestinations != oldWidget.totalNumberOfDestinations
-        || selectedAnimation != oldWidget.selectedAnimation
-        || labelBehavior != oldWidget.labelBehavior
-        || onTap != oldWidget.onTap;
+    return index != oldWidget.index ||
+        totalNumberOfDestinations != oldWidget.totalNumberOfDestinations ||
+        selectedAnimation != oldWidget.selectedAnimation ||
+        labelBehavior != oldWidget.labelBehavior ||
+        onTap != oldWidget.onTap;
   }
 }
 
@@ -569,8 +560,8 @@ class NavigationIndicator extends StatelessWidget {
         // 100% along a curve.
         final double scale = animation.isDismissed
             ? 0.0
-            : Tween<double>(begin: .4, end: 1.0).transform(
-            CurveTween(curve: Curves.easeInOutCubicEmphasized).transform(animation.value));
+            : Tween<double>(begin: .4, end: 1.0)
+                .transform(CurveTween(curve: Curves.easeInOutCubicEmphasized).transform(animation.value));
 
         return Transform(
           alignment: Alignment.center,
@@ -922,9 +913,9 @@ class _ClampTextScaleFactor extends StatelessWidget {
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
         textScaleFactor: MediaQuery.of(context).textScaleFactor.clamp(
-          0.0,
-          upperLimit,
-        ),
+              0.0,
+              upperLimit,
+            ),
       ),
       child: child,
     );
@@ -1036,14 +1027,12 @@ class _SelectableAnimatedBuilder extends StatefulWidget {
   final Widget Function(BuildContext, Animation<double>) builder;
 
   @override
-  _SelectableAnimatedBuilderState createState() =>
-      _SelectableAnimatedBuilderState();
+  _SelectableAnimatedBuilderState createState() => _SelectableAnimatedBuilderState();
 }
 
 /// State that manages the [AnimationController] that is passed to
 /// [_SelectableAnimatedBuilder.builder].
-class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
-    with SingleTickerProviderStateMixin {
+class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -1172,8 +1161,7 @@ class _CurvedAnimationBuilderState extends State<_CurvedAnimationBuilder> {
 /// Returns `true` if this animation is ticking forward, or has completed,
 /// based on [status].
 bool _isForwardOrCompleted(Animation<double> animation) {
-  return animation.status == AnimationStatus.forward
-      || animation.status == AnimationStatus.completed;
+  return animation.status == AnimationStatus.forward || animation.status == AnimationStatus.completed;
 }
 
 NavigationBarThemeData _defaultsFor(BuildContext context) {
@@ -1196,18 +1184,23 @@ class _Defaults extends NavigationBarThemeData {
 
   // With Material 3, the NavigationBar uses an overlay blend for the
   // default color regardless of light/dark mode.
-  @override Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.onSurface, 3.0);
+  @override
+  Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.onSurface, 3.0);
 
-  @override MaterialStateProperty<IconThemeData?>? get iconTheme {
+  @override
+  MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStateProperty.all(IconThemeData(
       size: 24,
       color: _colors.onSurface,
     ));
   }
 
-  @override Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
+  @override
+  Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
 
-  @override MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStateProperty.all(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
+  @override
+  MaterialStateProperty<TextStyle?>? get labelTextStyle =>
+      MaterialStateProperty.all(_theme.textTheme.overline!.copyWith(color: _colors.onSurface));
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES
@@ -1234,29 +1227,29 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
   // default color regardless of light/dark mode. This should be handled
   // in the Material widget based off of elevation, but for now we will do
   // it here in the defaults.
-  @override Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.primary, 3.0);
+  @override
+  Color? get backgroundColor => ElevationOverlay.colorWithOverlay(_colors.surface, _colors.primary, 3.0);
 
-  @override MaterialStateProperty<IconThemeData?>? get iconTheme {
+  @override
+  MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: 24.0,
-        color: states.contains(MaterialState.selected)
-          ? _colors.onSecondaryContainer
-          : _colors.onSurfaceVariant,
+        color: states.contains(MaterialState.selected) ? _colors.onSecondaryContainer : _colors.onSurfaceVariant,
       );
     });
   }
 
-  @override Color? get indicatorColor => _colors.secondaryContainer;
-  @override ShapeBorder? get indicatorShape => const StadiumBorder();
+  @override
+  Color? get indicatorColor => _colors.secondaryContainer;
+  @override
+  ShapeBorder? get indicatorShape => const StadiumBorder();
 
-  @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
+  @override
+  MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-    final TextStyle style = _theme.textTheme.labelMedium!;
-      return style.apply(color: states.contains(MaterialState.selected)
-        ? _colors.onSurface
-        : _colors.onSurfaceVariant
-      );
+      final TextStyle style = _theme.textTheme.labelMedium!;
+      return style.apply(color: states.contains(MaterialState.selected) ? _colors.onSurface : _colors.onSurfaceVariant);
     });
   }
 }

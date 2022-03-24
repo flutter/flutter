@@ -32,8 +32,7 @@ class MyStatelessWidget extends StatelessWidget {
             // Setting floatHeaderSlivers to true is required in order to float
             // the outer slivers over the inner scrollable.
             floatHeaderSlivers: true,
-            headerSliverBuilder:
-                (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
               return <Widget>[
                 SliverAppBar(
                   title: const Text('Floating Nested SliverAppBar'),

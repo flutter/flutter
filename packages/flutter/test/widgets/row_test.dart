@@ -307,7 +307,6 @@ void main() {
     expect(renderBox.size.height, equals(0.0));
   });
 
-
   // LTR
 
   testWidgets('Row with one Flexible child - LTR', (WidgetTester tester) async {
@@ -729,7 +728,6 @@ void main() {
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(0.0));
   });
-
 
   // RTL
 

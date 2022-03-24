@@ -23,12 +23,10 @@ platform.TargetPlatform get defaultTargetPlatform {
     result = platform.TargetPlatform.windows;
   }
   assert(() {
-    if (Platform.environment.containsKey('FLUTTER_TEST'))
-      result = platform.TargetPlatform.android;
+    if (Platform.environment.containsKey('FLUTTER_TEST')) result = platform.TargetPlatform.android;
     return true;
   }());
-  if (platform.debugDefaultTargetPlatformOverride != null)
-    result = platform.debugDefaultTargetPlatformOverride;
+  if (platform.debugDefaultTargetPlatformOverride != null) result = platform.debugDefaultTargetPlatformOverride;
   if (result == null) {
     throw FlutterError(
       'Unknown platform.\n'

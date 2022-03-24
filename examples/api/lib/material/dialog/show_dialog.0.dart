@@ -40,12 +40,10 @@ class MyStatelessWidget extends StatelessWidget {
     );
   }
 
-  static Route<Object?> _dialogBuilder(
-      BuildContext context, Object? arguments) {
+  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return DialogRoute<void>(
       context: context,
-      builder: (BuildContext context) =>
-          const AlertDialog(title: Text('Material Alert!')),
+      builder: (BuildContext context) => const AlertDialog(title: Text('Material Alert!')),
     );
   }
 }

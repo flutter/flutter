@@ -51,8 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute<PlatformViewPage>(
-                  builder: (BuildContext context) => const PlatformViewPage()),
+              MaterialPageRoute<PlatformViewPage>(builder: (BuildContext context) => const PlatformViewPage()),
             );
           },
         ),
@@ -90,7 +89,7 @@ class PlatformViewPage extends StatelessWidget {
           ElevatedButton(
             key: button,
             child: const Text('button'),
-            onPressed: (){},
+            onPressed: () {},
           )
         ],
       ),

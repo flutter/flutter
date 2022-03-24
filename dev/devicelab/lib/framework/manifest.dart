@@ -9,10 +9,8 @@ import 'package:yaml/yaml.dart';
 import 'utils.dart';
 
 /// Loads manifest data from `manifest.yaml` file or from [yaml], if present.
-Manifest loadTaskManifest([ String? yaml ]) {
-  final dynamic manifestYaml = yaml == null
-    ? loadYaml(file('manifest.yaml').readAsStringSync())
-    : loadYamlNode(yaml);
+Manifest loadTaskManifest([String? yaml]) {
+  final dynamic manifestYaml = yaml == null ? loadYaml(file('manifest.yaml').readAsStringSync()) : loadYamlNode(yaml);
 
   _checkType(manifestYaml is YamlMap, manifestYaml, 'Manifest', 'dictionary');
   return _validateAndParseManifest(manifestYaml as YamlMap);
@@ -69,11 +67,8 @@ class ManifestTask {
 
   /// Whether the task is supported by the current host platform
   bool isSupportedByHost() {
-    final Set<String> supportedHosts = Set<String>.from(
-      requiredAgentCapabilities.map<String>(
-        (String str) => str.split('/')[0]
-      )
-    );
+    final Set<String> supportedHosts =
+        Set<String>.from(requiredAgentCapabilities.map<String>((String str) => str.split('/')[0]));
     String hostPlatform = Platform.operatingSystem;
     if (hostPlatform == 'macos') {
       hostPlatform = 'mac'; // package:platform uses 'macos' while manifest.yaml uses 'mac'
@@ -103,7 +98,9 @@ List<ManifestTask> _validateAndParseTasks(dynamic tasksYaml) {
   _checkType(tasksYaml is YamlMap, tasksYaml, 'Value of "tasks"', 'dictionary');
   final List<String> sortedKeys = (tasksYaml as YamlMap).keys.toList().cast<String>()..sort();
   // ignore: avoid_dynamic_calls
-  return sortedKeys.map<ManifestTask>((String taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
+  return sortedKeys
+      .map<ManifestTask>((String taskName) => _validateAndParseTask(taskName, tasksYaml[taskName]))
+      .toList();
 }
 
 ManifestTask _validateAndParseTask(String taskName, dynamic taskYaml) {
@@ -177,9 +174,8 @@ void _checkIsNotBlank(dynamic value, String variableName, String ownerName) {
 void _checkKeys(Map<dynamic, dynamic> map, String variableName, List<String> allowedKeys) {
   for (final String key in map.keys.cast<String>()) {
     if (!allowedKeys.contains(key)) {
-      throw ManifestError(
-        'Unrecognized property "$key" in $variableName. '
-        'Allowed properties: ${allowedKeys.join(', ')}');
+      throw ManifestError('Unrecognized property "$key" in $variableName. '
+          'Allowed properties: ${allowedKeys.join(', ')}');
     }
   }
 }

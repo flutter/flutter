@@ -207,7 +207,8 @@ class UndoAction extends Action<UndoIntent> {
     if (buildContext == null) {
       return;
     }
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!) as UndoableActionDispatcher;
+    final UndoableActionDispatcher manager =
+        Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!) as UndoableActionDispatcher;
     manager.undo();
   }
 }
@@ -261,11 +262,14 @@ class UndoableFocusActionBase<T extends Intent> extends UndoableAction<T> {
   Memento invoke(T intent) {
     super.invoke(intent);
     final FocusNode? previousFocus = primaryFocus;
-    return Memento(name: previousFocus!.debugLabel!, undo: () {
-      previousFocus.requestFocus();
-    }, redo: () {
-      return invoke(intent);
-    });
+    return Memento(
+        name: previousFocus!.debugLabel!,
+        undo: () {
+          previousFocus.requestFocus();
+        },
+        redo: () {
+          return invoke(intent);
+        });
   }
 }
 
@@ -342,10 +346,8 @@ class _DemoButtonState extends State<DemoButton> {
       style: ButtonStyle(
         foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
         overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused))
-            return Colors.red;
-          if (states.contains(MaterialState.hovered))
-            return Colors.blue;
+          if (states.contains(MaterialState.focused)) return Colors.red;
+          if (states.contains(MaterialState.hovered)) return Colors.blue;
           return Colors.transparent;
         }),
       ),
@@ -415,8 +417,10 @@ class _FocusDemoState extends State<FocusDemo> {
         policy: ReadingOrderTraversalPolicy(),
         child: Shortcuts(
           shortcuts: <ShortcutActivator, Intent>{
-            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS, shift: true): const RedoIntent(),
-            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS): const UndoIntent(),
+            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS, shift: true):
+                const RedoIntent(),
+            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS):
+                const UndoIntent(),
           },
           child: FocusScope(
             key: FocusDemo.appKey,

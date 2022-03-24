@@ -28,18 +28,14 @@ void main() {
       final Process uninstall = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         <String>['--suppress-analytics', 'install', '--uninstall-only', '-d', device.deviceId],
-      )..stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-        print('uninstall:stdout: $line');
-      })..stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-        print('uninstall:stderr: $line');
-        stderr.add(line);
-      });
+      )
+        ..stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+          print('uninstall:stdout: $line');
+        })
+        ..stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+          print('uninstall:stderr: $line');
+          stderr.add(line);
+        });
       if (await uninstall.exitCode != 0) {
         throw 'flutter install --uninstall-only failed.';
       }
@@ -51,13 +47,9 @@ void main() {
         isBot: false, // we just want to test the output, not have any debugging info
       );
       int? runExitCode;
-      run.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          print('run:stdout: $line');
-          if (
-            !line.startsWith('Building flutter tool...') &&
+      run.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+        print('run:stdout: $line');
+        if (!line.startsWith('Building flutter tool...') &&
             !line.startsWith('Running "flutter pub get" in ui...') &&
             !line.startsWith('Initializing gradle...') &&
             !line.contains('settings_aar.gradle') &&
@@ -65,25 +57,26 @@ void main() {
             // Catch engine piped output from unrelated concurrent Flutter apps
             !line.contains(RegExp(r'[A-Z]\/flutter \([0-9]+\):')) &&
             // Empty lines could be due to the progress spinner breaking up.
-            line.length > 1
-          ) {
-            stdout.add(line);
-          }
-          if (line.contains('Quit (terminate the application on the device).')) {
-            ready.complete();
-          }
-        });
+            line.length > 1) {
+          stdout.add(line);
+        }
+        if (line.contains('Quit (terminate the application on the device).')) {
+          ready.complete();
+        }
+      });
       run.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        // TODO(egarciad): Remove once https://github.com/flutter/flutter/issues/95131 is fixed.
-        .skipWhile((String line) => line.contains('Mapping new ns'))
-        .listen((String line) {
-          print('run:stderr: $line');
-          stderr.add(line);
-        });
-      unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
-      await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          // TODO(egarciad): Remove once https://github.com/flutter/flutter/issues/95131 is fixed.
+          .skipWhile((String line) => line.contains('Mapping new ns'))
+          .listen((String line) {
+        print('run:stderr: $line');
+        stderr.add(line);
+      });
+      unawaited(run.exitCode.then<void>((int exitCode) {
+        runExitCode = exitCode;
+      }));
+      await Future.any<dynamic>(<Future<dynamic>>[ready.future, run.exitCode]);
       if (runExitCode != null) {
         throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';
       }
@@ -109,7 +102,8 @@ void main() {
 
       _findNextMatcherInList(
         stdout,
-        (String line) => line.contains('Built build/app/outputs/flutter-apk/app-release.apk (') && line.contains('MB).'),
+        (String line) =>
+            line.contains('Built build/app/outputs/flutter-apk/app-release.apk (') && line.contains('MB).'),
         'Built build/app/outputs/flutter-apk/app-release.apk',
       );
 
@@ -136,10 +130,7 @@ void main() {
 }
 
 void _findNextMatcherInList(
-  List<String> list,
-  bool Function(String testLine) matcher,
-  String errorMessageExpectedLine
-) {
+    List<String> list, bool Function(String testLine) matcher, String errorMessageExpectedLine) {
   final List<String> copyOfListForErrorMessage = List<String>.from(list);
 
   while (list.isNotEmpty) {

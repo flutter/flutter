@@ -83,17 +83,19 @@ void main() {
   });
 
   testWithoutContext('No devices listed if platform is unsupported', () async {
-    expect(await MacOSDevices(
-      fileSystem: MemoryFileSystem.test(),
-      processManager: FakeProcessManager.any(),
-      logger: BufferLogger.test(),
-      platform: linux,
-      operatingSystemUtils: FakeOperatingSystemUtils(),
-      macOSWorkflow: MacOSWorkflow(
-        featureFlags: TestFeatureFlags(isMacOSEnabled: true),
-        platform: linux,
-      ),
-    ).devices, isEmpty);
+    expect(
+        await MacOSDevices(
+          fileSystem: MemoryFileSystem.test(),
+          processManager: FakeProcessManager.any(),
+          logger: BufferLogger.test(),
+          platform: linux,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          macOSWorkflow: MacOSWorkflow(
+            featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+            platform: linux,
+          ),
+        ).devices,
+        isEmpty);
   });
 
   testWithoutContext('No devices listed if platform is supported and feature is disabled', () async {
@@ -181,8 +183,7 @@ void main() {
   });
 
   testWithoutContext('target platform display name on x86_64', () async {
-    final FakeOperatingSystemUtils fakeOperatingSystemUtils =
-        FakeOperatingSystemUtils();
+    final FakeOperatingSystemUtils fakeOperatingSystemUtils = FakeOperatingSystemUtils();
     fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_x64;
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
@@ -195,8 +196,7 @@ void main() {
   });
 
   testWithoutContext('target platform display name on ARM', () async {
-    final FakeOperatingSystemUtils fakeOperatingSystemUtils =
-        FakeOperatingSystemUtils();
+    final FakeOperatingSystemUtils fakeOperatingSystemUtils = FakeOperatingSystemUtils();
     fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm;
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),

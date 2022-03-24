@@ -42,7 +42,6 @@ static final String tokenBar = 'Barfoo';
 
 // END GENERATED TOKEN PROPERTIES
 ''');
-
     } finally {
       tempDir.deleteSync(recursive: true);
     }
@@ -92,7 +91,6 @@ static final String tokenBar = 'bar';
 
 // END GENERATED TOKEN PROPERTIES
 ''');
-
     } finally {
       tempDir.deleteSync(recursive: true);
     }
@@ -114,7 +112,8 @@ static final String tokenBar = 'bar';
       },
     };
     final TestTemplate template = TestTemplate('foobar.dart', tokens);
-    expect(template.shape('foo'), 'const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(1.0), topRight: Radius.circular(2.0), bottomLeft: Radius.circular(3.0), bottomRight: Radius.circular(4.0)))');
+    expect(template.shape('foo'),
+        'const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(1.0), topRight: Radius.circular(2.0), bottomLeft: Radius.circular(3.0), bottomRight: Radius.circular(4.0)))');
     expect(template.shape('bar'), 'const StadiumBorder()');
   });
 }

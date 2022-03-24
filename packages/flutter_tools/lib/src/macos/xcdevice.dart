@@ -38,24 +38,23 @@ class XCDevice {
     required Xcode xcode,
     required Platform platform,
     required IProxy iproxy,
-  }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-      _logger = logger,
-      _iMobileDevice = IMobileDevice(
-        artifacts: artifacts,
-        cache: cache,
-        logger: logger,
-        processManager: processManager,
-      ),
-      _iosDeploy = IOSDeploy(
-        artifacts: artifacts,
-        cache: cache,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-      ),
-      _iProxy = iproxy,
-      _xcode = xcode {
-
+  })  : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+        _logger = logger,
+        _iMobileDevice = IMobileDevice(
+          artifacts: artifacts,
+          cache: cache,
+          logger: logger,
+          processManager: processManager,
+        ),
+        _iosDeploy = IOSDeploy(
+          artifacts: artifacts,
+          cache: cache,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
+        _iProxy = iproxy,
+        _xcode = xcode {
     _setupDeviceIdentifierByEventStream();
   }
 
@@ -85,10 +84,7 @@ class XCDevice {
 
   bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck;
 
-  Future<List<Object>?> _getAllDevices({
-    bool useCache = false,
-    required Duration timeout
-  }) async {
+  Future<List<Object>?> _getAllDevices({bool useCache = false, required Duration timeout}) async {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
@@ -169,10 +165,9 @@ class XCDevice {
       );
 
       final StreamSubscription<String> stdoutSubscription = _deviceObservationProcess!.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
         // xcdevice observe example output of UDIDs:
         //
         // Listening for all devices, on both interfaces.
@@ -185,20 +180,16 @@ class XCDevice {
           final String verb = match.group(1)!.toLowerCase();
           final String identifier = match.group(2)!;
           if (verb.startsWith('attach')) {
-            _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{
-              XCDeviceEvent.attach: identifier
-            });
+            _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{XCDeviceEvent.attach: identifier});
           } else if (verb.startsWith('detach')) {
-            _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{
-              XCDeviceEvent.detach: identifier
-            });
+            _deviceIdentifierByEvent?.add(<XCDeviceEvent, String>{XCDeviceEvent.detach: identifier});
           }
         }
       });
       final StreamSubscription<String> stderrSubscription = _deviceObservationProcess!.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
         _logger.printTrace('xcdevice observe error: $line');
       });
       unawaited(_deviceObservationProcess?.exitCode.then((int status) {
@@ -227,7 +218,7 @@ class XCDevice {
   }
 
   /// [timeout] defaults to 2 seconds.
-  Future<List<IOSDevice>> getAvailableIOSDevices({ Duration? timeout }) async {
+  Future<List<IOSDevice>> getAvailableIOSDevices({Duration? timeout}) async {
     final List<Object>? allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
 
     if (allAvailableDevices == null) {
@@ -337,7 +328,6 @@ class XCDevice {
       }
     }
     return devices;
-
   }
 
   /// Despite the name, com.apple.platform.iphoneos includes iPhone, iPads, and all iOS devices.
@@ -505,10 +495,7 @@ class XCDevice {
 
   /// List of all devices reporting errors.
   Future<List<String>> getDiagnostics() async {
-    final List<Object>? allAvailableDevices = await _getAllDevices(
-      useCache: true,
-      timeout: const Duration(seconds: 2)
-    );
+    final List<Object>? allAvailableDevices = await _getAllDevices(useCache: true, timeout: const Duration(seconds: 2));
 
     if (allAvailableDevices == null) {
       return const <String>[];

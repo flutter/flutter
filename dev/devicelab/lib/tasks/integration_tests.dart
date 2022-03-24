@@ -124,9 +124,10 @@ TaskFunction createEndToEndKeyboardTextfieldTest() {
 TaskFunction dartDefinesTask() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/defines.dart', extraOptions: <String>[
-    '--dart-define=test.valueA=Example,A',
-    '--dart-define=test.valueB=Value',
+    'lib/defines.dart',
+    extraOptions: <String>[
+      '--dart-define=test.valueA=Example,A',
+      '--dart-define=test.valueB=Value',
     ],
   );
 }
@@ -142,9 +143,8 @@ class DriverTest {
   DriverTest(
     this.testDirectory,
     this.testTarget, {
-      this.extraOptions = const <String>[],
-    }
-  );
+    this.extraOptions = const <String>[],
+  });
 
   final String testDirectory;
   final String testTarget;
@@ -177,9 +177,8 @@ class IntegrationTest {
   IntegrationTest(
     this.testDirectory,
     this.testTarget, {
-      this.extraOptions = const <String>[],
-    }
-  );
+    this.extraOptions = const <String>[],
+  });
 
   final String testDirectory;
   final String testTarget;

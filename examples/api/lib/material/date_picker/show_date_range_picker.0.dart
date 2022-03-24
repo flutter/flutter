@@ -33,24 +33,19 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 /// RestorationProperty objects can be used because of RestorationMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with RestorationMixin {
+class _MyStatefulWidgetState extends State<MyStatefulWidget> with RestorationMixin {
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.
   @override
   String? get restorationId => widget.restorationId;
 
-  final RestorableDateTimeN _startDate =
-      RestorableDateTimeN(DateTime(2021));
-  final RestorableDateTimeN _endDate =
-      RestorableDateTimeN(DateTime(2021, 1, 5));
-  late final RestorableRouteFuture<DateTimeRange?>
-      _restorableDateRangePickerRouteFuture =
+  final RestorableDateTimeN _startDate = RestorableDateTimeN(DateTime(2021));
+  final RestorableDateTimeN _endDate = RestorableDateTimeN(DateTime(2021, 1, 5));
+  late final RestorableRouteFuture<DateTimeRange?> _restorableDateRangePickerRouteFuture =
       RestorableRouteFuture<DateTimeRange?>(
     onComplete: _selectDateRange,
     onPresent: (NavigatorState navigator, Object? arguments) {
-      return navigator
-          .restorablePush(_dateRangePickerRoute, arguments: <String, dynamic>{
+      return navigator.restorablePush(_dateRangePickerRoute, arguments: <String, dynamic>{
         'initialStartDate': _startDate.value?.millisecondsSinceEpoch,
         'initialEndDate': _endDate.value?.millisecondsSinceEpoch,
       });
@@ -70,8 +65,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_startDate, 'start_date');
     registerForRestoration(_endDate, 'end_date');
-    registerForRestoration(
-        _restorableDateRangePickerRouteFuture, 'date_picker_route_future');
+    registerForRestoration(_restorableDateRangePickerRouteFuture, 'date_picker_route_future');
   }
 
   static Route<DateTimeRange?> _dateRangePickerRoute(
@@ -83,8 +77,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       builder: (BuildContext context) {
         return DateRangePickerDialog(
           restorationId: 'date_picker_dialog',
-          initialDateRange:
-              _initialDateTimeRange(arguments! as Map<dynamic, dynamic>),
+          initialDateRange: _initialDateTimeRange(arguments! as Map<dynamic, dynamic>),
           firstDate: DateTime(2021),
           currentDate: DateTime(2021, 1, 25),
           lastDate: DateTime(2022),
@@ -94,13 +87,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   }
 
   static DateTimeRange? _initialDateTimeRange(Map<dynamic, dynamic> arguments) {
-    if (arguments['initialStartDate'] != null &&
-        arguments['initialEndDate'] != null) {
+    if (arguments['initialStartDate'] != null && arguments['initialEndDate'] != null) {
       return DateTimeRange(
-        start: DateTime.fromMillisecondsSinceEpoch(
-            arguments['initialStartDate'] as int),
-        end: DateTime.fromMillisecondsSinceEpoch(
-            arguments['initialEndDate'] as int),
+        start: DateTime.fromMillisecondsSinceEpoch(arguments['initialStartDate'] as int),
+        end: DateTime.fromMillisecondsSinceEpoch(arguments['initialEndDate'] as int),
       );
     }
 

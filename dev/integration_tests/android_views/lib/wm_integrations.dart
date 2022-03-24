@@ -24,14 +24,9 @@ class WindowManagerBody extends StatefulWidget {
   State<WindowManagerBody> createState() => WindowManagerBodyState();
 }
 
-enum _LastTestStatus {
-  pending,
-  success,
-  error
-}
+enum _LastTestStatus { pending, success, error }
 
 class WindowManagerBodyState extends State<WindowManagerBody> {
-
   MethodChannel? viewChannel;
   _LastTestStatus _lastTestStatus = _LastTestStatus.pending;
   String? lastError;
@@ -54,7 +49,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
             ),
           ),
           if (_lastTestStatus != _LastTestStatus.pending) _statusWidget(),
-          if (viewChannel != null) ... <Widget>[
+          if (viewChannel != null) ...<Widget>[
             ElevatedButton(
               key: const ValueKey<String>('ShowAlertDialog'),
               onPressed: onShowAlertDialogPressed,
@@ -74,8 +69,8 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
                 ),
                 if (windowClickCount > 0)
                   Text(
-                      'Click count: $windowClickCount',
-                      key: const ValueKey<String>('WindowClickCount'),
+                    'Click count: $windowClickCount',
+                    key: const ValueKey<String>('WindowClickCount'),
                   ),
               ],
             ),
@@ -111,7 +106,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       setState(() {
         _lastTestStatus = _LastTestStatus.success;
       });
-    } catch(e) {
+    } catch (e) {
       setState(() {
         _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
@@ -125,7 +120,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       setState(() {
         windowClickCount++;
       });
-    } catch(e) {
+    } catch (e) {
       setState(() {
         _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
@@ -152,5 +147,4 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       viewChannel = MethodChannel('simple_view/$id');
     });
   }
-
 }

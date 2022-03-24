@@ -44,8 +44,7 @@ void main() {
       final Version version = Version.fromString('1.0.0-0.0.pre');
       expect(
         () => Version.increment(version, level).toString(),
-        throwsExceptionWith(
-            'Incrementing $level is not supported by this tool'),
+        throwsExceptionWith('Incrementing $level is not supported by this tool'),
       );
     });
 

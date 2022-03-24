@@ -32,8 +32,8 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
       100,
       (int index) {
         return contacts[random.nextInt(contacts.length)]
-            // Randomly adds a telephone icon next to the contact or not.
-            ..add(random.nextBool().toString());
+          // Randomly adds a telephone icon next to the contact or not.
+          ..add(random.nextBool().toString());
       },
     );
   }
@@ -66,11 +66,11 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
             CupertinoSliverRefreshControl(
               onRefresh: () {
                 return Future<void>.delayed(const Duration(seconds: 2))
-                ..then((_) {
+                  ..then((_) {
                     if (mounted) {
                       setState(() => repopulateList());
                     }
-                });
+                  });
               },
             ),
             SliverSafeArea(
@@ -177,8 +177,8 @@ class _ListItem extends StatelessWidget {
                   )
                 : null,
           ),
-        Expanded(
-          child: Container(
+          Expanded(
+            child: Container(
               decoration: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),

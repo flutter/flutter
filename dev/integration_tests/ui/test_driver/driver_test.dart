@@ -40,9 +40,9 @@ void main() {
       // Begin waiting for it to disappear
       final Completer<void> whenWaitForAbsentResolves = Completer<void>();
       driver.waitForAbsent(presentText).then(
-        whenWaitForAbsentResolves.complete,
-        onError: whenWaitForAbsentResolves.completeError,
-      );
+            whenWaitForAbsentResolves.complete,
+            onError: whenWaitForAbsentResolves.completeError,
+          );
 
       // Wait 1 second then make it disappear
       await Future<void>.delayed(const Duration(seconds: 1));
@@ -67,9 +67,9 @@ void main() {
       // Begin waiting for it to reappear
       final Completer<void> whenWaitForResolves = Completer<void>();
       driver.waitFor(presentText).then(
-        whenWaitForResolves.complete,
-        onError: whenWaitForResolves.completeError,
-      );
+            whenWaitForResolves.complete,
+            onError: whenWaitForResolves.completeError,
+          );
 
       // Wait 1 second then make it appear
       await Future<void>.delayed(const Duration(seconds: 1));

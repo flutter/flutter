@@ -30,13 +30,12 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
     required Logger logger,
     required UserMessages userMessages,
     required FileSystem fileSystem,
-  }) : _androidSdk = androidSdk,
-       _processManager = processManager,
-       _logger = logger,
-       _userMessages = userMessages,
-       _fileSystem = fileSystem,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
-
+  })  : _androidSdk = androidSdk,
+        _processManager = processManager,
+        _logger = logger,
+        _userMessages = userMessages,
+        _fileSystem = fileSystem,
+        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final AndroidSdk _androidSdk;
   final ProcessManager _processManager;

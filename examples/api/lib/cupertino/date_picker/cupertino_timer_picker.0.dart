@@ -35,23 +35,22 @@ class _CupertinoTimerPickerSampleState extends State<CupertinoTimerPickerSample>
   // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoTimerPicker.
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
-      context: context,
-      builder: (BuildContext context) => Container(
-        height: 216,
-        padding: const EdgeInsets.only(top: 6.0),
-        // The Bottom margin is provided to align the popup above the system navigation bar.
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        // Provide a background color for the popup.
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        // Use a SafeArea widget to avoid system overlaps.
-        child: SafeArea(
-          top: false,
-          child: child,
-        ),
-      )
-    );
+        context: context,
+        builder: (BuildContext context) => Container(
+              height: 216,
+              padding: const EdgeInsets.only(top: 6.0),
+              // The Bottom margin is provided to align the popup above the system navigation bar.
+              margin: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              // Provide a background color for the popup.
+              color: CupertinoColors.systemBackground.resolveFrom(context),
+              // Use a SafeArea widget to avoid system overlaps.
+              child: SafeArea(
+                top: false,
+                child: child,
+              ),
+            ));
   }
 
   @override
@@ -83,7 +82,8 @@ class _CupertinoTimerPickerSampleState extends State<CupertinoTimerPickerSample>
                     ),
                     // In this example, the timer value is formatted manually. You can use intl package
                     // to format the value based on user's locale settings.
-                    child: Text('$duration',
+                    child: Text(
+                      '$duration',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),

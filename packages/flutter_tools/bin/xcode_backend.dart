@@ -39,8 +39,7 @@ class Context {
   void run() {
     if (arguments.isEmpty) {
       // Named entry points were introduced in Flutter v0.0.7.
-      stderr.write(
-          'error: Your Xcode project is incompatible with this version of Flutter. '
+      stderr.write('error: Your Xcode project is incompatible with this version of Flutter. '
           'Run "rm -rf ios/Runner.xcodeproj" and "flutter create ." to regenerate.\n');
       exit(-1);
     }
@@ -179,14 +178,11 @@ class Context {
     // Embed App.framework from Flutter into the app (after creating the Frameworks directory
     // if it doesn't already exist).
     final String xcodeFrameworksDir = '${environment['TARGET_BUILD_DIR']}/${environment['FRAMEWORKS_FOLDER_PATH']}';
-    runSync(
-      'mkdir',
-      <String>[
-        '-p',
-        '--',
-        xcodeFrameworksDir,
-      ]
-    );
+    runSync('mkdir', <String>[
+      '-p',
+      '--',
+      xcodeFrameworksDir,
+    ]);
     runSync(
       'rsync',
       <String>[
@@ -226,15 +222,15 @@ class Context {
       return;
     }
 
-    final String builtProductsPlist = '${environment['BUILT_PRODUCTS_DIR'] ?? ''}/${environment['INFOPLIST_PATH'] ?? ''}';
+    final String builtProductsPlist =
+        '${environment['BUILT_PRODUCTS_DIR'] ?? ''}/${environment['INFOPLIST_PATH'] ?? ''}';
 
     if (!existsFile(builtProductsPlist)) {
       // Very occasionally Xcode hasn't created an Info.plist when this runs.
       // The file will be present on re-run.
-      echo(
-        '${environment['INFOPLIST_PATH'] ?? ''} does not exist. Skipping '
-        '_dartobservatory._tcp NSBonjourServices insertion. Try re-building to '
-        'enable "flutter attach".');
+      echo('${environment['INFOPLIST_PATH'] ?? ''} does not exist. Skipping '
+          '_dartobservatory._tcp NSBonjourServices insertion. Try re-building to '
+          'enable "flutter attach".');
       return;
     }
 
@@ -255,13 +251,7 @@ class Context {
     if (result.exitCode == 0) {
       runSync(
         'plutil',
-        <String>[
-          '-insert',
-          'NSBonjourServices.0',
-          '-string',
-          '_dartobservatory._tcp',
-          builtProductsPlist
-        ],
+        <String>['-insert', 'NSBonjourServices.0', '-string', '_dartobservatory._tcp', builtProductsPlist],
       );
     } else {
       // Otherwise, add the NSBonjourServices key and observatory service name.
@@ -427,12 +417,15 @@ class Context {
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
     ]);
 
-    if (environment['PERFORMANCE_MEASUREMENT_FILE'] != null && environment['PERFORMANCE_MEASUREMENT_FILE']!.isNotEmpty) {
+    if (environment['PERFORMANCE_MEASUREMENT_FILE'] != null &&
+        environment['PERFORMANCE_MEASUREMENT_FILE']!.isNotEmpty) {
       flutterArgs.add('--performance-measurement-file=${environment['PERFORMANCE_MEASUREMENT_FILE']}');
     }
 
     final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
-    if (expandedCodeSignIdentity != null && expandedCodeSignIdentity.isNotEmpty && environment['CODE_SIGNING_REQUIRED'] != 'NO') {
+    if (expandedCodeSignIdentity != null &&
+        expandedCodeSignIdentity.isNotEmpty &&
+        environment['CODE_SIGNING_REQUIRED'] != 'NO') {
       flutterArgs.add('-dCodesignIdentity=$expandedCodeSignIdentity');
     }
 

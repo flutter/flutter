@@ -46,7 +46,7 @@ void main() {
       testDeviceManager.addDevice(device);
 
       expect(() async => createTestCommandRunner(command).run(<String>['install', '--device-user', '10']),
-        throwsToolExit(message: '--device-user is only supported for Android'));
+          throwsToolExit(message: '--device-user is only supported for Android'));
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     });
@@ -71,12 +71,15 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   final ApplicationPackage app;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform,
+      {BuildInfo buildInfo, File applicationBinary}) async {
     return app;
   }
 }
-class FakeIOSApp extends Fake implements IOSApp { }
-class FakeAndroidApk extends Fake implements AndroidApk { }
+
+class FakeIOSApp extends Fake implements IOSApp {}
+
+class FakeAndroidApk extends Fake implements AndroidApk {}
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
 // Until we fix that, we have to also ignore related lints here.
@@ -89,13 +92,15 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   Future<bool> isAppInstalled(
     IOSApp app, {
     String userIdentifier,
-  }) async => false;
+  }) async =>
+      false;
 
   @override
   Future<bool> installApp(
     IOSApp app, {
     String userIdentifier,
-  }) async => true;
+  }) async =>
+      true;
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -109,11 +114,13 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<bool> isAppInstalled(
     AndroidApk app, {
     String userIdentifier,
-  }) async => false;
+  }) async =>
+      false;
 
   @override
   Future<bool> installApp(
     AndroidApk app, {
     String userIdentifier,
-  }) async => true;
+  }) async =>
+      true;
 }

@@ -12,9 +12,9 @@ void main() {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
   testWidgets('Flutter Gallery app simple smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const GalleryApp(testMode: true) // builds the app and schedules a frame but doesn't trigger one
-    );
+    await tester
+        .pumpWidget(const GalleryApp(testMode: true) // builds the app and schedules a frame but doesn't trigger one
+            );
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
@@ -55,5 +55,5 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     await tester.pump(const Duration(hours: 100)); // for testing
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android, TargetPlatform.macOS}));
 }

@@ -33,7 +33,7 @@ class FuchsiaKernelCompiler {
     final String manifestPath = globals.fs.path.join(outDir, '$appName.dilpmanifest');
     final String? kernelCompiler = globals.artifacts?.getArtifactPath(
       Artifact.fuchsiaKernelCompiler,
-      platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
+      platform: TargetPlatform.fuchsia_arm64, // This file is not arch-specific.
       mode: buildInfo.mode,
     );
     if (kernelCompiler == null || !globals.fs.isFileSync(kernelCompiler)) {
@@ -113,10 +113,7 @@ class FuchsiaKernelCompiler {
       ],
 
       // debug, profile, jit release, release:
-      if (buildInfo.isDebug)
-        '--embed-sources'
-      else
-        '--no-embed-sources',
+      if (buildInfo.isDebug) '--embed-sources' else '--no-embed-sources',
 
       if (buildInfo.isProfile) ...<String>[
         '-Ddart.vm.profile=true',
@@ -128,8 +125,7 @@ class FuchsiaKernelCompiler {
         '-Ddart.vm.product=true',
       ],
 
-      for (final String dartDefine in buildInfo.dartDefines)
-        '-D$dartDefine',
+      for (final String dartDefine in buildInfo.dartDefines) '-D$dartDefine',
     ];
   }
 }

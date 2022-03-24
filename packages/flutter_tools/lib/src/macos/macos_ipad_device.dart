@@ -76,7 +76,8 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   Future<bool> stopApp(
     IOSApp app, {
     String? userIdentifier,
-  }) async => false;
+  }) async =>
+      false;
 
   @override
   Future<void> buildForDevice(

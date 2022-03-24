@@ -59,15 +59,19 @@ void main() {
     );
     expect((b1 + b2).dimensions, const EdgeInsets.all(2.0));
     const Rect rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
-    expect((Canvas canvas) => (b1 + b2).paint(canvas, rect), paints
-      ..rect(rect: rect.deflate(0.5), color: b2.top.color)
-      ..rect(rect: rect.deflate(1.5), color: b1.top.color),
+    expect(
+      (Canvas canvas) => (b1 + b2).paint(canvas, rect),
+      paints
+        ..rect(rect: rect.deflate(0.5), color: b2.top.color)
+        ..rect(rect: rect.deflate(1.5), color: b1.top.color),
     );
     expect((b1 + b2 + b1).dimensions, const EdgeInsets.all(3.0));
-    expect((Canvas canvas) => (b1 + b2 + b1).paint(canvas, rect), paints
-      ..rect(rect: rect.deflate(0.5), color: b1.top.color)
-      ..rect(rect: rect.deflate(1.5), color: b2.top.color)
-      ..rect(rect: rect.deflate(2.5), color: b1.top.color),
+    expect(
+      (Canvas canvas) => (b1 + b2 + b1).paint(canvas, rect),
+      paints
+        ..rect(rect: rect.deflate(0.5), color: b1.top.color)
+        ..rect(rect: rect.deflate(1.5), color: b2.top.color)
+        ..rect(rect: rect.deflate(2.5), color: b1.top.color),
     );
   });
 
@@ -124,15 +128,19 @@ void main() {
     );
     expect((b1 + b2).dimensions, const EdgeInsetsDirectional.fromSTEB(2.0, 2.0, 2.0, 2.0));
     const Rect rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
-    expect((Canvas canvas) => (b1 + b2).paint(canvas, rect, textDirection: TextDirection.rtl), paints
-      ..rect(rect: rect.deflate(0.5), color: b2.top.color)
-      ..rect(rect: rect.deflate(1.5), color: b1.top.color),
+    expect(
+      (Canvas canvas) => (b1 + b2).paint(canvas, rect, textDirection: TextDirection.rtl),
+      paints
+        ..rect(rect: rect.deflate(0.5), color: b2.top.color)
+        ..rect(rect: rect.deflate(1.5), color: b1.top.color),
     );
     expect((b1 + b2 + b1).dimensions, const EdgeInsetsDirectional.fromSTEB(3.0, 3.0, 3.0, 3.0));
-    expect((Canvas canvas) => (b1 + b2 + b1).paint(canvas, rect, textDirection: TextDirection.rtl), paints
-      ..rect(rect: rect.deflate(0.5), color: b1.top.color)
-      ..rect(rect: rect.deflate(1.5), color: b2.top.color)
-      ..rect(rect: rect.deflate(2.5), color: b1.top.color),
+    expect(
+      (Canvas canvas) => (b1 + b2 + b1).paint(canvas, rect, textDirection: TextDirection.rtl),
+      paints
+        ..rect(rect: rect.deflate(0.5), color: b1.top.color)
+        ..rect(rect: rect.deflate(1.5), color: b2.top.color)
+        ..rect(rect: rect.deflate(2.5), color: b1.top.color),
     );
   });
 }

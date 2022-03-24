@@ -35,8 +35,7 @@ class AndroidPlatformView extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlatformViewLink(
       viewType: viewType,
-      surfaceFactory:
-          (BuildContext context, PlatformViewController controller) {
+      surfaceFactory: (BuildContext context, PlatformViewController controller) {
         return AndroidViewSurface(
           controller: controller as AndroidViewController,
           gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
@@ -44,13 +43,11 @@ class AndroidPlatformView extends StatelessWidget {
         );
       },
       onCreatePlatformView: (PlatformViewCreationParams params) {
-        final AndroidViewController controller =
-          PlatformViewsService.initSurfaceAndroidView(
-            id: params.id,
-            viewType: params.viewType,
-            layoutDirection: TextDirection.ltr,
-          )
-          ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated);
+        final AndroidViewController controller = PlatformViewsService.initSurfaceAndroidView(
+          id: params.id,
+          viewType: params.viewType,
+          layoutDirection: TextDirection.ltr,
+        )..addOnPlatformViewCreatedListener(params.onPlatformViewCreated);
         if (onPlatformViewCreated != null) {
           controller.addOnPlatformViewCreatedListener(onPlatformViewCreated!);
         }

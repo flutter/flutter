@@ -20,9 +20,9 @@ class PathClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     log.add('getClip');
-    return Path()
-      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+    return Path()..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
+
   @override
   bool shouldReclip(PathClipper oldClipper) => false;
 }
@@ -59,7 +59,8 @@ class NotifyClipper<T> extends CustomClipper<T> {
 
 void main() {
   testWidgets('ClipRect with a FittedBox child sized to zero works with semantics', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: ClipRect(
           child: FittedBox(
@@ -153,7 +154,9 @@ void main() {
         clipper: PathClipper(),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () { log.add('tap'); },
+          onTap: () {
+            log.add('tap');
+          },
         ),
       ),
     );
@@ -173,7 +176,9 @@ void main() {
       ClipOval(
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () { log.add('tap'); },
+          onTap: () {
+            log.add('tap');
+          },
         ),
       ),
     );
@@ -195,7 +200,9 @@ void main() {
         child: ClipOval(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () { log.add('tap'); },
+            onTap: () {
+              log.add('tap');
+            },
           ),
         ),
       ),
@@ -222,7 +229,9 @@ void main() {
             clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -246,7 +255,9 @@ void main() {
             clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -264,7 +275,9 @@ void main() {
             clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -282,7 +295,9 @@ void main() {
             clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -300,7 +315,9 @@ void main() {
             clipper: ValueClipper<Rect>('b', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -318,7 +335,9 @@ void main() {
             clipper: ValueClipper<Rect>('c', const Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -340,18 +359,22 @@ void main() {
         child: Placeholder(),
       ),
     );
-    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
-      ..save()
-      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
-      ..save()
-      ..path() // Placeholder
-      ..restore()
-      ..restore(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).paint,
+      paints
+        ..save()
+        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+        ..save()
+        ..path() // Placeholder
+        ..restore()
+        ..restore(),
     );
     debugPaintSizeEnabled = true;
-    expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints
-      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
-      ..paragraph(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).debugPaint,
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+        ..paragraph(),
     );
     debugPaintSizeEnabled = false;
   });
@@ -796,13 +819,16 @@ void main() {
 
   testWidgets('ClipPath.shape', (WidgetTester tester) async {
     final List<String> logs = <String>[];
-    final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
+    final ShapeBorder shape = TestBorder((String message) {
+      logs.add(message);
+    });
     Widget buildClipPath() {
       return ClipPath.shape(
         shape: shape,
         child: const SizedBox(width: 100.0, height: 100.0),
       );
     }
+
     final Widget clipPath = buildClipPath();
     // verify that a regular clip works as one would expect
     logs.add('--0');
@@ -861,26 +887,30 @@ void main() {
       ),
     );
 
-    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
-      ..save()
-      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0))
-      ..save()
-      ..path() // Placeholder
-      ..restore()
-      ..restore(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).paint,
+      paints
+        ..save()
+        ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0))
+        ..save()
+        ..path() // Placeholder
+        ..restore()
+        ..restore(),
     );
 
     expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isFalse);
     clip.value = const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0);
     expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isTrue);
 
-    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
-      ..save()
-      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0))
-      ..save()
-      ..path() // Placeholder
-      ..restore()
-      ..restore(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).paint,
+      paints
+        ..save()
+        ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0))
+        ..save()
+        ..path() // Placeholder
+        ..restore()
+        ..restore(),
     );
   });
 }

@@ -36,75 +36,65 @@ String diffMotionEvents(
   return diff.toString();
 }
 
-void diffActions(StringBuffer diffBuffer, Map<String, dynamic> originalEvent,
-    Map<String, dynamic> synthesizedEvent) {
-  final int synthesizedActionMasked =
-      getActionMasked(synthesizedEvent['action'] as int);
+void diffActions(StringBuffer diffBuffer, Map<String, dynamic> originalEvent, Map<String, dynamic> synthesizedEvent) {
+  final int synthesizedActionMasked = getActionMasked(synthesizedEvent['action'] as int);
   final int originalActionMasked = getActionMasked(originalEvent['action'] as int);
-  final String synthesizedActionName =
-      getActionName(synthesizedActionMasked, synthesizedEvent['action'] as int);
-  final String originalActionName =
-      getActionName(originalActionMasked, originalEvent['action'] as int);
+  final String synthesizedActionName = getActionName(synthesizedActionMasked, synthesizedEvent['action'] as int);
+  final String originalActionName = getActionName(originalActionMasked, originalEvent['action'] as int);
 
   if (synthesizedActionMasked != originalActionMasked)
-    diffBuffer.write(
-        'action (expected: $originalActionName actual: $synthesizedActionName) ');
+    diffBuffer.write('action (expected: $originalActionName actual: $synthesizedActionName) ');
 
-  if (kPointerActions.contains(originalActionMasked) &&
-      originalActionMasked == synthesizedActionMasked) {
+  if (kPointerActions.contains(originalActionMasked) && originalActionMasked == synthesizedActionMasked) {
     final int originalPointer = getPointerIdx(originalEvent['action'] as int);
     final int synthesizedPointer = getPointerIdx(synthesizedEvent['action'] as int);
     if (originalPointer != synthesizedPointer)
-      diffBuffer.write(
-          'pointerIdx (expected: $originalPointer actual: $synthesizedPointer action: $originalActionName ');
+      diffBuffer
+          .write('pointerIdx (expected: $originalPointer actual: $synthesizedPointer action: $originalActionName ');
   }
 }
 
-void diffPointerProperties(StringBuffer diffBuffer,
-    Map<String, dynamic> originalEvent, Map<String, dynamic> synthesizedEvent) {
+void diffPointerProperties(
+    StringBuffer diffBuffer, Map<String, dynamic> originalEvent, Map<String, dynamic> synthesizedEvent) {
   final List<Map<dynamic, dynamic>> expectedList =
       (originalEvent['pointerProperties'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
   final List<Map<dynamic, dynamic>> actualList =
       (synthesizedEvent['pointerProperties'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
 
   if (expectedList.length != actualList.length) {
-    diffBuffer.write(
-        'pointerProperties (actual length: ${actualList.length}, expected length: ${expectedList.length} ');
+    diffBuffer
+        .write('pointerProperties (actual length: ${actualList.length}, expected length: ${expectedList.length} ');
     return;
   }
 
   for (int i = 0; i < expectedList.length; i++) {
-    final Map<String, dynamic> expected =
-        expectedList[i].cast<String, dynamic>();
+    final Map<String, dynamic> expected = expectedList[i].cast<String, dynamic>();
     final Map<String, dynamic> actual = actualList[i].cast<String, dynamic>();
-    diffMaps(expected, actual, diffBuffer,
-        messagePrefix: '[pointerProperty $i] ');
+    diffMaps(expected, actual, diffBuffer, messagePrefix: '[pointerProperty $i] ');
   }
 }
 
-void diffPointerCoordsList(StringBuffer diffBuffer,
-    Map<String, dynamic> originalEvent, Map<String, dynamic> synthesizedEvent) {
+void diffPointerCoordsList(
+    StringBuffer diffBuffer, Map<String, dynamic> originalEvent, Map<String, dynamic> synthesizedEvent) {
   final List<Map<dynamic, dynamic>> expectedList =
       (originalEvent['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
   final List<Map<dynamic, dynamic>> actualList =
       (synthesizedEvent['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
 
   if (expectedList.length != actualList.length) {
-    diffBuffer.write(
-        'pointerCoords (actual length: ${actualList.length}, expected length: ${expectedList.length} ');
+    diffBuffer.write('pointerCoords (actual length: ${actualList.length}, expected length: ${expectedList.length} ');
     return;
   }
 
   for (int i = 0; i < expectedList.length; i++) {
-    final Map<String, dynamic> expected =
-        expectedList[i].cast<String, dynamic>();
+    final Map<String, dynamic> expected = expectedList[i].cast<String, dynamic>();
     final Map<String, dynamic> actual = actualList[i].cast<String, dynamic>();
     diffPointerCoords(expected, actual, i, diffBuffer);
   }
 }
 
-void diffPointerCoords(Map<String, dynamic> expected,
-    Map<String, dynamic> actual, int pointerIdx, StringBuffer diffBuffer) {
+void diffPointerCoords(
+    Map<String, dynamic> expected, Map<String, dynamic> actual, int pointerIdx, StringBuffer diffBuffer) {
   diffMaps(expected, actual, diffBuffer, messagePrefix: '[pointerCoord $pointerIdx] ');
 }
 
@@ -117,19 +107,15 @@ void diffMaps(
 }) {
   const IterableEquality<String> eq = IterableEquality<String>();
   if (!eq.equals(expected.keys, actual.keys)) {
-    diffBuffer.write(
-        '${messagePrefix}keys (expected: ${expected.keys} actual: ${actual.keys} ');
+    diffBuffer.write('${messagePrefix}keys (expected: ${expected.keys} actual: ${actual.keys} ');
     return;
   }
   for (final String key in expected.keys) {
-    if (excludeKeys.contains(key))
-      continue;
-    if (doublesApproximatelyMatch(expected[key], actual[key]))
-      continue;
+    if (excludeKeys.contains(key)) continue;
+    if (doublesApproximatelyMatch(expected[key], actual[key])) continue;
 
     if (expected[key] != actual[key]) {
-      diffBuffer.write(
-          '$messagePrefix$key (expected: ${expected[key]} actual: ${actual[key]}) ');
+      diffBuffer.write('$messagePrefix$key (expected: ${expected[key]} actual: ${actual[key]}) ');
     }
   }
 }

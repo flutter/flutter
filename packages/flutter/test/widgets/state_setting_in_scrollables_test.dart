@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class Foo extends StatefulWidget {
-  const Foo({ Key? key }) : super(key: key);
+  const Foo({Key? key}) : super(key: key);
   @override
   FooState createState() => FooState();
 }
@@ -25,7 +25,7 @@ class FooState extends State<Foo> {
             children: <Widget>[
               GestureDetector(
                 onTap: () {
-                  setState(() { /* this is needed to trigger the original bug this is regression-testing */ });
+                  setState(() {/* this is needed to trigger the original bug this is regression-testing */});
                   scrollController.animateTo(200.0, duration: const Duration(milliseconds: 500), curve: Curves.linear);
                 },
                 child: const DecoratedBox(

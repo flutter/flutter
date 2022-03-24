@@ -41,9 +41,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       child: GestureDetector(
         onTap: () {
           setState(() {
-            _color == Colors.yellow
-                ? _color = Colors.white
-                : _color = Colors.yellow;
+            _color == Colors.yellow ? _color = Colors.white : _color = Colors.yellow;
           });
         },
       ),

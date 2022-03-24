@@ -86,8 +86,7 @@ class FlutterCompactFormatter {
       case 'done':
         stdout.write(_clearLine);
         stdout.write('$_bold${_stopwatch.elapsed}$_noColor ');
-        stdout.writeln(
-            '$_green+$successes $_yellow~$skips $_red-$failures:$_bold$_gray Done.$_noColor');
+        stdout.writeln('$_green+$successes $_yellow~$skips $_red-$failures:$_bold$_gray Done.$_noColor');
         break;
       case 'testStart':
         final Map<String, dynamic> testData = decoded['test'] as Map<String, dynamic>;
@@ -95,8 +94,7 @@ class FlutterCompactFormatter {
           started += 1;
           stdout.write(_clearLine);
           stdout.write('$_bold${_stopwatch.elapsed}$_noColor ');
-          stdout.write(
-              '$_green+$successes $_yellow~$skips $_red-$failures: $_gray${testData['name']}$_noColor');
+          stdout.write('$_green+$successes $_yellow~$skips $_red-$failures: $_gray${testData['name']}$_noColor');
           break;
         }
         _tests[testData['id'] as int] = TestResult(
@@ -118,7 +116,7 @@ class FlutterCompactFormatter {
           originalResult.status = TestStatus.skipped;
         } else {
           if (decoded['result'] == 'success') {
-            originalResult.status =TestStatus.succeeded;
+            originalResult.status = TestStatus.succeeded;
             successes += 1;
           } else {
             originalResult.status = TestStatus.failed;
@@ -133,10 +131,8 @@ class FlutterCompactFormatter {
           originalResult.errorMessage = error;
           originalResult.stackTrace = stackTrace;
         } else {
-          if (error != null)
-            stderr.writeln(error);
-          if (stackTrace != null)
-            stderr.writeln(stackTrace);
+          if (error != null) stderr.writeln(error);
+          if (stackTrace != null) stderr.writeln(stackTrace);
         }
         break;
       case 'print':
@@ -165,8 +161,7 @@ class FlutterCompactFormatter {
           failed.add(result.toString() + _noColor);
           break;
         case TestStatus.skipped:
-          skipped.add(
-              '${_yellow}Skipped ${result.name} (${result.pathLineColumn}).$_noColor');
+          skipped.add('${_yellow}Skipped ${result.name} (${result.pathLineColumn}).$_noColor');
           break;
         case TestStatus.failed:
           failed.addAll(<String>[
@@ -196,10 +191,13 @@ class FlutterCompactFormatter {
 enum TestStatus {
   /// Test execution has started.
   started,
+
   /// Test completed successfully.
   succeeded,
+
   /// Test failed.
   failed,
+
   /// Test was skipped.
   skipped,
 }

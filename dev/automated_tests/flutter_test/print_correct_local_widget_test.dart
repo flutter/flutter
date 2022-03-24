@@ -8,36 +8,32 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Rendering Error', (WidgetTester tester) async {
     // This should fail with user created widget = Row.
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('RenderFlex OverFlow'),
-          ),
-          body: SizedBox(
-            width: 400.0,
-            child: Row(
-              children: <Widget>[
-                const Icon(Icons.message),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const <Widget>[
-                    Text('Title'),
-                    Text(
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed '
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('RenderFlex OverFlow'),
+        ),
+        body: SizedBox(
+          width: 400.0,
+          child: Row(
+            children: <Widget>[
+              const Icon(Icons.message),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const <Widget>[
+                  Text('Title'),
+                  Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed '
                       'do eiusmod tempor incididunt ut labore et dolore magna '
                       'aliqua. Ut enim ad minim veniam, quis nostrud '
                       'exercitation ullamco laboris nisi ut aliquip ex ea '
-                      'commodo consequat.'
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      'commodo consequat.'),
+                ],
+              ),
+            ],
           ),
         ),
-      )
-    );
+      ),
+    ));
   });
 }

@@ -204,8 +204,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   AnimationController? _controller;
   late Animation<double> _frontOpacity;
 
-  static final Animatable<double> _frontOpacityTween = Tween<double>(begin: 0.2, end: 1.0)
-    .chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.easeInOut)));
+  static final Animatable<double> _frontOpacityTween =
+      Tween<double>(begin: 0.2, end: 1.0).chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.easeInOut)));
 
   @override
   void initState() {
@@ -244,8 +244,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_controller!.isAnimating || _controller!.status == AnimationStatus.completed)
-      return;
+    if (_controller!.isAnimating || _controller!.status == AnimationStatus.completed) return;
 
     final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
     if (flingVelocity < 0.0)

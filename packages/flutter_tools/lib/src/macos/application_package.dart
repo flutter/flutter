@@ -12,8 +12,7 @@ import '../ios/plist_parser.dart';
 import '../xcode_project.dart';
 
 /// Tests whether a [FileSystemEntity] is an macOS bundle directory.
-bool _isBundleDirectory(FileSystemEntity entity) =>
-    entity is Directory && entity.path.endsWith('.app');
+bool _isBundleDirectory(FileSystemEntity entity) => entity is Directory && entity.path.endsWith('.app');
 
 abstract class MacOSApp extends ApplicationPackage {
   MacOSApp({required String projectBundleId}) : super(id: projectBundleId);
@@ -71,10 +70,7 @@ abstract class MacOSApp extends ApplicationPackage {
         return null;
       }
       try {
-        uncompressedBundle = tempDir
-            .listSync()
-            .whereType<Directory>()
-            .singleWhere(_isBundleDirectory);
+        uncompressedBundle = tempDir.listSync().whereType<Directory>().singleWhere(_isBundleDirectory);
       } on StateError {
         globals.printError('Archive "${applicationBundle.path}" does not contain a single app bundle.');
         return null;
@@ -118,8 +114,8 @@ class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
     required this.projectBundleId,
     required String executable,
     required this.applicationPackage,
-  }) : _executable = executable,
-       super(projectBundleId: projectBundleId);
+  })  : _executable = executable,
+        super(projectBundleId: projectBundleId);
 
   /// The uncompressed bundle of the application.
   ///
@@ -148,7 +144,7 @@ class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
 }
 
 class BuildableMacOSApp extends MacOSApp {
-  BuildableMacOSApp(this.project, String projectBundleId): super(projectBundleId: projectBundleId);
+  BuildableMacOSApp(this.project, String projectBundleId) : super(projectBundleId: projectBundleId);
 
   final MacOSProject project;
 
@@ -162,12 +158,8 @@ class BuildableMacOSApp extends MacOSApp {
       globals.printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
       return null;
     }
-    return globals.fs.path.join(
-        getMacOSBuildDirectory(),
-        'Build',
-        'Products',
-        sentenceCase(getNameForBuildMode(buildMode)),
-        appBundleNameFile.readAsStringSync().trim());
+    return globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products',
+        sentenceCase(getNameForBuildMode(buildMode)), appBundleNameFile.readAsStringSync().trim());
   }
 
   @override

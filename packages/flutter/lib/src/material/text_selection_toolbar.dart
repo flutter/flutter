@@ -41,8 +41,8 @@ class TextSelectionToolbar extends StatelessWidget {
     required this.anchorBelow,
     this.toolbarBuilder = _defaultToolbarBuilder,
     required this.children,
-  }) : assert(children.length > 0),
-       super(key: key);
+  })  : assert(children.length > 0),
+        super(key: key);
 
   /// {@template flutter.material.TextSelectionToolbar.anchorAbove}
   /// The focal point above which the toolbar attempts to position itself.
@@ -88,8 +88,7 @@ class TextSelectionToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double paddingAbove = MediaQuery.of(context).padding.top
-        + _kToolbarScreenPadding;
+    final double paddingAbove = MediaQuery.of(context).padding.top + _kToolbarScreenPadding;
     final double availableHeight = anchorAbove.dy - paddingAbove;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
@@ -130,8 +129,8 @@ class _TextSelectionToolbarOverflowable extends StatefulWidget {
     required this.isAbove,
     required this.toolbarBuilder,
     required this.children,
-  }) : assert(children.length > 0),
-       super(key: key);
+  })  : assert(children.length > 0),
+        super(key: key);
 
   final List<Widget> children;
 
@@ -146,7 +145,8 @@ class _TextSelectionToolbarOverflowable extends StatefulWidget {
   _TextSelectionToolbarOverflowableState createState() => _TextSelectionToolbarOverflowableState();
 }
 
-class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbarOverflowable> with TickerProviderStateMixin {
+class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbarOverflowable>
+    with TickerProviderStateMixin {
   // Whether or not the overflow menu is open. When it is closed, the menu
   // items that don't overflow are shown. When it is open, only the overflowing
   // menu items are shown.
@@ -192,30 +192,30 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
         // This duration was eyeballed on a Pixel 2 emulator running Android
         // API 28.
         duration: const Duration(milliseconds: 140),
-        child: widget.toolbarBuilder(context, _TextSelectionToolbarItemsLayout(
-          isAbove: widget.isAbove,
-          overflowOpen: _overflowOpen,
-          children: <Widget>[
-            // TODO(justinmc): This overflow button should have its own slot in
-            // _TextSelectionToolbarItemsLayout separate from children, similar
-            // to how it's done in Cupertino's text selection menu.
-            // https://github.com/flutter/flutter/issues/69908
-            // The navButton that shows and hides the overflow menu is the
-            // first child.
-            _TextSelectionToolbarOverflowButton(
-              icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
-              onPressed: () {
-                setState(() {
-                  _overflowOpen = !_overflowOpen;
-                });
-              },
-              tooltip: _overflowOpen
-                  ? localizations.backButtonTooltip
-                  : localizations.moreButtonTooltip,
-            ),
-            ...widget.children,
-          ],
-        )),
+        child: widget.toolbarBuilder(
+            context,
+            _TextSelectionToolbarItemsLayout(
+              isAbove: widget.isAbove,
+              overflowOpen: _overflowOpen,
+              children: <Widget>[
+                // TODO(justinmc): This overflow button should have its own slot in
+                // _TextSelectionToolbarItemsLayout separate from children, similar
+                // to how it's done in Cupertino's text selection menu.
+                // https://github.com/flutter/flutter/issues/69908
+                // The navButton that shows and hides the overflow menu is the
+                // first child.
+                _TextSelectionToolbarOverflowButton(
+                  icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
+                  onPressed: () {
+                    setState(() {
+                      _overflowOpen = !_overflowOpen;
+                    });
+                  },
+                  tooltip: _overflowOpen ? localizations.backButtonTooltip : localizations.moreButtonTooltip,
+                ),
+                ...widget.children,
+              ],
+            )),
       ),
     );
   }
@@ -231,9 +231,9 @@ class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidg
     required Widget child,
     required this.overflowOpen,
     required this.textDirection,
-  }) : assert(child != null),
-       assert(overflowOpen != null),
-       super(key: key, child: child);
+  })  : assert(child != null),
+        assert(overflowOpen != null),
+        super(key: key, child: child);
 
   final bool overflowOpen;
   final TextDirection textDirection;
@@ -249,8 +249,8 @@ class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidg
   @override
   void updateRenderObject(BuildContext context, _TextSelectionToolbarTrailingEdgeAlignRenderBox renderObject) {
     renderObject
-        ..overflowOpen = overflowOpen
-        ..textDirection = textDirection;
+      ..overflowOpen = overflowOpen
+      ..textDirection = textDirection;
   }
 }
 
@@ -258,9 +258,9 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
   _TextSelectionToolbarTrailingEdgeAlignRenderBox({
     required bool overflowOpen,
     required TextDirection textDirection,
-  }) : _textDirection = textDirection,
-       _overflowOpen = overflowOpen,
-       super();
+  })  : _textDirection = textDirection,
+        _overflowOpen = overflowOpen,
+        super();
 
   // The width of the menu when it was closed. This is used to achieve the
   // behavior where the open menu aligns its trailing edge to the closed menu's
@@ -326,7 +326,7 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
 
   // Include the parent data offset in the hit test.
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     // The x, y parameters have the top left of the node's box as the origin.
     final ToolbarItemsParentData childParentData = child!.parentData! as ToolbarItemsParentData;
     return result.addWithPaintOffset(
@@ -362,10 +362,10 @@ class _TextSelectionToolbarItemsLayout extends MultiChildRenderObjectWidget {
     required this.isAbove,
     required this.overflowOpen,
     required List<Widget> children,
-  }) : assert(children != null),
-       assert(isAbove != null),
-       assert(overflowOpen != null),
-       super(key: key, children: children);
+  })  : assert(children != null),
+        assert(isAbove != null),
+        assert(overflowOpen != null),
+        super(key: key, children: children);
 
   final bool isAbove;
   final bool overflowOpen;
@@ -404,15 +404,16 @@ class _TextSelectionToolbarItemsLayoutElement extends MultiChildRenderObjectElem
   }
 }
 
-class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData> {
+class _RenderTextSelectionToolbarItemsLayout extends RenderBox
+    with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData> {
   _RenderTextSelectionToolbarItemsLayout({
     required bool isAbove,
     required bool overflowOpen,
-  }) : assert(overflowOpen != null),
-       assert(isAbove != null),
-       _isAbove = isAbove,
-       _overflowOpen = overflowOpen,
-       super();
+  })  : assert(overflowOpen != null),
+        assert(isAbove != null),
+        _isAbove = isAbove,
+        _overflowOpen = overflowOpen,
+        super();
 
   // The index of the last item that doesn't overflow.
   int _lastIndexThatFits = -1;
@@ -442,11 +443,11 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   void _layoutChildren() {
     // When overflow is not open, the toolbar is always a specific height.
     final BoxConstraints sizedConstraints = _overflowOpen
-      ? constraints
-      : BoxConstraints.loose(Size(
-          constraints.maxWidth,
-          _kToolbarHeight,
-        ));
+        ? constraints
+        : BoxConstraints.loose(Size(
+            constraints.maxWidth,
+            _kToolbarHeight,
+          ));
 
     int i = -1;
     double width = 0.0;
@@ -473,9 +474,9 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
     // If the last child overflows, but only because of the width of the
     // overflow button, then just show it and hide the overflow button.
     final RenderBox navButton = firstChild!;
-    if (_lastIndexThatFits != -1
-        && _lastIndexThatFits == childCount - 2
-        && width - navButton.size.width <= sizedConstraints.maxWidth) {
+    if (_lastIndexThatFits != -1 &&
+        _lastIndexThatFits == childCount - 2 &&
+        width - navButton.size.width <= sizedConstraints.maxWidth) {
       _lastIndexThatFits = -1;
     }
   }
@@ -547,9 +548,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
     if (_shouldPaintChild(firstChild!, 0)) {
       navButtonParentData.shouldPaint = true;
       if (overflowOpen) {
-        navButtonParentData.offset = isAbove
-          ? Offset(0.0, overflowHeight)
-          : Offset.zero;
+        navButtonParentData.offset = isAbove ? Offset(0.0, overflowHeight) : Offset.zero;
         nextSize = Size(
           nextSize.width,
           isAbove ? nextSize.height + navButton.size.height : nextSize.height,
@@ -598,7 +597,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     RenderBox? child = lastChild;
     while (child != null) {
       // The x, y parameters have the top left of the node's box as the origin.
@@ -618,8 +617,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
           return child!.hitTest(result, position: transformed);
         },
       );
-      if (isHit)
-        return true;
+      if (isHit) return true;
       child = childParentData.previousSibling;
     }
     return false;

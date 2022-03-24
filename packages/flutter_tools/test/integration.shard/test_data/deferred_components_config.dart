@@ -57,13 +57,17 @@ abstract class DeferredComponentsConfig {
       writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), appManifest);
     }
     if (appStrings != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml'), appStrings);
+      writeFile(
+          fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml'), appStrings);
     }
     if (appStyles != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'styles.xml'), appStyles);
+      writeFile(
+          fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'styles.xml'), appStyles);
     }
     if (appLaunchBackground != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'), appLaunchBackground);
+      writeFile(
+          fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'),
+          appLaunchBackground);
     }
     if (asset1 != null) {
       writeFile(fileSystem.path.join(dir.path, 'test_assets/asset1.txt'), asset1);

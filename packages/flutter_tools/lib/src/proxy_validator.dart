@@ -26,34 +26,29 @@ class ProxyValidator extends DoctorValidator {
   /// an empty string will be returned. Checks for the lowercase version of the
   /// environment variable first, then uppercase to match Dart's HTTP implementation.
   static String _getEnv(String key, Platform platform) =>
-    platform.environment[key.toLowerCase()]?.trim() ??
-    platform.environment[key.toUpperCase()]?.trim() ??
-    '';
+      platform.environment[key.toLowerCase()]?.trim() ?? platform.environment[key.toUpperCase()]?.trim() ?? '';
 
   @override
   Future<ValidationResult> validate() async {
     if (_httpProxy.isEmpty) {
-      return const ValidationResult(
-          ValidationType.installed, <ValidationMessage>[]);
+      return const ValidationResult(ValidationType.installed, <ValidationMessage>[]);
     }
 
     final List<ValidationMessage> messages = <ValidationMessage>[
       const ValidationMessage('HTTP_PROXY is set'),
       if (_noProxy.isEmpty)
         const ValidationMessage.hint('NO_PROXY is not set')
-      else
-        ...<ValidationMessage>[
-          ValidationMessage('NO_PROXY is $_noProxy'),
-          for (final String host in await _getLoopbackAddresses())
-            if (_noProxy.contains(host))
-              ValidationMessage('NO_PROXY contains $host')
-            else
-              ValidationMessage.hint('NO_PROXY does not contain $host'),
-        ],
+      else ...<ValidationMessage>[
+        ValidationMessage('NO_PROXY is $_noProxy'),
+        for (final String host in await _getLoopbackAddresses())
+          if (_noProxy.contains(host))
+            ValidationMessage('NO_PROXY contains $host')
+          else
+            ValidationMessage.hint('NO_PROXY does not contain $host'),
+      ],
     ];
 
-    final bool hasIssues = messages.any(
-      (ValidationMessage msg) => msg.isHint || msg.isError);
+    final bool hasIssues = messages.any((ValidationMessage msg) => msg.isHint || msg.isError);
 
     return ValidationResult(
       hasIssues ? ValidationType.partial : ValidationType.installed,
@@ -65,7 +60,7 @@ class ProxyValidator extends DoctorValidator {
     final List<String> loopBackAddresses = <String>['localhost'];
 
     final List<NetworkInterface> networkInterfaces =
-      await listNetworkInterfaces(includeLinkLocal: true, includeLoopback: true);
+        await listNetworkInterfaces(includeLinkLocal: true, includeLoopback: true);
 
     for (final NetworkInterface networkInterface in networkInterfaces) {
       for (final InternetAddress internetAddress in networkInterface.addresses) {

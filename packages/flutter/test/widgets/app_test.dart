@@ -76,7 +76,7 @@ void main() {
         actions: <Type, Action<Intent>>{
           TestIntent: action,
         },
-        shortcuts: const <ShortcutActivator, Intent> {
+        shortcuts: const <ShortcutActivator, Intent>{
           SingleActivator(LogicalKeyboardKey.space): TestIntent(),
         },
         builder: (BuildContext context, Widget? child) {
@@ -180,21 +180,20 @@ void main() {
           home: Container(),
           onGenerateRoute: (_) => null,
         ),
-        errorMessage:
-          'FlutterError\n'
-          '   Could not find a generator for route RouteSettings("/path", null)\n'
-          '   in the _WidgetsAppState.\n'
-          '   Make sure your root app widget has provided a way to generate\n'
-          '   this route.\n'
-          '   Generators for routes are searched for in the following order:\n'
-          '    1. For the "/" route, the "home" property, if non-null, is used.\n'
-          '    2. Otherwise, the "routes" table is used, if it has an entry for\n'
-          '   the route.\n'
-          '    3. Otherwise, onGenerateRoute is called. It should return a\n'
-          '   non-null value for any valid route not handled by "home" and\n'
-          '   "routes".\n'
-          '    4. Finally if all else fails onUnknownRoute is called.\n'
-          '   Unfortunately, onUnknownRoute was not set.\n',
+        errorMessage: 'FlutterError\n'
+            '   Could not find a generator for route RouteSettings("/path", null)\n'
+            '   in the _WidgetsAppState.\n'
+            '   Make sure your root app widget has provided a way to generate\n'
+            '   this route.\n'
+            '   Generators for routes are searched for in the following order:\n'
+            '    1. For the "/" route, the "home" property, if non-null, is used.\n'
+            '    2. Otherwise, the "routes" table is used, if it has an entry for\n'
+            '   the route.\n'
+            '    3. Otherwise, onGenerateRoute is called. It should return a\n'
+            '   non-null value for any valid route not handled by "home" and\n'
+            '   "routes".\n'
+            '    4. Finally if all else fails onUnknownRoute is called.\n'
+            '   Unfortunately, onUnknownRoute was not set.\n',
       );
     });
 
@@ -209,13 +208,12 @@ void main() {
           onGenerateRoute: (_) => null,
           onUnknownRoute: (_) => null,
         ),
-        errorMessage:
-          'FlutterError\n'
-          '   The onUnknownRoute callback returned null.\n'
-          '   When the _WidgetsAppState requested the route\n'
-          '   RouteSettings("/path", null) from its onUnknownRoute callback,\n'
-          '   the callback returned null. Such callbacks must never return\n'
-          '   null.\n' ,
+        errorMessage: 'FlutterError\n'
+            '   The onUnknownRoute callback returned null.\n'
+            '   When the _WidgetsAppState requested the route\n'
+            '   RouteSettings("/path", null) from its onUnknownRoute callback,\n'
+            '   the callback returned null. Such callbacks must never return\n'
+            '   null.\n',
       );
     });
   });
@@ -300,7 +298,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -465,7 +463,8 @@ void main() {
     late final List<Locale>? localesArg;
     late final Iterable<Locale> supportedLocalesArg;
     await tester.pumpWidget(
-      MaterialApp( // This uses a MaterialApp because it introduces some actual localizations.
+      MaterialApp(
+        // This uses a MaterialApp because it introduces some actual localizations.
         localeListResolutionCallback: (List<Locale>? locales, Iterable<Locale> supportedLocales) {
           localesArg = locales;
           supportedLocalesArg = supportedLocales;
@@ -482,10 +481,12 @@ void main() {
       expect(localesArg, const <Locale>[Locale('en', 'US'), Locale('zh', 'CN')]);
     }
     expect(supportedLocalesArg, const <Locale>[Locale('en', 'US')]);
-    expect(tester.takeException(), "Warning: This application's locale, C_UTF-8, is not supported by all of its localization delegates.");
+    expect(tester.takeException(),
+        "Warning: This application's locale, C_UTF-8, is not supported by all of its localization delegates.");
   });
 
-  testWidgets('WidgetsApp creates a MediaQuery if `useInheritedMediaQuery` is set to false', (WidgetTester tester) async {
+  testWidgets('WidgetsApp creates a MediaQuery if `useInheritedMediaQuery` is set to false',
+      (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       WidgetsApp(
@@ -499,12 +500,13 @@ void main() {
     expect(MediaQuery.of(capturedContext), isNotNull);
   });
 
-  testWidgets('WidgetsApp does not create MediaQuery if `useInheritedMediaQuery` is set to true and one is available', (WidgetTester tester) async {
+  testWidgets('WidgetsApp does not create MediaQuery if `useInheritedMediaQuery` is set to true and one is available',
+      (WidgetTester tester) async {
     late BuildContext capturedContext;
     final UniqueKey uniqueKey = UniqueKey();
     await tester.pumpWidget(
       MediaQuery(
-      key: uniqueKey,
+        key: uniqueKey,
         data: const MediaQueryData(),
         child: WidgetsApp(
           useInheritedMediaQuery: true,
@@ -519,7 +521,8 @@ void main() {
     expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
 
-  testWidgets('WidgetsApp does create a MediaQuery if `useInheritedMediaQuery` is set to true and none is available', (WidgetTester tester) async {
+  testWidgets('WidgetsApp does create a MediaQuery if `useInheritedMediaQuery` is set to true and none is available',
+      (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       WidgetsApp(
@@ -536,7 +539,8 @@ void main() {
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
-typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(
+    Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();
@@ -552,7 +556,8 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
   }
 }
 
-class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
+class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>
+    with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
   SimpleNavigatorRouterDelegate({
     required this.builder,
     required this.onPopPage,

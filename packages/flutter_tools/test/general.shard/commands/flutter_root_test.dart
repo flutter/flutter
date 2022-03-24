@@ -15,12 +15,7 @@ void main() {
     final String defaultFlutterRoot = Cache.defaultFlutterRoot(
         fileSystem: MemoryFileSystem.test(),
         userMessages: UserMessages(),
-        platform: FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': 'path/to/flutter'
-            }
-        )
-    );
+        platform: FakePlatform(environment: <String, String>{'FLUTTER_ROOT': 'path/to/flutter'}));
 
     expect(defaultFlutterRoot, '/path/to/flutter');
   });
@@ -29,8 +24,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     // For data-uri, the root is initialized to ../.. and then normalized. Change the
     // current directory to verify this.
-    final Directory directory = fileSystem.directory('foo/bar/baz/')
-      ..createSync(recursive: true);
+    final Directory directory = fileSystem.directory('foo/bar/baz/')..createSync(recursive: true);
     fileSystem.currentDirectory = directory;
 
     final String defaultFlutterRoot = Cache.defaultFlutterRoot(
@@ -39,8 +33,7 @@ void main() {
         platform: FakePlatform(
           environment: <String, String>{},
           script: Uri.parse('data:,Hello%2C%20World!'),
-        )
-    );
+        ));
 
     expect(defaultFlutterRoot, '/foo');
   });
@@ -53,9 +46,7 @@ void main() {
         platform: FakePlatform(
             environment: <String, String>{},
             script: Uri.parse('package:flutter_tools/flutter_tools.dart'),
-            packageConfig: 'flutter/packages/flutter_tools/.packages'
-        )
-    );
+            packageConfig: 'flutter/packages/flutter_tools/.packages'));
 
     expect(defaultFlutterRoot, '/flutter');
   });
@@ -68,8 +59,7 @@ void main() {
         platform: FakePlatform(
           environment: <String, String>{},
           script: Uri.parse('file:///flutter/bin/cache/flutter_tools.snapshot'),
-        )
-    );
+        ));
 
     expect(defaultFlutterRoot, '/flutter');
   });
@@ -82,8 +72,7 @@ void main() {
         platform: FakePlatform(
           environment: <String, String>{},
           script: Uri.parse('file:///flutter/packages/flutter_tools/bin/flutter_tools.dart'),
-        )
-    );
+        ));
 
     expect(defaultFlutterRoot, '/flutter');
   });
@@ -96,8 +85,7 @@ void main() {
         platform: FakePlatform(
           environment: <String, String>{},
           script: Uri.parse('http://foo.bar'), // does not match any heuristics.
-        )
-    );
+        ));
 
     expect(defaultFlutterRoot, '/');
   });

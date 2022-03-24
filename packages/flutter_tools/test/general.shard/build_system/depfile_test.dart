@@ -81,8 +81,7 @@ C:\\a.txt: C:\\b.txt
     );
     final File inputFile = fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
       ..createSync(recursive: true);
-    final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute
-      ..createSync();
+    final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute..createSync();
     final Depfile depfile = Depfile(<File>[inputFile], <File>[outputFile]);
     final File outputDepfile = fileSystem.file('depfile');
     depfileService.writeToFile(depfile, outputDepfile);
@@ -94,8 +93,7 @@ C:\\a.txt: C:\\b.txt
   testWithoutContext('Can escape depfile with spaces in directory names', () {
     final File inputFile = fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
       ..createSync(recursive: true);
-    final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute
-      ..createSync();
+    final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute..createSync();
     final Depfile depfile = Depfile(<File>[inputFile], <File>[outputFile]);
     final File outputDepfile = fileSystem.file('depfile');
     depfileService.writeToFile(depfile, outputDepfile);
@@ -103,7 +101,6 @@ C:\\a.txt: C:\\b.txt
     expect(outputDepfile.readAsStringSync(), contains(r'/Hello\ Flutter/a.txt'));
     expect(outputDepfile.readAsStringSync(), contains(r'/Hello\ Flutter/b.txt'));
   });
-
 
   testWithoutContext('Resillient to weird whitespace', () {
     final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''

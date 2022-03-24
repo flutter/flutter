@@ -181,8 +181,7 @@ class Icon extends StatelessWidget {
 
     final double iconOpacity = iconTheme.opacity ?? 1.0;
     Color iconColor = color ?? iconTheme.color!;
-    if (iconOpacity != 1.0)
-      iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
+    if (iconOpacity != 1.0) iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 
     Widget iconWidget = RichText(
       overflow: TextOverflow.visible, // Never clip.

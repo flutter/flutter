@@ -32,10 +32,7 @@ import '../src/fakes.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kResume,
-    timestamp: 0
-  ),
+  pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
   breakpoints: <vm_service.Breakpoint>[],
   exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[],
@@ -66,76 +63,97 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 void main() {
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
-      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
-        'type': 'ReloadReport',
-        'success': false,
-        'details': <String, dynamic>{},
-      })), false);
-      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
-        'type': 'ReloadReport',
-        'success': false,
-        'details': <String, dynamic>{
-          'notices': <Map<String, dynamic>>[
-          ],
-        },
-      })), false);
-      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
-        'type': 'ReloadReport',
-        'success': false,
-        'details': <String, dynamic>{
-          'notices': <String, dynamic>{
-            'message': 'error',
-          },
-        },
-      })), false);
-      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
-        'type': 'ReloadReport',
-        'success': false,
-        'details': <String, dynamic>{
-          'notices': <Map<String, dynamic>>[],
-        },
-      })), false);
-      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
-        'type': 'ReloadReport',
-        'success': false,
-        'details': <String, dynamic>{
-          'notices': <Map<String, dynamic>>[
-            <String, dynamic>{'message': false},
-          ],
-        },
-      })), false);
-      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
-        'type': 'ReloadReport',
-        'success': false,
-        'details': <String, dynamic>{
-          'notices': <Map<String, dynamic>>[
-            <String, dynamic>{'message': <String>['error']},
-          ],
-        },
-      })), false);
-      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
-        'type': 'ReloadReport',
-        'success': false,
-        'details': <String, dynamic>{
-          'notices': <Map<String, dynamic>>[
-            <String, dynamic>{'message': 'error'},
-            <String, dynamic>{'message': <String>['error']},
-          ],
-        },
-      })), false);
-      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
-        'type': 'ReloadReport',
-        'success': false,
-        'details': <String, dynamic>{
-          'notices': <Map<String, dynamic>>[
-            <String, dynamic>{'message': 'error'},
-          ],
-        },
-      })), false);
-      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
-        'type': 'ReloadReport',
-        'success': true,
-      })), true);
+      expect(
+          HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
+            'type': 'ReloadReport',
+            'success': false,
+            'details': <String, dynamic>{},
+          })),
+          false);
+      expect(
+          HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
+            'type': 'ReloadReport',
+            'success': false,
+            'details': <String, dynamic>{
+              'notices': <Map<String, dynamic>>[],
+            },
+          })),
+          false);
+      expect(
+          HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
+            'type': 'ReloadReport',
+            'success': false,
+            'details': <String, dynamic>{
+              'notices': <String, dynamic>{
+                'message': 'error',
+              },
+            },
+          })),
+          false);
+      expect(
+          HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
+            'type': 'ReloadReport',
+            'success': false,
+            'details': <String, dynamic>{
+              'notices': <Map<String, dynamic>>[],
+            },
+          })),
+          false);
+      expect(
+          HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
+            'type': 'ReloadReport',
+            'success': false,
+            'details': <String, dynamic>{
+              'notices': <Map<String, dynamic>>[
+                <String, dynamic>{'message': false},
+              ],
+            },
+          })),
+          false);
+      expect(
+          HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
+            'type': 'ReloadReport',
+            'success': false,
+            'details': <String, dynamic>{
+              'notices': <Map<String, dynamic>>[
+                <String, dynamic>{
+                  'message': <String>['error']
+                },
+              ],
+            },
+          })),
+          false);
+      expect(
+          HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
+            'type': 'ReloadReport',
+            'success': false,
+            'details': <String, dynamic>{
+              'notices': <Map<String, dynamic>>[
+                <String, dynamic>{'message': 'error'},
+                <String, dynamic>{
+                  'message': <String>['error']
+                },
+              ],
+            },
+          })),
+          false);
+      expect(
+          HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
+            'type': 'ReloadReport',
+            'success': false,
+            'details': <String, dynamic>{
+              'notices': <Map<String, dynamic>>[
+                <String, dynamic>{'message': 'error'},
+              ],
+            },
+          })),
+          false);
+      expect(
+          HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
+            'type': 'ReloadReport',
+            'success': true,
+          })),
+          true);
     });
 
     testWithoutContext('ReasonForCancelling toString has a hint for specific errors', () {
@@ -211,11 +229,12 @@ void main() {
             void Function(String message) onSlow,
             String reloadMessage,
             String fastReassembleClassName,
-          ) async => ReassembleResult(
-              <FlutterView, FlutterVmService>{null: null},
-              false,
-              true,
-            ),
+          ) async =>
+              ReassembleResult(
+            <FlutterView, FlutterVmService>{null: null},
+            false,
+            true,
+          ),
         ).restart();
         expect(result.isOk, false);
         expect(result.message, 'setupHotReload failed');
@@ -296,13 +315,13 @@ void main() {
         ];
 
         fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
-          success: true,
-          invalidatedSourcesCount: 2,
-          syncedBytes: 4,
-          scannedSourcesCount: 8,
-          compileDuration: const Duration(seconds: 16),
-          transferDuration: const Duration(seconds: 32),
-        );
+              success: true,
+              invalidatedSourcesCount: 2,
+              syncedBytes: 4,
+              scannedSourcesCount: 8,
+              compileDuration: const Duration(seconds: 16),
+              transferDuration: const Duration(seconds: 32),
+            );
 
         final FakeStopwatchFactory fakeStopwatchFactory = FakeStopwatchFactory(
           stopwatches: <String, Stopwatch>{
@@ -323,20 +342,21 @@ void main() {
 
         expect(result.isOk, true);
         expect(testUsage.events, <TestUsageEvent>[
-          const TestUsageEvent('hot', 'restart', parameters: CustomDimensions(
-            hotEventTargetPlatform: 'flutter-tester',
-            hotEventSdkName: 'Tester',
-            hotEventEmulator: false,
-            hotEventFullRestart: true,
-            fastReassemble: false,
-            hotEventOverallTimeInMs: 64000,
-            hotEventSyncedBytes: 4,
-            hotEventInvalidatedSourcesCount: 2,
-            hotEventTransferTimeInMs: 32000,
-            hotEventCompileTimeInMs: 16000,
-            hotEventFindInvalidatedTimeInMs: 128000,
-            hotEventScannedSourcesCount: 8,
-          )),
+          const TestUsageEvent('hot', 'restart',
+              parameters: CustomDimensions(
+                hotEventTargetPlatform: 'flutter-tester',
+                hotEventSdkName: 'Tester',
+                hotEventEmulator: false,
+                hotEventFullRestart: true,
+                fastReassemble: false,
+                hotEventOverallTimeInMs: 64000,
+                hotEventSyncedBytes: 4,
+                hotEventInvalidatedSourcesCount: 2,
+                hotEventTransferTimeInMs: 32000,
+                hotEventCompileTimeInMs: 16000,
+                hotEventFindInvalidatedTimeInMs: 128000,
+                hotEventScannedSourcesCount: 8,
+              )),
         ]);
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
@@ -364,13 +384,13 @@ void main() {
         ];
 
         fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
-          success: true,
-          invalidatedSourcesCount: 6,
-          syncedBytes: 8,
-          scannedSourcesCount: 16,
-          compileDuration: const Duration(seconds: 16),
-          transferDuration: const Duration(seconds: 32),
-        );
+              success: true,
+              invalidatedSourcesCount: 6,
+              syncedBytes: 8,
+              scannedSourcesCount: 16,
+              compileDuration: const Duration(seconds: 16),
+              transferDuration: const Duration(seconds: 32),
+            );
 
         final FakeStopwatchFactory fakeStopwatchFactory = FakeStopwatchFactory(
           stopwatches: <String, Stopwatch>{
@@ -411,35 +431,37 @@ void main() {
             void Function(String message) onSlow,
             String reloadMessage,
             String fastReassembleClassName,
-          ) async => ReassembleResult(
-              <FlutterView, FlutterVmService>{null: null},
-              false,
-              true,
-            ),
+          ) async =>
+              ReassembleResult(
+            <FlutterView, FlutterVmService>{null: null},
+            false,
+            true,
+          ),
         ).restart();
 
         expect(result.isOk, true);
         expect(testUsage.events, <TestUsageEvent>[
-          const TestUsageEvent('hot', 'reload', parameters: CustomDimensions(
-            hotEventFinalLibraryCount: 2,
-            hotEventSyncedLibraryCount: 3,
-            hotEventSyncedClassesCount: 4,
-            hotEventSyncedProceduresCount: 5,
-            hotEventSyncedBytes: 8,
-            hotEventInvalidatedSourcesCount: 6,
-            hotEventTransferTimeInMs: 32000,
-            hotEventOverallTimeInMs: 128000,
-            hotEventTargetPlatform: 'flutter-tester',
-            hotEventSdkName: 'Tester',
-            hotEventEmulator: false,
-            hotEventFullRestart: false,
-            fastReassemble: false,
-            hotEventCompileTimeInMs: 16000,
-            hotEventFindInvalidatedTimeInMs: 64000,
-            hotEventScannedSourcesCount: 16,
-            hotEventReassembleTimeInMs: 256000,
-            hotEventReloadVMTimeInMs: 512000,
-          )),
+          const TestUsageEvent('hot', 'reload',
+              parameters: CustomDimensions(
+                hotEventFinalLibraryCount: 2,
+                hotEventSyncedLibraryCount: 3,
+                hotEventSyncedClassesCount: 4,
+                hotEventSyncedProceduresCount: 5,
+                hotEventSyncedBytes: 8,
+                hotEventInvalidatedSourcesCount: 6,
+                hotEventTransferTimeInMs: 32000,
+                hotEventOverallTimeInMs: 128000,
+                hotEventTargetPlatform: 'flutter-tester',
+                hotEventSdkName: 'Tester',
+                hotEventEmulator: false,
+                hotEventFullRestart: false,
+                fastReassemble: false,
+                hotEventCompileTimeInMs: 16000,
+                hotEventFindInvalidatedTimeInMs: 64000,
+                hotEventScannedSourcesCount: 16,
+                hotEventReassembleTimeInMs: 256000,
+                hotEventReloadVMTimeInMs: 512000,
+              )),
         ]);
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
@@ -474,7 +496,10 @@ void main() {
           devtoolsHandler: createNoOpHandler,
         );
 
-        await expectLater(runner.restart(fullRestart: true), throwsA(isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
+        await expectLater(
+            runner.restart(fullRestart: true),
+            throwsA(
+                isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
@@ -508,7 +533,10 @@ void main() {
           devtoolsHandler: createNoOpHandler,
         );
 
-        await expectLater(runner.restart(), throwsA(isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
+        await expectLater(
+            runner.restart(),
+            throwsA(
+                isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
@@ -528,8 +556,9 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext('Exits with code 2 when HttpException is thrown '
-      'during VM service connection', () async {
+    testUsingContext(
+        'Exits with code 2 when HttpException is thrown '
+        'during VM service connection', () async {
       fileSystem.file('.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
@@ -545,7 +574,8 @@ void main() {
         ),
       ];
 
-      final int exitCode = await HotRunner(devices,
+      final int exitCode = await HotRunner(
+        devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
       ).attach();
@@ -571,7 +601,8 @@ void main() {
         flutterDevice2,
       ];
 
-      await HotRunner(devices,
+      await HotRunner(
+        devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
       ).cleanupAtFinish();
@@ -587,7 +618,7 @@ void main() {
 
 class FakeDevFs extends Fake implements DevFS {
   @override
-  Future<void> destroy() async { }
+  Future<void> destroy() async {}
 
   @override
   List<Uri> sources = <Uri>[];
@@ -686,7 +717,8 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     @required String dillOutputPath,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
-  }) => updateDevFSReportCallback();
+  }) =>
+      updateDevFSReportCallback();
 }
 
 class TestFlutterDevice extends FlutterDevice {
@@ -758,7 +790,8 @@ class FakeFlutterVmService extends Fake implements FlutterVmService {
   vm_service.VmService get service => FakeVmService();
 
   @override
-  Future<List<FlutterView>> getFlutterViews({bool returnEarly = false, Duration delay = const Duration(milliseconds: 50)}) async {
+  Future<List<FlutterView>> getFlutterViews(
+      {bool returnEarly = false, Duration delay = const Duration(milliseconds: 50)}) async {
     return <FlutterView>[];
   }
 }

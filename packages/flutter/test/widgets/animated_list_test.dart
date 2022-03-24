@@ -16,6 +16,7 @@ void main() {
         ),
       );
     }
+
     final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
@@ -30,9 +31,7 @@ void main() {
     );
 
     expect(find.byWidgetPredicate((Widget widget) {
-      return widget is SliverAnimatedList
-         && widget.initialItemCount == 2
-         && widget.itemBuilder == builder;
+      return widget is SliverAnimatedList && widget.initialItemCount == 2 && widget.itemBuilder == builder;
     }), findsOneWidget);
 
     listKey.currentState!.insertItem(0);
@@ -289,7 +288,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.getTopLeft(find.text('item 3')).dy, 500);
 
-      listKey.currentState!.removeItem(0,
+      listKey.currentState!.removeItem(
+        0,
         (BuildContext context, Animation<double> animation) {
           return SizeTransition(
             sizeFactor: animation,

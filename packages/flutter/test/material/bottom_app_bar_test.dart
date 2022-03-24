@@ -29,8 +29,7 @@ void main() {
 
     final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
-    final Path expectedPath = Path()
-      ..addRect(Offset.zero & renderBox.size);
+    final Path expectedPath = Path()..addRect(Offset.zero & renderBox.size);
 
     final Path actualPath = shapeListenerState.cache.value;
     expect(
@@ -54,7 +53,7 @@ void main() {
             child: MaterialApp(
               home: Scaffold(
                 floatingActionButton: FloatingActionButton(
-                  onPressed: () { },
+                  onPressed: () {},
                 ),
                 floatingActionButtonLocation: location,
                 bottomNavigationBar: const BottomAppBar(
@@ -72,6 +71,7 @@ void main() {
         ),
       );
     }
+
     await pump(FloatingActionButtonLocation.endDocked);
     await expectLater(
       find.byKey(key),
@@ -104,8 +104,7 @@ void main() {
       ),
     );
 
-    final PhysicalShape physicalShape =
-      tester.widget(find.byType(PhysicalShape).at(0));
+    final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
 
     expect(physicalShape.color, const Color(0xffffff00));
   });
@@ -131,8 +130,7 @@ void main() {
       ),
     );
 
-    final PhysicalShape physicalShape =
-      tester.widget(find.byType(PhysicalShape).at(0));
+    final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
 
     expect(physicalShape.color, const Color(0xff0000ff));
   });
@@ -204,8 +202,7 @@ void main() {
 
     final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
-    final Path expectedPath = Path()
-      ..addRect(Offset.zero & renderBox.size);
+    final Path expectedPath = Path()..addRect(Offset.zero & renderBox.size);
 
     final Path actualPath = shapeListenerState.cache.value;
 
@@ -365,8 +362,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomNavigationBar:
-          BottomAppBar(
+          bottomNavigationBar: BottomAppBar(
             shape: RectangularNotch(),
             notchMargin: 0.0,
             clipBehavior: Clip.antiAliasWithSaveLayer,
@@ -513,13 +509,12 @@ class ClipCachePainter extends CustomPainter {
 }
 
 class ShapeListener extends StatefulWidget {
-  const ShapeListener(this.child, { Key? key }) : super(key: key);
+  const ShapeListener(this.child, {Key? key}) : super(key: key);
 
   final Widget child;
 
   @override
   State createState() => ShapeListenerState();
-
 }
 
 class ShapeListenerState extends State<ShapeListener> {
@@ -538,7 +533,6 @@ class ShapeListenerState extends State<ShapeListener> {
     super.didChangeDependencies();
     cache = ClipCachePainter(context);
   }
-
 }
 
 class RectangularNotch extends NotchedShape {
@@ -546,8 +540,7 @@ class RectangularNotch extends NotchedShape {
 
   @override
   Path getOuterPath(Rect host, Rect? guest) {
-    if (guest == null)
-      return Path()..addRect(host);
+    if (guest == null) return Path()..addRect(host);
     return Path()
       ..moveTo(host.left, host.top)
       ..lineTo(guest.left, host.top)

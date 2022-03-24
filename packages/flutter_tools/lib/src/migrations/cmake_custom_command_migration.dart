@@ -12,8 +12,8 @@ import '../cmake_project.dart';
 // See https://github.com/flutter/flutter/issues/67270.
 class CmakeCustomCommandMigration extends ProjectMigrator {
   CmakeCustomCommandMigration(CmakeBasedProject project, Logger logger)
-    : _cmakeFile = project.managedCmakeFile,
-      super(logger);
+      : _cmakeFile = project.managedCmakeFile,
+        super(logger);
 
   final File _cmakeFile;
 

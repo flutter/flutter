@@ -36,18 +36,15 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
             children: <Widget>[
               const Padding(
                 padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'iOS themed buttons are flat. They can have borders or backgrounds but '
-                  'only when necessary.'
-                ),
+                child: Text('iOS themed buttons are flat. They can have borders or backgrounds but '
+                    'only when necessary.'),
               ),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget> [
-                    Text(_pressedCount > 0
-                        ? 'Button pressed $_pressedCount time${_pressedCount == 1 ? "" : "s"}'
-                        : ' '),
+                  children: <Widget>[
+                    Text(
+                        _pressedCount > 0 ? 'Button pressed $_pressedCount time${_pressedCount == 1 ? "" : "s"}' : ' '),
                     const Padding(padding: EdgeInsets.all(12.0)),
                     Align(
                       alignment: const Alignment(0.0, -0.2),
@@ -57,7 +54,9 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                           CupertinoButton(
                             child: const Text('Cupertino Button'),
                             onPressed: () {
-                              setState(() { _pressedCount += 1; });
+                              setState(() {
+                                _pressedCount += 1;
+                              });
                             },
                           ),
                           const CupertinoButton(
@@ -71,7 +70,9 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                     CupertinoButton.filled(
                       child: const Text('With Background'),
                       onPressed: () {
-                        setState(() { _pressedCount += 1; });
+                        setState(() {
+                          _pressedCount += 1;
+                        });
                       },
                     ),
                     const Padding(padding: EdgeInsets.all(12.0)),

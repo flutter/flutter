@@ -149,7 +149,8 @@ void main() {
     expect(state.bucket, isNull); // root bucket future has not completed yet.
 
     // Complete the future.
-    final RestorationBucket root = RestorationBucket.root(manager: binding.restorationManager, rawData: <String, dynamic>{});
+    final RestorationBucket root =
+        RestorationBucket.root(manager: binding.restorationManager, rawData: <String, dynamic>{});
     bucketCompleter.complete(root);
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -223,7 +224,8 @@ void main() {
     expect(find.text('Hello'), findsOneWidget);
 
     final Map<String, dynamic> outOfScopeRawData = <String, dynamic>{};
-    final RestorationBucket outOfScopeRootBucket = RestorationBucket.root(manager: binding.restorationManager, rawData: outOfScopeRawData);
+    final RestorationBucket outOfScopeRootBucket =
+        RestorationBucket.root(manager: binding.restorationManager, rawData: outOfScopeRawData);
     bucketCompleter.complete(outOfScopeRootBucket);
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -259,7 +261,8 @@ void main() {
 
   testWidgets('injects new root when old one is decommissioned', (WidgetTester tester) async {
     final Map<String, dynamic> firstRawData = <String, dynamic>{};
-    final RestorationBucket firstRoot = RestorationBucket.root(manager: binding.restorationManager, rawData: firstRawData);
+    final RestorationBucket firstRoot =
+        RestorationBucket.root(manager: binding.restorationManager, rawData: firstRawData);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(firstRoot);
 
     await tester.pumpWidget(
@@ -278,7 +281,10 @@ void main() {
     expect(find.text('Hello'), findsOneWidget);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
     state.bucket!.write('foo', 42);
-    expect((((firstRawData[childrenMapKey] as Map<Object?, Object?>)['root-child']! as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['foo'], 42);
+    expect(
+        (((firstRawData[childrenMapKey] as Map<Object?, Object?>)['root-child']! as Map<String, dynamic>)[valuesMapKey]
+            as Map<Object?, Object?>)['foo'],
+        42);
     final RestorationBucket firstBucket = state.bucket!;
 
     // Replace with new root.
@@ -291,7 +297,8 @@ void main() {
         },
       },
     };
-    final RestorationBucket secondRoot = RestorationBucket.root(manager: binding.restorationManager, rawData: secondRawData);
+    final RestorationBucket secondRoot =
+        RestorationBucket.root(manager: binding.restorationManager, rawData: secondRawData);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(secondRoot);
     await tester.pump();
     firstRoot.dispose();

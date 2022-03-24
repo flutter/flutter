@@ -20,7 +20,7 @@ class ShowLicenses extends StatelessWidget {
     BuildContext context,
     AsyncSnapshot<List<LicenseEntry>> snapshot,
   ) {
-    final List<LicenseEntry> entries = snapshot.data  ?? <LicenseEntry>[];
+    final List<LicenseEntry> entries = snapshot.data ?? <LicenseEntry>[];
     String flutterPackage = '';
     final List<String> flutterParagraphs = <String>[];
     String enginePackage = '';

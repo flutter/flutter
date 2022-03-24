@@ -33,13 +33,9 @@ import '../src/pubspec_schema.dart';
 /// Information for a platform entry in the 'platforms' section of a plugin's
 /// pubspec.yaml.
 class _PluginPlatformInfo {
-  const _PluginPlatformInfo({
-    this.pluginClass,
-    this.dartPluginClass,
-    this.androidPackage,
-    this.fileName
-  }) : assert(pluginClass != null || dartPluginClass != null),
-       assert(androidPackage == null || pluginClass != null);
+  const _PluginPlatformInfo({this.pluginClass, this.dartPluginClass, this.androidPackage, this.fileName})
+      : assert(pluginClass != null || dartPluginClass != null),
+        assert(androidPackage == null || pluginClass != null);
 
   /// The pluginClass entry, if any.
   final String pluginClass;
@@ -58,14 +54,10 @@ class _PluginPlatformInfo {
   String get indentedPubspecSection {
     const String indentation = '        ';
     return <String>[
-      if (pluginClass != null)
-        '${indentation}pluginClass: $pluginClass',
-      if (dartPluginClass != null)
-        '${indentation}dartPluginClass: $dartPluginClass',
-      if (androidPackage != null)
-        '${indentation}package: $androidPackage',
-      if (fileName != null)
-        '${indentation}fileName: $fileName',
+      if (pluginClass != null) '${indentation}pluginClass: $pluginClass',
+      if (dartPluginClass != null) '${indentation}dartPluginClass: $dartPluginClass',
+      if (androidPackage != null) '${indentation}package: $androidPackage',
+      if (fileName != null) '${indentation}fileName: $fileName',
     ].join('\n');
   }
 }
@@ -135,17 +127,20 @@ void main() {
 
       windowsProject = FakeWindowsProject();
       flutterProject.windows = windowsProject;
-      final Directory windowsManagedDirectory = flutterProject.directory.childDirectory('windows').childDirectory('flutter');
+      final Directory windowsManagedDirectory =
+          flutterProject.directory.childDirectory('windows').childDirectory('flutter');
       windowsProject
         ..managedDirectory = windowsManagedDirectory
         ..cmakeFile = windowsManagedDirectory.parent.childFile('CMakeLists.txt')
         ..generatedPluginCmakeFile = windowsManagedDirectory.childFile('generated_plugins.mk')
-        ..pluginSymlinkDirectory = windowsManagedDirectory.childDirectory('ephemeral').childDirectory('.plugin_symlinks')
+        ..pluginSymlinkDirectory =
+            windowsManagedDirectory.childDirectory('ephemeral').childDirectory('.plugin_symlinks')
         ..exists = false;
 
       linuxProject = FakeLinuxProject();
       flutterProject.linux = linuxProject;
-      final Directory linuxManagedDirectory = flutterProject.directory.childDirectory('linux').childDirectory('flutter');
+      final Directory linuxManagedDirectory =
+          flutterProject.directory.childDirectory('linux').childDirectory('flutter');
       final Directory linuxEphemeralDirectory = linuxManagedDirectory.childDirectory('ephemeral');
       linuxProject
         ..managedDirectory = linuxManagedDirectory
@@ -159,8 +154,7 @@ void main() {
     setUp(() async {
       fs = MemoryFileSystem.test();
       fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
-      systemClock = FakeSystemClock()
-        ..currentTime = DateTime(1970);
+      systemClock = FakeSystemClock()..currentTime = DateTime(1970);
       flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
 
       // Add basic properties to the Flutter project and subprojects
@@ -198,19 +192,16 @@ void main() {
 
       final List<Directory> directories = <Directory>[];
       final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
-      final File packagesFile = flutterProject.directory.childFile('.packages')
-            ..createSync(recursive: true);
+      final File packagesFile = flutterProject.directory.childFile('.packages')..createSync(recursive: true);
       for (final String nameOrPath in pluginNamesOrPaths) {
         final String name = fileSystem.path.basename(nameOrPath);
-        final Directory pluginDirectory = (nameOrPath == name)
-            ? fakePubCache.childDirectory(name)
-            : fileSystem.directory(nameOrPath);
-        packagesFile.writeAsStringSync(
-            '$name:file://${pluginDirectory.childFile('lib').uri}\n',
+        final Directory pluginDirectory =
+            (nameOrPath == name) ? fakePubCache.childDirectory(name) : fileSystem.directory(nameOrPath);
+        packagesFile.writeAsStringSync('$name:file://${pluginDirectory.childFile('lib').uri}\n',
             mode: FileMode.writeOnlyAppend);
         pluginDirectory.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', sentenceCase(camelCase(name))));
+          ..createSync(recursive: true)
+          ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', sentenceCase(camelCase(name))));
         directories.add(pluginDirectory);
       }
       return directories;
@@ -223,152 +214,130 @@ void main() {
 
     void createNewJavaPlugin1() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
-              fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
-      pluginUsingJavaAndNewEmbeddingDir
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('''
+          fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
+      pluginUsingJavaAndNewEmbeddingDir.childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     androidPackage: plugin1
     pluginClass: UseNewEmbedding
               ''');
       pluginUsingJavaAndNewEmbeddingDir
-        .childDirectory('android')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childDirectory('java')
-        .childDirectory('plugin1')
-        .childFile('UseNewEmbedding.java')
+          .childDirectory('android')
+          .childDirectory('src')
+          .childDirectory('main')
+          .childDirectory('java')
+          .childDirectory('plugin1')
+          .childFile('UseNewEmbedding.java')
         ..createSync(recursive: true)
         ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
 
-      flutterProject.directory
-        .childFile('.packages')
-        .writeAsStringSync(
-          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
-          mode: FileMode.append,
-        );
+      flutterProject.directory.childFile('.packages').writeAsStringSync(
+            'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+            mode: FileMode.append,
+          );
     }
 
     Directory createPluginWithInvalidAndroidPackage() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
-              fs.systemTempDirectory.createTempSync('flutter_plugin_invalid_package.');
-      pluginUsingJavaAndNewEmbeddingDir
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('''
+          fs.systemTempDirectory.createTempSync('flutter_plugin_invalid_package.');
+      pluginUsingJavaAndNewEmbeddingDir.childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     androidPackage: plugin1.invalid
     pluginClass: UseNewEmbedding
               ''');
       pluginUsingJavaAndNewEmbeddingDir
-        .childDirectory('android')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childDirectory('java')
-        .childDirectory('plugin1')
-        .childDirectory('correct')
-        .childFile('UseNewEmbedding.java')
+          .childDirectory('android')
+          .childDirectory('src')
+          .childDirectory('main')
+          .childDirectory('java')
+          .childDirectory('plugin1')
+          .childDirectory('correct')
+          .childFile('UseNewEmbedding.java')
         ..createSync(recursive: true)
         ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
 
-      flutterProject.directory
-        .childFile('.packages')
-        .writeAsStringSync(
-          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
-          mode: FileMode.append,
-        );
+      flutterProject.directory.childFile('.packages').writeAsStringSync(
+            'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+            mode: FileMode.append,
+          );
       return pluginUsingJavaAndNewEmbeddingDir;
     }
 
     void createNewKotlinPlugin2() {
       final Directory pluginUsingKotlinAndNewEmbeddingDir =
           fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
-      pluginUsingKotlinAndNewEmbeddingDir
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('''
+      pluginUsingKotlinAndNewEmbeddingDir.childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     androidPackage: plugin2
     pluginClass: UseNewEmbedding
           ''');
       pluginUsingKotlinAndNewEmbeddingDir
-        .childDirectory('android')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childDirectory('kotlin')
-        .childDirectory('plugin2')
-        .childFile('UseNewEmbedding.kt')
+          .childDirectory('android')
+          .childDirectory('src')
+          .childDirectory('main')
+          .childDirectory('kotlin')
+          .childDirectory('plugin2')
+          .childFile('UseNewEmbedding.kt')
         ..createSync(recursive: true)
         ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin');
 
-      flutterProject.directory
-        .childFile('.packages')
-        .writeAsStringSync(
-          'plugin2:${pluginUsingKotlinAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
-          mode: FileMode.append,
-        );
+      flutterProject.directory.childFile('.packages').writeAsStringSync(
+            'plugin2:${pluginUsingKotlinAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+            mode: FileMode.append,
+          );
     }
 
     void createOldJavaPlugin(String pluginName) {
       final Directory pluginUsingOldEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
-      pluginUsingOldEmbeddingDir
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('''
+          fs.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
+      pluginUsingOldEmbeddingDir.childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     androidPackage: $pluginName
     pluginClass: UseOldEmbedding
         ''');
       pluginUsingOldEmbeddingDir
-        .childDirectory('android')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childDirectory('java')
-        .childDirectory(pluginName)
-        .childFile('UseOldEmbedding.java')
-        .createSync(recursive: true);
+          .childDirectory('android')
+          .childDirectory('src')
+          .childDirectory('main')
+          .childDirectory('java')
+          .childDirectory(pluginName)
+          .childFile('UseOldEmbedding.java')
+          .createSync(recursive: true);
 
-      flutterProject.directory
-        .childFile('.packages')
-        .writeAsStringSync(
-          '$pluginName:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}\n',
-          mode: FileMode.append,
-        );
+      flutterProject.directory.childFile('.packages').writeAsStringSync(
+            '$pluginName:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+            mode: FileMode.append,
+          );
     }
 
     void createDualSupportJavaPlugin4() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
-      pluginUsingJavaAndNewEmbeddingDir
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('''
+          fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
+      pluginUsingJavaAndNewEmbeddingDir.childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     androidPackage: plugin4
     pluginClass: UseBothEmbedding
 ''');
       pluginUsingJavaAndNewEmbeddingDir
-        .childDirectory('android')
-        .childDirectory('src')
-        .childDirectory('main')
-        .childDirectory('java')
-        .childDirectory('plugin4')
-        .childFile('UseBothEmbedding.java')
+          .childDirectory('android')
+          .childDirectory('src')
+          .childDirectory('main')
+          .childDirectory('java')
+          .childDirectory('plugin4')
+          .childFile('UseBothEmbedding.java')
         ..createSync(recursive: true)
-        ..writeAsStringSync(
-          'import io.flutter.embedding.engine.plugins.FlutterPlugin;\n'
-          'PluginRegistry\n'
-          'registerWith(Irrelevant registrar)\n'
-        );
+        ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;\n'
+            'PluginRegistry\n'
+            'registerWith(Irrelevant registrar)\n');
 
-      flutterProject.directory
-        .childFile('.packages')
-        .writeAsStringSync(
-          'plugin4:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}',
-          mode: FileMode.append,
-        );
+      flutterProject.directory.childFile('.packages').writeAsStringSync(
+            'plugin4:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}',
+            mode: FileMode.append,
+          );
     }
 
     Directory createLegacyPluginWithDependencies({
@@ -379,9 +348,7 @@ flutter:
       assert(dependencies != null);
 
       final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('flutter_plugin.');
-      pluginDirectory
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('''
+      pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 name: $name
 flutter:
   plugin:
@@ -390,16 +357,12 @@ flutter:
 dependencies:
 ''');
       for (final String dependency in dependencies) {
-        pluginDirectory
-          .childFile('pubspec.yaml')
-          .writeAsStringSync('  $dependency:\n', mode: FileMode.append);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('  $dependency:\n', mode: FileMode.append);
       }
-      flutterProject.directory
-        .childFile('.packages')
-        .writeAsStringSync(
-          '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
-          mode: FileMode.append,
-        );
+      flutterProject.directory.childFile('.packages').writeAsStringSync(
+            '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
+            mode: FileMode.append,
+          );
       return pluginDirectory;
     }
 
@@ -411,14 +374,13 @@ dependencies:
       assert(name != null);
       assert(dependencies != null);
 
-      final Iterable<String> platformSections = platforms.entries.map((MapEntry<String, _PluginPlatformInfo> entry) => '''
+      final Iterable<String> platformSections =
+          platforms.entries.map((MapEntry<String, _PluginPlatformInfo> entry) => '''
       ${entry.key}:
 ${entry.value.indentedPubspecSection}
 ''');
       final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('flutter_plugin.');
-      pluginDirectory
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('''
+      pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 name: $name
 flutter:
   plugin:
@@ -428,16 +390,12 @@ ${platformSections.join('\n')}
 dependencies:
 ''');
       for (final String dependency in dependencies) {
-        pluginDirectory
-          .childFile('pubspec.yaml')
-          .writeAsStringSync('  $dependency:\n', mode: FileMode.append);
+        pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('  $dependency:\n', mode: FileMode.append);
       }
-      flutterProject.directory
-        .childFile('.packages')
-        .writeAsStringSync(
-          '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
-          mode: FileMode.append,
-        );
+      flutterProject.directory.childFile('.packages').writeAsStringSync(
+            '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
+            mode: FileMode.append,
+          );
       return pluginDirectory;
     }
 
@@ -458,7 +416,8 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Refreshing the plugin list deletes the plugin file when there were plugins but no longer are', () async {
+      testUsingContext('Refreshing the plugin list deletes the plugin file when there were plugins but no longer are',
+          () async {
         flutterProject.flutterPluginsFile.createSync();
         flutterProject.flutterPluginsDependenciesFile.createSync();
 
@@ -472,12 +431,7 @@ dependencies:
       });
 
       testUsingContext('Refreshing the plugin list creates a sorted plugin directory when there are plugins', () async {
-        createFakePlugins(fs, <String>[
-          'plugin_d',
-          'plugin_a',
-          '/local_plugins/plugin_c',
-          '/local_plugins/plugin_b'
-        ]);
+        createFakePlugins(fs, <String>['plugin_d', 'plugin_a', '/local_plugins/plugin_c', '/local_plugins/plugin_b']);
 
         iosProject.testExists = true;
 
@@ -496,10 +450,12 @@ dependencies:
       });
 
       testUsingContext(
-        'Refreshing the plugin list modifies .flutter-plugins '
-        'and .flutter-plugins-dependencies when there are plugins', () async {
-        final Directory pluginA = createLegacyPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
-        final Directory pluginB = createLegacyPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
+          'Refreshing the plugin list modifies .flutter-plugins '
+          'and .flutter-plugins-dependencies when there are plugins', () async {
+        final Directory pluginA = createLegacyPluginWithDependencies(
+            name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
+        final Directory pluginB =
+            createLegacyPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
         final Directory pluginC = createLegacyPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
         iosProject.testExists = true;
 
@@ -511,37 +467,32 @@ dependencies:
         // Verify .flutter-plugins-dependencies is configured correctly.
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
-        expect(flutterProject.flutterPluginsFile.readAsStringSync(),
-          '# This is a generated file; do not edit or check into version control.\n'
-          'plugin-a=${pluginA.path}/\n'
-          'plugin-b=${pluginB.path}/\n'
-          'plugin-c=${pluginC.path}/\n'
-        );
+        expect(
+            flutterProject.flutterPluginsFile.readAsStringSync(),
+            '# This is a generated file; do not edit or check into version control.\n'
+            'plugin-a=${pluginA.path}/\n'
+            'plugin-b=${pluginB.path}/\n'
+            'plugin-c=${pluginC.path}/\n');
 
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
-        final Map<String, dynamic> jsonContent = json.decode(pluginsString) as  Map<String, dynamic>;
+        final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
         expect(jsonContent['info'], 'This is a generated file; do not edit or check into version control.');
 
         final Map<String, dynamic> plugins = jsonContent['plugins'] as Map<String, dynamic>;
         final List<dynamic> expectedPlugins = <dynamic>[
-          <String, dynamic> {
+          <String, dynamic>{
             'name': 'plugin-a',
             'path': '${pluginA.path}/',
             'native_build': true,
-            'dependencies': <String>[
-              'plugin-b',
-              'plugin-c'
-            ],
+            'dependencies': <String>['plugin-b', 'plugin-c'],
           },
-          <String, dynamic> {
+          <String, dynamic>{
             'name': 'plugin-b',
             'path': '${pluginB.path}/',
             'native_build': true,
-            'dependencies': <String>[
-              'plugin-c'
-            ],
+            'dependencies': <String>['plugin-c'],
           },
-          <String, dynamic> {
+          <String, dynamic>{
             'name': 'plugin-c',
             'path': '${pluginC.path}/',
             'native_build': true,
@@ -556,23 +507,15 @@ dependencies:
         expect(plugins['web'], <dynamic>[]);
 
         final List<dynamic> expectedDependencyGraph = <dynamic>[
-          <String, dynamic> {
+          <String, dynamic>{
             'name': 'plugin-a',
-            'dependencies': <String>[
-              'plugin-b',
-              'plugin-c'
-            ]
+            'dependencies': <String>['plugin-b', 'plugin-c']
           },
-          <String, dynamic> {
+          <String, dynamic>{
             'name': 'plugin-b',
-            'dependencies': <String>[
-              'plugin-c'
-            ]
+            'dependencies': <String>['plugin-c']
           },
-          <String, dynamic> {
-            'name': 'plugin-c',
-            'dependencies': <String>[]
-          },
+          <String, dynamic>{'name': 'plugin-c', 'dependencies': <String>[]},
         ];
 
         expect(jsonContent['dependencyGraph'], expectedDependencyGraph);
@@ -595,20 +538,17 @@ dependencies:
         FlutterVersion: () => flutterVersion
       });
 
-      testUsingContext(
-        '.flutter-plugins-dependencies indicates native build inclusion', () async {
-        createPlugin(
-          name: 'plugin-a',
-          platforms: const <String, _PluginPlatformInfo>{
-            // Native-only; should include native build.
-            'android': _PluginPlatformInfo(pluginClass: 'Foo', androidPackage: 'bar.foo'),
-            // Hybrid native and Dart; should include native build.
-            'ios': _PluginPlatformInfo(pluginClass: 'Foo', dartPluginClass: 'Bar'),
-            // Web; should not have the native build key at all since it doesn't apply.
-            'web': _PluginPlatformInfo(pluginClass: 'Foo', fileName: 'lib/foo.dart'),
-            // Dart-only; should not include native build.
-            'windows': _PluginPlatformInfo(dartPluginClass: 'Foo'),
-          });
+      testUsingContext('.flutter-plugins-dependencies indicates native build inclusion', () async {
+        createPlugin(name: 'plugin-a', platforms: const <String, _PluginPlatformInfo>{
+          // Native-only; should include native build.
+          'android': _PluginPlatformInfo(pluginClass: 'Foo', androidPackage: 'bar.foo'),
+          // Hybrid native and Dart; should include native build.
+          'ios': _PluginPlatformInfo(pluginClass: 'Foo', dartPluginClass: 'Bar'),
+          // Web; should not have the native build key at all since it doesn't apply.
+          'web': _PluginPlatformInfo(pluginClass: 'Foo', fileName: 'lib/foo.dart'),
+          // Dart-only; should not include native build.
+          'windows': _PluginPlatformInfo(dartPluginClass: 'Foo'),
+        });
         iosProject.testExists = true;
 
         final DateTime dateCreated = DateTime(1970);
@@ -618,17 +558,18 @@ dependencies:
 
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
-        final Map<String, dynamic> jsonContent = json.decode(pluginsString) as  Map<String, dynamic>;
+        final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
         final Map<String, dynamic> plugins = jsonContent['plugins'] as Map<String, dynamic>;
 
         // Extracts the native_build key (if any) from the first plugin for the
         // given platform.
         bool getNativeBuildValue(String platform) {
-          final List<Map<String, dynamic>> platformPlugins = (plugins[platform]
-            as List<dynamic>).cast<Map<String, dynamic>>();
+          final List<Map<String, dynamic>> platformPlugins =
+              (plugins[platform] as List<dynamic>).cast<Map<String, dynamic>>();
           expect(platformPlugins.length, 1);
           return platformPlugins[0]['native_build'] as bool;
         }
+
         expect(getNativeBuildValue('android'), true);
         expect(getNativeBuildValue('ios'), true);
         expect(getNativeBuildValue('web'), null);
@@ -694,8 +635,8 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
@@ -712,13 +653,14 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
-        expect(registrant.readAsStringSync(), contains('public static void registerWith(@NonNull FlutterEngine flutterEngine)'));
+        expect(registrant.readAsStringSync(),
+            contains('public static void registerWith(@NonNull FlutterEngine flutterEngine)'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -734,15 +676,17 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
 
-        expect(registrant.readAsStringSync(),
-          contains('flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());'));
-        expect(registrant.readAsStringSync(),
-          contains('flutterEngine.getPlugins().add(new plugin2.UseNewEmbedding());'));
-        expect(registrant.readAsStringSync(),
-          contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
+        expect(
+            registrant.readAsStringSync(), contains('flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());'));
+        expect(
+            registrant.readAsStringSync(), contains('flutterEngine.getPlugins().add(new plugin2.UseNewEmbedding());'));
+        expect(
+            registrant.readAsStringSync(),
+            contains(
+                'plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
 
         // There should be no warning message
         expect(testLogger.statusText, isNot(contains('go/android-plugin-migration')));
@@ -752,7 +696,8 @@ dependencies:
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
-      testUsingContext('exits the tool if an app uses the v1 embedding and a plugin only supports the v2 embedding', () async {
+      testUsingContext('exits the tool if an app uses the v1 embedding and a plugin only supports the v2 embedding',
+          () async {
         androidProject.embeddingVersion = AndroidEmbeddingVersion.v1;
 
         createNewJavaPlugin1();
@@ -762,9 +707,8 @@ dependencies:
             await injectPlugins(flutterProject, androidPlatform: true);
           },
           throwsToolExit(
-            message: 'The plugin `plugin1` requires your app to be migrated to the Android embedding v2. '
-                     'Follow the steps on https://flutter.dev/go/android-project-migration and re-run this command.'
-          ),
+              message: 'The plugin `plugin1` requires your app to be migrated to the Android embedding v2. '
+                  'Follow the steps on https://flutter.dev/go/android-project-migration and re-run this command.'),
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -784,11 +728,11 @@ dependencies:
           },
           throwsToolExit(
             message: "The plugin `plugin1` doesn't have a main class defined in "
-                     '${pluginDir.path}/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
-                     '${pluginDir.path}/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
-                     "This is likely to due to an incorrect `androidPackage: plugin1.invalid` or `mainClass` entry in the plugin's pubspec.yaml.\n"
-                     'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
-                     'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile.',
+                '${pluginDir.path}/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
+                '${pluginDir.path}/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
+                "This is likely to due to an incorrect `androidPackage: plugin1.invalid` or `mainClass` entry in the plugin's pubspec.yaml.\n"
+                'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
+                'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile.',
           ),
         );
       }, overrides: <Type, Generator>{
@@ -805,14 +749,14 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
         expect(registrant.readAsStringSync(),
-          contains('UseBothEmbedding.registerWith(registry.registrarFor("plugin4.UseBothEmbedding"));'));
+            contains('UseBothEmbedding.registerWith(registry.registrarFor("plugin4.UseBothEmbedding"));'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -827,14 +771,14 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
-        expect(registrant.readAsStringSync(),
-          contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
+        expect(
+            registrant.readAsStringSync(), contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -848,13 +792,14 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
-        expect(registrant.readAsStringSync(), contains('public static void registerWith(@NonNull FlutterEngine flutterEngine)'));
+        expect(registrant.readAsStringSync(),
+            contains('public static void registerWith(@NonNull FlutterEngine flutterEngine)'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -869,15 +814,18 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
-        expect(registrant.readAsStringSync(),
-          contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
-        expect(testLogger.warningText, equals(
-          'The plugin `plugin3` uses a deprecated version of the Android embedding.\n'
-          'To avoid unexpected runtime failures, or future build failures, try to see if this plugin supports the Android V2 embedding. '
-          'Otherwise, consider removing it since a future release of Flutter will remove these deprecated APIs.\n'
-          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: https://flutter.dev/go/android-plugin-migration.\n'));
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
+        expect(
+            registrant.readAsStringSync(),
+            contains(
+                'plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
+        expect(
+            testLogger.warningText,
+            equals('The plugin `plugin3` uses a deprecated version of the Android embedding.\n'
+                'To avoid unexpected runtime failures, or future build failures, try to see if this plugin supports the Android V2 embedding. '
+                'Otherwise, consider removing it since a future release of Flutter will remove these deprecated APIs.\n'
+                'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: https://flutter.dev/go/android-plugin-migration.\n'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -893,10 +841,10 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
-        expect(registrant.readAsStringSync(),
-          contains('flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());'));
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
+        expect(
+            registrant.readAsStringSync(), contains('flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());'));
 
         expect(testLogger.errorText, isNot(contains('go/android-plugin-migration')));
       }, overrides: <Type, Generator>{
@@ -914,10 +862,10 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
-        expect(registrant.readAsStringSync(),
-          contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
+        expect(
+            registrant.readAsStringSync(), contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
 
         expect(testLogger.errorText, isNot(contains('go/android-plugin-migration')));
       }, overrides: <Type, Generator>{
@@ -935,10 +883,10 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
-        expect(registrant.readAsStringSync(),
-          contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
+        expect(
+            registrant.readAsStringSync(), contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
 
         expect(testLogger.errorText, isNot(contains('go/android-plugin-migration')));
       }, overrides: <Type, Generator>{
@@ -953,11 +901,11 @@ dependencies:
 
         await injectPlugins(flutterProject, androidPlatform: true);
 
-        expect(testLogger.warningText, equals(
-          'This app is using a deprecated version of the Android embedding.\n'
-          'To avoid unexpected runtime failures, or future build failures, try to migrate this app to the V2 embedding.\n'
-          'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects\n'
-        ));
+        expect(
+            testLogger.warningText,
+            equals('This app is using a deprecated version of the Android embedding.\n'
+                'To avoid unexpected runtime failures, or future build failures, try to migrate this app to the V2 embedding.\n'
+                'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects\n'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -974,18 +922,22 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
-        expect(registrant.readAsStringSync(),
-          contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
-        expect(registrant.readAsStringSync(),
-          contains('plugin4.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin4.UseOldEmbedding"));'));
-        expect(testLogger.warningText, equals(
-          'The plugins `plugin3, plugin4` use a deprecated version of the Android embedding.\n'
-          'To avoid unexpected runtime failures, or future build failures, try to see if these plugins support the Android V2 embedding. '
-          'Otherwise, consider removing them since a future release of Flutter will remove these deprecated APIs.\n'
-          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: https://flutter.dev/go/android-plugin-migration.\n'
-        ));
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
+        expect(
+            registrant.readAsStringSync(),
+            contains(
+                'plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
+        expect(
+            registrant.readAsStringSync(),
+            contains(
+                'plugin4.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin4.UseOldEmbedding"));'));
+        expect(
+            testLogger.warningText,
+            equals('The plugins `plugin3, plugin4` use a deprecated version of the Android embedding.\n'
+                'To avoid unexpected runtime failures, or future build failures, try to see if these plugins support the Android V2 embedding. '
+                'Otherwise, consider removing them since a future release of Flutter will remove these deprecated APIs.\n'
+                'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: https://flutter.dev/go/android-plugin-migration.\n'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1002,18 +954,22 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
-        expect(registrant.readAsStringSync(),
-          contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
-        expect(registrant.readAsStringSync(),
-          contains('plugin4.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin4.UseOldEmbedding"));'));
-        expect(testLogger.warningText, equals(
-          'The plugins `plugin3, plugin4` use a deprecated version of the Android embedding.\n'
-          'To avoid unexpected runtime failures, or future build failures, try to see if these plugins support the Android V2 embedding. '
-          'Otherwise, consider removing them since a future release of Flutter will remove these deprecated APIs.\n'
-          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: https://flutter.dev/go/android-plugin-migration.\n'
-        ));
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
+        expect(
+            registrant.readAsStringSync(),
+            contains(
+                'plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
+        expect(
+            registrant.readAsStringSync(),
+            contains(
+                'plugin4.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin4.UseOldEmbedding"));'));
+        expect(
+            testLogger.warningText,
+            equals('The plugins `plugin3, plugin4` use a deprecated version of the Android embedding.\n'
+                'To avoid unexpected runtime failures, or future build failures, try to see if these plugins support the Android V2 embedding. '
+                'Otherwise, consider removing them since a future release of Flutter will remove these deprecated APIs.\n'
+                'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: https://flutter.dev/go/android-plugin-migration.\n'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1030,12 +986,13 @@ dependencies:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
+            .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
         const String newPluginName = 'flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());';
-        const String oldPluginName = 'abcplugin1.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("abcplugin1.UseOldEmbedding"));';
+        const String oldPluginName =
+            'abcplugin1.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("abcplugin1.UseOldEmbedding"));';
         final String content = registrant.readAsStringSync();
-        for(final String plugin in <String>[newPluginName,oldPluginName]) {
+        for (final String plugin in <String>[newPluginName, oldPluginName]) {
           expect(content, contains(plugin));
           expect(content.split(plugin).first.trim().endsWith('try {'), isTrue);
           expect(content.split(plugin).last.trim().startsWith('} catch(Exception e) {'), isTrue);
@@ -1068,22 +1025,19 @@ dependencies:
           fileName: src/web_plugin.dart
   ''');
         webPluginWithNestedFile
-          .childDirectory('lib')
-          .childDirectory('src')
-          .childFile('web_plugin.dart')
-          .createSync(recursive: true);
+            .childDirectory('lib')
+            .childDirectory('src')
+            .childFile('web_plugin.dart')
+            .createSync(recursive: true);
 
-        flutterProject.directory
-          .childFile('.packages')
-          .writeAsStringSync('''
+        flutterProject.directory.childFile('.packages').writeAsStringSync('''
 web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toString()}
 ''');
 
         await injectPlugins(flutterProject, webPlatform: true);
 
-        final File registrant = flutterProject.directory
-            .childDirectory('lib')
-            .childFile('generated_plugin_registrant.dart');
+        final File registrant =
+            flutterProject.directory.childDirectory('lib').childFile('generated_plugin_registrant.dart');
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
@@ -1092,7 +1046,8 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Injecting creates generated Android registrant, but does not include Dart-only plugins', () async {
+      testUsingContext('Injecting creates generated Android registrant, but does not include Dart-only plugins',
+          () async {
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
         pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -1106,8 +1061,8 @@ flutter:
         await injectPlugins(flutterProject, androidPlatform: true);
 
         final File registrantFile = androidProject.pluginRegistrantHost
-          .childDirectory(fs.path.join('src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
+            .childDirectory(fs.path.join('src', 'main', 'java', 'io', 'flutter', 'plugins'))
+            .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrantFile, exists);
         expect(registrantFile, isNot(contains('SomePlugin')));
@@ -1139,7 +1094,8 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Injecting creates generated macos registrant, but does not include Dart-only plugins', () async {
+      testUsingContext('Injecting creates generated macos registrant, but does not include Dart-only plugins',
+          () async {
         flutterProject.isModule = true;
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
@@ -1221,7 +1177,8 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Injecting creates generated Linux registrant, but does not include Dart-only plugins', () async {
+      testUsingContext('Injecting creates generated Linux registrant, but does not include Dart-only plugins',
+          () async {
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
         pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -1287,12 +1244,7 @@ flutter:
       });
 
       testUsingContext('Generated Linux plugin files sorts by plugin name', () async {
-        createFakePlugins(fs, <String>[
-          'plugin_d',
-          'plugin_a',
-          '/local_plugins/plugin_c',
-          '/local_plugins/plugin_b'
-        ]);
+        createFakePlugins(fs, <String>['plugin_d', 'plugin_a', '/local_plugins/plugin_c', '/local_plugins/plugin_b']);
 
         await injectPlugins(flutterProject, linuxPlatform: true);
 
@@ -1325,7 +1277,8 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Injecting creates generated Windows registrant, but does not include Dart-only plugins', () async {
+      testUsingContext('Injecting creates generated Windows registrant, but does not include Dart-only plugins',
+          () async {
         // Create a plugin without a pluginClass.
         final Directory pluginDirectory = createFakePlugin(fs);
         pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
@@ -1372,12 +1325,7 @@ flutter:
       });
 
       testUsingContext('Generated Windows plugin files sorts by plugin name', () async {
-        createFakePlugins(fs, <String>[
-          'plugin_d',
-          'plugin_a',
-          '/local_plugins/plugin_c',
-          '/local_plugins/plugin_b'
-        ]);
+        createFakePlugins(fs, <String>['plugin_d', 'plugin_a', '/local_plugins/plugin_c', '/local_plugins/plugin_b']);
 
         await injectPlugins(flutterProject, windowsPlatform: true);
 
@@ -1558,7 +1506,9 @@ flutter:
       });
 
       void _createPubspecFile(String yamlString) {
-        projectDir.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(yamlString);
+        projectDir.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(yamlString);
       }
 
       testUsingContext('validatePubspecForPlugin works', () async {
@@ -1582,30 +1532,29 @@ flutter:
           package: AndroidPackage
   ''';
         _createPubspecFile(pluginYaml);
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'ios', 'macos', 'windows', 'linux', 'android', 'web'
-        ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');
+        validatePubspecForPlugin(
+            projectDir: projectDir.absolute.path,
+            pluginClass: 'SomePlugin',
+            expectedPlatforms: <String>['ios', 'macos', 'windows', 'linux', 'android', 'web'],
+            androidIdentifier: 'AndroidPackage',
+            webFileName: 'lib/SomeFile.dart');
       });
 
       testUsingContext('createPlatformsYamlMap should create the correct map', () async {
-        final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
-        expect(map['ios'], <String, String> {
-          'pluginClass' : 'PluginClass'
-        });
-        expect(map['android'], <String, String> {
-          'pluginClass' : 'PluginClass',
+        final YamlMap map =
+            Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
+        expect(map['ios'], <String, String>{'pluginClass': 'PluginClass'});
+        expect(map['android'], <String, String>{
+          'pluginClass': 'PluginClass',
           'package': 'some.android.package',
         });
-        expect(map['linux'], <String, String> {
-          'pluginClass' : 'PluginClass'
-        });
+        expect(map['linux'], <String, String>{'pluginClass': 'PluginClass'});
       });
 
       testUsingContext('createPlatformsYamlMap should create empty map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>[], null, null);
         expect(map.isEmpty, true);
       });
-
     });
 
     testWithoutContext('Symlink failures give developer mode instructions on recent versions of Windows', () async {
@@ -1615,17 +1564,17 @@ flutter:
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
       expect(() => handleSymlinkException(e, platform: platform, os: os),
-        throwsToolExit(message: 'start ms-settings:developers'));
+          throwsToolExit(message: 'start ms-settings:developers'));
     });
 
-    testWithoutContext('Symlink failures instruct developers to run as administrator on older versions of Windows', () async {
+    testWithoutContext('Symlink failures instruct developers to run as administrator on older versions of Windows',
+        () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
       final FakeOperatingSystemUtils os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
       const FileSystemException e = FileSystemException('', '', OSError('', 1314));
 
-      expect(() => handleSymlinkException(e, platform: platform, os: os),
-        throwsToolExit(message: 'administrator'));
+      expect(() => handleSymlinkException(e, platform: platform, os: os), throwsToolExit(message: 'administrator'));
     });
 
     testWithoutContext('Symlink failures only give instructions for specific errors', () async {
@@ -1824,7 +1773,6 @@ class FakeLinuxProject extends Fake implements LinuxProject {
 
   @override
   bool existsSync() => exists;
-
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {

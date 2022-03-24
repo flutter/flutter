@@ -47,7 +47,7 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('App bundle content using flavors without explicit target platform');
         // Add a few flavors.
-        await project.addProductFlavors(<String> [
+        await project.addProductFlavors(<String>[
           'production',
           'staging',
           'development',
@@ -82,7 +82,7 @@ Future<void> main() async {
 
         section('Build app bundle using the flutter tool - flavor: flavor_underscore');
 
-        int exitCode = await inDirectory(project.rootPath, ()  {
+        int exitCode = await inDirectory(project.rootPath, () {
           return flutter(
             'build',
             options: <String>[

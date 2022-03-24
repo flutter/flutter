@@ -90,6 +90,6 @@ void main() {
 
   // Finally, we register our beginFrame callback and kick off the first frame.
   ui.PlatformDispatcher.instance
-      ..onBeginFrame = beginFrame
-      ..scheduleFrame();
+    ..onBeginFrame = beginFrame
+    ..scheduleFrame();
 }

@@ -38,7 +38,7 @@ import 'theme.dart';
 @immutable
 class ExpansionTileThemeData with Diagnosticable {
   /// Creates a [ExpansionTileThemeData].
-  const ExpansionTileThemeData ({
+  const ExpansionTileThemeData({
     this.backgroundColor,
     this.collapsedBackgroundColor,
     this.tilePadding,
@@ -105,9 +105,8 @@ class ExpansionTileThemeData with Diagnosticable {
 
   /// Linearly interpolate between ExpansionTileThemeData objects.
   static ExpansionTileThemeData? lerp(ExpansionTileThemeData? a, ExpansionTileThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null)
-      return null;
+    assert(t != null);
+    if (a == null && b == null) return null;
     return ExpansionTileThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       collapsedBackgroundColor: Color.lerp(a?.collapsedBackgroundColor, b?.collapsedBackgroundColor, t),
@@ -138,20 +137,18 @@ class ExpansionTileThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is ExpansionTileThemeData
-      && other.backgroundColor == backgroundColor
-      && other.collapsedBackgroundColor == collapsedBackgroundColor
-      && other.tilePadding == tilePadding
-      && other.expandedAlignment == expandedAlignment
-      && other.childrenPadding == childrenPadding
-      && other.iconColor == iconColor
-      && other.collapsedIconColor == collapsedIconColor
-      && other.textColor == textColor
-      && other.collapsedTextColor == collapsedTextColor;
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is ExpansionTileThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.collapsedBackgroundColor == collapsedBackgroundColor &&
+        other.tilePadding == tilePadding &&
+        other.expandedAlignment == expandedAlignment &&
+        other.childrenPadding == childrenPadding &&
+        other.iconColor == iconColor &&
+        other.collapsedIconColor == collapsedIconColor &&
+        other.textColor == textColor &&
+        other.collapsedTextColor == collapsedTextColor;
   }
 
   @override
@@ -184,9 +181,9 @@ class ExpansionTileTheme extends InheritedTheme {
     Key? key,
     required this.data,
     required Widget child,
-  }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+  })  : assert(child != null),
+        assert(data != null),
+        super(key: key, child: child);
 
   /// Specifies color, alignment, and text style values for
   /// descendant [ExpansionTile] widgets.
@@ -214,4 +211,4 @@ class ExpansionTileTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ExpansionTileTheme oldWidget) => data != oldWidget.data;
- }
+}

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 /// This script removes published archives from the cloud storage and the
 /// corresponding JSON metadata file that the website uses to determine what
 /// releases are available.
@@ -114,9 +113,9 @@ class ProcessRunner {
     this.subprocessOutput = true,
     this.defaultWorkingDirectory,
     this.platform = const LocalPlatform(),
-  }) : assert(subprocessOutput != null),
-       assert(processManager != null),
-       assert(platform != null) {
+  })  : assert(subprocessOutput != null),
+        assert(processManager != null),
+        assert(platform != null) {
     environment = Map<String, String>.from(platform.environment);
   }
 
@@ -240,12 +239,14 @@ class ArchiveUnpublisher {
   /// Remove the archive from Google Storage.
   Future<void> unpublishArchive() async {
     final Map<String, dynamic> jsonData = await _loadMetadata();
-    final List<Map<String, String>> releases = (jsonData['releases'] as List<dynamic>).map<Map<String, String>>((dynamic entry) {
+    final List<Map<String, String>> releases =
+        (jsonData['releases'] as List<dynamic>).map<Map<String, String>>((dynamic entry) {
       final Map<String, dynamic> mapEntry = entry as Map<String, dynamic>;
       return mapEntry.cast<String, String>();
     }).toList();
     final Map<Channel, Map<String, String>> paths = await _getArchivePaths(releases);
-    releases.removeWhere((Map<String, String> value) => revisionsBeingRemoved.contains(value['hash']) && channels.contains(fromChannelName(value['channel'])));
+    releases.removeWhere((Map<String, String> value) =>
+        revisionsBeingRemoved.contains(value['hash']) && channels.contains(fromChannelName(value['channel'])));
     releases.sort((Map<String, String> a, Map<String, String> b) {
       final DateTime aDate = DateTime.parse(a['release_date']!);
       final DateTime bDate = DateTime.parse(b['release_date']!);
@@ -253,19 +254,19 @@ class ArchiveUnpublisher {
     });
     jsonData['releases'] = releases;
     for (final Channel channel in channels) {
-      if (!revisionsBeingRemoved.contains((jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)])) {
+      if (!revisionsBeingRemoved
+          .contains((jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)])) {
         // Don't replace the current release if it's not one of the revisions we're removing.
         continue;
       }
-      final Map<String, String> replacementRelease = releases.firstWhere((Map<String, String> value) => value['channel'] == getChannelName(channel));
+      final Map<String, String> replacementRelease =
+          releases.firstWhere((Map<String, String> value) => value['channel'] == getChannelName(channel));
       if (replacementRelease == null) {
         throw UnpublishException('Unable to find previous release for channel ${getChannelName(channel)}.');
       }
       (jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)] = replacementRelease['hash'];
-      print(
-        '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
-        '${getPublishedPlatform(platform)} release to ${replacementRelease['hash']} (version ${replacementRelease['version']}).'
-      );
+      print('${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
+          '${getPublishedPlatform(platform)} release to ${replacementRelease['hash']} (version ${replacementRelease['version']}).');
     }
     await _cloudRemoveArchive(paths);
     await _updateMetadata(jsonData);
@@ -286,7 +287,8 @@ class ArchiveUnpublisher {
     final Set<String> missingRevisions = revisionsBeingRemoved.difference(hashes.intersection(revisionsBeingRemoved));
     if (missingRevisions.isNotEmpty) {
       final bool plural = missingRevisions.length > 1;
-      throw UnpublishException('Revision${plural ? 's' : ''} $missingRevisions ${plural ? 'are' : 'is'} not present in the server metadata.');
+      throw UnpublishException(
+          'Revision${plural ? 's' : ''} $missingRevisions ${plural ? 'are' : 'is'} not present in the server metadata.');
     }
     return paths;
   }
@@ -322,7 +324,8 @@ class ArchiveUnpublisher {
     );
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
-    print('${confirmed ? 'Overwriting' : 'Would overwrite'} $metadataGsPath with contents of ${metadataFile.absolute.path}');
+    print(
+        '${confirmed ? 'Overwriting' : 'Would overwrite'} $metadataGsPath with contents of ${metadataFile.absolute.path}');
     await _cloudReplaceDest(metadataFile.absolute.path, metadataGsPath);
   }
 
@@ -396,8 +399,10 @@ void _printBanner(String message) {
 
 /// Prepares a flutter git repo to be removed from the published cloud storage.
 Future<void> main(List<String> rawArguments) async {
-  final List<String> allowedChannelValues = Channel.values.map<String>((Channel channel) => getChannelName(channel)).toList();
-  final List<String> allowedPlatformNames = PublishedPlatform.values.map<String>((PublishedPlatform platform) => getPublishedPlatform(platform)).toList();
+  final List<String> allowedChannelValues =
+      Channel.values.map<String>((Channel channel) => getChannelName(channel)).toList();
+  final List<String> allowedPlatformNames =
+      PublishedPlatform.values.map<String>((PublishedPlatform platform) => getPublishedPlatform(platform)).toList();
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
@@ -482,7 +487,8 @@ Future<void> main(List<String> rawArguments) async {
   }
 
   if (!(parsedArguments['confirm'] as bool)) {
-    _printBanner('This will be just a dry run.  To actually perform the changes below, re-run with --confirm argument.');
+    _printBanner(
+        'This will be just a dry run.  To actually perform the changes below, re-run with --confirm argument.');
   }
 
   final List<String> channelArg = parsedArguments['channel'] as List<String>;
@@ -490,7 +496,8 @@ Future<void> main(List<String> rawArguments) async {
   final Set<Channel> channels = channelOptions.map<Channel>((String value) => fromChannelName(value)).toSet();
   final List<String> platformArg = parsedArguments['platform'] as List<String>;
   final List<String> platformOptions = platformArg.isNotEmpty ? platformArg : allowedPlatformNames;
-  final List<PublishedPlatform> platforms = platformOptions.map<PublishedPlatform>((String value) => fromPublishedPlatform(value)).toList();
+  final List<PublishedPlatform> platforms =
+      platformOptions.map<PublishedPlatform>((String value) => fromPublishedPlatform(value)).toList();
   int exitCode = 0;
   late String message;
   late String stack;

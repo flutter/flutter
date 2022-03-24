@@ -12,14 +12,13 @@ const int _kNumWarmUp = 100;
 class Data {
   Data(this.value);
 
-  Map<String, dynamic> toJson() => <String, dynamic>{ 'value': value };
+  Map<String, dynamic> toJson() => <String, dynamic>{'value': value};
 
   final int value;
 }
 
 List<Data> test(int length) {
-  return List<Data>.generate(length,
-      (int index) => Data(index * index));
+  return List<Data>.generate(length, (int index) => Data(index * index));
 }
 
 Future<void> main() async {

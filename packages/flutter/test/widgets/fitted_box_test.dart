@@ -133,7 +133,8 @@ void main() {
     final Key outside = UniqueKey();
     final Key inside = UniqueKey();
 
-    { // align RTL
+    {
+      // align RTL
 
       await tester.pumpWidget(
         Directionality(
@@ -174,7 +175,8 @@ void main() {
       expect(insideBottomRight, equals(outsideBottomRight));
     }
 
-    { // change direction
+    {
+      // change direction
 
       await tester.pumpWidget(
         Directionality(
@@ -215,7 +217,8 @@ void main() {
       expect(insideBottomRight, equals(outsideBottomRight));
     }
 
-    { // change alignment
+    {
+      // change alignment
 
       await tester.pumpWidget(
         Directionality(
@@ -256,7 +259,8 @@ void main() {
       expect(insideBottomRight, equals(outsideBottomRight));
     }
 
-    { // change size
+    {
+      // change size
 
       await tester.pumpWidget(
         Directionality(
@@ -297,7 +301,8 @@ void main() {
       expect(insideBottomRight, equals(outsideBottomRight));
     }
 
-    { // change fit
+    {
+      // change fit
 
       await tester.pumpWidget(
         Directionality(

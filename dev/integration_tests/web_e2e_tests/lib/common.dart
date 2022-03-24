@@ -18,15 +18,11 @@ bool get isFirefox => window.navigator.userAgent.toLowerCase().contains('firefox
 List<Node> findElements(String selector) {
   final Element? glassPane = document.querySelector('flt-glass-pane');
   if (glassPane == null) {
-    fail(
-      'Failed to locate <flt-glass-pane>. Possible reasons:\n'
-      ' - The application failed to start'
-      ' - `findElements` was called before the application started'
-    );
+    fail('Failed to locate <flt-glass-pane>. Possible reasons:\n'
+        ' - The application failed to start'
+        ' - `findElements` was called before the application started');
   }
 
   final ShadowRoot? shadowRoot = glassPane.shadowRoot;
-  return shadowRoot != null
-    ? shadowRoot.querySelectorAll(selector)
-    : glassPane.querySelectorAll(selector);
+  return shadowRoot != null ? shadowRoot.querySelectorAll(selector) : glassPane.querySelectorAll(selector);
 }

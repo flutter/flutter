@@ -5,11 +5,9 @@
 import 'package:flutter_driver/flutter_driver.dart';
 
 class StubNestedCommand extends CommandWithTarget {
-  StubNestedCommand(SerializableFinder finder, this.times, {Duration? timeout})
-      : super(finder, timeout: timeout);
+  StubNestedCommand(SerializableFinder finder, this.times, {Duration? timeout}) : super(finder, timeout: timeout);
 
-  StubNestedCommand.deserialize(
-      Map<String, String> json, DeserializeFinderFactory finderFactory)
+  StubNestedCommand.deserialize(Map<String, String> json, DeserializeFinderFactory finderFactory)
       : times = int.parse(json['times']!),
         super.deserialize(json, finderFactory);
 
@@ -25,8 +23,7 @@ class StubNestedCommand extends CommandWithTarget {
 }
 
 class StubProberCommand extends CommandWithTarget {
-  StubProberCommand(SerializableFinder finder, this.times, {Duration? timeout})
-      : super(finder, timeout: timeout);
+  StubProberCommand(SerializableFinder finder, this.times, {Duration? timeout}) : super(finder, timeout: timeout);
 
   StubProberCommand.deserialize(Map<String, String> json, DeserializeFinderFactory finderFactory)
       : times = int.parse(json['times']!),

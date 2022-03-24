@@ -34,13 +34,12 @@ void main() {
       await driver.tap(aaplStockRow);
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
-      final SerializableFinder stockOption =
-          find.byValueKey('AAPL_symbol_name');
+      final SerializableFinder stockOption = find.byValueKey('AAPL_symbol_name');
       final String symbol = await driver.getText(stockOption);
 
       expect(symbol, 'AAPL');
     },
-    skip: 'Needs to be fixed on Fuchsia.', // https://github.com/flutter/flutter/issues/87069
-    timeout: Timeout.none);
+        skip: 'Needs to be fixed on Fuchsia.', // https://github.com/flutter/flutter/issues/87069
+        timeout: Timeout.none);
   });
 }

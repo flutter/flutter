@@ -183,7 +183,8 @@ void main() {
 
     test('rebuildFile can rebuild the correct file', () async {
       final File file = fileSystem.file('file')..writeAsStringSync(content1);
-      await FileTransfer().rebuildFile(file, expectedDelta, Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(expectedBinaryForRebuilding)]));
+      await FileTransfer().rebuildFile(
+          file, expectedDelta, Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(expectedBinaryForRebuilding)]));
       expect(file.readAsStringSync(), content2);
     });
   });

@@ -182,9 +182,9 @@ abstract class WidgetController {
 
   T _stateOf<T extends State>(Element element, Finder finder) {
     TestAsyncUtils.guardSync();
-    if (element is StatefulElement)
-      return element.state as T;
-    throw StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
+    if (element is StatefulElement) return element.state as T;
+    throw StateError(
+        'Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
   }
 
   /// Render objects of all the widgets currently in the widget tree
@@ -296,7 +296,8 @@ abstract class WidgetController {
   ///    between long enough to trigger the long-press gesture.
   Future<TestGesture> press(Finder finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
     return TestAsyncUtils.guard<TestGesture>(() {
-      return startGesture(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'press'), pointer: pointer, buttons: buttons);
+      return startGesture(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'press'),
+          pointer: pointer, buttons: buttons);
     });
   }
 
@@ -313,7 +314,8 @@ abstract class WidgetController {
   /// has no effect (since the widget is now obscured), setting `warnIfMissed`
   /// to false on that second call.
   Future<void> longPress(Finder finder, {int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true}) {
-    return longPressAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'longPress'), pointer: pointer, buttons: buttons);
+    return longPressAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'longPress'),
+        pointer: pointer, buttons: buttons);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location with
@@ -412,7 +414,8 @@ abstract class WidgetController {
       double lastTimeStamp = timeStamp;
       await sendEventToBinding(testPointer.down(startLocation, timeStamp: Duration(microseconds: timeStamp.round())));
       if (initialOffset.distance > 0.0) {
-        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: Duration(microseconds: timeStamp.round())));
+        await sendEventToBinding(
+            testPointer.move(startLocation + initialOffset, timeStamp: Duration(microseconds: timeStamp.round())));
         timeStamp += initialOffsetDelay.inMicroseconds;
         await pump(initialOffsetDelay);
       }
@@ -625,11 +628,13 @@ abstract class WidgetController {
               await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY));
             }
           }
-        } else { // The drag goes through the corner of the box.
+        } else {
+          // The drag goes through the corner of the box.
           await gesture.moveBy(Offset(signedSlopX, signedSlopY));
           await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - signedSlopY));
         }
-      } else { // The drag ends inside the box.
+      } else {
+        // The drag ends inside the box.
         await gesture.moveBy(offset);
       }
       await gesture.up();
@@ -694,32 +699,30 @@ abstract class WidgetController {
     assert(intervals > 1);
     pointer ??= _getNextPointer();
     final List<Duration> timeStamps = <Duration>[
-      for (int t = 0; t <= intervals; t += 1)
-        duration * t ~/ intervals,
+      for (int t = 0; t <= intervals; t += 1) duration * t ~/ intervals,
     ];
     final List<Offset> offsets = <Offset>[
       startLocation,
-      for (int t = 0; t <= intervals; t += 1)
-        startLocation + offset * (t / intervals),
+      for (int t = 0; t <= intervals; t += 1) startLocation + offset * (t / intervals),
     ];
     final List<PointerEventRecord> records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
-          PointerAddedEvent(
-            position: startLocation,
-          ),
-          PointerDownEvent(
-            position: startLocation,
-            pointer: pointer,
-            buttons: buttons,
-          ),
-        ]),
+        PointerAddedEvent(
+          position: startLocation,
+        ),
+        PointerDownEvent(
+          position: startLocation,
+          pointer: pointer,
+          buttons: buttons,
+        ),
+      ]),
       ...<PointerEventRecord>[
-        for(int t = 0; t <= intervals; t += 1)
+        for (int t = 0; t <= intervals; t += 1)
           PointerEventRecord(timeStamps[t], <PointerEvent>[
             PointerMoveEvent(
               timeStamp: timeStamps[t],
-              position: offsets[t+1],
-              delta: offsets[t+1] - offsets[t],
+              position: offsets[t + 1],
+              delta: offsets[t + 1] - offsets[t],
               pointer: pointer,
               buttons: buttons,
             )
@@ -835,14 +838,15 @@ abstract class WidgetController {
   /// this method is being called from another that is forwarding its own
   /// `warnIfMissed` parameter (see e.g. the implementation of [tap]).
   /// {@endtemplate}
-  Offset getCenter(Finder finder, { bool warnIfMissed = false, String callee = 'getCenter' }) {
-    return _getElementPoint(finder, (Size size) => size.center(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
+  Offset getCenter(Finder finder, {bool warnIfMissed = false, String callee = 'getCenter'}) {
+    return _getElementPoint(finder, (Size size) => size.center(Offset.zero),
+        warnIfMissed: warnIfMissed, callee: callee);
   }
 
   /// Returns the point at the top left of the given widget.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getTopLeft(Finder finder, { bool warnIfMissed = false, String callee = 'getTopLeft' }) {
+  Offset getTopLeft(Finder finder, {bool warnIfMissed = false, String callee = 'getTopLeft'}) {
     return _getElementPoint(finder, (Size size) => Offset.zero, warnIfMissed: warnIfMissed, callee: callee);
   }
 
@@ -850,24 +854,27 @@ abstract class WidgetController {
   /// point is not inside the object's hit test area.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getTopRight(Finder finder, { bool warnIfMissed = false, String callee = 'getTopRight' }) {
-    return _getElementPoint(finder, (Size size) => size.topRight(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
+  Offset getTopRight(Finder finder, {bool warnIfMissed = false, String callee = 'getTopRight'}) {
+    return _getElementPoint(finder, (Size size) => size.topRight(Offset.zero),
+        warnIfMissed: warnIfMissed, callee: callee);
   }
 
   /// Returns the point at the bottom left of the given widget. This
   /// point is not inside the object's hit test area.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getBottomLeft(Finder finder, { bool warnIfMissed = false, String callee = 'getBottomLeft' }) {
-    return _getElementPoint(finder, (Size size) => size.bottomLeft(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
+  Offset getBottomLeft(Finder finder, {bool warnIfMissed = false, String callee = 'getBottomLeft'}) {
+    return _getElementPoint(finder, (Size size) => size.bottomLeft(Offset.zero),
+        warnIfMissed: warnIfMissed, callee: callee);
   }
 
   /// Returns the point at the bottom right of the given widget. This
   /// point is not inside the object's hit test area.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getBottomRight(Finder finder, { bool warnIfMissed = false, String callee = 'getBottomRight' }) {
-    return _getElementPoint(finder, (Size size) => size.bottomRight(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
+  Offset getBottomRight(Finder finder, {bool warnIfMissed = false, String callee = 'getBottomRight'}) {
+    return _getElementPoint(finder, (Size size) => size.bottomRight(Offset.zero),
+        warnIfMissed: warnIfMissed, callee: callee);
   }
 
   /// Whether warnings relating to hit tests not hitting their mark should be
@@ -893,28 +900,28 @@ abstract class WidgetController {
   /// in the documentation for the [flutter_test] library.
   static bool hitTestWarningShouldBeFatal = false;
 
-  Offset _getElementPoint(Finder finder, Offset Function(Size size) sizeToPoint, { required bool warnIfMissed, required String callee }) {
+  Offset _getElementPoint(Finder finder, Offset Function(Size size) sizeToPoint,
+      {required bool warnIfMissed, required String callee}) {
     TestAsyncUtils.guardSync();
     final Iterable<Element> elements = finder.evaluate();
     if (elements.isEmpty) {
       throw FlutterError('The finder "$finder" (used in a call to "$callee()") could not find any matching widgets.');
     }
     if (elements.length > 1) {
-      throw FlutterError('The finder "$finder" (used in a call to "$callee()") ambiguously found multiple matching widgets. The "$callee()" method needs a single target.');
+      throw FlutterError(
+          'The finder "$finder" (used in a call to "$callee()") ambiguously found multiple matching widgets. The "$callee()" method needs a single target.');
     }
     final Element element = elements.single;
     final RenderObject? renderObject = element.renderObject;
     if (renderObject == null) {
       throw FlutterError(
-        'The finder "$finder" (used in a call to "$callee()") found an element, but it does not have a corresponding render object. '
-        'Maybe the element has not yet been rendered?'
-      );
+          'The finder "$finder" (used in a call to "$callee()") found an element, but it does not have a corresponding render object. '
+          'Maybe the element has not yet been rendered?');
     }
     if (renderObject is! RenderBox) {
       throw FlutterError(
-        'The finder "$finder" (used in a call to "$callee()") found an element whose corresponding render object is not a RenderBox (it is a ${renderObject.runtimeType}: "$renderObject"). '
-        'Unfortunately "$callee()" only supports targeting widgets that correspond to RenderBox objects in the rendering.'
-      );
+          'The finder "$finder" (used in a call to "$callee()") found an element whose corresponding render object is not a RenderBox (it is a ${renderObject.runtimeType}: "$renderObject"). '
+          'Unfortunately "$callee()" only supports targeting widgets that correspond to RenderBox objects in the rendering.');
     }
     final RenderBox box = element.renderObject! as RenderBox;
     final Offset location = box.localToGlobal(sizeToPoint(box.size));
@@ -936,14 +943,20 @@ abstract class WidgetController {
         if (hitTestWarningShouldBeFatal) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Finder specifies a widget that would not receive pointer events.'),
-            ErrorDescription('A call to $callee() with finder "$finder" derived an Offset ($location) that would not hit test on the specified widget.'),
-            ErrorHint('Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.'),
+            ErrorDescription(
+                'A call to $callee() with finder "$finder" derived an Offset ($location) that would not hit test on the specified widget.'),
+            ErrorHint(
+                'Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.'),
             if (outOfBounds)
-              ErrorHint('Indeed, $location is outside the bounds of the root of the render tree, ${binding.renderView.size}.'),
-            box.toDiagnosticsNode(name: 'The finder corresponds to this RenderBox', style: DiagnosticsTreeStyle.singleLine),
+              ErrorHint(
+                  'Indeed, $location is outside the bounds of the root of the render tree, ${binding.renderView.size}.'),
+            box.toDiagnosticsNode(
+                name: 'The finder corresponds to this RenderBox', style: DiagnosticsTreeStyle.singleLine),
             ErrorDescription('The hit test result at that offset is: $result'),
-            ErrorDescription('If you expected this target not to be able to receive pointer events, pass "warnIfMissed: false" to "$callee()".'),
-            ErrorDescription('To make this error into a non-fatal warning, set WidgetController.hitTestWarningShouldBeFatal to false.'),
+            ErrorDescription(
+                'If you expected this target not to be able to receive pointer events, pass "warnIfMissed: false" to "$callee()".'),
+            ErrorDescription(
+                'To make this error into a non-fatal warning, set WidgetController.hitTestWarningShouldBeFatal to false.'),
           ]);
         }
         printToConsole(
@@ -997,7 +1010,7 @@ abstract class WidgetController {
   ///
   ///  - [sendKeyDownEvent] to simulate only a key down event.
   ///  - [sendKeyUpEvent] to simulate only a key up event.
-  Future<bool> sendKeyEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyEvent(LogicalKeyboardKey key, {String platform = _defaultPlatform}) async {
     assert(platform != null);
     final bool handled = await simulateKeyDownEvent(key, platform: platform);
     // Internally wrapped in async guard.
@@ -1028,7 +1041,7 @@ abstract class WidgetController {
   ///  - [sendKeyUpEvent] and [sendKeyRepeatEvent] to simulate the corresponding
   ///    key up and repeat event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, {String? character, String platform = _defaultPlatform}) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, character: character, platform: platform);
@@ -1054,7 +1067,7 @@ abstract class WidgetController {
   ///  - [sendKeyDownEvent] and [sendKeyRepeatEvent] to simulate the
   ///    corresponding key down and repeat event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyUpEvent(LogicalKeyboardKey key, {String platform = _defaultPlatform}) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform);
@@ -1083,7 +1096,8 @@ abstract class WidgetController {
   ///  - [sendKeyDownEvent] and [sendKeyUpEvent] to simulate the corresponding
   ///    key down and up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyRepeatEvent(LogicalKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyRepeatEvent(LogicalKeyboardKey key,
+      {String? character, String platform = _defaultPlatform}) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyRepeatEvent(key, character: character, platform: platform);
@@ -1108,8 +1122,7 @@ abstract class WidgetController {
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
   SemanticsNode getSemantics(Finder finder) {
-    if (binding.pipelineOwner.semanticsOwner == null)
-      throw StateError('Semantics are not enabled.');
+    if (binding.pipelineOwner.semanticsOwner == null) throw StateError('Semantics are not enabled.');
     final Iterable<Element> candidates = finder.evaluate();
     if (candidates.isEmpty) {
       throw StateError('Finder returned no matching elements.');
@@ -1124,8 +1137,7 @@ abstract class WidgetController {
       renderObject = renderObject.parent as RenderObject?;
       result = renderObject?.debugSemantics;
     }
-    if (result == null)
-      throw StateError('No Semantics data found.');
+    if (result == null) throw StateError('No Semantics data found.');
     return result;
   }
 
@@ -1178,11 +1190,10 @@ abstract class WidgetController {
   Future<void> scrollUntilVisible(
     Finder finder,
     double delta, {
-      Finder? scrollable,
-      int maxScrolls = 50,
-      Duration duration = const Duration(milliseconds: 50),
-    }
-  ) {
+    Finder? scrollable,
+    int maxScrolls = 50,
+    Duration duration = const Duration(milliseconds: 50),
+  }) {
     assert(maxScrolls > 0);
     scrollable ??= find.byType(Scrollable);
     return TestAsyncUtils.guard<void>(() async {
@@ -1226,8 +1237,8 @@ abstract class WidgetController {
     Finder finder,
     Finder view,
     Offset moveStep, {
-      int maxIteration = 50,
-      Duration duration = const Duration(milliseconds: 50),
+    int maxIteration = 50,
+    Duration duration = const Duration(milliseconds: 50),
   }) {
     return TestAsyncUtils.guard<void>(() async {
       while (maxIteration > 0 && finder.evaluate().isEmpty) {
@@ -1250,8 +1261,7 @@ class LiveWidgetController extends WidgetController {
 
   @override
   Future<void> pump([Duration? duration]) async {
-    if (duration != null)
-      await Future<void>.delayed(duration);
+    if (duration != null) await Future<void>.delayed(duration);
     binding.scheduleFrame();
     await binding.endOfFrame;
   }

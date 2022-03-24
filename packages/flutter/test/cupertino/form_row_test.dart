@@ -153,13 +153,11 @@ void main() {
       ),
     );
 
-    final DefaultTextStyle helperTextStyle =
-        tester.widget(find.byType(DefaultTextStyle).first);
+    final DefaultTextStyle helperTextStyle = tester.widget(find.byType(DefaultTextStyle).first);
 
     expect(helperTextStyle.style.color, CupertinoColors.label);
 
-    final DefaultTextStyle errorTextStyle =
-        tester.widget(find.byType(DefaultTextStyle).last);
+    final DefaultTextStyle errorTextStyle = tester.widget(find.byType(DefaultTextStyle).last);
 
     expect(errorTextStyle.style.color, CupertinoColors.destructiveRed);
   });

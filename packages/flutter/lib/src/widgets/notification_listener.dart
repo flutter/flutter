@@ -78,7 +78,7 @@ abstract class Notification {
   /// method, as in `super.debugFillDescription(description)`.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) { }
+  void debugFillDescription(List<String> description) {}
 }
 
 /// A widget that listens for [Notification]s bubbling up the tree.

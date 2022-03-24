@@ -58,7 +58,7 @@ class FakeDaemonStreams implements DaemonStreams {
   }
 
   @override
-  void send(Map<String, dynamic> message, [ List<int> binary ]) {
+  void send(Map<String, dynamic> message, [List<int> binary]) {
     outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
   }
 
@@ -138,7 +138,8 @@ void main() {
       );
       globals.printError('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage message) {
-        return message.data['event'] == 'daemon.logMessage' && (message.data['params'] as Map<String, dynamic>)['level'] == 'error';
+        return message.data['event'] == 'daemon.logMessage' &&
+            (message.data['params'] as Map<String, dynamic>)['level'] == 'error';
       });
       expect(response.data['id'], isNull);
       expect(response.data['event'], 'daemon.logMessage');
@@ -156,7 +157,8 @@ void main() {
       );
       globals.printWarning('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage message) {
-        return message.data['event'] == 'daemon.logMessage' && (message.data['params'] as Map<String, dynamic>)['level'] == 'warning';
+        return message.data['event'] == 'daemon.logMessage' &&
+            (message.data['params'] as Map<String, dynamic>)['level'] == 'warning';
       });
       expect(response.data['id'], isNull);
       expect(response.data['event'], 'daemon.logMessage');
@@ -490,7 +492,8 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
       final Map<String, dynamic> params = <String, dynamic>{'emulatorId': 'device', 'coldBoot': 1};
-      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'emulator.launch', 'params': params}));
+      daemonStreams.inputs
+          .add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'emulator.launch', 'params': params}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
       expect(response.data['id'], 0);
       expect(response.data['error'], contains('coldBoot is not a bool'));
@@ -518,12 +521,14 @@ void main() {
 
       // Respond to any requests from the daemon to expose a URL.
       unawaited(daemonStreams.outputs.stream
-        .firstWhere((DaemonMessage request) => request.data['method'] == 'app.exposeUrl')
-        .then((DaemonMessage request) {
-          expect((request.data['params'] as Map<String, dynamic>)['url'], equals(originalUrl));
-          daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': request.data['id'], 'result': <String, dynamic>{'url': mappedUrl}}));
-        })
-      );
+          .firstWhere((DaemonMessage request) => request.data['method'] == 'app.exposeUrl')
+          .then((DaemonMessage request) {
+        expect((request.data['params'] as Map<String, dynamic>)['url'], equals(originalUrl));
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+          'id': request.data['id'],
+          'result': <String, dynamic>{'url': mappedUrl}
+        }));
+      }));
 
       final String exposedUrl = await daemon.daemonDomain.exposeUrl(originalUrl);
       expect(exposedUrl, equals(mappedUrl));
@@ -536,7 +541,8 @@ void main() {
       );
 
       daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'devtools.serve'}));
-      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage response) => response.data['id'] == 0);
+      final DaemonMessage response =
+          await daemonStreams.outputs.stream.firstWhere((DaemonMessage response) => response.data['id'] == 0);
       final Map<String, dynamic> result = response.data['result'] as Map<String, dynamic>;
       expect(result, isNotEmpty);
       expect(result['host'], '127.0.0.1');
@@ -552,7 +558,8 @@ void main() {
       );
 
       daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'devtools.serve'}));
-      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage response) => response.data['id'] == 0);
+      final DaemonMessage response =
+          await daemonStreams.outputs.stream.firstWhere((DaemonMessage response) => response.data['id'] == 0);
       final Map<String, dynamic> result = response.data['result'] as Map<String, dynamic>;
       expect(result, isNotEmpty);
       expect(result['host'], null);
@@ -561,7 +568,8 @@ void main() {
       DevtoolsLauncher: () => FakeDevtoolsLauncher(null),
     });
 
-    testUsingContext('proxy.connect tries to connect to an ipv4 address and proxies the connection correctly', () async {
+    testUsingContext('proxy.connect tries to connect to an ipv4 address and proxies the connection correctly',
+        () async {
       final TestIOOverrides ioOverrides = TestIOOverrides();
       await io.IOOverrides.runWithIOOverrides(() async {
         final FakeSocket socket = FakeSocket();
@@ -580,7 +588,11 @@ void main() {
           daemonConnection,
           notifyingLogger: notifyingLogger,
         );
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.connect', 'params': <String, dynamic>{'port': 123}}));
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+          'id': 0,
+          'method': 'proxy.connect',
+          'params': <String, dynamic>{'port': 123}
+        }));
 
         final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
         final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
@@ -601,13 +613,21 @@ void main() {
         expect(data[0], <int>[10, 11, 12]);
 
         // Can proxy data to the socket.
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.write', 'params': <String, dynamic>{'id': id}}, Stream<List<int>>.value(<int>[21, 22, 23])));
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+          'id': 0,
+          'method': 'proxy.write',
+          'params': <String, dynamic>{'id': id}
+        }, Stream<List<int>>.value(<int>[21, 22, 23])));
         await pumpEventQueue();
         expect(socket.addedData[0], <int>[21, 22, 23]);
 
         // Closes the connection when disconnect request received.
         expect(socket.closeCalled, false);
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.disconnect', 'params': <String, dynamic>{'id': id}}));
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+          'id': 0,
+          'method': 'proxy.disconnect',
+          'params': <String, dynamic>{'id': id}
+        }));
         await pumpEventQueue();
         expect(socket.closeCalled, true);
 
@@ -640,7 +660,11 @@ void main() {
           daemonConnection,
           notifyingLogger: notifyingLogger,
         );
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.connect', 'params': <String, dynamic>{'port': 123}}));
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+          'id': 0,
+          'method': 'proxy.connect',
+          'params': <String, dynamic>{'port': 123}
+        }));
 
         final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
         final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
@@ -660,7 +684,11 @@ void main() {
           daemonConnection,
           notifyingLogger: notifyingLogger,
         );
-        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'proxy.connect', 'params': <String, dynamic>{'port': 123}}));
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+          'id': 0,
+          'method': 'proxy.connect',
+          'params': <String, dynamic>{'port': 123}
+        }));
 
         final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
         final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
@@ -721,9 +749,7 @@ void main() {
       queue = DebounceOperationQueue<int, String>();
     });
 
-    testWithoutContext(
-        'debounces/merges same operation type and returns same result',
-        () async {
+    testWithoutContext('debounces/merges same operation type and returns same result', () async {
       await _runFakeAsync((FakeAsync time) async {
         final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
@@ -737,13 +763,12 @@ void main() {
       });
     });
 
-    testWithoutContext('does not merge results outside of the debounce duration',
-        () async {
+    testWithoutContext('does not merge results outside of the debounce duration', () async {
       await _runFakeAsync((FakeAsync time) async {
         final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
-          Future<int>.delayed(debounceDuration * 2).then((_) =>
-              queue.queueAndDebounce('OP1', debounceDuration, () async => 2)),
+          Future<int>.delayed(debounceDuration * 2)
+              .then((_) => queue.queueAndDebounce('OP1', debounceDuration, () async => 2)),
         ];
 
         time.elapse(debounceDuration * 5);
@@ -753,8 +778,7 @@ void main() {
       });
     });
 
-    testWithoutContext('does not merge results of different operations',
-        () async {
+    testWithoutContext('does not merge results of different operations', () async {
       await _runFakeAsync((FakeAsync time) async {
         final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
@@ -802,21 +826,21 @@ bool _notEvent(DaemonMessage message) => message.data['event'] == null;
 bool _isConnectedEvent(DaemonMessage message) => message.data['event'] == 'daemon.connected';
 
 class FakeFuchsiaWorkflow extends Fake implements FuchsiaWorkflow {
-  FakeFuchsiaWorkflow({ this.canListDevices = true });
+  FakeFuchsiaWorkflow({this.canListDevices = true});
 
   @override
   final bool canListDevices;
 }
 
 class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
-  FakeAndroidWorkflow({ this.canListDevices = true });
+  FakeAndroidWorkflow({this.canListDevices = true});
 
   @override
   final bool canListDevices;
 }
 
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {
-  FakeIOSWorkflow({ this.canListDevices = true });
+  FakeIOSWorkflow({this.canListDevices = true});
 
   @override
   final bool canListDevices;
@@ -886,7 +910,8 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   FutureOr<DeviceLogReader> getLogReader({
     covariant ApplicationPackage app,
     bool includePastLogs = false,
-  }) => logReader;
+  }) =>
+      logReader;
 
   ApplicationPackage startAppPackage;
   LaunchResult launchResult;
@@ -936,7 +961,6 @@ class FakeDeviceLogReader implements DeviceLogReader {
 
   @override
   String get name => 'device';
-
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
@@ -957,7 +981,8 @@ class FakeApplicationPackageFactory implements ApplicationPackageFactory {
   ApplicationPackage applicationPackage;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform,
+      {BuildInfo buildInfo, File applicationBinary}) async {
     platformRequested = platform;
     applicationBinaryRequested = applicationBinary;
     return applicationPackage;

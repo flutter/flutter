@@ -220,7 +220,6 @@ void main() {
     expect(find.text('Tile 1'), findsOneWidget);
     expect(find.text('Tile 2'), findsOneWidget);
     expect(find.text('Tile 3'), findsNothing);
-
   });
 
   testWidgets('SliverList should recalculate inaccurate layout offset case 2', (WidgetTester tester) async {
@@ -275,7 +274,8 @@ void main() {
     expect(find.text('Tile 3'), findsOneWidget);
   });
 
-  testWidgets('SliverList should start to perform layout from the initial child when there is no valid offset', (WidgetTester tester) async {
+  testWidgets('SliverList should start to perform layout from the initial child when there is no valid offset',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66198.
     bool isShow = true;
     final ScrollController controller = ScrollController();

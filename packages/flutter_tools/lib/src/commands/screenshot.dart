@@ -29,7 +29,7 @@ class ScreenshotCommand extends FlutterCommand {
     );
     argParser.addOption(
       _kObservatoryUrl,
-      aliases: <String>[ 'observatory-url' ], // for historical reasons
+      aliases: <String>['observatory-url'], // for historical reasons
       valueHelp: 'URI',
       help: 'The Observatory URL to which to connect.\n'
           'This is required when "--$_kType" is "$_kSkiaType" or "$_kRasterizerType".\n'
@@ -43,8 +43,8 @@ class ScreenshotCommand extends FlutterCommand {
       allowed: const <String>[_kDeviceType, _kSkiaType, _kRasterizerType],
       allowedHelp: const <String, String>{
         _kDeviceType: "Delegate to the device's native screenshot capabilities. This "
-                      'screenshots the entire screen currently being displayed (including content '
-                      'not rendered by Flutter, like the device status bar).',
+            'screenshots the entire screen currently being displayed (including content '
+            'not rendered by Flutter, like the device status bar).',
         _kSkiaType: 'Render the Flutter app as a Skia picture. Requires "--$_kObservatoryUrl".',
         _kRasterizerType: 'Render the Flutter app using the rasterizer. Requires "--$_kObservatoryUrl."',
       },
@@ -117,8 +117,7 @@ class ScreenshotCommand extends FlutterCommand {
         break;
     }
 
-    return success ? FlutterCommandResult.success()
-                   : FlutterCommandResult.fail();
+    return success ? FlutterCommandResult.success() : FlutterCommandResult.fail();
   }
 
   Future<void> runScreenshot(File? outputFile) async {

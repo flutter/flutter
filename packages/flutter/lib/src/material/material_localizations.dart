@@ -138,7 +138,7 @@ abstract class MaterialLocalizations {
   /// there are, e.g. 'Tab 1 of 2' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabLabel({ required int tabIndex, required int tabCount });
+  String tabLabel({required int tabIndex, required int tabCount});
 
   /// Title for the [PaginatedDataTable]'s selected row count header.
   String selectedRowCountTitle(int selectedRowCount);
@@ -215,7 +215,7 @@ abstract class MaterialLocalizations {
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
   /// each supported layout.
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false });
+  TimeOfDayFormat timeOfDayFormat({bool alwaysUse24HourFormat = false});
 
   /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
   ///
@@ -238,7 +238,7 @@ abstract class MaterialLocalizations {
   ///
   /// If [alwaysUse24HourFormat] is true, formats hour using [HourFormat.HH]
   /// rather than the default for the current locale.
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
+  String formatHour(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false});
 
   /// Formats [TimeOfDay.minute] in the given time of day according to the value
   /// of [timeOfDayFormat].
@@ -250,7 +250,7 @@ abstract class MaterialLocalizations {
   /// rather than the default for the current locale. This value is usually
   /// passed from [MediaQueryData.alwaysUse24HourFormat], which has platform-
   /// specific behavior.
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
+  String formatTimeOfDay(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false});
 
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
   String formatYear(DateTime date);
@@ -792,10 +792,8 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// 1582. It will not give valid results for dates prior to that time.
   int _getDaysInMonth(int year, int month) {
     if (month == DateTime.february) {
-      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) ||
-          (year % 400 == 0);
-      if (isLeapYear)
-        return 29;
+      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
+      if (isLeapYear) return 29;
       return 28;
     }
     const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -803,7 +801,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
+  String formatHour(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false}) {
     final TimeOfDayFormat format = timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat);
     switch (format) {
       case TimeOfDayFormat.h_colon_mm_space_a:
@@ -823,8 +821,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String _formatTwoDigitZeroPad(int number) {
     assert(0 <= number && number < 100);
 
-    if (number < 10)
-      return '0$number';
+    if (number < 10) return '0$number';
 
     return '$number';
   }
@@ -1000,22 +997,20 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatDecimal(int number) {
-    if (number > -1000 && number < 1000)
-      return number.toString();
+    if (number > -1000 && number < 1000) return number.toString();
 
     final String digits = number.abs().toString();
     final StringBuffer result = StringBuffer(number < 0 ? '-' : '');
     final int maxDigitIndex = digits.length - 1;
     for (int i = 0; i <= maxDigitIndex; i += 1) {
       result.write(digits[i]);
-      if (i < maxDigitIndex && (maxDigitIndex - i) % 3 == 0)
-        result.write(',');
+      if (i < maxDigitIndex && (maxDigitIndex - i) % 3 == 0) result.write(',');
     }
     return result.toString();
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
+  String formatTimeOfDay(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false}) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -1116,16 +1111,14 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
-    return rowCountIsApproximate
-      ? '$firstRow–$lastRow of about $rowCount'
-      : '$firstRow–$lastRow of $rowCount';
+    return rowCountIsApproximate ? '$firstRow–$lastRow of about $rowCount' : '$firstRow–$lastRow of $rowCount';
   }
 
   @override
   String get rowsPerPageTitle => 'Rows per page:';
 
   @override
-  String tabLabel({ required int tabIndex, required int tabCount }) {
+  String tabLabel({required int tabIndex, required int tabCount}) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     return 'Tab $tabIndex of $tabCount';
@@ -1189,10 +1182,8 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
-    return alwaysUse24HourFormat
-      ? TimeOfDayFormat.HH_colon_mm
-      : TimeOfDayFormat.h_colon_mm_space_a;
+  TimeOfDayFormat timeOfDayFormat({bool alwaysUse24HourFormat = false}) {
+    return alwaysUse24HourFormat ? TimeOfDayFormat.HH_colon_mm : TimeOfDayFormat.h_colon_mm_space_a;
   }
 
   @override

@@ -252,7 +252,7 @@ void main() {
             },
           ),
           routes: <String, WidgetBuilder>{
-            '/2' : (BuildContext context) => const Text('second route'),
+            '/2': (BuildContext context) => const Text('second route'),
           },
         ),
       ),

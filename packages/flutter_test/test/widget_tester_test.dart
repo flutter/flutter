@@ -40,7 +40,8 @@ void main() {
 
     testWidgets('respects the skip flag', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
-      final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip'); // [intended] API testing
+      final Future<void> future =
+          expectLater(null, FakeMatcher(completer), skip: 'testing skip'); // [intended] API testing
       bool completed = false;
       future.then<void>((_) {
         completed = true;
@@ -98,7 +99,8 @@ void main() {
       final String? message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
-      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo": Text("foo", textDirection: ltr)>\n'));
+      expect(message,
+          contains('Actual: _TextFinder:<exactly one widget with text "foo": Text("foo", textDirection: ltr)>\n'));
       expect(message, contains('Which: means one was found but none were expected\n'));
     });
 
@@ -116,7 +118,10 @@ void main() {
       final String? message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
-      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo", textDirection: ltr)>\n'));
+      expect(
+          message,
+          contains(
+              'Actual: _TextFinder:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo", textDirection: ltr)>\n'));
       expect(message, contains('Which: means one was found but none were expected\n'));
     });
   });
@@ -222,10 +227,12 @@ void main() {
         ],
       ));
 
-      expect(find.descendant(
-        of: find.widgetWithText(Row, 'foo'),
-        matching: find.text('bar'),
-      ), findsOneWidget);
+      expect(
+          find.descendant(
+            of: find.widgetWithText(Row, 'foo'),
+            matching: find.text('bar'),
+          ),
+          findsOneWidget);
     });
 
     testWidgets('finds two descendants with different ancestors', (WidgetTester tester) async {
@@ -237,10 +244,12 @@ void main() {
         ],
       ));
 
-      expect(find.descendant(
-        of: find.widgetWithText(Column, 'foo'),
-        matching: find.text('bar'),
-      ), findsNWidgets(2));
+      expect(
+          find.descendant(
+            of: find.widgetWithText(Column, 'foo'),
+            matching: find.text('bar'),
+          ),
+          findsNWidgets(2));
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
@@ -254,10 +263,12 @@ void main() {
 
       late TestFailure failure;
       try {
-        expect(find.descendant(
-          of: find.widgetWithText(Column, 'foo'),
-          matching: find.text('bar'),
-        ), findsOneWidget);
+        expect(
+            find.descendant(
+              of: find.widgetWithText(Column, 'foo'),
+              matching: find.text('bar'),
+            ),
+            findsOneWidget);
       } on TestFailure catch (e) {
         failure = e;
       }
@@ -281,10 +292,12 @@ void main() {
         ],
       ));
 
-      expect(find.ancestor(
-        of: find.text('bar'),
-        matching: find.widgetWithText(Row, 'foo'),
-      ), findsOneWidget);
+      expect(
+          find.ancestor(
+            of: find.text('bar'),
+            matching: find.widgetWithText(Row, 'foo'),
+          ),
+          findsOneWidget);
     });
 
     testWidgets('finds two matching ancestors, one descendant', (WidgetTester tester) async {
@@ -299,10 +312,12 @@ void main() {
         ),
       );
 
-      expect(find.ancestor(
-        of: find.text('bar'),
-        matching: find.byType(Row),
-      ), findsNWidgets(2));
+      expect(
+          find.ancestor(
+            of: find.text('bar'),
+            matching: find.byType(Row),
+          ),
+          findsNWidgets(2));
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
@@ -316,10 +331,12 @@ void main() {
 
       late TestFailure failure;
       try {
-        expect(find.ancestor(
-          of: find.text('bar'),
-          matching: find.widgetWithText(Column, 'foo'),
-        ), findsOneWidget);
+        expect(
+            find.ancestor(
+              of: find.text('bar'),
+              matching: find.widgetWithText(Column, 'foo'),
+            ),
+            findsOneWidget);
       } on TestFailure catch (e) {
         failure = e;
       }
@@ -341,10 +358,12 @@ void main() {
         ],
       ));
 
-      expect(find.ancestor(
-        of: find.byType(Column),
-        matching: find.widgetWithText(Column, 'foo'),
-      ), findsNothing);
+      expect(
+          find.ancestor(
+            of: find.byType(Column),
+            matching: find.widgetWithText(Column, 'foo'),
+          ),
+          findsNothing);
     });
 
     testWidgets('Match the root', (WidgetTester tester) async {
@@ -355,11 +374,13 @@ void main() {
         ],
       ));
 
-      expect(find.descendant(
-        of: find.byType(Column),
-        matching: find.widgetWithText(Column, 'foo'),
-        matchRoot: true,
-      ), findsOneWidget);
+      expect(
+          find.descendant(
+            of: find.byType(Column),
+            matching: find.widgetWithText(Column, 'foo'),
+            matchRoot: true,
+          ),
+          findsOneWidget);
     });
   });
 
@@ -393,7 +414,7 @@ void main() {
                     ));
                   },
                 );
-              } ,
+              },
             ),
           ),
         ),
@@ -432,7 +453,7 @@ void main() {
                     ));
                   },
                 );
-              } ,
+              },
             ),
           ),
         ),
@@ -488,68 +509,68 @@ void main() {
   });
 
   testWidgets('Input event array', (WidgetTester tester) async {
-      final List<String> logs = <String>[];
+    final List<String> logs = <String>[];
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
-            child: const Text('test'),
-          ),
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Listener(
+          onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+          onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+          onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+          child: const Text('test'),
         ),
-      );
+      ),
+    );
 
-      final Offset location = tester.getCenter(find.text('test'));
-      final List<PointerEventRecord> records = <PointerEventRecord>[
-        PointerEventRecord(Duration.zero, <PointerEvent>[
-          // Typically PointerAddedEvent is not used in testers, but for records
-          // captured on a device it is usually what start a gesture.
-          PointerAddedEvent(
-            position: location,
-          ),
-          PointerDownEvent(
-            position: location,
-            buttons: kSecondaryMouseButton,
-            pointer: 1,
-          ),
-        ]),
-        ...<PointerEventRecord>[
-          for (Duration t = const Duration(milliseconds: 5);
-               t < const Duration(milliseconds: 80);
-               t += const Duration(milliseconds: 16))
-            PointerEventRecord(t, <PointerEvent>[
-              PointerMoveEvent(
-                timeStamp: t - const Duration(milliseconds: 1),
-                position: location,
-                buttons: kSecondaryMouseButton,
-                pointer: 1,
-              )
-            ])
-        ],
-        PointerEventRecord(const Duration(milliseconds: 80), <PointerEvent>[
-          PointerUpEvent(
-            timeStamp: const Duration(milliseconds: 79),
-            position: location,
-            buttons: kSecondaryMouseButton,
-            pointer: 1,
-          )
-        ])
-      ];
-      final List<Duration> timeDiffs = await tester.handlePointerEventRecord(records);
-      expect(timeDiffs.length, records.length);
-      for (final Duration diff in timeDiffs) {
-        expect(diff, Duration.zero);
-      }
+    final Offset location = tester.getCenter(find.text('test'));
+    final List<PointerEventRecord> records = <PointerEventRecord>[
+      PointerEventRecord(Duration.zero, <PointerEvent>[
+        // Typically PointerAddedEvent is not used in testers, but for records
+        // captured on a device it is usually what start a gesture.
+        PointerAddedEvent(
+          position: location,
+        ),
+        PointerDownEvent(
+          position: location,
+          buttons: kSecondaryMouseButton,
+          pointer: 1,
+        ),
+      ]),
+      ...<PointerEventRecord>[
+        for (Duration t = const Duration(milliseconds: 5);
+            t < const Duration(milliseconds: 80);
+            t += const Duration(milliseconds: 16))
+          PointerEventRecord(t, <PointerEvent>[
+            PointerMoveEvent(
+              timeStamp: t - const Duration(milliseconds: 1),
+              position: location,
+              buttons: kSecondaryMouseButton,
+              pointer: 1,
+            )
+          ])
+      ],
+      PointerEventRecord(const Duration(milliseconds: 80), <PointerEvent>[
+        PointerUpEvent(
+          timeStamp: const Duration(milliseconds: 79),
+          position: location,
+          buttons: kSecondaryMouseButton,
+          pointer: 1,
+        )
+      ])
+    ];
+    final List<Duration> timeDiffs = await tester.handlePointerEventRecord(records);
+    expect(timeDiffs.length, records.length);
+    for (final Duration diff in timeDiffs) {
+      expect(diff, Duration.zero);
+    }
 
-      const String b = '$kSecondaryMouseButton';
-      expect(logs.first, 'down $b');
-      for (int i = 1; i < logs.length - 1; i++) {
-        expect(logs[i], 'move $b');
-      }
-      expect(logs.last, 'up $b');
+    const String b = '$kSecondaryMouseButton';
+    expect(logs.first, 'down $b');
+    for (int i = 1; i < logs.length - 1; i++) {
+      expect(logs[i], 'move $b');
+    }
+    expect(logs.last, 'up $b');
   });
 
   group('runAsync', () {
@@ -591,7 +612,7 @@ void main() {
     testWidgets('disallows re-entry', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       tester.runAsync<void>(() => completer.future);
-      expect(() => tester.runAsync(() async { }), throwsA(isA<TestFailure>()));
+      expect(() => tester.runAsync(() async {}), throwsA(isA<TestFailure>()));
       completer.complete();
     });
 
@@ -630,20 +651,19 @@ void main() {
       await tester.pump();
     });
 
-    testWidgets(
-      'can focus on offstage text input field if finder says not to skip offstage nodes',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: Offstage(
-                child: TextFormField(),
-              ),
+    testWidgets('can focus on offstage text input field if finder says not to skip offstage nodes',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Offstage(
+              child: TextFormField(),
             ),
           ),
-        );
-        await tester.showKeyboard(find.byType(TextField, skipOffstage: false));
-      });
+        ),
+      );
+      await tester.showKeyboard(find.byType(TextField, skipOffstage: false));
+    });
   });
 
   testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
@@ -666,16 +686,18 @@ void main() {
       );
       expect(error.diagnostics.last, isA<DiagnosticsProperty<Ticker>>());
       expect(error.diagnostics.last.value, ticker);
-      expect(error.toStringDeep(), startsWith(
-        'FlutterError\n'
-        '   A Ticker was active .\n'
-        '   All Tickers must be disposed.\n'
-        '   Tickers used by AnimationControllers should be disposed by\n'
-        '   calling dispose() on the AnimationController itself. Otherwise,\n'
-        '   the ticker will leak.\n'
-        '   The offending ticker was:\n'
-        '     _TestTicker()\n',
-      ));
+      expect(
+          error.toStringDeep(),
+          startsWith(
+            'FlutterError\n'
+            '   A Ticker was active .\n'
+            '   All Tickers must be disposed.\n'
+            '   Tickers used by AnimationControllers should be disposed by\n'
+            '   calling dispose() on the AnimationController itself. Otherwise,\n'
+            '   the ticker will leak.\n'
+            '   The offending ticker was:\n'
+            '     _TestTicker()\n',
+          ));
     }
     ticker.stop();
   });
@@ -728,7 +750,8 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('TargetPlatformVariant.desktop + mobile contains all TargetPlatform values', (WidgetTester tester) async {
+    testWidgets('TargetPlatformVariant.desktop + mobile contains all TargetPlatform values',
+        (WidgetTester tester) async {
       final TargetPlatformVariant all = TargetPlatformVariant.all();
       final TargetPlatformVariant desktop = TargetPlatformVariant.all();
       final TargetPlatformVariant mobile = TargetPlatformVariant.all();
@@ -759,7 +782,8 @@ void main() {
       }, () {});
 
       expect(flutterErrorDetails.exception, isA<AssertionError>());
-      expect((flutterErrorDetails.exception as AssertionError).message, 'A Timer is still pending even after the widget tree was disposed.');
+      expect((flutterErrorDetails.exception as AssertionError).message,
+          'A Timer is still pending even after the widget tree was disposed.');
       expect(binding.inTest, true);
       binding.postTest();
     });
@@ -798,7 +822,7 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
     controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 100),
-    )  ;
+    );
   }
 
   @override

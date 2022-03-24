@@ -92,7 +92,8 @@ void main() {
         bool? includeLoopback,
         bool? includeLinkLocal,
         InternetAddressType? type,
-      }) async => <NetworkInterface>[],
+      }) async =>
+          <NetworkInterface>[],
     );
 
     expect(await listNetworkInterfaces(), isEmpty);

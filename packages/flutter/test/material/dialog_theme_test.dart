@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData? theme }) {
+MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, {ThemeData? theme}) {
   return MaterialApp(
     theme: theme,
     home: Material(
@@ -57,7 +57,8 @@ void main() {
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode n) => n.toString()).toList();
+        .map((DiagnosticsNode n) => n.toString())
+        .toList();
     expect(description, <String>[
       'backgroundColor: Color(0xff123456)',
       'elevation: 8.0',
@@ -71,7 +72,7 @@ void main() {
     const Color customColor = Colors.pink;
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(backgroundColor: customColor));
 
@@ -87,7 +88,7 @@ void main() {
     const double customElevation = 12.0;
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(elevation: customElevation));
 
@@ -103,10 +104,10 @@ void main() {
 
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
     const RoundedRectangleBorder customBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+        RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(shape: customBorder));
 
@@ -123,7 +124,7 @@ void main() {
   testWidgets('Custom dialog alignment', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(alignment: Alignment.bottomLeft));
 
@@ -143,7 +144,7 @@ void main() {
   testWidgets('Dialog alignment takes priority over theme', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
-      actions: <Widget>[ ],
+      actions: <Widget>[],
       alignment: Alignment.topRight,
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(alignment: Alignment.bottomLeft));
@@ -163,10 +164,10 @@ void main() {
 
   testWidgets('Custom dialog shape matches golden', (WidgetTester tester) async {
     const RoundedRectangleBorder customBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
+        RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(shape: customBorder));
 
@@ -186,7 +187,7 @@ void main() {
     const AlertDialog dialog = AlertDialog(
       title: Text(titleText),
       titleTextStyle: titleTextStyle,
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
 
     await tester.pumpWidget(_appWithDialog(tester, dialog));
@@ -202,7 +203,7 @@ void main() {
     const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
     const AlertDialog dialog = AlertDialog(
       title: Text(titleText),
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(titleTextStyle: titleTextStyle));
 
@@ -219,7 +220,7 @@ void main() {
     const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
     const AlertDialog dialog = AlertDialog(
       title: Text(titleText),
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     final ThemeData theme = ThemeData(textTheme: const TextTheme(headline6: titleTextStyle));
 
@@ -285,7 +286,7 @@ void main() {
     const AlertDialog dialog = AlertDialog(
       content: Text(contentText),
       contentTextStyle: contentTextStyle,
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
 
     await tester.pumpWidget(_appWithDialog(tester, dialog));
@@ -301,7 +302,7 @@ void main() {
     const TextStyle contentTextStyle = TextStyle(color: Colors.pink);
     const AlertDialog dialog = AlertDialog(
       content: Text(contentText),
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(contentTextStyle: contentTextStyle));
 
@@ -318,7 +319,7 @@ void main() {
     const TextStyle contentTextStyle = TextStyle(color: Colors.pink);
     const AlertDialog dialog = AlertDialog(
       content: Text(contentText),
-      actions: <Widget>[ ],
+      actions: <Widget>[],
     );
     final ThemeData theme = ThemeData(textTheme: const TextTheme(subtitle1: contentTextStyle));
 

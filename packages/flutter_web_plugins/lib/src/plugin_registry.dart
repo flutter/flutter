@@ -40,11 +40,9 @@ class Registrar extends BinaryMessenger {
   /// The argument is ignored. To create a test [Registrar] with custom behavior,
   /// subclass the [Registrar] class and override methods as appropriate.
   Registrar([
-    @Deprecated(
-      'This argument is ignored. '
-      'This feature was deprecated after v1.24.0-7.0.pre.'
-    )
-    BinaryMessenger? binaryMessenger,
+    @Deprecated('This argument is ignored. '
+        'This feature was deprecated after v1.24.0-7.0.pre.')
+        BinaryMessenger? binaryMessenger,
   ]);
 
   /// Registers the registrar's message handler
@@ -69,16 +67,15 @@ class Registrar extends BinaryMessenger {
   /// Receives a platform message from the framework.
   ///
   /// This method has been replaced with the more clearly-named [handleFrameworkMessage].
-  @Deprecated(
-    'Use handleFrameworkMessage instead. '
-    'This feature was deprecated after v1.24.0-7.0.pre.'
-  )
+  @Deprecated('Use handleFrameworkMessage instead. '
+      'This feature was deprecated after v1.24.0-7.0.pre.')
   @override
   Future<void> handlePlatformMessage(
     String channel,
     ByteData? data,
     ui.PlatformMessageResponseCallback? callback,
-  ) => handleFrameworkMessage(channel, data, callback);
+  ) =>
+      handleFrameworkMessage(channel, data, callback);
 
   /// Message handler for web plugins.
   ///
@@ -129,10 +126,8 @@ class Registrar extends BinaryMessenger {
   }
 
   /// Returns `this`.
-  @Deprecated(
-    'This property is redundant. It returns the object on which it is called. '
-    'This feature was deprecated after v1.24.0-7.0.pre.'
-  )
+  @Deprecated('This property is redundant. It returns the object on which it is called. '
+      'This feature was deprecated after v1.24.0-7.0.pre.')
   BinaryMessenger get messenger => this;
 
   final Map<String, MessageHandler> _handlers = <String, MessageHandler>{};
@@ -167,31 +162,23 @@ class Registrar extends BinaryMessenger {
 
 /// This class was previously separate from [Registrar] but was merged into it
 /// as part of a simplification of the web plugins API.
-@Deprecated(
-  'Use Registrar instead. '
-  'This feature was deprecated after v1.26.0-18.0.pre.'
-)
+@Deprecated('Use Registrar instead. '
+    'This feature was deprecated after v1.26.0-18.0.pre.')
 class PluginRegistry extends Registrar {
   /// Creates a [Registrar].
   ///
   /// The argument is ignored.
-  @Deprecated(
-    'Use Registrar instead. '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
-  )
+  @Deprecated('Use Registrar instead. '
+      'This feature was deprecated after v1.26.0-18.0.pre.')
   PluginRegistry([
-    @Deprecated(
-      'This argument is ignored. '
-      'This feature was deprecated after v1.26.0-18.0.pre.'
-    )
-    BinaryMessenger? binaryMessenger,
+    @Deprecated('This argument is ignored. '
+        'This feature was deprecated after v1.26.0-18.0.pre.')
+        BinaryMessenger? binaryMessenger,
   ]) : super();
 
   /// Returns `this`. The argument is ignored.
-  @Deprecated(
-    'This method is redundant. It returns the object on which it is called. '
-    'This feature was deprecated after v1.26.0-18.0.pre.'
-  )
+  @Deprecated('This method is redundant. It returns the object on which it is called. '
+      'This feature was deprecated after v1.26.0-18.0.pre.')
   Registrar registrarFor(Type key) => this;
 }
 
@@ -199,15 +186,11 @@ class PluginRegistry extends Registrar {
 final Registrar webPluginRegistrar = PluginRegistry();
 
 /// A deprecated alias for [webPluginRegistrar].
-@Deprecated(
-  'Use webPluginRegistrar instead. '
-  'This feature was deprecated after v1.24.0-7.0.pre.'
-)
+@Deprecated('Use webPluginRegistrar instead. '
+    'This feature was deprecated after v1.24.0-7.0.pre.')
 PluginRegistry get webPluginRegistry => webPluginRegistrar as PluginRegistry;
 
 /// A deprecated alias for [webPluginRegistrar].
-@Deprecated(
-  'Use webPluginRegistrar instead. '
-  'This feature was deprecated after v1.24.0-7.0.pre.'
-)
+@Deprecated('Use webPluginRegistrar instead. '
+    'This feature was deprecated after v1.24.0-7.0.pre.')
 BinaryMessenger get pluginBinaryMessenger => webPluginRegistrar;

@@ -45,7 +45,8 @@ String getFlutterRoot() {
     return platform.environment['FLUTTER_ROOT']!;
   }
 
-  Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
+  Error invalidScript() => StateError(
+      'Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
 
   Uri scriptUri;
   switch (platform.script.scheme) {
@@ -89,7 +90,7 @@ Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
 final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
 
 /// Matcher for functions that throw [ToolExit].
-Matcher throwsToolExit({ int? exitCode, Pattern? message }) {
+Matcher throwsToolExit({int? exitCode, Pattern? message}) {
   Matcher matcher = _isToolExit;
   if (exitCode != null) {
     matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
@@ -104,7 +105,7 @@ Matcher throwsToolExit({ int? exitCode, Pattern? message }) {
 final TypeMatcher<ToolExit> _isToolExit = isA<ToolExit>();
 
 /// Matcher for functions that throw [ProcessException].
-Matcher throwsProcessException({ Pattern? message }) {
+Matcher throwsProcessException({Pattern? message}) {
   Matcher matcher = _isProcessException;
   if (message != null) {
     matcher = allOf(matcher, (ProcessException e) => e.message.contains(message));
@@ -119,10 +120,11 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   try {
     await future;
     fail('ToolExit expected, but nothing thrown');
-  } on ToolExit catch(e) {
+  } on ToolExit catch (e) {
     expect(e.message, messageMatcher);
-  // Catch all exceptions to give a better test failure message.
-  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
+    // Catch all exceptions to give a better test failure message.
+  } catch (e, trace) {
+    // ignore: avoid_catches_without_on_clauses
     fail('ToolExit expected, got $e\n$trace');
   }
 }
@@ -130,8 +132,9 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
 Future<void> expectReturnsNormallyLater(Future<dynamic> future) async {
   try {
     await future;
-  // Catch all exceptions to give a better test failure message.
-  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
+    // Catch all exceptions to give a better test failure message.
+  } catch (e, trace) {
+    // ignore: avoid_catches_without_on_clauses
     fail('Expected to run with no exceptions, got $e\n$trace');
   }
 }
@@ -149,7 +152,9 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 /// system temporary directory are deleted after each test by calling
 /// `LocalFileSystem.dispose()`.
 @isTest
-void test(String description, FutureOr<void> Function() body, {
+void test(
+  String description,
+  FutureOr<void> Function() body, {
   String? testOn,
   dynamic skip,
   List<String>? tags,
@@ -185,7 +190,9 @@ void test(String description, FutureOr<void> Function() body, {
 ///
 /// For more information, see https://github.com/flutter/flutter/issues/47161
 @isTest
-void testWithoutContext(String description, FutureOr<void> Function() body, {
+void testWithoutContext(
+  String description,
+  FutureOr<void> Function() body, {
   String? testOn,
   dynamic skip,
   List<String>? tags,
@@ -193,7 +200,8 @@ void testWithoutContext(String description, FutureOr<void> Function() body, {
   int? retry,
 }) {
   return test(
-    description, () async {
+    description,
+    () async {
       return runZoned(body, zoneValues: <Object, Object>{
         contextKey: const _NoContext(),
       });
@@ -219,11 +227,9 @@ class _NoContext implements AppContext {
 
   @override
   T get<T>() {
-    throw UnsupportedError(
-      'context.get<$T> is not supported in test methods. '
-      'Use Testbed or testUsingContext if accessing Zone injected '
-      'values.'
-    );
+    throw UnsupportedError('context.get<$T> is not supported in test methods. '
+        'Use Testbed or testUsingContext if accessing Zone injected '
+        'values.');
   }
 
   @override
@@ -258,7 +264,8 @@ class _NoContext implements AppContext {
 /// }
 /// ```
 class FileExceptionHandler {
-  final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors = <String, Map<FileSystemOp, FileSystemException>>{};
+  final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors =
+      <String, Map<FileSystemOp, FileSystemException>>{};
   final Map<FileSystemOp, FileSystemException> _tempErrors = <FileSystemOp, FileSystemException>{};
   static final RegExp _tempDirectoryEnd = RegExp('rand[0-9]+');
 

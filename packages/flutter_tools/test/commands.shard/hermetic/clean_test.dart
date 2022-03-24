@@ -45,7 +45,9 @@ void main() {
         buildDirectory.createSync(recursive: true);
       });
 
-      testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode for iOS and macOS', () async {
+      testUsingContext(
+          '$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode for iOS and macOS',
+          () async {
         final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory);
         // Xcode is installed and version satisfactory.
         xcodeProjectInterpreter.isInstalled = true;
@@ -72,7 +74,7 @@ void main() {
         expect(projectUnderTest.flutterPluginsDependenciesFile, isNot(exists));
         expect(projectUnderTest.packagesFile, isNot(exists));
 
-      expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+        expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
           CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
           CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
         ]);
@@ -137,8 +139,7 @@ void main() {
       testUsingContext('$CleanCommand handles missing delete permissions', () async {
         final FileExceptionHandler handler = FileExceptionHandler();
         final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-        final File throwingFile = fileSystem.file('bad')
-          ..createSync();
+        final File throwingFile = fileSystem.file('bad')..createSync();
         handler.addError(throwingFile, FileSystemOp.delete, const FileSystemException('OS error: Access Denied'));
 
         xcodeProjectInterpreter.isInstalled = false;
@@ -146,7 +147,10 @@ void main() {
         final CleanCommand command = CleanCommand();
         command.deleteFile(throwingFile);
 
-        expect(testLogger.errorText, contains('Failed to remove bad. A program may still be using a file in the directory or the directory itself'));
+        expect(
+            testLogger.errorText,
+            contains(
+                'Failed to remove bad. A program may still be using a file in the directory or the directory itself'));
         expect(throwingFile, exists);
       }, overrides: <Type, Generator>{
         Platform: () => windowsPlatform,
@@ -213,10 +217,11 @@ class CleanWorkspaceCall {
   final bool verbose;
 
   @override
-  bool operator ==(Object other) => other is CleanWorkspaceCall &&
-    workspacePath == other.workspacePath &&
-    scheme == other.scheme &&
-    verbose == other.verbose;
+  bool operator ==(Object other) =>
+      other is CleanWorkspaceCall &&
+      workspacePath == other.workspacePath &&
+      scheme == other.scheme &&
+      verbose == other.verbose;
 
   @override
   int get hashCode => Object.hash(workspacePath, scheme, verbose);

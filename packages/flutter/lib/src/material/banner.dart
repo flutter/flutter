@@ -86,25 +86,25 @@ class MaterialBanner extends StatefulWidget {
   /// The [actions], [content], and [forceActionsBelow] must be non-null.
   /// The [actions].length must be greater than 0. The [elevation] must be null or
   /// non-negative.
-  const MaterialBanner({
-    Key? key,
-    required this.content,
-    this.contentTextStyle,
-    required this.actions,
-    this.elevation,
-    this.leading,
-    this.backgroundColor,
-    this.padding,
-    this.leadingPadding,
-    this.forceActionsBelow = false,
-    this.overflowAlignment = OverflowBarAlignment.end,
-    this.animation,
-    this.onVisible
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(content != null),
-       assert(actions != null),
-       assert(forceActionsBelow != null),
-       super(key: key);
+  const MaterialBanner(
+      {Key? key,
+      required this.content,
+      this.contentTextStyle,
+      required this.actions,
+      this.elevation,
+      this.leading,
+      this.backgroundColor,
+      this.padding,
+      this.leadingPadding,
+      this.forceActionsBelow = false,
+      this.overflowAlignment = OverflowBarAlignment.end,
+      this.animation,
+      this.onVisible})
+      : assert(elevation == null || elevation >= 0.0),
+        assert(content != null),
+        assert(actions != null),
+        assert(forceActionsBelow != null),
+        super(key: key);
 
   /// The content of the [MaterialBanner].
   ///
@@ -185,7 +185,7 @@ class MaterialBanner extends StatefulWidget {
   // API for ScaffoldMessengerState.showMaterialBanner():
 
   /// Creates an animation controller useful for driving a material banner's entrance and exit animation.
-  static AnimationController createAnimationController({ required TickerProvider vsync }) {
+  static AnimationController createAnimationController({required TickerProvider vsync}) {
     return AnimationController(
       duration: _materialBannerTransitionDuration,
       debugLabel: 'MaterialBanner',
@@ -197,7 +197,7 @@ class MaterialBanner extends StatefulWidget {
   ///
   /// If the original material banner lacks a key, the newly created material banner will
   /// use the given fallback key.
-  MaterialBanner withAnimation(Animation<double> newAnimation, { Key? fallbackKey }) {
+  MaterialBanner withAnimation(Animation<double> newAnimation, {Key? fallbackKey}) {
     return MaterialBanner(
       key: key ?? fallbackKey,
       content: content,
@@ -268,12 +268,13 @@ class _MaterialBannerState extends State<MaterialBanner> {
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
     final bool isSingleRow = widget.actions.length == 1 && !widget.forceActionsBelow;
-    final EdgeInsetsGeometry padding = widget.padding ?? bannerTheme.padding ?? (isSingleRow
-        ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
-        : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0));
-    final EdgeInsetsGeometry leadingPadding = widget.leadingPadding
-        ?? bannerTheme.leadingPadding
-        ?? const EdgeInsetsDirectional.only(end: 16.0);
+    final EdgeInsetsGeometry padding = widget.padding ??
+        bannerTheme.padding ??
+        (isSingleRow
+            ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
+            : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0));
+    final EdgeInsetsGeometry leadingPadding =
+        widget.leadingPadding ?? bannerTheme.leadingPadding ?? const EdgeInsetsDirectional.only(end: 16.0);
 
     final Widget buttonBar = Container(
       alignment: AlignmentDirectional.centerEnd,
@@ -287,12 +288,8 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     final double elevation = widget.elevation ?? bannerTheme.elevation ?? 0.0;
-    final Color backgroundColor = widget.backgroundColor
-        ?? bannerTheme.backgroundColor
-        ?? theme.colorScheme.surface;
-    final TextStyle? textStyle = widget.contentTextStyle
-        ?? bannerTheme.contentTextStyle
-        ?? theme.textTheme.bodyText2;
+    final Color backgroundColor = widget.backgroundColor ?? bannerTheme.backgroundColor ?? theme.colorScheme.surface;
+    final TextStyle? textStyle = widget.contentTextStyle ?? bannerTheme.contentTextStyle ?? theme.textTheme.bodyText2;
 
     Widget materialBanner = Container(
       margin: EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0),
@@ -317,30 +314,26 @@ class _MaterialBannerState extends State<MaterialBanner> {
                       child: widget.content,
                     ),
                   ),
-                  if (isSingleRow)
-                    buttonBar,
+                  if (isSingleRow) buttonBar,
                 ],
               ),
             ),
-            if (!isSingleRow)
-              buttonBar,
-
-            if (elevation == 0)
-              const Divider(height: 0),
+            if (!isSingleRow) buttonBar,
+            if (elevation == 0) const Divider(height: 0),
           ],
         ),
       ),
     );
 
     // This provides a static banner for backwards compatibility.
-    if (widget.animation == null)
-      return materialBanner;
+    if (widget.animation == null) return materialBanner;
 
     materialBanner = SafeArea(
       child: materialBanner,
     );
 
-    final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
+    final CurvedAnimation heightAnimation =
+        CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
     final Animation<Offset> slideOutAnimation = Tween<Offset>(
       begin: const Offset(0.0, -1.0),
       end: Offset.zero,
@@ -358,9 +351,9 @@ class _MaterialBannerState extends State<MaterialBanner> {
       child: mediaQueryData.accessibleNavigation
           ? materialBanner
           : SlideTransition(
-        position: slideOutAnimation,
-        child: materialBanner,
-      ),
+              position: slideOutAnimation,
+              child: materialBanner,
+            ),
     );
 
     final Widget materialBannerTransition;

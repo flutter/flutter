@@ -47,8 +47,7 @@ class _MyScrollContainerState extends State<_MyScrollContainer> {
     // Without the timer the animation doesn't begin.
     Timer.run(() async {
       while (pageNumber < 25) {
-        await pageController.animateToPage(pageNumber % 5,
-            duration: stepDuration, curve: Curves.easeInOut);
+        await pageController.animateToPage(pageNumber % 5, duration: stepDuration, curve: Curves.easeInOut);
         pageNumber++;
       }
     });
@@ -94,8 +93,7 @@ class _CustomPainter extends CustomPainter {
     _textPainter.textDirection = TextDirection.ltr;
     _textPainter.textWidthBasis = TextWidthBasis.longestLine;
     _textPainter.textScaleFactor = 1;
-    const TextStyle textStyle =
-        TextStyle(color: Colors.black87, fontSize: 13, fontFamily: 'Roboto');
+    const TextStyle textStyle = TextStyle(color: Colors.black87, fontSize: 13, fontFamily: 'Roboto');
 
     _linePainter.isAntiAlias = true;
     for (int i = 0; i < 42; i++) {
@@ -115,14 +113,9 @@ class _CustomPainter extends CustomPainter {
 
       _textPainter.layout(maxWidth: width);
       _linePainter.style = PaintingStyle.fill;
-      canvas.drawRect(
-          Rect.fromLTWH(xPosition, yPosition - viewPadding, width, height),
-          _linePainter);
+      canvas.drawRect(Rect.fromLTWH(xPosition, yPosition - viewPadding, width, height), _linePainter);
 
-      _textPainter.paint(
-          canvas,
-          Offset(xPosition + (width / 2 - _textPainter.width / 2),
-              yPosition + circlePadding));
+      _textPainter.paint(canvas, Offset(xPosition + (width / 2 - _textPainter.width / 2), yPosition + circlePadding));
       xPosition += width;
       if (xPosition.round() >= size.width.round()) {
         xPosition = 0;
@@ -130,31 +123,25 @@ class _CustomPainter extends CustomPainter {
       }
     }
 
-    _drawVerticalAndHorizontalLines(
-        canvas, size, yPosition, xPosition, height, width);
+    _drawVerticalAndHorizontalLines(canvas, size, yPosition, xPosition, height, width);
   }
 
-  void _drawVerticalAndHorizontalLines(Canvas canvas, Size size,
-      double yPosition, double xPosition, double height, double width) {
+  void _drawVerticalAndHorizontalLines(
+      Canvas canvas, Size size, double yPosition, double xPosition, double height, double width) {
     yPosition = height;
     _linePainter.strokeWidth = lineWidth;
     _linePainter.color = Colors.grey;
-    canvas.drawLine(const Offset(0, lineWidth), Offset(size.width, lineWidth),
-        _linePainter);
+    canvas.drawLine(const Offset(0, lineWidth), Offset(size.width, lineWidth), _linePainter);
     for (int i = 0; i < 6; i++) {
-      canvas.drawLine(
-          Offset(0, yPosition), Offset(size.width, yPosition), _linePainter);
+      canvas.drawLine(Offset(0, yPosition), Offset(size.width, yPosition), _linePainter);
       yPosition += height;
     }
 
-    canvas.drawLine(Offset(0, size.height - lineWidth),
-        Offset(size.width, size.height - lineWidth), _linePainter);
+    canvas.drawLine(Offset(0, size.height - lineWidth), Offset(size.width, size.height - lineWidth), _linePainter);
     xPosition = width;
-    canvas.drawLine(const Offset(lineWidth, 0), Offset(lineWidth, size.height),
-        _linePainter);
+    canvas.drawLine(const Offset(lineWidth, 0), Offset(lineWidth, size.height), _linePainter);
     for (int i = 0; i < 6; i++) {
-      canvas.drawLine(
-          Offset(xPosition, 0), Offset(xPosition, size.height), _linePainter);
+      canvas.drawLine(Offset(xPosition, 0), Offset(xPosition, size.height), _linePainter);
       xPosition += width;
     }
   }

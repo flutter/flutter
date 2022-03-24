@@ -30,8 +30,7 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.any(),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
 
@@ -54,8 +53,7 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.any(),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
     // Unrelated file from another cache.
@@ -74,8 +72,9 @@ void main() {
     expect(fileSystem.file('out/test/foo.txt'), isNot(exists));
   });
 
-  testWithoutContext('ArtifactUpdater will not validate the md5 hash if the '
-    'x-goog-hash header is present but missing an md5 entry', () async {
+  testWithoutContext(
+      'ArtifactUpdater will not validate the md5 hash if the '
+      'x-goog-hash header is present but missing an md5 entry', () async {
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
@@ -86,14 +85,12 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(
-          headers: <String, List<String>>{
-            'x-goog-hash': <String>[],
-          }
-        )),
+        FakeRequest(Uri.parse('http://test.zip'),
+            response: const FakeResponse(headers: <String, List<String>>{
+              'x-goog-hash': <String>[],
+            })),
       ]),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
 
@@ -106,8 +103,9 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
-  testWithoutContext('ArtifactUpdater will validate the md5 hash if the '
-    'x-goog-hash header is present', () async {
+  testWithoutContext(
+      'ArtifactUpdater will validate the md5 hash if the '
+      'x-goog-hash header is present', () async {
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
@@ -118,18 +116,14 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(
-          body: <int>[0],
-          headers: <String, List<String>>{
-            'x-goog-hash': <String>[
-              'foo-bar-baz',
-              'md5=k7iFrf4NoInN9jSQT9WfcQ=='
-            ],
-          }
-        )),
+        FakeRequest(Uri.parse('http://test.zip'),
+            response: const FakeResponse(body: <int>[
+              0
+            ], headers: <String, List<String>>{
+              'x-goog-hash': <String>['foo-bar-baz', 'md5=k7iFrf4NoInN9jSQT9WfcQ=='],
+            })),
       ]),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
 
@@ -142,8 +136,9 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
-  testWithoutContext('ArtifactUpdater will validate the md5 hash if the '
-    'x-goog-hash header is present and throw if it does not match', () async {
+  testWithoutContext(
+      'ArtifactUpdater will validate the md5 hash if the '
+      'x-goog-hash header is present and throw if it does not match', () async {
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
@@ -154,34 +149,28 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.list(<FakeRequest>[
-         FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(
-           body: <int>[0],
-           headers: <String, List<String>>{
-             'x-goog-hash': <String>[
-              'foo-bar-baz',
-              'md5=k7iFrf4SQT9WfcQ=='
-            ],
-          }
-        )),
-       FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(
-           headers: <String, List<String>>{
-             'x-goog-hash': <String>[
-              'foo-bar-baz',
-              'md5=k7iFrf4SQT9WfcQ=='
-            ],
-          }
-        )),
+        FakeRequest(Uri.parse('http://test.zip'),
+            response: const FakeResponse(body: <int>[
+              0
+            ], headers: <String, List<String>>{
+              'x-goog-hash': <String>['foo-bar-baz', 'md5=k7iFrf4SQT9WfcQ=='],
+            })),
+        FakeRequest(Uri.parse('http://test.zip'),
+            response: const FakeResponse(headers: <String, List<String>>{
+              'x-goog-hash': <String>['foo-bar-baz', 'md5=k7iFrf4SQT9WfcQ=='],
+            })),
       ]),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
 
-    await expectLater(() async => artifactUpdater.downloadZipArchive(
-      'test message',
-      Uri.parse('http://test.zip'),
-      fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsToolExit(message: 'k7iFrf4SQT9WfcQ==')); // validate that the hash mismatch message is included.
+    await expectLater(
+        () async => artifactUpdater.downloadZipArchive(
+              'test message',
+              Uri.parse('http://test.zip'),
+              fileSystem.currentDirectory.childDirectory('out'),
+            ),
+        throwsToolExit(message: 'k7iFrf4SQT9WfcQ==')); // validate that the hash mismatch message is included.
   });
 
   testWithoutContext('ArtifactUpdater will restart the status ticker if it needs to retry the download', () async {
@@ -201,8 +190,7 @@ void main() {
         FakeRequest(Uri.parse('http://test.zip'), responseError: const HttpException('')),
         FakeRequest(Uri.parse('http://test.zip')),
       ]),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
 
@@ -226,25 +214,29 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(statusCode: HttpStatus.preconditionFailed)),
-        FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(statusCode: HttpStatus.preconditionFailed)),
+        FakeRequest(Uri.parse('http://test.zip'),
+            response: const FakeResponse(statusCode: HttpStatus.preconditionFailed)),
+        FakeRequest(Uri.parse('http://test.zip'),
+            response: const FakeResponse(statusCode: HttpStatus.preconditionFailed)),
       ]),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
 
-    await expectLater(() async => artifactUpdater.downloadZipArchive(
-      'test message',
-      Uri.parse('http://test.zip'),
-      fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsToolExit());
+    await expectLater(
+        () async => artifactUpdater.downloadZipArchive(
+              'test message',
+              Uri.parse('http://test.zip'),
+              fileSystem.currentDirectory.childDirectory('out'),
+            ),
+        throwsToolExit());
 
     expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
 
-  testWithoutContext('ArtifactUpdater will tool exit on an ArgumentError from http client with base url override', () async {
+  testWithoutContext('ArtifactUpdater will tool exit on an ArgumentError from http client with base url override',
+      () async {
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
@@ -253,29 +245,28 @@ void main() {
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
       platform: FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_STORAGE_BASE_URL': 'foo-bar'
-        },
+        environment: <String, String>{'FLUTTER_STORAGE_BASE_URL': 'foo-bar'},
       ),
-      httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http://foo-bar/test.zip'), responseError: ArgumentError())
-      ]),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      httpClient: FakeHttpClient.list(
+          <FakeRequest>[FakeRequest(Uri.parse('http://foo-bar/test.zip'), responseError: ArgumentError())]),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://foo-bar/test.zip'],
     );
 
-    await expectLater(() async => artifactUpdater.downloadZipArchive(
-      'test message',
-      Uri.parse('http://foo-bar/test.zip'),
-      fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsToolExit());
+    await expectLater(
+        () async => artifactUpdater.downloadZipArchive(
+              'test message',
+              Uri.parse('http://foo-bar/test.zip'),
+              fileSystem.currentDirectory.childDirectory('out'),
+            ),
+        throwsToolExit());
 
     expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
 
-  testWithoutContext('ArtifactUpdater will rethrow on an ArgumentError from http client without base url override', () async {
+  testWithoutContext('ArtifactUpdater will rethrow on an ArgumentError from http client without base url override',
+      () async {
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
@@ -287,16 +278,17 @@ void main() {
       httpClient: FakeHttpClient.list(<FakeRequest>[
         FakeRequest(Uri.parse('http://test.zip'), responseError: ArgumentError()),
       ]),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
 
-    await expectLater(() async => artifactUpdater.downloadZipArchive(
-      'test message',
-      Uri.parse('http://test.zip'),
-      fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsArgumentError);
+    await expectLater(
+        () async => artifactUpdater.downloadZipArchive(
+              'test message',
+              Uri.parse('http://test.zip'),
+              fileSystem.currentDirectory.childDirectory('out'),
+            ),
+        throwsArgumentError);
 
     expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), isNot(exists));
@@ -312,8 +304,7 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.any(),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 1;
@@ -337,8 +328,7 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.any(),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 1;
@@ -362,17 +352,18 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.any(),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 2;
 
-    expect(artifactUpdater.downloadZipArchive(
-      'test message',
-      Uri.parse('http://test.zip'),
-      fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsToolExit());
+    expect(
+        artifactUpdater.downloadZipArchive(
+          'test message',
+          Uri.parse('http://test.zip'),
+          fileSystem.currentDirectory.childDirectory('out'),
+        ),
+        throwsToolExit());
     expect(fileSystem.file('te,[/test'), isNot(exists));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
@@ -387,17 +378,18 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.any(),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 2;
 
-    expect(artifactUpdater.downloadZipArchive(
-      'test message',
-      Uri.parse('http://test.zip'),
-      fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsToolExit());
+    expect(
+        artifactUpdater.downloadZipArchive(
+          'test message',
+          Uri.parse('http://test.zip'),
+          fileSystem.currentDirectory.childDirectory('out'),
+        ),
+        throwsToolExit());
     expect(fileSystem.file('te,[/test'), isNot(exists));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
@@ -412,8 +404,7 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.any(),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
 
@@ -435,8 +426,7 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.any(),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
 
@@ -451,7 +441,8 @@ void main() {
     expect(logger.errorText, isEmpty);
   });
 
-  testWithoutContext('ArtifactUpdater will tool exit if deleting the existing artifacts fails with 32 on windows', () async {
+  testWithoutContext('ArtifactUpdater will tool exit if deleting the existing artifacts fails with 32 on windows',
+      () async {
     const int kSharingViolation = 32;
     final FileExceptionHandler handler = FileExceptionHandler();
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
@@ -463,24 +454,23 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: FakePlatform(operatingSystem: 'windows'),
       httpClient: FakeHttpClient.any(),
-      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
-        ..createSync(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
       allowedBaseUrls: <String>['http://test.zip'],
     );
 
-    final Directory errorDirectory = fileSystem.currentDirectory
-      .childDirectory('out')
-      .childDirectory('test')
+    final Directory errorDirectory = fileSystem.currentDirectory.childDirectory('out').childDirectory('test')
       ..createSync(recursive: true);
-    handler.addError(errorDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', kSharingViolation)));
+    handler.addError(
+        errorDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', kSharingViolation)));
 
-    await expectLater(() async => artifactUpdater.downloadZippedTarball(
-      'test message',
-      Uri.parse('http://test.zip'),
-      fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsToolExit(
-      message: 'Failed to delete /out/test because the local file/directory is in use by another process'
-    ));
+    await expectLater(
+        () async => artifactUpdater.downloadZippedTarball(
+              'test message',
+              Uri.parse('http://test.zip'),
+              fileSystem.currentDirectory.childDirectory('out'),
+            ),
+        throwsToolExit(
+            message: 'Failed to delete /out/test because the local file/directory is in use by another process'));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
 }
@@ -497,8 +487,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
       failures -= 1;
       throw Exception();
     }
-    targetDirectory.childFile(file.fileSystem.path.basenameWithoutExtension(file.path))
-      .createSync();
+    targetDirectory.childFile(file.fileSystem.path.basenameWithoutExtension(file.path)).createSync();
   }
 
   @override
@@ -507,7 +496,8 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
       failures -= 1;
       throw Exception();
     }
-    targetDirectory.childFile(gzippedTarFile.fileSystem.path.basenameWithoutExtension(gzippedTarFile.path))
-      .createSync();
+    targetDirectory
+        .childFile(gzippedTarFile.fileSystem.path.basenameWithoutExtension(gzippedTarFile.path))
+        .createSync();
   }
 }

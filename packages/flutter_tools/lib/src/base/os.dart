@@ -57,14 +57,14 @@ abstract class OperatingSystemUtils {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _platform = platform,
-       _processManager = processManager,
-       _processUtils = ProcessUtils(
-        logger: logger,
-        processManager: processManager,
-      );
+  })  : _fileSystem = fileSystem,
+        _logger = logger,
+        _platform = platform,
+        _processManager = processManager,
+        _processUtils = ProcessUtils(
+          logger: logger,
+          processManager: processManager,
+        );
 
   @visibleForTesting
   static final GZipCodec gzipLevel1 = GZipCodec(level: 1);
@@ -127,7 +127,7 @@ abstract class OperatingSystemUtils {
 
   HostPlatform get hostPlatform;
 
-  List<File> _which(String execName, { bool all = false });
+  List<File> _which(String execName, {bool all = false});
 
   /// Returns the separator between items in the PATH environment variable.
   String get pathVarSeparator;
@@ -141,8 +141,7 @@ abstract class OperatingSystemUtils {
   Future<int> findFreePort({bool ipv6 = false}) async {
     int port = 0;
     ServerSocket? serverSocket;
-    final InternetAddress loopback =
-        ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
+    final InternetAddress loopback = ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
     try {
       serverSocket = await ServerSocket.bind(loopback, 0);
       port = serverSocket.port;
@@ -171,11 +170,11 @@ class _PosixUtils extends OperatingSystemUtils {
     required Platform platform,
     required ProcessManager processManager,
   }) : super._private(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        );
 
   @override
   void makeExecutable(File file) {
@@ -190,12 +189,10 @@ class _PosixUtils extends OperatingSystemUtils {
         <String>['chmod', mode, entity.path],
       );
       if (result.exitCode != 0) {
-        _logger.printTrace(
-          'Error trying to run "chmod $mode ${entity.path}":\n'
-          '  exit code: ${result.exitCode}\n'
-          '  stdout: ${result.stdout.toString().trimRight()}\n'
-          '  stderr: ${result.stderr.toString().trimRight()}'
-        );
+        _logger.printTrace('Error trying to run "chmod $mode ${entity.path}":\n'
+            '  exit code: ${result.exitCode}\n'
+            '  stdout: ${result.stdout.toString().trimRight()}\n'
+            '  stderr: ${result.stderr.toString().trimRight()}');
       }
     } on ProcessException catch (error) {
       _logger.printTrace(
@@ -205,7 +202,7 @@ class _PosixUtils extends OperatingSystemUtils {
   }
 
   @override
-  List<File> _which(String execName, { bool all = false }) {
+  List<File> _which(String execName, {bool all = false}) {
     final List<String> command = <String>[
       'which',
       if (all) '-a',
@@ -216,9 +213,13 @@ class _PosixUtils extends OperatingSystemUtils {
       return const <File>[];
     }
     final String stdout = result.stdout as String;
-    return stdout.trim().split('\n').map<File>(
-      (String path) => _fileSystem.file(path.trim()),
-    ).toList();
+    return stdout
+        .trim()
+        .split('\n')
+        .map<File>(
+          (String path) => _fileSystem.file(path.trim()),
+        )
+        .toList();
   }
 
   // unzip -o -q zipfile -d dest
@@ -233,9 +234,7 @@ class _PosixUtils extends OperatingSystemUtils {
       } else if (_platform.isLinux) {
         message = 'Consider running "sudo apt-get install unzip".';
       }
-      throwToolExit(
-        'Missing "unzip" tool. Unable to extract ${file.path}.\n$message'
-      );
+      throwToolExit('Missing "unzip" tool. Unable to extract ${file.path}.\n$message');
     }
     _processUtils.runSync(
       <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
@@ -313,9 +312,8 @@ class _LinuxUtils extends _PosixUtils {
     if (_name == null) {
       const String prettyNameKey = 'PRETTY_NAME';
       // If "/etc/os-release" doesn't exist, fallback to "/usr/lib/os-release".
-      final String osReleasePath = _fileSystem.file('/etc/os-release').existsSync()
-        ? '/etc/os-release'
-        : '/usr/lib/os-release';
+      final String osReleasePath =
+          _fileSystem.file('/etc/os-release').existsSync() ? '/etc/os-release' : '/usr/lib/os-release';
       String prettyName;
       String kernelRelease;
       try {
@@ -350,8 +348,8 @@ class _LinuxUtils extends _PosixUtils {
     for (String entry in osReleaseSplitted) {
       entry = entry.trim();
       final List<String> entryKeyValuePair = entry.split('=');
-      if(entryKeyValuePair[0] == key) {
-        final String value =  entryKeyValuePair[1];
+      if (entryKeyValuePair[0] == key) {
+        final String value = entryKeyValuePair[1];
         // Remove quotes from either end of the value if they exist
         final String quote = value[0];
         if (quote == "'" || quote == '"') {
@@ -419,8 +417,7 @@ class _MacOSUtils extends _PosixUtils {
       if (sysctlPath == null) {
         throwToolExit('sysctl not found. Try adding it to your PATH environment variable.');
       }
-      final RunResult arm64Check =
-          _processUtils.runSync(<String>[sysctlPath, 'hw.optional.arm64']);
+      final RunResult arm64Check = _processUtils.runSync(<String>[sysctlPath, 'hw.optional.arm64']);
       // On arm64 stdout is "sysctl hw.optional.arm64: 1"
       // On x86 hw.optional.arm64 is unavailable and exits with 1.
       if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
@@ -480,11 +477,11 @@ class _WindowsUtils extends OperatingSystemUtils {
     required Platform platform,
     required ProcessManager processManager,
   }) : super._private(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        );
 
   @override
   HostPlatform hostPlatform = HostPlatform.windows_x64;
@@ -496,15 +493,13 @@ class _WindowsUtils extends OperatingSystemUtils {
   void chmod(FileSystemEntity entity, String mode) {}
 
   @override
-  List<File> _which(String execName, { bool all = false }) {
+  List<File> _which(String execName, {bool all = false}) {
     if (!_processManager.canRun('where')) {
       // `where` could be missing if system32 is not on the PATH.
-      throwToolExit(
-        'Cannot find the executable for `where`. This can happen if the System32 '
-        r'folder (e.g. C:\Windows\System32 ) is removed from the PATH environment '
-        'variable. Ensure that this is present and then try again after restarting '
-        'the terminal and/or IDE.'
-      );
+      throwToolExit('Cannot find the executable for `where`. This can happen if the System32 '
+          r'folder (e.g. C:\Windows\System32 ) is removed from the PATH environment '
+          'variable. Ensure that this is present and then try again after restarting '
+          'the terminal and/or IDE.');
     }
     // `where` always returns all matches, not just the first one.
     final ProcessResult result = _processManager.runSync(<String>['where', execName]);
@@ -582,8 +577,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   String get name {
     if (_name == null) {
-      final ProcessResult result = _processManager.runSync(
-          <String>['ver'], runInShell: true);
+      final ProcessResult result = _processManager.runSync(<String>['ver'], runInShell: true);
       if (result.exitCode == 0) {
         _name = (result.stdout as String).trim();
       } else {
@@ -601,7 +595,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 /// directory or the current working directory if none specified.
 /// Return null if the project root could not be found
 /// or if the project root is the flutter repository root.
-String? findProjectRoot(FileSystem fileSystem, [ String? directory ]) {
+String? findProjectRoot(FileSystem fileSystem, [String? directory]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fileSystem.currentDirectory.path;
   while (true) {

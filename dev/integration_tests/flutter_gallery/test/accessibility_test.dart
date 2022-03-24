@@ -611,9 +611,7 @@ void main() {
 
       testWidgets('modal_bottom_sheet_demo $themeName', (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
-        await tester.pumpWidget(
-          MaterialApp(theme: theme, home: const ModalBottomSheetDemo())
-        );
+        await tester.pumpWidget(MaterialApp(theme: theme, home: const ModalBottomSheetDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
@@ -634,9 +632,7 @@ void main() {
 
       testWidgets('persistent_bottom_sheet_demo $themeName', (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
-        await tester.pumpWidget(
-          MaterialApp(theme: theme, home: const PersistentBottomSheetDemo())
-        );
+        await tester.pumpWidget(MaterialApp(theme: theme, home: const PersistentBottomSheetDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
@@ -685,9 +681,7 @@ void main() {
 
       testWidgets('snack_bar_demo $themeName', (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
-        await tester.pumpWidget(
-          MaterialApp(theme: theme, home: const SnackBarDemo())
-        );
+        await tester.pumpWidget(MaterialApp(theme: theme, home: const SnackBarDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });

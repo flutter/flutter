@@ -41,26 +41,24 @@ void main() {
     });
 
     testWithoutContext('fetchUrl() gets the data', () async {
-      final Net net = createNet(
-        FakeHttpClient.list(<FakeRequest>[
-          FakeRequest(Uri.parse('http://example.invalid/'), response: FakeResponse(
-            body: utf8.encode(responseString),
-          )),
-        ])
-      );
+      final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+        FakeRequest(Uri.parse('http://example.invalid/'),
+            response: FakeResponse(
+              body: utf8.encode(responseString),
+            )),
+      ]));
 
       final List<int>? data = await net.fetchUrl(Uri.parse('http://example.invalid/'));
       expect(data, equals(responseData));
     });
 
     testWithoutContext('fetchUrl(destFile) writes the data to a file', () async {
-      final Net net = createNet(
-        FakeHttpClient.list(<FakeRequest>[
-          FakeRequest(Uri.parse('http://example.invalid/'), response: FakeResponse(
-            body: utf8.encode(responseString),
-          )),
-        ])
-      );
+      final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+        FakeRequest(Uri.parse('http://example.invalid/'),
+            response: FakeResponse(
+              body: utf8.encode(responseString),
+            )),
+      ]));
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final File destFile = fileSystem.file('dest_file')..createSync();
       final List<int>? data = await net.fetchUrl(
@@ -73,18 +71,21 @@ void main() {
   });
 
   testWithoutContext('retry from 500', () async {
-    final Net net = createNet(
-      FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http://example.invalid/'), response: const FakeResponse(statusCode: io.HttpStatus.internalServerError)),
-        FakeRequest(Uri.parse('http://example.invalid/'), response: const FakeResponse(statusCode: io.HttpStatus.internalServerError)),
-        FakeRequest(Uri.parse('http://example.invalid/'), response: const FakeResponse(statusCode: io.HttpStatus.internalServerError)),
-        FakeRequest(Uri.parse('http://example.invalid/'), response: const FakeResponse(statusCode: io.HttpStatus.internalServerError)),
-      ])
-    );
+    final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+      FakeRequest(Uri.parse('http://example.invalid/'),
+          response: const FakeResponse(statusCode: io.HttpStatus.internalServerError)),
+      FakeRequest(Uri.parse('http://example.invalid/'),
+          response: const FakeResponse(statusCode: io.HttpStatus.internalServerError)),
+      FakeRequest(Uri.parse('http://example.invalid/'),
+          response: const FakeResponse(statusCode: io.HttpStatus.internalServerError)),
+      FakeRequest(Uri.parse('http://example.invalid/'),
+          response: const FakeResponse(statusCode: io.HttpStatus.internalServerError)),
+    ]));
 
     await net.fetchUrl(Uri.parse('http://example.invalid/'), maxAttempts: 4, durationOverride: Duration.zero);
 
-    expect(testLogger.statusText,
+    expect(
+      testLogger.statusText,
       'Download failed -- attempting retry 1 in 1 second...\n'
       'Download failed -- attempting retry 2 in 2 seconds...\n'
       'Download failed -- attempting retry 3 in 4 seconds...\n'
@@ -95,18 +96,17 @@ void main() {
 
   testWithoutContext('retry from network error', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
-    final Net net = createNet(
-      FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(invalid, responseError: const io.SocketException('test')),
-        FakeRequest(invalid, responseError: const io.SocketException('test')),
-        FakeRequest(invalid, responseError: const io.SocketException('test')),
-        FakeRequest(invalid, responseError: const io.SocketException('test')),
-      ])
-    );
+    final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+      FakeRequest(invalid, responseError: const io.SocketException('test')),
+      FakeRequest(invalid, responseError: const io.SocketException('test')),
+      FakeRequest(invalid, responseError: const io.SocketException('test')),
+      FakeRequest(invalid, responseError: const io.SocketException('test')),
+    ]));
 
     await net.fetchUrl(Uri.parse('http://example.invalid/'), maxAttempts: 4, durationOverride: Duration.zero);
 
-    expect(testLogger.statusText,
+    expect(
+      testLogger.statusText,
       'Download failed -- attempting retry 1 in 1 second...\n'
       'Download failed -- attempting retry 2 in 2 seconds...\n'
       'Download failed -- attempting retry 3 in 4 seconds...\n'
@@ -117,14 +117,12 @@ void main() {
 
   testWithoutContext('retry from SocketException', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
-    final Net net = createNet(
-      FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(invalid, responseError: const io.SocketException('')),
-        FakeRequest(invalid, responseError: const io.SocketException('')),
-        FakeRequest(invalid, responseError: const io.SocketException('')),
-        FakeRequest(invalid, responseError: const io.SocketException('')),
-      ])
-    );
+    final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+      FakeRequest(invalid, responseError: const io.SocketException('')),
+      FakeRequest(invalid, responseError: const io.SocketException('')),
+      FakeRequest(invalid, responseError: const io.SocketException('')),
+      FakeRequest(invalid, responseError: const io.SocketException('')),
+    ]));
     String? error;
     FakeAsync().run((FakeAsync time) {
       net.fetchUrl(invalid).then((List<int>? value) async {
@@ -134,7 +132,8 @@ void main() {
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Download failed -- attempting retry 1 in 1 second...\n'
         'Download failed -- attempting retry 2 in 2 seconds...\n'
         'Download failed -- attempting retry 3 in 4 seconds...\n'
@@ -148,14 +147,12 @@ void main() {
 
   testWithoutContext('no retry from HandshakeException', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
-    final Net net = createNet(
-      FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(invalid, responseError: const io.HandshakeException()),
-        FakeRequest(invalid, responseError: const io.HandshakeException()),
-        FakeRequest(invalid, responseError: const io.HandshakeException()),
-        FakeRequest(invalid, responseError: const io.HandshakeException()),
-      ])
-    );
+    final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+      FakeRequest(invalid, responseError: const io.HandshakeException()),
+      FakeRequest(invalid, responseError: const io.HandshakeException()),
+      FakeRequest(invalid, responseError: const io.HandshakeException()),
+      FakeRequest(invalid, responseError: const io.HandshakeException()),
+    ]));
     String? error;
     FakeAsync().run((FakeAsync time) {
       net.fetchUrl(invalid).then((List<int>? value) async {
@@ -204,14 +201,12 @@ void main() {
 
   testWithoutContext('retry from HttpException', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
-    final Net net = createNet(
-      FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(invalid, responseError: const io.HttpException('')),
-        FakeRequest(invalid, responseError: const io.HttpException('')),
-        FakeRequest(invalid, responseError: const io.HttpException('')),
-        FakeRequest(invalid, responseError: const io.HttpException('')),
-      ])
-    );
+    final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+      FakeRequest(invalid, responseError: const io.HttpException('')),
+      FakeRequest(invalid, responseError: const io.HttpException('')),
+      FakeRequest(invalid, responseError: const io.HttpException('')),
+      FakeRequest(invalid, responseError: const io.HttpException('')),
+    ]));
     String? error;
     FakeAsync().run((FakeAsync time) {
       net.fetchUrl(invalid).then((List<int>? value) async {
@@ -221,7 +216,8 @@ void main() {
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Download failed -- attempting retry 1 in 1 second...\n'
         'Download failed -- attempting retry 2 in 2 seconds...\n'
         'Download failed -- attempting retry 3 in 4 seconds...\n'
@@ -235,14 +231,12 @@ void main() {
 
   testWithoutContext('retry from HttpException when request throws', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
-    final Net net = createNet(
-      FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(invalid, responseError: const io.HttpException('')),
-        FakeRequest(invalid, responseError: const io.HttpException('')),
-        FakeRequest(invalid, responseError: const io.HttpException('')),
-        FakeRequest(invalid, responseError: const io.HttpException('')),
-      ])
-    );
+    final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+      FakeRequest(invalid, responseError: const io.HttpException('')),
+      FakeRequest(invalid, responseError: const io.HttpException('')),
+      FakeRequest(invalid, responseError: const io.HttpException('')),
+      FakeRequest(invalid, responseError: const io.HttpException('')),
+    ]));
     String? error;
     FakeAsync().run((FakeAsync time) {
       net.fetchUrl(invalid).then((List<int>? value) async {
@@ -252,7 +246,8 @@ void main() {
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Download failed -- attempting retry 1 in 1 second...\n'
         'Download failed -- attempting retry 2 in 2 seconds...\n'
         'Download failed -- attempting retry 3 in 4 seconds...\n'
@@ -266,19 +261,20 @@ void main() {
 
   testWithoutContext('max attempts', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
-    final Net net = createNet(
-      FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(invalid, response: const FakeResponse(
-          statusCode: HttpStatus.internalServerError,
-        )),
-        FakeRequest(invalid, response: const FakeResponse(
-          statusCode: HttpStatus.internalServerError,
-        )),
-        FakeRequest(invalid, response: const FakeResponse(
-          statusCode: HttpStatus.internalServerError,
-        )),
-      ])
-    );
+    final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+      FakeRequest(invalid,
+          response: const FakeResponse(
+            statusCode: HttpStatus.internalServerError,
+          )),
+      FakeRequest(invalid,
+          response: const FakeResponse(
+            statusCode: HttpStatus.internalServerError,
+          )),
+      FakeRequest(invalid,
+          response: const FakeResponse(
+            statusCode: HttpStatus.internalServerError,
+          )),
+    ]));
     String? error;
     List<int>? actualResult;
     FakeAsync().run((FakeAsync time) {
@@ -289,7 +285,8 @@ void main() {
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Download failed -- attempting retry 1 in 1 second...\n'
         'Download failed -- attempting retry 2 in 2 seconds...\n'
         'Download failed -- retry 3\n',
@@ -302,37 +299,35 @@ void main() {
 
   testWithoutContext('remote file non-existent', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
-    final Net net = createNet(
-      FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(invalid, method: HttpMethod.head, response: const FakeResponse(
-          statusCode: HttpStatus.notFound,
-        )),
-      ])
-    );
+    final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+      FakeRequest(invalid,
+          method: HttpMethod.head,
+          response: const FakeResponse(
+            statusCode: HttpStatus.notFound,
+          )),
+    ]));
     final bool result = await net.doesRemoteFileExist(invalid);
     expect(result, false);
   });
 
   testWithoutContext('remote file server error', () async {
     final Uri valid = Uri.parse('http://example.valid/');
-    final Net net = createNet(
-      FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(valid, method: HttpMethod.head, response: const FakeResponse(
-          statusCode: HttpStatus.internalServerError,
-        )),
-      ])
-    );
+    final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+      FakeRequest(valid,
+          method: HttpMethod.head,
+          response: const FakeResponse(
+            statusCode: HttpStatus.internalServerError,
+          )),
+    ]));
     final bool result = await net.doesRemoteFileExist(valid);
     expect(result, false);
   });
 
   testWithoutContext('remote file exists', () async {
     final Uri valid = Uri.parse('http://example.valid/');
-    final Net net = createNet(
-      FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(valid, method: HttpMethod.head),
-      ])
-    );
+    final Net net = createNet(FakeHttpClient.list(<FakeRequest>[
+      FakeRequest(valid, method: HttpMethod.head),
+    ]));
     final bool result = await net.doesRemoteFileExist(valid);
     expect(result, true);
   });

@@ -48,8 +48,7 @@ const List<String> kAllCreatePlatforms = <String>[
   'winuwp',
 ];
 
-const String _kDefaultPlatformArgumentHelp =
-    '(required) The platforms supported by this project. '
+const String _kDefaultPlatformArgumentHelp = '(required) The platforms supported by this project. '
     'Platform folders (e.g. android/) will be generated in the target project. '
     'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
 
@@ -61,14 +60,12 @@ abstract class CreateBase extends FlutterCommand {
     argParser.addFlag(
       'pub',
       defaultsTo: true,
-      help:
-          'Whether to run "flutter pub get" after the project has been created.',
+      help: 'Whether to run "flutter pub get" after the project has been created.',
     );
     argParser.addFlag(
       'offline',
       defaultsTo: false,
-      help:
-          'When "flutter pub get" is run by the create command, this indicates '
+      help: 'When "flutter pub get" is run by the create command, this indicates '
           'whether to run it in offline mode or not. In offline mode, it will need to '
           'have all dependencies already available in the pub cache to succeed.',
     );
@@ -77,8 +74,8 @@ abstract class CreateBase extends FlutterCommand {
       negatable: true,
       defaultsTo: false,
       help: '(deprecated) Historically, this added a flutter_driver dependency and generated a '
-            'sample "flutter drive" test. Now it does nothing. Consider using the '
-            '"integration_test" package: https://pub.dev/packages/integration_test',
+          'sample "flutter drive" test. Now it does nothing. Consider using the '
+          '"integration_test" package: https://pub.dev/packages/integration_test',
       hide: !verboseHelp,
     );
     argParser.addFlag(
@@ -90,29 +87,24 @@ abstract class CreateBase extends FlutterCommand {
     argParser.addOption(
       'description',
       defaultsTo: 'A new Flutter project.',
-      help:
-          'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
+      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
     );
     argParser.addOption(
       'org',
       defaultsTo: 'com.example',
-      help:
-          'The organization responsible for your new Flutter project, in reverse domain name notation. '
+      help: 'The organization responsible for your new Flutter project, in reverse domain name notation. '
           'This string is used in Java package names and as prefix in the iOS bundle identifier.',
     );
     argParser.addOption(
       'project-name',
       defaultsTo: null,
-      help:
-          'The project name for this new Flutter project. This must be a valid dart package name.',
+      help: 'The project name for this new Flutter project. This must be a valid dart package name.',
     );
-    argParser.addOption(
-      'ios-language',
-      abbr: 'i',
-      defaultsTo: 'swift',
-      allowed: <String>['objc', 'swift'],
-      help: 'The language to use for iOS-specific code, either Objective-C (legacy) or Swift (recommended).'
-    );
+    argParser.addOption('ios-language',
+        abbr: 'i',
+        defaultsTo: 'swift',
+        allowed: <String>['objc', 'swift'],
+        help: 'The language to use for iOS-specific code, either Objective-C (legacy) or Swift (recommended).');
     argParser.addOption(
       'android-language',
       abbr: 'a',
@@ -122,15 +114,13 @@ abstract class CreateBase extends FlutterCommand {
     );
     argParser.addFlag(
       'skip-name-checks',
-      help:
-          'Allow the creation of applications and plugins with invalid names. '
+      help: 'Allow the creation of applications and plugins with invalid names. '
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
     argParser.addFlag(
       'implementation-tests',
-      help:
-          'Include implementation tests that verify the template functions correctly. '
+      help: 'Include implementation tests that verify the template functions correctly. '
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
@@ -138,7 +128,7 @@ abstract class CreateBase extends FlutterCommand {
       'initial-create-revision',
       defaultsTo: null,
       help: 'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
-            'internally and should generally not be used manually.',
+          'internally and should generally not be used manually.',
       hide: !verboseHelp,
     );
   }
@@ -160,18 +150,17 @@ abstract class CreateBase extends FlutterCommand {
   /// The help message of the argument is replaced with `customHelp` if `customHelp` is not null.
   @protected
   void addPlatformsOptions({String customHelp}) {
-    argParser.addMultiOption('platforms',
+    argParser.addMultiOption(
+      'platforms',
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
-      aliases: <String>[ 'platform' ],
+      aliases: <String>['platform'],
       defaultsTo: <String>[
         ..._kAvailablePlatforms,
-        if (featureFlags.isWindowsUwpEnabled)
-          'winuwp',
+        if (featureFlags.isWindowsUwpEnabled) 'winuwp',
       ],
       allowed: <String>[
         ..._kAvailablePlatforms,
-        if (featureFlags.isWindowsUwpEnabled)
-          'winuwp',
+        if (featureFlags.isWindowsUwpEnabled) 'winuwp',
       ],
     );
   }
@@ -215,27 +204,20 @@ abstract class CreateBase extends FlutterCommand {
   @protected
   FlutterProjectType determineTemplateType() {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);
-    final File metadataFile = globals.fs
-        .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
-    final FlutterProjectMetadata projectMetadata =
-        FlutterProjectMetadata(metadataFile, globals.logger);
+    final File metadataFile = globals.fs.file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
+    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, globals.logger);
     if (projectMetadata.projectType != null) {
       return projectMetadata.projectType;
     }
 
     bool exists(List<String> path) {
-      return globals.fs
-          .directory(globals.fs.path
-              .joinAll(<String>[projectDir.absolute.path, ...path]))
-          .existsSync();
+      return globals.fs.directory(globals.fs.path.joinAll(<String>[projectDir.absolute.path, ...path])).existsSync();
     }
 
     // There either wasn't any metadata, or it didn't contain the project type,
     // so try and figure out what type of project it is from the existing
     // directory structure.
-    if (exists(<String>['android', 'app']) ||
-        exists(<String>['ios', 'Runner']) ||
-        exists(<String>['ios', 'Flutter'])) {
+    if (exists(<String>['android', 'app']) || exists(<String>['ios', 'Runner']) || exists(<String>['ios', 'Flutter'])) {
       return FlutterProjectType.app;
     }
     // Since we can't really be definitive on nearly-empty directories, err on
@@ -256,8 +238,7 @@ abstract class CreateBase extends FlutterCommand {
       if (existingOrganizations.length == 1) {
         organization = existingOrganizations.first;
       } else if (existingOrganizations.length > 1) {
-        throwToolExit(
-            'Ambiguous organization in existing files: $existingOrganizations. '
+        throwToolExit('Ambiguous organization in existing files: $existingOrganizations. '
             'The --org command line argument must be specified to recreate project.');
       }
     }
@@ -275,7 +256,7 @@ abstract class CreateBase extends FlutterCommand {
           !globals.fs.path.isWithin(devDirectory, projectDirPath)) {
         throwToolExit(
             'Cannot create a project within the Flutter SDK. '
-                "Target directory '$projectDirPath' is within the Flutter SDK at '$flutterRoot'.",
+            "Target directory '$projectDirPath' is within the Flutter SDK at '$flutterRoot'.",
             exitCode: 2);
       }
     }
@@ -283,13 +264,8 @@ abstract class CreateBase extends FlutterCommand {
     // If the destination directory is actually a file, then we refuse to
     // overwrite, on the theory that the user probably didn't expect it to exist.
     if (globals.fs.isFileSync(projectDirPath)) {
-      final String message =
-          "Invalid project name: '$projectDirPath' - refers to an existing file.";
-      throwToolExit(
-          overwrite
-              ? '$message Refusing to overwrite a file with a directory.'
-              : message,
-          exitCode: 2);
+      final String message = "Invalid project name: '$projectDirPath' - refers to an existing file.";
+      throwToolExit(overwrite ? '$message Refusing to overwrite a file with a directory.' : message, exitCode: 2);
     }
 
     if (overwrite) {
@@ -298,16 +274,15 @@ abstract class CreateBase extends FlutterCommand {
 
     final FileSystemEntityType type = globals.fs.typeSync(projectDirPath);
 
-    switch (type) { // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
+    switch (type) {
+      // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
       case FileSystemEntityType.file:
         // Do not overwrite files.
-        throwToolExit("Invalid project name: '$projectDirPath' - file exists.",
-            exitCode: 2);
+        throwToolExit("Invalid project name: '$projectDirPath' - file exists.", exitCode: 2);
         break;
       case FileSystemEntityType.link:
         // Do not overwrite links.
-        throwToolExit("Invalid project name: '$projectDirPath' - refers to a link.",
-            exitCode: 2);
+        throwToolExit("Invalid project name: '$projectDirPath' - refers to a link.", exitCode: 2);
         break;
       case FileSystemEntityType.directory:
       case FileSystemEntityType.notFound:
@@ -320,8 +295,7 @@ abstract class CreateBase extends FlutterCommand {
   /// Use the current directory path name if the `--project-name` is not specified explicitly.
   @protected
   String get projectName {
-    final String projectName =
-        stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
+    final String projectName = stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
     if (!boolArg('skip-name-checks')) {
       final String error = _validateProjectName(projectName);
       if (error != null) {
@@ -359,29 +333,23 @@ abstract class CreateBase extends FlutterCommand {
     bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
-    final String pluginClass = pluginDartClass.endsWith('Plugin')
-        ? pluginDartClass
-        : '${pluginDartClass}Plugin';
+    final String pluginClass = pluginDartClass.endsWith('Plugin') ? pluginDartClass : '${pluginDartClass}Plugin';
     final String pluginClassSnakeCase = snakeCase(pluginClass);
-    final String pluginClassCapitalSnakeCase =
-        pluginClassSnakeCase.toUpperCase();
-    final String pluginClassLowerCamelCase =
-        pluginClass[0].toLowerCase() + pluginClass.substring(1);
-    final String appleIdentifier =
-        createUTIIdentifier(organization, projectName);
-    final String androidIdentifier =
-        createAndroidIdentifier(organization, projectName);
-    final String windowsIdentifier =
-        createWindowsIdentifier(organization, projectName);
+    final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
+    final String pluginClassLowerCamelCase = pluginClass[0].toLowerCase() + pluginClass.substring(1);
+    final String appleIdentifier = createUTIIdentifier(organization, projectName);
+    final String androidIdentifier = createAndroidIdentifier(organization, projectName);
+    final String windowsIdentifier = createWindowsIdentifier(organization, projectName);
     // Linux uses the same scheme as the Android identifier.
     // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
     final String linuxIdentifier = androidIdentifier;
 
     // TODO(dacoharkes): Replace with hardcoded version in template when Flutter 2.11 is released.
     final Version ffiPluginStableRelease = Version(2, 11, 0);
-    final String minFrameworkVersionFfiPlugin = Version.parse(globals.flutterVersion.frameworkVersion) < ffiPluginStableRelease
-        ? globals.flutterVersion.frameworkVersion
-        : ffiPluginStableRelease.toString();
+    final String minFrameworkVersionFfiPlugin =
+        Version.parse(globals.flutterVersion.frameworkVersion) < ffiPluginStableRelease
+            ? globals.flutterVersion.frameworkVersion
+            : ffiPluginStableRelease.toString();
 
     return <String, Object>{
       'organization': organization,
@@ -587,15 +555,14 @@ abstract class CreateBase extends FlutterCommand {
       platformsForMigrateConfig.add(SupportedPlatform.fuchsia);
     }
     if (generateMetadata) {
-      final File metadataFile = globals.fs
-          .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
+      final File metadataFile = globals.fs.file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
       final FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
-        file: metadataFile,
-        versionRevision: globals.flutterVersion.frameworkRevision,
-        versionChannel: globals.flutterVersion.channel,
-        projectType: projectType,
-        migrateConfig: MigrateConfig(),
-        logger: globals.logger);
+          file: metadataFile,
+          versionRevision: globals.flutterVersion.frameworkRevision,
+          versionChannel: globals.flutterVersion.channel,
+          projectType: projectType,
+          migrateConfig: MigrateConfig(),
+          logger: globals.logger);
       metadata.populate(
         platforms: platformsForMigrateConfig,
         projectDirectory: directory,
@@ -621,10 +588,7 @@ abstract class CreateBase extends FlutterCommand {
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
 
     // It must have at least two segments (one or more dots).
-    final List<String> segments = tmpIdentifier
-        .split('.')
-        .where((String segment) => segment.isNotEmpty)
-        .toList();
+    final List<String> segments = tmpIdentifier.split('.').where((String segment) => segment.isNotEmpty).toList();
     while (segments.length < 2) {
       segments.add('untitled');
     }
@@ -660,10 +624,7 @@ abstract class CreateBase extends FlutterCommand {
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
 
     // It must have at least two segments (one or more dots).
-    final List<String> segments = tmpIdentifier
-        .split('.')
-        .where((String segment) => segment.isNotEmpty)
-        .toList();
+    final List<String> segments = tmpIdentifier.split('.').where((String segment) => segment.isNotEmpty).toList();
     while (segments.length < 2) {
       segments.add('untitled');
     }
@@ -671,8 +632,7 @@ abstract class CreateBase extends FlutterCommand {
     return segments.join('.');
   }
 
-  Set<Uri> get _templateManifest =>
-      __templateManifest ??= _computeTemplateManifest();
+  Set<Uri> get _templateManifest => __templateManifest ??= _computeTemplateManifest();
   Set<Uri> __templateManifest;
   Set<Uri> _computeTemplateManifest() {
     final String flutterToolsAbsolutePath = globals.fs.path.join(
@@ -689,9 +649,9 @@ abstract class CreateBase extends FlutterCommand {
       globals.fs.file(manifestPath).readAsStringSync(),
     ) as Map<String, Object>;
     return Set<Uri>.from(
-      (manifest['files'] as List<Object>).cast<String>().map<Uri>(
-          (String path) =>
-              Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path))),
+      (manifest['files'] as List<Object>)
+          .cast<String>()
+          .map<Uri>((String path) => Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path))),
     );
   }
 
@@ -802,9 +762,7 @@ const Set<String> _packageDependencies = <String>{
 @visibleForTesting
 bool isValidPackageName(String name) {
   final Match match = _identifierRegExp.matchAsPrefix(name);
-  return match != null &&
-      match.end == name.length &&
-      !_keywords.contains(name);
+  return match != null && match.end == name.length && !_keywords.contains(name);
 }
 
 // Return null if the project name is legal. Return a validation message if

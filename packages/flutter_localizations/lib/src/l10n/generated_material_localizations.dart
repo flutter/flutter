@@ -37,17 +37,17 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Meer oor $applicationName';
@@ -523,17 +523,17 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'ስለ $applicationName';
@@ -1009,17 +1009,17 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'لمحة عن "$applicationName"';
@@ -1495,17 +1495,17 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationNameৰ বিষয়ে';
@@ -1981,17 +1981,17 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName haqqında';
@@ -2467,17 +2467,17 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Інфармацыя пра праграму "$applicationName"';
@@ -2953,17 +2953,17 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Всичко за $applicationName';
@@ -3439,17 +3439,17 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName সম্পর্কে';
@@ -3925,17 +3925,17 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -4411,17 +4411,17 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Sobre $applicationName';
@@ -4897,17 +4897,17 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaci $applicationName';
@@ -5383,17 +5383,17 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -5869,17 +5869,17 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Über $applicationName';
@@ -6355,17 +6355,17 @@ class MaterialLocalizationDeCh extends MaterialLocalizationDe {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get invalidTimeLabel => 'Gib eine gültige Uhrzeit ein';
@@ -6403,17 +6403,17 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Σχετικά με την εφαρμογή $applicationName';
@@ -6889,17 +6889,17 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'About $applicationName';
@@ -7375,17 +7375,17 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7444,17 +7444,17 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7513,17 +7513,17 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7585,17 +7585,17 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7657,17 +7657,17 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7726,17 +7726,17 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7795,17 +7795,17 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7864,17 +7864,17 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7936,17 +7936,17 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Sobre $applicationName';
@@ -8422,17 +8422,17 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8551,17 +8551,17 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8680,17 +8680,17 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8809,17 +8809,17 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8938,17 +8938,17 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9067,17 +9067,17 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9196,17 +9196,17 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9325,17 +9325,17 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9454,17 +9454,17 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9583,17 +9583,17 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9712,17 +9712,17 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9841,17 +9841,17 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9970,17 +9970,17 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10099,17 +10099,17 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10228,17 +10228,17 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10357,17 +10357,17 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10486,17 +10486,17 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10615,17 +10615,17 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10747,17 +10747,17 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10876,17 +10876,17 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -11005,17 +11005,17 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Teave rakenduse $applicationName kohta';
@@ -11491,17 +11491,17 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName aplikazioari buruz';
@@ -11977,17 +11977,17 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'درباره $applicationName';
@@ -12463,17 +12463,17 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Tietoja: $applicationName';
@@ -12949,17 +12949,17 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Tungkol sa $applicationName';
@@ -13435,17 +13435,17 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'À propos de $applicationName';
@@ -13921,17 +13921,17 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get invalidTimeLabel => 'Entrez une heure valide';
@@ -14023,17 +14023,17 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de: $applicationName';
@@ -14509,17 +14509,17 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Über $applicationName';
@@ -14995,17 +14995,17 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName વિશે';
@@ -15481,17 +15481,17 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'מידע על $applicationName';
@@ -15967,17 +15967,17 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName के बारे में जानकारी';
@@ -16453,17 +16453,17 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -16939,17 +16939,17 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'A(z) $applicationName névjegye';
@@ -17425,17 +17425,17 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName հավելվածի մասին';
@@ -17911,17 +17911,17 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Tentang $applicationName';
@@ -18397,17 +18397,17 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Um $applicationName';
@@ -18883,17 +18883,17 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Informazioni su $applicationName';
@@ -19369,17 +19369,17 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName について';
@@ -19855,17 +19855,17 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName-ის შესახებ';
@@ -20341,17 +20341,17 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName туралы';
@@ -20827,17 +20827,17 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'អំពី $applicationName';
@@ -21313,20 +21313,21 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
-  String get aboutListTileTitleRaw => '\u{24}\u{61}\u{70}\u{70}\u{6c}\u{69}\u{63}\u{61}\u{74}\u{69}\u{6f}\u{6e}\u{4e}\u{61}\u{6d}\u{65}\u{20}\u{cac}\u{c97}\u{ccd}\u{c97}\u{cc6}';
+  String get aboutListTileTitleRaw =>
+      '\u{24}\u{61}\u{70}\u{70}\u{6c}\u{69}\u{63}\u{61}\u{74}\u{69}\u{6f}\u{6e}\u{4e}\u{61}\u{6d}\u{65}\u{20}\u{cac}\u{c97}\u{ccd}\u{c97}\u{cc6}';
 
   @override
   String get alertDialogLabel => '\u{c8e}\u{c9a}\u{ccd}\u{c9a}\u{cb0}\u{cbf}\u{c95}\u{cc6}';
@@ -21338,7 +21339,8 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get backButtonTooltip => '\u{cb9}\u{cbf}\u{c82}\u{ca4}\u{cbf}\u{cb0}\u{cc1}\u{c97}\u{cbf}';
 
   @override
-  String get calendarModeButtonLabel => '\u{c95}\u{ccd}\u{caf}\u{cbe}\u{cb2}\u{cc6}\u{c82}\u{ca1}\u{cb0}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+  String get calendarModeButtonLabel =>
+      '\u{c95}\u{ccd}\u{caf}\u{cbe}\u{cb2}\u{cc6}\u{c82}\u{ca1}\u{cb0}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get cancelButtonLabel => '\u{cb0}\u{ca6}\u{ccd}\u{ca6}\u{cc1}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
@@ -21365,28 +21367,35 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get dateHelpText => 'mm/dd/yyyy';
 
   @override
-  String get dateInputLabel => '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
+  String get dateInputLabel =>
+      '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get dateOutOfRangeLabel => '\u{cb5}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{ca4}\u{cbf}\u{caf}\u{20}\u{cb9}\u{cca}\u{cb0}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+  String get dateOutOfRangeLabel =>
+      '\u{cb5}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{ca4}\u{cbf}\u{caf}\u{20}\u{cb9}\u{cca}\u{cb0}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
-  String get datePickerHelpText => '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get datePickerHelpText =>
+      '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => '\u{cae}\u{cc1}\u{c95}\u{ccd}\u{ca4}\u{cbe}\u{caf}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{24}\u{66}\u{75}\u{6c}\u{6c}\u{44}\u{61}\u{74}\u{65}';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      '\u{cae}\u{cc1}\u{c95}\u{ccd}\u{ca4}\u{cbe}\u{caf}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{24}\u{66}\u{75}\u{6c}\u{6c}\u{44}\u{61}\u{74}\u{65}';
 
   @override
   String get dateRangeEndLabel => '\u{c85}\u{c82}\u{ca4}\u{cbf}\u{cae}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}';
 
   @override
-  String get dateRangePickerHelpText => '\u{cb6}\u{ccd}\u{cb0}\u{cc7}\u{ca3}\u{cbf}\u{caf}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get dateRangePickerHelpText =>
+      '\u{cb6}\u{ccd}\u{cb0}\u{cc7}\u{ca3}\u{cbf}\u{caf}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{24}\u{66}\u{75}\u{6c}\u{6c}\u{44}\u{61}\u{74}\u{65}';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{24}\u{66}\u{75}\u{6c}\u{6c}\u{44}\u{61}\u{74}\u{65}';
 
   @override
-  String get dateRangeStartLabel => '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}';
+  String get dateRangeStartLabel =>
+      '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}';
 
   @override
   String get dateSeparator => '/';
@@ -21395,13 +21404,15 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => '\u{c85}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get dialModeButtonLabel => '\u{ca1}\u{caf}\u{cb2}\u{ccd}\u{20}\u{caa}\u{cbf}\u{c95}\u{cb0}\u{ccd}\u{200c}\u{20}\u{cae}\u{ccb}\u{ca1}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbe}\u{caf}\u{cbf}\u{cb8}\u{cbf}';
+  String get dialModeButtonLabel =>
+      '\u{ca1}\u{caf}\u{cb2}\u{ccd}\u{20}\u{caa}\u{cbf}\u{c95}\u{cb0}\u{ccd}\u{200c}\u{20}\u{cae}\u{ccb}\u{ca1}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbe}\u{caf}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get dialogLabel => '\u{ca1}\u{cc8}\u{cb2}\u{cbe}\u{c97}\u{ccd}';
 
   @override
-  String get drawerLabel => '\u{ca8}\u{ccd}\u{caf}\u{cbe}\u{cb5}\u{cbf}\u{c97}\u{cc7}\u{cb6}\u{ca8}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
+  String get drawerLabel =>
+      '\u{ca8}\u{ccd}\u{caf}\u{cbe}\u{cb5}\u{cbf}\u{c97}\u{cc7}\u{cb6}\u{ca8}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
 
   @override
   String get expandedIconTapHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cbf}';
@@ -21410,22 +21421,28 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get firstPageTooltip => '\u{cae}\u{cca}\u{ca6}\u{cb2}\u{20}\u{caa}\u{cc1}\u{c9f}';
 
   @override
-  String get hideAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cae}\u{cb0}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get hideAccountsLabel =>
+      '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cae}\u{cb0}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get inputDateModeButtonLabel => '\u{c87}\u{ca8}\u{ccd}\u{200c}\u{caa}\u{cc1}\u{c9f}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+  String get inputDateModeButtonLabel =>
+      '\u{c87}\u{ca8}\u{ccd}\u{200c}\u{caa}\u{cc1}\u{c9f}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get inputTimeModeButtonLabel => '\u{caa}\u{ca0}\u{ccd}\u{caf}\u{20}\u{c87}\u{ca8}\u{ccd}\u{200c}\u{caa}\u{cc1}\u{c9f}\u{ccd}\u{20}\u{cae}\u{ccb}\u{ca1}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbe}\u{caf}\u{cbf}\u{cb8}\u{cbf}';
+  String get inputTimeModeButtonLabel =>
+      '\u{caa}\u{ca0}\u{ccd}\u{caf}\u{20}\u{c87}\u{ca8}\u{ccd}\u{200c}\u{caa}\u{cc1}\u{c9f}\u{ccd}\u{20}\u{cae}\u{ccb}\u{ca1}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbe}\u{caf}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get invalidDateFormatLabel => '\u{c85}\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{cb5}\u{cbe}\u{ca6}\u{20}\u{cab}\u{cbe}\u{cb0}\u{ccd}\u{cae}\u{ccd}\u{caf}\u{cbe}\u{c9f}\u{ccd}\u{2e}';
+  String get invalidDateFormatLabel =>
+      '\u{c85}\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{cb5}\u{cbe}\u{ca6}\u{20}\u{cab}\u{cbe}\u{cb0}\u{ccd}\u{cae}\u{ccd}\u{caf}\u{cbe}\u{c9f}\u{ccd}\u{2e}';
 
   @override
-  String get invalidDateRangeLabel => '\u{c85}\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{20}\u{cb6}\u{ccd}\u{cb0}\u{cc7}\u{ca3}\u{cbf}\u{2e}';
+  String get invalidDateRangeLabel =>
+      '\u{c85}\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{20}\u{cb6}\u{ccd}\u{cb0}\u{cc7}\u{ca3}\u{cbf}\u{2e}';
 
   @override
-  String get invalidTimeLabel => '\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{cb5}\u{cbe}\u{ca6}\u{20}\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
+  String get invalidTimeLabel =>
+      '\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{cb5}\u{cbe}\u{ca6}\u{20}\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get keyboardKeyAlt => 'Alt';
@@ -21614,7 +21631,8 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get licensesPackageDetailTextOne => '\u{31}\u{20}\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}';
 
   @override
-  String get licensesPackageDetailTextOther => '\u{24}\u{6c}\u{69}\u{63}\u{65}\u{6e}\u{73}\u{65}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
+  String get licensesPackageDetailTextOther =>
+      '\u{24}\u{6c}\u{69}\u{63}\u{65}\u{6e}\u{73}\u{65}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
 
   @override
   String? get licensesPackageDetailTextTwo => null;
@@ -21632,7 +21650,8 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get moreButtonTooltip => '\u{c87}\u{ca8}\u{ccd}\u{ca8}\u{cb7}\u{ccd}\u{c9f}\u{cc1}';
 
   @override
-  String get nextMonthTooltip => '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{ca4}\u{cbf}\u{c82}\u{c97}\u{cb3}\u{cc1}';
+  String get nextMonthTooltip =>
+      '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{ca4}\u{cbf}\u{c82}\u{c97}\u{cb3}\u{cc1}';
 
   @override
   String get nextPageTooltip => '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{caa}\u{cc1}\u{c9f}';
@@ -21641,13 +21660,16 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get okButtonLabel => '\u{cb8}\u{cb0}\u{cbf}';
 
   @override
-  String get openAppDrawerTooltip => '\u{ca8}\u{ccd}\u{caf}\u{cbe}\u{cb5}\u{cbf}\u{c97}\u{cc7}\u{cb6}\u{ca8}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{cc6}\u{cb0}\u{cc6}\u{caf}\u{cbf}\u{cb0}\u{cbf}';
+  String get openAppDrawerTooltip =>
+      '\u{ca8}\u{ccd}\u{caf}\u{cbe}\u{cb5}\u{cbf}\u{c97}\u{cc7}\u{cb6}\u{ca8}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{cc6}\u{cb0}\u{cc6}\u{caf}\u{cbf}\u{cb0}\u{cbf}';
 
   @override
-  String get pageRowsInfoTitleRaw => '\u{24}\u{72}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{24}\u{66}\u{69}\u{72}\u{73}\u{74}\u{52}\u{6f}\u{77}\u{2013}\u{24}\u{6c}\u{61}\u{73}\u{74}\u{52}\u{6f}\u{77}';
+  String get pageRowsInfoTitleRaw =>
+      '\u{24}\u{72}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{24}\u{66}\u{69}\u{72}\u{73}\u{74}\u{52}\u{6f}\u{77}\u{2013}\u{24}\u{6c}\u{61}\u{73}\u{74}\u{52}\u{6f}\u{77}';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\u{24}\u{72}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{24}\u{66}\u{69}\u{72}\u{73}\u{74}\u{52}\u{6f}\u{77}\u{2013}\u{24}\u{6c}\u{61}\u{73}\u{74}\u{52}\u{6f}\u{77}';
+  String get pageRowsInfoTitleApproximateRaw =>
+      '\u{24}\u{72}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{24}\u{66}\u{69}\u{72}\u{73}\u{74}\u{52}\u{6f}\u{77}\u{2013}\u{24}\u{6c}\u{61}\u{73}\u{74}\u{52}\u{6f}\u{77}';
 
   @override
   String get pasteButtonLabel => '\u{c85}\u{c82}\u{c9f}\u{cbf}\u{cb8}\u{cbf}';
@@ -21659,13 +21681,15 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get postMeridiemAbbreviation => '\u{cb8}\u{c82}\u{c9c}\u{cc6}';
 
   @override
-  String get previousMonthTooltip => '\u{cb9}\u{cbf}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{ca4}\u{cbf}\u{c82}\u{c97}\u{cb3}\u{cc1}';
+  String get previousMonthTooltip =>
+      '\u{cb9}\u{cbf}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{ca4}\u{cbf}\u{c82}\u{c97}\u{cb3}\u{cc1}';
 
   @override
   String get previousPageTooltip => '\u{cb9}\u{cbf}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{caa}\u{cc1}\u{c9f}';
 
   @override
-  String get refreshIndicatorSemanticLabel => '\u{cb0}\u{cbf}\u{cab}\u{ccd}\u{cb0}\u{cc6}\u{cb6}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get refreshIndicatorSemanticLabel =>
+      '\u{cb0}\u{cbf}\u{cab}\u{ccd}\u{cb0}\u{cc6}\u{cb6}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String? get remainingTextFieldCharacterCountFew => null;
@@ -21674,10 +21698,12 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String? get remainingTextFieldCharacterCountOne => '\u{31}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{ca6}\u{cc6}';
+  String? get remainingTextFieldCharacterCountOne =>
+      '\u{31}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\u{24}\u{72}\u{65}\u{6d}\u{61}\u{69}\u{6e}\u{69}\u{6e}\u{67}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{cb5}\u{cc6}';
+  String get remainingTextFieldCharacterCountOther =>
+      '\u{24}\u{72}\u{65}\u{6d}\u{61}\u{69}\u{6e}\u{69}\u{6e}\u{67}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{cb5}\u{cc6}';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -21698,13 +21724,15 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get reorderItemToEnd => '\u{c95}\u{cca}\u{ca8}\u{cc6}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get reorderItemToStart => '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get reorderItemToStart =>
+      '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get reorderItemUp => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get rowsPerPageTitle => '\u{caa}\u{ccd}\u{cb0}\u{ca4}\u{cbf}\u{20}\u{caa}\u{cc1}\u{c9f}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cbe}\u{cb2}\u{cc1}\u{c97}\u{cb3}\u{cc1}\u{3a}';
+  String get rowsPerPageTitle =>
+      '\u{caa}\u{ccd}\u{cb0}\u{ca4}\u{cbf}\u{20}\u{caa}\u{cc1}\u{c9f}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cbe}\u{cb2}\u{cc1}\u{c97}\u{cb3}\u{cc1}\u{3a}';
 
   @override
   String get saveButtonLabel => '\u{c89}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
@@ -21716,10 +21744,12 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
-  String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get selectAllButtonLabel =>
+      '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get selectYearSemanticsLabel => '\u{cb5}\u{cb0}\u{ccd}\u{cb7}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get selectYearSemanticsLabel =>
+      '\u{cb5}\u{cb0}\u{ccd}\u{cb7}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -21728,10 +21758,12 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleMany => null;
 
   @override
-  String? get selectedRowCountTitleOne => '\u{31}\u{20}\u{c90}\u{c9f}\u{c82}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+  String? get selectedRowCountTitleOne =>
+      '\u{31}\u{20}\u{c90}\u{c9f}\u{c82}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
-  String get selectedRowCountTitleOther => '\u{24}\u{73}\u{65}\u{6c}\u{65}\u{63}\u{74}\u{65}\u{64}\u{52}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c90}\u{c9f}\u{c82}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+  String get selectedRowCountTitleOther =>
+      '\u{24}\u{73}\u{65}\u{6c}\u{65}\u{63}\u{74}\u{65}\u{64}\u{52}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c90}\u{c9f}\u{c82}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -21740,46 +21772,55 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get showAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get showAccountsLabel =>
+      '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get showMenuTooltip => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get signedInLabel => '\u{cb8}\u{cc8}\u{ca8}\u{ccd}\u{20}\u{c87}\u{ca8}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+  String get signedInLabel =>
+      '\u{cb8}\u{cc8}\u{ca8}\u{ccd}\u{20}\u{c87}\u{ca8}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
-  String get tabLabelRaw => '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
+  String get tabLabelRaw =>
+      '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => '\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get timePickerDialHelpText =>
+      '\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get timePickerHourLabel => '\u{c97}\u{c82}\u{c9f}\u{cc6}';
 
   @override
-  String get timePickerHourModeAnnouncement => '\u{c97}\u{c82}\u{c9f}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get timePickerHourModeAnnouncement =>
+      '\u{c97}\u{c82}\u{c9f}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get timePickerInputHelpText => '\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
+  String get timePickerInputHelpText =>
+      '\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get timePickerMinuteLabel => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}';
 
   @override
-  String get timePickerMinuteModeAnnouncement => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get timePickerMinuteModeAnnouncement =>
+      '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get unspecifiedDate => '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}';
 
   @override
-  String get unspecifiedDateRange => '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{cb5}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{ca4}\u{cbf}';
+  String get unspecifiedDateRange =>
+      '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{cb5}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{ca4}\u{cbf}';
 
   @override
-  String get viewLicensesButtonLabel => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb5}\u{cbf}\u{cd5}\u{c95}\u{ccd}\u{cb7}\u{cbf}\u{cb8}\u{cbf}';
+  String get viewLicensesButtonLabel =>
+      '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb5}\u{cbf}\u{cd5}\u{c95}\u{ccd}\u{cb7}\u{cbf}\u{cb8}\u{cbf}';
 }
 
 /// The translations for Korean (`ko`).
@@ -21799,17 +21840,17 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName 정보';
@@ -22285,17 +22326,17 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName каналы жөнүндө';
@@ -22771,17 +22812,17 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'ກ່ຽວກັບ $applicationName';
@@ -23257,17 +23298,17 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Apie „$applicationName“';
@@ -23743,17 +23784,17 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Par $applicationName';
@@ -24229,17 +24270,17 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'За $applicationName';
@@ -24715,17 +24756,17 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName എന്നതിനെക്കുറിച്ച്';
@@ -25201,17 +25242,17 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName-н тухай';
@@ -25687,17 +25728,17 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName बद्दल';
@@ -26173,17 +26214,17 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Perihal $applicationName';
@@ -26659,17 +26700,17 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName အကြောင်း';
@@ -27145,17 +27186,17 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -27631,17 +27672,17 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName बारे';
@@ -28117,17 +28158,17 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Over $applicationName';
@@ -28603,17 +28644,17 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -29089,17 +29130,17 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName ବିଷୟରେ';
@@ -29575,17 +29616,17 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName ਬਾਰੇ';
@@ -30061,17 +30102,17 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName – informacje';
@@ -30547,17 +30588,17 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'د $applicationName په اړه';
@@ -31033,17 +31074,17 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Sobre o app $applicationName';
@@ -31519,17 +31560,17 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get dialModeButtonLabel => 'Mude para o modo de seletor de mostrador';
@@ -31648,17 +31689,17 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Despre $applicationName';
@@ -32134,17 +32175,17 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName: сведения';
@@ -32620,17 +32661,17 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName ගැන';
@@ -33106,17 +33147,17 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName – informácie';
@@ -33592,17 +33633,17 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -34078,17 +34119,17 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Rreth $applicationName';
@@ -34564,17 +34605,17 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'О апликацији $applicationName';
@@ -35050,17 +35091,17 @@ class MaterialLocalizationSrCyrl extends MaterialLocalizationSr {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 }
 
 /// The translations for Serbian, using the Latin script (`sr_Latn`).
@@ -35080,17 +35121,17 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -35356,17 +35397,17 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -35842,17 +35883,17 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Kuhusu $applicationName';
@@ -36328,17 +36369,17 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName பற்றி';
@@ -36814,17 +36855,17 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName గురించి';
@@ -37300,17 +37341,17 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'เกี่ยวกับ $applicationName';
@@ -37786,17 +37827,17 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Tungkol sa $applicationName';
@@ -38272,17 +38313,17 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName Hakkında';
@@ -38758,17 +38799,17 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Про додаток $applicationName';
@@ -39244,17 +39285,17 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName کے بارے میں';
@@ -39730,17 +39771,17 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName haqida';
@@ -40216,17 +40257,17 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Giới thiệu về $applicationName';
@@ -40702,17 +40743,17 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'关于$applicationName';
@@ -41188,17 +41229,17 @@ class MaterialLocalizationZhHans extends MaterialLocalizationZh {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -41218,17 +41259,17 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'關於$applicationName';
@@ -41467,17 +41508,17 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -41497,17 +41538,17 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get dialModeButtonLabel => '切換至鐘面挑選器模式';
@@ -41602,17 +41643,17 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+          localeName: localeName,
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+        );
 
   @override
   String get aboutListTileTitleRaw => r'Mayelana no-$applicationName';
@@ -42269,268 +42310,1332 @@ GlobalMaterialLocalizations? getMaterialTranslation(
 ) {
   switch (locale.languageCode) {
     case 'af':
-      return MaterialLocalizationAf(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAf(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'am':
-      return MaterialLocalizationAm(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAm(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ar':
-      return MaterialLocalizationAr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'as':
-      return MaterialLocalizationAs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'az':
-      return MaterialLocalizationAz(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAz(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'be':
-      return MaterialLocalizationBe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBe(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bg':
-      return MaterialLocalizationBg(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBg(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bn':
-      return MaterialLocalizationBn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBn(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bs':
-      return MaterialLocalizationBs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ca':
-      return MaterialLocalizationCa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationCa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'cs':
-      return MaterialLocalizationCs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationCs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'da':
-      return MaterialLocalizationDa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'de': {
-      switch (locale.countryCode) {
-        case 'CH':
-          return MaterialLocalizationDeCh(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationDa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'de':
+      {
+        switch (locale.countryCode) {
+          case 'CH':
+            return MaterialLocalizationDeCh(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+        return MaterialLocalizationDe(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationDe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'el':
-      return MaterialLocalizationEl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'en': {
-      switch (locale.countryCode) {
-        case 'AU':
-          return MaterialLocalizationEnAu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'CA':
-          return MaterialLocalizationEnCa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'GB':
-          return MaterialLocalizationEnGb(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'IE':
-          return MaterialLocalizationEnIe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'IN':
-          return MaterialLocalizationEnIn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'NZ':
-          return MaterialLocalizationEnNz(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'SG':
-          return MaterialLocalizationEnSg(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'ZA':
-          return MaterialLocalizationEnZa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationEl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'en':
+      {
+        switch (locale.countryCode) {
+          case 'AU':
+            return MaterialLocalizationEnAu(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'CA':
+            return MaterialLocalizationEnCa(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'GB':
+            return MaterialLocalizationEnGb(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'IE':
+            return MaterialLocalizationEnIe(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'IN':
+            return MaterialLocalizationEnIn(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'NZ':
+            return MaterialLocalizationEnNz(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'SG':
+            return MaterialLocalizationEnSg(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'ZA':
+            return MaterialLocalizationEnZa(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+        return MaterialLocalizationEn(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationEn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
-    case 'es': {
-      switch (locale.countryCode) {
-        case '419':
-          return MaterialLocalizationEs419(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'AR':
-          return MaterialLocalizationEsAr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'BO':
-          return MaterialLocalizationEsBo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'CL':
-          return MaterialLocalizationEsCl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'CO':
-          return MaterialLocalizationEsCo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'CR':
-          return MaterialLocalizationEsCr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'DO':
-          return MaterialLocalizationEsDo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'EC':
-          return MaterialLocalizationEsEc(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'GT':
-          return MaterialLocalizationEsGt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'HN':
-          return MaterialLocalizationEsHn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'MX':
-          return MaterialLocalizationEsMx(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'NI':
-          return MaterialLocalizationEsNi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'PA':
-          return MaterialLocalizationEsPa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'PE':
-          return MaterialLocalizationEsPe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'PR':
-          return MaterialLocalizationEsPr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'PY':
-          return MaterialLocalizationEsPy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'SV':
-          return MaterialLocalizationEsSv(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'US':
-          return MaterialLocalizationEsUs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'UY':
-          return MaterialLocalizationEsUy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'VE':
-          return MaterialLocalizationEsVe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'es':
+      {
+        switch (locale.countryCode) {
+          case '419':
+            return MaterialLocalizationEs419(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'AR':
+            return MaterialLocalizationEsAr(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'BO':
+            return MaterialLocalizationEsBo(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'CL':
+            return MaterialLocalizationEsCl(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'CO':
+            return MaterialLocalizationEsCo(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'CR':
+            return MaterialLocalizationEsCr(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'DO':
+            return MaterialLocalizationEsDo(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'EC':
+            return MaterialLocalizationEsEc(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'GT':
+            return MaterialLocalizationEsGt(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'HN':
+            return MaterialLocalizationEsHn(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'MX':
+            return MaterialLocalizationEsMx(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'NI':
+            return MaterialLocalizationEsNi(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'PA':
+            return MaterialLocalizationEsPa(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'PE':
+            return MaterialLocalizationEsPe(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'PR':
+            return MaterialLocalizationEsPr(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'PY':
+            return MaterialLocalizationEsPy(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'SV':
+            return MaterialLocalizationEsSv(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'US':
+            return MaterialLocalizationEsUs(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'UY':
+            return MaterialLocalizationEsUy(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'VE':
+            return MaterialLocalizationEsVe(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+        return MaterialLocalizationEs(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationEs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'et':
-      return MaterialLocalizationEt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationEt(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'eu':
-      return MaterialLocalizationEu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationEu(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fa':
-      return MaterialLocalizationFa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationFa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fi':
-      return MaterialLocalizationFi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationFi(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fil':
-      return MaterialLocalizationFil(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'fr': {
-      switch (locale.countryCode) {
-        case 'CA':
-          return MaterialLocalizationFrCa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationFil(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'fr':
+      {
+        switch (locale.countryCode) {
+          case 'CA':
+            return MaterialLocalizationFrCa(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+        return MaterialLocalizationFr(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationFr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'gl':
-      return MaterialLocalizationGl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationGl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gsw':
-      return MaterialLocalizationGsw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationGsw(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gu':
-      return MaterialLocalizationGu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationGu(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'he':
-      return MaterialLocalizationHe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHe(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hi':
-      return MaterialLocalizationHi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHi(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hr':
-      return MaterialLocalizationHr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hu':
-      return MaterialLocalizationHu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHu(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hy':
-      return MaterialLocalizationHy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHy(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'id':
-      return MaterialLocalizationId(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationId(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'is':
-      return MaterialLocalizationIs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationIs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'it':
-      return MaterialLocalizationIt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationIt(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ja':
-      return MaterialLocalizationJa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationJa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ka':
-      return MaterialLocalizationKa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'kk':
-      return MaterialLocalizationKk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKk(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'km':
-      return MaterialLocalizationKm(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKm(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'kn':
-      return MaterialLocalizationKn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKn(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ko':
-      return MaterialLocalizationKo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKo(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ky':
-      return MaterialLocalizationKy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKy(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lo':
-      return MaterialLocalizationLo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationLo(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lt':
-      return MaterialLocalizationLt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationLt(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lv':
-      return MaterialLocalizationLv(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationLv(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mk':
-      return MaterialLocalizationMk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMk(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ml':
-      return MaterialLocalizationMl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mn':
-      return MaterialLocalizationMn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMn(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mr':
-      return MaterialLocalizationMr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ms':
-      return MaterialLocalizationMs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'my':
-      return MaterialLocalizationMy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMy(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'nb':
-      return MaterialLocalizationNb(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationNb(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ne':
-      return MaterialLocalizationNe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationNe(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'nl':
-      return MaterialLocalizationNl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationNl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'no':
-      return MaterialLocalizationNo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationNo(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'or':
-      return MaterialLocalizationOr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationOr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'pa':
-      return MaterialLocalizationPa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationPa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'pl':
-      return MaterialLocalizationPl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationPl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ps':
-      return MaterialLocalizationPs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'pt': {
-      switch (locale.countryCode) {
-        case 'PT':
-          return MaterialLocalizationPtPt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationPs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'pt':
+      {
+        switch (locale.countryCode) {
+          case 'PT':
+            return MaterialLocalizationPtPt(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+        return MaterialLocalizationPt(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationPt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'ro':
-      return MaterialLocalizationRo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationRo(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ru':
-      return MaterialLocalizationRu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationRu(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'si':
-      return MaterialLocalizationSi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSi(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sk':
-      return MaterialLocalizationSk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSk(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sl':
-      return MaterialLocalizationSl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sq':
-      return MaterialLocalizationSq(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'sr': {
-      switch (locale.scriptCode) {
-        case 'Cyrl': {
-          return MaterialLocalizationSrCyrl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSq(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'sr':
+      {
+        switch (locale.scriptCode) {
+          case 'Cyrl':
+            {
+              return MaterialLocalizationSrCyrl(
+                  fullYearFormat: fullYearFormat,
+                  compactDateFormat: compactDateFormat,
+                  shortDateFormat: shortDateFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  longDateFormat: longDateFormat,
+                  yearMonthFormat: yearMonthFormat,
+                  shortMonthDayFormat: shortMonthDayFormat,
+                  decimalFormat: decimalFormat,
+                  twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+            }
+          case 'Latn':
+            {
+              return MaterialLocalizationSrLatn(
+                  fullYearFormat: fullYearFormat,
+                  compactDateFormat: compactDateFormat,
+                  shortDateFormat: shortDateFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  longDateFormat: longDateFormat,
+                  yearMonthFormat: yearMonthFormat,
+                  shortMonthDayFormat: shortMonthDayFormat,
+                  decimalFormat: decimalFormat,
+                  twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+            }
         }
-        case 'Latn': {
-          return MaterialLocalizationSrLatn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        }
+        return MaterialLocalizationSr(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationSr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'sv':
-      return MaterialLocalizationSv(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSv(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sw':
-      return MaterialLocalizationSw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSw(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ta':
-      return MaterialLocalizationTa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'te':
-      return MaterialLocalizationTe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTe(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'th':
-      return MaterialLocalizationTh(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTh(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'tl':
-      return MaterialLocalizationTl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'tr':
-      return MaterialLocalizationTr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'uk':
-      return MaterialLocalizationUk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationUk(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ur':
-      return MaterialLocalizationUr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationUr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'uz':
-      return MaterialLocalizationUz(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationUz(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'vi':
-      return MaterialLocalizationVi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'zh': {
-      switch (locale.scriptCode) {
-        case 'Hans': {
-          return MaterialLocalizationZhHans(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationVi(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'zh':
+      {
+        switch (locale.scriptCode) {
+          case 'Hans':
+            {
+              return MaterialLocalizationZhHans(
+                  fullYearFormat: fullYearFormat,
+                  compactDateFormat: compactDateFormat,
+                  shortDateFormat: shortDateFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  longDateFormat: longDateFormat,
+                  yearMonthFormat: yearMonthFormat,
+                  shortMonthDayFormat: shortMonthDayFormat,
+                  decimalFormat: decimalFormat,
+                  twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+            }
+          case 'Hant':
+            {
+              switch (locale.countryCode) {
+                case 'HK':
+                  return MaterialLocalizationZhHantHk(
+                      fullYearFormat: fullYearFormat,
+                      compactDateFormat: compactDateFormat,
+                      shortDateFormat: shortDateFormat,
+                      mediumDateFormat: mediumDateFormat,
+                      longDateFormat: longDateFormat,
+                      yearMonthFormat: yearMonthFormat,
+                      shortMonthDayFormat: shortMonthDayFormat,
+                      decimalFormat: decimalFormat,
+                      twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+                case 'TW':
+                  return MaterialLocalizationZhHantTw(
+                      fullYearFormat: fullYearFormat,
+                      compactDateFormat: compactDateFormat,
+                      shortDateFormat: shortDateFormat,
+                      mediumDateFormat: mediumDateFormat,
+                      longDateFormat: longDateFormat,
+                      yearMonthFormat: yearMonthFormat,
+                      shortMonthDayFormat: shortMonthDayFormat,
+                      decimalFormat: decimalFormat,
+                      twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+              }
+              return MaterialLocalizationZhHant(
+                  fullYearFormat: fullYearFormat,
+                  compactDateFormat: compactDateFormat,
+                  shortDateFormat: shortDateFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  longDateFormat: longDateFormat,
+                  yearMonthFormat: yearMonthFormat,
+                  shortMonthDayFormat: shortMonthDayFormat,
+                  decimalFormat: decimalFormat,
+                  twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+            }
         }
-        case 'Hant': {
-          switch (locale.countryCode) {
-            case 'HK':
-              return MaterialLocalizationZhHantHk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-            case 'TW':
-              return MaterialLocalizationZhHantTw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-          }
-          return MaterialLocalizationZhHant(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        switch (locale.countryCode) {
+          case 'HK':
+            return MaterialLocalizationZhHantHk(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'TW':
+            return MaterialLocalizationZhHantTw(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         }
+        return MaterialLocalizationZh(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      switch (locale.countryCode) {
-        case 'HK':
-          return MaterialLocalizationZhHantHk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'TW':
-          return MaterialLocalizationZhHantTw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-      }
-      return MaterialLocalizationZh(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'zu':
-      return MaterialLocalizationZu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationZu(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
   }
   assert(false, 'getMaterialTranslation() called for unsupported locale "$locale"');
   return null;

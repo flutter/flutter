@@ -30,25 +30,25 @@ Future<String> evalTestAppInChrome({
   try {
     final Completer<String> resultCompleter = Completer<String>();
     server = await io.HttpServer.bind('localhost', serverPort);
-    final Cascade cascade = Cascade()
-      .add((Request request) async {
-        if (request.requestedUri.path.endsWith('/test-result')) {
-          resultCompleter.complete(await request.readAsString());
-          return Response.ok('Test results received');
-        }
-        return Response.notFound('');
-      })
-      .add(createStaticHandler(appDirectory));
+    final Cascade cascade = Cascade().add((Request request) async {
+      if (request.requestedUri.path.endsWith('/test-result')) {
+        resultCompleter.complete(await request.readAsString());
+        return Response.ok('Test results received');
+      }
+      return Response.notFound('');
+    }).add(createStaticHandler(appDirectory));
     shelf_io.serveRequests(server, cascade.handler);
     final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('flutter_chrome_user_data.');
-    chrome = await Chrome.launch(ChromeOptions(
-      headless: true,
-      debugPort: browserDebugPort,
-      url: appUrl,
-      userDataDirectory: userDataDirectory.path,
-      windowHeight: 500,
-      windowWidth: 500,
-    ), onError: resultCompleter.completeError);
+    chrome = await Chrome.launch(
+        ChromeOptions(
+          headless: true,
+          debugPort: browserDebugPort,
+          url: appUrl,
+          userDataDirectory: userDataDirectory.path,
+          windowHeight: 500,
+          windowWidth: 500,
+        ),
+        onError: resultCompleter.completeError);
     return await resultCompleter.future;
   } finally {
     chrome?.stop();
@@ -89,12 +89,14 @@ class AppServer {
     shelf_io.serveRequests(server, cascade.handler);
     final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('flutter_chrome_user_data.');
     final Completer<String> chromeErrorCompleter = Completer<String>();
-    chrome = await Chrome.launch(ChromeOptions(
-      headless: headless,
-      debugPort: browserDebugPort,
-      url: appUrl,
-      userDataDirectory: userDataDirectory.path,
-    ), onError: chromeErrorCompleter.complete);
+    chrome = await Chrome.launch(
+        ChromeOptions(
+          headless: headless,
+          debugPort: browserDebugPort,
+          url: appUrl,
+          userDataDirectory: userDataDirectory.path,
+        ),
+        onError: chromeErrorCompleter.complete);
     return AppServer._(server, chrome, chromeErrorCompleter.future);
   }
 

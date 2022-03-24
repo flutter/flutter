@@ -59,8 +59,7 @@ void main() {
         final RegExpMatch match = exp.firstMatch(line);
         final String port = match.group(1);
         if (port != null) {
-          final VmService vmService =
-              await vmServiceConnectUri('ws://localhost:$port/ws');
+          final VmService vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
           final VM vm = await vmService.getVM();
           for (final IsolateRef isolate in vm.isolates) {
             await vmService.resume(isolate.id);

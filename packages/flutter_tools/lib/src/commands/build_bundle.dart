@@ -17,7 +17,8 @@ class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
     bool verboseHelp = false,
     BundleBuilder? bundleBuilder,
-  }) :  _bundleBuilder = bundleBuilder ?? BundleBuilder(), super(verboseHelp: verboseHelp) {
+  })  : _bundleBuilder = bundleBuilder ?? BundleBuilder(),
+        super(verboseHelp: verboseHelp) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
@@ -26,11 +27,11 @@ class BuildBundleCommand extends BuildSubCommand {
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     argParser
       ..addOption('depfile',
-        defaultsTo: defaultDepfilePath,
-        help: 'A file path where a depfile will be written. '
-              'This contains all build inputs and outputs in a Make-style syntax.'
-      )
-      ..addOption('target-platform',
+          defaultsTo: defaultDepfilePath,
+          help: 'A file path where a depfile will be written. '
+              'This contains all build inputs and outputs in a Make-style syntax.')
+      ..addOption(
+        'target-platform',
         defaultsTo: 'android-arm',
         allowed: const <String>[
           'android-arm',
@@ -45,10 +46,11 @@ class BuildBundleCommand extends BuildSubCommand {
         ],
         help: 'The architecture for which to build the application.',
       )
-      ..addOption('asset-dir',
+      ..addOption(
+        'asset-dir',
         defaultsTo: getAssetBuildDirectory(),
         help: 'The output directory for the kernel_blob.bin file, the native snapshot, the assets, etc. '
-              'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
+            'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
       )
       ..addFlag(
         'tree-shake-icons',
@@ -88,7 +90,8 @@ class BuildBundleCommand extends BuildSubCommand {
   @override
   Future<void> validateCommand() async {
     if (boolArg('tree-shake-icons')) {
-      throwToolExit('The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
+      throwToolExit(
+          'The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
     }
     return super.validateCommand();
   }

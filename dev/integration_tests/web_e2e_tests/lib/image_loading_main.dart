@@ -18,8 +18,7 @@ Future<void> get whenNetworkImageLoads => _networkImageCompleter.future;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  const MethodChannel channel =
-      OptionalMethodChannel('flutter/web_test_e2e', JSONMethodCodec());
+  const MethodChannel channel = OptionalMethodChannel('flutter/web_test_e2e', JSONMethodCodec());
 
   // Artificially override the device pixel ratio to force the framework to pick the 1.5x asset variants.
   await channel.invokeMethod<void>('setDevicePixelRatio', '1.5');
@@ -41,7 +40,8 @@ class MyAppState extends State<MyApp> {
         title: 'Integration Test App',
         home: Column(children: <Widget>[
           const Text('Asset image:'),
-          RepaintBoundary(child: Image.asset(
+          RepaintBoundary(
+              child: Image.asset(
             'assets/icons/material/material.png',
             package: 'flutter_gallery_assets',
             frameBuilder: (
@@ -57,7 +57,8 @@ class MyAppState extends State<MyApp> {
             },
           )),
           const Text('Network image:'),
-          RepaintBoundary(child: Image.network(
+          RepaintBoundary(
+              child: Image.network(
             'assets/packages/flutter_gallery_assets/assets/icons/material/material.png',
             frameBuilder: (
               BuildContext context,
@@ -71,7 +72,6 @@ class MyAppState extends State<MyApp> {
               return child;
             },
           )),
-      ])
-    );
+        ]));
   }
 }

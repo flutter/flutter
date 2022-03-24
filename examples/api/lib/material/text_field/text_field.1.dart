@@ -56,8 +56,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: const Text('Thanks!'),
-                  content: Text(
-                      'You typed "$value", which has length ${value.characters.length}.'),
+                  content: Text('You typed "$value", which has length ${value.characters.length}.'),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () {

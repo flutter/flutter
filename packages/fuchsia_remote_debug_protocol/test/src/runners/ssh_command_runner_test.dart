@@ -23,9 +23,7 @@ void main() {
 
     test('throws exception from injection constructor with invalid addr', () async {
       SshCommandRunner newCommandRunner() {
-        return SshCommandRunner.withProcessManager(
-            const LocalProcessManager(),
-            address: '192.168.1.1.1');
+        return SshCommandRunner.withProcessManager(const LocalProcessManager(), address: '192.168.1.1.1');
       }
 
       expect(newCommandRunner, throwsArgumentError);
@@ -52,7 +50,7 @@ void main() {
         sshConfigPath: '/whatever',
       );
       fakeProcessResult.stdout = 'somestuff';
-            await runner.run('ls /whatever');
+      await runner.run('ls /whatever');
       expect(fakeProcessManager.runCommands.single, contains('$ipV6Addr%$interface'));
     });
 
@@ -69,8 +67,7 @@ void main() {
 
     test('verify commands are split into multiple lines', () async {
       const String addr = '192.168.1.1';
-      runner = SshCommandRunner.withProcessManager(fakeProcessManager,
-          address: addr);
+      runner = SshCommandRunner.withProcessManager(fakeProcessManager, address: addr);
       fakeProcessResult.stdout = '''
           this
           has
@@ -82,8 +79,7 @@ void main() {
 
     test('verify exception on nonzero process result exit code', () async {
       const String addr = '192.168.1.1';
-      runner = SshCommandRunner.withProcessManager(fakeProcessManager,
-          address: addr);
+      runner = SshCommandRunner.withProcessManager(fakeProcessManager, address: addr);
       fakeProcessResult.stdout = 'whatever';
       fakeProcessResult.exitCode = 1;
       Future<void> failingFunction() async {
@@ -131,7 +127,8 @@ class FakeProcessManager extends Fake implements ProcessManager {
   List<List<dynamic>> runCommands = <List<dynamic>>[];
 
   @override
-  Future<ProcessResult> run(List<dynamic> command, {
+  Future<ProcessResult> run(
+    List<dynamic> command, {
     String? workingDirectory,
     Map<String, String>? environment,
     bool includeParentEnvironment = true,

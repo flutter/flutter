@@ -44,9 +44,7 @@ class AutocompleteBasicExample extends StatelessWidget {
           return option.contains(textEditingValue.text.toLowerCase());
         });
       },
-      fieldViewBuilder: (BuildContext context,
-          TextEditingController textEditingController,
-          FocusNode focusNode,
+      fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode,
           VoidCallback onFieldSubmitted) {
         return TextFormField(
           controller: textEditingController,
@@ -56,8 +54,7 @@ class AutocompleteBasicExample extends StatelessWidget {
           },
         );
       },
-      optionsViewBuilder: (BuildContext context,
-          AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+      optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
         return Align(
           alignment: Alignment.topLeft,
           child: Material(

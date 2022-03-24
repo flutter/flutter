@@ -41,17 +41,12 @@ class FormatCommand extends FlutterCommand {
     ];
     final List<String> rest = argResults?.rest ?? <String>[];
     if (rest.isEmpty) {
-      globals.printError(
-        'No files specified to be formatted.'
-      );
+      globals.printError('No files specified to be formatted.');
       command.add('-h');
     } else {
       command.addAll(<String>[
         for (String arg in rest)
-          if (arg == '--dry-run' || arg == '-n')
-            '--output=none'
-          else
-            arg
+          if (arg == '--dry-run' || arg == '-n') '--output=none' else arg
       ]);
     }
 

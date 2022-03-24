@@ -47,8 +47,7 @@ Future<void> main() async {
   await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
 
-  final WidgetController controller =
-      LiveWidgetController(WidgetsBinding.instance);
+  final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
 
   debugPrint('Scrolling...');
   final Finder list = find.byKey(const Key('ImageList'));

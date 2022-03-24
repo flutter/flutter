@@ -42,8 +42,8 @@ class MaterialSlice extends MergeableMaterialItem {
     required LocalKey key,
     required this.child,
     this.color,
-  }) : assert(key != null),
-       super(key);
+  })  : assert(key != null),
+        super(key);
 
   /// The contents of this slice.
   ///
@@ -69,8 +69,8 @@ class MaterialGap extends MergeableMaterialItem {
   const MaterialGap({
     required LocalKey key,
     this.size = 16.0,
-  }) : assert(key != null),
-       super(key);
+  })  : assert(key != null),
+        super(key);
 
   /// The main axis extent of this gap. For example, if the [MergeableMaterial]
   /// is vertical, then this is the height of the gap.
@@ -211,8 +211,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   @override
   void dispose() {
     for (final MergeableMaterialItem child in _children) {
-      if (child is MaterialGap)
-        _animationTuples[child.key]!.controller.dispose();
+      if (child is MaterialGap) _animationTuples[child.key]!.controller.dispose();
     }
     super.dispose();
   }
@@ -225,22 +224,18 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
   bool _debugHasConsecutiveGaps(List<MergeableMaterialItem> children) {
     for (int i = 0; i < widget.children.length - 1; i += 1) {
-      if (widget.children[i] is MaterialGap &&
-          widget.children[i + 1] is MaterialGap)
-        return true;
+      if (widget.children[i] is MaterialGap && widget.children[i + 1] is MaterialGap) return true;
     }
     return false;
   }
 
   bool _debugGapsAreValid(List<MergeableMaterialItem> children) {
     // Check for consecutive gaps.
-    if (_debugHasConsecutiveGaps(children))
-      return false;
+    if (_debugHasConsecutiveGaps(children)) return false;
 
     // First and last children must not be gaps.
     if (children.isNotEmpty) {
-      if (children.first is MaterialGap || children.last is MaterialGap)
-        return false;
+      if (children.first is MaterialGap || children.last is MaterialGap) return false;
     }
 
     return true;
@@ -249,21 +244,18 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   void _insertChild(int index, MergeableMaterialItem child) {
     _children.insert(index, child);
 
-    if (child is MaterialGap)
-      _initGap(child);
+    if (child is MaterialGap) _initGap(child);
   }
 
   void _removeChild(int index) {
     final MergeableMaterialItem child = _children.removeAt(index);
 
-    if (child is MaterialGap)
-      _animationTuples[child.key] = null;
+    if (child is MaterialGap) _animationTuples[child.key] = null;
   }
 
   bool _isClosingGap(int index) {
     if (index < _children.length - 1 && _children[index] is MaterialGap) {
-      return _animationTuples[_children[index].key]!.controller.status ==
-          AnimationStatus.reverse;
+      return _animationTuples[_children[index].key]!.controller.status == AnimationStatus.reverse;
     }
 
     return false;
@@ -273,10 +265,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     int j = 0;
 
     while (j < _children.length) {
-      if (
-        _children[j] is MaterialGap &&
-        _animationTuples[_children[j].key]!.controller.status == AnimationStatus.dismissed
-      ) {
+      if (_children[j] is MaterialGap &&
+          _animationTuples[_children[j].key]!.controller.status == AnimationStatus.dismissed) {
         _removeChild(j);
       } else {
         j += 1;
@@ -288,12 +278,16 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   void didUpdateWidget(MergeableMaterial oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final Set<LocalKey> oldKeys = oldWidget.children.map<LocalKey>(
-      (MergeableMaterialItem child) => child.key,
-    ).toSet();
-    final Set<LocalKey> newKeys = widget.children.map<LocalKey>(
-      (MergeableMaterialItem child) => child.key,
-    ).toSet();
+    final Set<LocalKey> oldKeys = oldWidget.children
+        .map<LocalKey>(
+          (MergeableMaterialItem child) => child.key,
+        )
+        .toSet();
+    final Set<LocalKey> newKeys = widget.children
+        .map<LocalKey>(
+          (MergeableMaterialItem child) => child.key,
+        )
+        .toSet();
     final Set<LocalKey> newOnly = newKeys.difference(oldKeys);
     final Set<LocalKey> oldOnly = oldKeys.difference(newKeys);
 
@@ -306,25 +300,21 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     _removeEmptyGaps();
 
     while (i < newChildren.length && j < _children.length) {
-      if (newOnly.contains(newChildren[i].key) ||
-          oldOnly.contains(_children[j].key)) {
+      if (newOnly.contains(newChildren[i].key) || oldOnly.contains(_children[j].key)) {
         final int startNew = i;
         final int startOld = j;
 
         // Skip new keys.
-        while (newOnly.contains(newChildren[i].key))
-          i += 1;
+        while (newOnly.contains(newChildren[i].key)) i += 1;
 
         // Skip old keys.
-        while (oldOnly.contains(_children[j].key) || _isClosingGap(j))
-          j += 1;
+        while (oldOnly.contains(_children[j].key) || _isClosingGap(j)) j += 1;
 
         final int newLength = i - startNew;
         final int oldLength = j - startOld;
 
         if (newLength > 0) {
-          if (oldLength > 1 ||
-              oldLength == 1 && _children[startOld] is MaterialSlice) {
+          if (oldLength > 1 || oldLength == 1 && _children[startOld] is MaterialSlice) {
             if (newLength == 1 && newChildren[startNew] is MaterialGap) {
               // Shrink all gaps into the size of the new one.
               double gapSizeSum = 0.0;
@@ -348,15 +338,14 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               j += 1;
             } else {
               // No animation if replaced items are more than one.
-              for (int k = 0; k < oldLength; k += 1)
-                _removeChild(startOld);
-              for (int k = 0; k < newLength; k += 1)
-                _insertChild(startOld + k, newChildren[startNew + k]);
+              for (int k = 0; k < oldLength; k += 1) _removeChild(startOld);
+              for (int k = 0; k < newLength; k += 1) _insertChild(startOld + k, newChildren[startNew + k]);
 
               j += newLength - oldLength;
             }
           } else if (oldLength == 1) {
-            if (newLength == 1 && newChildren[startNew] is MaterialGap &&
+            if (newLength == 1 &&
+                newChildren[startNew] is MaterialGap &&
                 _children[startOld].key == newChildren[startNew].key) {
               /// Special case: gap added back.
               _animationTuples[newChildren[startNew].key]!.controller.forward();
@@ -365,8 +354,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
               _removeChild(startOld);
 
-              for (int k = 0; k < newLength; k += 1)
-                _insertChild(startOld + k, newChildren[startNew + k]);
+              for (int k = 0; k < newLength; k += 1) _insertChild(startOld + k, newChildren[startNew + k]);
 
               j += newLength - 1;
               double gapSizeSum = 0.0;
@@ -406,8 +394,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           }
         } else {
           // If more than a gap disappeared, just remove slices and shrink gaps.
-          if (oldLength > 1 ||
-              oldLength == 1 && _children[startOld] is MaterialSlice) {
+          if (oldLength > 1 || oldLength == 1 && _children[startOld] is MaterialSlice) {
             double gapSizeSum = 0.0;
 
             while (startOld < j) {
@@ -457,8 +444,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     }
 
     // Handle remaining items.
-    while (j < _children.length)
-      _removeChild(j);
+    while (j < _children.length) _removeChild(j);
     while (i < newChildren.length) {
       _insertChild(j, newChildren[i]);
 
@@ -515,10 +501,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   bool _willNeedDivider(int index) {
-    if (index < 0)
-      return false;
-    if (index >= _children.length)
-      return false;
+    if (index < 0) return false;
+    if (index >= _children.length) return false;
     return _children[index] is MaterialSlice || _isClosingGap(index);
   }
 
@@ -629,8 +613,7 @@ class _MergeableMaterialSliceKey extends GlobalKey {
 
   @override
   bool operator ==(Object other) {
-    return other is _MergeableMaterialSliceKey
-        && other.value == value;
+    return other is _MergeableMaterialSliceKey && other.value == value;
   }
 
   @override
@@ -679,14 +662,13 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
     List<RenderBox>? children,
     AxisDirection axisDirection = AxisDirection.down,
     double elevation = 0.0,
-  }) : _elevation = elevation,
-       super(children: children, axisDirection: axisDirection);
+  })  : _elevation = elevation,
+        super(children: children, axisDirection: axisDirection);
 
   double get elevation => _elevation;
   double _elevation;
   set elevation(double value) {
-    if (value == _elevation)
-      return;
+    if (value == _elevation) return;
     _elevation = value;
     markNeedsPaint();
   }
@@ -710,8 +692,7 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
     while (child != null) {
       final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
       final Rect rect = (childParentData.offset + offset) & child.size;
-      if (index.isEven)
-        _paintShadows(context.canvas, rect);
+      if (index.isEven) _paintShadows(context.canvas, rect);
       child = childParentData.nextSibling;
       index += 1;
     }

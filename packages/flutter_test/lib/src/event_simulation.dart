@@ -30,8 +30,7 @@ class _WebKeyLocationPair {
 
 String? _keyLabel(LogicalKeyboardKey key) {
   final String keyLabel = key.keyLabel;
-  if (keyLabel.length == 1)
-    return keyLabel.toLowerCase();
+  if (keyLabel.length == 1) return keyLabel.toLowerCase();
   return null;
 }
 
@@ -127,10 +126,10 @@ class KeyEventSimulator {
           map = kFuchsiaToLogicalKey;
           break;
         case 'macos':
-        // macOS doesn't do key codes, just scan codes.
+          // macOS doesn't do key codes, just scan codes.
           return -1;
         case 'ios':
-        // iOS doesn't do key codes, just scan codes.
+          // iOS doesn't do key codes, just scan codes.
           return -1;
         case 'web':
           // web doesn't have int type code.
@@ -275,6 +274,7 @@ class KeyEventSimulator {
       result['location'] = keyLocation.location;
       result['metaState'] = _getWebModifierFlags(key, isDown);
     }
+
     if (kIsWeb) {
       assignWeb();
       return result;
@@ -681,17 +681,14 @@ class KeyEventSimulator {
     return TestAsyncUtils.guard<bool>(() async {
       final Completer<bool> result = Completer<bool>();
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-        SystemChannels.keyEvent.name,
-        SystemChannels.keyEvent.codec.encodeMessage(buildKeyData()),
-        (ByteData? data) {
-          if (data == null) {
-            result.complete(false);
-            return;
-          }
-          final Map<String, Object?> decoded = SystemChannels.keyEvent.codec.decodeMessage(data)! as Map<String, dynamic>;
-          result.complete(decoded['handled']! as bool);
+          SystemChannels.keyEvent.name, SystemChannels.keyEvent.codec.encodeMessage(buildKeyData()), (ByteData? data) {
+        if (data == null) {
+          result.complete(false);
+          return;
         }
-      );
+        final Map<String, Object?> decoded = SystemChannels.keyEvent.codec.decodeMessage(data)! as Map<String, dynamic>;
+        result.complete(decoded['handled']! as bool);
+      });
       return result.future;
     });
   }
@@ -700,8 +697,7 @@ class KeyEventSimulator {
     final Map<String, PhysicalKeyboardKey> result = <String, PhysicalKeyboardKey>{};
     for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.knownPhysicalKeys) {
       final String? debugName = key.debugName;
-      if (debugName != null)
-        result[debugName] = key;
+      if (debugName != null) result[debugName] = key;
     }
     return result;
   })();
@@ -763,6 +759,7 @@ class KeyEventSimulator {
         return getKeyData(key, platform: platform!, physicalKey: physicalKey, character: character);
       });
     }
+
     switch (_transitMode) {
       case KeyDataTransitMode.rawKeyData:
         return _simulateByRawEvent();
@@ -808,6 +805,7 @@ class KeyEventSimulator {
         return getKeyData(key, platform: platform!, isDown: false, physicalKey: physicalKey);
       });
     }
+
     switch (_transitMode) {
       case KeyDataTransitMode.rawKeyData:
         return _simulateByRawEvent();
@@ -854,6 +852,7 @@ class KeyEventSimulator {
         return getKeyData(key, platform: platform!, physicalKey: physicalKey, character: character);
       });
     }
+
     switch (_transitMode) {
       case KeyDataTransitMode.rawKeyData:
         return _simulateByRawEvent();
@@ -901,7 +900,8 @@ Future<bool> simulateKeyDownEvent(
   PhysicalKeyboardKey? physicalKey,
   String? character,
 }) {
-  return KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey, character: character);
+  return KeyEventSimulator.simulateKeyDownEvent(key,
+      platform: platform, physicalKey: physicalKey, character: character);
 }
 
 /// Simulates sending a hardware key up event through the system channel.
@@ -953,7 +953,8 @@ Future<bool> simulateKeyRepeatEvent(
   PhysicalKeyboardKey? physicalKey,
   String? character,
 }) {
-  return KeyEventSimulator.simulateKeyRepeatEvent(key, platform: platform, physicalKey: physicalKey, character: character);
+  return KeyEventSimulator.simulateKeyRepeatEvent(key,
+      platform: platform, physicalKey: physicalKey, character: character);
 }
 
 /// A [TestVariant] that runs tests with transit modes set to different values
@@ -964,13 +965,12 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
 
   /// Creates a [KeySimulatorTransitModeVariant] for each value option of
   /// [KeyDataTransitMode].
-  KeySimulatorTransitModeVariant.all()
-    : this(KeyDataTransitMode.values.toSet());
+  KeySimulatorTransitModeVariant.all() : this(KeyDataTransitMode.values.toSet());
 
   /// Creates a [KeySimulatorTransitModeVariant] that only contains
   /// [KeyDataTransitMode.keyDataThenRawKeyData].
   KeySimulatorTransitModeVariant.keyDataThenRawKeyData()
-    : this(<KeyDataTransitMode>{KeyDataTransitMode.keyDataThenRawKeyData});
+      : this(<KeyDataTransitMode>{KeyDataTransitMode.keyDataThenRawKeyData});
 
   @override
   final Set<KeyDataTransitMode> values;

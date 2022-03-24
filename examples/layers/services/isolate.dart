@@ -16,12 +16,12 @@ typedef OnResultListener = void Function(String result);
 // The choice of JSON parsing here is meant as an example that might surface
 // in real-world applications.
 class Calculator {
-  Calculator({ required this.onProgressListener, required this.onResultListener, String? data })
-    : assert(onProgressListener != null),
-      assert(onResultListener != null),
-      // In order to keep the example files smaller, we "cheat" a little and
-      // replicate our small json string into a 10,000-element array.
-      _data = _replicateJson(data, 10000);
+  Calculator({required this.onProgressListener, required this.onResultListener, String? data})
+      : assert(onProgressListener != null),
+        assert(onResultListener != null),
+        // In order to keep the example files smaller, we "cheat" a little and
+        // replicate our small json string into a 10,000-element array.
+        _data = _replicateJson(data, 10000);
 
   final OnProgressListener onProgressListener;
   final OnResultListener onResultListener;
@@ -37,8 +37,7 @@ class Calculator {
     int i = 0;
     final JsonDecoder decoder = JsonDecoder(
       (dynamic key, dynamic value) {
-        if (key is int && i++ % _NOTIFY_INTERVAL == 0)
-          onProgressListener(i.toDouble(), _NUM_ITEMS.toDouble());
+        if (key is int && i++ % _NOTIFY_INTERVAL == 0) onProgressListener(i.toDouble(), _NUM_ITEMS.toDouble());
         return value;
       },
     );
@@ -56,8 +55,7 @@ class Calculator {
     final StringBuffer buffer = StringBuffer()..write('[');
     for (int i = 0; i < count; i++) {
       buffer.write(data);
-      if (i < count - 1)
-        buffer.write(',');
+      if (i < count - 1) buffer.write(',');
     }
     buffer.write(']');
     return buffer.toString();
@@ -65,11 +63,7 @@ class Calculator {
 }
 
 // The current state of the calculation.
-enum CalculationState {
-  idle,
-  loading,
-  calculating
-}
+enum CalculationState { idle, loading, calculating }
 
 // Structured message to initialize the spawned isolate.
 class CalculationMessage {
@@ -84,10 +78,10 @@ class CalculationMessage {
 // This class manages these ports and maintains state related to the
 // progress of the background computation.
 class CalculationManager {
-  CalculationManager({ required this.onProgressListener, required this.onResultListener })
-    : assert(onProgressListener != null),
-      assert(onResultListener != null),
-      _receivePort = ReceivePort() {
+  CalculationManager({required this.onProgressListener, required this.onResultListener})
+      : assert(onProgressListener != null),
+        assert(onResultListener != null),
+        _receivePort = ReceivePort() {
     _receivePort.listen(_handleMessage);
   }
 
@@ -179,7 +173,7 @@ class CalculationManager {
     final SendPort sender = message.sendPort;
     final Calculator calculator = Calculator(
       onProgressListener: (double completed, double total) {
-        sender.send(<double>[ completed, total ]);
+        sender.send(<double>[completed, total]);
       },
       onResultListener: sender.send,
       data: message.data,
@@ -205,7 +199,6 @@ class IsolateExampleWidget extends StatefulWidget {
 
 // Main application state.
 class IsolateExampleState extends State<StatefulWidget> with SingleTickerProviderStateMixin {
-
   String _status = 'Idle';
   String _label = 'Start';
   String _result = ' ';

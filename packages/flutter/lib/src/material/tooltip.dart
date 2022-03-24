@@ -101,7 +101,7 @@ class Tooltip extends StatefulWidget {
     this.child,
     this.triggerMode,
     this.enableFeedback,
-  }) :  assert((message == null) != (richMessage == null), 'Either `message` or `richMessage` must be specified'),
+  })  : assert((message == null) != (richMessage == null), 'Either `message` or `richMessage` must be specified'),
         assert(
           richMessage == null || textStyle == null,
           'If `richMessage` is specified, `textStyle` will have no effect. '
@@ -350,8 +350,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       duration: _fadeInDuration,
       reverseDuration: _fadeOutDuration,
       vsync: this,
-    )
-      ..addStatusListener(_handleStatusChanged);
+    )..addStatusListener(_handleStatusChanged);
     // Listen to see when a mouse is added.
     RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChange);
     // Listen to global pointer events so that we can hide a tooltip immediately
@@ -429,7 +428,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
-  void _dismissTooltip({ bool immediately = false }) {
+  void _dismissTooltip({bool immediately = false}) {
     _showTimer?.cancel();
     _showTimer = null;
     if (immediately) {
@@ -447,7 +446,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _pressActivated = false;
   }
 
-  void _showTooltip({ bool immediately = false }) {
+  void _showTooltip({bool immediately = false}) {
     _dismissTimer?.cancel();
     _dismissTimer = null;
     if (immediately) {
@@ -467,7 +466,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _dismissTimer = null;
     _showTimer?.cancel();
     _showTimer = null;
-    if (_entry!= null) {
+    if (_entry != null) {
       _entry!.remove();
     }
     _controller.reverse();
@@ -499,8 +498,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
   /// was already visible.
   bool ensureTooltipVisible() {
-    if (!_visible)
-      return false;
+    if (!_visible) return false;
     _showTimer?.cancel();
     _showTimer = null;
     _forceRemoval = false;
@@ -682,7 +680,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _margin = widget.margin ?? tooltipTheme.margin ?? _defaultMargin;
     _verticalOffset = widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset;
     _preferBelow = widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow;
-    _excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
+    _excludeFromSemantics =
+        widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
     _decoration = widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration;
     _textStyle = widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle;
     _waitDuration = widget.waitDuration ?? tooltipTheme.waitDuration ?? _defaultWaitDuration;
@@ -692,9 +691,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _enableFeedback = widget.enableFeedback ?? tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
 
     Widget result = Semantics(
-      label: _excludeFromSemantics
-          ? null
-          : _tooltipMessage,
+      label: _excludeFromSemantics ? null : _tooltipMessage,
       child: widget.child,
     );
 
@@ -702,8 +699,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (_visible) {
       result = GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ?
-        _handlePress : null,
+        onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
         onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handlePress : null,
         excludeFromSemantics: true,
         child: result,
@@ -732,9 +728,9 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     required this.target,
     required this.verticalOffset,
     required this.preferBelow,
-  }) : assert(target != null),
-       assert(verticalOffset != null),
-       assert(preferBelow != null);
+  })  : assert(target != null),
+        assert(verticalOffset != null),
+        assert(preferBelow != null);
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.
@@ -766,9 +762,9 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
-    return target != oldDelegate.target
-        || verticalOffset != oldDelegate.verticalOffset
-        || preferBelow != oldDelegate.preferBelow;
+    return target != oldDelegate.target ||
+        verticalOffset != oldDelegate.verticalOffset ||
+        preferBelow != oldDelegate.preferBelow;
   }
 }
 
@@ -805,29 +801,28 @@ class _TooltipOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget result = IgnorePointer(
-      child: FadeTransition(
-        opacity: animation,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: height),
-          child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.bodyText2!,
-            child: Container(
-              decoration: decoration,
-              padding: padding,
-              margin: margin,
-              child: Center(
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: Text.rich(
-                  richMessage,
-                  style: textStyle,
-                ),
+        child: FadeTransition(
+      opacity: animation,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: height),
+        child: DefaultTextStyle(
+          style: Theme.of(context).textTheme.bodyText2!,
+          child: Container(
+            decoration: decoration,
+            padding: padding,
+            margin: margin,
+            child: Center(
+              widthFactor: 1.0,
+              heightFactor: 1.0,
+              child: Text.rich(
+                richMessage,
+                style: textStyle,
               ),
             ),
           ),
         ),
-      )
-    );
+      ),
+    ));
     if (onEnter != null || onExit != null) {
       result = MouseRegion(
         onEnter: onEnter,

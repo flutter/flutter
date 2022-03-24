@@ -50,10 +50,7 @@ const String kExtensionName = 'ext.flutter.test.interestingExtension';
 
 final vm_service.Isolate isolate = vm_service.Isolate(
   id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kResume,
-    timestamp: 0
-  ),
+  pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
   breakpoints: <vm_service.Breakpoint>[],
   exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[
@@ -92,7 +89,7 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, Obje
 
 void main() {
   testWithoutContext('VmService registers reloadSources', () async {
-    Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
+    Future<void> reloadSources(String isolateId, {bool pause, bool force}) async {}
 
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
@@ -141,33 +138,35 @@ void main() {
   });
 
   testWithoutContext('VmService throws tool exit on service registration failure.', () async {
-    final MockVMService mockVMService = MockVMService()
-      ..errorOnRegisterService = true;
+    final MockVMService mockVMService = MockVMService()..errorOnRegisterService = true;
 
-    await expectLater(() async => setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      () async => 'hello',
-      null,
-      mockVMService,
-    ), throwsToolExit());
+    await expectLater(
+        () async => setUpVmService(
+              null,
+              null,
+              null,
+              null,
+              () async => 'hello',
+              null,
+              mockVMService,
+            ),
+        throwsToolExit());
   });
 
   testWithoutContext('VmService throws tool exit on service registration failure with awaited future.', () async {
-    final MockVMService mockVMService = MockVMService()
-      ..errorOnRegisterService = true;
+    final MockVMService mockVMService = MockVMService()..errorOnRegisterService = true;
 
-    await expectLater(() async => setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      () async => 'hello',
-      (vm_service.Event event) { },
-      mockVMService,
-    ), throwsToolExit());
+    await expectLater(
+        () async => setUpVmService(
+              null,
+              null,
+              null,
+              null,
+              () async => 'hello',
+              (vm_service.Event event) {},
+              mockVMService,
+            ),
+        throwsToolExit());
   });
 
   testWithoutContext('VmService registers flutterPrintStructuredErrorLogMethod', () async {
@@ -234,7 +233,7 @@ void main() {
 
   testWithoutContext('setAssetDirectory forwards arguments correctly', () async {
     final Completer<String> completer = Completer<String>();
-    final vm_service.VmService  vmService = vm_service.VmService(
+    final vm_service.VmService vmService = vm_service.VmService(
       const Stream<String>.empty(),
       completer.complete,
     );
@@ -248,19 +247,23 @@ void main() {
 
     final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
 
-    expect(rawRequest, allOf(<Matcher>[
-      containsPair('method', kSetAssetBundlePathMethod),
-      containsPair('params', allOf(<Matcher>[
-        containsPair('viewId', 'abc'),
-        containsPair('assetDirectory', '/abc'),
-        containsPair('isolateId', 'def'),
-      ]))
-    ]));
+    expect(
+        rawRequest,
+        allOf(<Matcher>[
+          containsPair('method', kSetAssetBundlePathMethod),
+          containsPair(
+              'params',
+              allOf(<Matcher>[
+                containsPair('viewId', 'abc'),
+                containsPair('assetDirectory', '/abc'),
+                containsPair('isolateId', 'def'),
+              ]))
+        ]));
   });
 
   testWithoutContext('getSkSLs forwards arguments correctly', () async {
     final Completer<String> completer = Completer<String>();
-    final vm_service.VmService  vmService = vm_service.VmService(
+    final vm_service.VmService vmService = vm_service.VmService(
       const Stream<String>.empty(),
       completer.complete,
     );
@@ -272,12 +275,16 @@ void main() {
 
     final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
 
-    expect(rawRequest, allOf(<Matcher>[
-      containsPair('method', kGetSkSLsMethod),
-      containsPair('params', allOf(<Matcher>[
-        containsPair('viewId', 'abc'),
-      ]))
-    ]));
+    expect(
+        rawRequest,
+        allOf(<Matcher>[
+          containsPair('method', kGetSkSLsMethod),
+          containsPair(
+              'params',
+              allOf(<Matcher>[
+                containsPair('viewId', 'abc'),
+              ]))
+        ]));
   });
 
   testWithoutContext('flushUIThreadTasks forwards arguments correctly', () async {
@@ -294,34 +301,33 @@ void main() {
 
     final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
 
-    expect(rawRequest, allOf(<Matcher>[
-      containsPair('method', kFlushUIThreadTasksMethod),
-      containsPair('params', allOf(<Matcher>[
-        containsPair('isolateId', 'def'),
-      ]))
-    ]));
+    expect(
+        rawRequest,
+        allOf(<Matcher>[
+          containsPair('method', kFlushUIThreadTasksMethod),
+          containsPair(
+              'params',
+              allOf(<Matcher>[
+                containsPair('isolateId', 'def'),
+              ]))
+        ]));
   });
 
   testWithoutContext('runInView forwards arguments correctly', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
-          'streamId': 'Isolate'
-        }),
-        const FakeVmServiceRequest(method: kRunInViewMethod, args: <String, Object>{
-          'viewId': '1234',
-          'mainScript': 'main.dart',
-          'assetDirectory': 'flutter_assets/',
-        }),
-        FakeVmServiceStreamResponse(
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{'streamId': 'Isolate'}),
+      const FakeVmServiceRequest(method: kRunInViewMethod, args: <String, Object>{
+        'viewId': '1234',
+        'mainScript': 'main.dart',
+        'assetDirectory': 'flutter_assets/',
+      }),
+      FakeVmServiceStreamResponse(
           streamId: 'Isolate',
           event: vm_service.Event(
             kind: vm_service.EventKind.kIsolateRunnable,
             timestamp: 1,
-          )
-        ),
-      ]
-    );
+          )),
+    ]);
 
     await fakeVmServiceHost.vmService.runInView(
       viewId: '1234',
@@ -332,135 +338,123 @@ void main() {
   });
 
   testWithoutContext('flutterDebugDumpSemanticsTreeInTraversalOrder handles missing method', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
-          args: <String, Object>{
-            'isolateId': '1'
-          },
-          errorCode: RPCErrorCodes.kMethodNotFound,
-        ),
-      ]
-    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
+        args: <String, Object>{'isolateId': '1'},
+        errorCode: RPCErrorCodes.kMethodNotFound,
+      ),
+    ]);
 
-    expect(await fakeVmServiceHost.vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
-      isolateId: '1',
-    ), '');
+    expect(
+        await fakeVmServiceHost.vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
+          isolateId: '1',
+        ),
+        '');
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
   testWithoutContext('flutterDebugDumpSemanticsTreeInInverseHitTestOrder handles missing method', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
-          args: <String, Object>{
-            'isolateId': '1'
-          },
-          errorCode: RPCErrorCodes.kMethodNotFound,
-        ),
-      ]
-    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
+        args: <String, Object>{'isolateId': '1'},
+        errorCode: RPCErrorCodes.kMethodNotFound,
+      ),
+    ]);
 
-    expect(await fakeVmServiceHost.vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
-      isolateId: '1',
-    ), '');
+    expect(
+        await fakeVmServiceHost.vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
+          isolateId: '1',
+        ),
+        '');
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
   testWithoutContext('flutterDebugDumpLayerTree handles missing method', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: 'ext.flutter.debugDumpLayerTree',
-          args: <String, Object>{
-            'isolateId': '1'
-          },
-          errorCode: RPCErrorCodes.kMethodNotFound,
-        ),
-      ]
-    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.debugDumpLayerTree',
+        args: <String, Object>{'isolateId': '1'},
+        errorCode: RPCErrorCodes.kMethodNotFound,
+      ),
+    ]);
 
-    expect(await fakeVmServiceHost.vmService.flutterDebugDumpLayerTree(
-      isolateId: '1',
-    ), '');
+    expect(
+        await fakeVmServiceHost.vmService.flutterDebugDumpLayerTree(
+          isolateId: '1',
+        ),
+        '');
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
   testWithoutContext('flutterDebugDumpRenderTree handles missing method', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: 'ext.flutter.debugDumpRenderTree',
-          args: <String, Object>{
-            'isolateId': '1'
-          },
-          errorCode: RPCErrorCodes.kMethodNotFound,
-        ),
-      ]
-    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.debugDumpRenderTree',
+        args: <String, Object>{'isolateId': '1'},
+        errorCode: RPCErrorCodes.kMethodNotFound,
+      ),
+    ]);
 
-    expect(await fakeVmServiceHost.vmService.flutterDebugDumpRenderTree(
-      isolateId: '1',
-    ), '');
+    expect(
+        await fakeVmServiceHost.vmService.flutterDebugDumpRenderTree(
+          isolateId: '1',
+        ),
+        '');
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
   testWithoutContext('flutterDebugDumpApp handles missing method', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: 'ext.flutter.debugDumpApp',
-          args: <String, Object>{
-            'isolateId': '1'
-          },
-          errorCode: RPCErrorCodes.kMethodNotFound,
-        ),
-      ]
-    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.debugDumpApp',
+        args: <String, Object>{'isolateId': '1'},
+        errorCode: RPCErrorCodes.kMethodNotFound,
+      ),
+    ]);
 
-    expect(await fakeVmServiceHost.vmService.flutterDebugDumpApp(
-      isolateId: '1',
-    ), '');
+    expect(
+        await fakeVmServiceHost.vmService.flutterDebugDumpApp(
+          isolateId: '1',
+        ),
+        '');
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
   testWithoutContext('Framework service extension invocations return null if service disappears ', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: kGetSkSLsMethod,
-          args: <String, Object>{
-            'viewId': '1234',
-          },
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
-          method: kListViewsMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
-          method: kScreenshotMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
-          method: kScreenshotSkpMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
-          method: 'setVMTimelineFlags',
-          args: <String, dynamic>{
-            'recordedStreams': <String>['test'],
-          },
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
-          method: 'getVMTimeline',
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-      ]
-    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: kGetSkSLsMethod,
+        args: <String, Object>{
+          'viewId': '1234',
+        },
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+      const FakeVmServiceRequest(
+        method: kListViewsMethod,
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+      const FakeVmServiceRequest(
+        method: kScreenshotMethod,
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+      const FakeVmServiceRequest(
+        method: kScreenshotSkpMethod,
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+      const FakeVmServiceRequest(
+        method: 'setVMTimelineFlags',
+        args: <String, dynamic>{
+          'recordedStreams': <String>['test'],
+        },
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+      const FakeVmServiceRequest(
+        method: 'getVMTimeline',
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+    ]);
 
     final Map<String, Object> skSLs = await fakeVmServiceHost.vmService.getSkSLs(
       viewId: '1234',
@@ -486,13 +480,14 @@ void main() {
   });
 
   testWithoutContext('getIsolateOrNull returns null if service disappears ', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(method: 'getIsolate', args: <String, Object>{
-          'isolateId': 'isolate/123',
-        }, errorCode: RPCErrorCodes.kServiceDisappeared),
-      ]
-    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': 'isolate/123',
+          },
+          errorCode: RPCErrorCodes.kServiceDisappeared),
+    ]);
 
     final vm_service.Isolate isolate = await fakeVmServiceHost.vmService.getIsolateOrNull(
       'isolate/123',
@@ -503,23 +498,21 @@ void main() {
   });
 
   testWithoutContext('getFlutterViews polls until a view is returned', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          },
-        ),
-        const FakeVmServiceRequest(
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          },
-        ),
-        listViewsRequest,
-      ]
-    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: kListViewsMethod,
+        jsonResponse: <String, Object>{
+          'views': <Object>[],
+        },
+      ),
+      const FakeVmServiceRequest(
+        method: kListViewsMethod,
+        jsonResponse: <String, Object>{
+          'views': <Object>[],
+        },
+      ),
+      listViewsRequest,
+    ]);
 
     expect(
       await fakeVmServiceHost.vmService.getFlutterViews(
@@ -531,16 +524,14 @@ void main() {
   });
 
   testWithoutContext('getFlutterViews does not poll if returnEarly is true', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          },
-        ),
-      ]
-    );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: kListViewsMethod,
+        jsonResponse: <String, Object>{
+          'views': <Object>[],
+        },
+      ),
+    ]);
 
     expect(
       await fakeVmServiceHost.vmService.getFlutterViews(
@@ -552,7 +543,6 @@ void main() {
   });
 
   group('findExtensionIsolate', () {
-
     testWithoutContext('returns an isolate with the registered extensionRPC', () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(
@@ -581,7 +571,8 @@ void main() {
       expect(isolateRef.id, '1');
     });
 
-    testWithoutContext('returns the isolate with the registered extensionRPC when there are multiple FlutterViews', () async {
+    testWithoutContext('returns the isolate with the registered extensionRPC when there are multiple FlutterViews',
+        () async {
       const String otherExtensionName = 'ext.flutter.test.otherExtension';
 
       // Copy the other isolate and change a few fields.
@@ -634,11 +625,13 @@ void main() {
         ),
       ]);
 
-      final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService.findExtensionIsolate(otherExtensionName);
+      final vm_service.IsolateRef isolateRef =
+          await fakeVmServiceHost.vmService.findExtensionIsolate(otherExtensionName);
       expect(isolateRef.id, '2');
     });
 
-    testWithoutContext('does not rethrow a sentinel exception if the initially queried flutter view disappears', () async {
+    testWithoutContext('does not rethrow a sentinel exception if the initially queried flutter view disappears',
+        () async {
       const String otherExtensionName = 'ext.flutter.test.otherExtension';
       final vm_service.Isolate isolate2 = vm_service.Isolate.parse(
         isolate.toJson()
@@ -686,11 +679,13 @@ void main() {
         ),
       ]);
 
-      final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService.findExtensionIsolate(otherExtensionName);
+      final vm_service.IsolateRef isolateRef =
+          await fakeVmServiceHost.vmService.findExtensionIsolate(otherExtensionName);
       expect(isolateRef.id, '2');
     });
 
-    testWithoutContext('when the isolate stream is already subscribed, returns an isolate with the registered extensionRPC', () async {
+    testWithoutContext(
+        'when the isolate stream is already subscribed, returns an isolate with the registered extensionRPC', () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(
           method: 'streamListen',
@@ -802,7 +797,8 @@ void main() {
     };
 
     // Construct a URL that does not end in a `/`.
-    await expectLater(() => connectToVmService(Uri.parse('http://localhost:8181/foo'), logger: BufferLogger.test()), throwsException);
+    await expectLater(
+        () => connectToVmService(Uri.parse('http://localhost:8181/foo'), logger: BufferLogger.test()), throwsException);
     expect(await completer.future, 'ws://localhost:8181/foo/ws');
     openChannelForTesting = null;
   });
@@ -838,7 +834,7 @@ class MockVMService extends Fake implements vm_service.VmService {
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types
-class FakeDevice extends Fake implements Device { }
+class FakeDevice extends Fake implements Device {}
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
   @override

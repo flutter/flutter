@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoCard extends StatelessWidget {
-  const VideoCard({ Key? key, this.controller, this.title, this.subtitle }) : super(key: key);
+  const VideoCard({Key? key, this.controller, this.title, this.subtitle}) : super(key: key);
 
   final VideoPlayerController? controller;
   final String? title;
@@ -148,8 +148,7 @@ class VideoPlayPause extends StatefulWidget {
 class _VideoPlayPauseState extends State<VideoPlayPause> {
   _VideoPlayPauseState() {
     listener = () {
-      if (mounted)
-        setState(() { });
+      if (mounted) setState(() {});
     };
   }
 
@@ -227,7 +226,7 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
     );
     animationController.addListener(() {
       if (mounted) {
-        setState(() { });
+        setState(() {});
       }
     });
     animationController.forward(from: 0.0);
@@ -343,7 +342,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
 }
 
 class VideoDemo extends StatefulWidget {
-  const VideoDemo({ Key? key }) : super(key: key);
+  const VideoDemo({Key? key}) : super(key: key);
 
   static const String routeName = '/video';
 
@@ -354,9 +353,7 @@ class VideoDemo extends StatefulWidget {
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 
 Future<bool> isIOSSimulator() async {
-  return !kIsWeb &&
-      Platform.isIOS &&
-      !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
+  return !kIsWeb && Platform.isIOS && !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
 }
 
 class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMixin {
@@ -388,7 +385,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       await connectedCompleter.future;
       await controller.initialize();
       if (mounted) {
-        setState(() { });
+        setState(() {});
       }
     }
 
@@ -401,7 +398,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
 
   @override
   void dispose() {
-    isDisposed  = true;
+    isDisposed = true;
     butterflyController.dispose();
     beeController.dispose();
     super.dispose();
@@ -414,30 +411,30 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
         title: const Text('Videos'),
       ),
       body: isSupported
-        ? ConnectivityOverlay(
-            connectedCompleter: connectedCompleter,
-            child: Scrollbar(
-              child: ListView(
-                children: <Widget>[
-                  VideoCard(
-                    title: 'Butterfly',
-                    subtitle: '… flutters by',
-                    controller: butterflyController,
-                  ),
-                  VideoCard(
-                    title: 'Bee',
-                    subtitle: '… gently buzzing',
-                    controller: beeController,
-                  ),
-                ],
+          ? ConnectivityOverlay(
+              connectedCompleter: connectedCompleter,
+              child: Scrollbar(
+                child: ListView(
+                  children: <Widget>[
+                    VideoCard(
+                      title: 'Butterfly',
+                      subtitle: '… flutters by',
+                      controller: butterflyController,
+                    ),
+                    VideoCard(
+                      title: 'Bee',
+                      subtitle: '… gently buzzing',
+                      controller: beeController,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : const Center(
+              child: Text(
+                'Video playback not supported on the iOS Simulator.',
               ),
             ),
-          )
-        : const Center(
-            child: Text(
-              'Video playback not supported on the iOS Simulator.',
-            ),
-          ),
     );
   }
 }

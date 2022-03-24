@@ -69,10 +69,7 @@ void main() {
       expect(
         () => method.decodeEnvelope(errorData),
         throwsA(predicate(
-          (PlatformException e) =>
-              e.code == 'errorCode' &&
-              e.message == 'errorMessage' &&
-              e.details == 'errorDetails',
+          (PlatformException e) => e.code == 'errorCode' && e.message == 'errorMessage' && e.details == 'errorDetails',
         )),
       );
     });
@@ -100,9 +97,7 @@ void main() {
         () => method.decodeEnvelope(errorData),
         throwsA(
           predicate((PlatformException e) {
-            return e.code == 'errorCode' &&
-              e.message == null &&
-              e.details == 'errorDetails';
+            return e.code == 'errorCode' && e.message == null && e.details == 'errorDetails';
           }),
         ),
       );
@@ -121,10 +116,7 @@ void main() {
       expect(
         () => jsonMethodCodec.decodeEnvelope(errorData),
         throwsA(predicate(
-          (PlatformException e) =>
-            e.code == 'errorCode' &&
-            e.message == 'errorMessage' &&
-            e.details == 'errorDetails',
+          (PlatformException e) => e.code == 'errorCode' && e.message == 'errorMessage' && e.details == 'errorDetails',
         )),
       );
     });

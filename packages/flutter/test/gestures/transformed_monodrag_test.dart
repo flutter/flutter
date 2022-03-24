@@ -249,7 +249,8 @@ void main() {
       expect(endDetails, hasLength(1));
       expect(startDetails.single.localPosition, const Offset(50 + (kTouchSlop + 1) * 2, 75.0 + 30.0 * 2));
       expect(startDetails.single.globalPosition, const Offset(400 + (kTouchSlop + 1), 300 + 30.0));
-      expect(updateDetails.single.localPosition, startDetails.single.localPosition + const Offset(100.0 * 2, 10.0 * 2.0));
+      expect(
+          updateDetails.single.localPosition, startDetails.single.localPosition + const Offset(100.0 * 2, 10.0 * 2.0));
       expect(updateDetails.single.globalPosition, startDetails.single.globalPosition + const Offset(100.0, 10.0));
       expect(updateDetails.single.delta, const Offset(100.0 * 2.0, 0.0));
       expect(updateDetails.single.primaryDelta, 100.0 * 2);
@@ -261,7 +262,8 @@ void main() {
       updateDetails.clear();
     });
 
-    testWidgets('kTouchSlop is evaluated in the global coordinate space when rotated 45 degrees', (WidgetTester tester) async {
+    testWidgets('kTouchSlop is evaluated in the global coordinate space when rotated 45 degrees',
+        (WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
@@ -304,7 +306,7 @@ void main() {
       );
 
       // Move just below kTouchSlop should not recognize drag.
-      const Offset moveBy1 = Offset(kTouchSlop/ 2, kTouchSlop / 2);
+      const Offset moveBy1 = Offset(kTouchSlop / 2, kTouchSlop / 2);
       expect(moveBy1.distance, lessThan(kTouchSlop));
       await tester.drag(find.byKey(redContainer), moveBy1);
       expect(dragCancelCount, 1);
@@ -327,11 +329,12 @@ void main() {
       await gesture.up();
 
       expect(dragCancelCount, 0);
-      expect(downDetails.single.localPosition,  within(distance: 0.0001, from: const Offset(50, 75)));
-      expect(downDetails.single.globalPosition,  within(distance: 0.0001, from: const Offset(400, 300)));
+      expect(downDetails.single.localPosition, within(distance: 0.0001, from: const Offset(50, 75)));
+      expect(downDetails.single.globalPosition, within(distance: 0.0001, from: const Offset(400, 300)));
       expect(endDetails, hasLength(1));
       expect(startDetails, hasLength(1));
-      expect(updateDetails.single.globalPosition, within(distance: 0.0001, from: const Offset(400 + kTouchSlop + 3, 300 + kTouchSlop + 4)));
+      expect(updateDetails.single.globalPosition,
+          within(distance: 0.0001, from: const Offset(400 + kTouchSlop + 3, 300 + kTouchSlop + 4)));
       expect(updateDetails.single.delta, within(distance: 0.1, from: const Offset(5, 0.0))); // sqrt(3^2 + 4^2)
       expect(updateDetails.single.primaryDelta, within<double>(distance: 0.1, from: 5.0)); // sqrt(3^2 + 4^2)
     });
@@ -577,7 +580,8 @@ void main() {
       expect(endDetails, hasLength(1));
       expect(startDetails.single.localPosition, const Offset(50 + 30.0 * 2, 75.0 + (kTouchSlop + 1) * 2));
       expect(startDetails.single.globalPosition, const Offset(400 + 30.0, 300 + (kTouchSlop + 1)));
-      expect(updateDetails.single.localPosition, startDetails.single.localPosition + const Offset(10.0 * 2, 100.0 * 2.0));
+      expect(
+          updateDetails.single.localPosition, startDetails.single.localPosition + const Offset(10.0 * 2, 100.0 * 2.0));
       expect(updateDetails.single.globalPosition, startDetails.single.globalPosition + const Offset(10.0, 100.0));
       expect(updateDetails.single.delta, const Offset(0.0, 100.0 * 2.0));
       expect(updateDetails.single.primaryDelta, 100.0 * 2);
@@ -589,7 +593,8 @@ void main() {
       updateDetails.clear();
     });
 
-    testWidgets('kTouchSlop is evaluated in the global coordinate space when rotated 45 degrees', (WidgetTester tester) async {
+    testWidgets('kTouchSlop is evaluated in the global coordinate space when rotated 45 degrees',
+        (WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
@@ -632,7 +637,7 @@ void main() {
       );
 
       // Move just below kTouchSlop should not recognize drag.
-      const Offset moveBy1 = Offset(kTouchSlop/ 2, kTouchSlop / 2);
+      const Offset moveBy1 = Offset(kTouchSlop / 2, kTouchSlop / 2);
       expect(moveBy1.distance, lessThan(kTouchSlop));
       await tester.drag(find.byKey(redContainer), moveBy1);
       expect(dragCancelCount, 1);
@@ -655,11 +660,12 @@ void main() {
       await gesture.up();
 
       expect(dragCancelCount, 0);
-      expect(downDetails.single.localPosition,  within(distance: 0.0001, from: const Offset(50, 75)));
-      expect(downDetails.single.globalPosition,  within(distance: 0.0001, from: const Offset(400, 300)));
+      expect(downDetails.single.localPosition, within(distance: 0.0001, from: const Offset(50, 75)));
+      expect(downDetails.single.globalPosition, within(distance: 0.0001, from: const Offset(400, 300)));
       expect(endDetails, hasLength(1));
       expect(startDetails, hasLength(1));
-      expect(updateDetails.single.globalPosition, within(distance: 0.0001, from: const Offset(400 + kTouchSlop - 4, 300 + kTouchSlop + 3)));
+      expect(updateDetails.single.globalPosition,
+          within(distance: 0.0001, from: const Offset(400 + kTouchSlop - 4, 300 + kTouchSlop + 3)));
       expect(updateDetails.single.delta, within(distance: 0.1, from: const Offset(0.0, 5.0))); // sqrt(3^2 + 4^2)
       expect(updateDetails.single.primaryDelta, within<double>(distance: 0.1, from: 5.0)); // sqrt(3^2 + 4^2)
     });

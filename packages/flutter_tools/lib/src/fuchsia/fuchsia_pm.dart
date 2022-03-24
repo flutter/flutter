@@ -106,14 +106,8 @@ class FuchsiaPM {
       '2',
     ];
     final Process process = await globals.processUtils.start(command);
-    process.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(globals.printTrace);
-    process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(globals.printError);
+    process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(globals.printTrace);
+    process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(globals.printError);
     return process;
   }
 
@@ -165,8 +159,7 @@ class FuchsiaPM {
 ///   server.stop();
 /// }
 class FuchsiaPackageServer {
-  factory FuchsiaPackageServer(
-      String repo, String name, String host, int port) {
+  factory FuchsiaPackageServer(String repo, String name, String host, int port) {
     return FuchsiaPackageServer._(repo, name, host, port);
   }
 

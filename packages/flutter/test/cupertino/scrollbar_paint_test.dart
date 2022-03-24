@@ -38,19 +38,22 @@ void main() {
     await gesture.moveBy(Offset.zero.translate(-_kGestureOffset.dx, -_kGestureOffset.dy));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: _kScrollbarColor,
-      rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(
-          800.0 - 3 - 3, // Screen width - margin - thickness.
-          3.0, // Initial position is the top margin.
-          3, // Thickness.
-          // Fraction in viewport * scrollbar height - top, bottom margin.
-          600.0 / 4000.0 * (600.0 - 2 * 3),
-        ),
-        _kScrollbarRadius,
-      ),
-    ));
+    expect(
+        find.byType(CupertinoScrollbar),
+        paints
+          ..rrect(
+            color: _kScrollbarColor,
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(
+                800.0 - 3 - 3, // Screen width - margin - thickness.
+                3.0, // Initial position is the top margin.
+                3, // Thickness.
+                // Fraction in viewport * scrollbar height - top, bottom margin.
+                600.0 / 4000.0 * (600.0 - 2 * 3),
+              ),
+              _kScrollbarRadius,
+            ),
+          ));
   });
 
   testWidgets('Paints iOS spec with nav bar', (WidgetTester tester) async {
@@ -82,20 +85,23 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: _kScrollbarColor,
-      rrect: RRect.fromRectAndRadius(
-        const Rect.fromLTWH(
-          800.0 - 3 - 3, // Screen width - margin - thickness.
-          44 + 20 + 3.0, // nav bar height + top margin
-          3, // Thickness.
-          // Fraction visible * (viewport size - padding - margin)
-          // where Fraction visible = (viewport size - padding) / content size
-          (600.0 - 34 - 44 - 20) / 4000.0 * (600.0 - 2 * 3 - 34 - 44 - 20),
-        ),
-        _kScrollbarRadius,
-      ),
-    ));
+    expect(
+        find.byType(CupertinoScrollbar),
+        paints
+          ..rrect(
+            color: _kScrollbarColor,
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(
+                800.0 - 3 - 3, // Screen width - margin - thickness.
+                44 + 20 + 3.0, // nav bar height + top margin
+                3, // Thickness.
+                // Fraction visible * (viewport size - padding - margin)
+                // where Fraction visible = (viewport size - padding) / content size
+                (600.0 - 34 - 44 - 20) / 4000.0 * (600.0 - 2 * 3 - 34 - 44 - 20),
+              ),
+              _kScrollbarRadius,
+            ),
+          ));
   });
 
   testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
@@ -113,7 +119,7 @@ void main() {
             child: CupertinoScrollbar(
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                children: const <Widget> [SizedBox(width: 10, height: 10)],
+                children: const <Widget>[SizedBox(width: 10, height: 10)],
               ),
             ),
           ),

@@ -53,7 +53,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'HostArtifact.engineDartBinary',
+          'HostArtifact.engineDartBinary',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -71,7 +71,8 @@ void main() {
       ]),
       stdoutHandler: stdoutHandler,
     );
-    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
@@ -98,7 +99,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'HostArtifact.engineDartBinary',
+          'HostArtifact.engineDartBinary',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -116,7 +117,8 @@ void main() {
       ]),
       stdoutHandler: stdoutHandler,
     );
-    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
@@ -143,7 +145,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'HostArtifact.engineDartBinary',
+          'HostArtifact.engineDartBinary',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -161,7 +163,8 @@ void main() {
       ]),
       stdoutHandler: stdoutHandler,
     );
-    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
@@ -207,7 +210,8 @@ void main() {
       ]),
       stdoutHandler: stdoutHandler,
     );
-    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.profile,
       trackWidgetCreation: false,
@@ -254,7 +258,8 @@ void main() {
       ]),
       stdoutHandler: stdoutHandler,
     );
-    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.release,
       trackWidgetCreation: false,
@@ -303,7 +308,8 @@ void main() {
       stdoutHandler: stdoutHandler,
     );
 
-    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
@@ -352,7 +358,8 @@ void main() {
       stdoutHandler: stdoutHandler,
     );
 
-    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
       mainPath: '/foo/bar/fizz/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,
@@ -401,13 +408,12 @@ void main() {
       stdoutHandler: stdoutHandler,
     );
 
-    final Directory buildDir = fs.directory('.dart_tools')
-        .childDirectory('flutter_build')
-        .childDirectory('test');
+    final Directory buildDir = fs.directory('.dart_tools').childDirectory('flutter_build').childDirectory('test');
 
     buildDir.parent.childFile('generated_main.dart').createSync(recursive: true);
 
-    final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
       mainPath: '/foo/bar/fizz/main.dart',
       buildMode: BuildMode.debug,
       trackWidgetCreation: false,

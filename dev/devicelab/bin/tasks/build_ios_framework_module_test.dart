@@ -13,7 +13,6 @@ import 'package:path/path.dart' as path;
 /// Tests that iOS .xcframeworks can be built.
 Future<void> main() async {
   await task(() async {
-
     section('Create module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
@@ -21,25 +20,17 @@ Future<void> main() async {
       await inDirectory(tempDir, () async {
         section('Test module template');
 
-        final Directory moduleProjectDir =
-            Directory(path.join(tempDir.path, 'hello_module'));
+        final Directory moduleProjectDir = Directory(path.join(tempDir.path, 'hello_module'));
         await flutter(
           'create',
-          options: <String>[
-            '--org',
-            'io.flutter.devicelab',
-            '--template',
-            'module',
-            'hello_module'
-          ],
+          options: <String>['--org', 'io.flutter.devicelab', '--template', 'module', 'hello_module'],
         );
 
         await _testBuildIosFramework(moduleProjectDir, isModule: true);
 
         section('Test app template');
 
-        final Directory projectDir =
-            Directory(path.join(tempDir.path, 'hello_project'));
+        final Directory projectDir = Directory(path.join(tempDir.path, 'hello_project'));
         await flutter(
           'create',
           options: <String>['--org', 'io.flutter.devicelab', 'hello_project'],
@@ -59,7 +50,7 @@ Future<void> main() async {
   });
 }
 
-Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = false}) async {
+Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false}) async {
   section('Add plugins');
 
   final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
@@ -169,8 +160,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
   final String aotSymbols = await _dylibSymbols(debugAppFrameworkPath);
 
-  if (aotSymbols.contains('architecture') ||
-      aotSymbols.contains('_kDartVmSnapshot')) {
+  if (aotSymbols.contains('architecture') || aotSymbols.contains('_kDartVmSnapshot')) {
     throw TaskResult.failure('Debug App.framework contains AOT');
   }
 
@@ -282,7 +272,8 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'Reachability',
     );
     if (await _linksOnFlutter(transitiveDependencyFrameworkPath)) {
-      throw TaskResult.failure('Transitive dependency $transitiveDependencyFrameworkPath unexpectedly links on Flutter');
+      throw TaskResult.failure(
+          'Transitive dependency $transitiveDependencyFrameworkPath unexpectedly links on Flutter');
     }
 
     checkFileExists(path.join(
@@ -411,8 +402,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
           'FlutterPluginRegistrant.xcframework',
         )).existsSync() !=
         isModule) {
-      throw TaskResult.failure(
-          'Unexpected FlutterPluginRegistrant.xcframework.');
+      throw TaskResult.failure('Unexpected FlutterPluginRegistrant.xcframework.');
     }
 
     checkDirectoryExists(path.join(

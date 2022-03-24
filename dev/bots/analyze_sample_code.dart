@@ -31,8 +31,8 @@ Future<void> main(List<String> arguments) async {
   argParser.addOption(
     'temp',
     help: 'A location where temporary files may be written. Defaults to a '
-          'directory in the system temp folder. If specified, will not be '
-          'automatically removed at the end of execution.',
+        'directory in the system temp folder. If specified, will not be '
+        'automatically removed at the end of execution.',
   );
   argParser.addFlag(
     'verbose',
@@ -43,9 +43,9 @@ Future<void> main(List<String> arguments) async {
     'dart-ui-location',
     defaultsTo: _defaultDartUiLocation,
     help: 'A location where the dart:ui dart files are to be found. Defaults to '
-          'the sky_engine directory installed in this flutter repo. This '
-          'is typically the engine/src/flutter/lib/ui directory in an engine dev setup. '
-          'Implies --include-dart-ui.',
+        'the sky_engine directory installed in this flutter repo. This '
+        'is typically the engine/src/flutter/lib/ui directory in an engine dev setup. '
+        'Implies --include-dart-ui.',
   );
   argParser.addFlag(
     'include-dart-ui',
@@ -66,7 +66,7 @@ Future<void> main(List<String> arguments) async {
     'global-activate-snippets',
     defaultsTo: true,
     help: 'Whether or not to "pub global activate" the snippets package. If set, will '
-          'activate version $_snippetsActivateVersion',
+        'activate version $_snippetsActivateVersion',
   );
 
   final ArgResults parsedArguments = argParser.parse(arguments);
@@ -85,11 +85,11 @@ Future<void> main(List<String> arguments) async {
     flutterPackage = Directory(_defaultFlutterPackage);
   }
 
-  final bool includeDartUi = parsedArguments.wasParsed('dart-ui-location') || parsedArguments['include-dart-ui'] as bool;
+  final bool includeDartUi =
+      parsedArguments.wasParsed('dart-ui-location') || parsedArguments['include-dart-ui'] as bool;
   late Directory dartUiLocation;
   if (((parsedArguments['dart-ui-location'] ?? '') as String).isNotEmpty) {
-    dartUiLocation = Directory(
-        path.absolute(parsedArguments['dart-ui-location'] as String));
+    dartUiLocation = Directory(path.absolute(parsedArguments['dart-ui-location'] as String));
   } else {
     dartUiLocation = Directory(_defaultDartUiLocation);
   }
@@ -103,7 +103,8 @@ Future<void> main(List<String> arguments) async {
     final String tempArg = parsedArguments['temp'] as String;
     tempDirectory = Directory(path.join(Directory.systemTemp.absolute.path, path.basename(tempArg)));
     if (path.basename(tempArg) != tempArg) {
-      stderr.writeln('Supplied temporary directory name should be a name, not a path. Using ${tempDirectory.absolute.path} instead.');
+      stderr.writeln(
+          'Supplied temporary directory name should be a name, not a path. Using ${tempDirectory.absolute.path} instead.');
     }
     print('Leaving temporary output in ${tempDirectory.absolute.path}.');
     // Make sure that any directory left around from a previous run is cleared
@@ -185,8 +186,7 @@ class TaskQueue<T> {
   /// Creates a task queue with a maximum number of simultaneous jobs.
   /// The [maxJobs] parameter defaults to the number of CPU cores on the
   /// system.
-  TaskQueue({int? maxJobs})
-      : maxJobs = maxJobs ?? Platform.numberOfProcessors;
+  TaskQueue({int? maxJobs}) : maxJobs = maxJobs ?? Platform.numberOfProcessors;
 
   /// The maximum number of jobs that this queue will run simultaneously.
   final int maxJobs;
@@ -306,9 +306,9 @@ class SampleChecker {
     Directory? tempDirectory,
     this.verbose = false,
     Directory? dartUiLocation,
-  }) : _tempDirectory = tempDirectory ?? Directory.systemTemp.createTempSync('flutter_analyze_sample_code.'),
-       _keepTmp = tempDirectory != null,
-       _dartUiLocation = dartUiLocation;
+  })  : _tempDirectory = tempDirectory ?? Directory.systemTemp.createTempSync('flutter_analyze_sample_code.'),
+        _keepTmp = tempDirectory != null,
+        _dartUiLocation = dartUiLocation;
 
   /// The prefix of each comment line
   static const String _dartDocPrefix = '///';
@@ -361,7 +361,11 @@ class SampleChecker {
   int _expressionId = 0;
 
   static List<File> _listDartFiles(Directory directory, {bool recursive = false}) {
-    return directory.listSync(recursive: recursive, followLinks: false).whereType<File>().where((File file) => path.extension(file.path) == '.dart').toList();
+    return directory
+        .listSync(recursive: recursive, followLinks: false)
+        .whereType<File>()
+        .where((File file) => path.extension(file.path) == '.dart')
+        .toList();
   }
 
   /// Computes the headers needed for each sample file.
@@ -396,7 +400,8 @@ class SampleChecker {
       }
       final List<File> filesToAnalyze = <File>[
         ..._listDartFiles(_flutterPackage, recursive: true),
-        if (_dartUiLocation != null && _dartUiLocation!.existsSync()) ... _listDartFiles(_dartUiLocation!, recursive: true),
+        if (_dartUiLocation != null && _dartUiLocation!.existsSync())
+          ..._listDartFiles(_dartUiLocation!, recursive: true),
       ];
       await _extractSamples(filesToAnalyze, sectionMap: sections, sampleMap: snippets);
       analysisResult = _analyze(_tempDirectory, sections, snippets);
@@ -586,7 +591,8 @@ class SampleChecker {
             }
             block.clear();
           } else if (!line.startsWith('// ')) {
-            throw SampleCheckerException('Unexpected content in sample code preamble.', file: relativeFilePath, line: lineNumber);
+            throw SampleCheckerException('Unexpected content in sample code preamble.',
+                file: relativeFilePath, line: lineNumber);
           } else if (_dartVersionRegExp.hasMatch(line)) {
             dartVersionOverride = line.substring(3);
           } else {
@@ -595,7 +601,8 @@ class SampleChecker {
         } else if (inSampleSection) {
           if (_dartDocSampleEndRegex.hasMatch(trimmedLine)) {
             if (inDart) {
-              throw SampleCheckerException("Dart section didn't terminate before end of sample", file: relativeFilePath, line: lineNumber);
+              throw SampleCheckerException("Dart section didn't terminate before end of sample",
+                  file: relativeFilePath, line: lineNumber);
             }
             inSampleSection = false;
           }
@@ -603,7 +610,8 @@ class SampleChecker {
             if (_codeBlockEndRegex.hasMatch(trimmedLine)) {
               inDart = false;
               final Section processed = _processBlock(startLine, block);
-              final Section combinedSection = preambleSections.isEmpty ? processed : Section.combine(preambleSections..add(processed));
+              final Section combinedSection =
+                  preambleSections.isEmpty ? processed : Section.combine(preambleSections..add(processed));
               sections.add(combinedSection.copyWith(dartVersionOverride: dartVersionOverride));
               block.clear();
             } else if (trimmedLine == _dartDocPrefix) {
@@ -673,8 +681,7 @@ class SampleChecker {
           '$dartpadCount dartpad sections.');
     for (final Section section in sections) {
       final String path = _writeSection(section).path;
-      if (sectionMap != null)
-        sectionMap[path] = section;
+      if (sectionMap != null) sectionMap[path] = section;
     }
     final TaskQueue<File> sampleQueue = TaskQueue<File>();
     for (final Sample sample in samples) {
@@ -782,7 +789,8 @@ analyzer:
       Line.generated(code: section.dartVersionOverride ?? '', filename: section.start.filename),
       ...headers,
       Line.generated(filename: section.start.filename),
-      Line.generated(code: '// From: ${section.start.filename}:${section.start.line}', filename: section.start.filename),
+      Line.generated(
+          code: '// From: ${section.start.filename}:${section.start.line}', filename: section.start.filename),
       ...section.code,
     ];
     outputFile.writeAsStringSync(mainContents.map<String>((Line line) => line.code).join('\n'));
@@ -791,8 +799,7 @@ analyzer:
 
   /// Invokes the analyzer on the given [directory] and returns the stdout.
   int _runAnalyzer(Directory directory, {bool silent = true, required List<String> output}) {
-    if (!silent)
-      print('Starting analysis of code samples.');
+    if (!silent) print('Starting analysis of code samples.');
     _createConfigurationFiles(directory);
     final ProcessResult result = Process.runSync(
       _flutter,
@@ -803,8 +810,8 @@ analyzer:
     final List<String> stdout = result.stdout.toString().trim().split('\n');
     // Remove output from building the flutter tool.
     stderr.removeWhere((String line) {
-      return line.startsWith('Building flutter tool...')
-          || line.startsWith('Waiting for another flutter command to release the startup lock...');
+      return line.startsWith('Building flutter tool...') ||
+          line.startsWith('Waiting for another flutter command to release the startup lock...');
     });
     // Check out the stderr to see if the analyzer had it's own issues.
     if (stderr.isNotEmpty && stderr.first.contains(RegExp(r' issues? found\. \(ran in '))) {
@@ -981,8 +988,7 @@ analyzer:
       exitCode = 0;
     }
     if (exitCode == 0) {
-      if (!silent)
-        print('No analysis errors in samples!');
+      if (!silent) print('No analysis errors in samples!');
       assert(analysisErrors.isEmpty);
     }
     return AnalysisResult(exitCode, analysisErrors);
@@ -1017,7 +1023,8 @@ analyzer:
         // treated as a separate code block.
         if (block[index] == '' || block[index] == '// ...') {
           if (subline == null)
-            throw SampleCheckerException('${Line(filename: line.filename, line: line.line + index, indent: line.indent)}: '
+            throw SampleCheckerException(
+                '${Line(filename: line.filename, line: line.line + index, indent: line.indent)}: '
                 'Unexpected blank line or "// ..." line near start of subblock in sample code.');
           subblocks += 1;
           subsections.add(_processBlock(subline, buffer));
@@ -1052,10 +1059,8 @@ analyzer:
 
 /// A class to represent a line of input code.
 class Line {
-  const Line({this.code = '', required this.filename, this.line = -1, this.indent = 0})
-      : generated = false;
-  const Line.generated({this.code = '', required this.filename, this.line = -1, this.indent = 0})
-      : generated = true;
+  const Line({this.code = '', required this.filename, this.line = -1, this.indent = 0}) : generated = false;
+  const Line.generated({this.code = '', required this.filename, this.line = -1, this.indent = 0}) : generated = true;
 
   /// The file that this line came from, or the file that the line was generated for, if [generated] is true.
   final String filename;
@@ -1079,9 +1084,7 @@ class Line {
 class Section {
   const Section(this.code, {this.dartVersionOverride});
   factory Section.combine(List<Section> sections) {
-    final List<Line> code = sections
-      .expand((Section section) => section.code)
-      .toList();
+    final List<Line> code = sections.expand((Section section) => section.code).toList();
     return Section(code);
   }
   factory Section.fromStrings(Line firstLine, List<String> code) {

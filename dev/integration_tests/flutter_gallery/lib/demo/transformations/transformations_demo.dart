@@ -9,13 +9,14 @@ import 'transformations_demo_edit_board_point.dart';
 import 'transformations_demo_gesture_transformable.dart';
 
 class TransformationsDemo extends StatefulWidget {
-  const TransformationsDemo({ Key? key }) : super(key: key);
+  const TransformationsDemo({Key? key}) : super(key: key);
 
   static const String routeName = '/transformations';
 
   @override
   State<TransformationsDemo> createState() => _TransformationsDemoState();
 }
+
 class _TransformationsDemoState extends State<TransformationsDemo> {
   // The radius of a hexagon tile in pixels.
   static const double _kHexagonRadius = 32.0;
@@ -32,7 +33,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
   );
 
   @override
-  Widget build (BuildContext context) {
+  Widget build(BuildContext context) {
     final BoardPainter painter = BoardPainter(
       board: _board,
     );
@@ -134,22 +135,24 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
         if (_board.selected == null) {
           return;
         }
-        showModalBottomSheet<Widget>(context: context, builder: (BuildContext context) {
-          return Container(
-            width: double.infinity,
-            height: 150,
-            padding: const EdgeInsets.all(12.0),
-            child: EditBoardPoint(
-              boardPoint: _board.selected!,
-              onColorSelection: (Color color) {
-                setState(() {
-                  _board = _board.copyWithBoardPointColor(_board.selected!, color);
-                  Navigator.pop(context);
-                });
-              },
-            ),
-          );
-        });
+        showModalBottomSheet<Widget>(
+            context: context,
+            builder: (BuildContext context) {
+              return Container(
+                width: double.infinity,
+                height: 150,
+                padding: const EdgeInsets.all(12.0),
+                child: EditBoardPoint(
+                  boardPoint: _board.selected!,
+                  onColorSelection: (Color color) {
+                    setState(() {
+                      _board = _board.copyWithBoardPointColor(_board.selected!, color);
+                      Navigator.pop(context);
+                    });
+                  },
+                ),
+              );
+            });
       },
       tooltip: 'Edit Tile',
       child: const Icon(Icons.edit),

@@ -54,7 +54,10 @@ void main() {
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = <FocusNode>[
-      FocusNode(), FocusNode(), FocusNode(), FocusNode(),
+      FocusNode(),
+      FocusNode(),
+      FocusNode(),
+      FocusNode(),
     ];
 
     await tester.pumpWidget(
@@ -130,10 +133,12 @@ void main() {
       ),
     );
 
-    BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
-      of: find.byType(CupertinoTabBar),
-      matching: find.byType(DecoratedBox),
-    )).decoration as BoxDecoration;
+    BoxDecoration tabDecoration = tester
+        .widget<DecoratedBox>(find.descendant(
+          of: find.byType(CupertinoTabBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .decoration as BoxDecoration;
 
     expect(tabDecoration.color, isSameColorAs(const Color(0xF0F9F9F9))); // Inherited from theme.
 
@@ -156,10 +161,12 @@ void main() {
       ),
     );
 
-    tabDecoration = tester.widget<DecoratedBox>(find.descendant(
-      of: find.byType(CupertinoTabBar),
-      matching: find.byType(DecoratedBox),
-    )).decoration as BoxDecoration;
+    tabDecoration = tester
+        .widget<DecoratedBox>(find.descendant(
+          of: find.byType(CupertinoTabBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .decoration as BoxDecoration;
 
     expect(tabDecoration.color, isSameColorAs(const Color(0xF01D1D1D)));
 
@@ -196,12 +203,14 @@ void main() {
 
     // The DecoratedBox with the smallest depth is the DecoratedBox of the
     // CupertinoTabScaffold.
-    BoxDecoration tabDecoration = tester.firstWidget<DecoratedBox>(
-      find.descendant(
-        of: find.byType(CupertinoTabScaffold),
-        matching: find.byType(DecoratedBox),
-      ),
-    ).decoration as BoxDecoration;
+    BoxDecoration tabDecoration = tester
+        .firstWidget<DecoratedBox>(
+          find.descendant(
+            of: find.byType(CupertinoTabScaffold),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.color.value);
 
@@ -219,12 +228,14 @@ void main() {
       ),
     );
 
-    tabDecoration = tester.firstWidget<DecoratedBox>(
-      find.descendant(
-        of: find.byType(CupertinoTabScaffold),
-        matching: find.byType(DecoratedBox),
-      ),
-    ).decoration as BoxDecoration;
+    tabDecoration = tester
+        .firstWidget<DecoratedBox>(
+          find.descendant(
+            of: find.byType(CupertinoTabScaffold),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
   });
@@ -255,7 +266,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          viewInsets:  EdgeInsets.only(bottom: 100),
+          viewInsets: EdgeInsets.only(bottom: 100),
         ),
         child: MaterialApp(
           home: Material(
@@ -285,7 +296,8 @@ void main() {
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), label: '$i'),
+                  (int i) => BottomNavigationBarItem(
+                      icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), label: '$i'),
                 ),
               ),
               tabBuilder: (BuildContext context, int index) => const Text('content'),
@@ -318,7 +330,7 @@ void main() {
   });
 }
 
-CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
+CupertinoTabBar _buildTabBar({int selectedTab = 0}) {
   return CupertinoTabBar(
     items: <BottomNavigationBarItem>[
       BottomNavigationBarItem(

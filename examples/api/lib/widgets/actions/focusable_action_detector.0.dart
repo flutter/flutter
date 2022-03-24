@@ -42,8 +42,7 @@ class _FadButtonState extends State<FadButton> {
   bool _hovering = false;
   bool _on = false;
   late final Map<Type, Action<Intent>> _actionMap;
-  final Map<ShortcutActivator, Intent> _shortcutMap =
-      const <ShortcutActivator, Intent>{
+  final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.keyX): ActivateIntent(),
   };
 
@@ -135,8 +134,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child:
-                  TextButton(onPressed: () {}, child: const Text('Press Me')),
+              child: TextButton(onPressed: () {}, child: const Text('Press Me')),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
