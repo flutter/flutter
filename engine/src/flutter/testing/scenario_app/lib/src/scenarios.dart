@@ -4,6 +4,8 @@
 
 import 'dart:ui';
 
+import 'package:scenario_app/src/texture.dart';
+
 import 'animated_color_square.dart';
 import 'bogus_font_text.dart';
 import 'initial_route_reply.dart';
@@ -49,6 +51,7 @@ Map<String, ScenarioFactory> _scenarios = <String, ScenarioFactory>{
   'bogus_font_text': () => BogusFontText(PlatformDispatcher.instance),
   'spawn_engine_works' : () => BogusFontText(PlatformDispatcher.instance),
   'pointer_events': () => TouchesScenario(PlatformDispatcher.instance),
+  'display_texture': () => DisplayTexture(PlatformDispatcher.instance),
 };
 
 Map<String, dynamic> _currentScenarioParams = <String, dynamic>{};
