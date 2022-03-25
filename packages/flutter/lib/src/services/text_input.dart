@@ -469,8 +469,17 @@ class TextInputConfiguration {
     this.autofillConfiguration = AutofillConfiguration.disabled,
     this.enableIMEPersonalizedLearning = true,
     this.enableDeltaModel = false,
-  }) : smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
+  }) : assert(inputType != null),
+       assert(obscureText != null),
+       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+       assert(autocorrect != null),
+       assert(enableSuggestions != null),
+       assert(keyboardAppearance != null),
+       assert(inputAction != null),
+       assert(textCapitalization != null),
+       assert(enableIMEPersonalizedLearning != null),
+       assert(enableDeltaModel != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -563,10 +572,10 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final bool enableSuggestions;
 
-  /// Whether to a user can change its selection.
+  /// Whether a user can change its selection.
   ///
   /// This flag only affects iOS VoiceOver. On Android Talkback, the selection
-  /// change is sent through semantics actions and are directly disabled from
+  /// change is sent through semantics actions and is directly disabled from
   /// the widget side.
   ///
   /// Defaults to true. Cannot be null.
