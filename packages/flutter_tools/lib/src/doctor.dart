@@ -315,7 +315,10 @@ class Doctor {
 
     for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
-      final Status status = _logger.startSpinner();
+      final Status status = _logger.startSpinner(
+        timeout: const Duration(seconds: 2),
+        slowWarningCallback: () => validator.slowWarning,
+      );
       ValidationResult result;
       try {
         result = await validatorTask.result;

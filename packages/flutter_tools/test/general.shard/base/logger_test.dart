@@ -451,7 +451,7 @@ void main() {
           FakeAsync().run((FakeAsync time) {
             final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
               stdio: mockStdio,
-              stopwatch: stopwatchFactory.createStopwatch(),
+              stopwatch: mockStopwatch,
               terminal: terminal,
             )..start();
             doWhileAsync(time, () => spinner.ticks < 10);
@@ -474,6 +474,39 @@ void main() {
             // Verify that stopping or canceling multiple times throws.
             expect(spinner.stop, throwsAssertionError);
             expect(spinner.cancel, throwsAssertionError);
+            done = true;
+          });
+          expect(done, isTrue);
+        });
+
+        testWithoutContext('AnonymousSpinnerStatus logs warning after timeout', () async {
+          bool done = false;
+          mockStopwatch = FakeStopwatch();
+          const String warningMessage = 'a warning message.';
+          FakeAsync().run((FakeAsync time) {
+            final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
+              stdio: mockStdio,
+              stopwatch: mockStopwatch,
+              terminal: terminal,
+              slowWarningCallback: () => warningMessage,
+              timeout: const Duration(milliseconds: 100),
+            )..start();
+            // must be greater than the spinner timer duration
+            const Duration timeLapse = Duration(milliseconds: 101);
+            mockStopwatch.elapsed += timeLapse;
+            time.elapse(timeLapse);
+
+            List<String> lines = outputStdout();
+            expect(
+              lines.join(),
+              contains(warningMessage),
+            );
+
+            spinner.stop();
+            lines = outputStdout();
+
+            expect(lines[0], endsWith('\b \b'));
+            expect(lines.length, equals(1));
             done = true;
           });
           expect(done, isTrue);
