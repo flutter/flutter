@@ -78,8 +78,16 @@ public abstract class TestActivity extends TestableFlutterActivity {
       test.put("name", "animated_color_square");
     }
     test.put("use_android_view", launchIntent.getBooleanExtra("use_android_view", false));
+    getScenarioParams(test);
     channel.invokeMethod("set_scenario", test);
   }
+
+  /**
+   * Populates test-specific parameters that are sent to the Dart test scenario.
+   *
+   * @param args The map of test arguments
+   */
+  protected void getScenarioParams(@NonNull Map<String, Object> args) {}
 
   protected void writeTimelineData(@Nullable Uri logFile) {
     if (logFile == null) {
