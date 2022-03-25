@@ -96,7 +96,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
     return specialKeyConstants.toString().trimRight();
   }
 
-  String get _layoutPresets {
+  String get _layoutGoals {
     final OutputLines<int> lines = OutputLines<int>('macOS layout goals');
     final StringBuffer modifierKeyMap = StringBuffer();
     final Iterable<LogicalKeyEntry> asciiEntries = logicalData.entries.where(
@@ -137,7 +137,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
       'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,
-      'LAYOUT_PRESETS': _layoutPresets,
+      'LAYOUT_GOALS': _layoutGoals,
     };
   }
 }
