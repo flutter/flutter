@@ -1524,7 +1524,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: color_filter_cache_perf__e2e_summary
-      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android shader_mask_cache_perf__e2e_summary
@@ -1536,7 +1535,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: shader_mask_cache_perf__e2e_summary
-      benchmark: "true"
     scheduler: luci
 
   - name: Linux_android complex_layout_android__compile
