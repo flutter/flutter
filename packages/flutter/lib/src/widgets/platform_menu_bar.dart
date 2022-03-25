@@ -236,6 +236,8 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   @override
   bool debugLockDelegate(BuildContext context) {
     assert(() {
+      // It's OK to lock if the lock isn't set, but not OK if a different
+      // context is locking it.
       if (_lockedContext != null && _lockedContext != context) {
         return false;
       }
@@ -248,7 +250,9 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   @override
   bool debugUnlockDelegate(BuildContext context) {
     assert(() {
-      if (_lockedContext == context) {
+      // It's OK to unlock if the lock isn't set, but not OK if a different
+      // context is unlocking it.
+      if (_lockedContext != null && _lockedContext != context) {
         return false;
       }
       _lockedContext = null;

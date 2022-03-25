@@ -69,84 +69,90 @@ void main() {
         ),
       );
 
-      expect(fakeMenuChannel.outgoingCalls.last.method, equals('Menu.SetMenu'));
+      expect(fakeMenuChannel.outgoingCalls.last.method, equals('Menu.setMenu'));
       expect(
         fakeMenuChannel.outgoingCalls.last.arguments,
         equals(
           <Map<String, Object?>>[
             <String, Object?>{
-              'id': 1,
+              'id': 2,
               'label': 'Menu 0',
               'enabled': true,
               'children': <Map<String, Object?>>[
                 <String, Object?>{
-                  'id': 2,
+                  'id': 1,
                   'label': 'Sub Menu 00',
                   'enabled': true,
-                },
+                }
               ]
             },
             <String, Object?>{
-              'id': 3,
+              'id': 12,
               'label': 'Menu 1',
               'enabled': true,
               'children': <Map<String, Object?>>[
                 <String, Object?>{
-                  'id': 4,
+                  'id': 3,
                   'label': 'Sub Menu 10',
                   'enabled': true,
                 },
-                <String, Object?>{'id': 5, 'isDivider': true},
                 <String, Object?>{
-                  'id': 6,
+                  'id': 4,
+                  'isDivider': true,
+                },
+                <String, Object?>{
+                  'id': 10,
                   'label': 'Sub Menu 11',
                   'enabled': true,
                   'children': <Map<String, Object?>>[
                     <String, Object?>{
-                      'id': 7,
+                      'id': 5,
                       'label': 'Sub Sub Menu 100',
                       'enabled': true,
                       'shortcutTrigger': 97,
-                      'shortcutModifiers': 8,
+                      'shortcutModifiers': 8
                     },
-                    <String, Object?>{'id': 8, 'isDivider': true},
                     <String, Object?>{
-                      'id': 9,
+                      'id': 6,
+                      'isDivider': true,
+                    },
+                    <String, Object?>{
+                      'id': 7,
                       'label': 'Sub Sub Menu 101',
                       'enabled': true,
                       'shortcutTrigger': 98,
-                      'shortcutModifiers': 2,
+                      'shortcutModifiers': 2
                     },
                     <String, Object?>{
-                      'id': 10,
+                      'id': 8,
                       'label': 'Sub Sub Menu 102',
                       'enabled': true,
                       'shortcutTrigger': 99,
-                      'shortcutModifiers': 4,
+                      'shortcutModifiers': 4
                     },
                     <String, Object?>{
-                      'id': 11,
+                      'id': 9,
                       'label': 'Sub Sub Menu 103',
                       'enabled': true,
                       'shortcutTrigger': 100,
-                      'shortcutModifiers': 1,
+                      'shortcutModifiers': 1
                     }
                   ]
                 },
                 <String, Object?>{
-                  'id': 12,
+                  'id': 11,
                   'label': 'Sub Menu 12',
                   'enabled': true,
                 }
               ]
             },
             <String, Object?>{
-              'id': 13,
+              'id': 14,
               'label': 'Menu 2',
               'enabled': true,
               'children': <Map<String, Object?>>[
                 <String, Object?>{
-                  'id': 14,
+                  'id': 13,
                   'label': 'Sub Menu 20',
                   'enabled': false,
                 }
@@ -195,7 +201,7 @@ void main() {
         menuBar.toStringDeep(),
         equalsIgnoringHashCodes(
           'PlatformMenuBar#00000\n'
-          ' └─PlatformMenuBarItem#00000\n'
+          ' └─PlatformMenuItem#00000\n'
           '     label: "label2"\n'
           '     shortcut: SingleActivator#00000(keys: Key A)\n'
           '     DISABLED\n',
