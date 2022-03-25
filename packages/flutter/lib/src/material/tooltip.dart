@@ -66,6 +66,13 @@ import 'tooltip_visibility.dart';
 /// ** See code in examples/api/lib/material/tooltip/tooltip.2.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how [Tooltip] can be shown manually with [TooltipTriggerMode.manual]
+/// by calling the [TooltipState.ensureTooltipVisible] function.
+///
+/// ** See code in examples/api/lib/material/tooltip/tooltip.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/tooltips.html>
