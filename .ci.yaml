@@ -885,7 +885,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: web_benchmarks_canvaskit
-    scheduler: luci
 
   - name: Linux web_benchmarks_html
     recipe: devicelab/devicelab_drone
@@ -1403,7 +1402,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: android_semantics_integration_test
-    scheduler: luci
 
   - name: Linux_android android_stack_size_test
     recipe: devicelab/devicelab_drone
@@ -1525,7 +1523,6 @@ targets:
         ["devicelab","android","linux"]
       task_name: color_filter_cache_perf__e2e_summary
       benchmark: "true"
-    scheduler: luci
 
   - name: Linux_android complex_layout_android__compile
     recipe: devicelab/devicelab_drone
@@ -1670,7 +1667,6 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
-    scheduler: luci
 
   - name: Linux_android cubic_bezier_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2353,7 +2349,6 @@ targets:
       tags: >
         ["framework","hostonly"]
     timeout: 60
-    scheduler: luci
 
   - name: Linux deferred components
     bringup: true # Flaky https://github.com/flutter/flutter/issues/96403
@@ -2368,7 +2363,6 @@ targets:
       tags: >
         ["framework","hostonly"]
     timeout: 60
-    scheduler: luci
 
   - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2449,7 +2443,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: android_choreographer_do_frame_test
-    scheduler: luci
 
   - name: Linux_android android_lifecycles_test
     bringup: true
@@ -2460,7 +2453,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: android_lifecycles_test
-    scheduler: luci
 
   - name: Mac build_aar_module_test
     recipe: devicelab/devicelab_drone
@@ -2481,7 +2473,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: build_aar_module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3374,7 +3365,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: flutter_view_ios__start_up
-    scheduler: luci
 
   - name: Mac_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3456,7 +3446,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: integration_ui_ios_textfield
-    scheduler: luci
 
   - name: Mac_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
@@ -3537,7 +3526,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: new_gallery_ios__transition_perf
-    scheduler: luci
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3548,7 +3536,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: ios_picture_cache_complexity_scoring_perf__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios platform_channel_sample_test_ios
     recipe: devicelab/devicelab_drone
@@ -3619,7 +3606,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: post_backdrop_filter_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios simple_animation_perf_ios
     recipe: devicelab/devicelab_drone
@@ -3640,7 +3626,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
-    scheduler: luci
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3661,7 +3646,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: native_ui_tests_ios
-    scheduler: luci
 
   - name: Mac native_ui_tests_macos
     recipe: devicelab/devicelab_drone
@@ -3695,7 +3679,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: run_release_test_macos
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4000,7 +3983,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
