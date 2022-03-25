@@ -178,7 +178,6 @@ targets:
         ["framework","hostonly"]
       validation: analyze
       validation_name: Analyze
-    scheduler: luci
 
   - name: Linux build_aar_module_test
     recipe: devicelab/devicelab_drone
@@ -197,7 +196,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: build_aar_module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -222,7 +220,6 @@ targets:
       subshard: "1_2"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Linux build_tests_2_2
     recipe: flutter/flutter_drone
@@ -242,7 +239,6 @@ targets:
       subshard: "2_2"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
@@ -261,7 +257,6 @@ targets:
         ["framework","hostonly"]
       validation: customer_testing
       validation_name: Customer testing
-    scheduler: luci
 
   - name: Linux docs_publish
     enabled_branches:
@@ -282,7 +277,6 @@ targets:
       validation_name: Docs
       firebase_project: master-docs-flutter-dev
       release_ref: refs/heads/master
-    scheduler: luci
 
   - name: Linux docs_test
     recipe: flutter/flutter
@@ -298,7 +292,6 @@ targets:
         ["framework","hostonly"]
       validation: docs
       validation_name: Docs
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter/
@@ -319,7 +312,6 @@ targets:
       tags: >
         ["firebaselab"]
       task_name: abstract_method_smoke_test
-    scheduler: luci
 
   - name: Linux firebase_android_embedding_v2_smoke_test
     recipe: firebaselab/firebaselab
@@ -332,7 +324,6 @@ targets:
       tags: >
         ["firebaselab"]
       task_name: android_embedding_v2_smoke_test
-    scheduler: luci
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
@@ -345,7 +336,6 @@ targets:
       tags: >
         ["firebaselab"]
       task_name: release_smoke_test
-    scheduler: luci
 
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
@@ -355,7 +345,6 @@ targets:
       subshard: analyze
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Linux framework_tests_libraries
     recipe: flutter/flutter_drone
@@ -369,7 +358,6 @@ targets:
       subshard: libraries
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter/
@@ -400,7 +388,6 @@ targets:
       subshard: misc
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter/
@@ -426,7 +413,6 @@ targets:
       subshard: widgets
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter/
@@ -448,7 +434,6 @@ targets:
       validation_name: Fuchsia precache
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Linux gradle_desugar_classes_test
     recipe: devicelab/devicelab_drone
@@ -466,7 +451,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_desugar_classes_test
-    scheduler: luci
     runIf:
       - dev/**
       - bin/**
@@ -488,7 +472,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_java8_compile_test
-    scheduler: luci
     runIf:
       - dev/**
       - bin/**
@@ -510,7 +493,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_bundle_test
-    scheduler: luci
     runIf:
       - dev/**
       - bin/**
@@ -532,7 +514,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_fat_apk_test
-    scheduler: luci
     runIf:
       - dev/**
       - bin/**
@@ -554,7 +535,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_light_apk_test
-    scheduler: luci
     runIf:
       - dev/**
       - bin/**
@@ -576,7 +556,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_custom_host_app_name_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -599,7 +578,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_host_with_custom_build_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -622,7 +600,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -645,7 +622,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_dependencies_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -668,7 +644,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -686,7 +661,6 @@ targets:
       subshard: "0"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter/
@@ -711,7 +685,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: technical_debt__cost
-    scheduler: luci
 
   - name: Linux test_ownership
     recipe: infra/test_ownership
@@ -721,7 +694,6 @@ targets:
     properties:
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - .ci.yaml
 
@@ -743,7 +715,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter_tools/
@@ -768,7 +739,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter_tools/
@@ -793,7 +763,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter_tools/
@@ -818,7 +787,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter_tools/
@@ -839,7 +807,6 @@ targets:
       subshard: commands
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter_tools/
@@ -860,7 +827,6 @@ targets:
       subshard: general
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter_tools/
@@ -902,7 +868,6 @@ targets:
       tags: >
         ["devicelab"]
       task_name: web_benchmarks_html
-    scheduler: luci
     runIf:
       - dev/**
       - bin/**
@@ -922,7 +887,6 @@ targets:
       subshard: "1_5"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -943,7 +907,6 @@ targets:
       subshard: "2_5"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -964,7 +927,6 @@ targets:
       subshard: "3_5"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -985,7 +947,6 @@ targets:
       subshard: "4_5"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1006,7 +967,6 @@ targets:
       subshard: "5_5"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1027,7 +987,6 @@ targets:
       subshard: "0"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1048,7 +1007,6 @@ targets:
       subshard: "1"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1069,7 +1027,6 @@ targets:
       subshard: "2"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1090,7 +1047,6 @@ targets:
       subshard: "3"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1111,7 +1067,6 @@ targets:
       subshard: "4"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1132,7 +1087,6 @@ targets:
       subshard: "5"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1153,7 +1107,6 @@ targets:
       subshard: "6"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1174,7 +1127,6 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1195,7 +1147,6 @@ targets:
       subshard: "0"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1215,7 +1166,6 @@ targets:
       subshard: "1"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1235,7 +1185,6 @@ targets:
       subshard: "2"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1255,7 +1204,6 @@ targets:
       subshard: "3"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1275,7 +1223,6 @@ targets:
       subshard: "4"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1295,7 +1242,6 @@ targets:
       subshard: "5"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1315,7 +1261,6 @@ targets:
       subshard: "6"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1335,7 +1280,6 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/
@@ -1356,7 +1300,6 @@ targets:
       subshard: web
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter_tools/
@@ -2497,7 +2440,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: build_ios_framework_module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2522,7 +2464,6 @@ targets:
       subshard: "1_4"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Mac build_tests_2_4
     recipe: flutter/flutter_drone
@@ -2542,7 +2483,6 @@ targets:
       subshard: "2_4"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Mac build_tests_3_4
     recipe: flutter/flutter_drone
@@ -2562,7 +2502,6 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Mac build_tests_4_4
     recipe: flutter/flutter_drone
@@ -2582,7 +2521,6 @@ targets:
       subshard: "4_4"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Mac customer_testing
     recipe: flutter/flutter
@@ -2593,7 +2531,6 @@ targets:
       validation_name: Customer testing
       tags: >
         ["framework","hostonly"]
-    scheduler: luci
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -2611,7 +2548,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: dart_plugin_registry_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2630,7 +2566,6 @@ targets:
       subshard: libraries
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter/**
@@ -2660,7 +2595,6 @@ targets:
       subshard: misc
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter/**
@@ -2686,7 +2620,6 @@ targets:
       subshard: widgets
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter/**
@@ -2718,7 +2651,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_bundle_test
-    scheduler: luci
     runIf:
       - dev/**
       - bin/**
@@ -2742,7 +2674,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_fat_apk_test
-    scheduler: luci
     runIf:
       - dev/**
       - bin/**
@@ -2766,7 +2697,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_custom_host_app_name_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2791,7 +2721,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_host_with_custom_build_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2816,7 +2745,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2841,7 +2769,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test_ios
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2866,7 +2793,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_dependencies_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2891,7 +2817,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_lint_mac
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2917,7 +2842,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2942,7 +2866,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_test_ios
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2968,7 +2891,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2994,7 +2916,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3020,7 +2941,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3046,7 +2966,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3067,7 +2986,6 @@ targets:
       subshard: commands
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Mac tool_tests_general
     recipe: flutter/flutter_drone
@@ -3083,7 +3001,6 @@ targets:
       subshard: general
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3106,7 +3023,6 @@ targets:
         ["framework","hostonly","shard"]
       validation: verify_binaries_codesigned
       validation_name: Verify binaries codesigned
-    scheduler: luci
 
   - name: Mac web_tool_tests
     recipe: flutter/flutter_drone
@@ -3124,7 +3040,6 @@ targets:
       subshard: web
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3659,7 +3574,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: native_ui_tests_macos
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3703,7 +3617,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: build_aar_module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3727,7 +3640,6 @@ targets:
       subshard: "1_3"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Windows build_tests_2_3
     recipe: flutter/flutter_drone
@@ -3746,7 +3658,6 @@ targets:
       subshard: "2_3"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Windows build_tests_3_3
     recipe: flutter/flutter_drone
@@ -3765,7 +3676,6 @@ targets:
       subshard: "3_3"
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
 
   - name: Windows customer_testing
     recipe: flutter/flutter
@@ -3776,7 +3686,6 @@ targets:
       validation_name: Customer testing
       tags: >
         ["framework","hostonly"]
-    scheduler: luci
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone
@@ -3790,7 +3699,6 @@ targets:
       subshard: libraries
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter/
@@ -3819,7 +3727,6 @@ targets:
       subshard: misc
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter/
@@ -3845,7 +3752,6 @@ targets:
       subshard: widgets
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/
       - packages/flutter/
@@ -3876,7 +3782,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_bundle_test
-    scheduler: luci
     runIf:
       - dev/**
       - bin/**
@@ -3900,7 +3805,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_fat_apk_test
-    scheduler: luci
 
   - name: Windows hot_mode_dev_cycle_win_target__benchmark
     recipe: devicelab/devicelab_drone
@@ -3918,7 +3822,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: hot_mode_dev_cycle_win_target__benchmark
-    scheduler: luci
 
   - name: Windows module_custom_host_app_name_test
     bringup: true # Flaky https://github.com/flutter/flutter/issues/96790
@@ -3934,7 +3837,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_custom_host_app_name_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3958,7 +3860,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_host_with_custom_build_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4006,7 +3907,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_dependencies_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4030,7 +3930,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4055,7 +3954,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4080,7 +3978,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4105,7 +4002,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4130,7 +4026,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4155,7 +4050,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4180,7 +4074,6 @@ targets:
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4201,7 +4094,6 @@ targets:
       subshard: commands
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4222,7 +4114,6 @@ targets:
       subshard: general
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4244,7 +4135,6 @@ targets:
       subshard: web
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4262,7 +4152,6 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       task_name: windows_home_scroll_perf__timeline_summary
-    scheduler: luci
 
   - name: Windows_android basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
