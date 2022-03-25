@@ -480,10 +480,9 @@ void main() {
         });
 
         testWithoutContext('AnonymousSpinnerStatus logs warning after timeout', () async {
-          bool done = false;
           mockStopwatch = FakeStopwatch();
           const String warningMessage = 'a warning message.';
-          FakeAsync().run((FakeAsync time) {
+          final bool done = FakeAsync().run<bool>((FakeAsync time) {
             final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
               stdio: mockStdio,
               stopwatch: mockStopwatch,
@@ -504,10 +503,7 @@ void main() {
 
             spinner.stop();
             lines = outputStdout();
-
-            expect(lines[0], endsWith('\b \b'));
-            expect(lines.length, equals(1));
-            done = true;
+            return true;
           });
           expect(done, isTrue);
         });
