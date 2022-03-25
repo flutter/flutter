@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import <objc/message.h>
+#include <memory>
 
 #import "FlutterEmbedderKeyResponder.h"
 #import "KeyCodeMap_Internal.h"
@@ -248,40 +249,11 @@ const char* getEventString(NSString* characters) {
 /**
  * The invocation context for |HandleResponse|, wrapping
  * |FlutterEmbedderKeyResponder.handleResponse|.
- *
- * The embedder functions only accept C-functions as callbacks, as well as an
- * arbitrary user_data. In order to send an instance method of
- * |FlutterEmbedderKeyResponder.handleResponse| to the engine's |SendKeyEvent|,
- * the embedder wraps the invocation into a C-function |HandleResponse| and
- * invocation context |FlutterKeyPendingResponse|.
- *
- * When this object is sent to the engine's |SendKeyEvent| as |user_data|, it
- * must be attached with |__bridge_retained|. When this object is parsed
- * in |HandleResponse| from |user_data|, it will be attached with
- * |__bridge_transfer|.
  */
-@interface FlutterKeyPendingResponse : NSObject
-
-@property(nonatomic) FlutterEmbedderKeyResponder* responder;
-
-@property(nonatomic) uint64_t responseId;
-
-- (nonnull instancetype)initWithHandler:(nonnull FlutterEmbedderKeyResponder*)responder
-                             responseId:(uint64_t)responseId;
-
-@end
-
-@implementation FlutterKeyPendingResponse
-- (instancetype)initWithHandler:(FlutterEmbedderKeyResponder*)responder
-                     responseId:(uint64_t)responseId {
-  self = [super init];
-  if (self != nil) {
-    _responder = responder;
-    _responseId = responseId;
-  }
-  return self;
-}
-@end
+struct FlutterKeyPendingResponse {
+  FlutterEmbedderKeyResponder* responder;
+  uint64_t responseId;
+};
 
 /**
  * Guards a |FlutterAsyncKeyCallback| to make sure it's handled exactly once
@@ -598,11 +570,10 @@ const char* getEventString(NSString* characters) {
                        callback:(FlutterKeyCallbackGuard*)callback {
   _responseId += 1;
   uint64_t responseId = _responseId;
-  FlutterKeyPendingResponse* pending =
-      [[FlutterKeyPendingResponse alloc] initWithHandler:self responseId:responseId];
+  // The `pending` is released in `HandleResponse`.
+  FlutterKeyPendingResponse* pending = new FlutterKeyPendingResponse{self, responseId};
   [callback pendTo:_pendingResponses withId:responseId];
-  // The `__bridge_retained` here is matched by `__bridge_transfer` in HandleResponse.
-  _sendEvent(event, HandleResponse, (__bridge_retained void*)pending);
+  _sendEvent(event, HandleResponse, pending);
   callback.sentAnyEvents = TRUE;
 }
 
@@ -809,8 +780,9 @@ const char* getEventString(NSString* characters) {
 
 namespace {
 void HandleResponse(bool handled, void* user_data) {
-  // The `__bridge_transfer` here is matched by `__bridge_retained` in sendPrimaryFlutterEvent.
-  FlutterKeyPendingResponse* pending = (__bridge_transfer FlutterKeyPendingResponse*)user_data;
-  [pending.responder handleResponse:handled forId:pending.responseId];
+  // Use unique_ptr to release on leaving.
+  auto pending = std::unique_ptr<FlutterKeyPendingResponse>(
+      reinterpret_cast<FlutterKeyPendingResponse*>(user_data));
+  [pending->responder handleResponse:handled forId:pending->responseId];
 }
 }  // namespace
