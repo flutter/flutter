@@ -19,8 +19,8 @@ import 'inherited_theme.dart';
 ///
 /// The [MaterialApp] automatically creates this widget with
 /// [ThemeData.textSelectionTheme]. If it is null, it then sets the selection
-/// color to [ThemeData.colorScheme.primary] with 0.4 opacity and cursorColor
-/// to [ThemeData.colorScheme.primary].
+/// color to [ColorScheme.primary] with 0.4 opacity and cursorColor
+/// to [ColorScheme.primary].
 ///
 /// See also:
 ///  * [TextSelectionTheme]: which also creates a [DefaultSelectionStyle] for
