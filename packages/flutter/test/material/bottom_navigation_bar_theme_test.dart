@@ -151,27 +151,13 @@ void main() {
       ),
     );
 
-    final Finder findACTransform = find.descendant(
-      of: find.byType(BottomNavigationBar),
-      matching: find.ancestor(
-        of: find.text('AC'),
-        matching: find.byType(Transform),
-      ),
-    );
-    final Finder findAlarmTransform = find.descendant(
-      of: find.byType(BottomNavigationBar),
-      matching: find.ancestor(
-        of: find.text('Alarm'),
-        matching: find.byType(Transform),
-      ),
-    );
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.fontSize, selectedFontStyle.fontSize);
     // Unselected label has a font size of 22 but is scaled down to be font size 21.
     expect(
-      tester.firstWidget<Transform>(findAlarmTransform).transform,
+      tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
       equals(Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize! / selectedTextStyle.fontSize!))),
     );
     expect(selectedIcon.color, equals(selectedItemColor));
@@ -193,8 +179,14 @@ void main() {
     expect(_material(tester).elevation, equals(elevation));
     expect(_material(tester).color, equals(backgroundColor));
 
-    final Offset selectedBarItem = tester.getCenter(findACTransform);
-    final Offset unselectedBarItem = tester.getCenter(findAlarmTransform);
+    final Offset selectedBarItem = tester.getCenter(
+      find.ancestor(of: find.text('AC'),
+      matching: find.byType(Transform))
+    );
+    final Offset unselectedBarItem = tester.getCenter(
+      find.ancestor(of: find.text('Alarm'),
+      matching: find.byType(Transform))
+    );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
@@ -278,27 +270,13 @@ void main() {
       ),
     );
 
-    Finder findDescendantOfBottomNavigationBar(Finder finder) {
-      return find.descendant(
-        of: find.byType(BottomNavigationBar),
-        matching: finder,
-      );
-    }
-
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.fontSize, selectedFontStyle.fontSize);
     // Unselected label has a font size of 22 but is scaled down to be font size 21.
     expect(
-      tester.firstWidget<Transform>(
-        findDescendantOfBottomNavigationBar(
-          find.ancestor(
-            of: find.text('Alarm'),
-            matching: find.byType(Transform),
-          ),
-        ),
-      ).transform,
+      tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
       equals(Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize! / selectedTextStyle.fontSize!))),
     );
     expect(selectedIcon.color, equals(selectedItemColor));
@@ -307,11 +285,13 @@ void main() {
     expect(unselectedIcon.fontSize, equals(unselectedIconTheme.size));
     // There should not be any [Opacity] or [FadeTransition] widgets
     // since showUnselectedLabels and showSelectedLabels are true.
-    final Finder findOpacity = findDescendantOfBottomNavigationBar(
-      find.byType(Opacity),
+    final Finder findOpacity = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byType(Opacity),
     );
-    final Finder findFadeTransition = findDescendantOfBottomNavigationBar(
-      find.byType(FadeTransition),
+    final Finder findFadeTransition = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byType(FadeTransition),
     );
     expect(findOpacity, findsNothing);
     expect(findFadeTransition, findsNothing);
@@ -319,12 +299,8 @@ void main() {
     expect(_material(tester).color, equals(backgroundColor));
 
     final Offset barItem = tester.getCenter(
-      findDescendantOfBottomNavigationBar(
-        find.ancestor(
-          of: find.text('AC'),
-          matching: find.byType(Transform),
-        ),
-      ),
+      find.ancestor(of: find.text('AC'),
+      matching: find.byType(Transform))
     );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
