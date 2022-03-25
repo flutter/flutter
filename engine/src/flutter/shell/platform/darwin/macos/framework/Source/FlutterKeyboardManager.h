@@ -4,16 +4,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardViewDelegate.h"
-
-namespace {
-// Someohow this pointer type must be defined as a single type for the compiler
-// to compile the function pointer type (due to _Nullable).
-typedef NSResponder* _NSResponderPtr;
-}
-
-typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
 
 /**
  * Processes keyboard events and cooperate with |TextInputPlugin|.

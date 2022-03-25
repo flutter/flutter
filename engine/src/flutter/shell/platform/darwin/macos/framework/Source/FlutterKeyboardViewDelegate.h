@@ -4,6 +4,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 
 /**
