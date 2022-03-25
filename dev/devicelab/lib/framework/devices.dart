@@ -52,7 +52,16 @@ String? _findMatchId(List<String> idList, String idPattern) {
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, androidArm, androidArm64 ,ios, fuchsia, fake, windows }
+enum DeviceOperatingSystem {
+  android,
+  androidArm,
+  androidArm64,
+  fake,
+  fuchsia,
+  ios,
+  macos,
+  windows,
+}
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -71,6 +80,8 @@ abstract class DeviceDiscovery {
         return IosDeviceDiscovery();
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
+      case DeviceOperatingSystem.macos:
+        return MacosDeviceDiscovery();
       case DeviceOperatingSystem.windows:
         return WindowsDeviceDiscovery();
       case DeviceOperatingSystem.fake:
@@ -151,6 +162,14 @@ abstract class Device {
   /// Flutter applications' `print` statements end up in this log
   /// with some prefix.
   Stream<String> get logcat;
+
+  /// Clears the device logs.
+  ///
+  /// This is important because benchmarks tests rely on the logs produced by
+  /// the flutter run command.
+  ///
+  /// On Android, those logs may contain logs from previous test.
+  Future<void> clearLogs();
 
   /// Whether this device supports calls to [startLoggingToSink]
   /// and [stopLoggingToSink].
@@ -334,6 +353,40 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   }
 }
 
+class MacosDeviceDiscovery implements DeviceDiscovery {
+  factory MacosDeviceDiscovery() {
+    return _instance ??= MacosDeviceDiscovery._();
+  }
+
+  MacosDeviceDiscovery._();
+
+  static MacosDeviceDiscovery? _instance;
+
+  static const MacosDevice _device = MacosDevice();
+
+  @override
+  Future<Map<String, HealthCheckResult>> checkDevices() async {
+    return <String, HealthCheckResult>{};
+  }
+
+  @override
+  Future<void> chooseWorkingDevice() async { }
+
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async { }
+
+  @override
+  Future<List<String>> discoverDevices() async {
+    return <String>['macos'];
+  }
+
+  @override
+  Future<void> performPreflightTasks() async { }
+
+  @override
+  Future<Device> get workingDevice  async => _device;
+}
+
 class WindowsDeviceDiscovery implements DeviceDiscovery {
   factory WindowsDeviceDiscovery() {
     return _instance ??= WindowsDeviceDiscovery._();
@@ -366,7 +419,6 @@ class WindowsDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Device> get workingDevice  async => _device;
-
 }
 
 class FuchsiaDeviceDiscovery implements DeviceDiscovery {
@@ -668,6 +720,11 @@ class AndroidDevice extends Device {
   }
 
   @override
+  Future<void> clearLogs() {
+    return adb(<String>['logcat', '-c']);
+  }
+
+  @override
   Stream<String> get logcat {
     final Completer<void> stdoutDone = Completer<void>();
     final Completer<void> stderrDone = Completer<void>();
@@ -677,7 +734,7 @@ class AndroidDevice extends Device {
     late final StreamController<String> stream;
     stream = StreamController<String>(
       onListen: () async {
-        await adb(<String>['logcat', '-c']);
+        await clearLogs();
         final Process process = await startProcess(
           adbPath,
           // Make logcat less chatty by filtering down to just ActivityManager
@@ -972,12 +1029,67 @@ class IosDevice extends Device {
   }
 
   @override
+  Future<void> clearLogs() async {}
+
+  @override
   Future<void> stop(String packageName) async {}
 
   @override
   Future<void> reboot() {
     return Process.run('idevicediagnostics', <String>['restart', '-u', deviceId]);
   }
+}
+
+class MacosDevice extends Device {
+  const MacosDevice();
+
+  @override
+  String get deviceId => 'macos';
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    return <String, dynamic>{};
+  }
+
+  @override
+  Future<void> home() async { }
+
+  @override
+  Future<bool> isAsleep() async {
+    return false;
+  }
+
+  @override
+  Future<bool> isAwake() async {
+    return true;
+  }
+
+  @override
+  Stream<String> get logcat => const Stream<String>.empty();
+
+  @override
+  Future<void> clearLogs() async {}
+
+  @override
+  Future<void> reboot() async { }
+
+  @override
+  Future<void> sendToSleep() async { }
+
+  @override
+  Future<void> stop(String packageName) async { }
+
+  @override
+  Future<void> tap(int x, int y) async { }
+
+  @override
+  Future<void> togglePower() async { }
+
+  @override
+  Future<void> unlock() async { }
+
+  @override
+  Future<void> wakeUp() async { }
 }
 
 class WindowsDevice extends Device {
@@ -1006,6 +1118,9 @@ class WindowsDevice extends Device {
 
   @override
   Stream<String> get logcat => const Stream<String>.empty();
+
+  @override
+  Future<void> clearLogs() async {}
 
   @override
   Future<void> reboot() async { }
@@ -1075,6 +1190,9 @@ class FuchsiaDevice extends Device {
   }
 
   @override
+  Future<void> clearLogs() async {}
+
+  @override
   Future<void> reboot() async {
     // Unsupported.
   }
@@ -1141,6 +1259,9 @@ class FakeDevice extends Device {
   Stream<String> get logcat {
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> clearLogs() async {}
 
   @override
   Future<void> stop(String packageName) async {}

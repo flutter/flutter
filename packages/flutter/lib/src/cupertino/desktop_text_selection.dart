@@ -77,6 +77,12 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
   }
+
+  @override
+  void handleSelectAll(TextSelectionDelegate delegate) {
+    super.handleSelectAll(delegate);
+    delegate.hideToolbar();
+  }
 }
 
 /// Text selection controls that follows Mac design conventions.

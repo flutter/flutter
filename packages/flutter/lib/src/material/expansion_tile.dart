@@ -9,6 +9,7 @@ import 'colors.dart';
 import 'expansion_tile_theme.dart';
 import 'icons.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
 import 'theme.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);

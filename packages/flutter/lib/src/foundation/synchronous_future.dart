@@ -6,7 +6,7 @@ import 'dart:async';
 
 /// A [Future] whose [then] implementation calls the callback immediately.
 ///
-/// This is similar to [new Future.value], except that the value is available in
+/// This is similar to [Future.value], except that the value is available in
 /// the same event-loop iteration.
 ///
 /// ⚠ This class is useful in cases where you want to expose a single API, where
@@ -19,7 +19,7 @@ class SynchronousFuture<T> implements Future<T> {
   ///
   /// See also:
   ///
-  ///  * [new Future.value] for information about creating a regular
+  ///  * [Future.value] for information about creating a regular
   ///    [Future] that completes with a value.
   SynchronousFuture(this._value);
 

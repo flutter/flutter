@@ -104,6 +104,7 @@ class ColorScheme with Diagnosticable {
     Color? inverseSurface,
     Color? onInverseSurface,
     Color? inversePrimary,
+    Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
@@ -143,7 +144,8 @@ class ColorScheme with Diagnosticable {
        _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
        _primaryVariant = primaryVariant,
-       _secondaryVariant = secondaryVariant;
+       _secondaryVariant = secondaryVariant,
+       _surfaceTint = surfaceTint;
 
   /// Generate a [ColorScheme] derived from the given `seedColor`.
   ///
@@ -197,6 +199,7 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? shadow,
+    Color? surfaceTint,
   }) {
     final Scheme scheme;
     switch (brightness) {
@@ -235,6 +238,7 @@ class ColorScheme with Diagnosticable {
       onInverseSurface: onInverseSurface ?? Color(scheme.inverseOnSurface),
       inversePrimary: inversePrimary ?? Color(scheme.inversePrimary),
       shadow: shadow ?? Color(scheme.shadow),
+      surfaceTint: surfaceTint ?? Color(scheme.primary),
       brightness: brightness,
     );
   }
@@ -270,6 +274,7 @@ class ColorScheme with Diagnosticable {
     Color? inverseSurface,
     Color? onInverseSurface,
     Color? inversePrimary,
+    Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
@@ -309,7 +314,8 @@ class ColorScheme with Diagnosticable {
        _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
        _primaryVariant = primaryVariant,
-       _secondaryVariant = secondaryVariant;
+       _secondaryVariant = secondaryVariant,
+       _surfaceTint = surfaceTint;
 
   /// Create the recommended dark color scheme that matches the
   /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
@@ -342,6 +348,7 @@ class ColorScheme with Diagnosticable {
     Color? inverseSurface,
     Color? onInverseSurface,
     Color? inversePrimary,
+    Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
@@ -381,7 +388,8 @@ class ColorScheme with Diagnosticable {
        _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
        _primaryVariant = primaryVariant,
-       _secondaryVariant = secondaryVariant;
+       _secondaryVariant = secondaryVariant,
+       _surfaceTint = surfaceTint;
 
   /// Create a high contrast ColorScheme based on a purple primary color that
   /// matches the [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
@@ -414,6 +422,7 @@ class ColorScheme with Diagnosticable {
     Color? inverseSurface,
     Color? onInverseSurface,
     Color? inversePrimary,
+    Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
@@ -453,7 +462,8 @@ class ColorScheme with Diagnosticable {
        _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
        _primaryVariant = primaryVariant,
-       _secondaryVariant = secondaryVariant;
+       _secondaryVariant = secondaryVariant,
+       _surfaceTint = surfaceTint;
 
   /// Create a high contrast ColorScheme based on the dark
   /// [baseline Material color scheme](https://material.io/design/color/dark-theme.html#ui-application).
@@ -486,6 +496,7 @@ class ColorScheme with Diagnosticable {
     Color? inverseSurface,
     Color? onInverseSurface,
     Color? inversePrimary,
+    Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
@@ -525,7 +536,8 @@ class ColorScheme with Diagnosticable {
        _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
        _primaryVariant = primaryVariant,
-       _secondaryVariant = secondaryVariant;
+       _secondaryVariant = secondaryVariant,
+       _surfaceTint = surfaceTint;
 
   /// Create a color scheme from a [MaterialColor] swatch.
   ///
@@ -730,6 +742,11 @@ class ColorScheme with Diagnosticable {
   /// backgrounds, like button text in a SnackBar.
   Color get inversePrimary => _inversePrimary ?? onPrimary;
 
+  final Color? _surfaceTint;
+  /// A color used as an overlay on a surface color to indicate a component's
+  /// elevation.
+  Color get surfaceTint => _surfaceTint ?? primary;
+
   final Color? _primaryVariant;
   /// A darker version of the primary color.
   @Deprecated(
@@ -777,6 +794,7 @@ class ColorScheme with Diagnosticable {
     Color? inverseSurface,
     Color? onInverseSurface,
     Color? inversePrimary,
+    Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
@@ -819,6 +837,7 @@ class ColorScheme with Diagnosticable {
       inversePrimary : inversePrimary ?? this.inversePrimary,
       primaryVariant: primaryVariant ?? this.primaryVariant,
       secondaryVariant: secondaryVariant ?? this.secondaryVariant,
+      surfaceTint: _surfaceTint ?? this.surfaceTint,
     );
   }
 
@@ -857,6 +876,7 @@ class ColorScheme with Diagnosticable {
       inversePrimary: Color.lerp(a.inversePrimary, b.inversePrimary, t),
       primaryVariant: Color.lerp(a.primaryVariant, b.primaryVariant, t),
       secondaryVariant: Color.lerp(a.secondaryVariant, b.secondaryVariant, t),
+      surfaceTint: Color.lerp(a.surfaceTint, b.surfaceTint, t),
     );
   }
 
@@ -896,7 +916,8 @@ class ColorScheme with Diagnosticable {
       && other.onInverseSurface == onInverseSurface
       && other.inversePrimary == inversePrimary
       && other.primaryVariant == primaryVariant
-      && other.secondaryVariant == secondaryVariant;
+      && other.secondaryVariant == secondaryVariant
+      && other.surfaceTint == surfaceTint;
   }
 
   @override
@@ -932,6 +953,7 @@ class ColorScheme with Diagnosticable {
       inversePrimary,
       primaryVariant,
       secondaryVariant,
+      surfaceTint,
     ),
   );
 
@@ -969,5 +991,6 @@ class ColorScheme with Diagnosticable {
     properties.add(ColorProperty('inversePrimary', inversePrimary, defaultValue: defaultScheme.inversePrimary));
     properties.add(ColorProperty('primaryVariant', primaryVariant, defaultValue: defaultScheme.primaryVariant));
     properties.add(ColorProperty('secondaryVariant', secondaryVariant, defaultValue: defaultScheme.secondaryVariant));
+    properties.add(ColorProperty('surfaceTint', surfaceTint, defaultValue: defaultScheme.surfaceTint));
   }
 }
