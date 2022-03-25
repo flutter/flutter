@@ -14,8 +14,6 @@ namespace impeller {
 
 using Scalar = float;
 
-constexpr Scalar kEhCloseEnough = 1e-3f;
-
 template <class T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
 constexpr T Absolute(const T& val) {
   return val >= T{} ? val : -val;

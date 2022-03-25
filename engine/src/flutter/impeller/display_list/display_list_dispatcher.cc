@@ -247,7 +247,8 @@ void DisplayListDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setImageFilter(const flutter::DlImageFilter* filter) {
+void DisplayListDispatcher::setImageFilter(
+    const flutter::DlImageFilter* filter) {
   UNIMPLEMENTED;
 }
 
@@ -609,9 +610,10 @@ void DisplayListDispatcher::drawDisplayList(
 void DisplayListDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                          SkScalar x,
                                          SkScalar y) {
-  canvas_.DrawTextFrame(TextFrameFromTextBlob(blob),  //
-                        impeller::Point{x, y},        //
-                        paint_                        //
+  Scalar scale = canvas_.GetCurrentTransformation().GetMaxBasisLength();
+  canvas_.DrawTextFrame(TextFrameFromTextBlob(blob, scale),  //
+                        impeller::Point{x, y},               //
+                        paint_                               //
   );
 }
 

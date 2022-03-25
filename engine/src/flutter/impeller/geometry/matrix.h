@@ -219,6 +219,8 @@ struct Matrix {
 
   Scalar GetDeterminant() const;
 
+  Scalar GetMaxBasisLength() const;
+
   constexpr bool IsAffine() const {
     return (m[2] == 0 && m[3] == 0 && m[6] == 0 && m[7] == 0 && m[8] == 0 &&
             m[9] == 0 && m[10] == 1 && m[11] == 0 && m[14] == 0 && m[15] == 1);

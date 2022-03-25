@@ -12,13 +12,14 @@
 
 namespace impeller {
 
-static Font ToFont(const SkFont& font) {
+static Font ToFont(const SkFont& font, Scalar scale) {
   auto typeface = std::make_shared<TypefaceSkia>(font.refTypefaceOrDefault());
 
   SkFontMetrics sk_metrics;
   font.getMetrics(&sk_metrics);
 
   Font::Metrics metrics;
+  metrics.scale = scale;
   metrics.point_size = font.getSize();
   metrics.ascent = sk_metrics.fAscent;
   metrics.descent = sk_metrics.fDescent;
@@ -28,7 +29,8 @@ static Font ToFont(const SkFont& font) {
   return Font{std::move(typeface), std::move(metrics)};
 }
 
-TextFrame TextFrameFromTextBlob(sk_sp<SkTextBlob> blob) {
+TextFrame TextFrameFromTextBlob(sk_sp<SkTextBlob> blob,
+                                Scalar scale) {
   if (!blob) {
     return {};
   }
@@ -36,7 +38,7 @@ TextFrame TextFrameFromTextBlob(sk_sp<SkTextBlob> blob) {
   TextFrame frame;
 
   for (SkTextBlobRunIterator run(blob.get()); !run.done(); run.next()) {
-    TextRun text_run(ToFont(run.font()));
+    TextRun text_run(ToFont(run.font(), scale));
     const auto glyph_count = run.glyphCount();
     const auto* glyphs = run.glyphs();
     switch (run.positioning()) {

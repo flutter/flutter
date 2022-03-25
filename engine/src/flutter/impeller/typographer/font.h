@@ -29,6 +29,12 @@ class Font : public Comparable<Font> {
   ///
   struct Metrics {
     //--------------------------------------------------------------------------
+    /// The scaling factor that should be used when rendering this font to an
+    /// atlas. This should normally be set in accordance with the transformation
+    /// matrix that will be used to position glyph geometry.
+    ///
+    Scalar scale = 1.0f;
+    //--------------------------------------------------------------------------
     /// The point size of the font.
     ///
     Scalar point_size = 12.0f;
@@ -69,9 +75,9 @@ class Font : public Comparable<Font> {
     }
 
     constexpr bool operator==(const Metrics& o) const {
-      return point_size == o.point_size && ascent == o.ascent &&
-             descent == o.descent && min_extent == o.min_extent &&
-             max_extent == o.max_extent;
+      return scale == o.scale && point_size == o.point_size &&
+             ascent == o.ascent && descent == o.descent &&
+             min_extent == o.min_extent && max_extent == o.max_extent;
     }
   };
 
@@ -107,6 +113,6 @@ class Font : public Comparable<Font> {
 template <>
 struct std::hash<impeller::Font::Metrics> {
   constexpr std::size_t operator()(const impeller::Font::Metrics& m) const {
-    return fml::HashCombine(m.point_size, m.ascent, m.descent);
+    return fml::HashCombine(m.scale, m.point_size, m.ascent, m.descent);
   }
 };
