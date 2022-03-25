@@ -15,6 +15,7 @@ class PackageAutoroller {
     required this.token,
     required this.framework,
     this.featureBranchname = 'package-autoroller',
+    required this.orgName,
   }) {
     if (token.trim().isEmpty) {
       throw Exception('empty token!');
@@ -36,6 +37,9 @@ class PackageAutoroller {
 
   final String featureBranchname;
 
+  /// Name of the GitHub organization to push the feature branch to.
+  final String orgName;
+
   Future<void> roll() async {
     await authLogout(); // TODO delete
     await authLogin();
@@ -43,7 +47,6 @@ class PackageAutoroller {
     await pushBranch();
     await createPr(
       repository: await framework.checkoutDirectory,
-      orgName: 'christopherfujino', // TODO wire through args
     );
     await authLogout();
   }
@@ -138,7 +141,6 @@ class PackageAutoroller {
     String title = 'A PR Title',
     String body = 'A PR Body',
     String base = 'master',
-    required String orgName,
   }) async {
     // TODO ensure title and body don't have quotes
     assert(orgName.isNotEmpty);
@@ -154,6 +156,7 @@ class PackageAutoroller {
         '$orgName:$featureBranchname',
         '--base',
         base,
+        '--draft', // TODO delete
       ],
       workingDirectory: repository.path,
     );
