@@ -153,7 +153,7 @@ class ButtonStyle with Diagnosticable {
 
   /// The surface tint color of the button's [Material].
   ///
-  /// See [Material.surfaceTint] for more details.
+  /// See [Material.surfaceTintColor] for more details.
   final MaterialStateProperty<Color?>? surfaceTintColor;
 
   /// The elevation of the button's [Material].
