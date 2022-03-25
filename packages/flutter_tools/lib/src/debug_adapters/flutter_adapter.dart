@@ -191,15 +191,11 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
 
   @override
   Future<void> debuggerConnected(vm.VM vmInfo) async {
-    // Capture the PID from the VM Service so that we can terminate it when
-    // cleaning up. Terminating the process might not be enough as it could be
-    // just a shell script (e.g. flutter.bat on Windows) and may not pass the
-    // signal on correctly.
-    // See: https://github.com/Dart-Code/Dart-Code/issues/907
-    final int? pid = vmInfo.pid;
-    if (pid != null) {
-      pidsToTerminate.add(pid);
-    }
+    // Usually we'd capture the pid from the VM here and record it for
+    // terminating, however for Flutter apps it may be running on a remote
+    // device so it's not valid to terminate a process with that pid locally.
+    // For attach, pids should never be collected as terminateRequest() should
+    // not terminate the debugee.
   }
 
   /// Called by [disconnectRequest] to request that we forcefully shut down the app being run (or in the case of an attach, disconnect).
@@ -407,6 +403,17 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     _connectDebuggerIfReady();
   }
 
+  /// Handles the daemon.connected event, recording the pid of the flutter_tools process.
+  void _handleDaemonConnected(Map<String, Object?> params) {
+    // On Windows, the pid from the process we spawn is the shell running
+    // flutter.bat and terminating it may not be reliable, so we also take the
+    // pid provided from the VM running flutter_tools.
+    final int? pid = params['pid'] as int?;
+    if (pid != null) {
+      pidsToTerminate.add(pid);
+    }
+  }
+
   /// Handles the app.debugPort event from Flutter, connecting to the VM Service if everything else is ready.
   void _handleDebugPort(Map<String, Object?> params) {
     // When running in noDebug mode, Flutter may still provide us a VM Service
@@ -434,6 +441,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   void _handleJsonEvent(String event, Map<String, Object?>? params) {
     params ??= <String, Object?>{};
     switch (event) {
+      case 'daemon.connected':
+        _handleDaemonConnected(params);
+        break;
       case 'app.debugPort':
         _handleDebugPort(params);
         break;

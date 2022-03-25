@@ -65,7 +65,6 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   switch (type) {
     // success; see _buildSuccessResponse
     case 1:
-      assert(response[0] is R);
       return response[0] as R;
 
     // native error; see Isolate.addErrorListener
@@ -78,10 +77,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
     // caught error; see _buildErrorResponse
     case 3:
     default:
-      assert(type == 3);
-      assert(response[0] is Object);
-      assert(response[1] is StackTrace);
-      assert(response[2] == null);
+      assert(type == 3 && response[2] == null);
 
       await Future<Never>.error(
         response[0] as Object,
