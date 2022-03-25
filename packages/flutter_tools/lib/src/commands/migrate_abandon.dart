@@ -4,10 +4,10 @@
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../cache.dart';
 import '../migrate/migrate_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../cache.dart';
 import 'migrate.dart';
 
 /// Abandons the existing migration by deleting the migrate working directory.
@@ -21,7 +21,6 @@ class MigrateAbandonCommand extends FlutterCommand {
     argParser.addOption(
       'working-directory',
       help: 'Specifies the custom migration working directory used to stage and edit proposed changes.',
-      defaultsTo: null,
       valueHelp: 'path',
     );
   }

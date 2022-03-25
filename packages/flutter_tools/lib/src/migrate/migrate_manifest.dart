@@ -117,12 +117,12 @@ class MigrateManifest {
     }
 
     String newFileManifestContents = '';
-    for (String localPath in addedFiles) {
+    for (final String localPath in addedFiles) {
       newFileManifestContents += '  - $localPath\n';
     }
 
     String deletedFileManifestContents = '';
-    for (String localPath in deletedFiles) {
+    for (final String localPath in deletedFiles) {
       deletedFileManifestContents += '  - $localPath\n';
     }
 

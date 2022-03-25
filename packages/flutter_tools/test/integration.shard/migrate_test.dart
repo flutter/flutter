@@ -7,7 +7,6 @@
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/migrate/migrate_compute.dart';
 import 'package:flutter_tools/src/project.dart';
 
@@ -38,7 +37,6 @@ void main() {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
     final MigrateProject project = MigrateProject('version:1.22.6_stable');
     await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     // Init a git repo to test uncommitted changes checks
     await processManager.run(<String>[
@@ -63,23 +61,24 @@ void main() {
       '"Initial commit"',
     ], workingDirectory: tempDir.path);
 
-    FlutterProjectFactory flutterFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
-    FlutterProject flutterProject = flutterFactory.fromDirectory(tempDir);
+    final FlutterProjectFactory flutterFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
+    final FlutterProject flutterProject = flutterFactory.fromDirectory(tempDir);
 
-    // MigrateResult result = await computeMigration(
-    //   verbose: true,
-    //   flutterProject: flutterProject,
-    //   deleteTempDirectories: false,
-    //   logger: logger,
-    // );
-    // print(logger.statusText);
-    // print(logger.errorText);
-    // expect(result.sdkDirs.length, equals(1));
-    // expect(result.deletedFiles.isEmpty, true);
-    // expect(result.addedFiles.isEmpty, false);
-    // expect(result.mergeResults.isEmpty, false);
-    // expect(result.generatedBaseTemplateDirectory, isNotNull);
-    // expect(result.generatedTargetTemplateDirectory, isNotNull);
+    final MigrateResult result = await computeMigration(
+      verbose: true,
+      flutterProject: flutterProject,
+      deleteTempDirectories: false,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    print(logger.statusText);
+    print(logger.errorText);
+    expect(result.sdkDirs.length, equals(1));
+    expect(result.deletedFiles.isEmpty, true);
+    expect(result.addedFiles.isEmpty, false);
+    expect(result.mergeResults.isEmpty, false);
+    expect(result.generatedBaseTemplateDirectory, isNotNull);
+    expect(result.generatedTargetTemplateDirectory, isNotNull);
   });
 
   // Migrates a clean untouched app generated with flutter create
@@ -129,7 +128,8 @@ void main() {
     ], workingDirectory: tempDir.path);
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Working directory created at'));
-    expect(result.stdout.toString(), contains('''Added files:
+    expect(result.stdout.toString(), contains('''
+           Added files:
              - macos/Runner.xcworkspace/contents.xcworkspacedata
              - macos/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
              - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png
@@ -225,7 +225,7 @@ void main() {
 
     // Manually resolve conflics. The correct contents for resolution may change over time,
     // but it shouldnt matter for this test.
-    File metadataFile = tempDir.childFile('migrate_working_dir/.metadata');
+    final File metadataFile = tempDir.childFile('migrate_working_dir/.metadata');
     metadataFile.writeAsStringSync('''
 # This file tracks properties of this Flutter project.
 # Used by Flutter tool to assess capabilities and perform upgrades etc.
@@ -309,7 +309,8 @@ project_type: app
     ], workingDirectory: tempDir.path);
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Working directory created at'));
-    expect(result.stdout.toString(), contains('''Modified files:
+    expect(result.stdout.toString(), contains('''
+           Modified files:
              - ios/Runner/Info.plist
              - ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
              - ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
@@ -338,12 +339,11 @@ project_type: app
     ], workingDirectory: tempDir.path);
     expect(result.exitCode, 1);
     expect(result.stdout.toString(), contains('''Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:'''));
-    expect(result.stdout.toString(), contains(''']   - .metadata
-             - pubspec.yaml'''));
+    expect(result.stdout.toString(), contains(']   - .metadata\n             - pubspec.yaml'));
 
     // Manually resolve conflics. The correct contents for resolution may change over time,
     // but it shouldnt matter for this test.
-    File metadataFile = tempDir.childFile('migrate_working_dir/.metadata');
+    final File metadataFile = tempDir.childFile('migrate_working_dir/.metadata');
     metadataFile.writeAsStringSync('''
 # This file tracks properties of this Flutter project.
 # Used by Flutter tool to assess capabilities and perform upgrades etc.
@@ -357,7 +357,7 @@ version:
 project_type: app
 
 ''', flush: true);
-    File pubspecYamlFile = tempDir.childFile('migrate_working_dir/pubspec.yaml');
+    final File pubspecYamlFile = tempDir.childFile('migrate_working_dir/pubspec.yaml');
     pubspecYamlFile.writeAsStringSync('''
 name: vanilla_app_1_22_6_stable
 description: This is a modified description from the default.

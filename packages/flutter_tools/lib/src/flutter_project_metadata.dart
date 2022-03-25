@@ -162,6 +162,7 @@ class FlutterProjectMetadata {
       ..writeAsStringSync(toString(), flush: true);
   }
 
+  @override
   String toString() {
     return '''
 # This file tracks properties of this Flutter project.
