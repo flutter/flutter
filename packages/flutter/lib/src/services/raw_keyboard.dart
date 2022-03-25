@@ -343,7 +343,7 @@ abstract class RawKeyEvent with Diagnosticable {
             charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
             keyCode: message['keyCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0,
-            overrideLogicalKey: message['overrideLogicalKey'] as int?,
+            specifiedLogicalKey: message['specifiedLogicalKey'] as int?,
           );
           character = message['characters'] as String?;
           break;
