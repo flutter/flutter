@@ -727,7 +727,7 @@ class PlatformProvidedMenuItem extends PlatformMenuItem with DefaultPlatformMenu
           PlatformProvidedMenuItemType.toggleFullScreen,
           PlatformProvidedMenuItemType.minimizeWindow,
           PlatformProvidedMenuItemType.zoomWindow,
-          PlatformProvidedMenuItemType.arrangeWindowInFront,
+          PlatformProvidedMenuItemType.arrangeWindowsInFront,
         }.contains(menu);
     }
   }
@@ -882,5 +882,5 @@ enum PlatformProvidedMenuItemType {
   /// On macOS, this is the `arrangeInFront` default menu.
   ///
   /// This default menu is currently only supported on macOS.
-  arrangeWindowInFront,
+  arrangeWindowsInFront,
 }
