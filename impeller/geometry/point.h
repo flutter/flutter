@@ -88,6 +88,13 @@ struct TPoint {
     return *this;
   }
 
+  template <class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+  inline TPoint operator*=(U scale) {
+    x *= static_cast<Type>(scale);
+    y *= static_cast<Type>(scale);
+    return *this;
+  }
+
   template <class U>
   inline TPoint operator/=(const TPoint<U>& p) {
     x /= static_cast<Type>(p.x);
@@ -99,6 +106,13 @@ struct TPoint {
   inline TPoint operator/=(const TSize<U>& s) {
     x /= static_cast<Type>(s.width);
     y /= static_cast<Type>(s.height);
+    return *this;
+  }
+
+  template <class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+  inline TPoint operator/=(U scale) {
+    x /= static_cast<Type>(scale);
+    y /= static_cast<Type>(scale);
     return *this;
   }
 

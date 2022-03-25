@@ -65,7 +65,8 @@ static bool PairsFitInAtlasOfSize(const FontGlyphPair::Vector& pairs,
 
   for (const auto& pair : pairs) {
     const auto glyph_size =
-        ISize::Ceil(pair.font.GetMetrics().GetBoundingBox().size);
+        ISize::Ceil(pair.font.GetMetrics().GetBoundingBox().size *
+                    pair.font.GetMetrics().scale);
     SkIPoint16 location_in_atlas;
     if (!rect_packer->addRect(glyph_size.width,   //
                               glyph_size.height,  //
@@ -125,7 +126,8 @@ static std::optional<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
 
     SkFont sk_font(
         TypefaceSkia::Cast(*font_glyph.font.GetTypeface()).GetSkiaTypeface(),
-        font_glyph.font.GetMetrics().point_size);
+        font_glyph.font.GetMetrics().point_size *
+            font_glyph.font.GetMetrics().scale);
 
     const auto& metrics = font_glyph.font.GetMetrics();
 
@@ -133,13 +135,14 @@ static std::optional<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
 
     SkPaint glyph_paint;
     glyph_paint.setColor(glyph_color);
-    canvas->drawGlyphs(1u,         // count
-                       &glyph_id,  // glyphs
-                       &position,  // positions
-                       SkPoint::Make(-metrics.min_extent.x,
-                                     -metrics.ascent),  // origin
-                       sk_font,                         // font
-                       glyph_paint                      // paint
+    canvas->drawGlyphs(
+        1u,         // count
+        &glyph_id,  // glyphs
+        &position,  // positions
+        SkPoint::Make(-metrics.min_extent.x * metrics.scale,
+                      -metrics.ascent * metrics.scale),  // origin
+        sk_font,                                         // font
+        glyph_paint                                      // paint
     );
     return true;
   });
