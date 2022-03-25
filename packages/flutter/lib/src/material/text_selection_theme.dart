@@ -120,7 +120,7 @@ class TextSelectionThemeData with Diagnosticable {
 /// color with light blue selection handles to the child text field.
 ///
 /// ```dart
-/// const TextSelectionTheme(
+/// TextSelectionTheme(
 ///   data: TextSelectionThemeData(
 ///     cursorColor: Colors.blue,
 ///     selectionHandleColor: Colors.lightBlue,
