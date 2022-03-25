@@ -4,6 +4,9 @@ on:
   branch_protection_rule:
   push:
     branches: [ main ]
+  pull_request:
+    branches:
+      - main
 
 # Declare default permissions as read only.
 permissions: read-all
@@ -21,12 +24,20 @@ jobs:
 
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2.4.0
+        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
         with:
           persist-credentials: false
 
+      - name: setup python
+        uses: actions/setup-python@0ebf233433c08fb9061af664d501c3f3ff0e9e20
+        with:
+          python-version: '3.7.7' # install the python version needed
+
+      - name: execute py script
+        run: python ci/deps_parser.py
+
       - name: "Run analysis"
-        uses: ossf/scorecard-action@c8416b0b2bf627c349ca92fc8e3de51a64b005cf # v1.0.2
+        uses: ossf/scorecard-action@c8416b0b2bf627c349ca92fc8e3de51a64b005cf
         with:
           results_file: results.sarif
           results_format: sarif
@@ -41,7 +52,7 @@ jobs:
 
       # Upload the results as artifacts (optional).
       - name: "Upload artifact"
-        uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # v2.3.1
+        uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2
         with:
           name: SARIF file
           path: results.sarif
@@ -49,6 +60,6 @@ jobs:
 
       # Upload the results to GitHub's code scanning dashboard.
       - name: "Upload to code-scanning"
-        uses: github/codeql-action/upload-sarif@5f532563584d71fdef14ee64d17bafb34f751ce5 # v1.0.26
+        uses: github/codeql-action/upload-sarif@5f532563584d71fdef14ee64d17bafb34f751ce5
         with:
           sarif_file: results.sarif
