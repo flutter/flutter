@@ -121,11 +121,11 @@ class TextSelectionThemeData with Diagnosticable {
 ///
 /// ```dart
 /// TextSelectionTheme(
-///   data: TextSelectionThemeData(
+///   data: const TextSelectionThemeData(
 ///     cursorColor: Colors.blue,
 ///     selectionHandleColor: Colors.lightBlue,
 ///   ),
-///   child: TextField(),
+///   child: const TextField(),
 /// )
 /// ```
 /// {@end-tool}
