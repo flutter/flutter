@@ -4,6 +4,10 @@
 
 // Flutter code sample for PlatformMenuBar
 
+////////////////////////////////////
+// THIS SAMPLE ONLY WORKS ON MACOS.
+////////////////////////////////////
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -55,19 +59,23 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
 
   @override
   Widget build(BuildContext context) {
-    assert(defaultTargetPlatform == TargetPlatform.macOS, 'This sample only works on macOS');
+    ////////////////////////////////////
+    // THIS SAMPLE ONLY WORKS ON MACOS.
+    ////////////////////////////////////
+
     // This builds a menu hierarchy that looks like this:
-    // Sample App
+    // Flutter API Sample
     //  ├ About
     //  ├ ────────  (group divider)
     //  ├ Hide/Show Message
-    //  └ Messages
-    //     ├ I am not throwing away my shot.
-    //     └ There's a million things I haven't done, but just you wait.
+    //  ├ Messages
+    //  │  ├ I am not throwing away my shot.
+    //  │  └ There's a million things I haven't done, but just you wait.
+    //  └ Quit
     return PlatformMenuBar(
       children: <MenuItem>[
         PlatformMenu(
-          label: 'Sample App',
+          label: 'Flutter API Sample',
           children: <MenuItem>[
             PlatformMenuItemGroup(
               members: <MenuItem>[
