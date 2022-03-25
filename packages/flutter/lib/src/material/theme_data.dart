@@ -1201,7 +1201,7 @@ class ThemeData with Diagnosticable {
   ///   * [AlertDialog]
   ///   * [Card]
   ///   * [Dialog]
-  ///   * [ElevatedButton], see [Elevated.styleFrom] for important details on color
+  ///   * [ElevatedButton], see [ElevatedButton.styleFrom] for important details on color
   ///     changes for M3.
   ///   * [FloatingActionButton]
   ///   * [Material]
