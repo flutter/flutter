@@ -52,6 +52,7 @@ static NSString* const kKeyboardType = @"inputType";
 static NSString* const kKeyboardAppearance = @"keyboardAppearance";
 static NSString* const kInputAction = @"inputAction";
 static NSString* const kEnableDeltaModel = @"enableDeltaModel";
+static NSString* const kEnableInteractiveSelection = @"enableInteractiveSelection";
 
 static NSString* const kSmartDashesType = @"smartDashesType";
 static NSString* const kSmartQuotesType = @"smartQuotesType";
@@ -732,6 +733,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   // The view has reached end of life, and is no longer
   // allowed to access its textInputDelegate.
   BOOL _decommissioned;
+  bool _enableInteractiveSelection;
 }
 
 @synthesize tokenizer = _tokenizer;
@@ -765,6 +767,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
     _returnKeyType = UIReturnKeyDone;
     _secureTextEntry = NO;
     _enableDeltaModel = NO;
+    _enableInteractiveSelection = YES;
     _accessibilityEnabled = NO;
     _decommissioned = NO;
     if (@available(iOS 11.0, *)) {
@@ -796,7 +799,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   self.keyboardType = ToUIKeyboardType(inputType);
   self.returnKeyType = ToUIReturnKeyType(configuration[kInputAction]);
   self.autocapitalizationType = ToUITextAutoCapitalizationType(configuration);
-
+  _enableInteractiveSelection = [configuration[kEnableInteractiveSelection] boolValue];
   if (@available(iOS 11.0, *)) {
     NSString* smartDashesType = configuration[kSmartDashesType];
     // This index comes from the SmartDashesType enum in the framework.
@@ -1115,6 +1118,10 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 }
 
 - (void)setSelectedTextRange:(UITextRange*)selectedTextRange {
+  if (!_enableInteractiveSelection) {
+    return;
+  }
+
   [self setSelectedTextRangeLocal:selectedTextRange];
 
   if (_enableDeltaModel) {
@@ -1740,7 +1747,6 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
     composingBase = ((FlutterTextPosition*)self.markedTextRange.start).index;
     composingExtent = ((FlutterTextPosition*)self.markedTextRange.end).index;
   }
-
   NSDictionary* state = @{
     @"selectionBase" : @(selectionBase),
     @"selectionExtent" : @(selectionExtent),
