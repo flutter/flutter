@@ -635,7 +635,7 @@ class FrameworkRepository extends Repository {
         .childDirectory('bin')
         .childDirectory('internal')
         .childFile('release-candidate-branch.version');
-    if(versionFile.existsSync()) {
+    if (versionFile.existsSync()) {
       final String oldCandidateBranch = versionFile.readAsStringSync();
       if (oldCandidateBranch.trim() == branch.trim()) {
         stdio.printTrace(
