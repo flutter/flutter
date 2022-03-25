@@ -212,6 +212,21 @@ TEST(GeometryTest, MatrixTransformDirection) {
   }
 }
 
+TEST(GeometryTest, MatrixGetMaxBasisLength) {
+  {
+    auto m = Matrix::MakeScale({3, 1, 1});
+    ASSERT_EQ(m.GetMaxBasisLength(), 3);
+
+    m = m * Matrix::MakeSkew(0, 4);
+    ASSERT_EQ(m.GetMaxBasisLength(), 5);
+  }
+
+  {
+    auto m = Matrix::MakeScale({-3, 4, 2});
+    ASSERT_EQ(m.GetMaxBasisLength(), 4);
+  }
+}
+
 TEST(GeometryTest, QuaternionLerp) {
   auto q1 = Quaternion{{0.0, 0.0, 1.0}, 0.0};
   auto q2 = Quaternion{{0.0, 0.0, 1.0}, M_PI_4};
@@ -567,6 +582,21 @@ TEST(GeometryTest, CanUsePointAssignmentOperators) {
   {
     IPoint p(2, 6);
     p /= ISize(2, 3);
+    ASSERT_EQ(p.x, 1u);
+    ASSERT_EQ(p.y, 2u);
+  }
+
+  // Arithmetic type on RHS
+  {
+    IPoint p(1, 2);
+    p *= 3;
+    ASSERT_EQ(p.x, 3u);
+    ASSERT_EQ(p.y, 6u);
+  }
+
+  {
+    IPoint p(3, 6);
+    p /= 3;
     ASSERT_EQ(p.x, 1u);
     ASSERT_EQ(p.y, 2u);
   }

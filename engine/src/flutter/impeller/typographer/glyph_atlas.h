@@ -47,7 +47,7 @@ class GlyphAtlas {
   const std::shared_ptr<Texture>& GetTexture() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Record there location of a specific font-glyph pair within the
+  /// @brief      Record the location of a specific font-glyph pair within the
   ///             atlas.
   ///
   /// @param[in]  pair  The font-glyph pair
