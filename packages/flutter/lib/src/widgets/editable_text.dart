@@ -2573,8 +2573,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
 
-  Future<List<SpellCheckerSuggestionSpan>>? spellCheckResultsFuture;
-
   @pragma('vm:notify-debugger-on-exception')
   void _formatAndSetValue(TextEditingValue value, SelectionChangedCause? cause, {bool userInteraction = false}) {
     // Only apply input formatters if the text has changed (including uncommitted
@@ -2595,12 +2593,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
         ) ?? value;
 
-        if (value.text.length > 0 && _spellCheckEnabled!) {
+        if (value.text.length > 0 && _spellCheckEnabled! && _value.text != value.text) {
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-          spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
-                spellCheckResultsFuture!.then((results) {
+          Future<List<SpellCheckerSuggestionSpan>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
+          spellCheckResultsFuture.then((results) {
               _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results;
-          // renderEditable.text = buildTextSpan();
+          renderEditable.text = buildTextSpan();
       });
         }
       } catch (exception, stack) {

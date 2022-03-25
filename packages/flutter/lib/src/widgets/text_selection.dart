@@ -435,6 +435,9 @@ class TextSelectionOverlay {
 
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   void showToolbar(ToolbarType toolbarType, SpellCheckConfiguration? spellCheckConfiguration) {
+    if (visibleToolbarType != null && _toolbar != null) {
+      hideToolbar(visibleToolbarType!);
+    }
     assert(_toolbar == null);
     visibleToolbarType = toolbarType;
     _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(context, toolbarType, spellCheckConfiguration));
@@ -501,6 +504,7 @@ class TextSelectionOverlay {
   /// To hide the whole overlay, see [hide].
   void hideToolbar(ToolbarType toolbarType) {
     assert(_toolbar != null);
+    visibleToolbarType = null;
     _toolbarController.stop();
     _toolbar?.remove();
     _toolbar = null;
@@ -1232,8 +1236,9 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onSingleLongTapEnd(LongPressEndDetails details) {
-    if (shouldShowSelectionToolbar)
+    if (shouldShowSelectionToolbar) {
       editableText.showToolbar(ToolbarType.copyPasteControls);
+    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
@@ -1279,9 +1284,10 @@ class TextSelectionGestureDetectorBuilder {
   void onDoubleTapDown(TapDownDetails details) {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
-      if (shouldShowSelectionToolbar)
+      if (shouldShowSelectionToolbar) {
         editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
         editableText.showToolbar(ToolbarType.copyPasteControls);
+    }
     }
   }
 

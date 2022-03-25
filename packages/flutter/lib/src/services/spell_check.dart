@@ -268,7 +268,6 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
             right_index = right_index - 1;
         }
     }
-
     return null;
   }
 

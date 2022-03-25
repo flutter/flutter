@@ -37,6 +37,7 @@ class MaterialSpellCheckService implements SpellCheckService {
           List<String> resultParsed = result.split(".");
           spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
         });
+
         if (spellCheckerSuggestionSpans.length > 0) {
           controller.sink.add(spellCheckerSuggestionSpans);
         }
@@ -50,6 +51,7 @@ class MaterialSpellCheckService implements SpellCheckService {
     Future<List<SpellCheckerSuggestionSpan>> fetchSpellCheckSuggestions(Locale locale, String text) async {
     assert(locale != null);
     assert(text != null);
+
     spellCheckChannel.invokeMethod<void>(
         'SpellCheck.initiateSpellChecking',
         <String>[ locale.toLanguageTag(), text ],
