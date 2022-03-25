@@ -77,7 +77,7 @@ platform_properties:
           {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"openjdk","path":"java"},
-          {"name":"osx_sdk_13a233","path":"osx_sdk"},
+          {"name":"osx_sdk_13a1030d","path":"osx_sdk"},
           {"name":"pub_cache","path":".pub-cache"},
           {"name":"xcode_binary","path":"xcode_binary"}
         ]
@@ -86,7 +86,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       mac_model: Macmini8,1
-      xcode: 13a233
+      xcode: 13a1030d
   mac_android:
     properties:
       caches: >-
@@ -118,7 +118,7 @@ platform_properties:
             {"name":"openjdk","path":"java"},
             {"name":"pub_cache","path":".pub-cache"},
             {"name":"xcode_binary","path":"xcode_binary"},
-            {"name":"osx_sdk_13a233","path":"osx_sdk"}
+            {"name":"osx_sdk_13a1030d","path":"osx_sdk"}
           ]
       dependencies: >-
         [
@@ -128,7 +128,7 @@ platform_properties:
         ]
       os: Mac-12
       device_os: iOS-15.1
-      xcode: 13a233
+      xcode: 13a1030d
   windows:
     properties:
       caches: >-
