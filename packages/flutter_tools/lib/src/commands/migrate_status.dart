@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../project.dart';
-import '../runner/flutter_command.dart';
+import '../cache.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
-import '../cache.dart';
+import '../project.dart';
+import '../runner/flutter_command.dart';
 import 'migrate.dart';
 
 /// Flutter migrate subcommand to check the migration status of the project.
@@ -25,7 +23,6 @@ class MigrateStatusCommand extends FlutterCommand {
     argParser.addOption(
       'working-directory',
       help: 'Specifies the custom migration working directory used to stage and edit proposed changes.',
-      defaultsTo: null,
       valueHelp: 'path',
     );
   }
@@ -68,7 +65,7 @@ class MigrateStatusCommand extends FlutterCommand {
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
     for (final String localPath in manifest.mergedFiles) {
-      DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
+      final DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
       if (result.diff != '') {
         // Print with different colors for better visibility.
         int lineNumber = -1;

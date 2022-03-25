@@ -12,8 +12,6 @@ import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../commands/migrate.dart';
 import '../globals.dart' as globals;
-import '../project.dart';
-import '../cache.dart';
 
 // TODO(garyq): support windows.
 
@@ -25,7 +23,7 @@ class MigrateUtils {
   ///
   /// This directory should be deleted after use.
   static Future<Directory> createTempDirectory(String name) async {
-    ProcessResult result = await Process.run('mktemp', ['-d', '-t', name]);
+    final ProcessResult result = await Process.run('mktemp', <String>['-d', '-t', name]);
     checkForErrors(result);
     final Directory dir = globals.fs.directory((result.stdout as String).trim());
     dir.createSync(recursive: true);
@@ -42,14 +40,14 @@ class MigrateUtils {
     }
     String gitCmd = '';
     if (outputPath != null) {
-      String parentDirPath = outputPath.substring(0, outputPath.lastIndexOf('/'));
+      final String parentDirPath = outputPath.substring(0, outputPath.lastIndexOf('/'));
       gitCmd += 'mkdir -p "$parentDirPath" && touch "$outputPath"; ';
     }
     gitCmd += 'git diff --no-index "${one.absolute.path}" "${two.absolute.path}"';
     if (outputPath != null) {
       gitCmd += ' > "$outputPath"';
     }
-    List<String> cmdArgs = ['-c', '$gitCmd'];
+    final List<String> cmdArgs = <String>['-c', gitCmd];
     final ProcessResult result = await Process.run('bash', cmdArgs);
 
     checkForErrors(result, allowedExitCodes: <int>[1], commandDescription: 'git ${cmdArgs.join(' ')}'); // diff exits with 1 if diffs are found.
@@ -59,7 +57,7 @@ class MigrateUtils {
   // Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
   static Future<bool> cloneFlutter(String revision, String destination) async {
     // Use https url instead of ssh to avoid need to setup ssh on git.
-    List<String> cmdArgs = ['clone', 'https://github.com/flutter/flutter.git', destination];
+    List<String> cmdArgs = <String>['clone', 'https://github.com/flutter/flutter.git', destination];
     ProcessResult result = await Process.run('git', cmdArgs);
     checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}', silent: true);
 
@@ -81,7 +79,7 @@ class MigrateUtils {
     String? createVersion,
     List<String> platforms = const <String>[],
   }) async {
-     List<String> cmdArgs = ['create', '--no-pub', '--project-name', name];
+    final List<String> cmdArgs = <String>['create', '--no-pub', '--project-name', name];
     if (platforms.isNotEmpty) {
       String platformsArg = '--platforms=';
       for (int i = 0; i < platforms.length; i++) {
@@ -103,7 +101,6 @@ class MigrateUtils {
         androidLanguage: androidLanguage,
         iosLanguage: iosLanguage,
         outputDirectory: outputDirectory,
-        platforms: const <String>[],
       );
     }
     checkForErrors(result, commandDescription: '${flutterBinPath}flutter ${cmdArgs.join(' ')}');
@@ -119,7 +116,7 @@ class MigrateUtils {
     required String target,
     required String localPath
   }) async {
-    List<String> cmdArgs = ['merge-file', '-p', current, base, target];
+    final List<String> cmdArgs = <String>['merge-file', '-p', current, base, target];
     final ProcessResult result = await Process.run('git', cmdArgs);
     checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
     return MergeResult(result, localPath);
@@ -127,20 +124,20 @@ class MigrateUtils {
 
   /// Calls `git init` on the workingDirectory.
   static Future<void> gitInit(String workingDirectory) async {
-    List<String> cmdArgs = ['init'];
+    final List<String> cmdArgs = <String>['init'];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: 'git ${cmdArgs.join(' ')}');
   }
 
   /// Returns true if the workingDirectory git repo has any uncommited changes.
   static Future<bool> hasUncommitedChanges(String workingDirectory) async {
-    File gitIgnore = globals.fs.file(globals.fs.path.join(workingDirectory, '.gitignore'));
+    final File gitIgnore = globals.fs.file(globals.fs.path.join(workingDirectory, '.gitignore'));
     if (!gitIgnore.existsSync()) {
       gitIgnore.writeAsStringSync(kDefaultMigrateWorkingDirectoryName, flush: true);
     } else if (!gitIgnore.readAsStringSync().contains('$kDefaultMigrateWorkingDirectoryName/')) {
       gitIgnore.writeAsStringSync('\n$kDefaultMigrateWorkingDirectoryName/\n', mode: FileMode.append, flush: true);
     }
-    List<String> cmdArgs = ['diff', '--quiet', 'HEAD'];
+    final List<String> cmdArgs = <String>['diff', '--quiet', 'HEAD'];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
     if (result.exitCode == 0) {
@@ -151,7 +148,7 @@ class MigrateUtils {
 
   /// Returns true if the workingDirectory is a git repo.
   static Future<bool> isGitRepo(String workingDirectory) async {
-    List<String> cmdArgs = ['rev-parse', '--is-inside-work-tree'];
+    final List<String> cmdArgs = <String>['rev-parse', '--is-inside-work-tree'];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
     if (result.exitCode == 0) {
@@ -162,7 +159,7 @@ class MigrateUtils {
 
   /// Returns true if the file at `filePath` is covered by the `.gitignore`
   static Future<bool> isGitIgnored(String filePath, String workingDirectory) async {
-    List<String> cmdArgs = ['check-ignore', filePath];
+    final List<String> cmdArgs = <String>['check-ignore', filePath];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[0, 1, 128], commandDescription: 'git ${cmdArgs.join(' ')}');
     return result.exitCode == 0;
@@ -170,10 +167,10 @@ class MigrateUtils {
 
   /// Deletes the files or directories at the provided paths.
   static void deleteTempDirectories({List<String> paths = const <String>[], List<Directory> directories = const <Directory>[]}) {
-    for (Directory d in directories) {
+    for (final Directory d in directories) {
       d.deleteSync(recursive: true);
     }
-    for (String p in paths) {
+    for (final String p in paths) {
       globals.fs.directory(p).deleteSync(recursive: true);
     }
   }
@@ -263,11 +260,10 @@ class DiffResult {
 
 /// Data class to hold the 
 class MergeResult {
-  MergeResult(ProcessResult result, String localPath) :
+  MergeResult(ProcessResult result, this.localPath) :
     mergedString = result.stdout as String,
     hasConflict = result.exitCode != 0,
-    exitCode = result.exitCode,
-    localPath = localPath;
+    exitCode = result.exitCode;
 
   MergeResult.explicit({
     this.mergedString,

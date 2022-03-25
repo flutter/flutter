@@ -26,7 +26,6 @@ class MigrateApplyCommand extends FlutterCommand {
     argParser.addOption(
       'working-directory',
       help: 'Specifies the custom migration working directory used to stage and edit proposed changes.',
-      defaultsTo: null,
       valueHelp: 'path',
     );
     argParser.addFlag(
@@ -86,8 +85,10 @@ class MigrateApplyCommand extends FlutterCommand {
     if (allFilesToCopy.isNotEmpty) {
       logger.printStatus('Modifying ${allFilesToCopy.length} files.', indent: 2);
     }
-    for (String localPath in allFilesToCopy) {
-      if (_verbose) logger.printStatus('Copying $localPath');
+    for (final String localPath in allFilesToCopy) {
+      if (_verbose) {
+        logger.printStatus('Copying $localPath');
+      }
       final File workingFile = workingDirectory.childFile(localPath);
       final File targetFile = FlutterProject.current().directory.childFile(localPath);
       if (!workingFile.existsSync()) {
@@ -108,13 +109,15 @@ class MigrateApplyCommand extends FlutterCommand {
     if (manifest.deletedFiles.isNotEmpty) {
       logger.printStatus('Deleting ${manifest.deletedFiles.length} files.', indent: 2);
     }
-    for (String localPath in manifest.deletedFiles) {
+    for (final String localPath in manifest.deletedFiles) {
       final File targetFile = FlutterProject.current().directory.childFile(localPath);
       targetFile.deleteSync();
     }
 
     // Update the migrate config files to reflect latest migration.
-    if (_verbose) logger.printStatus('Updating .migrate_configs');
+    if (_verbose) {
+      logger.printStatus('Updating .migrate_configs');
+    }
     final FlutterProjectMetadata metadata = FlutterProjectMetadata(flutterProject.directory.childFile('.metadata'), logger);
     final FlutterVersion version = FlutterVersion(workingDirectory: flutterProject.directory.absolute.path);
 
