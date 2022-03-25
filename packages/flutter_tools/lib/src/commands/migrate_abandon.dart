@@ -20,7 +20,7 @@ class MigrateAbandonCommand extends FlutterCommand {
     requiresPubspecYaml();
     argParser.addOption(
       'working-directory',
-      help: '',
+      help: 'Specifies the custom migration working directory used to stage and edit proposed changes.',
       defaultsTo: null,
       valueHelp: 'path',
     );
@@ -46,17 +46,17 @@ class MigrateAbandonCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Directory workingDir = FlutterProject.current().directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
+    Directory workingDirectory = FlutterProject.current().directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     if (stringArg('working-directory') != null) {
-      workingDir = fileSystem.directory(stringArg('working-directory'));
+      workingDirectory = fileSystem.directory(stringArg('working-directory'));
     }
-    if (!workingDir.existsSync()) {
+    if (!workingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Start a new migration with:');
       MigrateUtils.printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
-    logger.printStatus('Abandoning the existing migration will delete the migration working directory at ${workingDir.path}');
-    workingDir.deleteSync(recursive: true);
+    logger.printStatus('Abandoning the existing migration will delete the migration working directory at ${workingDirectory.path}');
+    workingDirectory.deleteSync(recursive: true);
     logger.printStatus('\nAbandon complete. Start a new migration with:');
     MigrateUtils.printCommandText('flutter migrate start', logger);
     return const FlutterCommandResult(ExitStatus.success);

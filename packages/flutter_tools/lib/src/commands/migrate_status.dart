@@ -24,7 +24,7 @@ class MigrateStatusCommand extends FlutterCommand {
     requiresPubspecYaml();
     argParser.addOption(
       'working-directory',
-      help: '',
+      help: 'Specifies the custom migration working directory used to stage and edit proposed changes.',
       defaultsTo: null,
       valueHelp: 'path',
     );
@@ -54,21 +54,21 @@ class MigrateStatusCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject project = FlutterProject.current();
-    Directory workingDir = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
+    Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     if (stringArg('working-directory') != null) {
-      workingDir = fileSystem.directory(stringArg('working-directory'));
+      workingDirectory = fileSystem.directory(stringArg('working-directory'));
     }
-    if (!workingDir.existsSync()) {
+    if (!workingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Start a new migration with:');
       MigrateUtils.printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDir);
+    final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
     for (final String localPath in manifest.mergedFiles) {
-      DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDir.childFile(localPath));
+      DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
       if (result.diff != '') {
         // Print with different colors for better visibility.
         int lineNumber = -1;
@@ -91,9 +91,9 @@ class MigrateStatusCommand extends FlutterCommand {
       }
     }
 
-    logger.printBox('Working directory at `${workingDir.path}`');
+    logger.printBox('Working directory at `${workingDirectory.path}`');
 
-    checkAndPrintMigrateStatus(manifest, workingDir, logger: logger);
+    checkAndPrintMigrateStatus(manifest, workingDirectory, logger: logger);
 
     logger.printStatus('Resolve conflicts and accept changes with:');
     MigrateUtils.printCommandText('flutter migrate apply', logger);

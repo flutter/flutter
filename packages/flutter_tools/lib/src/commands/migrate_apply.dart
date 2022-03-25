@@ -25,14 +25,14 @@ class MigrateApplyCommand extends FlutterCommand {
     requiresPubspecYaml();
     argParser.addOption(
       'working-directory',
-      help: '',
+      help: 'Specifies the custom migration working directory used to stage and edit proposed changes.',
       defaultsTo: null,
       valueHelp: 'path',
     );
     argParser.addFlag(
       'force',
       abbr: 'f',
-      help: 'Ignore unresolved merge conflicts and apply by force.',
+      help: 'Ignore unresolved merge conflicts and apply staged changes by force.',
     );
   }
 
@@ -57,28 +57,28 @@ class MigrateApplyCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = FlutterProject.current();
-    Directory workingDir = flutterProject.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
+    Directory workingDirectory = flutterProject.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     if (stringArg('working-directory') != null) {
-      workingDir = fileSystem.directory(stringArg('working-directory'));
+      workingDirectory = fileSystem.directory(stringArg('working-directory'));
     }
-    if (!workingDir.existsSync()) {
+    if (!workingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Please run:');
       MigrateUtils.printCommandText('flutter migrate start', logger);
       throwToolExit('No migration in progress.');
     }
 
-    final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDir);
+    final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
-    if (!checkAndPrintMigrateStatus(manifest, workingDir, warnConflict: true, logger: logger) && !boolArg('force')) {
+    if (!checkAndPrintMigrateStatus(manifest, workingDirectory, warnConflict: true, logger: logger) && !boolArg('force')) {
       throwToolExit('Conflicting files found. Resolve these conflicts and try again.');
     }
 
-    if (await MigrateUtils.hasUncommitedChanges(workingDir.path)) {
+    if (!boolArg('force') && await MigrateUtils.hasUncommitedChanges(workingDirectory.path)) {
       throwToolExit('There are uncommitted changes in your project. Please commit, abandon, or stash your changes before trying again.');
     }
 
     logger.printStatus('Applying migration.');
-    // Copy files from working dir to project root
+    // Copy files from working directory to project root
     final List<String> allFilesToCopy = <String>[];
     allFilesToCopy.addAll(manifest.mergedFiles);
     allFilesToCopy.addAll(manifest.conflictFiles);
@@ -88,7 +88,7 @@ class MigrateApplyCommand extends FlutterCommand {
     }
     for (String localPath in allFilesToCopy) {
       if (_verbose) logger.printStatus('Copying $localPath');
-      final File workingFile = workingDir.childFile(localPath);
+      final File workingFile = workingDirectory.childFile(localPath);
       final File targetFile = FlutterProject.current().directory.childFile(localPath);
       if (!workingFile.existsSync()) {
         continue;
@@ -126,7 +126,7 @@ class MigrateApplyCommand extends FlutterCommand {
     );
 
     // Clean up the working directory
-    workingDir.deleteSync(recursive: true);
+    workingDirectory.deleteSync(recursive: true);
 
     logger.printStatus('Migration complete. You may use commands like `git status`, `git diff` and `git restore <file>` to continue working with the migrated files.');
     return const FlutterCommandResult(ExitStatus.success);
