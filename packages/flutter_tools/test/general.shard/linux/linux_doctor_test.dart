@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/linux/linux_doctor.dart';
@@ -87,6 +88,14 @@ FakeCommand _missingBinaryCommand(String binary) {
   return FakeCommand(
     command: <String>[binary, '--version'],
     exitCode: 1,
+  );
+}
+
+FakeCommand _missingBinaryException(String binary) {
+  return FakeCommand(
+    command: <String>[binary, '--version'],
+    exitCode: 1,
+    exception: ProcessException(binary, <String>[])
   );
 }
 
@@ -260,7 +269,7 @@ void main() {
 
   testWithoutContext('Missing validation when clang++ is not available', () async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      _missingBinaryCommand('clang++'),
+      _missingBinaryException('clang++'),
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
       _pkgConfigPresentCommand('0.29'),

@@ -79,6 +79,26 @@ Future<void> main() async {
         );
       }
 
+      section('Build ephemeral host app when SDK is on external disk');
+
+      // Pretend the SDK was on an external drive with stray "._" files in the xcframework
+      // and build again.
+      Directory(path.join(
+        projectDir.path,
+        '.ios',
+        'Flutter',
+        'engine',
+        'Flutter.xcframework',
+        '._ios-arm64_x86_64-simulator',
+      )).createSync(recursive: true);
+
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'build',
+          options: <String>['ios', '--no-codesign', '--simulator', '--debug'],
+        );
+      });
+
       section('Clean build');
 
       await inDirectory(projectDir, () async {

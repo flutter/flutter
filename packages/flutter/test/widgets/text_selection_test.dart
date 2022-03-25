@@ -91,6 +91,10 @@ void main() {
     );
   }
 
+  test('TextSelectionOverlay.fadeDuration exist', () async {
+    expect(TextSelectionOverlay.fadeDuration, SelectionOverlay.fadeDuration);
+  });
+
   testWidgets('a series of taps all call onTaps', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     await tester.tapAt(const Offset(200, 200));

@@ -54,23 +54,6 @@ const _DebugOnly _debugOnly = _DebugOnly();
 
 // KEYS
 
-/// A key that is only equal to itself.
-///
-/// This cannot be created with a const constructor because that implies that
-/// all instantiated keys would be the same instance and therefore not be unique.
-class UniqueKey extends LocalKey {
-  /// Creates a key that is equal only to itself.
-  ///
-  /// The key cannot be created with a const constructor because that implies
-  /// that all instantiated keys would be the same instance and therefore not
-  /// be unique.
-  // ignore: prefer_const_constructors_in_immutables , never use const for this class
-  UniqueKey();
-
-  @override
-  String toString() => '[#${shortHash(this)}]';
-}
-
 /// A key that takes its identity from the object used as its value.
 ///
 /// Used to tie the identity of a widget to the identity of an object used to
@@ -391,53 +374,6 @@ abstract class Widget extends DiagnosticableTree {
     return widget is StatefulWidget ? 1 :
            widget is StatelessWidget ? 2 :
            0;
-  }
-}
-
-/// A cache of inherited elements with an optional parent cache.
-///
-/// When looking up an inherited element, this will look through parent
-/// caches until the element is found or the end is reached. When an element
-/// is found, it is cached at the first element where the search began.
-///
-/// The intention of this cache is to speed up the initial build of widget
-/// trees that contain a significant number of inherited widgets by deferring
-/// expensive map allocations until they are needed, and by only allocating
-/// in the "closest" hash map.
-///
-/// This will not cache `null` results if an inherited element is not found.
-@visibleForTesting
-class InheritedTreeCache {
-  /// Create a new [InheritedTreeCache] with an optional parent.
-  InheritedTreeCache([this._parent]);
-
-  final InheritedTreeCache? _parent;
-  final HashMap<Type, InheritedElement> _current = HashMap<Type, InheritedElement>();
-
-  /// Place the [element] in the cache under [type].
-  void operator []=(Type type, InheritedElement element) {
-    _current[type] = element;
-  }
-
-  /// Find the nearest [InheritedElement] of type [type], or `null` if it
-  /// cannot be found.
-  ///
-  /// This operation will also cache the inherited element to improve the
-  /// speed of future lookups.
-  InheritedElement? operator[](Type type) {
-    InheritedElement? potential = _current[type];
-    if (potential != null) {
-      return potential;
-    }
-    potential =  _parent?._lookupWithoutCaching(type);
-    if (potential != null) {
-      _current[type] = potential;
-    }
-    return potential;
-  }
-
-  InheritedElement? _lookupWithoutCaching(Type type) {
-    return _current[type] ?? _parent?._lookupWithoutCaching(type);
   }
 }
 
@@ -2493,7 +2429,7 @@ class BuildOwner {
   /// This field will default to a [FocusManager] that has registered its
   /// global input handlers via [FocusManager.registerGlobalHandlers]. Callers
   /// wishing to avoid registering those handlers (and modifying the associated
-  /// static state) can explicitly pass a focus manager to the [new BuildOwner]
+  /// static state) can explicitly pass a focus manager to the [BuildOwner.new]
   /// constructor.
   FocusManager focusManager;
 
@@ -4030,7 +3966,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // implementation to decide whether to rebuild based on whether we had
       // dependencies here.
     }
-    _inheritedLookup = null;
+    _inheritedWidgets = null;
     _lifecycleState = _ElementLifecycle.inactive;
   }
 
@@ -4222,8 +4158,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  InheritedTreeCache? _inheritedLookup;
-
+  Map<Type, InheritedElement>? _inheritedWidgets;
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -4260,7 +4195,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedLookup?[T];
+    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
     if (ancestor != null) {
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
@@ -4271,7 +4206,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedLookup?[T];
+    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
     return ancestor;
   }
 
@@ -4291,7 +4226,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    _inheritedLookup = _parent?._inheritedLookup;
+    _inheritedWidgets = _parent?._inheritedWidgets;
   }
 
   @override
@@ -5292,8 +5227,12 @@ class InheritedElement extends ProxyElement {
   @override
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    _inheritedLookup = InheritedTreeCache(_parent?._inheritedLookup)
-      ..[widget.runtimeType] = this;
+    final Map<Type, InheritedElement>? incomingWidgets = _parent?._inheritedWidgets;
+    if (incomingWidgets != null)
+      _inheritedWidgets = HashMap<Type, InheritedElement>.of(incomingWidgets);
+    else
+      _inheritedWidgets = HashMap<Type, InheritedElement>();
+    _inheritedWidgets![widget.runtimeType] = this;
   }
 
   @override
@@ -6053,31 +5992,14 @@ abstract class RenderObjectElement extends Element {
 
   /// Insert the given child into [renderObject] at the given slot.
   ///
-  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
-  ///
-  /// ## Deprecation
-  ///
-  /// This method has been deprecated in favor of [insertRenderObjectChild].
-  ///
-  /// The reason for the deprecation is to provide the `oldSlot` argument to
-  /// the [moveRenderObjectChild] method (such an argument was missing from
-  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
-  /// argument to the [removeRenderObjectChild] method (such an argument was
-  /// missing from the now-deprecated [removeChildRenderObject] method). While
-  /// no argument was added to [insertRenderObjectChild], the name change (and
-  /// corresponding deprecation) was made to maintain naming parity with the
-  /// other two methods.
-  ///
-  /// To migrate, simply override [insertRenderObjectChild] instead of
-  /// [insertChildRenderObject]. The arguments stay the same. Subclasses should
-  /// _not_ call `super.insertRenderObjectChild(...)`.
+  /// {@template flutter.widgets.RenderObjectElement.insertRenderObjectChild}
+  /// The semantics of `slot` are determined by this element. For example, if
+  /// this element has a single child, the slot should always be null. If this
+  /// element has a list of children, the previous sibling element wrapped in an
+  /// [IndexedSlot] is a convenient value for the slot.
+  /// {@endtemplate}
   @protected
-  @mustCallSuper
-  @Deprecated(
-    'Override insertRenderObjectChild instead. '
-    'This feature was deprecated after v1.21.0-9.0.pre.',
-  )
-  void insertChildRenderObject(covariant RenderObject child, covariant Object? slot) {
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderObjectElement.insertChildRenderObject() is deprecated.'),
@@ -6102,20 +6024,7 @@ abstract class RenderObjectElement extends Element {
     }());
   }
 
-  /// Insert the given child into [renderObject] at the given slot.
-  ///
-  /// {@template flutter.widgets.RenderObjectElement.insertRenderObjectChild}
-  /// The semantics of `slot` are determined by this element. For example, if
-  /// this element has a single child, the slot should always be null. If this
-  /// element has a list of children, the previous sibling element wrapped in an
-  /// [IndexedSlot] is a convenient value for the slot.
-  /// {@endtemplate}
-  @protected
-  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
-    insertChildRenderObject(child, slot);
-  }
-
-  /// Move the given child to the given slot.
+  /// Move the given child from the given old slot to the given new slot.
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
   ///
@@ -6129,32 +6038,8 @@ abstract class RenderObjectElement extends Element {
   /// always having the same slot (and where children in different slots are never
   /// compared against each other for the purposes of updating one slot with the
   /// element from another slot) would never call this.
-  ///
-  /// ## Deprecation
-  ///
-  /// This method has been deprecated in favor of [moveRenderObjectChild].
-  ///
-  /// The reason for the deprecation is to provide the `oldSlot` argument to
-  /// the [moveRenderObjectChild] method (such an argument was missing from
-  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
-  /// argument to the [removeRenderObjectChild] method (such an argument was
-  /// missing from the now-deprecated [removeChildRenderObject] method). While
-  /// no argument was added to [insertRenderObjectChild], the name change (and
-  /// corresponding deprecation) was made to maintain naming parity with the
-  /// other two methods.
-  ///
-  /// To migrate, simply override [moveRenderObjectChild] instead of
-  /// [moveChildRenderObject]. The `slot` argument becomes the `newSlot`
-  /// argument, and the method will now take a new `oldSlot` argument that
-  /// subclasses may find useful. Subclasses should _not_ call
-  /// `super.moveRenderObjectChild(...)`.
   @protected
-  @mustCallSuper
-  @Deprecated(
-    'Override moveRenderObjectChild instead. '
-    'This feature was deprecated after v1.21.0-9.0.pre.',
-  )
-  void moveChildRenderObject(covariant RenderObject child, covariant Object? slot) {
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderObjectElement.moveChildRenderObject() is deprecated.'),
@@ -6179,53 +6064,12 @@ abstract class RenderObjectElement extends Element {
     }());
   }
 
-  /// Move the given child from the given old slot to the given new slot.
-  ///
-  /// The given child is guaranteed to have [renderObject] as its parent.
-  ///
-  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
-  ///
-  /// This method is only ever called if [updateChild] can end up being called
-  /// with an existing [Element] child and a `slot` that differs from the slot
-  /// that element was previously given. [MultiChildRenderObjectElement] does this,
-  /// for example. [SingleChildRenderObjectElement] does not (since the `slot` is
-  /// always null). An [Element] that has a specific set of slots with each child
-  /// always having the same slot (and where children in different slots are never
-  /// compared against each other for the purposes of updating one slot with the
-  /// element from another slot) would never call this.
-  @protected
-  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {
-    moveChildRenderObject(child, newSlot);
-  }
-
   /// Remove the given child from [renderObject].
   ///
-  /// The given child is guaranteed to have [renderObject] as its parent.
-  ///
-  /// ## Deprecation
-  ///
-  /// This method has been deprecated in favor of [removeRenderObjectChild].
-  ///
-  /// The reason for the deprecation is to provide the `oldSlot` argument to
-  /// the [moveRenderObjectChild] method (such an argument was missing from
-  /// the now-deprecated [moveChildRenderObject] method) and the `slot`
-  /// argument to the [removeRenderObjectChild] method (such an argument was
-  /// missing from the now-deprecated [removeChildRenderObject] method). While
-  /// no argument was added to [insertRenderObjectChild], the name change (and
-  /// corresponding deprecation) was made to maintain naming parity with the
-  /// other two methods.
-  ///
-  /// To migrate, simply override [removeRenderObjectChild] instead of
-  /// [removeChildRenderObject]. The method will now take a new `slot` argument
-  /// that subclasses may find useful. Subclasses should _not_ call
-  /// `super.removeRenderObjectChild(...)`.
+  /// The given child is guaranteed to have been inserted at the given `slot`
+  /// and have [renderObject] as its parent.
   @protected
-  @mustCallSuper
-  @Deprecated(
-    'Override removeRenderObjectChild instead. '
-    'This feature was deprecated after v1.21.0-9.0.pre.',
-  )
-  void removeChildRenderObject(covariant RenderObject child) {
+  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
     assert(() {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderObjectElement.removeChildRenderObject() is deprecated.'),
@@ -6248,15 +6092,6 @@ abstract class RenderObjectElement extends Element {
         ),
       ]);
     }());
-  }
-
-  /// Remove the given child from [renderObject].
-  ///
-  /// The given child is guaranteed to have been inserted at the given `slot`
-  /// and have [renderObject] as its parent.
-  @protected
-  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
-    removeChildRenderObject(child);
   }
 
   @override

@@ -251,39 +251,6 @@ void main() {
     );
   });
 
-  testWidgets('ModalBarrier pops the Navigator when dismissed by tap cancel', (WidgetTester tester) async {
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => const FirstWidget(),
-      '/modal': (BuildContext context) => const SecondWidget(),
-    };
-
-    await tester.pumpWidget(MaterialApp(routes: routes));
-
-    // Initially the barrier is not visible
-    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
-
-    // Tapping on X routes to the barrier
-    await tester.tap(find.text('X'));
-    await tester.pump(); // begin transition
-    await tester.pump(const Duration(seconds: 1)); // end transition
-
-    // Press the barrier; it shouldn't dismiss yet
-    final TestGesture gesture = await tester.press(
-      find.byKey(const ValueKey<String>('barrier')),
-    );
-    await tester.pumpAndSettle(); // begin transition
-    expect(find.byKey(const ValueKey<String>('barrier')), findsOneWidget);
-
-    // Cancel the pointer; the barrier should be dismissed
-    await gesture.cancel();
-    await tester.pumpAndSettle(const Duration(seconds: 1)); // end transition
-    expect(
-      find.byKey(const ValueKey<String>('barrier')),
-      findsNothing,
-      reason: 'The route should have been dismissed by tapping the barrier.',
-    );
-  });
-
   testWidgets('ModalBarrier may pop the Navigator when competing with other gestures', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const FirstWidget(),

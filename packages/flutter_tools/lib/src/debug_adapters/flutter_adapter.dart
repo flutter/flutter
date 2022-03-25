@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:dds/dap.dart' hide PidTracker, PackageConfigUtils;
+import 'package:dds/dap.dart' hide PidTracker;
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
@@ -19,7 +19,7 @@ import 'mixins.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter applications.
 class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
-    with PidTracker, PackageConfigUtils {
+    with PidTracker {
   FlutterDebugAdapter(
     ByteStreamServerChannel channel, {
     required this.fileSystem,
@@ -36,7 +36,6 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
           logger: logger,
         );
 
-  @override
   FileSystem fileSystem;
   Platform platform;
   Process? _process;
@@ -192,15 +191,11 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
 
   @override
   Future<void> debuggerConnected(vm.VM vmInfo) async {
-    // Capture the PID from the VM Service so that we can terminate it when
-    // cleaning up. Terminating the process might not be enough as it could be
-    // just a shell script (e.g. flutter.bat on Windows) and may not pass the
-    // signal on correctly.
-    // See: https://github.com/Dart-Code/Dart-Code/issues/907
-    final int? pid = vmInfo.pid;
-    if (pid != null) {
-      pidsToTerminate.add(pid);
-    }
+    // Usually we'd capture the pid from the VM here and record it for
+    // terminating, however for Flutter apps it may be running on a remote
+    // device so it's not valid to terminate a process with that pid locally.
+    // For attach, pids should never be collected as terminateRequest() should
+    // not terminate the debugee.
   }
 
   /// Called by [disconnectRequest] to request that we forcefully shut down the app being run (or in the case of an attach, disconnect).
@@ -223,9 +218,27 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
           case 'Flutter.ServiceExtensionStateChanged':
             _sendServiceExtensionStateChanged(event.extensionData);
             break;
+          case 'Flutter.Error':
+            _handleFlutterErrorEvent(event.extensionData);
+            break;
         }
         break;
     }
+  }
+
+  /// Sends OutputEvents to the client for a Flutter.Error event.
+  void _handleFlutterErrorEvent(vm.ExtensionData? data) {
+    final Map<String, dynamic>? errorData = data?.data;
+    if (errorData == null) {
+      return;
+    }
+
+    final String errorText = (errorData['renderedErrorText'] as String?)
+        ?? (errorData['description'] as String?)
+        // We should never not error text, but if we do at least send something
+        // so it's not just completely silent.
+        ?? 'Unknown error in Flutter.Error event';
+    sendOutput('stderr', '$errorText\n');
   }
 
   /// Called by [launchRequest] to request that we actually start the app to be run/debugged.
@@ -240,6 +253,12 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       'run',
       '--machine',
       if (enableDebugger) '--start-paused',
+      // Structured errors are enabled by default, but since we don't connect
+      // the VM Service for noDebug, we need to disable them so that error text
+      // is sent to stderr. Otherwise the user will not see any exception text
+      // (because nobody is listening for Flutter.Error events).
+      if (!enableDebugger)
+        '--dart-define=flutter.inspector.structuredErrors=false',
     ];
 
     await _startProcess(
@@ -384,6 +403,17 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     _connectDebuggerIfReady();
   }
 
+  /// Handles the daemon.connected event, recording the pid of the flutter_tools process.
+  void _handleDaemonConnected(Map<String, Object?> params) {
+    // On Windows, the pid from the process we spawn is the shell running
+    // flutter.bat and terminating it may not be reliable, so we also take the
+    // pid provided from the VM running flutter_tools.
+    final int? pid = params['pid'] as int?;
+    if (pid != null) {
+      pidsToTerminate.add(pid);
+    }
+  }
+
   /// Handles the app.debugPort event from Flutter, connecting to the VM Service if everything else is ready.
   void _handleDebugPort(Map<String, Object?> params) {
     // When running in noDebug mode, Flutter may still provide us a VM Service
@@ -411,6 +441,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   void _handleJsonEvent(String event, Map<String, Object?>? params) {
     params ??= <String, Object?>{};
     switch (event) {
+      case 'daemon.connected':
+        _handleDaemonConnected(params);
+        break;
       case 'app.debugPort':
         _handleDebugPort(params);
         break;

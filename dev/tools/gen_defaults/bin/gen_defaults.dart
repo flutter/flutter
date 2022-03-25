@@ -17,9 +17,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/fab_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
+import 'package:gen_defaults/navigation_rail_template.dart';
+import 'package:gen_defaults/surface_tint.dart';
 import 'package:gen_defaults/typography_template.dart';
 
 Map<String, dynamic> _readTokenFile(String fileName) {
@@ -29,8 +32,19 @@ Map<String, dynamic> _readTokenFile(String fileName) {
 Future<void> main(List<String> args) async {
   const String materialLib = 'packages/flutter/lib/src/material';
   const List<String> tokenFiles = <String>[
-    'assist_chip.json',
     'banner.json',
+    'button_elevated.json',
+    'button_filled.json',
+    'button_filled_tonal.json',
+    'button_outlined.json',
+    'button_text.json',
+    'card_elevated.json',
+    'card_filled.json',
+    'card_outlined.json',
+    'chip_assist.json',
+    'chip_filter.json',
+    'chip_input.json',
+    'chip_suggestion.json',
     'color_dark.json',
     'color_light.json',
     'dialog.json',
@@ -39,15 +53,13 @@ Future<void> main(List<String> args) async {
     'fab_large_primary.json',
     'fab_primary.json',
     'fab_small_primary.json',
-    'filter_chip.json',
-    'input_chip.json',
     'motion.json',
     'navigation_bar.json',
+    'navigation_rail.json',
     'palette.json',
     'shape.json',
     'slider.json',
     'state.json',
-    'suggestion_chip.json',
     'text_style.json',
     'top_app_bar_large.json',
     'top_app_bar_medium.json',
@@ -65,8 +77,11 @@ Future<void> main(List<String> args) async {
   tokens['colorsLight'] = _readTokenFile('color_light.json');
   tokens['colorsDark'] = _readTokenFile('color_dark.json');
 
+  CardTemplate('$materialLib/card.dart', tokens).updateFile();
+  DialogTemplate('$materialLib/dialog.dart', tokens).updateFile();
   FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();
   NavigationBarTemplate('$materialLib/navigation_bar.dart', tokens).updateFile();
+  NavigationRailTemplate('$materialLib/navigation_rail.dart', tokens).updateFile();
+  SurfaceTintTemplate('$materialLib/elevation_overlay.dart', tokens).updateFile();
   TypographyTemplate('$materialLib/typography.dart', tokens).updateFile();
-  DialogTemplate('$materialLib/dialog.dart', tokens).updateFile();
 }

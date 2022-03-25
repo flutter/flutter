@@ -397,7 +397,10 @@ class StartContext extends Context {
     ));
 
     final String frameworkHead = await framework.reverseParse('HEAD');
-    final String branchPoint = await framework.branchPoint(candidateBranch, FrameworkRepository.defaultBranch);
+    final String branchPoint = await framework.branchPoint(
+      '${framework.upstreamRemote.name}/$candidateBranch',
+      '${framework.upstreamRemote.name}/${FrameworkRepository.defaultBranch}',
+    );
     final bool atBranchPoint = branchPoint == frameworkHead;
 
     final ReleaseType releaseType = computeReleaseType(lastVersion, atBranchPoint);
