@@ -752,16 +752,13 @@ static void fl_key_embedder_responder_handle_event_impl(
   if (is_down_event) {
     if (last_logical_record) {
       // A key has been pressed that has the exact physical key as a currently
-      // pressed one, usually indicating multiple keyboards are pressing keys
-      // with the same physical key, or the up event was lost during a loss of
-      // focus. The down event is ignored.
-      callback(true, user_data);
-      return;
+      // pressed one. This can happen during repeated events.
+      out_event.type = kFlutterKeyEventTypeRepeat;
     } else {
       out_event.type = kFlutterKeyEventTypeDown;
-      character_to_free = event_to_character(event);  // Might be null
-      out_event.character = character_to_free;
     }
+    character_to_free = event_to_character(event);  // Might be null
+    out_event.character = character_to_free;
   } else {  // is_down_event false
     if (!last_logical_record) {
       // The physical key has been released before. It might indicate a missed

@@ -953,7 +953,7 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   g_object_unref(responder);
 }
 
-TEST(FlKeyEmbedderResponderTest, IgnoreDuplicateDownEvent) {
+TEST(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
   FlEngine* engine = make_mock_engine_with_records();
@@ -976,24 +976,25 @@ TEST(FlKeyEmbedderResponderTest, IgnoreDuplicateDownEvent) {
   invoke_record_callback_and_verify(record, TRUE, &user_data);
   g_ptr_array_clear(g_call_records);
 
-  // Press KeyA again (with different logical key, which is not necessari but
-  // for coverage).
-  g_expected_handled = true;  // The empty event is always handled.
+  // Another KeyA down events, which usually means a repeated event.
+  g_expected_handled = false;
   fl_key_responder_handle_event(
       responder,
-      fl_key_event_new_by_mock(102, kPress, GDK_KEY_q, kKeyCodeKeyA, 0,
+      fl_key_event_new_by_mock(102, kPress, GDK_KEY_a, kKeyCodeKeyA, 0,
                                kIsNotModifier),
       verify_response_handled, &user_data);
 
   EXPECT_EQ(g_call_records->len, 1u);
 
   record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 0));
-  EXPECT_EQ(record->event->physical, 0ull);
-  EXPECT_EQ(record->event->logical, 0ull);
-  EXPECT_STREQ(record->event->character, nullptr);
+  EXPECT_EQ(record->event->type, kFlutterKeyEventTypeRepeat);
+  EXPECT_EQ(record->event->physical, kPhysicalKeyA);
+  EXPECT_EQ(record->event->logical, kLogicalKeyA);
+  EXPECT_STREQ(record->event->character, "a");
   EXPECT_EQ(record->event->synthesized, false);
-  EXPECT_EQ(record->callback, nullptr);
+  EXPECT_NE(record->callback, nullptr);
 
+  invoke_record_callback_and_verify(record, TRUE, &user_data);
   g_ptr_array_clear(g_call_records);
 
   // Release KeyA
