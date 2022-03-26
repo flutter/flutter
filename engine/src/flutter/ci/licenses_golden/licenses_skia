@@ -1,4 +1,4 @@
-Signature: 389e33663f861ac2465c34006d07aa79
+Signature: cd6901c905ed8e5ab181d5af324fea77
 
 UNUSED LICENSES:
 
@@ -6070,6 +6070,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawGeometry.h
 FILE: ../../../third_party/skia/experimental/graphite/src/GlobalCache.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/GlobalCache.h
+FILE: ../../../third_party/skia/experimental/graphite/src/GpuWorkSubmission.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/GraphiteResourceKey.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/GraphiteResourceKey.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Log.h
@@ -6519,6 +6520,8 @@ ORIGIN: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp + ../../../
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
 FILE: ../../../third_party/skia/gm/palette.cpp
+FILE: ../../../third_party/skia/samplecode/SampleSBIX.cpp
+FILE: ../../../third_party/skia/src/sfnt/SkOTTable_hmtx.h
 FILE: ../../../third_party/skia/src/utils/SkBlitterTrace.h
 FILE: ../../../third_party/skia/src/utils/SkBlitterTraceCommon.h
 FILE: ../../../third_party/skia/src/utils/SkCycles.h
