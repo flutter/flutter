@@ -1363,17 +1363,17 @@ class AnonymousSpinnerStatus extends Status {
     assert(this.timer == timer);
     assert(timer != null);
     assert(timer.isActive);
-    _writeToStdOut(_backspaceChar * _currentLineLength);
+    _writeToStdOut(_backspaceChar * _lastAnimationFrameLength);
     ticks += 1;
     if (seemsSlow) {
       if (!timedOut) {
         timedOut = true;
         _clear(_currentLineLength);
       }
-      if (slowWarningCallback != null) {
+      if (_slowWarning == '' && slowWarningCallback != null) {
         _slowWarning = slowWarningCallback!();
+        _writeToStdOut(_slowWarning);
       }
-      _writeToStdOut(_slowWarning);
     }
     final String newFrame = _currentAnimationFrame;
     _lastAnimationFrameLength = newFrame.runes.length;
