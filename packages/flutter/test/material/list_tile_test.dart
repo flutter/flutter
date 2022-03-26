@@ -1296,22 +1296,19 @@ void main() {
 
   testWidgets('ListTile can be splashed and has correct splash color', (WidgetTester tester) async {
     final Widget buildApp = MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Container(
-                width: 100,
-                height: 100,
-                color: Colors.white,
-                child: ListTile(
-                  onTap: () {},
-                  splashColor: const Color(0xff88ff88),
-                ),
-              );
-            }),
+      home: Material(
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: ListTile(
+              onTap: () {},
+              splashColor: const Color(0xff88ff88),
+            ),
           ),
         ),
-      );
+      ),
+    );
 
     await tester.pumpWidget(buildApp);
     await tester.pumpAndSettle();
