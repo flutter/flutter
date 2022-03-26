@@ -1523,16 +1523,18 @@ void main() {
     bool gotFocus = false;
     await tester.pumpWidget(
       MaterialApp(
-          home: Material(
-            child: ListTile(
-              focusNode: node,
-              onFocusChange: (bool focused) => gotFocus = focused,
-              onTap: () {},
-            ),
+        home: Material(
+          child: ListTile(
+            focusNode: node,
+            onFocusChange: (bool focused) {
+              gotFocus = focused;
+            },
+            onTap: () {},
           ),
+        ),
       ),
     );
-    
+
     node.requestFocus();
     await tester.pump();
     expect(gotFocus, isTrue);
@@ -1543,7 +1545,7 @@ void main() {
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
   });
-  
+
   testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
