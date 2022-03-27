@@ -316,6 +316,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _userHidOptions = false;
       _lastFieldText = value.text;
     }
+    _updateActions();
     _updateOverlay();
   }
 
@@ -323,6 +324,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void _onChangedFocus() {
     // Options should no longer be hidden when the field is re-focused.
     _userHidOptions = !_focusNode.hasFocus;
+    _updateActions();
     _updateOverlay();
   }
 
@@ -345,6 +347,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       selection: TextSelection.collapsed(offset: selectionString.length),
       text: selectionString,
     );
+    _updateActions();
+    _updateOverlay();
     widget.onSelected?.call(_selection!);
   }
 
@@ -355,6 +359,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {
     if (_userHidOptions) {
       _userHidOptions = false;
+      _updateActions();
       _updateOverlay();
       return;
     }
@@ -364,17 +369,21 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void _highlightNextOption(AutocompleteNextOptionIntent intent) {
     if (_userHidOptions) {
       _userHidOptions = false;
+      _updateActions();
       _updateOverlay();
       return;
     }
     _updateHighlight(_highlightedOptionIndex.value + 1);
   }
 
-  void _hideOptions(DismissIntent intent) {
+  Object? _hideOptions(DismissIntent intent) {
     if (!_userHidOptions) {
       _userHidOptions = true;
+      _updateActions();
       _updateOverlay();
+      return null;
     }
+    return Actions.invoke(context, intent);
   }
 
   void _setActionsEnabled(bool enabled) {
@@ -387,12 +396,27 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _hideOptionsAction.enabled = enabled;
   }
 
+  void _updateActions() {
+    _setActionsEnabled(_focusNode.hasFocus && _selection == null && _options.isNotEmpty);
+  }
+
+  bool _floatingOptionsUpdateScheduled = false;
   // Hide or show the options overlay, if needed.
   void _updateOverlay() {
-    _setActionsEnabled(_focusNode.hasFocus && _selection == null && _options.isNotEmpty);
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      if (!_floatingOptionsUpdateScheduled) {
+        _floatingOptionsUpdateScheduled = true;
+        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+          _floatingOptionsUpdateScheduled = false;
+          _updateOverlay();
+        });
+      }
+      return;
+    }
+
+    _floatingOptions?.remove();
     if (_shouldShowOptions) {
-      _floatingOptions?.remove();
-      _floatingOptions = OverlayEntry(
+      final OverlayEntry newFloatingOptions = OverlayEntry(
         builder: (BuildContext context) {
           return CompositedTransformFollower(
             link: _optionsLayerLink,
@@ -409,9 +433,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
           );
         },
       );
-      Overlay.of(context, rootOverlay: true)!.insert(_floatingOptions!);
-    } else if (_floatingOptions != null) {
-      _floatingOptions!.remove();
+      Overlay.of(context, rootOverlay: true)!.insert(newFloatingOptions);
+      _floatingOptions = newFloatingOptions;
+    } else {
       _floatingOptions = null;
     }
   }
@@ -471,9 +495,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       AutocompleteNextOptionIntent: _nextOptionAction,
       DismissIntent: _hideOptionsAction,
     };
-    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-      _updateOverlay();
-    });
+    _updateActions();
+    _updateOverlay();
   }
 
   @override
@@ -484,9 +507,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       widget.textEditingController,
     );
     _updateFocusNode(oldWidget.focusNode, widget.focusNode);
-    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-      _updateOverlay();
-    });
+    _updateActions();
+    _updateOverlay();
   }
 
   @override

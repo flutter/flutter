@@ -288,7 +288,7 @@ class TableBorder {
   }
 
   @override
-  int get hashCode => hashValues(top, right, bottom, left, horizontalInside, verticalInside, borderRadius);
+  int get hashCode => Object.hash(top, right, bottom, left, horizontalInside, verticalInside, borderRadius);
 
   @override
   String toString() => 'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside, $borderRadius)';

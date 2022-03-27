@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:ui' as ui show Image, Codec, FrameInfo;
-import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -130,7 +129,7 @@ class ImageInfo {
   String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x';
 
   @override
-  int get hashCode => hashValues(image, scale, debugLabel);
+  int get hashCode => Object.hash(image, scale, debugLabel);
 
   @override
   bool operator ==(Object other) {
@@ -209,7 +208,7 @@ class ImageStreamListener {
   final ImageErrorListener? onError;
 
   @override
-  int get hashCode => hashValues(onImage, onChunk, onError);
+  int get hashCode => Object.hash(onImage, onChunk, onError);
 
   @override
   bool operator ==(Object other) {
@@ -778,7 +777,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   ///
   /// Errors are reported using [FlutterError.reportError] with the `silent`
   /// argument on [FlutterErrorDetails] set to true, meaning that by default the
-  /// message is only dumped to the console in debug mode (see [new
+  /// message is only dumped to the console in debug mode (see [
   /// FlutterErrorDetails]).
   OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector? informationCollector })
       : assert(image != null) {

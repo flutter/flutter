@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -12,8 +11,8 @@ import 'basic_types.dart';
 /// Base class for [Alignment] that allows for text-direction aware
 /// resolution.
 ///
-/// A property or argument of this type accepts classes created either with [new
-/// Alignment] and its variants, or [new AlignmentDirectional].
+/// A property or argument of this type accepts classes created either with [
+/// Alignment] and its variants, or [AlignmentDirectional.new].
 ///
 /// To convert an [AlignmentGeometry] object of indeterminate type into an
 /// [Alignment] object, call the [resolve] method.
@@ -135,7 +134,7 @@ abstract class AlignmentGeometry {
   }
 
   @override
-  int get hashCode => hashValues(_x, _start, _y);
+  int get hashCode => Object.hash(_x, _start, _y);
 }
 
 /// A point within a rectangle.

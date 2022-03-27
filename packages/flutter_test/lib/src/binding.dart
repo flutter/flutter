@@ -161,6 +161,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   final TestWindow _window;
 
   @override
+  TestPlatformDispatcher get platformDispatcher => _window.platformDispatcher;
+
+  @override
   TestRestorationManager get restorationManager {
     _restorationManager ??= createRestorationManager();
     return _restorationManager!;
@@ -1112,8 +1115,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void ensureFrameCallbacksRegistered() {
     // Leave PlatformDispatcher alone, do nothing.
-    assert(window.onDrawFrame == null);
-    assert(window.onBeginFrame == null);
+    assert(platformDispatcher.onDrawFrame == null);
+    assert(platformDispatcher.onBeginFrame == null);
   }
 
   @override
@@ -1550,7 +1553,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _pendingFrame = null;
       _expectingFrame = false;
     } else if (framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
-      window.scheduleFrame();
+      platformDispatcher.scheduleFrame();
     }
   }
 

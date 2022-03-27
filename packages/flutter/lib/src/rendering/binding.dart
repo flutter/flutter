@@ -32,7 +32,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
     );
-    window
+    platformDispatcher
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
@@ -327,7 +327,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   void _handleSemanticsEnabledChanged() {
-    setSemanticsEnabled(window.semanticsEnabled);
+    setSemanticsEnabled(platformDispatcher.semanticsEnabled);
   }
 
   /// Whether the render tree associated with this binding should produce a tree

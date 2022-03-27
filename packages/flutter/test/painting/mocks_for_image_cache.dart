@@ -26,7 +26,7 @@ class TestImageInfo extends ImageInfo {
   }
 
   @override
-  int get hashCode => hashValues(value, image, scale, debugLabel);
+  int get hashCode => Object.hash(value, image, scale, debugLabel);
 
   @override
   bool operator ==(Object other) {

@@ -789,7 +789,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  ///  * [new DecoratedBox]
+  ///  * [DecoratedBox.new]
   const DecoratedBoxTransition({
     Key? key,
     required this.decoration,
@@ -856,7 +856,7 @@ class AlignTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  ///  * [new Align].
+  ///  * [Align.new].
   const AlignTransition({
     Key? key,
     required Animation<AlignmentGeometry> alignment,
@@ -979,7 +979,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// rebuilding it on every animation tick.
 ///
 /// If you pass the pre-built subtree as the [child] parameter, the
-/// AnimatedBuilder will pass it back to your builder function so that you
+/// [AnimatedBuilder] will pass it back to your builder function so that you
 /// can incorporate it into your build.
 ///
 /// Using this pre-built child is entirely optional, but can improve
@@ -992,6 +992,25 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///
 /// ** See code in examples/api/lib/widgets/transitions/animated_builder.0.dart **
 /// {@end-tool}
+///
+/// {@template flutter.flutter.animatedbuilder_changenotifier.rebuild}
+/// ## Improve rebuilds performance using AnimatedBuilder
+///
+/// Despite the name, [AnimatedBuilder] is not limited to [Animation]s. Any subtype
+/// of [Listenable] (such as [ChangeNotifier] and [ValueNotifier]) can be used with
+/// an [AnimatedBuilder] to rebuild only certain parts of a widget when the
+/// [Listenable] notifies its listeners. This technique is a performance improvement
+/// that allows rebuilding only specific widgets leaving others untouched.
+///
+/// {@tool dartpad}
+/// The following example implements a simple counter that utilizes an
+/// [AnimatedBuilder] to limit rebuilds to only the [Text] widget. The current count
+/// is stored in a [ValueNotifier], which rebuilds the [AnimatedBuilder]'s contents
+/// when its value is changed.
+///
+/// ** See code in examples/api/lib/foundation/change_notifier/change_notifier.0.dart **
+/// {@end-tool}
+/// {@endtemplate}
 ///
 /// See also:
 ///

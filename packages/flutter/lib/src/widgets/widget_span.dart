@@ -140,7 +140,7 @@ class WidgetSpan extends PlaceholderSpan {
   @override
   int? codeUnitAtVisitor(int index, Accumulator offset) {
     offset.increment(1);
-    return PlaceholderSpan.placeholderCodeUnit.codeUnitAt(0);
+    return PlaceholderSpan.placeholderCodeUnit;
   }
 
   @override
@@ -181,7 +181,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  int get hashCode => hashValues(super.hashCode, child, alignment, baseline);
+  int get hashCode => Object.hash(super.hashCode, child, alignment, baseline);
 
   /// Returns the text span that contains the given position in the text.
   @override

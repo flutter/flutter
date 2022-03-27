@@ -83,7 +83,12 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> setSize(Size size) {
+  Future<Size> setSize(Size size) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setOffset(Offset off) {
     throw UnimplementedError();
   }
 
@@ -140,6 +145,8 @@ class FakeAndroidPlatformViewsController {
 
   bool synchronizeToNativeViewHierarchy = true;
 
+  Map<int, Offset> offsets = <int, Offset>{};
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -165,6 +172,8 @@ class FakeAndroidPlatformViewsController {
         return _setDirection(call);
       case 'clearFocus':
         return _clearFocus(call);
+      case 'offset':
+        return _offset(call);
       case 'synchronizeToNativeViewHierarchy':
         return _synchronizeToNativeViewHierarchy(call);
     }
@@ -247,6 +256,15 @@ class FakeAndroidPlatformViewsController {
     }
     _views[id] = _views[id]!.copyWith(size: Size(width, height));
 
+    return Future<Map<dynamic, dynamic>>.sync(() => <dynamic, dynamic>{'width': width, 'height': height});
+  }
+
+  Future<dynamic> _offset(MethodCall call) async {
+    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+    final int id = args['id'] as int;
+    final double top = args['top'] as double;
+    final double left = args['left'] as double;
+    offsets[id] = Offset(left, top);
     return Future<dynamic>.sync(() => null);
   }
 
@@ -503,7 +521,14 @@ class FakeAndroidPlatformView {
   }
 
   @override
-  int get hashCode => hashValues(id, type, hashList(creationParams), size, layoutDirection, hybrid);
+  int get hashCode => Object.hash(
+    id,
+    type,
+    creationParams == null ? null : Object.hashAll(creationParams!),
+    size,
+    layoutDirection,
+    hybrid,
+  );
 
   @override
   String toString() {
@@ -529,7 +554,7 @@ class FakeAndroidMotionEvent {
   }
 
   @override
-  int get hashCode => hashValues(action, hashList(pointers), hashList(pointerIds));
+  int get hashCode => Object.hash(action, Object.hashAll(pointers), Object.hashAll(pointerIds));
 
   @override
   String toString() {
@@ -556,7 +581,7 @@ class FakeUiKitView {
   }
 
   @override
-  int get hashCode => hashValues(id, type);
+  int get hashCode => Object.hash(id, type);
 
   @override
   String toString() {
@@ -581,7 +606,7 @@ class FakeHtmlPlatformView {
   }
 
   @override
-  int get hashCode => hashValues(id, type);
+  int get hashCode => Object.hash(id, type);
 
   @override
   String toString() {

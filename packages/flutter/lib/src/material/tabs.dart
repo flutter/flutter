@@ -1328,6 +1328,7 @@ class TabBarView extends StatefulWidget {
     this.controller,
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.viewportFraction = 1.0,
   }) : assert(children != null),
        assert(dragStartBehavior != null),
        super(key: key);
@@ -1357,6 +1358,9 @@ class TabBarView extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// {@macro flutter.widgets.pageview.viewportFraction}
+  final double viewportFraction;
 
   @override
   State<TabBarView> createState() => _TabBarViewState();
@@ -1411,7 +1415,10 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
-    _pageController = PageController(initialPage: _currentIndex!);
+    _pageController = PageController(
+      initialPage: _currentIndex!,
+      viewportFraction: widget.viewportFraction,
+    );
   }
 
   @override
@@ -1420,7 +1427,9 @@ class _TabBarViewState extends State<TabBarView> {
     if (widget.controller != oldWidget.controller) {
       _updateTabController();
       _currentIndex = _controller!.index;
+      _warpUnderwayCount += 1;
       _pageController.jumpToPage(_currentIndex!);
+      _warpUnderwayCount -= 1;
     }
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
       _updateChildren();

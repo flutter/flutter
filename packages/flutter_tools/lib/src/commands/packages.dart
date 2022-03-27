@@ -27,7 +27,7 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesTestCommand());
     addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies')); // path to package can be specified with --directory argument
     addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
     addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));

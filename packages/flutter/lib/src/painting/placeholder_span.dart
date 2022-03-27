@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show PlaceholderAlignment;
 
 import 'package:flutter/foundation.dart';
@@ -42,7 +41,7 @@ abstract class PlaceholderSpan extends InlineSpan {
   }) : super(style: style);
 
   /// The unicode character to represent a placeholder.
-  static const String placeholderCodeUnit = '\uFFFC';
+  static const int placeholderCodeUnit = 0xFFFC;
 
   /// How the placeholder aligns vertically with the text.
   ///
@@ -60,7 +59,7 @@ abstract class PlaceholderSpan extends InlineSpan {
   @override
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     if (includePlaceholders) {
-      buffer.write(placeholderCodeUnit);
+      buffer.writeCharCode(placeholderCodeUnit);
     }
   }
 

@@ -318,6 +318,15 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
       ..offset = offset
       ..clipBehavior = clipBehavior;
   }
+
+  @override
+  SingleChildRenderObjectElement createElement() {
+    return _SingleChildViewportElement(this);
+  }
+}
+
+class _SingleChildViewportElement extends SingleChildRenderObjectElement with NotifiableElementMixin, ViewportElementMixin {
+  _SingleChildViewportElement(_SingleChildViewport widget) : super(widget);
 }
 
 class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> implements RenderAbstractViewport {
@@ -667,6 +676,12 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       duration: duration,
       curve: curve,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('offset', _paintOffset));
   }
 
   @override

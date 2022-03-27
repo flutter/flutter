@@ -144,10 +144,12 @@ class PageController extends ScrollController {
   ///    locations used to save scroll offsets.
   final bool keepPage;
 
+  /// {@template flutter.widgets.pageview.viewportFraction}
   /// The fraction of the viewport that each page should occupy.
   ///
   /// Defaults to 1.0, which means each page fills the viewport in the scrolling
   /// direction.
+  /// {@endtemplate}
   final double viewportFraction;
 
   /// The current page displayed in the controlled [PageView].
@@ -663,9 +665,14 @@ class PageView extends StatefulWidget {
   /// [itemBuilder] will be called only with indices greater than or equal to
   /// zero and less than [itemCount].
   ///
-  /// [PageView.builder] by default does not support child reordering. If
-  /// you are planning to change child order at a later time, consider using
-  /// [PageView] or [PageView.custom].
+  /// {@template flutter.widgets.PageView.findChildIndexCallback}
+  /// The [findChildIndexCallback] corresponds to the
+  /// [SliverChildBuilderDelegate.findChildIndexCallback] property. If null,
+  /// a child widget may not map to its existing [RenderObject] when the order
+  /// of children returned from the children builder changes.
+  /// This may result in state-loss. This callback needs to be implemented if
+  /// the order of the children may change at a later time.
+  /// {@endtemplate}
   ///
   /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
   PageView.builder({
@@ -677,6 +684,7 @@ class PageView extends StatefulWidget {
     this.pageSnapping = true,
     this.onPageChanged,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
@@ -687,7 +695,11 @@ class PageView extends StatefulWidget {
   }) : assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
-       childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
+       childrenDelegate = SliverChildBuilderDelegate(
+         itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
+         childCount: itemCount,
+       ),
        super(key: key);
 
   /// Creates a scrollable list that works page by page with a custom child

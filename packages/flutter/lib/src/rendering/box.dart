@@ -61,20 +61,20 @@ class _DebugSize extends Size {
 /// ## Terminology
 ///
 /// When the minimum constraints and the maximum constraint in an axis are the
-/// same, that axis is _tightly_ constrained. See: [new
-/// BoxConstraints.tightFor], [new BoxConstraints.tightForFinite], [tighten],
+/// same, that axis is _tightly_ constrained. See: [
+/// BoxConstraints.tightFor], [BoxConstraints.tightForFinite], [tighten],
 /// [hasTightWidth], [hasTightHeight], [isTight].
 ///
 /// An axis with a minimum constraint of 0.0 is _loose_ (regardless of the
 /// maximum constraint; if it is also 0.0, then the axis is simultaneously tight
-/// and loose!). See: [new BoxConstraints.loose], [loosen].
+/// and loose!). See: [BoxConstraints.loose], [loosen].
 ///
 /// An axis whose maximum constraint is not infinite is _bounded_. See:
 /// [hasBoundedWidth], [hasBoundedHeight].
 ///
 /// An axis whose maximum constraint is infinite is _unbounded_. An axis is
 /// _expanding_ if it is tightly infinite (its minimum and maximum constraints
-/// are both infinite). See: [new BoxConstraints.expand].
+/// are both infinite). See: [BoxConstraints.expand].
 ///
 /// An axis whose _minimum_ constraint is infinite is just said to be _infinite_
 /// (since by definition the maximum constraint must also be infinite in that
@@ -107,7 +107,7 @@ class BoxConstraints extends Constraints {
   ///
   /// See also:
   ///
-  ///  * [new BoxConstraints.tightForFinite], which is similar but instead of
+  ///  * [BoxConstraints.tightForFinite], which is similar but instead of
   ///    being tight if the value is non-null, is tight if the value is not
   ///    infinite.
   const BoxConstraints.tightFor({
@@ -123,7 +123,7 @@ class BoxConstraints extends Constraints {
   ///
   /// See also:
   ///
-  ///  * [new BoxConstraints.tightFor], which is similar but instead of being
+  ///  * [BoxConstraints.tightFor], which is similar but instead of being
   ///    tight if the value is not infinite, is tight if the value is non-null.
   const BoxConstraints.tightForFinite({
     double width = double.infinity,
@@ -600,7 +600,7 @@ class BoxConstraints extends Constraints {
   @override
   int get hashCode {
     assert(debugAssertIsValid());
-    return hashValues(minWidth, maxWidth, minHeight, maxHeight);
+    return Object.hash(minWidth, maxWidth, minHeight, maxHeight);
   }
 
   @override
@@ -934,7 +934,7 @@ class _IntrinsicDimensionsCacheEntry {
   }
 
   @override
-  int get hashCode => hashValues(dimension, argument);
+  int get hashCode => Object.hash(dimension, argument);
 }
 
 /// A render object in a 2D Cartesian coordinate system.
