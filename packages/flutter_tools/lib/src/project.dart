@@ -27,6 +27,19 @@ import 'xcode_project.dart';
 export 'cmake_project.dart';
 export 'xcode_project.dart';
 
+/// Emum for each officially supported platform.
+enum SupportedPlatform {
+  android,
+  ios,
+  linux,
+  macos,
+  web,
+  windows,
+  windowsuwp,
+  fuchsia,
+  root, // Special platform to represent the root project directory
+}
+
 class FlutterProjectFactory {
   FlutterProjectFactory({
     required Logger logger,
@@ -223,7 +236,7 @@ class FlutterProject {
   /// The generated Dart plugin registrant for non-web platforms.
   File get dartPluginRegistrant => dartTool
     .childDirectory('flutter_build')
-    .childFile('dart_plugin_registrant.dart');
+    .childFile('generated_main.dart');
 
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
@@ -243,6 +256,36 @@ class FlutterProject {
 
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
+
+  /// Returns a list of platform names that are supported by the project.
+  List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {
+    final List<SupportedPlatform> platforms = includeRoot ? <SupportedPlatform>[SupportedPlatform.root] : <SupportedPlatform>[];
+    if (android.existsSync()) {
+      platforms.add(SupportedPlatform.android);
+    }
+    if (ios.exists) {
+      platforms.add(SupportedPlatform.ios);
+    }
+    if (web.existsSync()) {
+      platforms.add(SupportedPlatform.web);
+    }
+    if (macos.existsSync()) {
+      platforms.add(SupportedPlatform.macos);
+    }
+    if (linux.existsSync()) {
+      platforms.add(SupportedPlatform.linux);
+    }
+    if (windows.existsSync()) {
+      platforms.add(SupportedPlatform.windows);
+    }
+    if (windowsUwp.existsSync()) {
+      platforms.add(SupportedPlatform.windowsuwp);
+    }
+    if (fuchsia.existsSync()) {
+      platforms.add(SupportedPlatform.fuchsia);
+    }
+    return platforms;
+  }
 
   /// The directory that will contain the example if an example exists.
   static Directory _exampleDirectory(Directory directory) => directory.childDirectory('example');
@@ -555,12 +598,10 @@ class AndroidProject extends FlutterProjectPlatform {
     if (deprecationBehavior == DeprecationBehavior.none) {
       return;
     }
-
     final AndroidEmbeddingVersionResult result = computeEmbeddingVersion();
     if (result.version != AndroidEmbeddingVersion.v1) {
       return;
     }
-
     globals.printStatus(
 '''
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -584,11 +625,11 @@ The detected reason was:
     if (deprecationBehavior == DeprecationBehavior.ignore) {
       BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
     } else { // DeprecationBehavior.exit
-        BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-        throwToolExit(
-          'Build failed due to use of deprecated Android v1 embedding.',
-          exitCode: 1,
-        );
+      BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+      throwToolExit(
+        'Build failed due to use of deprecated Android v1 embedding.',
+        exitCode: 1,
+      );
     }
   }
 

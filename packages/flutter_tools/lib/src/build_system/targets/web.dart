@@ -518,7 +518,6 @@ class WebServiceWorker extends Target {
     final String serviceWorker = generateServiceWorker(
       urlToHash,
       <String>[
-        '/',
         'main.dart.js',
         'index.html',
         'assets/NOTICES',

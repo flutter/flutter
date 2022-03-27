@@ -275,6 +275,7 @@ class TimelineSummary {
       'total_ui_gc_time': gcSummarizer.totalGCTimeMillis,
       '30hz_frame_percentage': refreshRateSummary.percentageOf30HzFrames,
       '60hz_frame_percentage': refreshRateSummary.percentageOf60HzFrames,
+      '80hz_frame_percentage': refreshRateSummary.percentageOf80HzFrames,
       '90hz_frame_percentage': refreshRateSummary.percentageOf90HzFrames,
       '120hz_frame_percentage': refreshRateSummary.percentageOf120HzFrames,
       'illegal_refresh_rate_frame_count': refreshRateSummary.framesWithIllegalRefreshRate.length,

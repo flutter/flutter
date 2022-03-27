@@ -990,18 +990,16 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node should be considered a live region.
   ///
-  /// On Android, when the label changes on a live region semantics node,
-  /// TalkBack will make a polite announcement of the current label. This
-  /// announcement occurs even if the node is not focused, but only if the label
-  /// has changed since the last update.
+  /// A live region indicates that updates to semantics node are important.
+  /// Platforms may use this information to make polite announcements to the
+  /// user to inform them of updates to this node.
   ///
-  /// On iOS, no announcements are made but the node is marked as
-  /// `UIAccessibilityTraitUpdatesFrequently`.
-  ///
-  /// An example of a live region is the [SnackBar] widget. When it appears
-  /// on the screen it may be difficult to focus to read the label. A live
-  /// region causes an initial polite announcement to be generated
-  /// automatically.
+  /// An example of a live region is a [SnackBar] widget. On Android and iOS,
+  /// live region causes a polite announcement to be generated automatically,
+  /// even if the widget does not have accessibility focus. This announcement
+  /// may not be spoken if the OS accessibility services are already
+  /// announcing something else, such as reading the label of a focused widget
+  /// or providing a system announcement.
   ///
   /// See also:
   ///
@@ -4039,15 +4037,16 @@ class SemanticsConfiguration {
 
   /// Whether the semantics node is a live region.
   ///
-  /// On Android, when the label changes on a live region semantics node,
-  /// TalkBack will make a polite announcement of the current label. This
-  /// announcement occurs even if the node is not focused, but only if the label
-  /// has changed since the last update.
+  /// A live region indicates that updates to semantics node are important.
+  /// Platforms may use this information to make polite announcements to the
+  /// user to inform them of updates to this node.
   ///
-  /// An example of a live region is the [SnackBar] widget. When it appears
-  /// on the screen it may be difficult to focus to read the label. A live
-  /// region causes an initial polite announcement to be generated
-  /// automatically.
+  /// An example of a live region is a [SnackBar] widget. On Android and iOS,
+  /// live region causes a polite announcement to be generated automatically,
+  /// even if the widget does not have accessibility focus. This announcement
+  /// may not be spoken if the OS accessibility services are already
+  /// announcing something else, such as reading the label of a focused widget
+  /// or providing a system announcement.
   ///
   /// See also:
   ///

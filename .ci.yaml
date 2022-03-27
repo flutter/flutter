@@ -17,7 +17,7 @@ platform_properties:
         [
           {"name":"builder_linux_framework","path":"builder"},
           {"name":"android_sdk","path":"android"},
-          {"name":"chrome_and_driver","path":"chrome"},
+          {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"openjdk","path":"java"},
           {"name":"pub_cache","path":".pub-cache"}
@@ -34,7 +34,7 @@ platform_properties:
         [
           {"name":"builder_linux_devicelab","path":"builder"},
           {"name":"android_sdk","path":"android"},
-          {"name":"chrome_and_driver","path":"chrome"},
+          {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"gradle","path":"gradle"},
           {"name":"openjdk","path":"java"},
@@ -54,7 +54,7 @@ platform_properties:
         [
           {"name":"builder_linux_devicelab","path":"builder"},
           {"name":"android_sdk","path":"android"},
-          {"name":"chrome_and_driver","path":"chrome"},
+          {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"gradle","path":"gradle"},
           {"name":"openjdk","path":"java"},
@@ -74,7 +74,7 @@ platform_properties:
         [
           {"name":"builder_mac_framework","path":"builder"},
           {"name":"android_sdk","path":"android"},
-          {"name":"chrome_and_driver","path":"chrome"},
+          {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"openjdk","path":"java"},
           {"name":"osx_sdk_13a233","path":"osx_sdk"},
@@ -93,7 +93,7 @@ platform_properties:
           [
             {"name":"builder_mac_devicelab","path":"builder"},
             {"name":"android_sdk","path":"android"},
-            {"name":"chrome_and_driver","path":"chrome"},
+            {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
             {"name":"openjdk","path":"java"},
@@ -112,7 +112,7 @@ platform_properties:
       caches: >-
           [
             {"name":"builder_mac_devicelab","path":"builder"},
-            {"name":"chrome_and_driver","path":"chrome"},
+            {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
             {"name":"openjdk","path":"java"},
@@ -135,7 +135,7 @@ platform_properties:
           [
             {"name":"builder_win_framework","path":"builder"},
             {"name":"android_sdk","path":"android"},
-            {"name":"chrome_and_driver","path":"chrome"},
+            {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"openjdk","path":"java"},
             {"name":"pub_cache","path":".pub-cache"},
@@ -153,7 +153,7 @@ platform_properties:
           [
             {"name":"builder_win_devicelab","path":"builder"},
             {"name":"android_sdk","path":"android"},
-            {"name":"chrome_and_driver","path":"chrome"},
+            {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
             {"name":"openjdk","path":"java"},
@@ -163,7 +163,7 @@ platform_properties:
           [
             {"dependency": "android_sdk", "version": "version:31v8"},
             {"dependency": "certs"},
-            {"dependency": "chrome_and_driver", "version": "version:84"},
+            {"dependency": "chrome_and_driver", "version": "version:96.2"},
             {"dependency": "open_jdk"}
           ]
       os: Windows-10
@@ -192,7 +192,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -211,7 +211,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "clang"},
@@ -231,7 +231,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "clang"},
@@ -250,7 +250,6 @@ targets:
     properties:
       tags: >
         ["framework","hostonly","shard"]
-    scheduler: luci
     runIf:
       - .ci.yaml
 
@@ -462,7 +461,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -484,7 +483,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -506,7 +505,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -528,7 +527,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -550,7 +549,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -572,7 +571,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -595,7 +594,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -618,7 +617,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -641,7 +640,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -664,7 +663,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -707,7 +706,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -734,7 +733,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
@@ -759,7 +758,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
@@ -784,7 +783,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
@@ -809,7 +808,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
@@ -870,6 +869,7 @@ targets:
 
   - name: Linux web_benchmarks_canvaskit
     recipe: devicelab/devicelab_drone
+    bringup: true # rolling to Chrome 96: https://github.com/flutter/flutter/issues/98723
     presubmit: false
     timeout: 60
     properties:
@@ -880,12 +880,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab","hostonly"]
       task_name: web_benchmarks_canvaskit
-    scheduler: luci
 
   - name: Linux web_benchmarks_html
     recipe: devicelab/devicelab_drone
@@ -898,7 +897,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"}
+          {"dependency": "chrome_and_driver", "version": "version:96.2"}
         ]
       tags: >
         ["devicelab"]
@@ -916,7 +915,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_long_running_tests
@@ -937,7 +936,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_long_running_tests
@@ -958,7 +957,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_long_running_tests
@@ -979,7 +978,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_long_running_tests
@@ -1000,7 +999,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_long_running_tests
@@ -1021,7 +1020,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_tests
@@ -1042,7 +1041,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_tests
@@ -1063,7 +1062,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_tests
@@ -1084,7 +1083,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_tests
@@ -1105,7 +1104,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_tests
@@ -1126,7 +1125,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_tests
@@ -1147,7 +1146,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_tests
@@ -1168,7 +1167,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_tests
@@ -1189,7 +1188,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_canvaskit_tests
@@ -1209,7 +1208,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_canvaskit_tests
@@ -1229,7 +1228,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_canvaskit_tests
@@ -1249,7 +1248,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_canvaskit_tests
@@ -1269,7 +1268,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_canvaskit_tests
@@ -1289,7 +1288,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_canvaskit_tests
@@ -1309,7 +1308,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_canvaskit_tests
@@ -1329,7 +1328,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "goldctl"}
         ]
       shard: web_canvaskit_tests
@@ -1349,7 +1348,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
         ]
@@ -1395,7 +1394,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android android_semantics_integration_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/74522
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/98417
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1403,7 +1402,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: android_semantics_integration_test
-    scheduler: luci
 
   - name: Linux_android android_stack_size_test
     recipe: devicelab/devicelab_drone
@@ -1514,6 +1512,17 @@ targets:
         ["devicelab","android","linux"]
       task_name: color_filter_and_fade_perf__timeline_summary
     scheduler: luci
+
+  - name: Linux_android color_filter_cache_perf__e2e_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: color_filter_cache_perf__e2e_summary
+      benchmark: "true"
 
   - name: Linux_android complex_layout_android__compile
     recipe: devicelab/devicelab_drone
@@ -1658,7 +1667,6 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
-    scheduler: luci
 
   - name: Linux_android cubic_bezier_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2341,7 +2349,6 @@ targets:
       tags: >
         ["framework","hostonly"]
     timeout: 60
-    scheduler: luci
 
   - name: Linux deferred components
     bringup: true # Flaky https://github.com/flutter/flutter/issues/96403
@@ -2356,7 +2363,6 @@ targets:
       tags: >
         ["framework","hostonly"]
     timeout: 60
-    scheduler: luci
 
   - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2437,7 +2443,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: android_choreographer_do_frame_test
-    scheduler: luci
 
   - name: Linux_android android_lifecycles_test
     bringup: true
@@ -2448,7 +2453,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: android_lifecycles_test
-    scheduler: luci
 
   - name: Mac build_aar_module_test
     recipe: devicelab/devicelab_drone
@@ -2469,7 +2473,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: build_aar_module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2615,30 +2618,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac entrypoint_dart_registrant
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    timeout: 60
-    properties:
-      caches: >-
-        [
-          {"name":"gradle","path":"gradle"}
-        ]
-      dependencies: >-
-        [
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
-        ]
-      tags: >
-        ["devicelab","hostonly"]
-      task_name: entrypoint_dart_registrant
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
   - name: Mac framework_tests_libraries
     recipe: flutter/flutter_drone
     timeout: 60
@@ -2763,30 +2742,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_fat_apk_test
-    scheduler: luci
-    runIf:
-      - dev/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Mac gradle_plugin_light_apk_test
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      caches: >-
-        [
-          {"name":"gradle","path":"gradle"}
-        ]
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
-        ]
-      tags: >
-        ["devicelab","hostonly"]
-      task_name: gradle_plugin_light_apk_test
     scheduler: luci
     runIf:
       - dev/**
@@ -3361,15 +3316,14 @@ targets:
       task_name: external_ui_integration_test_ios
     scheduler: luci
 
-  - name: Mac_ios routing_test
-    bringup: true
+  - name: Mac_ios route_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab","ios","mac"]
-      task_name: routing_test
+      task_name: route_test_ios
     scheduler: luci
 
   - name: Mac_ios flavors_test_ios
@@ -3411,7 +3365,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: flutter_view_ios__start_up
-    scheduler: luci
 
   - name: Mac_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
@@ -3485,7 +3438,6 @@ targets:
     scheduler: luci
 
   - name: Mac_ios integration_ui_ios_textfield
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/96787
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3493,7 +3445,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: integration_ui_ios_textfield
-    scheduler: luci
 
   - name: Mac_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
@@ -3574,7 +3525,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: new_gallery_ios__transition_perf
-    scheduler: luci
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3585,7 +3535,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: ios_picture_cache_complexity_scoring_perf__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios platform_channel_sample_test_ios
     recipe: devicelab/devicelab_drone
@@ -3656,7 +3605,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: post_backdrop_filter_perf_ios__timeline_summary
-    scheduler: luci
 
   - name: Mac_ios simple_animation_perf_ios
     recipe: devicelab/devicelab_drone
@@ -3677,7 +3625,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
-    scheduler: luci
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3698,7 +3645,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: native_ui_tests_ios
-    scheduler: luci
 
   - name: Mac native_ui_tests_macos
     recipe: devicelab/devicelab_drone
@@ -3714,10 +3660,29 @@ targets:
       task_name: native_ui_tests_macos
     scheduler: luci
     runIf:
-    - dev/**
-    - packages/flutter_tools/**
-    - bin/**
-    - .ci.yaml
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac run_release_test_macos
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode"},
+          {"dependency": "gems"}
+        ]
+      tags: >
+        ["devicelab","hostonly"]
+      task_name: run_release_test_macos
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
 
   - name: Windows build_aar_module_test
     recipe: devicelab/devicelab_drone
@@ -3731,7 +3696,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"}
         ]
       tags: >
@@ -3752,7 +3717,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -3771,7 +3736,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -3790,7 +3755,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -3904,7 +3869,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"}
         ]
       tags: >
@@ -3928,37 +3893,13 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"}
         ]
       tags: >
         ["devicelab","hostonly"]
       task_name: gradle_plugin_fat_apk_test
     scheduler: luci
-
-  - name: Windows gradle_plugin_light_apk_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/97956
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      caches: >-
-        [
-          {"name":"gradle","path":"gradle"}
-        ]
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"}
-        ]
-      tags: >
-        ["devicelab","hostonly"]
-      task_name: gradle_plugin_light_apk_test
-    scheduler: luci
-    runIf:
-      - dev/**
-      - bin/**
-      - .ci.yaml
 
   - name: Windows hot_mode_dev_cycle_win_target__benchmark
     recipe: devicelab/devicelab_drone
@@ -3986,7 +3927,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"}
         ]
       tags: >
@@ -4010,7 +3951,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"}
         ]
       tags: >
@@ -4035,13 +3976,12 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"}
         ]
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test
-    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4059,7 +3999,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"}
         ]
       tags: >
@@ -4083,7 +4023,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"}
         ]
       tags: >
@@ -4104,7 +4044,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -4129,7 +4069,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -4154,7 +4094,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -4179,7 +4119,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -4204,7 +4144,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -4229,7 +4169,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -4295,7 +4235,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
         ]
@@ -4313,7 +4253,6 @@ targets:
   - name: Windows windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab","hostonly"]

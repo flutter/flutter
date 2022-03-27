@@ -557,6 +557,7 @@ const String _dartPluginRegistryTemplate = '''
 
 // ignore_for_file: directives_ordering
 // ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: depend_on_referenced_packages
 
 {{#methodChannelPlugins}}
 import 'package:{{name}}/{{file}}';
@@ -706,6 +707,10 @@ const String _dartPluginRegistryForNonWebTemplate = '''
 
 // @dart = {{dartLanguageVersion}}
 
+// When `{{mainEntrypoint}}` defines `main`, that definition is shadowed by the definition below.
+export '{{mainEntrypoint}}';
+
+import '{{mainEntrypoint}}' as entrypoint;
 import 'dart:io'; // flutter_ignore: dart_io_import.
 {{#android}}
 import 'package:{{pluginName}}/{{pluginName}}.dart';
@@ -749,6 +754,18 @@ $_dartPluginRegisterWith
 $_dartPluginRegisterWith
       {{/windows}}
     }
+  }
+
+}
+
+typedef _UnaryFunction = dynamic Function(List<String> args);
+typedef _NullaryFunction = dynamic Function();
+
+void main(List<String> args) {
+  if (entrypoint.main is _UnaryFunction) {
+    (entrypoint.main as _UnaryFunction)(args);
+  } else {
+    (entrypoint.main as _NullaryFunction)();
   }
 }
 ''';

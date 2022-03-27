@@ -196,9 +196,21 @@ class NextContext extends Context {
           upstreamRemote: upstream,
           previousCheckoutLocation: state.framework.checkoutPath,
         );
-
+        stdio.printStatus('Writing candidate branch...');
+        bool needsCommit = await framework.updateCandidateBranchVersion(state.releaseVersion);
+        if (needsCommit) {
+          final String revision = await framework.commit(
+              'Create candidate branch version ${state.engine.candidateBranch} for ${state.releaseChannel}',
+              addFirst: true,
+          );
+          // append to list of cherrypicks so we know a PR is required
+          state.framework.cherrypicks.add(pb.Cherrypick(
+                  appliedRevision: revision,
+                  state: pb.CherrypickState.COMPLETED,
+          ));
+        }
         stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
-        final bool needsCommit = await framework.updateEngineRevision(engineRevision);
+        needsCommit = await framework.updateEngineRevision(engineRevision);
         if (needsCommit) {
           final String revision = await framework.commit(
               'Update Engine revision to $engineRevision for ${state.releaseChannel} release ${state.releaseVersion}',

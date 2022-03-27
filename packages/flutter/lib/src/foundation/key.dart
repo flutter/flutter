@@ -4,6 +4,8 @@
 
 import 'package:meta/meta.dart';
 
+import 'diagnostics.dart';
+
 /// A [Key] is an identifier for [Widget]s, [Element]s and [SemanticsNode]s.
 ///
 /// A new widget will only be used to update an existing element if its key is
@@ -27,7 +29,7 @@ abstract class Key {
 
   /// Default constructor, used by subclasses.
   ///
-  /// Useful so that subclasses can call us, because the [new Key] factory
+  /// Useful so that subclasses can call us, because the [Key.new] factory
   /// constructor shadows the implicit constructor.
   @protected
   const Key.empty();
@@ -45,6 +47,23 @@ abstract class LocalKey extends Key {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const LocalKey() : super.empty();
+}
+
+/// A key that is only equal to itself.
+///
+/// This cannot be created with a const constructor because that implies that
+/// all instantiated keys would be the same instance and therefore not be unique.
+class UniqueKey extends LocalKey {
+  /// Creates a key that is equal only to itself.
+  ///
+  /// The key cannot be created with a const constructor because that implies
+  /// that all instantiated keys would be the same instance and therefore not
+  /// be unique.
+  // ignore: prefer_const_constructors_in_immutables , never use const for this class
+  UniqueKey();
+
+  @override
+  String toString() => '[#${shortHash(this)}]';
 }
 
 /// A key that uses a value of a particular type to identify itself.
