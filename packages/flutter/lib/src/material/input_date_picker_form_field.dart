@@ -56,6 +56,7 @@ class InputDatePickerFormField extends StatefulWidget {
     this.errorInvalidText,
     this.fieldHintText,
     this.fieldLabelText,
+    this.keyboardType,
     this.autofocus = false,
   }) : assert(firstDate != null),
        assert(lastDate != null),
@@ -125,6 +126,11 @@ class InputDatePickerFormField extends StatefulWidget {
   /// string. For example, 'Month, Day, Year' for en_US.
   final String? fieldLabelText;
 
+  /// The keyboard type of the [TextField].
+  ///
+  /// If this is null, it will default to [TextInputType.datetime]
+  final TextInputType? keyboardType;
+
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
@@ -161,7 +167,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     super.didUpdateWidget(oldWidget);
     if (widget.initialDate != oldWidget.initialDate) {
       // Can't update the form field in the middle of a build, so do it next frame
-      WidgetsBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
         setState(() {
           _selectedDate = widget.initialDate;
           _updateValueForSelectedDate();
@@ -242,7 +248,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
         labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
       ),
       validator: _validateDate,
-      keyboardType: TextInputType.datetime,
+      keyboardType: widget.keyboardType ?? TextInputType.datetime,
       onSaved: _handleSaved,
       onFieldSubmitted: _handleSubmitted,
       autofocus: widget.autofocus,

@@ -31,6 +31,29 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
     };
   }
 
+  /// The current [TestRenderingFlutterBinding], if one has been created.
+  ///
+  /// Provides access to the features exposed by this binding. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [TestRenderingFlutterBinding.ensureInitialized].
+  static TestRenderingFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static TestRenderingFlutterBinding? _instance;
+
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// Creates and initializes the binding. This function is
+  /// idempotent; calling it a second time will just return the
+  /// previously-created instance.
+  static TestRenderingFlutterBinding ensureInitialized({ VoidCallback? onErrors }) {
+    if (_instance != null)
+      return _instance!;
+    return TestRenderingFlutterBinding(onErrors: onErrors);
+  }
+
   final List<FlutterErrorDetails> _errors = <FlutterErrorDetails>[];
 
   /// A function called after drawing a frame if [FlutterError] caught any errors.
@@ -92,8 +115,8 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
       _errors.add(details);
     };
     try {
-      renderer.handleBeginFrame(null);
-      renderer.handleDrawFrame();
+      TestRenderingFlutterBinding.instance.handleBeginFrame(null);
+      TestRenderingFlutterBinding.instance.handleDrawFrame();
     } finally {
       FlutterError.onError = oldErrorHandler;
       if (_errors.isNotEmpty) {
@@ -153,10 +176,6 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   }
 }
 
-final TestRenderingFlutterBinding _renderer = TestRenderingFlutterBinding();
-TestRenderingFlutterBinding get renderer => _renderer;
-
-
 /// Place the box in the render tree, at the given size and with the given
 /// alignment on the screen.
 ///
@@ -181,7 +200,7 @@ void layout(
   assert(box != null); // If you want to just repump the last box, call pumpFrame().
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
 
-  renderer.renderView.child = null;
+  TestRenderingFlutterBinding.instance.renderView.child = null;
   if (constraints != null) {
     box = RenderPositionedBox(
       alignment: alignment,
@@ -191,7 +210,7 @@ void layout(
       ),
     );
   }
-  renderer.renderView.child = box;
+  TestRenderingFlutterBinding.instance.renderView.child = box;
 
   pumpFrame(phase: phase, onErrors: onErrors);
 }
@@ -200,16 +219,16 @@ void layout(
 ///
 /// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
 void pumpFrame({ EnginePhase phase = EnginePhase.layout, VoidCallback? onErrors }) {
-  assert(renderer != null);
-  assert(renderer.renderView != null);
-  assert(renderer.renderView.child != null); // call layout() first!
+  assert(TestRenderingFlutterBinding.instance != null);
+  assert(TestRenderingFlutterBinding.instance.renderView != null);
+  assert(TestRenderingFlutterBinding.instance.renderView.child != null); // call layout() first!
 
   if (onErrors != null) {
-    renderer.onErrors = onErrors;
+    TestRenderingFlutterBinding.instance.onErrors = onErrors;
   }
 
-  renderer.phase = phase;
-  renderer.drawFrame();
+  TestRenderingFlutterBinding.instance.phase = phase;
+  TestRenderingFlutterBinding.instance.drawFrame();
 }
 
 class TestCallbackPainter extends CustomPainter {
@@ -341,7 +360,7 @@ class TestClipPaintingContext extends PaintingContext {
 }
 
 void expectOverflowedErrors() {
-  final FlutterErrorDetails errorDetails = renderer.takeFlutterErrorDetails()!;
+  final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
   final bool overflowed = errorDetails.toString().contains('overflowed');
   if (!overflowed) {
     FlutterError.reportError(errorDetails);

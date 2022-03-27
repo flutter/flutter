@@ -96,8 +96,7 @@ class AutofillGroup extends StatefulWidget {
   /// {@macro flutter.services.TextInput.finishAutofillContext}
   ///
   /// Defaults to [AutofillContextAction.commit], which prompts the platform to
-  /// save the user input and destroy the current autofill context. No action
-  /// will be taken if [onDisposeAction] is set to null.
+  /// save the user input and destroy the current autofill context.
   final AutofillContextAction onDisposeAction;
 
   @override

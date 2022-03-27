@@ -100,7 +100,7 @@ abstract class ScrollView extends StatelessWidget {
        assert(shrinkWrap != null),
        assert(dragStartBehavior != null),
        assert(clipBehavior != null),
-       assert(!(controller != null && primary == true),
+       assert(!(controller != null && (primary ?? false)),
            'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
            'You cannot both set primary to true and pass an explicit controller.',
        ),
@@ -109,7 +109,7 @@ abstract class ScrollView extends StatelessWidget {
        assert(anchor >= 0.0 && anchor <= 1.0),
        assert(semanticChildCount == null || semanticChildCount >= 0),
        primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
-       physics = physics ?? (primary == true || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
+       physics = physics ?? ((primary ?? false) || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
        super(key: key);
 
   /// {@template flutter.widgets.scroll_view.scrollDirection}
@@ -1010,6 +1010,13 @@ abstract class BoxScrollView extends ScrollView {
 /// example of how a caller might wire up basic item selection, see
 /// [ListTile.selected].
 ///
+/// {@tool dartpad}
+/// This example shows a custom implementation of [ListTile] selection in a [ListView] or [GridView].
+/// Long press any ListTile to enable selection mode.
+///
+/// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
@@ -1119,6 +1126,8 @@ class ListView extends BoxScrollView {
   /// efficient, however, is to create the instances on demand using this
   /// constructor's `itemBuilder` callback.
   ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
@@ -1126,10 +1135,6 @@ class ListView extends BoxScrollView {
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
   /// null.
-  ///
-  /// [ListView.builder] by default does not support child reordering. If
-  /// you are planning to change child order at a later time, consider using
-  /// [ListView] or [ListView.custom].
   ListView.builder({
     Key? key,
     Axis scrollDirection = Axis.vertical,
@@ -1142,6 +1147,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.prototypeItem,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
@@ -1160,6 +1166,7 @@ class ListView extends BoxScrollView {
        ),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -1204,6 +1211,8 @@ class ListView extends BoxScrollView {
   /// view's children are created in advance, or all at once when the [ListView]
   /// itself is created, it is more efficient to use the [ListView] constructor.
   ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
   /// {@tool snippet}
   ///
   /// This example shows how to create [ListView] whose [ListTile] list items
@@ -1239,6 +1248,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap = false,
     EdgeInsetsGeometry? padding,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     required IndexedWidgetBuilder separatorBuilder,
     required int itemCount,
     bool addAutomaticKeepAlives = true,
@@ -1271,6 +1281,7 @@ class ListView extends BoxScrollView {
            }
            return widget;
          },
+         findChildIndexCallback: findChildIndexCallback,
          childCount: _computeActualChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -1581,33 +1592,33 @@ class ListView extends BoxScrollView {
 ///   children: <Widget>[
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text("He'd have you all unravel at the"),
 ///       color: Colors.teal[100],
+///       child: const Text("He'd have you all unravel at the"),
 ///     ),
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text('Heed not the rabble'),
 ///       color: Colors.teal[200],
+///       child: const Text('Heed not the rabble'),
 ///     ),
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text('Sound of screams but the'),
 ///       color: Colors.teal[300],
+///       child: const Text('Sound of screams but the'),
 ///     ),
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text('Who scream'),
 ///       color: Colors.teal[400],
+///       child: const Text('Who scream'),
 ///     ),
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text('Revolution is coming...'),
 ///       color: Colors.teal[500],
+///       child: const Text('Revolution is coming...'),
 ///     ),
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text('Revolution, they...'),
 ///       color: Colors.teal[600],
+///       child: const Text('Revolution, they...'),
 ///     ),
 ///   ],
 /// )
@@ -1633,33 +1644,33 @@ class ListView extends BoxScrollView {
 ///         children: <Widget>[
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text("He'd have you all unravel at the"),
 ///             color: Colors.green[100],
+///             child: const Text("He'd have you all unravel at the"),
 ///           ),
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text('Heed not the rabble'),
 ///             color: Colors.green[200],
+///             child: const Text('Heed not the rabble'),
 ///           ),
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text('Sound of screams but the'),
 ///             color: Colors.green[300],
+///             child: const Text('Sound of screams but the'),
 ///           ),
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text('Who scream'),
 ///             color: Colors.green[400],
+///             child: const Text('Who scream'),
 ///           ),
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text('Revolution is coming...'),
 ///             color: Colors.green[500],
+///             child: const Text('Revolution is coming...'),
 ///           ),
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text('Revolution, they...'),
 ///             color: Colors.green[600],
+///             child: const Text('Revolution, they...'),
 ///           ),
 ///         ],
 ///       ),
@@ -1698,6 +1709,13 @@ class ListView extends BoxScrollView {
 ///   );
 /// }
 /// ```
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows a custom implementation of [ListTile] selection in a [GridView] or [ListView].
+/// Long press any ListTile to enable selection mode.
+///
+/// ** See code in examples/api/lib/widgets/scroll_view/listview_select.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1783,6 +1801,8 @@ class GridView extends BoxScrollView {
   /// `itemBuilder` will be called only with indices greater than or equal to
   /// zero and less than `itemCount`.
   ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
   /// The [gridDelegate] argument must not be null.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
@@ -1801,6 +1821,7 @@ class GridView extends BoxScrollView {
     EdgeInsetsGeometry? padding,
     required this.gridDelegate,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
@@ -1814,6 +1835,7 @@ class GridView extends BoxScrollView {
   }) : assert(gridDelegate != null),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,

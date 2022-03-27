@@ -15,7 +15,7 @@ import 'framework.dart' show BuildContext;
 /// widget subtree.
 ///
 /// To obtain the current icon theme, use [IconTheme.of]. To convert an icon
-/// theme to a version with all the fields filled in, use [new
+/// theme to a version with all the fields filled in, use [
 /// IconThemeData.fallback].
 @immutable
 class IconThemeData with Diagnosticable {
@@ -118,7 +118,12 @@ class IconThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode => hashValues(color, opacity, size, hashList(shadows));
+  int get hashCode => Object.hash(
+    color,
+    opacity,
+    size,
+    shadows == null ? null : Object.hashAll(shadows!),
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

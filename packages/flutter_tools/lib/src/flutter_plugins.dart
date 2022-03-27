@@ -393,8 +393,8 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
 
       final List<String> pluginsUsingV1 = <String>[];
       for (final Map<String, Object?> plugin in androidPlugins) {
-        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) == true;
-        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) == true;
+        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) ?? false;
+        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) ?? false;
         if (supportsEmbeddingV1 && !supportsEmbeddingV2) {
           templateContext['needsShim'] = true;
           if (plugin['name'] != null) {
@@ -431,8 +431,8 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'
       );
       for (final Map<String, Object?> plugin in androidPlugins) {
-        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) == true;
-        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) == true;
+        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) ?? false;
+        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) ?? false;
         if (!supportsEmbeddingV1 && supportsEmbeddingV2) {
           throwToolExit(
             'The plugin `${plugin['name']}` requires your app to be migrated to '
@@ -530,7 +530,7 @@ const String _pluginRegistrantPodspecTemplate = '''
 Pod::Spec.new do |s|
   s.name             = 'FlutterPluginRegistrant'
   s.version          = '0.0.1'
-  s.summary          = 'Registers plugins with your flutter app'
+  s.summary          = 'Registers plugins with your Flutter app'
   s.description      = <<-DESC
 Depends on all your plugins, and provides a function to register them.
                        DESC
@@ -557,6 +557,7 @@ const String _dartPluginRegistryTemplate = '''
 
 // ignore_for_file: directives_ordering
 // ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: depend_on_referenced_packages
 
 {{#methodChannelPlugins}}
 import 'package:{{name}}/{{file}}';

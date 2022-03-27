@@ -55,7 +55,7 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['ios', '--no-codesign'],
+          options: <String>['ios', '--no-codesign', '--verbose'],
         );
       });
 
@@ -78,6 +78,26 @@ Future<void> main() async {
           'Ephemeral host app ${ephemeralIOSHostApp.path} was not a release build as expected'
         );
       }
+
+      section('Build ephemeral host app when SDK is on external disk');
+
+      // Pretend the SDK was on an external drive with stray "._" files in the xcframework
+      // and build again.
+      Directory(path.join(
+        projectDir.path,
+        '.ios',
+        'Flutter',
+        'engine',
+        'Flutter.xcframework',
+        '._ios-arm64_x86_64-simulator',
+      )).createSync(recursive: true);
+
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'build',
+          options: <String>['ios', '--no-codesign', '--simulator', '--debug'],
+        );
+      });
 
       section('Clean build');
 
@@ -246,6 +266,9 @@ dependencies:
       final Directory objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
 
       section('Build iOS Objective-C host app');
+
+      final File dummyAppFramework = File(path.join(projectDir.path, '.ios', 'Flutter', 'App.framework', 'App'));
+      checkFileNotExists(dummyAppFramework.path);
       await inDirectory(objectiveCHostApp, () async {
         await exec(
           'pod',
@@ -265,6 +288,14 @@ dependencies:
             || hostPodfileLockOutput.contains(dartPluginName)) {
           print(hostPodfileLockOutput);
           throw TaskResult.failure('Building host app Podfile.lock does not contain expected pods');
+        }
+
+        // Just running "pod install" should create a fake App.framework so CocoaPods recognizes
+        // it as a framework that needs to be embedded, before Flutter actually creates it.
+        checkFileExists(dummyAppFramework.path);
+        final String? version = await minPhoneOSVersion(dummyAppFramework.path);
+        if (version != '9.0') {
+          throw TaskResult.failure('Minimum version set to $version, expected 9.0');
         }
 
         await exec(

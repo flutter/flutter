@@ -20,7 +20,9 @@ class DoNothingAndStopPropagationTextIntent extends Intent {
 /// direction of the current caret location.
 abstract class DirectionalTextEditingIntent extends Intent {
   /// Creates a [DirectionalTextEditingIntent].
-  const DirectionalTextEditingIntent(this.forward);
+  const DirectionalTextEditingIntent(
+    this.forward,
+  );
 
   /// Whether the input field, if applicable, should perform the text editing
   /// operation from the current caret location towards the end of the document.
@@ -65,7 +67,10 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   const DirectionalCaretMovementIntent(
     bool forward,
     this.collapseSelection,
-    [this.collapseAtReversal = false]
+    [
+      this.collapseAtReversal = false,
+      this.continuesAtWrap = false,
+    ]
   ) : assert(!collapseSelection || !collapseAtReversal),
       super(forward);
 
@@ -90,6 +95,14 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   ///
   /// Cannot be true when collapseSelection is true.
   final bool collapseAtReversal;
+
+  /// Whether or not to continue to the next line at a wordwrap.
+  ///
+  /// If true, when an [Intent] to go to the beginning/end of a wordwrapped line
+  /// is received and the selection is already at the beginning/end of the line,
+  /// then the selection will be moved to the next/previous line.  If false, the
+  /// selection will remain at the wordwrap.
+  final bool continuesAtWrap;
 }
 
 /// Extends, or moves the current selection from the current
@@ -132,6 +145,23 @@ class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends Directional
   }) : super(forward);
 }
 
+/// Expands the current selection to the document boundary in the direction
+/// given by [forward].
+///
+/// Unlike [ExpandSelectionToLineBreakIntent], the extent will be moved, which
+/// matches the behavior on MacOS.
+///
+/// See also:
+///
+///   [ExtendSelectionToDocumentBoundaryIntent], which is similar but always
+///   moves the extent.
+class ExpandSelectionToDocumentBoundaryIntent extends DirectionalTextEditingIntent {
+  /// Creates an [ExpandSelectionToDocumentBoundaryIntent].
+  const ExpandSelectionToDocumentBoundaryIntent({
+    required bool forward,
+  }) : super(forward);
+}
+
 /// Expands the current selection to the closest line break in the direction
 /// given by [forward].
 ///
@@ -165,8 +195,9 @@ class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
     required bool forward,
     required bool collapseSelection,
     bool collapseAtReversal = false,
+    bool continuesAtWrap = false,
   }) : assert(!collapseSelection || !collapseAtReversal),
-       super(forward, collapseSelection, collapseAtReversal);
+       super(forward, collapseSelection, collapseAtReversal, continuesAtWrap);
 }
 
 /// Extends, or moves the current selection from the current
@@ -182,12 +213,26 @@ class ExtendSelectionVerticallyToAdjacentLineIntent extends DirectionalCaretMove
 
 /// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the start or the end of the document.
+///
+/// See also:
+///
+///   [ExtendSelectionToDocumentBoundaryIntent], which is similar but always
+///   increases the size of the selection.
 class ExtendSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToDocumentBoundaryIntent].
   const ExtendSelectionToDocumentBoundaryIntent({
     required bool forward,
     required bool collapseSelection,
   }) : super(forward, collapseSelection);
+}
+
+/// Scrolls to the beginning or end of the document depending on the [forward]
+/// parameter.
+class ScrollToDocumentBoundaryIntent extends DirectionalTextEditingIntent {
+  /// Creates a [ScrollToDocumentBoundaryIntent].
+  const ScrollToDocumentBoundaryIntent({
+    required bool forward,
+  }) : super(forward);
 }
 
 /// An [Intent] to select everything in the field.
@@ -231,6 +276,16 @@ class PasteTextIntent extends Intent {
   final SelectionChangedCause cause;
 }
 
+/// An [Intent] that represents a user interaction that attempts to go back to
+/// the previous editing state.
+class RedoTextIntent extends Intent {
+  /// Creates a [RedoTextIntent].
+  const RedoTextIntent(this.cause);
+
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
+  final SelectionChangedCause cause;
+}
+
 /// An [Intent] that represents a user interaction that attempts to modify the
 /// current [TextEditingValue] in an input field.
 class ReplaceTextIntent extends Intent {
@@ -250,10 +305,20 @@ class ReplaceTextIntent extends Intent {
   final SelectionChangedCause cause;
 }
 
+/// An [Intent] that represents a user interaction that attempts to go back to
+/// the previous editing state.
+class UndoTextIntent extends Intent {
+  /// Creates an [UndoTextIntent].
+  const UndoTextIntent(this.cause);
+
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
+  final SelectionChangedCause cause;
+}
+
 /// An [Intent] that represents a user interaction that attempts to change the
 /// selection in an input field.
 class UpdateSelectionIntent extends Intent {
-  /// Creates a [UpdateSelectionIntent].
+  /// Creates an [UpdateSelectionIntent].
   const UpdateSelectionIntent(this.currentTextEditingValue, this.newSelection, this.cause);
 
   /// The [TextEditingValue] that this [Intent]'s action should perform on.

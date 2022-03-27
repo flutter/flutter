@@ -65,8 +65,20 @@ class CommonFinders {
     );
   }
 
-  /// Finds [Text] and [EditableText] widgets which contain the given
-  /// `pattern` argument.
+  /// Finds [Text] and [EditableText], and optionally [RichText] widgets
+  /// which contain the given `pattern` argument.
+  ///
+  /// If `findRichText` is false, all standalone [RichText] widgets are
+  /// ignored and `pattern` is matched with [Text.data] or [Text.textSpan].
+  /// If `findRichText` is true, [RichText] widgets (and therefore also
+  /// [Text] and [Text.rich] widgets) are matched by comparing the
+  /// [InlineSpan.toPlainText] with the given `pattern`.
+  ///
+  /// For [EditableText] widgets, the `pattern` is always compared to the currentt
+  /// value of the [EditableText.controller].
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   ///
   /// ## Sample code
   ///
@@ -75,9 +87,27 @@ class CommonFinders {
   /// expect(find.textContain(RegExp(r'(\w+)')), findsOneWidget);
   /// ```
   ///
-  /// If the `skipOffstage` argument is true (the default), then this skips
-  /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder textContaining(Pattern pattern, { bool skipOffstage = true }) => _TextContainingFinder(pattern, skipOffstage: skipOffstage);
+  /// This will match [Text], [Text.rich], and [EditableText] widgets that
+  /// contain the given pattern : 'Back' or RegExp(r'(\w+)').
+  ///
+  /// ```dart
+  /// expect(find.textContain('Close', findRichText: true), findsOneWidget);
+  /// expect(find.textContain(RegExp(r'(\w+)'), findRichText: true), findsOneWidget);
+  /// ```
+  ///
+  /// This will match [Text], [Text.rich], [EditableText], as well as standalone
+  /// [RichText] widgets that contain the given pattern : 'Close' or RegExp(r'(\w+)').
+  Finder textContaining(
+    Pattern pattern, {
+    bool findRichText = false,
+    bool skipOffstage = true,
+  }) {
+    return _TextContainingFinder(
+      pattern,
+      findRichText: findRichText,
+      skipOffstage: skipOffstage
+    );
+  }
 
   /// Looks for widgets that contain a [Text] descendant with `text`
   /// in it.
@@ -405,7 +435,7 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
-    if (WidgetsBinding.instance!.pipelineOwner.semanticsOwner == null)
+    if (WidgetsBinding.instance.pipelineOwner.semanticsOwner == null)
       throw StateError('Semantics are not enabled. '
                        'Make sure to call tester.ensureSemantics() before using '
                        'this finder, and call dispose on its return value after.');
@@ -462,7 +492,7 @@ abstract class Finder {
   @protected
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
-      WidgetsBinding.instance!.renderViewElement!,
+      WidgetsBinding.instance.renderViewElement!,
       skipOffstage: skipOffstage,
     );
   }
@@ -605,7 +635,7 @@ class _HitTestableFinder extends ChainedFinder {
       final RenderBox box = candidate.renderObject! as RenderBox;
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
-      WidgetsBinding.instance!.hitTest(hitResult, absoluteOffset);
+      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
           yield candidate;
@@ -634,14 +664,11 @@ abstract class MatchFinder extends Finder {
   }
 }
 
-class _TextFinder extends MatchFinder {
-  _TextFinder(
-    this.text, {
+abstract class _MatchTextFinder extends MatchFinder {
+  _MatchTextFinder({
     this.findRichText = false,
     bool skipOffstage = true,
   }) : super(skipOffstage: skipOffstage);
-
-  final String text;
 
   /// Whether standalone [RichText] widgets should be found or not.
   ///
@@ -656,17 +683,18 @@ class _TextFinder extends MatchFinder {
   /// In either case, [EditableText] widgets will also be matched.
   final bool findRichText;
 
-  @override
-  String get description => 'text "$text"';
+  bool matchesText(String textToMatch);
 
   @override
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
-    if (widget is EditableText)
+    if (widget is EditableText) {
       return _matchesEditableText(widget);
+    }
 
-    if (!findRichText)
+    if (!findRichText) {
       return _matchesNonRichText(widget);
+    }
     // It would be sufficient to always use _matchesRichText if we wanted to
     // match both standalone RichText widgets as well as Text widgets. However,
     // the find.text() finder used to always ignore standalone RichText widgets,
@@ -676,29 +704,52 @@ class _TextFinder extends MatchFinder {
   }
 
   bool _matchesRichText(Widget widget) {
-    if (widget is RichText)
-      return widget.text.toPlainText() == text;
+    if (widget is RichText) {
+      return matchesText(widget.text.toPlainText());
+    }
     return false;
   }
 
   bool _matchesNonRichText(Widget widget) {
     if (widget is Text) {
-      if (widget.data != null)
-        return widget.data == text;
+      if (widget.data != null) {
+        return matchesText(widget.data!);
+      }
       assert(widget.textSpan != null);
-      return widget.textSpan!.toPlainText() == text;
+      return matchesText(widget.textSpan!.toPlainText());
     }
     return false;
   }
 
   bool _matchesEditableText(EditableText widget) {
-    return widget.controller.text == text;
+    return matchesText(widget.controller.text);
   }
 }
 
-class _TextContainingFinder extends MatchFinder {
-  _TextContainingFinder(this.pattern, {bool skipOffstage = true})
-      : super(skipOffstage: skipOffstage);
+class _TextFinder extends _MatchTextFinder {
+  _TextFinder(
+    this.text, {
+    bool findRichText = false,
+    bool skipOffstage = true,
+  }) : super(findRichText: findRichText, skipOffstage: skipOffstage);
+
+  final String text;
+
+  @override
+  String get description => 'text "$text"';
+
+  @override
+  bool matchesText(String textToMatch) {
+    return textToMatch == text;
+  }
+}
+
+class _TextContainingFinder extends _MatchTextFinder {
+  _TextContainingFinder(
+    this.pattern, {
+    bool findRichText = false,
+    bool skipOffstage = true,
+  }) : super(findRichText: findRichText, skipOffstage: skipOffstage);
 
   final Pattern pattern;
 
@@ -706,17 +757,8 @@ class _TextContainingFinder extends MatchFinder {
   String get description => 'text containing $pattern';
 
   @override
-  bool matches(Element candidate) {
-    final Widget widget = candidate.widget;
-    if (widget is Text) {
-      if (widget.data != null)
-        return widget.data!.contains(pattern);
-      assert(widget.textSpan != null);
-      return widget.textSpan!.toPlainText().contains(pattern);
-    } else if (widget is EditableText) {
-      return widget.controller.text.contains(pattern);
-    }
-    return false;
+  bool matchesText(String textToMatch) {
+    return textToMatch.contains(pattern);
   }
 }
 

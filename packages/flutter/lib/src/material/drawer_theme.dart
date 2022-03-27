@@ -36,6 +36,7 @@ class DrawerThemeData with Diagnosticable {
     this.scrimColor,
     this.elevation,
     this.shape,
+    this.width,
   });
 
   /// Overrides the default value of [Drawer.backgroundColor].
@@ -50,6 +51,9 @@ class DrawerThemeData with Diagnosticable {
   /// Overrides the default value of [Drawer.shape].
   final ShapeBorder? shape;
 
+  /// Overrides the default value of [Drawer.width].
+  final double? width;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DrawerThemeData copyWith({
@@ -57,12 +61,14 @@ class DrawerThemeData with Diagnosticable {
     Color? scrimColor,
     double? elevation,
     ShapeBorder? shape,
+    double? width,
   }) {
     return DrawerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       scrimColor: scrimColor ?? this.scrimColor,
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
+      width: width ?? this.width,
     );
   }
 
@@ -80,18 +86,18 @@ class DrawerThemeData with Diagnosticable {
       scrimColor: Color.lerp(a?.scrimColor, b?.scrimColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      width: lerpDouble(a?.width, b?.width, t),
     );
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      scrimColor,
-      elevation,
-      shape,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    scrimColor,
+    elevation,
+    shape,
+    width,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -103,7 +109,8 @@ class DrawerThemeData with Diagnosticable {
         && other.backgroundColor == backgroundColor
         && other.scrimColor == scrimColor
         && other.elevation == elevation
-        && other.shape == shape;
+        && other.shape == shape
+        && other.width == width;
   }
 
   @override
@@ -113,6 +120,7 @@ class DrawerThemeData with Diagnosticable {
     properties.add(ColorProperty('scrimColor', scrimColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DoubleProperty('width', width, defaultValue: null));
   }
 }
 
@@ -144,7 +152,7 @@ class DrawerTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// DrawerTheme theme = DrawerTheme.of(context);
+  /// DrawerThemeData theme = DrawerTheme.of(context);
   /// ```
   static DrawerThemeData of(BuildContext context) {
     final DrawerTheme? drawerTheme = context.dependOnInheritedWidgetOfExactType<DrawerTheme>();

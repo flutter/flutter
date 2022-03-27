@@ -93,7 +93,7 @@ class Chrome {
         options.url!,
       if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true')
         '--no-sandbox',
-      if (options.headless == true)
+      if (options.headless ?? false)
         '--headless',
       if (withDebugging)
         '--remote-debugging-port=${options.debugPort}',
@@ -505,8 +505,17 @@ class BlinkTraceEvent {
   /// This event does not include non-UI thread scripting, such as web workers,
   /// service workers, and CSS Paint paintlets.
   ///
+  /// WebViewImpl::beginFrame was used in earlier versions of Chrome, kept
+  /// for compatibility.
+  ///
   /// This event is a duration event that has its `tdur` populated.
-  bool get isBeginFrame => ph == 'X' && name == 'WebViewImpl::beginFrame';
+  bool get isBeginFrame {
+    return ph == 'X' && (
+      name == 'WebViewImpl::beginFrame' ||
+      name == 'WebFrameWidgetBase::BeginMainFrame' ||
+      name == 'WebFrameWidgetImpl::BeginMainFrame'
+    );
+  }
 
   /// An "update all lifecycle phases" event contains UI thread computations
   /// related to an animation frame that's outside the scripting phase.
@@ -514,8 +523,16 @@ class BlinkTraceEvent {
   /// This event includes style recalculation, layer tree update, layout,
   /// painting, and parts of compositing work.
   ///
+  /// WebViewImpl::updateAllLifecyclePhases was used in earlier versions of
+  /// Chrome, kept for compatibility.
+  ///
   /// This event is a duration event that has its `tdur` populated.
-  bool get isUpdateAllLifecyclePhases => ph == 'X' && name == 'WebViewImpl::updateAllLifecyclePhases';
+  bool get isUpdateAllLifecyclePhases {
+    return ph == 'X' && (
+      name == 'WebViewImpl::updateAllLifecyclePhases' ||
+      name == 'WebFrameWidgetImpl::UpdateLifecycle'
+    );
+  }
 
   /// Whether this is the beginning of a "measured_frame" event.
   ///

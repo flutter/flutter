@@ -340,6 +340,23 @@ vars = {
       expect(processManager.hasRemainingExpectations, false);
     });
 
+    test('updateCandidateBranchVersion() returns false if branch is the same as version file', () async {
+      const String branch = 'flutter-2.15-candidate.3';
+      final File versionFile = fileSystem.file('/release-candidate-branch.version')..writeAsStringSync(branch);
+
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
+      final bool didUpdate = await repo.updateCandidateBranchVersion(branch, versionFile: versionFile);
+      expect(didUpdate, false);
+    });
+
     test('updateEngineRevision() returns false if newCommit is the same as version file', () async {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
@@ -407,9 +424,6 @@ vars = {
         ),
         const FakeCommand(
           command: <String>['git', 'checkout', 'beta', '--'],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'checkout', 'dev', '--'],
         ),
         const FakeCommand(
           command: <String>['git', 'checkout', FrameworkRepository.defaultBranch, '--'],

@@ -546,7 +546,7 @@ class _AndroidViewState extends State<AndroidView> {
     }
     SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setPlatformViewClient',
-      <String, dynamic>{'platformViewId': _id, 'usesVirtualDisplay': true},
+      <String, dynamic>{'platformViewId': _id},
     ).catchError((dynamic e) {
       if (e is MissingPluginException) {
         // We land the framework part of Android platform views keyboard

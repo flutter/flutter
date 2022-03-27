@@ -115,6 +115,7 @@ class FlutterOptions {
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
+  static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const String kFatalWarnings = 'fatal-warnings';
 }
 
@@ -290,7 +291,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   String get targetFile {
-    if (argResults?.wasParsed('target') == true) {
+    if (argResults?.wasParsed('target') ?? false) {
       return stringArg('target')!;
     }
     final List<String>? rest = argResults?.rest;
@@ -422,8 +423,8 @@ abstract class FlutterCommand extends Command<void> {
 
   late final bool enableDds = () {
     bool ddsEnabled = false;
-    if (argResults?.wasParsed('disable-dds') == true) {
-      if (argResults?.wasParsed('dds') == true) {
+    if (argResults?.wasParsed('disable-dds') ?? false) {
+      if (argResults?.wasParsed('dds') ?? false) {
         throwToolExit(
             'The "--[no-]dds" and "--[no-]disable-dds" arguments are mutually exclusive. Only specify "--[no-]dds".');
       }
@@ -444,8 +445,8 @@ abstract class FlutterCommand extends Command<void> {
     return ddsEnabled;
   }();
 
-  bool get _hostVmServicePortProvided => argResults?.wasParsed('observatory-port') == true ||
-                                         argResults?.wasParsed('host-vmservice-port') == true;
+  bool get _hostVmServicePortProvided => (argResults?.wasParsed('observatory-port') ?? false)
+      || (argResults?.wasParsed('host-vmservice-port') ?? false);
 
   int _tryParseHostVmservicePort() {
     final String? observatoryPort = stringArg('observatory-port');
@@ -464,7 +465,7 @@ abstract class FlutterCommand extends Command<void> {
     if (argResults?.wasParsed('dds-port') != true && _hostVmServicePortProvided) {
       // If an explicit DDS port is _not_ provided, use the host-vmservice-port for DDS.
       return _tryParseHostVmservicePort();
-    } else if (argResults?.wasParsed('dds-port') == true) {
+    } else if (argResults?.wasParsed('dds-port') ?? false) {
       // If an explicit DDS port is provided, use dds-port for DDS.
       return int.tryParse(stringArg('dds-port')!) ?? 0;
     }
@@ -473,7 +474,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   Uri? get devToolsServerAddress {
-    if (argResults?.wasParsed(kDevToolsServerAddress) == true) {
+    if (argResults?.wasParsed(kDevToolsServerAddress) ?? false) {
       final Uri? uri = Uri.tryParse(stringArg(kDevToolsServerAddress)!);
       if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
         return uri;
@@ -493,8 +494,8 @@ abstract class FlutterCommand extends Command<void> {
     if (!_usesPortOption || !_hostVmServicePortProvided) {
       return null;
     }
-    if (argResults?.wasParsed('observatory-port') == true &&
-        argResults?.wasParsed('host-vmservice-port') == true) {
+    if ((argResults?.wasParsed('observatory-port') ?? false)
+        && (argResults?.wasParsed('host-vmservice-port') ?? false)) {
       throwToolExit('Only one of "--observatory-port" and '
         '"--host-vmservice-port" may be specified.');
     }
@@ -612,8 +613,8 @@ abstract class FlutterCommand extends Command<void> {
   bool get reportNullSafety => false;
 
   late final Duration? deviceDiscoveryTimeout = () {
-    if (argResults?.options.contains(FlutterOptions.kDeviceTimeout) == true
-        && argResults?.wasParsed(FlutterOptions.kDeviceTimeout) == true) {
+    if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false)
+        && (argResults?.wasParsed(FlutterOptions.kDeviceTimeout) ?? false)) {
       final int? timeoutSeconds = int.tryParse(stringArg(FlutterOptions.kDeviceTimeout)!);
       if (timeoutSeconds == null) {
         throwToolExit( 'Could not parse "--${FlutterOptions.kDeviceTimeout}" argument. It must be an integer.');
@@ -829,6 +830,11 @@ abstract class FlutterCommand extends Command<void> {
         'the default cached location.',
       hide: hide,
     );
+    argParser.addFlag(FlutterOptions.kAssumeInitializeFromDillUpToDate,
+      help: 'If set, assumes that the file passed in initialize-from-dill is up '
+        'to date and skip the check and potential invalidation of files.',
+      hide: hide,
+    );
   }
 
   void addMultidexOption({ bool hide = false }) {
@@ -1000,7 +1006,7 @@ abstract class FlutterCommand extends Command<void> {
       // Explicitly check for `true` and `false` so that `null` results in not
       // passing a flag. Examine the entrypoint file to determine if it
       // is opted in or out.
-      final bool wasNullSafetyFlagParsed = argResults?.wasParsed(FlutterOptions.kNullSafety) == true;
+      final bool wasNullSafetyFlagParsed = argResults?.wasParsed(FlutterOptions.kNullSafety) ?? false;
       if (!wasNullSafetyFlagParsed && (argParser.options.containsKey('target') || forcedTargetFile != null)) {
         final File entrypointFile = forcedTargetFile ?? globals.fs.file(targetFile);
         final LanguageVersion languageVersion = determineLanguageVersion(
@@ -1113,6 +1119,8 @@ abstract class FlutterCommand extends Command<void> {
       initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
           ? stringArg(FlutterOptions.kInitializeFromDill)
           : null,
+      assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
+          && boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
     );
   }
 
@@ -1364,6 +1372,12 @@ abstract class FlutterCommand extends Command<void> {
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       globals.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
+      final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+      if (allDevices.isNotEmpty) {
+        globals.printStatus('');
+        globals.printStatus('The following devices were found:');
+        await Device.printDevices(allDevices, globals.logger);
+      }
       return null;
     } else if (devices.isEmpty) {
       if (deviceManager.hasSpecifiedAllDevices) {

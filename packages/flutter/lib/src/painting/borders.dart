@@ -262,7 +262,7 @@ class BorderSide {
   }
 
   @override
-  int get hashCode => hashValues(color, width, style);
+  int get hashCode => Object.hash(color, width, style);
 
   @override
   String toString() => '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)';
@@ -639,7 +639,7 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   @override
-  int get hashCode => hashList(borders);
+  int get hashCode => Object.hashAll(borders);
 
   @override
   String toString() {

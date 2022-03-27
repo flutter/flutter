@@ -88,19 +88,19 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
       expect((await command.usageValues).commandCreateProjectType, 'module');
 
-      await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=app', 'testy1']);
       expect((await command.usageValues).commandCreateProjectType, 'app');
 
-      await runner.run(<String>['create', '--no-pub', '--template=skeleton', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=skeleton', 'testy2']);
       expect((await command.usageValues).commandCreateProjectType, 'skeleton');
 
-      await runner.run(<String>['create', '--no-pub', '--template=package', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=package', 'testy3']);
       expect((await command.usageValues).commandCreateProjectType, 'package');
 
-      await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy4']);
       expect((await command.usageValues).commandCreateProjectType, 'plugin');
 
-      await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', 'testy5']);
       expect((await command.usageValues).commandCreateProjectType, 'plugin_ffi');
     }));
 

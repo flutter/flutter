@@ -346,7 +346,7 @@ void main() {
               '[☠] Crashing validator (the doctor check crashed)\n'
               '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
               'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
-              '    ✗ fatal error\n'
+              '    ✗ Bad state: fatal error\n'
               '[✓] Validators are fun (with statusInfo)\n'
               '[✓] Four score and seven validators ago (with statusInfo)\n'
               '\n'
@@ -378,7 +378,7 @@ void main() {
               '[☠] Async crashing validator (the doctor check crashed)\n'
               '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
               'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
-              '    ✗ fatal error\n'
+              '    ✗ Bad state: fatal error\n'
               '[✓] Validators are fun (with statusInfo)\n'
               '[✓] Four score and seven validators ago (with statusInfo)\n'
               '\n'
@@ -848,7 +848,7 @@ class CrashingValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    throw 'fatal error';
+    throw StateError('fatal error');
   }
 }
 
@@ -862,7 +862,7 @@ class AsyncCrashingValidator extends DoctorValidator {
     const Duration delay = Duration(seconds: 1);
     final Future<ValidationResult> result = Future<ValidationResult>.delayed(delay)
       .then((_) {
-        throw 'fatal error';
+        throw StateError('fatal error');
       });
     _time.elapse(const Duration(seconds: 1));
     _time.flushMicrotasks();

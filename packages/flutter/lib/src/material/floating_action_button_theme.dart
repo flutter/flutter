@@ -211,30 +211,28 @@ class FloatingActionButtonThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      foregroundColor,
-      backgroundColor,
-      focusColor,
-      hoverColor,
-      splashColor,
-      elevation,
-      focusElevation,
-      hoverElevation,
-      disabledElevation,
-      highlightElevation,
-      shape,
-      enableFeedback,
-      iconSize,
-      sizeConstraints,
-      smallSizeConstraints,
-      largeSizeConstraints,
-      extendedSizeConstraints,
-      extendedIconLabelSpacing,
-      extendedPadding,
-      extendedTextStyle,
-    );
-  }
+  int get hashCode => Object.hash(
+    foregroundColor,
+    backgroundColor,
+    focusColor,
+    hoverColor,
+    splashColor,
+    elevation,
+    focusElevation,
+    hoverElevation,
+    disabledElevation,
+    highlightElevation,
+    shape,
+    enableFeedback,
+    iconSize,
+    sizeConstraints,
+    smallSizeConstraints,
+    largeSizeConstraints,
+    extendedSizeConstraints,
+    extendedIconLabelSpacing,
+    extendedPadding,
+    extendedTextStyle,
+  );
 
   @override
   bool operator ==(Object other) {

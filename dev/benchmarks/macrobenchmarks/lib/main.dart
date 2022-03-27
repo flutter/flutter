@@ -11,6 +11,7 @@ import 'src/animated_placeholder.dart';
 import 'src/animation_with_microtasks.dart';
 import 'src/backdrop_filter.dart';
 import 'src/color_filter_and_fade.dart';
+import 'src/color_filter_cache.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
 import 'src/filtered_child_animation.dart';
@@ -21,6 +22,7 @@ import 'src/large_images.dart';
 import 'src/multi_widget_construction.dart';
 import 'src/opacity_peephole.dart';
 import 'src/picture_cache.dart';
+import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
@@ -47,12 +49,14 @@ class MacrobenchmarksApp extends StatelessWidget {
         kPostBackdropFilterRouteName: (BuildContext context) => const PostBackdropFilterPage(),
         kSimpleAnimationRouteName: (BuildContext context) => const SimpleAnimationPage(),
         kPictureCacheRouteName: (BuildContext context) => const PictureCachePage(),
+        kPictureCacheComplexityScoringRouteName: (BuildContext context) => const PictureCacheComplexityScoringPage(),
         kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
         kTextRouteName: (BuildContext context) => const TextPage(),
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => const ColorFilterAndFadePage(),
+        kColorFilterCacheRouteName: (BuildContext context) => const ColorFilterCachePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
@@ -123,6 +127,13 @@ class HomePage extends StatelessWidget {
             },
           ),
           ElevatedButton(
+            key: const Key(kPictureCacheComplexityScoringRouteName),
+            child: const Text('Picture Cache Complexity Scoring'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPictureCacheComplexityScoringRouteName);
+            },
+          ),
+          ElevatedButton(
             key: const Key(kLargeImagesRouteName),
             child: const Text('Large Images'),
             onPressed: () {
@@ -155,6 +166,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Color Filter and Fade'),
             onPressed: () {
               Navigator.pushNamed(context, kColorFilterAndFadeRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kColorFilterCacheRouteName),
+            child: const Text('Color Filter Cache'),
+            onPressed: () {
+              Navigator.pushNamed(context, kColorFilterCacheRouteName);
             },
           ),
           ElevatedButton(
