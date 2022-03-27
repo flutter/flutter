@@ -521,6 +521,7 @@ void main() {
         dartEntrypointArgs: <String>['a', 'b'],
         dartFlags: 'c',
         deviceVmServicePort: 1234,
+        enableImpeller: true,
       );
       final String jsonString = json.encode(original.toJson());
       final Map<String, dynamic> decoded = castStringKeyedMap(json.decode(jsonString))!;
@@ -531,6 +532,7 @@ void main() {
       expect(deserialized.dartEntrypointArgs, original.dartEntrypointArgs);
       expect(deserialized.dartFlags, original.dartFlags);
       expect(deserialized.deviceVmServicePort, original.deviceVmServicePort);
+      expect(deserialized.enableImpeller, original.enableImpeller);
     });
   });
 }

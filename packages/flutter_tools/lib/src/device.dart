@@ -790,6 +790,7 @@ class DebuggingOptions {
     this.fastStart = false,
     this.nullAssertions = false,
     this.nativeNullAssertions = false,
+    this.enableImpeller = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -805,6 +806,7 @@ class DebuggingOptions {
       this.webLaunchUrl,
       this.cacheSkSL = false,
       this.traceAllowlist,
+      this.enableImpeller = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -870,6 +872,7 @@ class DebuggingOptions {
     required this.fastStart,
     required this.nullAssertions,
     required this.nativeNullAssertions,
+    required this.enableImpeller,
   });
 
   final bool debuggingEnabled;
@@ -903,6 +906,7 @@ class DebuggingOptions {
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
+  final bool enableImpeller;
 
   /// Whether to run the browser in headless mode.
   ///
@@ -972,6 +976,7 @@ class DebuggingOptions {
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
+    'enableImpeller': enableImpeller,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1014,6 +1019,7 @@ class DebuggingOptions {
       fastStart: (json['fastStart'] as bool?)!,
       nullAssertions: (json['nullAssertions'] as bool?)!,
       nativeNullAssertions: (json['nativeNullAssertions'] as bool?)!,
+      enableImpeller: (json['enableImpeller'] as bool?) ?? false,
     );
 }
 
