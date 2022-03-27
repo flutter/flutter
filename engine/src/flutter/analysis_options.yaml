@@ -17,9 +17,6 @@ analyzer:
   exclude:
     # Fixture depends on dart:ui and raises false positives.
     - flutter_frontend_server/test/fixtures/lib/main.dart
-  strong-mode:
-    implicit-casts: false
-    implicit-dynamic: false
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
