@@ -48,17 +48,20 @@ using SolidStrokePipeline =
     PipelineT<SolidStrokeVertexShader, SolidStrokeFragmentShader>;
 using GlyphAtlasPipeline =
     PipelineT<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
-// Instead of requiring new shaders for clips,  the solid fill stages are used
+// Instead of requiring new shaders for clips, the solid fill stages are used
 // to redirect writing to the stencil instead of color attachments.
 using ClipPipeline = PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
 
 struct ContentContextOptions {
   SampleCount sample_count = SampleCount::kCount1;
   Entity::BlendMode blend_mode = Entity::BlendMode::kSourceOver;
+  CompareFunction stencil_compare = CompareFunction::kEqual;
+  StencilOperation stencil_operation = StencilOperation::kKeep;
 
   struct Hash {
     constexpr std::size_t operator()(const ContentContextOptions& o) const {
-      return fml::HashCombine(o.sample_count, o.blend_mode);
+      return fml::HashCombine(o.sample_count, o.blend_mode, o.stencil_compare,
+                              o.stencil_operation);
     }
   };
 
@@ -66,7 +69,9 @@ struct ContentContextOptions {
     constexpr bool operator()(const ContentContextOptions& lhs,
                               const ContentContextOptions& rhs) const {
       return lhs.sample_count == rhs.sample_count &&
-             lhs.blend_mode == rhs.blend_mode;
+             lhs.blend_mode == rhs.blend_mode &&
+             lhs.stencil_compare == rhs.stencil_compare &&
+             lhs.stencil_operation == rhs.stencil_operation;
     }
   };
 };
@@ -118,11 +123,6 @@ class ContentContext {
     return GetPipeline(clip_pipelines_, opts);
   }
 
-  std::shared_ptr<Pipeline> GetClipRestorePipeline(
-      ContentContextOptions opts) const {
-    return GetPipeline(clip_restoration_pipelines_, opts);
-  }
-
   std::shared_ptr<Pipeline> GetGlyphAtlasPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(glyph_atlas_pipelines_, opts);
@@ -150,7 +150,6 @@ class ContentContext {
   mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
   mutable Variants<SolidStrokePipeline> solid_stroke_pipelines_;
   mutable Variants<ClipPipeline> clip_pipelines_;
-  mutable Variants<ClipPipeline> clip_restoration_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
 
   static void ApplyOptionsToDescriptor(PipelineDescriptor& desc,
@@ -262,6 +261,14 @@ class ContentContext {
         FML_UNREACHABLE();
     }
     desc.SetColorAttachmentDescriptor(0u, std::move(color0));
+
+    if (desc.GetFrontStencilAttachmentDescriptor().has_value()) {
+      StencilAttachmentDescriptor stencil =
+          desc.GetFrontStencilAttachmentDescriptor().value();
+      stencil.stencil_compare = options.stencil_compare;
+      stencil.depth_stencil_pass = options.stencil_operation;
+      desc.SetStencilAttachmentDescriptors(stencil);
+    }
   }
 
   template <class TypedPipeline>

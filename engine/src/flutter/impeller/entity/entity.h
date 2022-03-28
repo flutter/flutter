@@ -48,6 +48,11 @@ class Entity {
     kLastAdvancedBlendMode = kScreen,
   };
 
+  enum class ClipOperation {
+    kDifference,
+    kIntersect,
+  };
+
   Entity();
 
   ~Entity();
