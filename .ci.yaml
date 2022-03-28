@@ -1522,7 +1522,18 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: color_filter_cache_perf__e2e_summary
-      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android shader_mask_cache_perf__e2e_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: shader_mask_cache_perf__e2e_summary
+    scheduler: luci
 
   - name: Linux_android complex_layout_android__compile
     recipe: devicelab/devicelab_drone
@@ -3438,7 +3449,6 @@ targets:
     scheduler: luci
 
   - name: Mac_ios integration_ui_ios_textfield
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/96787
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3526,6 +3536,16 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: new_gallery_ios__transition_perf
+
+  - name: Mac_ios new_gallery_impeller_ios__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96401
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","ios","mac"]
+      task_name: new_gallery_impeller_ios__transition_perf
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
