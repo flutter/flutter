@@ -28,8 +28,7 @@ const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 /// Generates the key mapping for iOS, based on the information in the key
 /// data structure given to it.
 class IOSCodeGenerator extends PlatformCodeGenerator {
-  IOSCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
-      : super(keyData, logicalData);
+  IOSCodeGenerator(super.keyData, super.logicalData);
 
   /// This generates the map of iOS key codes to physical keys.
   String get _scanCodeMap {
