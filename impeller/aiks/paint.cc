@@ -23,6 +23,9 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity() const {
       auto solid_stroke = std::make_shared<SolidStrokeContents>();
       solid_stroke->SetColor(color.Premultiply());
       solid_stroke->SetStrokeSize(stroke_width);
+      solid_stroke->SetStrokeMiter(stroke_miter);
+      solid_stroke->SetStrokeCap(stroke_cap);
+      solid_stroke->SetStrokeJoin(stroke_join);
       return solid_stroke;
     }
   }

@@ -8,6 +8,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
+#include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 
@@ -21,6 +22,9 @@ struct Paint {
 
   Color color = Color::Black();
   Scalar stroke_width = 0.0;
+  SolidStrokeContents::Cap stroke_cap = SolidStrokeContents::Cap::kButt;
+  SolidStrokeContents::Join stroke_join = SolidStrokeContents::Join::kMiter;
+  Scalar stroke_miter = 4.0;
   Style style = Style::kFill;
   Entity::BlendMode blend_mode = Entity::BlendMode::kSourceOver;
   std::shared_ptr<Contents> contents;

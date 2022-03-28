@@ -8,6 +8,7 @@
 
 #include "flutter/fml/trace_event.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
+#include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
@@ -65,17 +66,37 @@ void DisplayListDispatcher::setStrokeWidth(SkScalar width) {
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setStrokeMiter(SkScalar limit) {
-  UNIMPLEMENTED;
+  paint_.stroke_miter = limit;
 }
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setStrokeCap(SkPaint::Cap cap) {
-  UNIMPLEMENTED;
+  switch (cap) {
+    case SkPaint::kButt_Cap:
+      paint_.stroke_cap = SolidStrokeContents::Cap::kButt;
+      break;
+    case SkPaint::kRound_Cap:
+      paint_.stroke_cap = SolidStrokeContents::Cap::kRound;
+      break;
+    case SkPaint::kSquare_Cap:
+      paint_.stroke_cap = SolidStrokeContents::Cap::kSquare;
+      break;
+  }
 }
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setStrokeJoin(SkPaint::Join join) {
-  UNIMPLEMENTED;
+  switch (join) {
+    case SkPaint::kMiter_Join:
+      paint_.stroke_join = SolidStrokeContents::Join::kMiter;
+      break;
+    case SkPaint::kRound_Join:
+      paint_.stroke_join = SolidStrokeContents::Join::kRound;
+      break;
+    case SkPaint::kBevel_Join:
+      paint_.stroke_join = SolidStrokeContents::Join::kBevel;
+      break;
+  }
 }
 
 static Point ToPoint(const SkPoint& point) {
@@ -397,11 +418,9 @@ static Path ToPath(const SkPath& path) {
         builder.MoveTo(ToPoint(data.points[0]));
         break;
       case SkPath::kLine_Verb:
-        builder.LineTo(ToPoint(data.points[0]));
         builder.LineTo(ToPoint(data.points[1]));
         break;
       case SkPath::kQuad_Verb:
-        builder.LineTo(ToPoint(data.points[0]));
         builder.QuadraticCurveTo(ToPoint(data.points[1]),
                                  ToPoint(data.points[2]));
         break;
@@ -422,13 +441,11 @@ static Path ToPath(const SkPath& path) {
              curve_index < curve_count;             //
              curve_index++, point_index += 2        //
         ) {
-          builder.LineTo(ToPoint(points[point_index + 0]));
           builder.QuadraticCurveTo(ToPoint(points[point_index + 1]),
                                    ToPoint(points[point_index + 2]));
         }
       } break;
       case SkPath::kCubic_Verb:
-        builder.LineTo(ToPoint(data.points[0]));
         builder.CubicCurveTo(ToPoint(data.points[1]), ToPoint(data.points[2]),
                              ToPoint(data.points[3]));
         break;
