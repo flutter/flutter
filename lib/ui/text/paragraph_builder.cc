@@ -51,6 +51,7 @@ const int tsBackgroundIndex = 15;
 const int tsForegroundIndex = 16;
 const int tsTextShadowsIndex = 17;
 const int tsFontFeaturesIndex = 18;
+const int tsFontVariationsIndex = 19;
 
 const int tsLeadingDistributionMask = 1 << tsLeadingDistributionIndex;
 const int tsColorMask = 1 << tsColorIndex;
@@ -71,6 +72,7 @@ const int tsBackgroundMask = 1 << tsBackgroundIndex;
 const int tsForegroundMask = 1 << tsForegroundIndex;
 const int tsTextShadowsMask = 1 << tsTextShadowsIndex;
 const int tsFontFeaturesMask = 1 << tsFontFeaturesIndex;
+const int tsFontVariationsMask = 1 << tsFontVariationsIndex;
 
 // ParagraphStyle
 
@@ -113,6 +115,10 @@ constexpr uint32_t kBlurOffset = 3;
 // FontFeature decoding
 constexpr uint32_t kBytesPerFontFeature = 8;
 constexpr uint32_t kFontFeatureTagLength = 4;
+
+// FontVariation decoding
+constexpr uint32_t kBytesPerFontVariation = 8;
+constexpr uint32_t kFontVariationTagLength = 4;
 
 // Strut decoding
 const int sFontWeightIndex = 0;
@@ -365,6 +371,24 @@ void decodeFontFeatures(Dart_Handle font_features_data,
   }
 }
 
+void decodeFontVariations(Dart_Handle font_variations_data,
+                          txt::FontVariations& font_variations) {  // NOLINT
+  tonic::DartByteData byte_data(font_variations_data);
+  FML_CHECK(byte_data.length_in_bytes() % kBytesPerFontVariation == 0);
+
+  size_t variation_count = byte_data.length_in_bytes() / kBytesPerFontVariation;
+  for (size_t variation_index = 0; variation_index < variation_count;
+       ++variation_index) {
+    size_t variation_offset = variation_index * kBytesPerFontVariation;
+    const char* variation_bytes =
+        static_cast<const char*>(byte_data.data()) + variation_offset;
+    std::string tag(variation_bytes, kFontVariationTagLength);
+    float value = *(reinterpret_cast<const float*>(variation_bytes +
+                                                   kFontVariationTagLength));
+    font_variations.SetAxisValue(tag, value);
+  }
+}
+
 void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
                                  const std::vector<std::string>& fontFamilies,
                                  double fontSize,
@@ -378,7 +402,8 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
                                  Dart_Handle foreground_objects,
                                  Dart_Handle foreground_data,
                                  Dart_Handle shadows_data,
-                                 Dart_Handle font_features_data) {
+                                 Dart_Handle font_features_data,
+                                 Dart_Handle font_variations_data) {
   FML_DCHECK(encoded.num_elements() == 9);
 
   int32_t mask = encoded[0];
@@ -481,6 +506,10 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
 
   if (mask & tsFontFeaturesMask) {
     decodeFontFeatures(font_features_data, style.font_features);
+  }
+
+  if (mask & tsFontVariationsMask) {
+    decodeFontVariations(font_variations_data, style.font_variations);
   }
 
   m_paragraphBuilder->PushStyle(style);

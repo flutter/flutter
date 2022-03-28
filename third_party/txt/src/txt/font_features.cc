@@ -44,4 +44,12 @@ const std::map<std::string, int>& FontFeatures::GetFontFeatures() const {
   return feature_map_;
 }
 
+void FontVariations::SetAxisValue(std::string tag, float value) {
+  axis_map_[tag] = value;
+}
+
+const std::map<std::string, float>& FontVariations::GetAxisValues() const {
+  return axis_map_;
+}
+
 }  // namespace txt
