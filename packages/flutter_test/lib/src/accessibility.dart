@@ -242,11 +242,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         assert(element.renderObject != null && element.renderObject is RenderBox);
         final RenderBox renderObject = element.renderObject! as RenderBox;
         paintBounds = Rect.fromPoints(
-          renderObject.localToGlobal(renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
-          renderObject.localToGlobal(renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
+          renderObject.localToGlobal(renderObject.paintBounds.topLeft),
+          renderObject.localToGlobal(renderObject.paintBounds.bottomRight),
         );
         final Widget widget = element.widget;
         final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
+
         if (widget is Text) {
           final TextStyle effectiveTextStyle = widget.style == null || widget.style!.inherit
               ? defaultTextStyle.style.merge(widget.style)
@@ -270,7 +271,22 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
         return result;
       }
-      final List<int> subset = _colorsWithinRect(byteData, paintBounds, image!.width, image!.height);
+
+      // Sometimes the initial paint bounds are too tight and we cannot locate more than one color
+      // to estimate contrast from. In this case, we need to re-sample from a larger area to pick
+      // up more background color.
+      final Rect smallerPaintBounds = Rect.fromPoints(
+        paintBounds.topLeft + const Offset(1.0, 1.0),
+        paintBounds.bottomRight - const Offset(1.0, 1.0),
+      );
+      final Rect expandedPaintBounds = Rect.fromPoints(
+        paintBounds.topLeft - const Offset(4.0, 4.0),
+        paintBounds.bottomRight + const Offset(4.0, 4.0),
+      );
+      List<int> subset = _colorsWithinRect(byteData, smallerPaintBounds, image!.width, image!.height);
+      if (subset.toSet().length == 1) {
+        subset = _colorsWithinRect(byteData, expandedPaintBounds, image!.width, image!.height);
+      }
       // Node was too far off screen.
       if (subset.isEmpty) {
         return result;
@@ -283,7 +299,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
-      if ((isBold && (fontSize ?? _kDefaultFontSize) > kBoldTextMinimumSize) || (fontSize ?? _kDefaultFontSize) > kLargeTextMinimumSize) {
+      if ((isBold && (fontSize ?? _kDefaultFontSize) >= kBoldTextMinimumSize) ||
+          (fontSize ?? _kDefaultFontSize) >= kLargeTextMinimumSize) {
         targetContrastRatio = kMinimumRatioLargeText;
       } else {
         targetContrastRatio = kMinimumRatioNormalText;
@@ -386,14 +403,10 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     assert(image != null);
 
     // How to evaluate a single element.
-
     Evaluation evaluateElement(Element element) {
       final RenderBox renderObject = element.renderObject! as RenderBox;
-
       final Rect originalPaintBounds = renderObject.paintBounds;
-
       final Rect inflatedPaintBounds = originalPaintBounds.inflate(4.0);
-
       final Rect paintBounds = Rect.fromPoints(
         renderObject.localToGlobal(inflatedPaintBounds.topLeft),
         renderObject.localToGlobal(inflatedPaintBounds.bottomRight),

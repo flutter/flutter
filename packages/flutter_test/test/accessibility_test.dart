@@ -126,9 +126,9 @@ void main() {
       expect(result.reason,
         'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), label: "this is a test",'
         ' textDirection: ltr):\nExpected contrast ratio of at least '
-        '4.5 but found 1.17 for a font size of 14.0. The '
-        'computed light color was: Color(0xfffafafa), The computed dark color was:'
-        ' Color(0xffffeb3b)\n'
+        '4.5 but found 0.88 for a font size of 14.0. The '
+        'computed light color was: Color(0xffffeb3b), The computed dark color was:'
+        ' Color(0xffffff00)\n'
         'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html');
       handle.dispose();
     });
@@ -647,6 +647,37 @@ void main() {
       ),
     ));
     await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
+  testWidgets('Blue contrast check with text background', (WidgetTester tester) async {
+    /// Shades of blue with contrast ratio of 2.9, 4.4, 4.5 from [surface].
+    const Color blue29 = Color(0xFF7E7EFB);
+    const Color blue44 = Color(0xFF5757FF);
+    const Color blue45 = Color(0xFF5252FF);
+    const Color surface = Color(0xFFF0F0F0);
+
+    const List<TextStyle> meetStyle = <TextStyle>[
+      TextStyle(color: blue44, backgroundColor: surface, fontSize: 18),
+      TextStyle(color: blue44, backgroundColor: surface, fontSize: 14, fontWeight: FontWeight.bold),
+      TextStyle(color: blue45, backgroundColor: surface),
+    ];
+
+    const List<TextStyle> doesNotMeetStyle = <TextStyle>[
+      TextStyle(color: blue44, backgroundColor: surface),
+      TextStyle(color: blue29, backgroundColor: surface, fontSize: 18)
+    ];
+
+    final SemanticsHandle handle = tester.ensureSemantics();
+    for (final TextStyle style in meetStyle) {
+      await tester.pumpWidget(_boilerplate(Text('Hello World', style: style)));
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    }
+    for (final TextStyle style in doesNotMeetStyle) {
+      await tester.pumpWidget(_boilerplate(Text('Hello World', style: style)));
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+    }
+
     handle.dispose();
   });
 }
