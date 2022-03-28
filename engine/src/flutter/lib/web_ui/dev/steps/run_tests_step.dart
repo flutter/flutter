@@ -51,17 +51,6 @@ class RunTestsStep implements PipelineStep {
 
   final BrowserEnvironment _browserEnvironment;
 
-  /// Global list of shards that failed.
-  ///
-  /// This is used to make sure that when there's a test failure anywhere we
-  /// exit with a non-zero exit code.
-  ///
-  /// Shards must never be removed from this list, only added.
-  List<String> failedShards = <String>[];
-
-  /// Whether all test shards succeeded.
-  bool get allShardsPassed => failedShards.isEmpty;
-
   @override
   String get description => 'run_tests';
 
@@ -88,27 +77,10 @@ class RunTestsStep implements PipelineStep {
       skiaClient: skiaClient,
       overridePathToCanvasKit: overridePathToCanvasKit,
     );
-    _checkExitCode('Unit tests');
 
-    if (!allShardsPassed) {
-      throw ToolExit(_createFailedShardsMessage());
-    }
-  }
-
-  void _checkExitCode(String shard) {
     if (io.exitCode != 0) {
-      failedShards.add(shard);
+      throw ToolExit('Some tests failed');
     }
-  }
-
-  String _createFailedShardsMessage() {
-    final StringBuffer message = StringBuffer(
-      'The following test shards failed:\n',
-    );
-    for (final String failedShard in failedShards) {
-      message.writeln(' - $failedShard');
-    }
-    return message.toString();
   }
 
   Future<SkiaGoldClient?> _createSkiaClient() async {
