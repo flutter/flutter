@@ -114,7 +114,17 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 ///  * [debugProfileLayoutsEnabled], which does something similar for layout,
 ///    and [debugPrintLayouts], its console equivalent.
 ///  * [debugProfilePaintsEnabled], which does something similar for painting.
+///  * [debugProfileBuildsEnabledUserWidgets], which filters user generated
+///    [Widget]s.
 bool debugProfileBuildsEnabled = false;
+
+/// Filters [debugProfileBuildsEnabled] events to user generated [Widget]s.
+///
+/// When [debugProfileBuildsEnabledUserWidgets] is true,
+/// [debugProfileBuildsEnabled] will only add [Timeline] events for user created
+/// widgets.  This reduces noise in the output and overhead from the [Timeline]
+/// events.
+bool debugProfileBuildsEnabledUserWidgets = false;
 
 /// Show banners for deprecated widgets.
 bool debugHighlightDeprecatedWidgets = false;
