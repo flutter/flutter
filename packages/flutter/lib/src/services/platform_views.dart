@@ -129,30 +129,44 @@ class PlatformViewsService {
 
   /// {@macro flutter.services.PlatformViewsService.initAndroidView}
   ///
-  /// Alias for [initAndroidView]. When possible, use [initAndroidView] directly.
-  static SurfaceAndroidViewController initSurfaceAndroidView({
+  /// When [useHybridComposition] is true, the Android view and Flutter widgets are composed
+  /// at the Android view hierarchy level.
+  /// This is only useful if the view is a Android SurfaceView. However, enabling this mode
+  /// has a performance cost on devices that run below 10, or underpowered devices.
+  static AndroidViewController initSurfaceAndroidView({
     required int id,
     required String viewType,
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
+    bool useHybridComposition = false,
   }) {
     assert(id != null);
     assert(viewType != null);
     assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
 
-    final SurfaceAndroidViewController controller = SurfaceAndroidViewController._(
-      viewId: id,
+    if (useHybridComposition) {
+      final SurfaceAndroidViewController controller = SurfaceAndroidViewController._(
+        viewId: id,
+        viewType: viewType,
+        layoutDirection: layoutDirection,
+        creationParams: creationParams,
+        creationParamsCodec: creationParamsCodec,
+      );
+
+      _instance._focusCallbacks[id] = onFocus ?? () {};
+      return controller;
+    }
+    return initAndroidView(
+      id: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
       creationParams: creationParams,
       creationParamsCodec: creationParamsCodec,
+      onFocus: onFocus,
     );
-
-    _instance._focusCallbacks[id] = onFocus ?? () {};
-    return controller;
   }
 
   /// Whether the render surface of the Android `FlutterView` should be converted to a `FlutterImageView`.
@@ -914,13 +928,12 @@ abstract class AndroidViewController extends PlatformViewController {
   }
 }
 
-/// Controls an Android view by rendering to an [AndroidViewSurface].
+/// Controls an Android view by rendering to an [AndroidViewSurface] that uses the
+/// Android system compositor.
 ///
 /// Typically created with [PlatformViewsService.initSurfaceAndroidView].
-///
-/// This is an alias for [TextureAndroidViewController].
-class SurfaceAndroidViewController extends TextureAndroidViewController{
-    SurfaceAndroidViewController._({
+class SurfaceAndroidViewController extends AndroidViewController {
+  SurfaceAndroidViewController._({
     required int viewId,
     required String viewType,
     required TextDirection layoutDirection,
@@ -933,6 +946,50 @@ class SurfaceAndroidViewController extends TextureAndroidViewController{
           creationParams: creationParams,
           creationParamsCodec: creationParamsCodec,
         );
+
+  @override
+  Future<void> _sendCreateMessage() {
+    final Map<String, dynamic> args = <String, dynamic>{
+      'id': viewId,
+      'viewType': _viewType,
+      'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
+      'hybrid': true,
+    };
+    if (_creationParams != null) {
+      final ByteData paramsByteData =
+          _creationParamsCodec!.encodeMessage(_creationParams)!;
+      args['params'] = Uint8List.view(
+        paramsByteData.buffer,
+        0,
+        paramsByteData.lengthInBytes,
+      );
+    }
+    return SystemChannels.platform_views.invokeMethod<void>('create', args);
+  }
+
+  @override
+  int get textureId {
+    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
+  }
+
+  @override
+  Future<void> _sendDisposeMessage() {
+    return SystemChannels.platform_views
+        .invokeMethod<void>('dispose', <String, dynamic>{
+      'id': viewId,
+      'hybrid': true,
+    });
+  }
+
+  @override
+  Future<Size> setSize(Size size) {
+    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
+  }
+
+  @override
+  Future<void> setOffset(Offset off) {
+    throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
+  }
 }
 
 /// Controls an Android view that is rendered to a texture.
