@@ -11,6 +11,8 @@ import 'package:ui/ui.dart' as ui;
 
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../../common.dart';
+
 /// Class that controls some details of how screenshotting is made.
 ///
 /// (For Googlers: Not really related with internal Scuba anymore)
@@ -67,6 +69,12 @@ class EngineScubaTester {
   }) async {
     // Wrap in <flt-scene> so that our CSS selectors kick in.
     final html.Element sceneElement = html.Element.tag('flt-scene');
+    if (isIosSafari) {
+      // Shrink to fit on the iPhone screen.
+      sceneElement.style.position = 'absolute';
+      sceneElement.style.transformOrigin = '0 0 0';
+      sceneElement.style.transform = 'scale(0.3)';
+    }
     try {
       sceneElement.append(canvas.rootElement);
       html.document.body!.append(sceneElement);
@@ -127,9 +135,9 @@ CanvasParagraph paragraph(
 /// Configures the test to use bundled Roboto and Ahem fonts to avoid golden
 /// screenshot differences due to differences in the preinstalled system fonts.
 void setUpStableTestFonts() {
-  setUp(() async {
+  setUpAll(() async {
     await ui.webOnlyInitializePlatform();
-    ui.webOnlyFontCollection.debugRegisterTestFonts();
-    await ui.webOnlyFontCollection.ensureFontsLoaded();
+    fontCollection.debugRegisterTestFonts();
+    await fontCollection.ensureFontsLoaded();
   });
 }

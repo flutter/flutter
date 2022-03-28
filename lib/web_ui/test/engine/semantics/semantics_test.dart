@@ -28,7 +28,9 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() {
+Future<void> testMain() async {
+  await ui.webOnlyInitializePlatform();
+
   setUp(() {
     EngineSemanticsOwner.debugResetSemantics();
   });

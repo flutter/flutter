@@ -51,5 +51,4 @@ safari_ios:
   # phone screeen we enlarge or shrink the area by applying a linear
   # transformation by a scale_factor (a.k.a. we perform isotropic scaling).
   # This value will be differ depending on the phone.
-  # For iOS 13.0 iPhone 11 Pro, this number is 1.15.
-  scale_factor: 1.00
+  scale_factor: 3.00

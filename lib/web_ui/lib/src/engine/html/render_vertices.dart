@@ -70,11 +70,6 @@ void initWebGl() {
   glRenderer ??= _WebGlRenderer();
 }
 
-void disposeWebGl() {
-  GlContextCache.dispose();
-  glRenderer = null;
-}
-
 abstract class GlRenderer {
   void drawVertices(
       html.CanvasRenderingContext2D? context,

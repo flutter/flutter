@@ -10,7 +10,9 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() {
+Future<void> testMain() async {
+  await webOnlyInitializePlatform();
+
   test('Should be able to build and layout a paragraph', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
     builder.addText('Hello');

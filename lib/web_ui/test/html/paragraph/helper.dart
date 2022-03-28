@@ -8,6 +8,8 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../../common.dart';
+
 const Color white = Color(0xFFFFFFFF);
 const Color black = Color(0xFF000000);
 const Color red = Color(0xFFFF0000);
@@ -52,6 +54,12 @@ Future<void> takeScreenshot(
   double? maxDiffRatePercent,
 }) async {
   final html.Element sceneElement = html.Element.tag('flt-scene');
+  if (isIosSafari) {
+    // Shrink to fit on the iPhone screen.
+    sceneElement.style.position = 'absolute';
+    sceneElement.style.transformOrigin = '0 0 0';
+    sceneElement.style.transform = 'scale(0.3)';
+  }
   try {
     sceneElement.append(canvas.rootElement);
     html.document.body!.append(sceneElement);

@@ -21,7 +21,7 @@ void main() {
 
 void testMain() {
   setUpAll(() {
-    ui.webOnlyInitializeEngine();
+    ui.webOnlyInitializePlatform();
   });
 
   group('SceneBuilder', () {
