@@ -56,6 +56,13 @@ class MigrateApplyCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = FlutterProject.current();
+
+    if (!await gitRepoExists(flutterProject.directory.path, logger)) {
+      return const FlutterCommandResult(ExitStatus.fail);
+    }
+
+    final bool force = boolArg('force');
+
     Directory workingDirectory = flutterProject.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     if (stringArg('working-directory') != null) {
       workingDirectory = fileSystem.directory(stringArg('working-directory'));
@@ -68,12 +75,12 @@ class MigrateApplyCommand extends FlutterCommand {
 
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
-    if (!checkAndPrintMigrateStatus(manifest, workingDirectory, warnConflict: true, logger: logger) && !boolArg('force')) {
+    if (!checkAndPrintMigrateStatus(manifest, workingDirectory, warnConflict: true, logger: logger) && !force) {
       throwToolExit('Conflicting files found. Resolve these conflicts and try again.');
     }
 
-    if (!boolArg('force') && await MigrateUtils.hasUncommitedChanges(workingDirectory.path)) {
-      throwToolExit('There are uncommitted changes in your project. Please commit, abandon, or stash your changes before trying again.');
+    if (await hasUncommittedChanges(flutterProject.directory.path, logger) && !force) {
+      return const FlutterCommandResult(ExitStatus.fail);
     }
 
     logger.printStatus('Applying migration.');
@@ -82,7 +89,7 @@ class MigrateApplyCommand extends FlutterCommand {
     allFilesToCopy.addAll(manifest.mergedFiles);
     allFilesToCopy.addAll(manifest.conflictFiles);
     allFilesToCopy.addAll(manifest.addedFiles);
-    if (allFilesToCopy.isNotEmpty) {
+    if (allFilesToCopy.isNotEmpty && _verbose) {
       logger.printStatus('Modifying ${allFilesToCopy.length} files.', indent: 2);
     }
     for (final String localPath in allFilesToCopy) {
@@ -90,7 +97,7 @@ class MigrateApplyCommand extends FlutterCommand {
         logger.printStatus('Copying $localPath');
       }
       final File workingFile = workingDirectory.childFile(localPath);
-      final File targetFile = FlutterProject.current().directory.childFile(localPath);
+      final File targetFile = flutterProject.directory.childFile(localPath);
       if (!workingFile.existsSync()) {
         continue;
       }

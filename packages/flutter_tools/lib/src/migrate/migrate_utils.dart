@@ -50,7 +50,8 @@ class MigrateUtils {
     final List<String> cmdArgs = <String>['-c', gitCmd];
     final ProcessResult result = await Process.run('bash', cmdArgs);
 
-    checkForErrors(result, allowedExitCodes: <int>[1], commandDescription: 'git ${cmdArgs.join(' ')}'); // diff exits with 1 if diffs are found.
+    // diff exits with 1 if diffs are found.
+    checkForErrors(result, allowedExitCodes: <int>[1], commandDescription: 'git ${cmdArgs.join(' ')}');
     return DiffResult(result, outputPath);
   }
 
@@ -131,13 +132,7 @@ class MigrateUtils {
 
   /// Returns true if the workingDirectory git repo has any uncommited changes.
   static Future<bool> hasUncommitedChanges(String workingDirectory) async {
-    final File gitIgnore = globals.fs.file(globals.fs.path.join(workingDirectory, '.gitignore'));
-    if (!gitIgnore.existsSync()) {
-      gitIgnore.writeAsStringSync(kDefaultMigrateWorkingDirectoryName, flush: true);
-    } else if (!gitIgnore.readAsStringSync().contains('$kDefaultMigrateWorkingDirectoryName/')) {
-      gitIgnore.writeAsStringSync('\n$kDefaultMigrateWorkingDirectoryName/\n', mode: FileMode.append, flush: true);
-    }
-    final List<String> cmdArgs = <String>['diff', '--quiet', 'HEAD'];
+    final List<String> cmdArgs = <String>['diff', '--quiet', 'HEAD', '--', '.', "':(exclude)$kDefaultMigrateWorkingDirectoryName'"];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
     if (result.exitCode == 0) {

@@ -92,15 +92,12 @@ class MigrateStartCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject project = FlutterProject.current();
-    if (stringArg('project-directory') != null) {
-      // project = FlutterProject();
-    }
     if (project.isModule || project.isPlugin) {
       logger.printError('Migrate tool only supports app projects. This project is a ${project.isModule ? 'module' : 'plugin'}');
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    if (!await checkGitRepoExists(project.directory.path, logger)) {
+    if (!await gitRepoExists(project.directory.path, logger)) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -115,7 +112,7 @@ class MigrateStartCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    if (!await checkUncommittedChanges(project.directory.path, logger)) {
+    if (await hasUncommittedChanges(project.directory.path, logger)) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
