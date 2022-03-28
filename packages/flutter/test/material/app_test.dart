@@ -14,8 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 class StateMarker extends StatefulWidget {
   const StateMarker({ super.key, this.child });
 

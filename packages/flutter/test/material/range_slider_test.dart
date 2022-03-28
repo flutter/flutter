@@ -9,8 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   testWidgets('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);

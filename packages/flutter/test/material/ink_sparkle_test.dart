@@ -10,8 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   testWidgets('InkSparkle in a Button compiles and does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(

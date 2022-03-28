@@ -8,8 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const Color green = Color(0xFF00FF00);
 const Color yellow = Color(0xFFFFFF00);
 

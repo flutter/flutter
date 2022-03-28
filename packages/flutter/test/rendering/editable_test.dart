@@ -19,8 +19,6 @@ import 'package:meta/meta.dart';
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 
-import 'mock_canvas.dart';
-import 'recording_canvas.dart';
 import 'rendering_tester.dart';
 
 class _FakeEditableTextState with TextSelectionDelegate {

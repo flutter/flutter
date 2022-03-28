@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock_canvas.dart';
+
 
 class MyPainter extends CustomPainter {
   const MyPainter({

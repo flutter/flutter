@@ -5,7 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 class TestState extends StatefulWidget {

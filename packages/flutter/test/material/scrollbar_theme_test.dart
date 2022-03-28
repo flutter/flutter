@@ -9,8 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 // The const represents the starting position of the scrollbar thumb for
 // the below tests. The thumb is 90 pixels long, and 8 pixels wide, with a 2
 // pixel margin to the right edge of the viewport.

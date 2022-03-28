@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/21506.
   testWidgets('InkSplash receives textDirection', (WidgetTester tester) async {

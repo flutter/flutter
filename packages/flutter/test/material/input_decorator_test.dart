@@ -13,8 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 Widget buildInputDecorator({
   InputDecoration decoration = const InputDecoration(),
   ThemeData? theme,
