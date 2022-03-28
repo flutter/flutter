@@ -1755,8 +1755,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     _replaceText(ReplaceTextIntent(textEditingValue, replacementSuggestion, selection, cause));
 
-    Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-
     bringIntoView(textEditingValue.selection.extent);
     hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
   }
@@ -2597,8 +2595,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
           Future<List<SpellCheckerSuggestionSpan>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
           spellCheckResultsFuture.then((results) {
-              _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results;
-          renderEditable.text = buildTextSpan();
+            _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results;
+            renderEditable.text = buildTextSpan();
       });
         }
       } catch (exception, stack) {
@@ -2952,6 +2950,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (!_spellCheckEnabled!) {
         return false;
       }
+
       _selectionOverlay!.showToolbar(toolbarType, 
       _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration);
       return true;

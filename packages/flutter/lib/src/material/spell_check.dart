@@ -38,9 +38,7 @@ class MaterialSpellCheckService implements SpellCheckService {
           spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
         });
 
-        if (spellCheckerSuggestionSpans.length > 0) {
-          controller.sink.add(spellCheckerSuggestionSpans);
-        }
+        controller.sink.add(spellCheckerSuggestionSpans);
         break;
       default:
         throw MissingPluginException();
