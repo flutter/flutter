@@ -525,20 +525,15 @@ void applyGlobalCssRulesToSheet(
   // TODO(web): use more efficient CSS selectors; descendant selectors are slow.
   // More info: https://csswizardry.com/2011/09/writing-efficient-css-selectors
 
-  // This undoes browser's default layout attributes for paragraphs. We
-  // compute paragraph layout ourselves.
   if (isFirefox) {
     // For firefox set line-height, otherwise textx at same font-size will
     // measure differently in ruler.
+    //
+    // - See: https://github.com/flutter/flutter/issues/44803
     sheet.insertRule(
-        'flt-ruler-host p, flt-scene p '
-        '{ margin: 0; line-height: 100%;}',
-        sheet.cssRules.length);
-  } else {
-    sheet.insertRule(
-        'flt-ruler-host p, flt-scene p '
-        '{ margin: 0; }',
-        sheet.cssRules.length);
+      'flt-paragraph, flt-span {line-height: 100%;}',
+      sheet.cssRules.length,
+    );
   }
 
   // This undoes browser's default painting and layout attributes of range

@@ -759,51 +759,6 @@ void applyTextStyleToElement({
   }
 }
 
-html.Element createPlaceholderElement({
-  required ParagraphPlaceholder placeholder,
-}) {
-  final html.Element element = html.document.createElement('span');
-  final html.CssStyleDeclaration style = element.style;
-  style
-    ..display = 'inline-block'
-    ..width = '${placeholder.width}px'
-    ..height = '${placeholder.height}px'
-    ..verticalAlign = _placeholderAlignmentToCssVerticalAlign(placeholder);
-
-  return element;
-}
-
-String _placeholderAlignmentToCssVerticalAlign(
-  ParagraphPlaceholder placeholder,
-) {
-  // For more details about the vertical-align CSS property, see:
-  // - https://developer.mozilla.org/en-US/docs/Web/CSS/vertical-align
-  switch (placeholder.alignment) {
-    case ui.PlaceholderAlignment.top:
-      return 'top';
-
-    case ui.PlaceholderAlignment.middle:
-      return 'middle';
-
-    case ui.PlaceholderAlignment.bottom:
-      return 'bottom';
-
-    case ui.PlaceholderAlignment.aboveBaseline:
-      return 'baseline';
-
-    case ui.PlaceholderAlignment.belowBaseline:
-      return '-${placeholder.height}px';
-
-    case ui.PlaceholderAlignment.baseline:
-      // In CSS, the placeholder is already placed above the baseline. But
-      // Flutter's `baselineOffset` assumes the placeholder is placed below the
-      // baseline. That's why we need to subtract the placeholder's height from
-      // `baselineOffset`.
-      final double offset = placeholder.baselineOffset - placeholder.height;
-      return '${offset}px';
-  }
-}
-
 String _shadowListToCss(List<ui.Shadow> shadows) {
   if (shadows.isEmpty) {
     return '';
@@ -879,37 +834,6 @@ String? _decorationStyleToCssString(ui.TextDecorationStyle decorationStyle) {
     default:
       return null;
   }
-}
-
-/// Converts [textDirection] to its corresponding CSS value.
-///
-/// This value is used for the "direction" CSS property, e.g.:
-///
-/// ```css
-/// direction: rtl;
-/// ```
-String? textDirectionToCss(ui.TextDirection? textDirection) {
-  if (textDirection == null) {
-    return null;
-  }
-  return textDirectionIndexToCss(textDirection.index);
-}
-
-String? textDirectionIndexToCss(int textDirectionIndex) {
-  switch (textDirectionIndex) {
-    case 0:
-      return 'rtl';
-    case 1:
-      return null; // ltr is the default
-  }
-
-  assert(() {
-    throw AssertionError(
-      'Failed to convert text direction $textDirectionIndex to CSS',
-    );
-  }());
-
-  return null;
 }
 
 /// Converts [align] to its corresponding CSS value.

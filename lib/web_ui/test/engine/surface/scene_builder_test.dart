@@ -513,10 +513,10 @@ void testMain() {
         renderedLayers[char] = pushChild(builder, char, oldLayer: renderedLayers[char]);
       }
       final SurfaceScene scene = builder.build();
-      final List<html.Element> pTags = scene.webOnlyRootElement!.querySelectorAll('p');
+      final List<html.Element> pTags = scene.webOnlyRootElement!.querySelectorAll('flt-paragraph');
       expect(pTags, hasLength(string.length));
       expect(
-        scene.webOnlyRootElement!.querySelectorAll('p').map((html.Element p) => p.innerText).join(''),
+        scene.webOnlyRootElement!.querySelectorAll('flt-paragraph').map((html.Element p) => p.innerText).join(''),
         string,
       );
       renderedLayers.removeWhere((String key, ui.EngineLayer value) => !string.contains(key));
