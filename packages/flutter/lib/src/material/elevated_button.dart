@@ -163,7 +163,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// This sample will create 'Filled' and 'Filled Tonal' buttons using
   /// [ElevatedButton].
   ///
-  /// ** See code in examples/api/lib/material/elevated_button.1.dart **
+  /// ** See code in examples/api/lib/material/elevated_button/elevated_button.1.dart **
   /// {@end-tool}
   ///
   /// ```
