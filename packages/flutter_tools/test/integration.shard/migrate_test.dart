@@ -71,8 +71,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
     );
-    print(logger.statusText);
-    print(logger.errorText);
     expect(result.sdkDirs.length, equals(1));
     expect(result.deletedFiles.isEmpty, true);
     expect(result.addedFiles.isEmpty, false);
@@ -126,10 +124,9 @@ void main() {
       'start',
       '--verbose',
     ], workingDirectory: tempDir.path);
-    expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Working directory created at'));
     expect(result.stdout.toString(), contains('''
-           Added files:
+Added files:
              - macos/Runner.xcworkspace/contents.xcworkspacedata
              - macos/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
              - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png
@@ -156,7 +153,6 @@ void main() {
              - macos/Flutter/Flutter-Debug.xcconfig
              - macos/Flutter/Flutter-Release.xcconfig
              - macos/.gitignore
-             - macos/.migrate_config
              - web/index.html
              - web/favicon.png
              - web/icons/Icon-192.png
@@ -164,18 +160,14 @@ void main() {
              - web/icons/Icon-maskable-512.png
              - web/icons/Icon-512.png
              - web/manifest.json
-             - ios/.migrate_config
              - linux/main.cc
              - linux/CMakeLists.txt
              - linux/my_application.h
              - linux/my_application.cc
              - linux/flutter/CMakeLists.txt
              - linux/.gitignore
-             - linux/.migrate_config
              - android/app/src/main/res/values-night/styles.xml
              - android/app/src/main/res/drawable-v21/launch_background.xml
-             - android/.migrate_config
-             - .migrate_config
              - analysis_options.yaml
              - windows/CMakeLists.txt
              - windows/runner/flutter_window.cpp
@@ -192,14 +184,13 @@ void main() {
              - windows/runner/flutter_window.h
              - windows/flutter/CMakeLists.txt
              - windows/.gitignore
-             - windows/.migrate_config
            Modified files:
+             - .metadata
              - ios/Runner/Info.plist
              - ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
              - ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
              - ios/Flutter/AppFrameworkInfo.plist
              - ios/.gitignore
-             - README.md
              - pubspec.yaml
              - .gitignore
              - android/app/build.gradle
@@ -209,36 +200,7 @@ void main() {
              - android/app/src/debug/AndroidManifest.xml
              - android/gradle/wrapper/gradle-wrapper.properties
              - android/.gitignore
-             - android/build.gradle
-           Merge conflicted files:
-[        ]   - .metadata'''));
-
-    // Call apply with conflicts remaining. Should fail.
-    result = await processManager.run(<String>[
-      flutterBin,
-      'migrate',
-      'apply',
-      '--verbose',
-    ], workingDirectory: tempDir.path);
-    expect(result.exitCode, 1);
-    expect(result.stdout.toString(), contains('Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:'));
-
-    // Manually resolve conflics. The correct contents for resolution may change over time,
-    // but it shouldnt matter for this test.
-    final File metadataFile = tempDir.childFile('migrate_working_dir/.metadata');
-    metadataFile.writeAsStringSync('''
-# This file tracks properties of this Flutter project.
-# Used by Flutter tool to assess capabilities and perform upgrades etc.
-#
-# This file should be version controlled and should not be manually edited.
-
-version:
-  revision: e96a72392696df66755ca246ff291dfc6ca6c4ad
-  channel: unknown
-
-project_type: app
-
-''', flush: true);
+             - android/build.gradle'''));
 
     result = await processManager.run(<String>[
       flutterBin,
@@ -246,18 +208,14 @@ project_type: app
       'apply',
       '--verbose',
     ], workingDirectory: tempDir.path);
-    print(result.stdout);
-    print(result.stderr);
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Migration complete'));
 
-    expect(tempDir.childFile('.metadata').readAsStringSync(), contains('e96a72392696df66755ca246ff291dfc6ca6c4ad'));
+    expect(tempDir.childFile('.metadata').readAsStringSync(), contains('7c73951e1b23b01c5b9a799b2e38c3d47a5221c3'));
 
     expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png').existsSync(), true);
     expect(tempDir.childFile('web/icons/Icon-192.png').existsSync(), true);
     expect(tempDir.childFile('linux/main.cc').existsSync(), true);
-    expect(tempDir.childFile('linux/.migrate_config').existsSync(), true);
-    expect(tempDir.childFile('.migrate_config').existsSync(), true);
     expect(tempDir.childFile('windows/runner/CMakeLists.txt').existsSync(), true);
 
   });
@@ -304,19 +262,28 @@ project_type: app
     result = await processManager.run(<String>[
       flutterBin,
       'migrate',
+      'status',
+      '--verbose',
+    ], workingDirectory: tempDir.path);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString(), contains('No migration'));
+
+    result = await processManager.run(<String>[
+      flutterBin,
+      'migrate',
       'start',
       '--verbose',
     ], workingDirectory: tempDir.path);
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Working directory created at'));
     expect(result.stdout.toString(), contains('''
-           Modified files:
+Modified files:
+             - .metadata
              - ios/Runner/Info.plist
              - ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
              - ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
              - ios/Flutter/AppFrameworkInfo.plist
              - ios/.gitignore
-             - README.md
              - .gitignore
              - android/app/build.gradle
              - android/app/src/profile/AndroidManifest.xml
@@ -327,8 +294,7 @@ project_type: app
              - android/.gitignore
              - android/build.gradle
            Merge conflicted files:
-[        ]   - .metadata
-             - pubspec.yaml'''));
+[        ]   - pubspec.yaml'''));
 
     // Call apply with conflicts remaining. Should fail.
     result = await processManager.run(<String>[
@@ -339,7 +305,17 @@ project_type: app
     ], workingDirectory: tempDir.path);
     expect(result.exitCode, 1);
     expect(result.stdout.toString(), contains('''Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:'''));
-    expect(result.stdout.toString(), contains(']   - .metadata\n             - pubspec.yaml'));
+    expect(result.stdout.toString(), contains(']   - pubspec.yaml'));
+
+    result = await processManager.run(<String>[
+      flutterBin,
+      'migrate',
+      'status',
+      '--verbose',
+    ], workingDirectory: tempDir.path);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString(), contains('Modified files'));
+    expect(result.stdout.toString(), contains('Merge conflicted files'));
 
     // Manually resolve conflics. The correct contents for resolution may change over time,
     // but it shouldnt matter for this test.
@@ -454,6 +430,18 @@ flutter:
     result = await processManager.run(<String>[
       flutterBin,
       'migrate',
+      'status',
+      '--verbose',
+    ], workingDirectory: tempDir.path);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString(), contains('Modified files'));
+    expect(result.stdout.toString(), contains('diff --git'));
+    expect(result.stdout.toString(), contains('@@'));
+    expect(result.stdout.toString(), isNot(contains('Merge conflicted files')));
+
+    result = await processManager.run(<String>[
+      flutterBin,
+      'migrate',
       'apply',
       '--verbose',
     ], workingDirectory: tempDir.path);
@@ -492,12 +480,8 @@ flutter:
     expect(tempDir.childFile('macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist').existsSync(), true);
     expect(tempDir.childFile('macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme').existsSync(), true);
     expect(tempDir.childFile('macos/Flutter/Flutter-Debug.xcconfig').existsSync(), true);
-    expect(tempDir.childFile('macos/Flutter/GeneratedPluginRegistrant.swift').existsSync(), true);
     expect(tempDir.childFile('macos/Flutter/Flutter-Release.xcconfig').existsSync(), true);
-    expect(tempDir.childFile('macos/Flutter/ephemeral/flutter_export_environment.sh').existsSync(), true);
-    expect(tempDir.childFile('macos/Flutter/ephemeral/Flutter-Generated.xcconfig').existsSync(), true);
     expect(tempDir.childFile('macos/.gitignore').existsSync(), true);
-    expect(tempDir.childFile('macos/.migrate_config').existsSync(), true);
     expect(tempDir.childFile('web/index.html').existsSync(), true);
     expect(tempDir.childFile('web/favicon.png').existsSync(), true);
     expect(tempDir.childFile('web/icons/Icon-192.png').existsSync(), true);
@@ -505,40 +489,13 @@ flutter:
     expect(tempDir.childFile('web/icons/Icon-maskable-512.png').existsSync(), true);
     expect(tempDir.childFile('web/icons/Icon-512.png').existsSync(), true);
     expect(tempDir.childFile('web/manifest.json').existsSync(), true);
-    expect(tempDir.childFile('ios/.migrate_config').existsSync(), true);
     expect(tempDir.childFile('linux/main.cc').existsSync(), true);
     expect(tempDir.childFile('linux/CMakeLists.txt').existsSync(), true);
     expect(tempDir.childFile('linux/my_application.h').existsSync(), true);
     expect(tempDir.childFile('linux/my_application.cc').existsSync(), true);
-    expect(tempDir.childFile('linux/flutter/generated_plugin_registrant.cc').existsSync(), true);
     expect(tempDir.childFile('linux/flutter/CMakeLists.txt').existsSync(), true);
-    expect(tempDir.childFile('linux/flutter/generated_plugins.cmake').existsSync(), true);
-    expect(tempDir.childFile('linux/flutter/generated_plugin_registrant.h').existsSync(), true);
     expect(tempDir.childFile('linux/.gitignore').existsSync(), true);
-    expect(tempDir.childFile('linux/.migrate_config').existsSync(), true);
     expect(tempDir.childFile('android/app/src/main/res/values-night/styles.xml').existsSync(), true);
-    expect(tempDir.childFile('android/app/src/main/res/drawable-v21/launch_background.xml').existsSync(), true);
-    expect(tempDir.childFile('android/.migrate_config').existsSync(), true);
-    expect(tempDir.childFile('.migrate_config').existsSync(), true);
     expect(tempDir.childFile('analysis_options.yaml').existsSync(), true);
-    expect(tempDir.childFile('windows/CMakeLists.txt').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/flutter_window.cpp').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/utils.h').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/utils.cpp').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/runner.exe.manifest').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/CMakeLists.txt').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/win32_window.h').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/win32_window.cpp').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/resources/app_icon.ico').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/resource.h').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/Runner.rc').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/main.cpp').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/flutter_window.h').existsSync(), true);
-    expect(tempDir.childFile('windows/flutter/generated_plugin_registrant.cc').existsSync(), true);
-    expect(tempDir.childFile('windows/flutter/CMakeLists.txt').existsSync(), true);
-    expect(tempDir.childFile('windows/flutter/generated_plugins.cmake').existsSync(), true);
-    expect(tempDir.childFile('windows/flutter/generated_plugin_registrant.h').existsSync(), true);
-    expect(tempDir.childFile('windows/.gitignore').existsSync(), true);
-    expect(tempDir.childFile('windows/.migrate_config').existsSync(), true);
   });
 }

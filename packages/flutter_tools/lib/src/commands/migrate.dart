@@ -49,19 +49,19 @@ class MigrateCommand extends FlutterCommand {
   }
 }
 
-Future<bool> checkGitRepoExists(String projectDirectory, Logger logger) async {
-  if (!(await MigrateUtils.isGitRepo(projectDirectory))) {
-    logger.printStatus('Project is not a git repo. Please initialize a git repo and try again.');
-    MigrateUtils.printCommandText('git init', logger);
-    return false;
+Future<bool> gitRepoExists(String projectDirectory, Logger logger) async {
+  if (await MigrateUtils.isGitRepo(projectDirectory)) {
+    return true;
   }
-  return true;
+  logger.printStatus('Project is not a git repo. Please initialize a git repo and try again.');
+  MigrateUtils.printCommandText('git init', logger);
+  return false;
 }
 
-Future<bool> checkUncommittedChanges(String projectDirectory, Logger logger) async {
+Future<bool> hasUncommittedChanges(String projectDirectory, Logger logger) async {
   if (await MigrateUtils.hasUncommitedChanges(projectDirectory)) {
     logger.printStatus('There are uncommitted changes in your project. Please git commit, abandon, or stash your changes before trying again.');
-    return false;
+    return true;
   }
-  return true;
+  return false;
 }
