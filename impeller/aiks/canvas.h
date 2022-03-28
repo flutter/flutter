@@ -72,7 +72,9 @@ class Canvas {
                      Rect dest,
                      Paint paint);
 
-  void ClipPath(Path path);
+  void ClipPath(
+      Path path,
+      Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
 
   void DrawShadow(Path path, Color color, Scalar elevation);
 

@@ -151,11 +151,14 @@ void Canvas::SaveLayer(Paint paint, std::optional<Rect> bounds) {
   }
 }
 
-void Canvas::ClipPath(Path path) {
+void Canvas::ClipPath(Path path, Entity::ClipOperation clip_op) {
+  auto contents = std::make_shared<ClipContents>();
+  contents->SetClipOperation(clip_op);
+
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetPath(std::move(path));
-  entity.SetContents(std::make_shared<ClipContents>());
+  entity.SetContents(std::move(contents));
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetAddsToCoverage(false);
 
