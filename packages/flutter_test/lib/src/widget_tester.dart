@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -692,6 +695,14 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         await binding.pump(interval);
         elapsed += interval;
       }
+    });
+  }
+
+  Future<void> dumpScreenshot() {
+    return TestAsyncUtils.guard<void>(() async {
+      final image = await (binding.renderView.layer as OffsetLayer).toImage(binding.renderView.paintBounds);
+      final data = await image.toByteData(format: ImageByteFormat.png);
+      File('foo_bar_bazz.png').writeAsBytesSync(data!.buffer.asUint8List());
     });
   }
 

@@ -272,9 +272,6 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result;
       }
 
-      // Sometimes the initial paint bounds are too tight and we cannot locate more than one color
-      // to estimate contrast from. In this case, we need to re-sample from a larger area to pick
-      // up more background color.
       final Rect smallerPaintBounds = Rect.fromPoints(
         paintBounds.topLeft + const Offset(1.0, 1.0),
         paintBounds.bottomRight - const Offset(1.0, 1.0),
@@ -283,15 +280,19 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         paintBounds.topLeft - const Offset(4.0, 4.0),
         paintBounds.bottomRight + const Offset(4.0, 4.0),
       );
-      List<int> subset = _colorsWithinRect(byteData, smallerPaintBounds, image!.width, image!.height);
-      if (subset.toSet().length == 1) {
-        subset = _colorsWithinRect(byteData, expandedPaintBounds, image!.width, image!.height);
-      }
+      final List<int> subset = _colorsWithinRect(byteData, smallerPaintBounds, image!.width, image!.height);
       // Node was too far off screen.
       if (subset.isEmpty) {
         return result;
       }
-      final _ContrastReport report = _ContrastReport(subset);
+      // Sometimes the initial paint bounds are too tight and we cannot locate more than one color
+      // to estimate contrast from. In this case, we need to re-sample from a larger area to pick
+      // up more background color.
+      _ContrastReport report = _ContrastReport(subset);
+      if (report.isSingleColor || report.areColorsClose) {
+        final List<int> subset = _colorsWithinRect(byteData, expandedPaintBounds, image!.width, image!.height);
+        report = _ContrastReport(subset);
+      }
       // If rectangle is empty, pass the test.
       if (report.isEmptyRect) {
         return result;
@@ -468,7 +469,7 @@ class _ContrastReport {
     }
     if (colorHistogram.length == 1) {
       final Color hslColor = Color(colorHistogram.keys.first);
-      return _ContrastReport._(hslColor, hslColor);
+      return _ContrastReport.singleColor(hslColor);
     }
     // to determine the lighter and darker color, partition the colors
     // by lightness and then choose the mode from each group.
@@ -495,20 +496,33 @@ class _ContrastReport {
         lightCount = count;
       }
     }
+    // Sometimes the selected colors are imperceptibly close, due to picking up
+    // one primary color and a few anti-aliased pixels. If this is the case, then
+    // mark areColorsClose to true so the tester can expand the selection area.
+    final Color lightColorObject = Color(lightColor);
+    final Color darkColorObject = Color(darkColor);
+    const double kMinimumDistance = 10;
+    final double computedDistance = math.sqrt(
+      math.pow(lightColorObject.red - darkColorObject.red, 2) +
+      math.pow(lightColorObject.green - darkColorObject.green, 2) +
+      math.pow(lightColorObject.blue - darkColorObject.blue, 2)
+    );
+    final bool areColorsClose = computedDistance < kMinimumDistance;
+
     // Depending on the number of colors present, return the correct contrast
     // report.
     if (lightCount > 0 && darkCount > 0) {
-      return _ContrastReport._(Color(lightColor), Color(darkColor));
+      return _ContrastReport._(lightColorObject, darkColorObject, areColorsClose);
     } else if (lightCount > 0) {
-      return _ContrastReport.singleColor(Color(lightColor));
+      return _ContrastReport.singleColor(lightColorObject);
     } else if (darkCount > 0) {
-      return _ContrastReport.singleColor(Color(darkColor));
+      return _ContrastReport.singleColor(darkColorObject);
     } else {
       return const _ContrastReport.emptyRect();
     }
   }
 
-  const _ContrastReport._(this.lightColor, this.darkColor)
+  const _ContrastReport._(this.lightColor, this.darkColor, this.areColorsClose)
       : isSingleColor = false,
         isEmptyRect = false;
 
@@ -516,13 +530,15 @@ class _ContrastReport {
       : lightColor = color,
         darkColor = color,
         isSingleColor = true,
-        isEmptyRect = false;
+        isEmptyRect = false,
+        areColorsClose = false;
 
   const _ContrastReport.emptyRect()
       : lightColor = _transparent,
         darkColor = _transparent,
         isSingleColor = false,
-        isEmptyRect = true;
+        isEmptyRect = true,
+        areColorsClose = false;
 
   static const Color _transparent = Color(0x00000000);
 
@@ -536,6 +552,9 @@ class _ContrastReport {
 
   /// Whether the rectangle contains only one color.
   final bool isSingleColor;
+
+  /// Whether there were multiple colors that were extremely close together.
+  final bool areColorsClose;
 
   /// Whether the rectangle contains 0 pixels.
   final bool isEmptyRect;
