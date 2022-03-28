@@ -95,7 +95,7 @@ class TextHeightStyle {
 class TextDimensions {
   TextDimensions(this._element);
 
-  final html.HtmlElement _element;
+  final html.Element _element;
   html.Rectangle<num>? _cachedBoundingClientRect;
 
   void _invalidateBoundsCache() {
@@ -165,7 +165,7 @@ class TextHeightRuler {
   // Elements used to measure the line-height metric.
   late final html.HtmlElement _probe = _createProbe();
   late final html.HtmlElement _host = _createHost();
-  final TextDimensions _dimensions = TextDimensions(html.ParagraphElement());
+  final TextDimensions _dimensions = TextDimensions(html.document.createElement('flt-paragraph'));
 
   /// The alphabetic baseline for this ruler's [textHeightStyle].
   late final double alphabeticBaseline = _probe.getBoundingClientRect().bottom.toDouble();

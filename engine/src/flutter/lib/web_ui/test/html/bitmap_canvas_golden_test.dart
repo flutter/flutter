@@ -171,7 +171,7 @@ Future<void> testMain() async {
     canvas.drawParagraph(paragraph, Offset(8.5, 8.5 + innerClip.top));
 
     expect(
-      canvas.rootElement.querySelectorAll('p').map<String>((html.Element e) => e.innerText).toList(),
+      canvas.rootElement.querySelectorAll('flt-paragraph').map<String>((html.Element e) => e.innerText).toList(),
       <String>['Am I blurry?', 'Am I blurry?'],
       reason: 'Expected to render text using HTML',
     );
@@ -229,7 +229,7 @@ Future<void> testMain() async {
     canvas.drawParagraph(paragraph, const Offset(180, 50));
 
     expect(
-      canvas.rootElement.querySelectorAll('p').map<String?>((html.Element e) => e.text).toList(),
+      canvas.rootElement.querySelectorAll('flt-paragraph').map<String?>((html.Element e) => e.text).toList(),
       <String>[text],
       reason: 'Expected to render text using HTML',
     );

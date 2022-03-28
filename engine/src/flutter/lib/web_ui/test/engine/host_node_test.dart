@@ -66,7 +66,7 @@ void _runDomTests(HostNode hostNode) {
       hostNode.nodes.addAll(<html.Node>[
         html.document.createElement('div'),
         target,
-        html.document.createElement('span'),
+        html.document.createElement('flt-span'),
         html.document.createElement('div'),
       ]);
     });
