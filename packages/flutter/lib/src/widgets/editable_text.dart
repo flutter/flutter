@@ -1605,7 +1605,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   SpellCheckConfiguration? _spellCheckConfiguration;
 
-  bool? get _spellCheckEnabled => (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance?.platformDispatcher.defaultSpellCheckEnabled : true;
+  bool? get _spellCheckEnabled => (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance?.platformDispatcher.defaultSpellCheckEnabled : widget.spellCheckEnabled;
 
 
   /// Whether to create an input connection with the platform for text editing
@@ -2591,7 +2591,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
         ) ?? value;
 
-        if (value.text.length > 0 && _spellCheckEnabled! && _value.text != value.text) {
+        if (_spellCheckEnabled! && value.text.length > 0 && _value.text != value.text) {
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
           Future<List<SpellCheckerSuggestionSpan>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value.text);
           spellCheckResultsFuture.then((results) {
