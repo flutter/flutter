@@ -121,7 +121,7 @@ class _PreferredAppBarSize extends Size {
 /// [ButtonStyle.foregroundColor] for [TextButton] for light themes.
 /// In this case a preferable text button foreground color is
 /// [ColorScheme.onPrimary], a color that contrasts nicely with
-/// [ColorScheme.primary].  to remedy the problem, override
+/// [ColorScheme.primary]. To remedy the problem, override
 /// [TextButton.style]:
 ///
 /// {@tool dartpad}
