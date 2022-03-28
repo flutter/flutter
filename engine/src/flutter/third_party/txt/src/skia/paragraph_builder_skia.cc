@@ -122,6 +122,24 @@ skt::TextStyle TxtToSkia(const TextStyle& txt) {
     skia.addFontFeature(SkString(ff.first.c_str()), ff.second);
   }
 
+  if (!txt.font_variations.GetAxisValues().empty()) {
+    std::vector<SkFontArguments::VariationPosition::Coordinate> coordinates;
+    for (const auto& it : txt.font_variations.GetAxisValues()) {
+      const std::string& axis = it.first;
+      if (axis.length() != 4) {
+        continue;
+      }
+      coordinates.push_back({
+          SkSetFourByteTag(axis[0], axis[1], axis[2], axis[3]),
+          it.second,
+      });
+    }
+    SkFontArguments::VariationPosition position = {
+        coordinates.data(), static_cast<int>(coordinates.size())};
+    skia.setFontArguments(
+        SkFontArguments().setVariationDesignPosition(position));
+  }
+
   skia.resetShadows();
   for (const txt::TextShadow& txt_shadow : txt.text_shadows) {
     skt::TextShadow shadow;

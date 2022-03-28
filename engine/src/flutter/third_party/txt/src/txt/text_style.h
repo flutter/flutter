@@ -62,6 +62,7 @@ class TextStyle {
   // the bottom).
   std::vector<TextShadow> text_shadows;
   FontFeatures font_features;
+  FontVariations font_variations;
 
   TextStyle();
 
