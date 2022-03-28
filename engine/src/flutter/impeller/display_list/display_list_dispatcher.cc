@@ -159,7 +159,7 @@ void DisplayListDispatcher::setInvertColors(bool invert) {
   UNIMPLEMENTED;
 }
 
-std::optional<Entity::BlendMode> ToBlendMode(flutter::DlBlendMode mode) {
+static std::optional<Entity::BlendMode> ToBlendMode(flutter::DlBlendMode mode) {
   switch (mode) {
     case flutter::DlBlendMode::kClear:
       return Entity::BlendMode::kClear;
@@ -351,12 +351,21 @@ static Rect ToRect(const SkRect& rect) {
   return Rect::MakeLTRB(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom);
 }
 
+static Entity::ClipOperation ToClipOperation(SkClipOp clip_op) {
+  switch (clip_op) {
+    case SkClipOp::kDifference:
+      return Entity::ClipOperation::kDifference;
+    case SkClipOp::kIntersect:
+      return Entity::ClipOperation::kIntersect;
+  }
+}
+
 // |flutter::Dispatcher|
 void DisplayListDispatcher::clipRect(const SkRect& rect,
                                      SkClipOp clip_op,
                                      bool is_aa) {
   auto path = PathBuilder{}.AddRect(ToRect(rect)).TakePath();
-  canvas_.ClipPath(std::move(path));
+  canvas_.ClipPath(std::move(path), ToClipOperation(clip_op));
 }
 
 static PathBuilder::RoundingRadii ToRoundingRadii(const SkRRect& rrect) {
@@ -444,7 +453,7 @@ static Path ToPath(const SkRRect& rrect) {
 void DisplayListDispatcher::clipRRect(const SkRRect& rrect,
                                       SkClipOp clip_op,
                                       bool is_aa) {
-  canvas_.ClipPath(ToPath(rrect));
+  canvas_.ClipPath(ToPath(rrect), ToClipOperation(clip_op));
 }
 
 // |flutter::Dispatcher|
