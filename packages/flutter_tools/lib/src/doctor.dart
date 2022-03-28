@@ -301,7 +301,7 @@ class Doctor {
     return globals.cache.areRemoteArtifactsAvailable(engineVersion: engineRevision);
   }
 
-  /// Maximum allowed duration for an entire [diagnose] run.
+  /// Maximum allowed duration for an entire validator to take.
   ///
   /// This should only ever be reached if a process is stuck.
   static const Duration doctorDuration = Duration(minutes: 10);
