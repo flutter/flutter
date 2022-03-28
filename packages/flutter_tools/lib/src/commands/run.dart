@@ -140,7 +140,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
               'startup. By default this is main(List<String> args). Specify '
               'this option multiple times each with one argument to pass '
               'multiple arguments to the Dart entrypoint. Currently this is '
-              'only supported on desktop platforms.'
+              'only supported on desktop platforms.',
     );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -155,6 +155,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addDevToolsOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
+    addEnableImpellerFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -164,6 +165,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
   bool get runningWithPrebuiltApplication => argResults['use-application-binary'] != null;
   bool get trackWidgetCreation => boolArg('track-widget-creation');
+  bool get enableImpeller => boolArg('enable-impeller');
 
   @override
   bool get reportNullSafety => true;
@@ -193,6 +195,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
+        enableImpeller: enableImpeller,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -235,6 +238,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
           && !runningWithPrebuiltApplication,
         nullAssertions: boolArg('null-assertions'),
         nativeNullAssertions: boolArg('native-null-assertions'),
+        enableImpeller: enableImpeller,
       );
     }
   }
@@ -438,6 +442,7 @@ class RunCommand extends RunCommandBase {
       commandRunProjectModule: FlutterProject.current().isModule,
       commandRunProjectHostLanguage: hostLanguage.join(','),
       commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
+      commandRunEnableImpeller: enableImpeller,
     );
   }
 
