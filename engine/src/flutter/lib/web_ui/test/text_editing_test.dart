@@ -12,6 +12,7 @@ import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart' show flutterViewEmbedder;
 import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/initialization.dart';
 import 'package:ui/src/engine/services.dart';
 import 'package:ui/src/engine/text_editing/autofill_hint.dart';
 import 'package:ui/src/engine/text_editing/input_type.dart';
@@ -60,7 +61,9 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() {
+Future<void> testMain() async {
+  await initializeEngine();
+
   tearDown(() {
     lastEditingState = null;
     editingDeltaState = null;

@@ -46,9 +46,12 @@ void testMain() {
     ];
   }
 
-  group('ImageFilters', () {
+  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
+  if (!isIosSafari) {
     setUpCanvasKitTest();
+  }
 
+  group('ImageFilters', () {
     test('can be constructed', () {
       final CkImageFilter imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
       expect(imageFilter, isA<CkImageFilter>());
@@ -93,8 +96,6 @@ void testMain() {
   }, skip: isIosSafari);
 
   group('MaskFilter', () {
-    setUpCanvasKitTest();
-
     test('with 0 sigma can be set on a Paint', () {
       final ui.Paint paint = ui.Paint();
       const ui.MaskFilter filter = ui.MaskFilter.blur(ui.BlurStyle.normal, 0);

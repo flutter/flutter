@@ -11,6 +11,8 @@ import 'package:ui/ui.dart' hide TextStyle;
 
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../common.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -27,8 +29,8 @@ Future<void> testMain() async {
   setUp(() async {
     debugEmulateFlutterTesterEnvironment = true;
     await webOnlyInitializePlatform();
-    webOnlyFontCollection.debugRegisterTestFonts();
-    await webOnlyFontCollection.ensureFontsLoaded();
+    fontCollection.debugRegisterTestFonts();
+    await fontCollection.ensureFontsLoaded();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/51514
@@ -49,6 +51,12 @@ Future<void> testMain() async {
     engineCanvas.endOfPaint();
 
     html.Element sceneElement = html.Element.tag('flt-scene');
+    if (isIosSafari) {
+      // Shrink to fit on the iPhone screen.
+      sceneElement.style.position = 'absolute';
+      sceneElement.style.transformOrigin = '0 0 0';
+      sceneElement.style.transform = 'scale(0.3)';
+    }
     sceneElement.append(engineCanvas.rootElement);
     html.document.body!.append(sceneElement);
 
@@ -79,6 +87,12 @@ Future<void> testMain() async {
     rc2.apply(engineCanvas, screenRect);
 
     sceneElement = html.Element.tag('flt-scene');
+    if (isIosSafari) {
+      // Shrink to fit on the iPhone screen.
+      sceneElement.style.position = 'absolute';
+      sceneElement.style.transformOrigin = '0 0 0';
+      sceneElement.style.transform = 'scale(0.3)';
+    }
     sceneElement.append(engineCanvas.rootElement);
     html.document.body!.append(sceneElement);
 

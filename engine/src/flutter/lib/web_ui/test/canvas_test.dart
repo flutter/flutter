@@ -16,7 +16,9 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() {
+Future<void> testMain() async {
+  await initializeEngine();
+
   group('EngineCanvas', () {
     late MockEngineCanvas mockCanvas;
     late ui.Paragraph paragraph;

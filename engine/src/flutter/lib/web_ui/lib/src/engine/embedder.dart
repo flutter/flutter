@@ -633,8 +633,23 @@ void applyGlobalCssRulesToSheet(
 }
 
 /// The embedder singleton.
-FlutterViewEmbedder get flutterViewEmbedder => ensureFlutterViewEmbedderInitialized();
+///
+/// [ensureFlutterViewEmbedderInitialized] must be called prior to calling this
+/// getter.
+FlutterViewEmbedder get flutterViewEmbedder {
+  final FlutterViewEmbedder? embedder = _flutterViewEmbedder;
+  assert(() {
+    if (embedder == null) {
+      throw StateError(
+        'FlutterViewEmbedder not initialized. Call `ensureFlutterViewEmbedderInitialized()` '
+        'prior to calling the `flutterViewEmbedder` getter.'
+      );
+    }
+    return true;
+  }());
+  return embedder!;
+}
+FlutterViewEmbedder? _flutterViewEmbedder;
 
 /// Initializes the [FlutterViewEmbedder], if it's not already initialized.
 FlutterViewEmbedder ensureFlutterViewEmbedderInitialized() => _flutterViewEmbedder ??= FlutterViewEmbedder();
-FlutterViewEmbedder? _flutterViewEmbedder;

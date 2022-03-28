@@ -14,7 +14,7 @@ void main() {
 
 void testMain() {
   setUp(() async {
-    initializeEngine();
+    await initializeEngine();
   });
 
   test('collects frame timings', () async {

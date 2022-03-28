@@ -2,25 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(yjbanov): this does not need to be in the production sources.
+//                https://github.com/flutter/flutter/issues/100394
+
 import 'dart:async';
 import 'dart:html' as html;
 
 import 'package:ui/ui.dart' as ui;
 
 import '../engine.dart';
-
-Future<void>? _testPlatformInitializedFuture;
-
-Future<dynamic> ensureTestPlatformInitializedThenRunTest(dynamic Function() body) {
-  if (_testPlatformInitializedFuture == null) {
-    ui.debugEmulateFlutterTesterEnvironment = true;
-
-    // Initializing the platform will ensure that the test font is loaded.
-    _testPlatformInitializedFuture =
-        ui.webOnlyInitializePlatform(assetManager: WebOnlyMockAssetManager());
-  }
-  return _testPlatformInitializedFuture!.then<dynamic>((_) => body());
-}
 
 Future<void>? _platformInitializedFuture;
 
@@ -42,7 +32,7 @@ Future<void> initializeTestFlutterViewEmbedder({double devicePixelRatio = 3.0}) 
     return _platformInitializedFuture!;
   }
   return _platformInitializedFuture =
-      ui.webOnlyInitializePlatform(assetManager: WebOnlyMockAssetManager());
+      initializeEngine(assetManager: WebOnlyMockAssetManager());
 }
 
 const bool _debugLogHistoryActions = false;

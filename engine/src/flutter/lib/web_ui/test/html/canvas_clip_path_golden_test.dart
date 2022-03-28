@@ -21,11 +21,11 @@ Future<void> testMain() async {
   const double screenHeight = 500.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
 
-  setUp(() async {
+  setUpAll(() async {
     debugEmulateFlutterTesterEnvironment = true;
     await webOnlyInitializePlatform();
-    webOnlyFontCollection.debugRegisterTestFonts();
-    await webOnlyFontCollection.ensureFontsLoaded();
+    engine.fontCollection.debugRegisterTestFonts();
+    await engine.fontCollection.ensureFontsLoaded();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/48683

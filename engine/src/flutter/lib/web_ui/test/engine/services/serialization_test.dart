@@ -7,7 +7,10 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui.dart';
+
+// Some tests here cannot run in JS mode because of limited numerics. This
+// should be fixed by dart2wasm.
+const bool _kSupportsDartNumerics = !identical(0, 0.0);
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -38,7 +41,7 @@ void testMain() {
       expect(written.lengthInBytes, equals(8));
       final ReadBuffer read = ReadBuffer(written);
       expect(read.getInt64(), equals(-9000000000000));
-    }, skip: isWeb);
+    }, skip: !_kSupportsDartNumerics);
     test('of double', () {
       final WriteBuffer write = WriteBuffer();
       write.putFloat64(3.14);
@@ -68,7 +71,7 @@ void testMain() {
       final ReadBuffer read = ReadBuffer(written);
       read.getUint8();
       expect(read.getInt64List(3), equals(integers));
-    }, skip: isWeb);
+    }, skip: !_kSupportsDartNumerics);
     test('of double list when unaligned', () {
       final Float64List doubles =
           Float64List.fromList(<double>[3.14, double.nan]);

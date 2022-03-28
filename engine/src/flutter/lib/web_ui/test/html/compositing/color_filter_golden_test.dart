@@ -19,16 +19,18 @@ void main() {
 }
 
 Future<void> testMain() async {
+  setUpAll(() async {
+    await webOnlyInitializePlatform();
+    fontCollection.debugRegisterTestFonts();
+    await fontCollection.ensureFontsLoaded();
+  });
+
   setUp(() async {
     debugShowClipLayers = true;
     SurfaceSceneBuilder.debugForgetFrameScene();
     for (final html.Node scene in html.document.querySelectorAll('flt-scene')) {
       scene.remove();
     }
-
-    await webOnlyInitializePlatform();
-    webOnlyFontCollection.debugRegisterTestFonts();
-    await webOnlyFontCollection.ensureFontsLoaded();
   });
 
   test('Should apply color filter to image', () async {

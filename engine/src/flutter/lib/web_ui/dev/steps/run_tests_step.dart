@@ -77,59 +77,18 @@ class RunTestsStep implements PipelineStep {
     await _browserEnvironment.prepare();
 
     final SkiaGoldClient? skiaClient = await _createSkiaClient();
-
     final List<FilePath> testFiles = this.testFiles ?? findAllTests();
 
-    // Separate screenshot tests from unit-tests. Screenshot tests must run
-    // one at a time. Otherwise, they will end up screenshotting each other.
-    // This is not an issue for unit-tests.
-    final List<FilePath> screenshotTestFiles = <FilePath>[];
-    final List<FilePath> unitTestFiles = <FilePath>[];
-
-    for (final FilePath testFilePath in testFiles) {
-      if (!testFilePath.absolute.endsWith('_test.dart')) {
-        // Not a test file at all. Skip.
-        continue;
-      }
-
-      // Any file whose name ends with "_golden_test.dart" is run as a golden test.
-      final bool isGoldenTestFile = pathlib
-          .basename(testFilePath.relativeToWebUi)
-          .endsWith('_golden_test.dart');
-      if (isGoldenTestFile) {
-        screenshotTestFiles.add(testFilePath);
-      } else {
-        unitTestFiles.add(testFilePath);
-      }
-    }
-
-    // Run non-screenshot tests.
-    if (unitTestFiles.isNotEmpty) {
-      await _runTestBatch(
-        testFiles: unitTestFiles,
-        browserEnvironment: _browserEnvironment,
-        expectFailure: false,
-        isDebug: isDebug,
-        doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
-        skiaClient: skiaClient,
-        overridePathToCanvasKit: overridePathToCanvasKit,
-      );
-      _checkExitCode('Unit tests');
-    }
-
-    // Run screenshot tests.
-    if (screenshotTestFiles.isNotEmpty) {
-      await _runTestBatch(
-        testFiles: screenshotTestFiles,
-        browserEnvironment: _browserEnvironment,
-        expectFailure: false,
-        isDebug: isDebug,
-        doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
-        skiaClient: skiaClient,
-        overridePathToCanvasKit: overridePathToCanvasKit,
-      );
-      _checkExitCode('Golden tests');
-    }
+    await _runTestBatch(
+      testFiles: testFiles,
+      browserEnvironment: _browserEnvironment,
+      expectFailure: false,
+      isDebug: isDebug,
+      doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
+      skiaClient: skiaClient,
+      overridePathToCanvasKit: overridePathToCanvasKit,
+    );
+    _checkExitCode('Unit tests');
 
     if (!allShardsPassed) {
       throw ToolExit(_createFailedShardsMessage());

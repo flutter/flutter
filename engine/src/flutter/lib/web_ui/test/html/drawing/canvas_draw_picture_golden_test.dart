@@ -20,12 +20,15 @@ void main() {
 SurfacePaint makePaint() => Paint() as SurfacePaint;
 
 Future<void> testMain() async {
-  setUp(() async {
+  setUpAll(() async {
     debugShowClipLayers = true;
-    SurfaceSceneBuilder.debugForgetFrameScene();
     await webOnlyInitializePlatform();
-    webOnlyFontCollection.debugRegisterTestFonts();
-    await webOnlyFontCollection.ensureFontsLoaded();
+    fontCollection.debugRegisterTestFonts();
+    await fontCollection.ensureFontsLoaded();
+  });
+
+  setUp(() async {
+    SurfaceSceneBuilder.debugForgetFrameScene();
   });
 
   group('Add picture to scene', () {

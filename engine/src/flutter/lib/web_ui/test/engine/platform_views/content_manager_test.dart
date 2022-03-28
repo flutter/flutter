@@ -15,6 +15,10 @@ void main() {
 }
 
 void testMain() {
+  setUpAll(() async {
+    await initializeEngine();
+  });
+
   group('PlatformViewManager', () {
     const String viewType = 'forTest';
     const int viewId = 6;
