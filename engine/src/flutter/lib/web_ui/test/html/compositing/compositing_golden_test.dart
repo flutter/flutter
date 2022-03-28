@@ -872,7 +872,7 @@ void _testCullRectComputation() {
       final html.Element sceneElement = builder.build().webOnlyRootElement!;
       expect(
         sceneElement
-            .querySelectorAll('p')
+            .querySelectorAll('flt-paragraph')
             .map<String>((html.Element e) => e.innerText)
             .toList(),
         <String>['Am I blurry?', 'Am I blurry?'],
