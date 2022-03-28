@@ -2489,6 +2489,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+    scheduler: luci
 
   - name: Mac build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
@@ -3456,6 +3457,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: integration_ui_ios_textfield
+    scheduler: luci
 
   - name: Mac_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
@@ -3546,6 +3548,7 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: new_gallery_impeller_ios__transition_perf
+    scheduler: luci
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
