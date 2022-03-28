@@ -1,4 +1,4 @@
-Signature: bacd8b505c52523e9f54800cd81ad207
+Signature: ab9fe277f76b85973d3952afcecbdf89
 
 UNUSED LICENSES:
 
@@ -6351,6 +6351,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/text/GrGlyphVector.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrGlyphVector.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLFinalizationChecks.cpp
+FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
 FILE: ../../../third_party/skia/src/utils/SkTestCanvas.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google LLC
