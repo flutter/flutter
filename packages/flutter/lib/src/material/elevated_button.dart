@@ -122,7 +122,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// [ButtonStyle.foregroundColor] is now based on [primary] instead of
   /// [onPrimary] and [ButtonStyle.backgroundColor] is based on [surface]
   /// instead [primary]. If you are migrating from Material 2, you will
-  /// probably need to change the colors you are using to maintain the colors
+  /// probably need to change the colors you are using to maintain your color
   /// scheme for the button style.
   ///
   /// To use these new Material 3 color roles, applications should set
@@ -153,6 +153,19 @@ class ElevatedButton extends ButtonStyleButton {
   /// ElevatedButton(
   ///   style: ElevatedButton.styleFrom(primary: Colors.green),
   /// )
+  ///
+  /// ## Filled and Filled Tonal styles
+  ///
+  /// Material 3 introduced two new styles that can be achieved with
+  /// [ElevatedButton].
+  ///
+  /// {@tool dartpad}
+  /// This sample will create 'Filled' and 'Filled Tonal' buttons using
+  /// [ElevatedButton].
+  ///
+  /// ** See code in examples/api/lib/material/elevated_button.1.dart **
+  /// {@end-tool}
+  ///
   /// ```
   static ButtonStyle styleFrom({
     Color? primary,
@@ -184,7 +197,7 @@ class ElevatedButton extends ButtonStyleButton {
     late final MaterialStateProperty<Color?>? overlayColor;
     if (useMaterial3Colors) {
       backgroundColor = _TokenDefaultsM3.backgroundColorFor(surface, onSurface);
-      foregroundColor = _TokenDefaultsM3.backgroundColorFor(primary, onSurface);
+      foregroundColor = _TokenDefaultsM3.foregroundColorFor(primary, onSurface);
       overlayColor = _TokenDefaultsM3.overlayColorFor(primary, primary);
     } else {
       backgroundColor = (onSurface == null && primary == null)
