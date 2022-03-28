@@ -6,8 +6,6 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
-import 'package:ui/ui.dart' as ui;
-
 import 'common.dart';
 
 void main() {
@@ -15,26 +13,22 @@ void main() {
 }
 
 void testMain() {
-  group('initialize', () {
-    test(
-        're-uses the same initialized instance if it is already set on the window',
-        () async {
-      expect(windowFlutterCanvasKit, isNull);
+  test('CanvasKit reuses the instance already set on `window`', () async {
+    expect(windowFlutterCanvasKit, isNull);
 
-      FlutterViewEmbedder();
-      await ui.webOnlyInitializePlatform(
-          assetManager: WebOnlyMockAssetManager());
-      expect(windowFlutterCanvasKit, isNotNull);
+    // First initialization should make CanvasKit available through `window`.
+    await initializeCanvasKit();
+    expect(windowFlutterCanvasKit, isNotNull);
 
-      final CanvasKit? firstCanvasKitInstance = windowFlutterCanvasKit;
+    // Remember the initial instance.
+    final CanvasKit firstCanvasKitInstance = windowFlutterCanvasKit!;
 
-      // Triggers a reset of the CanvasKit script element.
-      FlutterViewEmbedder();
-      await ui.webOnlyInitializePlatform(
-          assetManager: WebOnlyMockAssetManager());
-      // The instance is the same.
-      expect(firstCanvasKitInstance, windowFlutterCanvasKit);
-    });
+    // Try to load CanvasKit again.
+    await initializeCanvasKit();
+
+    // Should find the existing instance and reuse it.
+    expect(firstCanvasKitInstance, windowFlutterCanvasKit);
+
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }

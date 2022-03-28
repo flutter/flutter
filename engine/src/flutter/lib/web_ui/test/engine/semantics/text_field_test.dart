@@ -34,6 +34,8 @@ void main() {
 }
 
 void testMain() {
+  ensureFlutterViewEmbedderInitialized();
+
   setUp(() {
     EngineSemanticsOwner.debugResetSemantics();
   });

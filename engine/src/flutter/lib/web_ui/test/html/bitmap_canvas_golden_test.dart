@@ -11,6 +11,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
+import '../common.dart';
 import 'screenshot.dart';
 
 void main() {
@@ -25,6 +26,12 @@ Future<void> testMain() async {
   void appendToScene() {
     // Create a <flt-scene> element to make sure our CSS reset applies correctly.
     final html.Element testScene = html.Element.tag('flt-scene');
+    if (isIosSafari) {
+      // Shrink to fit on the iPhone screen.
+      testScene.style.position = 'absolute';
+      testScene.style.transformOrigin = '0 0 0';
+      testScene.style.transform = 'scale(0.3)';
+    }
     testScene.append(canvas.rootElement);
     flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(testScene);
   }
@@ -246,6 +253,12 @@ Future<void> testMain() async {
     sb.pop();
     final SurfaceScene scene = sb.build() as SurfaceScene;
     final html.Element sceneElement = scene.webOnlyRootElement!;
+    if (isIosSafari) {
+      // Shrink to fit on the iPhone screen.
+      sceneElement.style.position = 'absolute';
+      sceneElement.style.transformOrigin = '0 0 0';
+      sceneElement.style.transform = 'scale(0.3)';
+    }
 
     sceneElement.querySelector('flt-clip')!.append(canvas.rootElement);
     flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(sceneElement);

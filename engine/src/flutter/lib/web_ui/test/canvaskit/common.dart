@@ -25,7 +25,7 @@ void setUpCanvasKitTest() {
   setUpAll(() async {
     expect(useCanvasKit, true, reason: 'This test must run in CanvasKit mode.');
     debugResetBrowserSupportsFinalizationRegistry();
-    await ui.webOnlyInitializePlatform(assetManager: WebOnlyMockAssetManager());
+    await initializeEngine(assetManager: WebOnlyMockAssetManager());
   });
 
   setUp(() async {

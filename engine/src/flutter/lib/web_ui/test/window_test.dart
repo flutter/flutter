@@ -30,8 +30,11 @@ void main() {
 void testMain() {
   late EngineSingletonFlutterWindow window;
 
+  setUpAll(() async {
+    await initializeEngine();
+  });
+
   setUp(() {
-    ui.webOnlyInitializeEngine();
     window = EngineSingletonFlutterWindow(0, EnginePlatformDispatcher.instance);
   });
 

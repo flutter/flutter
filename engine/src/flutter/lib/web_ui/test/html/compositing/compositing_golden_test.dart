@@ -20,6 +20,12 @@ void main() {
 }
 
 Future<void> testMain() async {
+  setUpAll(() async {
+    await ui.webOnlyInitializePlatform();
+    fontCollection.debugRegisterTestFonts();
+    await fontCollection.ensureFontsLoaded();
+  });
+
   setUp(() async {
     // To debug test failures uncomment the following to visualize clipping
     // layers:
@@ -28,10 +34,6 @@ Future<void> testMain() async {
     for (final html.Node scene in html.document.querySelectorAll('flt-scene')) {
       scene.remove();
     }
-
-    await ui.webOnlyInitializePlatform();
-    ui.webOnlyFontCollection.debugRegisterTestFonts();
-    await ui.webOnlyFontCollection.ensureFontsLoaded();
   });
 
   test('pushClipRect', () async {

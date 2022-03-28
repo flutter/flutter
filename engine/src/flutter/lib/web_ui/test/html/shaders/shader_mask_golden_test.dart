@@ -33,17 +33,20 @@ Future<void> main() async {
 // https://github.com/flutter/flutter/issues/86623
 
 Future<void> testMain() async {
-  setUp(() async {
+  setUpAll(() async {
     debugShowClipLayers = true;
+    await webOnlyInitializePlatform();
+  });
+
+  setUp(() async {
     SurfaceSceneBuilder.debugForgetFrameScene();
     for (final html.Node scene in
         flutterViewEmbedder.sceneHostElement!.querySelectorAll('flt-scene')) {
       scene.remove();
     }
     initWebGl();
-    await webOnlyInitializePlatform();
-    webOnlyFontCollection.debugRegisterTestFonts();
-    await webOnlyFontCollection.ensureFontsLoaded();
+    fontCollection.debugRegisterTestFonts();
+    await fontCollection.ensureFontsLoaded();
   });
 
   /// Should render the picture unmodified.

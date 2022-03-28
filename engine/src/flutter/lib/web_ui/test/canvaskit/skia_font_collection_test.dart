@@ -21,6 +21,7 @@ void testMain() {
     late void Function(String) oldPrintWarning;
 
     setUpAll(() async {
+      ensureFlutterViewEmbedderInitialized();
       await initializeCanvasKit();
       oldPrintWarning = printWarning;
       printWarning = (String warning) {

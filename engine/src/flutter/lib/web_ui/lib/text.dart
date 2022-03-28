@@ -731,7 +731,7 @@ Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) {
         .loadFontFromList(list, fontFamily: fontFamily)
         .then((_) => engine.sendFontChangeMessage());
   } else {
-    return _fontCollection!
+    return engine.fontCollection
         .loadFontFromList(list, fontFamily: fontFamily!)
         .then((_) => engine.sendFontChangeMessage());
   }

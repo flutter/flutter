@@ -476,7 +476,7 @@ Future<Codec> webOnlyInstantiateImageCodecFromUrl(Uri uri,
     return engine.skiaInstantiateWebImageCodec(
       uri.toString(), chunkCallback);
   } else {
-    return _futurize<Codec>((engine.Callback<Codec> callback) =>
+    return engine.futurize<Codec>((engine.Callback<Codec> callback) =>
       _instantiateImageCodecFromUrl(uri, chunkCallback, callback));
   }
 }
