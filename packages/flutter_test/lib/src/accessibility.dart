@@ -234,6 +234,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       // contrast ratio based on text size/weight.
       double? fontSize;
       bool isBold;
+      // Italic ahem font has AA artifacts between characters and requires an expanded rect.
+      bool forceLargeRect = false;
       final String text = data.label.isEmpty ? data.value : data.label;
       final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
       Rect paintBounds;
@@ -241,10 +243,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         final Element element = elements.single;
         assert(element.renderObject != null && element.renderObject is RenderBox);
         final RenderBox renderObject = element.renderObject! as RenderBox;
-        paintBounds = Rect.fromPoints(
-          renderObject.localToGlobal(renderObject.paintBounds.topLeft),
-          renderObject.localToGlobal(renderObject.paintBounds.bottomRight),
-        );
+        paintBounds = MatrixUtils.transformRect(renderObject.getTransformTo(null), renderObject.paintBounds);
         final Widget widget = element.widget;
         final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
 
@@ -254,9 +253,11 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
               : widget.style!;
           fontSize = effectiveTextStyle.fontSize;
           isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
+          forceLargeRect = effectiveTextStyle.fontStyle == FontStyle.italic;
         } else if (widget is EditableText) {
           isBold = widget.style.fontWeight == FontWeight.bold;
           fontSize = widget.style.fontSize;
+          forceLargeRect = widget.style.fontStyle == FontStyle.italic;
         } else {
           throw StateError('Unexpected widget type: ${widget.runtimeType}');
         }
@@ -289,7 +290,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       // to estimate contrast from. In this case, we need to re-sample from a larger area to pick
       // up more background color.
       _ContrastReport report = _ContrastReport(subset);
-      if (report.isSingleColor || report.areColorsClose) {
+      if (report.isSingleColor || report.areColorsClose || forceLargeRect) {
         final List<int> subset = _colorsWithinRect(byteData, expandedPaintBounds, image!.width, image!.height);
         report = _ContrastReport(subset);
       }
