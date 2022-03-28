@@ -359,6 +359,63 @@ void main() {
       expect(logger.statusText, contains('#0      CrashingValidator.validate'));
     });
 
+    testUsingContext('foo bar', () async {
+      Future<void> asyncFunc() {
+        return Future<void>.delayed(
+            const Duration(seconds: 42),
+            () => throwToolExit('Foo bar!'),
+        );
+      }
+      Future<Object> futureError;
+      FakeAsync().run<Future<void>>((FakeAsync time) {
+        futureError = asyncFunc().onError<Object>((Object error, StackTrace stackTrace) async {
+          print('caught!');
+          print(error);
+        });
+        time.elapse(const Duration(seconds: 43));
+        time.flushMicrotasks();
+      });
+      print('back in test');
+      print('done with test');
+      await futureError;
+    });
+
+    testUsingContext('validate tool exit when exceeding timeout', () async {
+      print('test start');
+      bool didError = false;
+      final Completer<ToolExit> completer = Completer<ToolExit>();
+      FakeAsync().run<void>((FakeAsync time) {
+        completer.future.whenComplete(() {
+          print('future completed!');
+        });
+        print('start of fakeasync');
+        final Doctor doctor = FakeAsyncCrashingDoctor(time, logger);
+        doctor.diagnose(verbose: false);
+        doctor.timeoutFuture.onError<ToolExit>((ToolExit error, StackTrace stackTrace) async {
+          print('gotcha');
+          print(error);
+          didError = true;
+          completer.complete(error);
+          print('completed completer');
+          return error;
+        });
+        print('no time lapsed');
+        time.elapse(const Duration(seconds: 3));
+        print('after 3 second lapse');
+        expect(didError, isFalse);
+        time.elapse(Doctor.doctorDuration);
+        print('after 10 minute lapse');
+        time.flushMicrotasks();
+        print('about to return futureError');
+      });
+
+      print('back in test');
+      final ToolExit toolExit = await completer.future;
+      expect(toolExit.message, contains('Doctor exceeded maximum allowed duration'));
+      expect(didError, isTrue);
+      print('test finished');
+    });
+
 
     testUsingContext('validate non-verbose output format for run with an async crash', () async {
       final Completer<void> completer = Completer<void>();
@@ -738,6 +795,9 @@ class NoOpDoctor implements Doctor {
 
   @override
   Future<bool> checkRemoteArtifacts(String engineRevision) async => true;
+
+  @override
+  Future<Object> timeoutFuture;
 
   @override
   Future<bool> diagnose({

@@ -9,6 +9,7 @@ import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
 import 'base/async_guard.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -193,9 +194,16 @@ class Doctor {
     return DoctorValidatorsProvider._instance.validators;
   }
 
+  @visibleForTesting
+  late final Future<Object?> timeoutFuture;
+
   /// Return a list of [ValidatorTask] objects and starts validation on all
   /// objects in [validators].
-  List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[
+  List<ValidatorTask> startValidatorTasks() {
+    timeoutFuture = Future<Object?>.delayed(doctorDuration, () {
+      throwToolExit('Doctor exceeded maximum allowed duration of $doctorDuration');
+    });
+    return <ValidatorTask>[
     for (final DoctorValidator validator in validators)
       ValidatorTask(
         validator,
@@ -210,7 +218,8 @@ class Doctor {
           },
         ),
       ),
-  ];
+    ];
+  }
 
   List<Workflow> get workflows {
     return DoctorValidatorsProvider._instance.workflows;
@@ -290,6 +299,11 @@ class Doctor {
     return globals.cache.areRemoteArtifactsAvailable(engineVersion: engineRevision);
   }
 
+  /// Maximum allowed duration for an entire [diagnose] run.
+  ///
+  /// This should only ever be reached if a process is stuck.
+  static const Duration doctorDuration = Duration(minutes: 10);
+
   /// Print information about the state of installed tooling.
   ///
   /// To exclude personally identifiable information like device names and
@@ -316,7 +330,7 @@ class Doctor {
     for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = _logger.startSpinner(
-        timeout: const Duration(seconds: 2),
+        timeout: validator.slowWarningDuration,
         slowWarningCallback: () => validator.slowWarning,
       );
       ValidationResult result;
