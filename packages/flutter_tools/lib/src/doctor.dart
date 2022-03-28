@@ -194,16 +194,9 @@ class Doctor {
     return DoctorValidatorsProvider._instance.validators;
   }
 
-  @visibleForTesting
-  late final Future<Object?> timeoutFuture;
-
   /// Return a list of [ValidatorTask] objects and starts validation on all
   /// objects in [validators].
-  List<ValidatorTask> startValidatorTasks() {
-    timeoutFuture = Future<Object?>.delayed(doctorDuration, () {
-      throwToolExit('Doctor exceeded maximum allowed duration of $doctorDuration');
-    });
-    return <ValidatorTask>[
+  List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[
     for (final DoctorValidator validator in validators)
       ValidatorTask(
         validator,
@@ -212,14 +205,23 @@ class Doctor {
         // Future returned by the asyncGuard() is not awaited, we pass an
         // onError callback to it and translate errors into ValidationResults.
         asyncGuard<ValidationResult>(
-          validator.validate,
+          () {
+            // This future can only complete with a ToolExit.
+            final Future<ValidationResult> timeoutFuture = Future<ValidationResult>.delayed(doctorDuration, () {
+              throwToolExit('${validator.title} exceeded maximum allowed duration of $doctorDuration');
+            });
+            final Future<ValidationResult> validatorFuture = validator.validate();
+            return Future.any<ValidationResult>(<Future<ValidationResult>>[
+              validatorFuture,
+              timeoutFuture,
+            ]);
+          },
           onError: (Object exception, StackTrace stackTrace) {
             return ValidationResult.crash(exception, stackTrace);
           },
         ),
       ),
     ];
-  }
 
   List<Workflow> get workflows {
     return DoctorValidatorsProvider._instance.workflows;

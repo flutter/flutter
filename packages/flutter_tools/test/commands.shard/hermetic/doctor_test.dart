@@ -359,63 +359,16 @@ void main() {
       expect(logger.statusText, contains('#0      CrashingValidator.validate'));
     });
 
-    testUsingContext('foo bar', () async {
-      Future<void> asyncFunc() {
-        return Future<void>.delayed(
-            const Duration(seconds: 42),
-            () => throwToolExit('Foo bar!'),
-        );
-      }
-      Future<Object> futureError;
-      FakeAsync().run<Future<void>>((FakeAsync time) {
-        futureError = asyncFunc().onError<Object>((Object error, StackTrace stackTrace) async {
-          print('caught!');
-          print(error);
-        });
-        time.elapse(const Duration(seconds: 43));
-        time.flushMicrotasks();
-      });
-      print('back in test');
-      print('done with test');
-      await futureError;
-    });
-
     testUsingContext('validate tool exit when exceeding timeout', () async {
-      print('test start');
-      bool didError = false;
-      final Completer<ToolExit> completer = Completer<ToolExit>();
       FakeAsync().run<void>((FakeAsync time) {
-        completer.future.whenComplete(() {
-          print('future completed!');
-        });
-        print('start of fakeasync');
-        final Doctor doctor = FakeAsyncCrashingDoctor(time, logger);
+        final Doctor doctor = FakeAsyncStuckDoctor(time, logger);
         doctor.diagnose(verbose: false);
-        doctor.timeoutFuture.onError<ToolExit>((ToolExit error, StackTrace stackTrace) async {
-          print('gotcha');
-          print(error);
-          didError = true;
-          completer.complete(error);
-          print('completed completer');
-          return error;
-        });
-        print('no time lapsed');
-        time.elapse(const Duration(seconds: 3));
-        print('after 3 second lapse');
-        expect(didError, isFalse);
-        time.elapse(Doctor.doctorDuration);
-        print('after 10 minute lapse');
+        time.elapse(Doctor.doctorDuration + const Duration(seconds: 1));
         time.flushMicrotasks();
-        print('about to return futureError');
       });
 
-      print('back in test');
-      final ToolExit toolExit = await completer.future;
-      expect(toolExit.message, contains('Doctor exceeded maximum allowed duration'));
-      expect(didError, isTrue);
-      print('test finished');
+      expect(logger.statusText, contains('Stuck validator that never completes exceeded maximum allowed duration of '));
     });
-
 
     testUsingContext('validate non-verbose output format for run with an async crash', () async {
       final Completer<void> completer = Completer<void>();
@@ -797,9 +750,6 @@ class NoOpDoctor implements Doctor {
   Future<bool> checkRemoteArtifacts(String engineRevision) async => true;
 
   @override
-  Future<Object> timeoutFuture;
-
-  @override
   Future<bool> diagnose({
     bool androidLicenses = false,
     bool verbose = true,
@@ -873,6 +823,18 @@ class NotAvailableValidator extends DoctorValidator {
       ValidationMessage.hint('A hint message'),
     ];
     return const ValidationResult(ValidationType.notAvailable, messages);
+  }
+}
+
+class StuckValidator extends DoctorValidator {
+  StuckValidator() : super('Stuck validator that never completes');
+
+  @override
+  Future<ValidationResult> validate() {
+    final Completer<ValidationResult> completer = Completer<ValidationResult>();
+
+    // This future will never complete
+    return completer.future;
   }
 }
 
@@ -1019,6 +981,27 @@ class FakeCrashingDoctor extends Doctor {
       _validators.add(PassingValidator('Passing Validator'));
       _validators.add(PassingValidator('Another Passing Validator'));
       _validators.add(CrashingValidator());
+      _validators.add(PassingValidator('Validators are fun'));
+      _validators.add(PassingValidator('Four score and seven validators ago'));
+    }
+    return _validators;
+  }
+}
+
+/// A doctor with a validator that will never finish.
+class FakeAsyncStuckDoctor extends Doctor {
+  FakeAsyncStuckDoctor(this._time, Logger logger) : super(logger: logger);
+
+  final FakeAsync _time;
+
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(PassingValidator('Another Passing Validator'));
+      _validators.add(StuckValidator());
       _validators.add(PassingValidator('Validators are fun'));
       _validators.add(PassingValidator('Four score and seven validators ago'));
     }
