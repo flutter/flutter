@@ -43,6 +43,14 @@ class _ShaderMaskCachePageState extends State<ShaderMaskCachePage>
           buildShaderMask(0),
           const SizedBox(height: 10),
           buildShaderMask(1),
+          const SizedBox(height: 10),
+          buildShaderMaskWithBlendMode(BlendMode.modulate, 'BlendMode.modulate'),
+          const SizedBox(height: 10),
+          buildShaderMaskWithBlendMode(BlendMode.clear, 'BlendMode.clear'),
+          const SizedBox(height: 10),
+          buildShaderMaskWithBlendMode(BlendMode.dst, 'BlendMode.dst'),
+          const SizedBox(height: 10),
+          buildShaderMaskWithBlendMode(BlendMode.src, 'BlendMode.src'),
           const SizedBox(height: 1000),
         ],
       ),
@@ -68,6 +76,67 @@ class _ShaderMaskCachePageState extends State<ShaderMaskCachePage>
           ),
         ]),
         child: ListItem(index: index),
+      ),
+    );
+  }
+
+  Widget buildShaderMaskWithBlendMode(BlendMode blendMode, String blendModeDesc) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 100,
+      child: Stack(
+        children: [
+          Positioned(
+            top: 50,
+            left: 10,
+            child: Text(blendModeDesc, style: const TextStyle(fontWeight: FontWeight.w500),),
+          ),
+          Positioned(
+            top: 0,
+            left: 150,
+            child: Container(
+              width: 100,
+              height: 100,
+              color: Colors.green,
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 250,
+            child: Container(
+              width: 100,
+              height: 100,
+              color: Colors.red,
+            ),
+          ),
+          Positioned(
+              top: 0,
+              left:170,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                // We hope the ShaderMask is larger than his children
+                child: ShaderMask(
+                  // We can specified the blend mode to check the ShaderMask behavior in different blend mode
+                  blendMode: blendMode,
+                  shaderCallback: (Rect bounds) {
+                    return const RadialGradient(
+                      center: Alignment.topLeft,
+                      radius: 1.0,
+                      colors: <Color>[Colors.yellow, Colors.red],
+                      tileMode: TileMode.mirror,
+                    ).createShader(bounds);
+                  },
+                  child: Flex(
+                    direction: Axis.horizontal,
+                    children: [
+                      Container(width: 50, height: 50, color: Colors.blue,)
+                    ],
+                  ),
+                ),
+              )
+          )
+        ],
       ),
     );
   }
