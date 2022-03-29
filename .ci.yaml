@@ -61,8 +61,8 @@ platform_properties:
           {"name":"osx_sdk_13a233_13_15","path":"osx_sdk"},
           {"name":"builder_mac_engine","path":"builder"},
           {"name":"openjdk","path":"java"},
-          {"name":"xcode_runtime_ios-13-0","path":"xcode_runtime_ios-13-0"},
-          {"name":"xcode_runtime_ios-15-0","path":"xcode_runtime_ios-15-0"}
+          {"name":"xcode_runtime_ios_13_0","path":"xcode_runtime_ios_13_0"},
+          {"name":"xcode_runtime_ios_15_0","path":"xcode_runtime_ios_15_0"}
         ]
       # CIPD flutter_internal/java/openjdk/$platform
       dependencies: >-
