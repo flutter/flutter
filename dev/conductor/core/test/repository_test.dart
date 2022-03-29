@@ -319,7 +319,8 @@ vars = {
         const FakeCommand(command: <String>[
           'git',
           'commit',
-          "--message='$message'",
+          '--message',
+          message,
         ]),
         const FakeCommand(command: <String>[
           'git',
