@@ -1,0 +1,172 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/migrate/migrate_manifest.dart';
+import 'package:flutter_tools/src/migrate/migrate_utils.dart';
+
+import '../../src/common.dart';
+
+void main() {
+  late FileSystem fileSystem;
+  late BufferLogger logger;
+  late File manifestFile;
+
+  setUpAll(() {
+    fileSystem = MemoryFileSystem.test();
+    logger = BufferLogger.test();
+    manifestFile = fileSystem.file('.migrate_manifest');
+  });
+
+  group('manifest file parsing', () {
+    testWithoutContext('empty fails', () async {
+      manifestFile.writeAsStringSync('');
+      bool exceptionFound = false;
+      try {
+        final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+      } catch (e) {
+        exceptionFound = true;
+        expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. File is not a Yaml map.');
+      }
+      expect(exceptionFound, true);
+    });
+
+    testWithoutContext('invalid name fails', () async {
+      manifestFile.writeAsStringSync('''
+        merged_files:
+        conflict_files:
+        added_filessssss:
+        deleted_files:
+      ''');
+      bool exceptionFound = false;
+      try {
+        final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+      } catch (e) {
+        exceptionFound = true;
+        expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. File is missing an entry. Fix the manifest or abandon the migration and try again.');
+      }
+      expect(exceptionFound, true);
+    });
+
+    testWithoutContext('missing name fails', () async {
+      manifestFile.writeAsStringSync('''
+        merged_files:
+        conflict_files:
+        deleted_files:
+      ''');
+      bool exceptionFound = false;
+      try {
+        final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+      } catch (e) {
+        exceptionFound = true;
+        expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. File is missing an entry. Fix the manifest or abandon the migration and try again.');
+      }
+      expect(exceptionFound, true);
+    });
+
+    testWithoutContext('wrong entry type fails', () async {
+      manifestFile.writeAsStringSync('''
+        merged_files:
+        conflict_files:
+          other_key:
+        added_files:
+        deleted_files:
+      ''');
+      bool exceptionFound = false;
+      try {
+        final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+      } catch (e) {
+        exceptionFound = true;
+        expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. Entry is not a Yaml list. Fix the manifest or abandon the migration and try again.');
+      }
+      expect(exceptionFound, true);
+    });
+
+    testWithoutContext('unpopulated succeeds', () async {
+      manifestFile.writeAsStringSync('''
+        merged_files:
+        conflict_files:
+        added_files:
+        deleted_files:
+      ''');
+      final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+      expect(manifest.mergedFiles.isEmpty, true);
+      expect(manifest.conflictFiles.isEmpty, true);
+      expect(manifest.addedFiles.isEmpty, true);
+      expect(manifest.deletedFiles.isEmpty, true);
+    });
+
+    testWithoutContext('order does not matter', () async {
+      manifestFile.writeAsStringSync('''
+        added_files:
+        merged_files:
+        deleted_files:
+        conflict_files:
+      ''');
+      final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+      expect(manifest.mergedFiles.isEmpty, true);
+      expect(manifest.conflictFiles.isEmpty, true);
+      expect(manifest.addedFiles.isEmpty, true);
+      expect(manifest.deletedFiles.isEmpty, true);
+    });
+
+    testWithoutContext('basic succeeds', () async {
+      manifestFile.writeAsStringSync('''
+        merged_files:
+          - file1
+        conflict_files:
+          - file2
+        added_files:
+          - file3
+        deleted_files:
+          - file4
+      ''');
+      final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+      expect(manifest.mergedFiles.isEmpty, false);
+      expect(manifest.conflictFiles.isEmpty, false);
+      expect(manifest.addedFiles.isEmpty, false);
+      expect(manifest.deletedFiles.isEmpty, false);
+
+      expect(manifest.mergedFiles.length, 1);
+      expect(manifest.conflictFiles.length, 1);
+      expect(manifest.addedFiles.length, 1);
+      expect(manifest.deletedFiles.length, 1);
+
+      expect(manifest.mergedFiles[0], 'file1');
+      expect(manifest.conflictFiles[0], 'file2');
+      expect(manifest.addedFiles[0], 'file3');
+      expect(manifest.deletedFiles[0], 'file4');
+    });
+
+    testWithoutContext('basic multi-list succeeds', () async {
+      manifestFile.writeAsStringSync('''
+        merged_files:
+          - file1
+          - file2
+        conflict_files:
+        added_files:
+        deleted_files:
+          - file3
+          - file4
+      ''');
+      final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+      expect(manifest.mergedFiles.isEmpty, false);
+      expect(manifest.conflictFiles.isEmpty, true);
+      expect(manifest.addedFiles.isEmpty, true);
+      expect(manifest.deletedFiles.isEmpty, false);
+
+      expect(manifest.mergedFiles.length, 2);
+      expect(manifest.conflictFiles.length, 0);
+      expect(manifest.addedFiles.length, 0);
+      expect(manifest.deletedFiles.length, 2);
+
+      expect(manifest.mergedFiles[0], 'file1');
+      expect(manifest.mergedFiles[1], 'file2');
+      expect(manifest.deletedFiles[0], 'file3');
+      expect(manifest.deletedFiles[1], 'file4');
+    });
+  });
+}
