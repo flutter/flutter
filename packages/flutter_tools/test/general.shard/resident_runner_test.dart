@@ -2013,6 +2013,8 @@ flutter:
     runZonedGuarded(() {
       flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete());
     }, (Object e, StackTrace st) {
+      print(e);
+      print(st);
       expect(e is StateError, true);
       expect((e as StateError).message, contains('No URI'));
       expect(testLogger.errorText, contains(
