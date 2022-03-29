@@ -56,7 +56,8 @@ TEST(FlutterChannelKeyResponderUnittests, BasicKeyEvent) {
       [[FlutterChannelKeyResponder alloc] initWithChannel:mockKeyEventChannel];
 
   // Initial empty modifiers. This can happen when user opens window while modifier key is pressed
-  // and then releases the modifier. Shouldn't result in an event being sent.
+  // and then releases the modifier. No events should be sent, but the callback
+  // should still be called.
   // Regression test for https://github.com/flutter/flutter/issues/87339.
   [responder handleEvent:keyEvent(NSEventTypeFlagsChanged, 0x100, @"", @"", FALSE, 60)
                 callback:^(BOOL handled) {
@@ -64,6 +65,9 @@ TEST(FlutterChannelKeyResponderUnittests, BasicKeyEvent) {
                 }];
 
   EXPECT_EQ([messages count], 0u);
+  EXPECT_EQ([responses count], 1u);
+  EXPECT_EQ([responses[0] boolValue], TRUE);
+  [responses removeAllObjects];
 
   // Key down
   [responder handleEvent:keyEvent(NSEventTypeKeyDown, 0x100, @"a", @"a", FALSE, 0)
@@ -182,7 +186,8 @@ TEST(FlutterChannelKeyResponderUnittests, BasicKeyEvent) {
   [messages removeAllObjects];
   [responses removeAllObjects];
 
-  // RShift up again, should be ignored and not produce a keydown event.
+  // RShift up again, should be ignored and not produce a keydown event, but the
+  // callback should be called.
   next_response = false;
   [responder handleEvent:keyEvent(NSEventTypeFlagsChanged, 0x100, @"", @"", FALSE, 60)
                 callback:^(BOOL handled) {
@@ -190,7 +195,8 @@ TEST(FlutterChannelKeyResponderUnittests, BasicKeyEvent) {
                 }];
 
   EXPECT_EQ([messages count], 0u);
-  EXPECT_EQ([responses count], 0u);
+  EXPECT_EQ([responses count], 1u);
+  EXPECT_EQ([responses[0] boolValue], TRUE);
 }
 
 TEST(FlutterChannelKeyResponderUnittests, EmptyResponseIsTakenAsHandled) {
