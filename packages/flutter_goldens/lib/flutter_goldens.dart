@@ -212,10 +212,10 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
   /// The [fs] and [platform] parameters are useful in tests, where the default
   /// file system and platform can be replaced by mock instances.
   FlutterPostSubmitFileComparator(
-    final super.basedir,
-    final super.skiaClient, {
-    final super.fs,
-    final super.platform,
+    super.basedir,
+    super.skiaClient, {
+    super.fs,
+    super.platform,
     super.namePrefix,
   });
 
@@ -287,11 +287,11 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// The [fs] and [platform] parameters are useful in tests, where the default
   /// file system and platform can be replaced by mock instances.
   FlutterPreSubmitFileComparator(
-    final super.basedir,
-    final super.skiaClient, {
-    final super.fs,
-    final super.platform,
-    final super.namePrefix,
+    super.basedir,
+    super.skiaClient, {
+    super.fs,
+    super.platform,
+    super.namePrefix,
   });
 
   /// Creates a new [FlutterPreSubmitFileComparator] that mirrors the
@@ -371,8 +371,8 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   /// Creates a [FlutterSkippingFileComparator] that will skip tests that
   /// are not in the right environment for golden file testing.
   FlutterSkippingFileComparator(
-    final super.basedir,
-    final super.skiaClient,
+    super.basedir,
+    super.skiaClient,
     this.reason, {
     super.namePrefix,
   });
@@ -454,10 +454,10 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   /// The [fs] and [platform] parameters are useful in tests, where the default
   /// file system and platform can be replaced by mock instances.
   FlutterLocalFileComparator(
-    final super.basedir,
-    final super.skiaClient, {
-    final super.fs,
-    final super.platform,
+    super.basedir,
+    super.skiaClient, {
+    super.fs,
+    super.platform,
   });
 
   /// Creates a new [FlutterLocalFileComparator] that mirrors the
