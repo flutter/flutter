@@ -1513,10 +1513,26 @@ void main() {
       ),
     );
 
-    final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
-    final RenderBox trailing = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(1));
+    RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+    RenderBox trailing = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(1));
     expect(leading.localToGlobal(Offset.zero), Offset((80 - leading.size.width) / 2, 8.0));
     expect(trailing.localToGlobal(Offset.zero), Offset((80 - trailing.size.width) / 2, 248.0));
+
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 0,
+        leading: FloatingActionButton(onPressed: () { }),
+        trailing: FloatingActionButton(onPressed: () { }),
+        spacedTrailing: true,
+        destinations: _destinations(),
+      ),
+    );
+
+    leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
+    trailing = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(1));
+    expect(leading.localToGlobal(Offset.zero), Offset((80 - leading.size.width) / 2, 8.0));
+    expect(trailing.localToGlobal(Offset.zero), Offset((80 - trailing.size.width) / 2, 536.0));
   });
 
   testWidgets('Extended rail animates the width and labels appear - [textDirection]=LTR', (WidgetTester tester) async {

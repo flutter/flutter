@@ -98,6 +98,7 @@ class NavigationRail extends StatefulWidget {
     this.minExtendedWidth,
     this.useIndicator,
     this.indicatorColor,
+    this.spacedTrailing = false,
   }) :  assert(destinations != null && destinations.length >= 2),
         assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
         assert(elevation == null || elevation > 0),
@@ -106,6 +107,7 @@ class NavigationRail extends StatefulWidget {
         assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
         assert(extended != null),
         assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none)),
+        assert(spacedTrailing != null),
         super(key: key);
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
@@ -297,6 +299,13 @@ class NavigationRail extends StatefulWidget {
   /// when [useIndicator] is true.
   final Color? indicatorColor;
 
+  /// When `true`, the [NavigationRail.trailing] will be placed below the [destinations]
+  /// group and [groupAlignment] will not effect the alignment of the [trailing] widget.
+  /// The [trailing] widget will be placed at the bottom of the rail.
+  ///
+  /// Defaults to `false`, which places the [trailing] widget at the bottom of the [destinations] group.
+  final bool spacedTrailing;
+
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
   /// This can be used to synchronize animations in the [leading] or [trailing]
@@ -438,12 +447,18 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                             tabCount: widget.destinations.length,
                           ),
                         ),
-                      if (widget.trailing != null)
+                      if (widget.trailing != null && !widget.spacedTrailing)
                         widget.trailing!,
                     ],
                   ),
                 ),
               ),
+              if (widget.trailing != null && widget.spacedTrailing)
+                ...<Widget>[
+                  _verticalSpacer,
+                  widget.trailing!,
+                  _verticalSpacer,
+                ],
             ],
           ),
         ),
