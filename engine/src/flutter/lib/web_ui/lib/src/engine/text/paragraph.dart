@@ -699,9 +699,6 @@ void applyTextStyleToElement({
   if (background != null) {
     cssStyle.backgroundColor = colorToCssString(background);
   }
-  if (style.height != null) {
-    cssStyle.lineHeight = '${style.height}';
-  }
   final double? fontSize = style.fontSize;
   if (fontSize != null) {
     cssStyle.fontSize = '${fontSize.floor()}px';

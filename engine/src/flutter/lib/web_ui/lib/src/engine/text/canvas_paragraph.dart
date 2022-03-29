@@ -258,7 +258,9 @@ void _positionSpanElement(html.Element element, EngineLineMetrics line, RangeBox
     ..top = '${boxRect.top}px'
     ..left = '${boxRect.left}px'
     // This is needed for space-only spans that are used to justify the paragraph.
-    ..width = '${boxRect.width}px';
+    ..width = '${boxRect.width}px'
+    // Makes sure the baseline of each span is positioned as expected.
+    ..lineHeight = '${boxRect.height}px';
 }
 
 /// A common interface for all types of spans that make up a paragraph.
