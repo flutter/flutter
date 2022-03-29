@@ -33,9 +33,8 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testUsingContext('migrate compute', () async {
-    // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
-    final MigrateProject project = MigrateProject('version:1.22.6_stable');
+  Future<void> installProject(String verison, {bool vanilla = true}) async {
+    final MigrateProject project = MigrateProject(verison, vanilla: vanilla);
     await project.setUpIn(tempDir);
 
     // Init a git repo to test uncommitted changes checks
@@ -60,6 +59,55 @@ void main() {
       '-m',
       '"Initial commit"',
     ], workingDirectory: tempDir.path);
+  }
+
+  testUsingContext('migrate abandon', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+
+    // Abandon in an empty dir fails.
+    ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'migrate',
+      'abandon',
+      '--verbose',
+    ], workingDirectory: tempDir.path);
+    expect(result.exitCode, 1);
+    expect(result.stderr.toString(), contains('Error: No pubspec.yaml file found'));
+    expect(result.stderr.toString(), contains('This command should be run from the root of your Flutter project'));
+
+    final File manifestFile = tempDir.childFile('migrate_working_dir/.migrate_manifest');
+    expect(manifestFile.existsSync(), false);
+
+    // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+    await installProject('version:1.22.6_stable');
+
+    // Initialized repo fails.
+    result = await processManager.run(<String>[
+      flutterBin,
+      'migrate',
+      'abandon',
+      '--verbose',
+    ], workingDirectory: tempDir.path);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString(), contains('No migration'));
+
+    // Create migration.
+    manifestFile.createSync(recursive: true);
+
+    // Directory with manifest_working_dir succeeds.
+    result = await processManager.run(<String>[
+      flutterBin,
+      'migrate',
+      'abandon',
+      '--verbose',
+    ], workingDirectory: tempDir.path);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString(), contains('Abandon complete'));
+  });
+
+  testUsingContext('migrate compute', () async {
+    // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+    await installProject('version:1.22.6_stable');
 
     final FlutterProjectFactory flutterFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
     final FlutterProject flutterProject = flutterFactory.fromDirectory(tempDir);
@@ -82,43 +130,10 @@ void main() {
   // Migrates a clean untouched app generated with flutter create
   testWithoutContext('vanilla migrate process succeeds', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
-    final MigrateProject project = MigrateProject('version:1.22.6_stable');
-    await project.setUpIn(tempDir);
+    await installProject('version:1.22.6_stable');
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
-    // Init a git repo to test uncommitted changes checks
-    await processManager.run(<String>[
-      'git',
-      'init',
-    ], workingDirectory: tempDir.path);
-    await processManager.run(<String>[
-      'git',
-      'checkout',
-      '-b',
-      'master',
-    ], workingDirectory: tempDir.path);
-    await processManager.run(<String>[
-      'git',
-      'add',
-      '.',
-    ], workingDirectory: tempDir.path);
-    await processManager.run(<String>[
-      'git',
-      'commit',
-      '-m',
-      '"Initial commit"',
-    ], workingDirectory: tempDir.path);
-
     ProcessResult result = await processManager.run(<String>[
-      flutterBin,
-      'migrate',
-      'apply',
-      '--verbose',
-    ], workingDirectory: tempDir.path);
-    expect(result.exitCode, 1);
-    expect(result.stderr.toString(), contains('No migration'));
-
-    result = await processManager.run(<String>[
       flutterBin,
       'migrate',
       'start',
@@ -211,7 +226,7 @@ Added files:
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Migration complete'));
 
-    expect(tempDir.childFile('.metadata').readAsStringSync(), contains('7c73951e1b23b01c5b9a799b2e38c3d47a5221c3'));
+    expect(tempDir.childFile('.metadata').readAsStringSync(), contains('migration:\n  platforms:\n    - platform: root\n'));
 
     expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png').existsSync(), true);
     expect(tempDir.childFile('web/icons/Icon-192.png').existsSync(), true);
@@ -223,32 +238,8 @@ Added files:
   // Migrates a user-modified app
   testWithoutContext('modified migrate process succeeds', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
-    final MigrateProject project = MigrateProject('version:1.22.6_stable', vanilla: false);
-    await project.setUpIn(tempDir);
+    await installProject('version:1.22.6_stable', vanilla: false);
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-
-    // Init a git repo to test uncommitted changes checks
-    await processManager.run(<String>[
-      'git',
-      'init',
-    ], workingDirectory: tempDir.path);
-    await processManager.run(<String>[
-      'git',
-      'checkout',
-      '-b',
-      'master',
-    ], workingDirectory: tempDir.path);
-    await processManager.run(<String>[
-      'git',
-      'add',
-      '.',
-    ], workingDirectory: tempDir.path);
-    await processManager.run(<String>[
-      'git',
-      'commit',
-      '-m',
-      '"Initial commit"',
-    ], workingDirectory: tempDir.path);
 
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
