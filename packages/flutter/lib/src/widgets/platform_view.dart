@@ -15,7 +15,7 @@ import 'framework.dart';
 
 /// Embeds an Android view in the Widget hierarchy.
 ///
-/// Requires Android API level 23 or greater.
+/// Requires Android API level 20 or greater.
 ///
 /// Embedding Android views is an expensive operation and should be avoided when a Flutter
 /// equivalent is possible.
@@ -681,7 +681,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderAndroidView renderObject) {
-    renderObject.controller = controller;
+    renderObject.viewController = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
     renderObject.updateGestureRecognizers(gestureRecognizers);
     renderObject.clipBehavior = clipBehavior;
@@ -842,11 +842,15 @@ class PlatformViewLink extends StatefulWidget {
 class _PlatformViewLinkState extends State<PlatformViewLink> {
   int? _id;
   PlatformViewController? _controller;
+  bool _platformViewCreated = false;
   Widget? _surface;
   FocusNode? _focusNode;
 
   @override
   Widget build(BuildContext context) {
+    if (!_platformViewCreated) {
+      return const SizedBox.expand();
+    }
     _surface ??= widget._surfaceFactory(context, _controller!);
     return Focus(
       focusNode: _focusNode,
@@ -871,6 +875,9 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       // The _surface has to be recreated as its controller is disposed.
       // Setting _surface to null will trigger its creation in build().
       _surface = null;
+
+      // We are about to create a new platform view.
+      _platformViewCreated = false;
       _initialize();
     }
   }
@@ -881,10 +888,14 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       PlatformViewCreationParams._(
         id: _id!,
         viewType: widget.viewType,
-        onPlatformViewCreated: (_) {},
+        onPlatformViewCreated: _onPlatformViewCreated,
         onFocusChanged: _handlePlatformFocusChanged,
       ),
     );
+  }
+
+  void _onPlatformViewCreated(int id) {
+    setState(() { _platformViewCreated = true; });
   }
 
   void _handleFrameworkFocusChanged(bool isFocused) {
@@ -1009,18 +1020,18 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 
 /// Integrates an Android view with Flutter's compositor, touch, and semantics subsystems.
 ///
-/// The compositor integration is done by adding a [TextureLayer] to the layer tree.
+/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewLayer]
+/// isn't supported on all platforms. Custom Flutter embedders can support
+/// [PlatformViewLayer]s by implementing a SystemCompositor.
 ///
-/// The parent of this object must provide bounded layout constraints.
+/// The widget fills all available space, the parent of this object must provide bounded layout
+/// constraints.
 ///
 /// If the associated platform view is not created, the [AndroidViewSurface] does not paint any contents.
 ///
-/// When possible, you may want to use [AndroidView] directly, since it requires less boilerplate code
-/// than [AndroidViewSurface], and there's no difference in performance, or other trade-off(s).
-///
 /// See also:
 ///
-///  * [AndroidView] which embeds an Android platform view in the widget hierarchy.
+///  * [AndroidView] which embeds an Android platform view in the widget hierarchy using a [TextureLayer].
 ///  * [UiKitView] which embeds an iOS platform view in the widget hierarchy.
 class AndroidViewSurface extends PlatformViewSurface {
   /// Construct an `AndroidPlatformViewSurface`.
@@ -1041,26 +1052,12 @@ class AndroidViewSurface extends PlatformViewSurface {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    final AndroidViewController viewController = controller as AndroidViewController;
-    // Compose using the Android view hierarchy.
-    // This is useful when embedding a SurfaceView into a Flutter app.
-    // SurfaceViews cannot be composed using GL textures.
-    if (viewController is ExpensiveAndroidViewController) {
-      final PlatformViewRenderBox renderBox =
-          super.createRenderObject(context) as PlatformViewRenderBox;
-      viewController.pointTransformer =
-          (Offset position) => renderBox.globalToLocal(position);
-      return renderBox;
-    }
-    // Use GL texture based composition.
-    // App should use GL texture unless they require to embed a SurfaceView.
-    final RenderAndroidView renderBox = RenderAndroidView(
-      viewController: viewController,
-      gestureRecognizers: gestureRecognizers,
-      hitTestBehavior: hitTestBehavior,
-    );
-    viewController.pointTransformer =
+    final PlatformViewRenderBox renderBox =
+        super.createRenderObject(context) as PlatformViewRenderBox;
+
+    (controller as AndroidViewController).pointTransformer =
         (Offset position) => renderBox.globalToLocal(position);
+
     return renderBox;
   }
 }

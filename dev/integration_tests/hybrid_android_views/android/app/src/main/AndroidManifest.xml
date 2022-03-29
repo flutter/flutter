@@ -16,8 +16,7 @@ found in the LICENSE file. -->
             android:launchMode="singleTop"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density"
             android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="true">
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
                 android:value="true" />
@@ -29,5 +28,9 @@ found in the LICENSE file. -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Hybrid composition -->
+        <meta-data
+            android:name="io.flutter.embedded_views_preview"
+            android:value="true" />
     </application>
 </manifest>

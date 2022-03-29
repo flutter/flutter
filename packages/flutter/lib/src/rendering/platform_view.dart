@@ -52,7 +52,7 @@ Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
 
 /// A render object for an Android view.
 ///
-/// Requires Android API level 23 or greater.
+/// Requires Android API level 20 or greater.
 ///
 /// [RenderAndroidView] is responsible for sizing, displaying and passing touch events to an
 /// Android [View](https://developer.android.com/reference/android/view/View).
@@ -74,7 +74,7 @@ Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
 ///
 ///  * [AndroidView] which is a widget that is used to show an Android view.
 ///  * [PlatformViewsService] which is a service for controlling platform views.
-class RenderAndroidView extends PlatformViewRenderBox {
+class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   /// Creates a render object for an Android view.
   RenderAndroidView({
     required AndroidViewController viewController,
@@ -86,8 +86,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
        assert(gestureRecognizers != null),
        assert(clipBehavior != null),
        _viewController = viewController,
-       _clipBehavior = clipBehavior,
-       super(controller: viewController, hitTestBehavior: hitTestBehavior, gestureRecognizers: gestureRecognizers) {
+       _clipBehavior = clipBehavior {
     _viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
     updateGestureRecognizers(gestureRecognizers);
     _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
@@ -102,22 +101,18 @@ class RenderAndroidView extends PlatformViewRenderBox {
   bool _isDisposed = false;
 
   /// The Android view controller for the Android view associated with this render object.
-  @override
-  AndroidViewController get controller => _viewController;
-
+  AndroidViewController get viewController => _viewController;
   AndroidViewController _viewController;
-
   /// Sets a new Android view controller.
-  @override
-  set controller(AndroidViewController controller) {
+  ///
+  /// `viewController` must not be null.
+  set viewController(AndroidViewController viewController) {
     assert(_viewController != null);
-    assert(controller != null);
-    if (_viewController == controller)
+    assert(viewController != null);
+    if (_viewController == viewController)
       return;
     _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
-    super.controller = controller;
-    _viewController = controller;
-    _viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
+    _viewController = viewController;
     _sizePlatformView();
     if (_viewController.isCreated) {
       markNeedsSemanticsUpdate();
@@ -141,6 +136,26 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
   void _onPlatformViewCreated(int id) {
     markNeedsSemanticsUpdate();
+  }
+
+  /// {@template flutter.rendering.RenderAndroidView.updateGestureRecognizers}
+  /// Updates which gestures should be forwarded to the platform view.
+  ///
+  /// Gesture recognizers created by factories in this set participate in the gesture arena for each
+  /// pointer that was put down on the render box. If any of the recognizers on this list wins the
+  /// gesture arena, the entire pointer event sequence starting from the pointer down event
+  /// will be dispatched to the Android view.
+  ///
+  /// The `gestureRecognizers` property must not contain more than one factory with the same [Factory.type].
+  ///
+  /// Setting a new set of gesture recognizer factories with the same [Factory.type]s as the current
+  /// set has no effect, because the factories' constructors would have already been called with the previous set.
+  /// {@endtemplate}
+  ///
+  /// Any active gesture arena the Android view participates in is rejected when the
+  /// set of gesture recognizers is changed.
+  void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
+    _updateGestureRecognizersWithCallBack(gestureRecognizers, _viewController.dispatchPointerEvent);
   }
 
   @override
@@ -167,8 +182,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
     // Android virtual displays cannot have a zero size.
     // Trying to size it to 0 crashes the app, which was happening when starting the app
     // with a locked screen (see: https://github.com/flutter/flutter/issues/20456).
-    if (_state == _PlatformViewState.resizing || size.isEmpty)
+    if (_state == _PlatformViewState.resizing || size.isEmpty) {
       return;
+    }
 
     _state = _PlatformViewState.resizing;
     markNeedsPaint();
@@ -196,8 +212,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
   void _setOffset() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!_isDisposed) {
-        if (attached)
-          await _viewController.setOffset(localToGlobal(Offset.zero));
+        await _viewController.setOffset(localToGlobal(Offset.zero));
         // Schedule a new post frame callback.
         _setOffset();
       }
@@ -206,7 +221,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_viewController.textureId == null || _currentTextureSize == null)
+    if (_viewController.textureId == null)
       return;
 
     // As resizing the Android view happens asynchronously we don't know exactly when is a
@@ -249,15 +264,14 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
     context.addLayer(TextureLayer(
       rect: offset & _currentTextureSize!,
-      textureId: _viewController.textureId!,
+      textureId: viewController.textureId!,
     ));
   }
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    // Don't call the super implementation since `platformViewId` should
-    // be set only when the platform view is created, but the concept of
-    // a "created" platform view belongs to this subclass.
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
     config.isSemanticBoundary = true;
 
     if (_viewController.isCreated) {
@@ -325,7 +339,7 @@ class RenderUiKitView extends RenderBox {
   // any newly arriving events there's nothing we need to invalidate.
   PlatformViewHitTestBehavior hitTestBehavior;
 
-  /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
+  /// {@macro flutter.rendering.RenderAndroidView.updateGestureRecognizers}
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     assert(gestureRecognizers != null);
     assert(
@@ -639,11 +653,11 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   PlatformViewController get controller => _controller;
   PlatformViewController _controller;
   /// This value must not be null, and setting it to a new value will result in a repaint.
-  set controller(covariant PlatformViewController controller) {
+  set controller(PlatformViewController controller) {
     assert(controller != null);
     assert(controller.viewId != null && controller.viewId > -1);
 
-    if (_controller == controller) {
+    if ( _controller == controller) {
       return;
     }
     final bool needsSemanticsUpdate = _controller.viewId != controller.viewId;
@@ -654,19 +668,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     }
   }
 
-  /// {@template flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
-  /// Updates which gestures should be forwarded to the platform view.
-  ///
-  /// Gesture recognizers created by factories in this set participate in the gesture arena for each
-  /// pointer that was put down on the render box. If any of the recognizers on this list wins the
-  /// gesture arena, the entire pointer event sequence starting from the pointer down event
-  /// will be dispatched to the Android view.
-  ///
-  /// The `gestureRecognizers` property must not contain more than one factory with the same [Factory.type].
-  ///
-  /// Setting a new set of gesture recognizer factories with the same [Factory.type]s as the current
-  /// set has no effect, because the factories' constructors would have already been called with the previous set.
-  /// {@endtemplate}
+  /// {@macro  flutter.rendering.RenderAndroidView.updateGestureRecognizers}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
@@ -698,7 +700,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   }
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     assert(_controller.viewId != null);
     config.isSemanticBoundary = true;

@@ -39,7 +39,6 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
   int? id;
   int nestedViewClickCount = 0;
   bool showPlatformView = true;
-  bool useHybridComposition = false;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +55,6 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
                   key: const ValueKey<String>('PlatformView'),
                   viewType: 'simple_view',
                   onPlatformViewCreated: onPlatformViewCreated,
-                  useHybridComposition: useHybridComposition,
                 ) : null,
           ),
           if (_lastTestStatus != _LastTestStatus.pending) _statusWidget(),
@@ -70,15 +68,6 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
               key: const ValueKey<String>('TogglePlatformView'),
               onPressed: onTogglePlatformView,
               child: const Text('TOGGLE PLATFORM VIEW'),
-            ),
-            ElevatedButton(
-              key: const ValueKey<String>('ToggleHybridComposition'),
-              child: const Text('TOGGLE HYBRID COMPOSITION'),
-              onPressed: () {
-                setState(() {
-                  useHybridComposition = !useHybridComposition;
-                });
-              },
             ),
             Row(
               children: <Widget>[

@@ -84,22 +84,23 @@ class FakeAndroidViewController implements AndroidViewController {
 
   @override
   Future<Size> setSize(Size size) {
-    return Future<Size>.value(size);
+    throw UnimplementedError();
   }
 
   @override
-  Future<void> setOffset(Offset off) async {}
-
-  @override
-  int get textureId => 0;
-
-  @override
-  bool get isCreated => created;
-
-  @override
-  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
-    created = true;
+  Future<void> setOffset(Offset off) {
+    throw UnimplementedError();
   }
+
+  @override
+  int get textureId => throw UnimplementedError();
+
+  @override
+  bool get isCreated => throw UnimplementedError();
+
+  @override
+  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) =>
+      throw UnimplementedError();
 
   @override
   void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
@@ -117,10 +118,9 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> create() async {}
-
-  @override
-  List<PlatformViewCreatedCallback> get createdCallbacks => <PlatformViewCreatedCallback>[];
+  Future<void> create() async {
+    created = true;
+  }
 }
 
 class FakeAndroidPlatformViewsController {
@@ -142,6 +142,8 @@ class FakeAndroidPlatformViewsController {
   Completer<void>? createCompleter;
 
   int? lastClearedFocusViewId;
+
+  bool synchronizeToNativeViewHierarchy = true;
 
   Map<int, Offset> offsets = <int, Offset>{};
 
@@ -172,6 +174,8 @@ class FakeAndroidPlatformViewsController {
         return _clearFocus(call);
       case 'offset':
         return _offset(call);
+      case 'synchronizeToNativeViewHierarchy':
+        return _synchronizeToNativeViewHierarchy(call);
     }
     return Future<dynamic>.sync(() => null);
   }
@@ -312,6 +316,11 @@ class FakeAndroidPlatformViewsController {
       );
 
     lastClearedFocusViewId = id;
+    return Future<dynamic>.sync(() => null);
+  }
+
+  Future<dynamic> _synchronizeToNativeViewHierarchy(MethodCall call) {
+    synchronizeToNativeViewHierarchy = call.arguments as bool;
     return Future<dynamic>.sync(() => null);
   }
 }
