@@ -16,7 +16,7 @@ RenderBoxToRenderSectorAdapter initCircle() {
 }
 
 class SectorApp extends StatefulWidget {
-  const SectorApp({Key? key}) : super(key: key);
+  const SectorApp({super.key});
 
   @override
   SectorAppState createState() => SectorAppState();
