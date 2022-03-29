@@ -3081,10 +3081,8 @@ class _NotificationNode {
 }
 
 bool _isProfileBuildsEnabledFor(Widget widget) {
-  // ignore: avoid_bool_literals_in_conditional_expressions
-  return debugProfileBuildsEnabled && debugProfileBuildsEnabledUserWidgets
-      ? debugIsWidgetLocalCreation(widget)
-      : true;
+  return debugProfileBuildsEnabled || (debugProfileBuildsEnabledUserWidgets
+      && debugIsWidgetLocalCreation(widget));
 }
 
 /// An instantiation of a [Widget] at a particular location in the tree.
