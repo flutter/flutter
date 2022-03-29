@@ -23,7 +23,7 @@ _flutter.loader = null;
     _scriptLoaded = false;
 
     // Resolver for the pending promise returned by loadMainDartJs.
-    _didLoadMainDartJsResolve = null;
+    _didCreateEngineInitializerResolve = null;
 
     /**
      * Initializes the main.dart.js with/without serviceWorker.
@@ -45,11 +45,11 @@ _flutter.loader = null;
      * the JS <-> Flutter jumps.
      * @param {*} engineInitializer
      */
-    didLoadMainDartJs = (function(engineInitializer) {
-      if (typeof this._didLoadMainDartJsResolve != 'function') {
-        console.warn('Do not call didLoadMainDartJs by hand. Start with loadMainDartJs instead.');
+    didCreateEngineInitializer = (function(engineInitializer) {
+      if (typeof this._didCreateEngineInitializerResolve != 'function') {
+        console.warn('Do not call didCreateEngineInitializer by hand. Start with loadMainDartJs instead.');
       }
-      this._didLoadMainDartJsResolve(engineInitializer);
+      this._didCreateEngineInitializerResolve(engineInitializer);
     }).bind(this);
 
     _loadMainDartJs(entrypointUrl) {
@@ -63,7 +63,7 @@ _flutter.loader = null;
         let scriptTag = document.createElement('script');
         scriptTag.src = entrypointUrl;
         scriptTag.type = 'application/javascript';
-        this._didLoadMainDartJsResolve = resolve; // Cache the resolve, so it can be called from Flutter.
+        this._didCreateEngineInitializerResolve = resolve; // Cache the resolve, so it can be called from Flutter.
         scriptTag.addEventListener('error', reject);
         document.body.append(scriptTag);
       });
