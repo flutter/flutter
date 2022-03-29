@@ -949,6 +949,7 @@ class DebuggingOptions {
     'dartEntrypointArgs': dartEntrypointArgs,
     'disableServiceAuthCodes': disableServiceAuthCodes,
     'enableDds': enableDds,
+    'cacheStartupProfile': cacheStartupProfile,
     'enableSoftwareRendering': enableSoftwareRendering,
     'skiaDeterministicRendering': skiaDeterministicRendering,
     'traceSkia': traceSkia,
