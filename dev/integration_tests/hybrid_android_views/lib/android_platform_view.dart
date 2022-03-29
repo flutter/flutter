@@ -49,18 +49,26 @@ class AndroidPlatformView extends StatelessWidget {
       },
       onCreatePlatformView: (PlatformViewCreationParams params) {
         print('useHybridComposition=$useHybridComposition');
-        final AndroidViewController controller =
-          PlatformViewsService.initSurfaceAndroidView(
+        late AndroidViewController controller;
+        if (useHybridComposition) {
+          controller = PlatformViewsService.initExpensiveAndroidView(
             id: params.id,
             viewType: params.viewType,
             layoutDirection: TextDirection.ltr,
-            useHybridComposition: useHybridComposition,
-          )
-          ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated);
+          );
+        } else {
+          controller = PlatformViewsService.initSurfaceAndroidView(
+            id: params.id,
+            viewType: params.viewType,
+            layoutDirection: TextDirection.ltr,
+          );
+        }
         if (onPlatformViewCreated != null) {
           controller.addOnPlatformViewCreatedListener(onPlatformViewCreated!);
         }
-        return controller..create();
+        return controller
+          ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
+          ..create();
       },
     );
   }

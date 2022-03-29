@@ -129,56 +129,61 @@ class PlatformViewsService {
 
   /// {@macro flutter.services.PlatformViewsService.initAndroidView}
   ///
-  /// When [useHybridComposition] is true, the Android view and Flutter widgets are composed
-  /// at the Android view hierarchy level.
-  /// This is only useful if the view is a Android SurfaceView. However, enabling this mode
-  /// has a performance cost on devices that run below 10, or underpowered devices.
-  static AndroidViewController initSurfaceAndroidView({
+  /// Alias for [initAndroidView].
+  /// This factory is provided for backward compatibility purposes.
+  /// In the future, this method will be deprecated.
+  static SurfaceAndroidViewController initSurfaceAndroidView({
     required int id,
     required String viewType,
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
-    bool useHybridComposition = false,
   }) {
     assert(id != null);
     assert(viewType != null);
     assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
 
-    if (useHybridComposition) {
-      final SurfaceAndroidViewController controller = SurfaceAndroidViewController._(
-        viewId: id,
-        viewType: viewType,
-        layoutDirection: layoutDirection,
-        creationParams: creationParams,
-        creationParamsCodec: creationParamsCodec,
-      );
-
-      _instance._focusCallbacks[id] = onFocus ?? () {};
-      return controller;
-    }
-    return initAndroidView(
-      id: id,
+    final SurfaceAndroidViewController controller = SurfaceAndroidViewController._(
+      viewId: id,
       viewType: viewType,
       layoutDirection: layoutDirection,
       creationParams: creationParams,
       creationParamsCodec: creationParamsCodec,
-      onFocus: onFocus,
     );
+    _instance._focusCallbacks[id] = onFocus ?? () {};
+    return controller;
+  }
+
+  /// {@macro flutter.services.PlatformViewsService.initAndroidView}
+  ///
+  /// When this factory is used, the Android view and Flutter widgets are composed at the
+  /// Android view hierarchy level.
+  /// This is only useful if the view is a Android SurfaceView. However, using this method
+  /// has a performance cost on devices that run below 10, or underpowered devices.
+  /// In most situations, you should use [initAndroidView].
+  static ExpensiveAndroidViewController initExpensiveAndroidView({
+    required int id,
+    required String viewType,
+    required TextDirection layoutDirection,
+    dynamic creationParams,
+    MessageCodec<dynamic>? creationParamsCodec,
+    VoidCallback? onFocus,
+  }) {
+    final ExpensiveAndroidViewController controller = ExpensiveAndroidViewController._(
+      viewId: id,
+      viewType: viewType,
+      layoutDirection: layoutDirection,
+      creationParams: creationParams,
+      creationParamsCodec: creationParamsCodec,
+    );
+
+    _instance._focusCallbacks[id] = onFocus ?? () {};
+    return controller;
   }
 
   /// Whether the render surface of the Android `FlutterView` should be converted to a `FlutterImageView`.
-  ///
-  /// When adding platform views using
-  /// [Hybrid Composition](https://flutter.dev/docs/development/platform-integration/platform-views),
-  /// the engine converts the render surface to a `FlutterImageView` to improve
-  /// animation synchronization between Flutter widgets and the Android platform
-  /// views. On Android versions < 10, this can have some performance issues.
-  /// This flag allows disabling this conversion.
-  ///
-  /// Defaults to true.
   @Deprecated(
     'No longer necessary to improve performance. '
     'This feature was deprecated after v2.11.0-0.1.pre.',
@@ -653,7 +658,7 @@ class _AndroidMotionEventConverter {
       event is! PointerDownEvent && event is! PointerUpEvent;
 }
 
-/// Controls an Android view.
+/// Controls an Android view that is composed using a GL texture.
 ///
 /// Typically created with [PlatformViewsService.initAndroidView].
 // TODO(bparrishMines): Remove abstract methods that are not required by all subclasses.
@@ -928,12 +933,29 @@ abstract class AndroidViewController extends PlatformViewController {
   }
 }
 
-/// Controls an Android view by rendering to an [AndroidViewSurface] that uses the
-/// Android system compositor.
-///
-/// Typically created with [PlatformViewsService.initSurfaceAndroidView].
-class SurfaceAndroidViewController extends AndroidViewController {
-  SurfaceAndroidViewController._({
+/// Controls an Android view that is composed using a GL texture.
+/// This controller is created from the [PlatformViewsService.initSurfaceAndroidView] factory,
+/// and is defined for backward compatibility.
+class SurfaceAndroidViewController extends TextureAndroidViewController{
+    SurfaceAndroidViewController._({
+    required int viewId,
+    required String viewType,
+    required TextDirection layoutDirection,
+    dynamic creationParams,
+    MessageCodec<dynamic>? creationParamsCodec,
+  })  : super._(
+          viewId: viewId,
+          viewType: viewType,
+          layoutDirection: layoutDirection,
+          creationParams: creationParams,
+          creationParamsCodec: creationParamsCodec,
+        );
+}
+
+/// Controls an Android view that is composed using the Android view hierarchy.
+/// This controller is created from the [PlatformViewsService.initExpensiveAndroidView] factory.
+class ExpensiveAndroidViewController extends AndroidViewController {
+  ExpensiveAndroidViewController._({
     required int viewId,
     required String viewType,
     required TextDirection layoutDirection,

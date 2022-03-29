@@ -1042,10 +1042,10 @@ class AndroidViewSurface extends PlatformViewSurface {
   @override
   RenderObject createRenderObject(BuildContext context) {
     final AndroidViewController viewController = controller as AndroidViewController;
-    // Use the Android system compositor.
-    // Android platform views support embedding a SurfaceView into a Flutter app.
-    // Surface Views cannot be composed using GL textures.
-    if (viewController is SurfaceAndroidViewController) {
+    // Compose using the Android view hierarchy.
+    // This is useful when embedding a SurfaceView into a Flutter app.
+    // SurfaceViews cannot be composed using GL textures.
+    if (viewController is ExpensiveAndroidViewController) {
       final PlatformViewRenderBox renderBox =
           super.createRenderObject(context) as PlatformViewRenderBox;
       viewController.pointTransformer =
