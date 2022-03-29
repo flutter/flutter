@@ -22,7 +22,7 @@ _flutter.loader = null;
     // Watchdog to prevent injecting the main entrypoint multiple times.
     _scriptLoaded = false;
 
-    // Resolver for the pending promise returned by loadMainDartJs.
+    // Resolver for the pending promise returned by loadEntrypoint.
     _didCreateEngineInitializerResolve = null;
 
     /**
@@ -31,7 +31,7 @@ _flutter.loader = null;
      * @returns a Promise that will eventually resolve with an EngineInitializer,
      * or will be rejected with the error caused by the loader.
      */
-    loadMainDartJs(options) {
+    loadEntrypoint(options) {
       const {
         entrypointUrl = 'main.dart.js',
         serviceWorker,
@@ -40,19 +40,19 @@ _flutter.loader = null;
     }
 
     /**
-     * Resolves the promise created by loadMainDartJs. Called by Flutter.
+     * Resolves the promise created by loadEntrypoint. Called by Flutter.
      * Needs to be weirdly bound like it is, so "this" is preserved across
      * the JS <-> Flutter jumps.
      * @param {*} engineInitializer
      */
     didCreateEngineInitializer = (function(engineInitializer) {
       if (typeof this._didCreateEngineInitializerResolve != 'function') {
-        console.warn('Do not call didCreateEngineInitializer by hand. Start with loadMainDartJs instead.');
+        console.warn('Do not call didCreateEngineInitializer by hand. Start with loadEntrypoint instead.');
       }
       this._didCreateEngineInitializerResolve(engineInitializer);
     }).bind(this);
 
-    _loadMainDartJs(entrypointUrl) {
+    _loadEntrypoint(entrypointUrl) {
       if (this._scriptLoaded) {
         return null;
       }
@@ -75,7 +75,7 @@ _flutter.loader = null;
         serviceWorker.addEventListener('statechange', () => {
           if (serviceWorker.state == 'activated') {
             console.log('Installed new service worker.');
-            resolve(this._loadMainDartJs(entrypointUrl));
+            resolve(this._loadEntrypoint(entrypointUrl));
           }
         });
       });
@@ -84,7 +84,7 @@ _flutter.loader = null;
     _loadWithServiceWorker(entrypointUrl, serviceWorkerOptions) {
       if (!('serviceWorker' in navigator) || serviceWorkerOptions == null) {
         console.warn('Service worker not supported (or configured). Falling back to plain <script> tag.', serviceWorkerOptions);
-        return this._loadMainDartJs(entrypointUrl);
+        return this._loadEntrypoint(entrypointUrl);
       }
 
       const {
@@ -108,7 +108,7 @@ _flutter.loader = null;
             } else {
               // Existing service worker is still good.
               console.log('Loading app from service worker.');
-              return this._loadMainDartJs(entrypointUrl);
+              return this._loadEntrypoint(entrypointUrl);
             }
           });
 
@@ -119,7 +119,7 @@ _flutter.loader = null;
           setTimeout(() => {
             if (!this._scriptLoaded) {
               console.warn('Failed to load app from service worker. Falling back to plain <script> tag.');
-              resolve(this._loadMainDartJs(entrypointUrl));
+              resolve(this._loadEntrypoint(entrypointUrl));
             }
           }, timeoutMillis);
         });

@@ -43,20 +43,14 @@
   <script>
     window.addEventListener('load', function(ev) {
       // Download main.dart.js
-      _flutter.loader.loadMainDartJs({
-        entrypointUrl: 'main.dart.js',
+      _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
-          timeoutMillis: 4000
         }
       }).then(function(engineInitializer) {
-        return engineInitializer.initializeEngine({
-          // Potential engine config
-        });
+        return engineInitializer.initializeEngine();
       }).then(function(appRunner) {
-        return appRunner.runApp({
-          // App startup parameters
-        });
+        return appRunner.runApp();
       });
     });
   </script>
