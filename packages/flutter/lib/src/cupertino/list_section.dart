@@ -130,13 +130,13 @@ enum _CupertinoListSectionType { base, insetGrouped }
 ///
 /// {@macro flutter.material.Material.clipBehavior}
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// Creates a base [CupertinoListSection] containing [CupertinoListTile]s with
 /// `leading`, `title`, `additionalInfo` and `trailing` widgets.
 ///
 /// ```dart
-/// class MyStatefulWidget extends StatelessWidget {
-///   const MyStatefulWidget({Key? key}) : super(key: key);
+/// class MyStatelessWidget extends StatelessWidget {
+///   const MyStatelessWidget({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -182,14 +182,14 @@ enum _CupertinoListSectionType { base, insetGrouped }
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// Creates an "Inset Grouped" [CupertinoListSection] containing
 /// notched [CupertinoListTile]s with `leading`, `title`, `additionalInfo` and
 /// `trailing` widgets.
 ///
 /// ```dart
-/// class MyStatefulWidget extends StatelessWidget {
-///   const MyStatefulWidget({Key? key}) : super(key: key);
+/// class MyStatelessWidget extends StatelessWidget {
+///   const MyStatelessWidget({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
