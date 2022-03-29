@@ -1,12 +1,17 @@
 import("//flutter/build/zip_bundle.gni")
+import("//flutter/sky/tools/macos_snapshots.gni")
 
 zip_bundle("artifacts") {
-  output = "$full_platform_name/artifacts.zip"
   deps = [
     "//flutter/flutter_frontend_server:frontend_server",
     "//flutter/lib/snapshot:generate_snapshot_bin",
     "//flutter/shell/testing:testing",
   ]
+  prefix = "$full_platform_name/"
+  if (flutter_runtime_mode != "debug") {
+    prefix = "$full_platform_name-$flutter_runtime_mode/"
+  }
+  output = "$prefix/artifacts.zip"
   files = [
     {
       source = "//third_party/icu/flutter/icudtl.dat"
@@ -78,7 +83,8 @@ zip_bundle("flutter_patched_sdk") {
 if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
   copy("dart_sdk_archive") {
     sources = [ prebuilt_dart_sdk_archive ]
-    outputs = [ "$root_out_dir/zip_archives/dart-sdk-$full_platform_name.zip" ]
+    outputs =
+        [ "$root_out_dir/zip_archives/dart-sdk-$full_target_platform_name.zip" ]
   }
 }
 
@@ -132,6 +138,33 @@ if (is_mac) {
   group("macos_flutter_framework") {
     deps = [
       "//flutter/shell/platform/darwin/macos:macos_flutter_framework_archive",
+    ]
+  }
+
+  macos_gen_snapshots("create_macos_gen_snapshots") {
+    visibility = [ ":*" ]
+    deps = [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
+    arch = "$target_cpu"
+  }
+
+  zip_bundle("archive_gen_snapshot") {
+    deps = [ ":create_macos_gen_snapshots" ]
+    suffix = "-$flutter_runtime_mode"
+    if (flutter_runtime_mode == "debug") {
+      suffix = ""
+    }
+    output = "$full_platform_name$suffix/gen_snapshot.zip"
+    files = [
+      {
+        source = "$root_out_dir/gen_snapshot_$target_cpu"
+        destination = "gen_snapshot_$target_cpu"
+      },
+    ]
+  }
+
+  group("flutter_embedder_framework") {
+    deps = [
+      "//flutter/shell/platform/embedder:flutter_embedder_framework_archive",
     ]
   }
 }
