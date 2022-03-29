@@ -172,13 +172,13 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
                     flutter::DlBlendMode mode) override;
 
   // |flutter::Dispatcher|
-  void drawImage(const sk_sp<SkImage> image,
+  void drawImage(const sk_sp<flutter::DlImage> image,
                  const SkPoint point,
                  const SkSamplingOptions& sampling,
                  bool render_with_attributes) override;
 
   // |flutter::Dispatcher|
-  void drawImageRect(const sk_sp<SkImage> image,
+  void drawImageRect(const sk_sp<flutter::DlImage> image,
                      const SkRect& src,
                      const SkRect& dst,
                      const SkSamplingOptions& sampling,
@@ -186,21 +186,21 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
                      SkCanvas::SrcRectConstraint constraint) override;
 
   // |flutter::Dispatcher|
-  void drawImageNine(const sk_sp<SkImage> image,
+  void drawImageNine(const sk_sp<flutter::DlImage> image,
                      const SkIRect& center,
                      const SkRect& dst,
                      SkFilterMode filter,
                      bool render_with_attributes) override;
 
   // |flutter::Dispatcher|
-  void drawImageLattice(const sk_sp<SkImage> image,
+  void drawImageLattice(const sk_sp<flutter::DlImage> image,
                         const SkCanvas::Lattice& lattice,
                         const SkRect& dst,
                         SkFilterMode filter,
                         bool render_with_attributes) override;
 
   // |flutter::Dispatcher|
-  void drawAtlas(const sk_sp<SkImage> atlas,
+  void drawAtlas(const sk_sp<flutter::DlImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
                  const SkColor colors[],

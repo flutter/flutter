@@ -25,7 +25,7 @@ struct TextureDescriptor {
       static_cast<TextureUsageMask>(TextureUsage::kShaderRead);
   SampleCount sample_count = SampleCount::kCount1;
 
-  constexpr size_t GetSizeOfBaseMipLevel() const {
+  constexpr size_t GetByteSizeOfBaseMipLevel() const {
     if (!IsValid()) {
       return 0u;
     }

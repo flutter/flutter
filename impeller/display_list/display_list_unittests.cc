@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/display_list_builder.h"
 #include "flutter/testing/testing.h"
+#include "impeller/display_list/display_list_image_impeller.h"
 #include "impeller/display_list/display_list_playground.h"
 #include "third_party/skia/include/core/SkPathBuilder.h"
 
@@ -24,6 +25,14 @@ TEST_F(DisplayListTest, CanDrawTextBlob) {
   builder.setColor(SK_ColorBLUE);
   builder.drawTextBlob(SkTextBlob::MakeFromString("Hello", CreateTestFont()),
                        100, 100);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_F(DisplayListTest, CanDrawImage) {
+  auto texture = CreateTextureForFixture("embarcadero.jpg");
+  flutter::DisplayListBuilder builder;
+  builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(100, 100),
+                    SkSamplingOptions{}, true);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 

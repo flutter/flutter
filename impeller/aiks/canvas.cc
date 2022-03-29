@@ -200,22 +200,24 @@ void Canvas::DrawPicture(Picture picture) {
 
 void Canvas::DrawImage(std::shared_ptr<Image> image,
                        Point offset,
-                       Paint paint) {
+                       Paint paint,
+                       SamplerDescriptor sampler) {
   if (!image) {
     return;
   }
 
-  const auto source = IRect::MakeSize(image->GetSize());
+  const auto source = Rect::MakeSize(Size(image->GetSize()));
   const auto dest =
       Rect::MakeXYWH(offset.x, offset.y, source.size.width, source.size.height);
 
-  DrawImageRect(image, source, dest, std::move(paint));
+  DrawImageRect(image, source, dest, std::move(paint), std::move(sampler));
 }
 
 void Canvas::DrawImageRect(std::shared_ptr<Image> image,
-                           IRect source,
+                           Rect source,
                            Rect dest,
-                           Paint paint) {
+                           Paint paint,
+                           SamplerDescriptor sampler) {
   if (!image || source.size.IsEmpty() || dest.size.IsEmpty()) {
     return;
   }
@@ -229,10 +231,12 @@ void Canvas::DrawImageRect(std::shared_ptr<Image> image,
   auto contents = std::make_shared<TextureContents>();
   contents->SetTexture(image->GetTexture());
   contents->SetSourceRect(source);
+  contents->SetSamplerDescriptor(std::move(sampler));
 
   Entity entity;
   entity.SetPath(PathBuilder{}.AddRect(dest).TakePath());
   entity.SetBlendMode(paint.blend_mode);
+  entity.SetStencilDepth(GetStencilDepth());
   entity.SetContents(contents);
   entity.SetTransformation(GetCurrentTransformation());
 

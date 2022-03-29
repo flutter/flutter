@@ -38,7 +38,7 @@ bool TextureMTL::SetContents(const uint8_t* contents, size_t length) {
   const auto& desc = GetTextureDescriptor();
 
   // Out of bounds access.
-  if (length != desc.GetSizeOfBaseMipLevel()) {
+  if (length != desc.GetByteSizeOfBaseMipLevel()) {
     return false;
   }
 
