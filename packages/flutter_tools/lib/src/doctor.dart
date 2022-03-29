@@ -217,7 +217,7 @@ class Doctor {
             final Future<ValidationResult> validatorFuture = validator.validate();
             return Future.any<ValidationResult>(<Future<ValidationResult>>[
               validatorFuture,
-              // This future can only complete with a ToolExit.
+              // This future can only complete with an error
               timeoutCompleter.future,
             ]).then((ValidationResult result) async {
               timer.cancel();
