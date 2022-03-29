@@ -24,33 +24,44 @@ class MigrateManifest {
 
   /// Parses an existing migrate manifest.
   MigrateManifest.fromFile(File manifestFile) : migrateResult = MigrateResult.empty(), migrateRootDir = manifestFile.parent {
-    final dynamic yamlContents = loadYaml(manifestFile.readAsStringSync());
+    final Object? yamlContents = loadYaml(manifestFile.readAsStringSync());
     if (yamlContents is! YamlMap) {
-      throwToolExit('Invalid .migrate_manifest file in the migrate working directory. File is not a Yaml map', exitCode: 1);
+      throwToolExit('Invalid .migrate_manifest file in the migrate working directory. File is not a Yaml map.', exitCode: 1);
     }
     final YamlMap map = yamlContents;
-    final bool valid = map.containsKey('mergedFiles') && map.containsKey('conflictFiles') && map.containsKey('newFiles') && map.containsKey('deletedFiles');
+    bool valid = map.containsKey('merged_files') && map.containsKey('conflict_files') && map.containsKey('added_files') && map.containsKey('deleted_files');
     if (!valid) {
-      throwToolExit('Invalid .migrate_manifest file in the migrate working directory. Fix the manifest or abandon the migration and try again.', exitCode: 1);
+      throwToolExit('Invalid .migrate_manifest file in the migrate working directory. File is missing an entry. Fix the manifest or abandon the migration and try again.', exitCode: 1);
+    }
+    final Object? mergedFilesYaml = map['merged_files'];
+    final Object? conflictFilesYaml = map['conflict_files'];
+    final Object? addedFilesYaml = map['added_files'];
+    final Object? deletedFilesYaml = map['deleted_files'];
+    valid = valid && (mergedFilesYaml is YamlList || mergedFilesYaml == null);
+    valid = valid && (conflictFilesYaml is YamlList || conflictFilesYaml == null);
+    valid = valid && (addedFilesYaml is YamlList || addedFilesYaml == null);
+    valid = valid && (deletedFilesYaml is YamlList || deletedFilesYaml == null);
+    if (!valid) {
+      throwToolExit('Invalid .migrate_manifest file in the migrate working directory. Entry is not a Yaml list. Fix the manifest or abandon the migration and try again.', exitCode: 1);
     }
     // We can fill the maps with partially dummy data as not all properties are used by the manifest.
-    if (map['mergedFiles'] != null) {
-      for (final String localPath in map['mergedFiles']) {
+    if (map['merged_files'] != null) {
+      for (final String localPath in map['merged_files']) {
         migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: false, exitCode: 0, localPath: localPath));
       }
     }
-    if (map['conflictFiles'] != null) {
-      for (final String localPath in map['conflictFiles']) {
+    if (map['conflict_files'] != null) {
+      for (final String localPath in map['conflict_files']) {
         migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: true, exitCode: 1, localPath: localPath));
       }
     }
-    if (map['newFiles'] != null) {
-      for (final String localPath in map['newFiles']) {
+    if (map['added_files'] != null) {
+      for (final String localPath in map['added_files']) {
         migrateResult.addedFiles.add(FilePendingMigration(localPath, migrateRootDir.childFile(localPath)));
       }
     }
-    if (map['deletedFiles'] != null) {
-      for (final String localPath in map['deletedFiles']) {
+    if (map['deleted_files'] != null) {
+      for (final String localPath in map['deleted_files']) {
         migrateResult.deletedFiles.add(FilePendingMigration(localPath, migrateRootDir.childFile(localPath)));
       }
     }
@@ -101,7 +112,7 @@ class MigrateManifest {
 
   /// Returns the manifest file given a migration workind directory.
   static File getManifestFileFromDirectory(Directory workingDir) {
-    return workingDir.childFile('.migrateManifest.yaml');
+    return workingDir.childFile('.migrate_manifest');
   }
 
   /// Writes the manifest yaml file in the working directory.
@@ -126,7 +137,7 @@ class MigrateManifest {
       deletedFileManifestContents += '  - $localPath\n';
     }
 
-    final String migrateManifestContents = 'mergedFiles:\n${mergedFileManifestContents}conflictFiles:\n${conflictFilesManifestContents}newFiles:\n${newFileManifestContents}deletedFiles:\n$deletedFileManifestContents';
+    final String migrateManifestContents = 'merged_files:\n${mergedFileManifestContents}conflict_files:\n${conflictFilesManifestContents}new_files:\n${newFileManifestContents}deleted_files:\n$deletedFileManifestContents';
     final File migrateManifest = getManifestFileFromDirectory(migrateRootDir);
     migrateManifest.createSync(recursive: true);
     migrateManifest.writeAsStringSync(migrateManifestContents, flush: true);
