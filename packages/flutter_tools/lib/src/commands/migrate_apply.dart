@@ -58,6 +58,8 @@ class MigrateApplyCommand extends FlutterCommand {
     final FlutterProject flutterProject = FlutterProject.current();
 
     if (!await gitRepoExists(flutterProject.directory.path, logger)) {
+      logger.printStatus('No git repo found. Please run in a project with an initialized git repo or initialize one with:');
+      MigrateUtils.printCommandText('git init', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -70,13 +72,14 @@ class MigrateApplyCommand extends FlutterCommand {
     if (!workingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Please run:');
       MigrateUtils.printCommandText('flutter migrate start', logger);
-      throwToolExit('No migration in progress.');
+      return const FlutterCommandResult(ExitStatus.fail);
     }
 
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
     if (!checkAndPrintMigrateStatus(manifest, workingDirectory, warnConflict: true, logger: logger) && !force) {
-      throwToolExit('Conflicting files found. Resolve these conflicts and try again.');
+      logger.printStatus('Conflicting files found. Resolve these conflicts and try again.');
+      return const FlutterCommandResult(ExitStatus.fail);
     }
 
     if (await hasUncommittedChanges(flutterProject.directory.path, logger) && !force) {

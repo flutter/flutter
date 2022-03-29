@@ -25,6 +25,12 @@ class MigrateStatusCommand extends FlutterCommand {
       help: 'Specifies the custom migration working directory used to stage and edit proposed changes.',
       valueHelp: 'path',
     );
+    argParser.addFlag(
+      'show-diff',
+      defaultsTo: true,
+      negatable: true,
+      help: 'Shows the diff output when enabled. Enabled by default.',
+    );
   }
 
   final bool _verbose;
@@ -64,26 +70,28 @@ class MigrateStatusCommand extends FlutterCommand {
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
-    for (final String localPath in manifest.mergedFiles) {
-      final DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
-      if (result.diff != '') {
-        // Print with different colors for better visibility.
-        int lineNumber = -1;
-        for (final String line in result.diff.split('\n')) {
-          lineNumber++;
-          if (line.startsWith('---') || line.startsWith('+++') || line.startsWith('&&') || _initialDiffLines.contains(lineNumber)) {
-            logger.printStatus(line);
-            continue;
+    if (boolArg('show-diff')) {
+      for (final String localPath in manifest.mergedFiles) {
+        final DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
+        if (result.diff != '') {
+          // Print with different colors for better visibility.
+          int lineNumber = -1;
+          for (final String line in result.diff.split('\n')) {
+            lineNumber++;
+            if (line.startsWith('---') || line.startsWith('+++') || line.startsWith('&&') || _initialDiffLines.contains(lineNumber)) {
+              logger.printStatus(line);
+              continue;
+            }
+            if (line.startsWith('-')) {
+              logger.printStatus(line, color: TerminalColor.red);
+              continue;
+            }
+            if (line.startsWith('+')) {
+              logger.printStatus(line, color: TerminalColor.green);
+              continue;
+            }
+            logger.printStatus(line, color: TerminalColor.grey);
           }
-          if (line.startsWith('-')) {
-            logger.printStatus(line, color: TerminalColor.red);
-            continue;
-          }
-          if (line.startsWith('+')) {
-            logger.printStatus(line, color: TerminalColor.green);
-            continue;
-          }
-          logger.printStatus(line, color: TerminalColor.grey);
         }
       }
     }
