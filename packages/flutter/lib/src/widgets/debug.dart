@@ -122,7 +122,7 @@ bool debugProfileBuildsEnabled = false;
 ///
 /// See also:
 ///  * [debugProfileBuildsEnabled], functions similarly but shows events for
-///    every widget with a higher overhead cost.
+///    every widget and has a higher overhead cost.
 bool debugProfileBuildsEnabledUserWidgets = true;
 
 /// Show banners for deprecated widgets.

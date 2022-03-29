@@ -3097,10 +3097,8 @@ bool debugIsLocalCreationLocation(Object object) {
 /// This is a faster variant of `debugIsLocalCreationLocation` that is available
 /// in debug and profile builds.
 bool debugIsWidgetLocalCreation(Widget widget) {
-  final _Location? location = _getWidgetCreationLocation(widget);
-  // ignore: avoid_bool_literals_in_conditional_expressions
-  return location == null ?
-      false :
+  final _Location? location = _getObjectCreationLocation(widget);
+  return location != null &&
       WidgetInspectorService.instance._isLocalCreationLocation(location.file);
 }
 
@@ -3116,8 +3114,7 @@ String? _describeCreationLocation(Object object) {
   return location?.toString();
 }
 
-_Location? _getWidgetCreationLocation(Widget widget) {
-  final Object object = widget;
+_Location? _getObjectCreationLocation(Object object) {
   return object is _HasCreationLocation ? object._location : null;
 }
 
@@ -3127,10 +3124,8 @@ _Location? _getWidgetCreationLocation(Widget widget) {
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 _Location? _getCreationLocation(Object? object) {
-  final Widget? widget = object is Element
-      ? (object.debugIsDefunct ? null : object.widget)
-      : (object is Widget ? object : null);
-  return widget == null ? null :  _getWidgetCreationLocation(widget);
+  final Object? candidate =  object is Element && !object.debugIsDefunct ? object.widget : object;
+  return candidate == null ? null : _getObjectCreationLocation(candidate);
 }
 
 // _Location objects are always const so we don't need to worry about the GC

@@ -63,6 +63,7 @@ void main() {
   test('Timeline', () async {
     // We don't have expectations around the first frame because there's a race around
     // the warm-up frame that we don't want to get involved in here.
+    debugProfileBuildsEnabledUserWidgets = false;
     await runFrame(() { runApp(const TestRoot()); });
     await SchedulerBinding.instance.endOfFrame;
     await fetchInterestingEvents(interestingLabels);
@@ -109,6 +110,17 @@ void main() {
     args = (events.where((TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['color'], 'Color(0xffffffff)');
     debugProfileBuildsEnabled = false;
+
+    debugProfileBuildsEnabledUserWidgets = true;
+    await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey(), color: const Color(0xFFFFFFFF))); });
+    events = await fetchInterestingEvents(interestingLabels);
+    expect(
+      events.map<String>(eventToName),
+      <String>['BUILD', 'Placeholder', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
+    );
+    args = (events.where((TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
+    expect(args['color'], 'Color(0xffffffff)');
+    debugProfileBuildsEnabledUserWidgets = false;
 
     debugProfileLayoutsEnabled = true;
     await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey())); });

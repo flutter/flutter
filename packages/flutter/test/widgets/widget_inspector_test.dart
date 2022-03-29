@@ -3014,13 +3014,29 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       final Element element = key.currentContext! as Element;
-      expect(debugIsWidgetLocalCreation(element.widget),
-          equals(WidgetInspectorService.instance.isWidgetCreationTracked()));
+      expect(debugIsWidgetLocalCreation(element.widget), isTrue);
 
       final Finder paddingFinder = find.byType(Padding);
       final Element paddingElement = paddingFinder.evaluate().first;
       expect(debugIsWidgetLocalCreation(paddingElement.widget), isFalse);
-    });
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+    testWidgets('debugIsWidgetLocalCreation false test', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Text('target', key: key, textDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      final Element element = key.currentContext! as Element;
+      expect(debugIsWidgetLocalCreation(element.widget), isFalse);
+    }, skip: WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --no-track-widget-creation flag.
 
     test('devToolsInspectorUri test', () {
       activeDevToolsServerAddress = 'http://127.0.0.1:9100';
