@@ -33,8 +33,22 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  Future<void> installProject(String verison, {bool vanilla = true}) async {
-    final MigrateProject project = MigrateProject(verison, vanilla: vanilla);
+  Future<void> commitChanges() async {
+    await processManager.run(<String>[
+      'git',
+      'add',
+      '.',
+    ], workingDirectory: tempDir.path);
+    await processManager.run(<String>[
+      'git',
+      'commit',
+      '-m',
+      '"Initial commit"',
+    ], workingDirectory: tempDir.path);
+  }
+
+  Future<void> installProject(String verison, {bool vanilla = true, String main}) async {
+    final MigrateProject project = MigrateProject(verison, vanilla: vanilla, main: main);
     await project.setUpIn(tempDir);
 
     // Init a git repo to test uncommitted changes checks
@@ -48,18 +62,63 @@ void main() {
       '-b',
       'master',
     ], workingDirectory: tempDir.path);
-    await processManager.run(<String>[
-      'git',
-      'add',
-      '.',
-    ], workingDirectory: tempDir.path);
-    await processManager.run(<String>[
-      'git',
-      'commit',
-      '-m',
-      '"Initial commit"',
-    ], workingDirectory: tempDir.path);
+    await commitChanges();
   }
+
+  // Migrates a clean untouched app generated with flutter create
+  testWithoutContext('vanilla migrate builds', () async {
+    // Flutter Stable 2.0.0 hash: 60bd88df915880d23877bfc1602e8ddcf4c4dd2a
+    await installProject('version:2.0.0_stable', main: '''
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Container(),
+    );
+  }
+}
+''');
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+
+    ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'migrate',
+      'start',
+      '--verbose',
+    ], workingDirectory: tempDir.path);
+    expect(result.stdout.toString(), contains('Working directory created at'));
+
+    result = await processManager.run(<String>[
+      flutterBin,
+      'migrate',
+      'apply',
+      '--verbose',
+    ], workingDirectory: tempDir.path);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString(), contains('Migration complete'));
+
+    result = await processManager.run(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--debug',
+    ], workingDirectory: tempDir.path);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString(), contains('app-debug.apk'));
+  });
 
   testUsingContext('migrate abandon', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -232,7 +291,6 @@ Added files:
     expect(tempDir.childFile('web/icons/Icon-192.png').existsSync(), true);
     expect(tempDir.childFile('linux/main.cc').existsSync(), true);
     expect(tempDir.childFile('windows/runner/CMakeLists.txt').existsSync(), true);
-
   });
 
   // Migrates a user-modified app

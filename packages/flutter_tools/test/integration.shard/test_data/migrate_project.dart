@@ -12,7 +12,17 @@ import '../test_utils.dart';
 import 'project.dart';
 
 class MigrateProject extends Project {
-  MigrateProject(this.version, {this.vanilla = true});
+  MigrateProject(this.version, {this.vanilla = true, this.main});
+
+  final String version;
+
+  /// Manually set main.dart
+  final String? main;
+
+  /// Non-vanilla is a set of changed files that guarantee a merge conflict.
+  final bool vanilla;
+
+  late String _appPath;
 
   @override
   Future<void> setUpIn(Directory dir, {
@@ -105,13 +115,12 @@ class MigrateProject extends Project {
       writeFile(fileSystem.path.join(dir.path, 'lib', 'other.dart'), libOther);
       writeFile(fileSystem.path.join(dir.path, 'pubspec.yaml'), pubspecCustom);
     }
+    if (main != null) {
+      writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), main!);
+    }
     tryToDelete(tempDir);
     tryToDelete(depotToolsDir);
   }
-
-  final String version;
-  final bool vanilla;
-  late String _appPath;
 
   // Maintain the same pubspec as the configured app.
   @override
