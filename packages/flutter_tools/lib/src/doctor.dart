@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -204,13 +206,29 @@ class Doctor {
         // Future returned by the asyncGuard() is not awaited, we pass an
         // onError callback to it and translate errors into ValidationResults.
         asyncGuard<ValidationResult>(
-          validator.validate,
+          () {
+            final Completer<ValidationResult> timeoutCompleter = Completer<ValidationResult>();
+            final Timer timer = Timer(doctorDuration, () {
+              timeoutCompleter.completeError(
+                Exception('${validator.title} exceeded maximum allowed duration of $doctorDuration'),
+              );
+            });
+            final Future<ValidationResult> validatorFuture = validator.validate();
+            return Future.any<ValidationResult>(<Future<ValidationResult>>[
+              validatorFuture,
+              // This future can only complete with an error
+              timeoutCompleter.future,
+            ]).then((ValidationResult result) async {
+              timer.cancel();
+              return result;
+            });
+          },
           onError: (Object exception, StackTrace stackTrace) {
             return ValidationResult.crash(exception, stackTrace);
           },
         ),
       ),
-  ];
+    ];
 
   List<Workflow> get workflows {
     return DoctorValidatorsProvider._instance.workflows;
@@ -290,6 +308,11 @@ class Doctor {
     return globals.cache.areRemoteArtifactsAvailable(engineVersion: engineRevision);
   }
 
+  /// Maximum allowed duration for an entire validator to take.
+  ///
+  /// This should only ever be reached if a process is stuck.
+  static const Duration doctorDuration = Duration(minutes: 10);
+
   /// Print information about the state of installed tooling.
   ///
   /// To exclude personally identifiable information like device names and
@@ -316,7 +339,7 @@ class Doctor {
     for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = _logger.startSpinner(
-        timeout: const Duration(seconds: 2),
+        timeout: validator.slowWarningDuration,
         slowWarningCallback: () => validator.slowWarning,
       );
       ValidationResult result;
