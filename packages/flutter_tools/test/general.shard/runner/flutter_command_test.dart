@@ -768,7 +768,7 @@ class FakeCache extends Fake implements Cache {
   List<Set<DevelopmentArtifact>> artifacts = <Set<DevelopmentArtifact>>[];
 
   @override
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, [bool offline = false]) async {
     artifacts.add(requiredArtifacts.toSet());
   }
 
