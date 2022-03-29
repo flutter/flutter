@@ -47,9 +47,14 @@ class DataColumn {
   /// [Icon] (typically using size 18), or a [Row] with an icon and
   /// some text.
   ///
-  /// By default, this widget will only occupy the minimal space. If you want
-  /// it to take the entire remaining space, e.g. when you want to use [Center],
-  /// you can wrap it with an [Expanded].
+  /// This widget and the sort indicator (if visible) will wrap with a [Row],
+  /// by default, this widget will only occupy minimal space. It is
+  /// recommended to wrap this with an [Expanded] or [Flexible] to control how
+  /// it flexes. Otherwise, an exception will occur when the the available space
+  /// is insufficient.
+  ///
+  /// By default, [DefaultTextStyle.softWrap] of this subtree will be set to false.
+  /// Use [DefaultTextStyle.merge] to override it if needed.
   ///
   /// The label should not include the sort indicator.
   final Widget label;
