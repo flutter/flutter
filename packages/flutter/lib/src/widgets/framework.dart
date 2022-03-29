@@ -2645,7 +2645,9 @@ class BuildOwner {
         if (isTimelineTracked) {
           Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
           assert(() {
-            debugTimelineArguments = element.widget.toDiagnosticsNode().toTimelineArguments();
+            if (kDebugMode) {
+              debugTimelineArguments = element.widget.toDiagnosticsNode().toTimelineArguments();
+            }
             return true;
           }());
           Timeline.startSync(
@@ -3514,7 +3516,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         if (isTimelineTracked) {
           Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
           assert(() {
-            debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+            if (kDebugMode) {
+              debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+            }
             return true;
           }());
           Timeline.startSync(
@@ -3777,7 +3781,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (isTimelineTracked) {
       Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
       assert(() {
-        debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+        if (kDebugMode) {
+          debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+        }
         return true;
       }());
       Timeline.startSync(
