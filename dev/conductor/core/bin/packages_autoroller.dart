@@ -39,10 +39,20 @@ Future<void> main(List<String> args) async {
     defaultsTo: 'flutter.git',
   );
 
-  final ArgResults results = parser.parse(args);
+  late final ArgResults results;
+  try {
+    results = parser.parse(args);
+  } on FormatException {
+    print('''
+Usage:
+
+${parser.usage}
+''');
+    rethrow;
+  }
   final String orgName = results[kOrgName] as String;
 
-  final String mirrorUrl = 'https://github.com/$orgName/${results[kRepoName]}.git';
+  final String mirrorUrl = 'https://github.com/$orgName/${results[kRepoName]}';
 
   final FrameworkRepository framework = FrameworkRepository(
     _localCheckouts,

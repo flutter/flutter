@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
-//import 'globals.dart';
+import 'globals.dart';
 import 'repository.dart';
 
 // https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
@@ -43,7 +43,7 @@ class PackageAutoroller {
   Future<void> roll() async {
     await authLogout(); // TODO delete
     await authLogin();
-    await updatePackages();
+    await updatePackages(verbose: false); // TODO make true
     await pushBranch();
     await createPr(
       repository: await framework.checkoutDirectory,
@@ -51,13 +51,18 @@ class PackageAutoroller {
     await authLogout();
   }
 
-  Future<void> updatePackages() async {
+  Future<void> updatePackages({ required bool verbose }) async {
     await framework.newBranch(featureBranchname);
-    // TODO actually update the packages
-    await (await framework.checkoutDirectory)
-        .childFile('new-file.txt')
-        .writeAsString('foo bar\n');
-    await framework.commit('dummy commit', addFirst: true);
+    final io.Process flutterProcess = await framework.streamFlutter(<String>[
+      if (verbose) '--verbose',
+      'update-packages',
+      '--force-upgrade',
+    ]);
+    final int exitCode = await flutterProcess.exitCode;
+    if (exitCode != 0) {
+      throw ConductorException('Failed to update packages with exit code $exitCode');
+    }
+    await framework.commit('roll packages', addFirst: true);
   }
 
   Future<void> pushBranch() async {
@@ -137,7 +142,7 @@ class PackageAutoroller {
   ///   $ gh pr create --project "Roadmap"
   ///   $ gh pr create --base develop --head monalisa:feature
   Future<void> createPr({
-    required Directory repository,
+    required io.Directory repository,
     String title = 'A PR Title',
     String body = 'A PR Body',
     String base = 'master',
@@ -176,7 +181,7 @@ class PackageAutoroller {
     String? workingDirectory,
   }) async {
     print('Executing "$githubClient ${args.join(' ')}" in $workingDirectory');
-    final Process process = await Process.start(
+    final io.Process process = await io.Process.start(
       githubClient,
       args,
       workingDirectory: workingDirectory,
@@ -191,7 +196,6 @@ class PackageAutoroller {
         .transform(utf8.decoder)
         .forEach(stderrStrings.add);
     if (stdin != null) {
-      print('passing STDIN: "$stdin"');
       process.stdin.write(stdin);
       await process.stdin.flush();
       await process.stdin.close();
@@ -208,7 +212,7 @@ class PackageAutoroller {
       print(stderr);
       print(stdout);
       print(StackTrace.current);
-      exit(1);
+      io.exit(1);
     }
     print(stdout);
   }

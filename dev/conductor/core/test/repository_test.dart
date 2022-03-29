@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:conductor_core/src/repository.dart';
+import 'package:conductor_core/src/stdio.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
@@ -500,6 +501,47 @@ vars = {
 
       expect(processManager.hasRemainingExpectations, false);
       expect(createdCandidateBranch, true);
+    });
+
+    test('.listRemoteBranches() parses git output', () async {
+      const String remoteName = 'mirror';
+      const String lsRemoteOutput = '''
+Extraneous debug information that should be ignored.
+
+4d44dca340603e25d4918c6ef070821181202e69        refs/heads/experiment
+35185330c6af3a435f615ee8ac2fed8b8bb7d9d4        refs/heads/feature-a
+6f60a1e7b2f3d2c2460c9dc20fe54d0e9654b131        refs/heads/feature-b
+c1436c42c0f3f98808ae767e390c3407787f1a67        refs/heads/fix_bug_1234
+bbbcae73699263764ad4421a4b2ca3952a6f96cb        refs/heads/stable
+
+Extraneous debug information that should be ignored.
+''';
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(
+          command: <String>['git', 'ls-remote', '--heads', remoteName],
+          stdout: lsRemoteOutput,
+        ),
+      ]);
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final Repository repo = EngineRepository(
+        checkouts,
+        localUpstream: true,
+      );
+      final List<String> branchNames = await repo.listRemoteBranches(remoteName);
+      expect(branchNames, equals(<String>[
+        'experiment',
+        'feature-a',
+        'feature-b',
+        'fix_bug_1234',
+        'stable',
+      ]));
     });
   });
 }
