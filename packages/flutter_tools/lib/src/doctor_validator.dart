@@ -53,6 +53,11 @@ abstract class DoctorValidator {
 
   String get slowWarning => 'This is taking an unexpectedly long time...';
 
+  static const Duration _slowWarningDuration = Duration(seconds: 10);
+
+  /// Duration before the spinner should display [slowWarning].
+  Duration get slowWarningDuration => _slowWarningDuration;
+
   Future<ValidationResult> validate();
 }
 

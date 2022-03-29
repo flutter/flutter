@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -656,12 +657,15 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
           onTap: () { widget.onValueChanged(entry.key); },
           inMutuallyExclusiveGroup: true,
           selected: widget.groupValue == entry.key,
-          child: _Segment<T>(
-            key: ValueKey<T>(entry.key),
-            highlighted: isHighlighted,
-            pressed: pressed == entry.key,
-            isDragging: isThumbDragging,
-            child: entry.value,
+          child: MouseRegion(
+            cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+            child: _Segment<T>(
+              key: ValueKey<T>(entry.key),
+              highlighted: isHighlighted,
+              pressed: pressed == entry.key,
+              isDragging: isThumbDragging,
+              child: entry.value,
+            ),
           ),
         ),
       );

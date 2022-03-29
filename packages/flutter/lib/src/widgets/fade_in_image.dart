@@ -17,7 +17,7 @@ import 'implicit_animations.dart';
 /// An image that shows a [placeholder] image while the target [image] is
 /// loading, then fades in the new image when it loads.
 ///
-/// Use this class to display long-loading images, such as [new NetworkImage],
+/// Use this class to display long-loading images, such as [NetworkImage.new],
 /// so that the image appears on screen with a graceful animation rather than
 /// abruptly popping onto the screen.
 ///
@@ -129,9 +129,9 @@ class FadeInImage extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [new Image.memory], which has more details about loading images from
+  ///  * [Image.memory], which has more details about loading images from
   ///    memory.
-  ///  * [new Image.network], which has more details about loading images from
+  ///  * [Image.network], which has more details about loading images from
   ///    the network.
   FadeInImage.memoryNetwork({
     Key? key,
@@ -200,9 +200,9 @@ class FadeInImage extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [new Image.asset], which has more details about loading images from
+  ///  * [Image.asset], which has more details about loading images from
   ///    asset bundles.
-  ///  * [new Image.network], which has more details about loading images from
+  ///  * [Image.network], which has more details about loading images from
   ///    the network.
   FadeInImage.assetNetwork({
     Key? key,

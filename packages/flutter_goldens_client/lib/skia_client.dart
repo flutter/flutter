@@ -144,9 +144,7 @@ class SkiaGoldClient {
       '--commit', commitHash,
       '--keys-file', keys.path,
       '--failure-file', failures.path,
-      // TODO(Piinks): Re-enable once https://github.com/flutter/flutter/issues/100304
-      // is resolved.
-      //'--passfail',
+      '--passfail',
     ];
 
     if (imgtestInitCommand.contains(null)) {
@@ -193,9 +191,7 @@ class SkiaGoldClient {
         .path,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
-      // TODO(Piinks): Re-enable once https://github.com/flutter/flutter/issues/100304
-      // is resolved.
-      //'--passfail',
+      '--passfail',
     ];
 
     final io.ProcessResult result = await process.run(imgtestCommand);

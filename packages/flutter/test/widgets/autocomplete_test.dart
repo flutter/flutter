@@ -1023,4 +1023,53 @@ void main() {
     expect(lastHighlighted, 5);
   });
 
+  testWidgets('floating menu goes away on select', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/99749.
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late AutocompleteOnSelected<String> lastOnSelected;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOnSelected = onSelected;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The field is always rendered, but the options are not unless needed.
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+
+    await tester.enterText(find.byKey(fieldKey), kOptions[0]);
+    await tester.pumpAndSettle();
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    // Pretend that the only option is selected. This does not change the
+    // text in the text field.
+    lastOnSelected(kOptions[0]);
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+  });
 }

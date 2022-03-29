@@ -10125,6 +10125,56 @@ void main() {
     expect(cursorRight, inputWidth - kCaretGap);
   });
 
+  testWidgets('Text selection menu hides after select all on desktop', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final String selectAll = defaultTargetPlatform == TargetPlatform.macOS
+        ? 'Select All'
+        : 'Select all';
+
+    expect(find.text(selectAll), findsNothing);
+    expect(find.text('Copy'), findsNothing);
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(10.0, 0.0) + textOffsetToPosition(tester, controller.text.length),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      controller.value.selection,
+      TextSelection.collapsed(
+        offset: controller.text.length,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+    expect(find.text(selectAll), findsOneWidget);
+
+    await tester.tapAt(tester.getCenter(find.text(selectAll)));
+
+    await tester.pump();
+    expect(find.text(selectAll), findsNothing);
+    expect(find.text('Copy'), findsNothing);
+  },
+    variant: TargetPlatformVariant.desktop(),
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
+
   // Regressing test for https://github.com/flutter/flutter/issues/70625
   testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();

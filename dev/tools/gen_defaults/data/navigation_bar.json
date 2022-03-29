@@ -1,5 +1,5 @@
 {
-  "version": "v0_90",
+  "version": "v0_92",
 
   "md.comp.navigation-bar.active.focus.icon.color": "onSecondaryContainer",
   "md.comp.navigation-bar.active.focus.label-text.color": "onSurface",

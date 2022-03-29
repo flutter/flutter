@@ -1042,21 +1042,25 @@ class AndroidViewSurface extends PlatformViewSurface {
   @override
   RenderObject createRenderObject(BuildContext context) {
     final AndroidViewController viewController = controller as AndroidViewController;
-    final RenderAndroidView renderObject = RenderAndroidView(
+    // Compose using the Android view hierarchy.
+    // This is useful when embedding a SurfaceView into a Flutter app.
+    // SurfaceViews cannot be composed using GL textures.
+    if (viewController is ExpensiveAndroidViewController) {
+      final PlatformViewRenderBox renderBox =
+          super.createRenderObject(context) as PlatformViewRenderBox;
+      viewController.pointTransformer =
+          (Offset position) => renderBox.globalToLocal(position);
+      return renderBox;
+    }
+    // Use GL texture based composition.
+    // App should use GL texture unless they require to embed a SurfaceView.
+    final RenderAndroidView renderBox = RenderAndroidView(
       viewController: viewController,
       gestureRecognizers: gestureRecognizers,
       hitTestBehavior: hitTestBehavior,
     );
     viewController.pointTransformer =
-        (Offset position) => renderObject.globalToLocal(position);
-    return renderObject;
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderAndroidView renderObject) {
-    renderObject
-      ..controller = controller as AndroidViewController
-      ..hitTestBehavior = hitTestBehavior
-      ..updateGestureRecognizers(gestureRecognizers);
+        (Offset position) => renderBox.globalToLocal(position);
+    return renderBox;
   }
 }

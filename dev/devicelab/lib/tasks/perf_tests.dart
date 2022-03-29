@@ -378,6 +378,13 @@ TaskFunction createColorFilterCachePerfE2ETest() {
   ).run;
 }
 
+TaskFunction createShaderMaskCachePerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/shader_mask_cache_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createFadingChildAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -622,9 +629,10 @@ class StartupTest {
           ]);
           applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
           break;
-        case DeviceOperatingSystem.windows:
-        case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.fake:
+        case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.macos:
+        case DeviceOperatingSystem.windows:
           break;
       }
 
@@ -738,9 +746,10 @@ class DevtoolsStartupTest {
           ]);
           applicationBinaryPath = _findIosAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
           break;
-        case DeviceOperatingSystem.windows:
-        case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.fake:
+        case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.macos:
+        case DeviceOperatingSystem.windows:
           break;
       }
 
@@ -791,6 +800,11 @@ class DevtoolsStartupTest {
   }
 }
 
+/// A callback function to be used to mock the flutter drive command in PerfTests.
+///
+/// The `options` contains all the arguments in the `flutter drive` command in PerfTests.
+typedef FlutterDriveCallback = void Function(List<String> options);
+
 /// Measures application runtime performance, specifically per-frame
 /// performance.
 class PerfTest {
@@ -806,6 +820,9 @@ class PerfTest {
     this.benchmarkScoreKeys,
     this.dartDefine = '',
     String? resultFilename,
+    this.device,
+    this.flutterDriveCallback,
+    this.enableImpeller = false,
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -818,6 +835,9 @@ class PerfTest {
     this.benchmarkScoreKeys = _kCommonScoreKeys,
     this.dartDefine = '',
     String resultFilename = 'e2e_perf_summary',
+    this.device,
+    this.flutterDriveCallback,
+    this.enableImpeller = false,
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -839,6 +859,18 @@ class PerfTest {
   final bool needsFullTimeline;
   /// Whether to save the trace timeline file `*.timeline.json`.
   final bool saveTraceFile;
+  /// The device to test on.
+  ///
+  /// If null, the device is selected depending on the current environment.
+  final Device? device;
+
+  /// The function called instead of the actually `flutter drive`.
+  ///
+  /// If it is not `null`, `flutter drive` will not happen in the PerfTests.
+  final FlutterDriveCallback? flutterDriveCallback;
+
+  /// Whether the perf test should enable Impeller.
+  final bool enableImpeller;
 
   /// The keys of the values that need to be reported.
   ///
@@ -876,13 +908,18 @@ class PerfTest {
       String? writeSkslFileName,
   }) {
     return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
+      late Device selectedDevice;
+      if (device != null) {
+        selectedDevice = device!;
+      } else {
+        selectedDevice = await devices.workingDevice;
+      }
+      await selectedDevice.unlock();
+      final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
-      await flutter('drive', options: <String>[
+      final List<String> options = <String>[
         if (localEngine != null)
           ...<String>['--local-engine', localEngine],
         if (localEngineSrcPath != null)
@@ -904,9 +941,15 @@ class PerfTest {
         if (cacheSkSL) '--cache-sksl',
         if (dartDefine.isNotEmpty)
           ...<String>['--dart-define', dartDefine],
+        if (enableImpeller) '--enable-impeller',
         '-d',
         deviceId,
-      ]);
+      ];
+      if (flutterDriveCallback != null) {
+        flutterDriveCallback!(options);
+      } else {
+        await flutter('drive', options:options);
+      }
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
@@ -943,6 +986,12 @@ class PerfTest {
             if (data['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
             if (data['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
           ],
+          if (data['30hz_frame_percentage'] != null) '30hz_frame_percentage',
+          if (data['60hz_frame_percentage'] != null) '60hz_frame_percentage',
+          if (data['80hz_frame_percentage'] != null) '80hz_frame_percentage',
+          if (data['90hz_frame_percentage'] != null) '90hz_frame_percentage',
+          if (data['120hz_frame_percentage'] != null) '120hz_frame_percentage',
+          if (data['illegal_refresh_rate_frame_count'] != null) 'illegal_refresh_rate_frame_count',
         ],
       );
     });
@@ -1230,8 +1279,6 @@ class CompileTest {
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
       await flutter('packages', options: <String>['get']);
 
       final Map<String, dynamic> compileRelease = await _compileApp(reportPackageContentSizes: reportPackageContentSizes);
@@ -1316,12 +1363,14 @@ class CompileTest {
         if (reportPackageContentSizes)
           metrics.addAll(await getSizesFromApk(apkPath));
         break;
-      case DeviceOperatingSystem.windows:
-        throw Exception('Unsupported option for Windows devices');
-      case DeviceOperatingSystem.fuchsia:
-        throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.fake:
         throw Exception('Unsupported option for fake devices');
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.macos:
+        throw Exception('Unsupported option for macOS devices');
+      case DeviceOperatingSystem.windows:
+        throw Exception('Unsupported option for Windows devices');
     }
 
     metrics.addAll(<String, dynamic>{
@@ -1354,12 +1403,14 @@ class CompileTest {
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm64');
         break;
-      case DeviceOperatingSystem.windows:
-        throw Exception('Unsupported option for Windows devices');
-      case DeviceOperatingSystem.fuchsia:
-        throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.fake:
         throw Exception('Unsupported option for fake devices');
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.macos:
+        throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.windows:
+        throw Exception('Unsupported option for Windows devices');
     }
     watch.start();
     await flutter('build', options: options);
