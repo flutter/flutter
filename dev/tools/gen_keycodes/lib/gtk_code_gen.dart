@@ -15,13 +15,12 @@ import 'utils.dart';
 /// data structure given to it.
 class GtkCodeGenerator extends PlatformCodeGenerator {
   GtkCodeGenerator(
-    PhysicalKeyData keyData,
-    LogicalKeyData logicalData,
+    super.keyData,
+    super.logicalData,
     String modifierBitMapping,
     String lockBitMapping,
   ) : _modifierBitMapping = parseMapOfListOfString(modifierBitMapping),
-      _lockBitMapping = parseMapOfListOfString(lockBitMapping),
-      super(keyData, logicalData);
+      _lockBitMapping = parseMapOfListOfString(lockBitMapping);
 
   /// This generates the map of XKB scan codes to Flutter physical keys.
   String get _xkbScanCodeMap {

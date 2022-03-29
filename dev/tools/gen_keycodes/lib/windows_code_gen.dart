@@ -14,11 +14,10 @@ import 'utils.dart';
 /// data structure given to it.
 class WindowsCodeGenerator extends PlatformCodeGenerator {
   WindowsCodeGenerator(
-    PhysicalKeyData keyData,
-    LogicalKeyData logicalData,
+    super.keyData,
+    super.logicalData,
     String scancodeToLogical,
-  ) : _scancodeToLogical = parseMapOfString(scancodeToLogical),
-      super(keyData, logicalData);
+  ) : _scancodeToLogical = parseMapOfString(scancodeToLogical);
 
   /// This generates the map of Windows scan codes to physical keys.
   String get _windowsScanCodeMap {

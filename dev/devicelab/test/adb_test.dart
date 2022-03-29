@@ -180,7 +180,7 @@ class CommandArgs {
 }
 
 class FakeDevice extends AndroidDevice {
-  FakeDevice({required String deviceId}) : super(deviceId: deviceId);
+  FakeDevice({required super.deviceId});
 
   static String output = '';
 
