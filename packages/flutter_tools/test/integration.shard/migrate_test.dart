@@ -66,6 +66,113 @@ void main() {
   }
 
   // Migrates a clean untouched app generated with flutter create
+  testWithoutContext('vanilla migrate process succeeds', () async {
+    // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+    await installProject('version:1.22.6_stable');
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+
+    ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'migrate',
+      'start',
+      '--verbose',
+    ], workingDirectory: tempDir.path);
+    expect(result.stdout.toString(), contains('Working directory created at'));
+    expect(result.stdout.toString(), contains('''
+Added files:
+             - macos/Runner.xcworkspace/contents.xcworkspacedata
+             - macos/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png
+             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png
+             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png
+             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png
+             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png
+             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png
+             - macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
+             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png
+             - macos/Runner/DebugProfile.entitlements
+             - macos/Runner/Base.lproj/MainMenu.xib
+             - macos/Runner/MainFlutterWindow.swift
+             - macos/Runner/Configs/AppInfo.xcconfig
+             - macos/Runner/Configs/Debug.xcconfig
+             - macos/Runner/Configs/Release.xcconfig
+             - macos/Runner/Configs/Warnings.xcconfig
+             - macos/Runner/AppDelegate.swift
+             - macos/Runner/Info.plist
+             - macos/Runner/Release.entitlements
+             - macos/Runner.xcodeproj/project.pbxproj
+             - macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+             - macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
+             - macos/Flutter/Flutter-Debug.xcconfig
+             - macos/Flutter/Flutter-Release.xcconfig
+             - macos/.gitignore
+             - web/index.html
+             - web/favicon.png
+             - web/icons/Icon-192.png
+             - web/icons/Icon-maskable-192.png
+             - web/icons/Icon-maskable-512.png
+             - web/icons/Icon-512.png
+             - web/manifest.json
+             - linux/main.cc
+             - linux/CMakeLists.txt
+             - linux/my_application.h
+             - linux/my_application.cc
+             - linux/flutter/CMakeLists.txt
+             - linux/.gitignore
+             - android/app/src/main/res/values-night/styles.xml
+             - android/app/src/main/res/drawable-v21/launch_background.xml
+             - analysis_options.yaml
+             - windows/CMakeLists.txt
+             - windows/runner/flutter_window.cpp
+             - windows/runner/utils.h
+             - windows/runner/utils.cpp
+             - windows/runner/runner.exe.manifest
+             - windows/runner/CMakeLists.txt
+             - windows/runner/win32_window.h
+             - windows/runner/win32_window.cpp
+             - windows/runner/resources/app_icon.ico
+             - windows/runner/resource.h
+             - windows/runner/Runner.rc
+             - windows/runner/main.cpp
+             - windows/runner/flutter_window.h
+             - windows/flutter/CMakeLists.txt
+             - windows/.gitignore
+           Modified files:
+             - .metadata
+             - ios/Runner/Info.plist
+             - ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+             - ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
+             - ios/Flutter/AppFrameworkInfo.plist
+             - ios/.gitignore
+             - pubspec.yaml
+             - .gitignore
+             - android/app/build.gradle
+             - android/app/src/profile/AndroidManifest.xml
+             - android/app/src/main/res/values/styles.xml
+             - android/app/src/main/AndroidManifest.xml
+             - android/app/src/debug/AndroidManifest.xml
+             - android/gradle/wrapper/gradle-wrapper.properties
+             - android/.gitignore
+             - android/build.gradle'''));
+
+    result = await processManager.run(<String>[
+      flutterBin,
+      'migrate',
+      'apply',
+      '--verbose',
+    ], workingDirectory: tempDir.path);
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString(), contains('Migration complete'));
+
+    expect(tempDir.childFile('.metadata').readAsStringSync(), contains('migration:\n  platforms:\n    - platform: root\n'));
+
+    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png').existsSync(), true);
+    expect(tempDir.childFile('web/icons/Icon-192.png').existsSync(), true);
+    expect(tempDir.childFile('linux/main.cc').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/CMakeLists.txt').existsSync(), true);
+  });
+
+  // Migrates a clean untouched app generated with flutter create
   testWithoutContext('vanilla migrate builds', () async {
     // Flutter Stable 2.0.0 hash: 60bd88df915880d23877bfc1602e8ddcf4c4dd2a
     await installProject('version:2.0.0_stable', main: '''
@@ -186,113 +293,6 @@ class MyApp extends StatelessWidget {
     expect(result.generatedTargetTemplateDirectory, isNotNull);
   });
 
-  // Migrates a clean untouched app generated with flutter create
-  testWithoutContext('vanilla migrate process succeeds', () async {
-    // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
-    await installProject('version:1.22.6_stable');
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-
-    ProcessResult result = await processManager.run(<String>[
-      flutterBin,
-      'migrate',
-      'start',
-      '--verbose',
-    ], workingDirectory: tempDir.path);
-    expect(result.stdout.toString(), contains('Working directory created at'));
-    expect(result.stdout.toString(), contains('''
-Added files:
-             - macos/Runner.xcworkspace/contents.xcworkspacedata
-             - macos/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png
-             - macos/Runner/DebugProfile.entitlements
-             - macos/Runner/Base.lproj/MainMenu.xib
-             - macos/Runner/MainFlutterWindow.swift
-             - macos/Runner/Configs/AppInfo.xcconfig
-             - macos/Runner/Configs/Debug.xcconfig
-             - macos/Runner/Configs/Release.xcconfig
-             - macos/Runner/Configs/Warnings.xcconfig
-             - macos/Runner/AppDelegate.swift
-             - macos/Runner/Info.plist
-             - macos/Runner/Release.entitlements
-             - macos/Runner.xcodeproj/project.pbxproj
-             - macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
-             - macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
-             - macos/Flutter/Flutter-Debug.xcconfig
-             - macos/Flutter/Flutter-Release.xcconfig
-             - macos/.gitignore
-             - web/index.html
-             - web/favicon.png
-             - web/icons/Icon-192.png
-             - web/icons/Icon-maskable-192.png
-             - web/icons/Icon-maskable-512.png
-             - web/icons/Icon-512.png
-             - web/manifest.json
-             - linux/main.cc
-             - linux/CMakeLists.txt
-             - linux/my_application.h
-             - linux/my_application.cc
-             - linux/flutter/CMakeLists.txt
-             - linux/.gitignore
-             - android/app/src/main/res/values-night/styles.xml
-             - android/app/src/main/res/drawable-v21/launch_background.xml
-             - analysis_options.yaml
-             - windows/CMakeLists.txt
-             - windows/runner/flutter_window.cpp
-             - windows/runner/utils.h
-             - windows/runner/utils.cpp
-             - windows/runner/runner.exe.manifest
-             - windows/runner/CMakeLists.txt
-             - windows/runner/win32_window.h
-             - windows/runner/win32_window.cpp
-             - windows/runner/resources/app_icon.ico
-             - windows/runner/resource.h
-             - windows/runner/Runner.rc
-             - windows/runner/main.cpp
-             - windows/runner/flutter_window.h
-             - windows/flutter/CMakeLists.txt
-             - windows/.gitignore
-           Modified files:
-             - .metadata
-             - ios/Runner/Info.plist
-             - ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
-             - ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
-             - ios/Flutter/AppFrameworkInfo.plist
-             - ios/.gitignore
-             - pubspec.yaml
-             - .gitignore
-             - android/app/build.gradle
-             - android/app/src/profile/AndroidManifest.xml
-             - android/app/src/main/res/values/styles.xml
-             - android/app/src/main/AndroidManifest.xml
-             - android/app/src/debug/AndroidManifest.xml
-             - android/gradle/wrapper/gradle-wrapper.properties
-             - android/.gitignore
-             - android/build.gradle'''));
-
-    result = await processManager.run(<String>[
-      flutterBin,
-      'migrate',
-      'apply',
-      '--verbose',
-    ], workingDirectory: tempDir.path);
-    expect(result.exitCode, 0);
-    expect(result.stdout.toString(), contains('Migration complete'));
-
-    expect(tempDir.childFile('.metadata').readAsStringSync(), contains('migration:\n  platforms:\n    - platform: root\n'));
-
-    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png').existsSync(), true);
-    expect(tempDir.childFile('web/icons/Icon-192.png').existsSync(), true);
-    expect(tempDir.childFile('linux/main.cc').existsSync(), true);
-    expect(tempDir.childFile('windows/runner/CMakeLists.txt').existsSync(), true);
-  });
-
   // Migrates a user-modified app
   testWithoutContext('modified migrate process succeeds', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
@@ -305,8 +305,8 @@ Added files:
       'apply',
       '--verbose',
     ], workingDirectory: tempDir.path);
-    expect(result.exitCode, 1);
-    expect(result.stderr.toString(), contains('No migration'));
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString(), contains('No migration'));
 
     result = await processManager.run(<String>[
       flutterBin,
@@ -352,7 +352,7 @@ Modified files:
       'apply',
       '--verbose',
     ], workingDirectory: tempDir.path);
-    expect(result.exitCode, 1);
+    expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('''Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:'''));
     expect(result.stdout.toString(), contains(']   - pubspec.yaml'));
 

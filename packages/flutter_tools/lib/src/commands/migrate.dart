@@ -25,6 +25,7 @@ class MigrateCommand extends FlutterCommand {
     addSubcommand(MigrateApplyCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));
     addSubcommand(MigrateStartCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));
     addSubcommand(MigrateStatusCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));
+    // TODO(garyq): add command for guided conflict resolution.
   }
 
   final bool _verbose;

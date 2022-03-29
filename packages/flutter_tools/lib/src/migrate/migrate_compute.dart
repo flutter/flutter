@@ -173,6 +173,9 @@ Future<MigrateResult?> computeMigration({
   if (baseRevision == null) {
     for (final MigratePlatformConfig platform in config.platformConfigs.values) {
       final String effectiveRevision = platform.baseRevision == null ? fallbackRevision : platform.baseRevision!;
+      if (platforms != null && !platforms.contains(platform.platform)) {
+        continue;
+      }
       if (platform.platform == SupportedPlatform.root) {
         rootBaseRevision = effectiveRevision;
       }
