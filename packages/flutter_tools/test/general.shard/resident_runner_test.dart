@@ -1921,7 +1921,7 @@ flutter:
       expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
-      expect(cachedUserTags, <String>['AppStartUp']);
+      expect(cachedUserTags, isEmpty);
       throw FakeDartDevelopmentServiceException(message:
         'Existing VM service clients prevent DDS from taking control.',
       );
@@ -1969,7 +1969,7 @@ flutter:
       expect(enableAuthCodes, isFalse);
       expect(ipv6, isTrue);
       expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
-      expect(cachedUserTags, <String>['AppStartUp']);
+      expect(cachedUserTags, isEmpty);
       done.complete();
       return null;
     };
@@ -2001,7 +2001,7 @@ flutter:
       expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
       expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
-      expect(cachedUserTags, <String>['AppStartUp']);
+      expect(cachedUserTags, isEmpty);
       throw FakeDartDevelopmentServiceException(message: 'No URI');
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
@@ -2013,8 +2013,6 @@ flutter:
     runZonedGuarded(() {
       flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete());
     }, (Object e, StackTrace st) {
-      print(e);
-      print(st);
       expect(e is StateError, true);
       expect((e as StateError).message, contains('No URI'));
       expect(testLogger.errorText, contains(
