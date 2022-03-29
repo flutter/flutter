@@ -12,6 +12,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'navigation_bar_theme.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -1216,19 +1217,18 @@ class _Defaults extends NavigationBarThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_86
+// Generated version v0_92
 class _TokenDefaultsM3 extends NavigationBarThemeData {
-  _TokenDefaultsM3(BuildContext context)
-      : _theme = Theme.of(context),
-        _colors = Theme.of(context).colorScheme,
-        super(
+  _TokenDefaultsM3(this.context)
+      : super(
           height: 80.0,
           elevation: 3.0,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         );
 
-  final ThemeData _theme;
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   // With Material 3, the NavigationBar uses an overlay blend for the
   // default color regardless of light/dark mode. This should be handled
@@ -1252,7 +1252,7 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
 
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-    final TextStyle style = _theme.textTheme.labelMedium!;
+    final TextStyle style = _textTheme.labelMedium!;
       return style.apply(color: states.contains(MaterialState.selected)
         ? _colors.onSurface
         : _colors.onSurfaceVariant

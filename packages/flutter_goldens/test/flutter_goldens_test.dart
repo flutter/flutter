@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' hide Directory;
 import 'dart:typed_data';
-import 'dart:ui' show hashValues, hashList;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -258,44 +257,46 @@ void main() {
       await skiaClient.tryjobInit();
     });
 
-    test('throws for error state from imgtestAdd', () {
-      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
-        ..createSync(recursive: true);
-      platform = FakePlatform(
-          environment: <String, String>{
-            'FLUTTER_ROOT': _kFlutterRoot,
-            'GOLDCTL' : 'goldctl',
-          },
-          operatingSystem: 'macos'
-      );
-
-      skiaClient = SkiaGoldClient(
-        workDirectory,
-        fs: fs,
-        process: process,
-        platform: platform,
-        httpClient: fakeHttpClient,
-      );
-
-      const RunInvocation goldctlInvocation = RunInvocation(
-        <String>[
-          'goldctl',
-          'imgtest', 'add',
-          '--work-dir', '/workDirectory/temp',
-          '--test-name', 'golden_file_test',
-          '--png-file', '/workDirectory/temp/golden_file_test.png',
-          '--passfail',
-        ],
-        null,
-      );
-      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
-      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
-
-      expect(
-        skiaClient.imgtestAdd('golden_file_test', goldenFile),
-        throwsException,
-      );
-    });
+    // TODO(Piinks): Re-enable once https://github.com/flutter/flutter/issues/100304
+    // is resolved.
+    // test('throws for error state from imgtestAdd', () {
+    //   final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+    //     ..createSync(recursive: true);
+    //   platform = FakePlatform(
+    //       environment: <String, String>{
+    //         'FLUTTER_ROOT': _kFlutterRoot,
+    //         'GOLDCTL' : 'goldctl',
+    //       },
+    //       operatingSystem: 'macos'
+    //   );
+    //
+    //   skiaClient = SkiaGoldClient(
+    //     workDirectory,
+    //     fs: fs,
+    //     process: process,
+    //     platform: platform,
+    //     httpClient: fakeHttpClient,
+    //   );
+    //
+    //   const RunInvocation goldctlInvocation = RunInvocation(
+    //     <String>[
+    //       'goldctl',
+    //       'imgtest', 'add',
+    //       '--work-dir', '/workDirectory/temp',
+    //       '--test-name', 'golden_file_test',
+    //       '--png-file', '/workDirectory/temp/golden_file_test.png',
+    //       '--passfail',
+    //     ],
+    //     null,
+    //   );
+    //   process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
+    //   process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
+    //
+    //   expect(
+    //     skiaClient.imgtestAdd('golden_file_test', goldenFile),
+    //     throwsException,
+    //   );
+    // });
 
     test('correctly inits tryjob for luci', () async {
       platform = FakePlatform(
@@ -873,7 +874,7 @@ class RunInvocation {
   final String? workingDirectory;
 
   @override
-  int get hashCode => hashValues(hashList(command), workingDirectory);
+  int get hashCode => Object.hash(Object.hashAll(command), workingDirectory);
 
   bool _commandEquals(List<String> other) {
     if (other == command) {

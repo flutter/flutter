@@ -134,6 +134,13 @@ abstract class CreateBase extends FlutterCommand {
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
+    argParser.addOption(
+      'initial-create-revision',
+      defaultsTo: null,
+      help: 'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
+            'internally and should generally not be used manually.',
+      hide: !verboseHelp,
+    );
   }
 
   /// The output directory of the command.
@@ -358,6 +365,8 @@ abstract class CreateBase extends FlutterCommand {
     final String pluginClassSnakeCase = snakeCase(pluginClass);
     final String pluginClassCapitalSnakeCase =
         pluginClassSnakeCase.toUpperCase();
+    final String pluginClassLowerCamelCase =
+        pluginClass[0].toLowerCase() + pluginClass.substring(1);
     final String appleIdentifier =
         createUTIIdentifier(organization, projectName);
     final String androidIdentifier =
@@ -389,6 +398,7 @@ abstract class CreateBase extends FlutterCommand {
       'androidSdkVersion': kAndroidSdkMinVersion,
       'pluginClass': pluginClass,
       'pluginClassSnakeCase': pluginClassSnakeCase,
+      'pluginClassLowerCamelCase': pluginClassLowerCamelCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
       'pluginProjectUUID': const Uuid().v4().toUpperCase(),
@@ -485,6 +495,8 @@ abstract class CreateBase extends FlutterCommand {
     bool overwrite = false,
     bool pluginExampleApp = false,
     bool printStatusWhenWriting = true,
+    bool generateMetadata = true,
+    FlutterProjectType projectType,
   }) async {
     int generatedCount = 0;
     generatedCount += await renderMerged(
@@ -498,6 +510,14 @@ abstract class CreateBase extends FlutterCommand {
     if (templateContext['android'] == true) {
       generatedCount += _injectGradleWrapper(project);
     }
+
+    final bool androidPlatform = templateContext['android'] as bool ?? false;
+    final bool iosPlatform = templateContext['ios'] as bool ?? false;
+    final bool linuxPlatform = templateContext['linux'] as bool ?? false;
+    final bool macOSPlatform = templateContext['macos'] as bool ?? false;
+    final bool windowsPlatform = templateContext['windows'] as bool ?? false;
+    final bool webPlatform = templateContext['web'] as bool ?? false;
+    final bool winUwpPlatform = templateContext['winuwp'] as bool ?? false;
 
     if (boolArg('pub')) {
       final Environment environment = Environment(
@@ -531,18 +551,63 @@ abstract class CreateBase extends FlutterCommand {
       );
 
       await project.ensureReadyForPlatformSpecificTooling(
-        androidPlatform: templateContext['android'] as bool ?? false,
-        iosPlatform: templateContext['ios'] as bool ?? false,
-        linuxPlatform: templateContext['linux'] as bool ?? false,
-        macOSPlatform: templateContext['macos'] as bool ?? false,
-        windowsPlatform: templateContext['windows'] as bool ?? false,
-        webPlatform: templateContext['web'] as bool ?? false,
-        winUwpPlatform: templateContext['winuwp'] as bool ?? false,
+        androidPlatform: androidPlatform,
+        iosPlatform: iosPlatform,
+        linuxPlatform: linuxPlatform,
+        macOSPlatform: macOSPlatform,
+        windowsPlatform: windowsPlatform,
+        webPlatform: webPlatform,
+        winUwpPlatform: winUwpPlatform,
       );
     }
-    if (templateContext['android'] == true) {
+    final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
+    if (androidPlatform) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      platformsForMigrateConfig.add(SupportedPlatform.android);
     }
+    if (iosPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.ios);
+    }
+    if (linuxPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.linux);
+    }
+    if (macOSPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.macos);
+    }
+    if (webPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.web);
+    }
+    if (windowsPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.windows);
+    }
+    if (winUwpPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.windowsuwp);
+    }
+    if (templateContext['fuchsia'] == true) {
+      platformsForMigrateConfig.add(SupportedPlatform.fuchsia);
+    }
+    if (generateMetadata) {
+      final File metadataFile = globals.fs
+          .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
+      final FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
+        file: metadataFile,
+        versionRevision: globals.flutterVersion.frameworkRevision,
+        versionChannel: globals.flutterVersion.channel,
+        projectType: projectType,
+        migrateConfig: MigrateConfig(),
+        logger: globals.logger);
+      metadata.populate(
+        platforms: platformsForMigrateConfig,
+        projectDirectory: directory,
+        create: true,
+        update: false,
+        currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
+        createRevision: globals.flutterVersion.frameworkRevision,
+        logger: globals.logger,
+      );
+      metadata.writeFile();
+    }
+
     return generatedCount;
   }
 

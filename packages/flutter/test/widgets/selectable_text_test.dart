@@ -2323,6 +2323,99 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/100395.
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem', fontSize: 200);
+    const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
+    const String offScreenText = 'off screen';
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          controller: controller,
+          child: SelectableText.rich(
+            TextSpan(
+              children: <TextSpan>[
+                const TextSpan(text: onScreenText),
+                TextSpan(
+                  text: offScreenText,
+                  recognizer: TapGestureRecognizer()..onTap = () { },
+                ),
+              ],
+              style: textStyle,
+            ),
+            textDirection: TextDirection.ltr,
+          ),
+        )
+      ),
+    );
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                      actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          actions: <SemanticsAction>[SemanticsAction.longPress],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  label: 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                                TestSemantics(
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isHidden,
+                                    SemanticsFlag.isLink
+                                  ],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                                  label: 'off screen',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
+
+    // Test show on screen.
+    expect(controller.offset, 0.0);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(8, SemanticsAction.showOnScreen);
+    await tester.pumpAndSettle();
+    expect(controller.offset != 0.0, isTrue);
+
+    semantics.dispose();
+  });
+
   testWidgets('SelectableText change selection with semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;

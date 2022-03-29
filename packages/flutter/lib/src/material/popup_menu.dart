@@ -37,6 +37,15 @@ const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
 const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
+const double _kDefaultIconSize = 24.0;
+
+/// Used to configure how the [PopupMenuButton] positions its popup menu.
+enum PopupMenuPosition {
+  /// Menu is positioned over the anchor.
+  over,
+  /// Menu is positioned under the anchor.
+  under,
+}
 
 /// A base class for entries in a material design popup menu.
 ///
@@ -627,6 +636,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     this.selectedItemIndex,
     this.textDirection,
     this.padding,
+    this.avoidBounds,
   );
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
@@ -645,6 +655,9 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
   // The padding of unsafe area.
   EdgeInsets padding;
+
+  // List of rectangles that we should avoid overlapping. Unusable screen area.
+  final Set<Rect> avoidBounds;
 
   // We put the child wherever position specifies, so long as it will fit within
   // the specified parent size padded (inset) by 8. If necessary, we adjust the
@@ -696,19 +709,38 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
           break;
       }
     }
+    final Offset wantedPosition = Offset(x, y);
+    final Offset originCenter = position.toRect(Offset.zero & size).center;
+    final Iterable<Rect> subScreens = DisplayFeatureSubScreen.subScreensInBounds(Offset.zero & size, avoidBounds);
+    final Rect subScreen = _closestScreen(subScreens, originCenter);
+    return _fitInsideScreen(subScreen, childSize, wantedPosition);
+  }
 
+  Rect _closestScreen(Iterable<Rect> screens, Offset point) {
+    Rect closest = screens.first;
+    for (final Rect screen in screens) {
+      if ((screen.center - point).distance < (closest.center - point).distance) {
+        closest = screen;
+      }
+    }
+    return closest;
+  }
+
+  Offset _fitInsideScreen(Rect screen, Size childSize, Offset wantedPosition){
+    double x = wantedPosition.dx;
+    double y = wantedPosition.dy;
     // Avoid going outside an area defined as the rectangle 8.0 pixels from the
     // edge of the screen in every direction.
-    if (x < _kMenuScreenPadding + padding.left)
-      x = _kMenuScreenPadding + padding.left;
-    else if (x + childSize.width > size.width - _kMenuScreenPadding - padding.right)
-      x = size.width - childSize.width - _kMenuScreenPadding - padding.right  ;
-    if (y < _kMenuScreenPadding + padding.top)
+    if (x < screen.left + _kMenuScreenPadding + padding.left)
+      x = screen.left + _kMenuScreenPadding + padding.left;
+    else if (x + childSize.width > screen.right - _kMenuScreenPadding - padding.right)
+      x = screen.right - childSize.width - _kMenuScreenPadding - padding.right;
+    if (y < screen.top + _kMenuScreenPadding + padding.top)
       y = _kMenuScreenPadding + padding.top;
-    else if (y + childSize.height > size.height - _kMenuScreenPadding - padding.bottom)
-      y = size.height - padding.bottom - _kMenuScreenPadding - childSize.height ;
+    else if (y + childSize.height > screen.bottom - _kMenuScreenPadding - padding.bottom)
+      y = screen.bottom - childSize.height - _kMenuScreenPadding - padding.bottom;
 
-    return Offset(x, y);
+    return Offset(x,y);
   }
 
   @override
@@ -722,7 +754,8 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       || selectedItemIndex != oldDelegate.selectedItemIndex
       || textDirection != oldDelegate.textDirection
       || !listEquals(itemSizes, oldDelegate.itemSizes)
-      || padding != oldDelegate.padding;
+      || padding != oldDelegate.padding
+      || !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 }
 
@@ -804,12 +837,17 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
               selectedItemIndex,
               Directionality.of(context),
               mediaQuery.padding,
+              _avoidBounds(mediaQuery),
             ),
             child: capturedThemes.wrap(menu),
           );
         },
       ),
     );
+  }
+
+  Set<Rect> _avoidBounds(MediaQueryData mediaQuery) {
+    return DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet();
   }
 }
 
@@ -977,8 +1015,8 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.color,
     this.enableFeedback,
     this.constraints,
+    this.position = PopupMenuPosition.over,
   }) : assert(itemBuilder != null),
-       assert(offset != null),
        assert(enabled != null),
        assert(
          !(child != null && icon != null),
@@ -1033,10 +1071,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// and the button will behave like an [IconButton].
   final Widget? icon;
 
-  /// The offset applied to the Popup Menu Button.
+  /// The offset is applied relative to the initial position
+  /// set by the [position].
   ///
-  /// When not set, the Popup Menu Button will be positioned directly next to
-  /// the button that was used to create it.
+  /// When not set, the offset defaults to [Offset.zero].
   final Offset offset;
 
   /// Whether this popup menu button is interactive.
@@ -1080,7 +1118,9 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// If provided, the size of the [Icon].
   ///
-  /// If this property is null, the default size is 24.0 pixels.
+  /// If this property is null, then [IconThemeData.size] is used.
+  /// If [IconThemeData.size] is also null, then
+  /// default size is 24.0 pixels.
   final double? iconSize;
 
   /// Optional size constraints for the menu.
@@ -1098,6 +1138,15 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Specifying this parameter enables creation of menu wider than
   /// the default maximum width.
   final BoxConstraints? constraints;
+
+  /// Whether the popup menu is positioned over or under the popup menu button.
+  ///
+  /// [offset] is used to change the position of the popup menu relative to the
+  /// position set by this parameter.
+  ///
+  /// When not set, the position defaults to [PopupMenuPosition.over] which makes the
+  /// popup menu appear directly over the button that was used to create it.
+  final PopupMenuPosition position;
 
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
@@ -1120,10 +1169,19 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
+    final Offset offset;
+    switch (widget.position) {
+      case PopupMenuPosition.over:
+        offset = widget.offset;
+        break;
+      case PopupMenuPosition.under:
+        offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2)) + widget.offset;
+        break;
+    }
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
-        button.localToGlobal(widget.offset, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero) + widget.offset, ancestor: overlay),
+        button.localToGlobal(offset, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero) + offset, ancestor: overlay),
       ),
       Offset.zero & overlay.size,
     );
@@ -1164,6 +1222,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final IconThemeData iconTheme = IconTheme.of(context);
     final bool enableFeedback = widget.enableFeedback
       ?? PopupMenuTheme.of(context).enableFeedback
       ?? true;
@@ -1186,7 +1245,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
       splashRadius: widget.splashRadius,
-      iconSize: widget.iconSize ?? 24.0,
+      iconSize: widget.iconSize ?? iconTheme.size ?? _kDefaultIconSize,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
       enableFeedback: enableFeedback,

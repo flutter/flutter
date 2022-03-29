@@ -430,7 +430,7 @@ class ColorSwatch<T> extends Color {
   /// Creates a color that has a small table of related colors called a "swatch".
   ///
   /// The `primary` argument should be the 32 bit ARGB value of one of the
-  /// values in the swatch, as would be passed to the [new Color] constructor
+  /// values in the swatch, as would be passed to the [Color.new] constructor
   /// for that same color, and as is exposed by [value]. (This is distinct from
   /// the specific index of the color in the swatch.)
   const ColorSwatch(int primary, this._swatch) : super(primary);

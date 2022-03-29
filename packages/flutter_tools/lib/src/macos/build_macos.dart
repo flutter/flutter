@@ -16,9 +16,13 @@ import '../project.dart';
 import 'cocoapod_utils.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 
-/// When run in -quiet mode, Xcode only prints from the underlying tasks to stdout.
+/// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
 /// Passing this regexp to trace moves the stdout output to stderr.
-final RegExp _anyOutput = RegExp('.*');
+///
+/// Filter out xcodebuild logging unrelated to macOS builds:
+/// xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
+/// note: Using new build system
+final RegExp _filteredOutput = RegExp(r'^((?!Requested but did not find extension point with identifier|note\:).)*$');
 
 /// Builds the macOS project through xcodebuild.
 // TODO(zanderso): refactor to share code with the existing iOS code.
@@ -102,6 +106,7 @@ Future<void> buildMacOS({
       '-configuration', configuration,
       '-scheme', 'Runner',
       '-derivedDataPath', flutterBuildDir.absolute.path,
+      '-destination', 'platform=macOS',
       'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
       if (verboseLogging)
@@ -112,7 +117,8 @@ Future<void> buildMacOS({
       ...environmentVariablesAsXcodeBuildSettings(globals.platform)
     ],
     trace: true,
-    stdoutErrorMatcher: verboseLogging ? null : _anyOutput,
+    stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
+    mapFunction: verboseLogging ? null : (String line) => _filteredOutput.hasMatch(line) ? line : null,
   );
   } finally {
     status.cancel();

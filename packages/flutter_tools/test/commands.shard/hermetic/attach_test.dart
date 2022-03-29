@@ -631,7 +631,11 @@ class StreamLogger extends Logger {
   }
 
   @override
-  Status startSpinner({ VoidCallback onFinish }) {
+  Status startSpinner({
+    VoidCallback onFinish,
+    Duration timeout,
+    SlowWarningCallback slowWarningCallback,
+  }) {
     return SilentStatus(
       stopwatch: Stopwatch(),
       onFinish: onFinish,

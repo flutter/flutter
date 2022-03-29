@@ -11,6 +11,7 @@ import 'src/animated_placeholder.dart';
 import 'src/animation_with_microtasks.dart';
 import 'src/backdrop_filter.dart';
 import 'src/color_filter_and_fade.dart';
+import 'src/color_filter_cache.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
 import 'src/filtered_child_animation.dart';
@@ -23,6 +24,7 @@ import 'src/opacity_peephole.dart';
 import 'src/picture_cache.dart';
 import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
+import 'src/shader_mask_cache.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
 import 'src/stack_size.dart';
@@ -55,10 +57,12 @@ class MacrobenchmarksApp extends StatelessWidget {
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => const ColorFilterAndFadePage(),
+        kColorFilterCacheRouteName: (BuildContext context) => const ColorFilterCachePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
         kHeavyGridViewRouteName: (BuildContext context) => const HeavyGridViewPage(),
+        kShaderMaskCacheRouteName: (BuildContext context) => const ShaderMaskCachePage(),
         kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
         kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
         kAnimationWithMicrotasksRouteName: (BuildContext context) => const AnimationWithMicrotasks(),
@@ -164,6 +168,20 @@ class HomePage extends StatelessWidget {
             child: const Text('Color Filter and Fade'),
             onPressed: () {
               Navigator.pushNamed(context, kColorFilterAndFadeRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kColorFilterCacheRouteName),
+            child: const Text('Color Filter Cache'),
+            onPressed: () {
+              Navigator.pushNamed(context, kColorFilterCacheRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kShaderMaskCacheRouteName),
+            child: const Text('Shader Mask Cache'),
+            onPressed: () {
+              Navigator.pushNamed(context, kShaderMaskCacheRouteName);
             },
           ),
           ElevatedButton(

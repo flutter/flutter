@@ -703,25 +703,28 @@ class CupertinoActionSheetAction extends StatelessWidget {
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
 
-    return GestureDetector(
-      onTap: onPressed,
-      behavior: HitTestBehavior.opaque,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: _kActionSheetButtonHeight,
-        ),
-        child: Semantics(
-          button: true,
-          child: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(
-              vertical: 16.0,
-              horizontal: 10.0,
-            ),
-            child: DefaultTextStyle(
-              style: style,
-              textAlign: TextAlign.center,
-              child: child,
+    return MouseRegion(
+      cursor: onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: GestureDetector(
+        onTap: onPressed,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: _kActionSheetButtonHeight,
+          ),
+          child: Semantics(
+            button: true,
+            child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(
+                vertical: 16.0,
+                horizontal: 10.0,
+              ),
+              child: DefaultTextStyle(
+                style: style,
+                textAlign: TextAlign.center,
+                child: child,
+              ),
             ),
           ),
         ),
@@ -1751,18 +1754,21 @@ class CupertinoDialogAction extends StatelessWidget {
             content: child,
           );
 
-    return GestureDetector(
-      excludeFromSemantics: true,
-      onTap: onPressed,
-      behavior: HitTestBehavior.opaque,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: _kDialogMinButtonHeight,
-        ),
-        child: Container(
-          alignment: Alignment.center,
-          padding: EdgeInsets.all(_calculatePadding(context)),
-          child: sizedContent,
+    return MouseRegion(
+      cursor: onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: GestureDetector(
+        excludeFromSemantics: true,
+        onTap: onPressed,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: _kDialogMinButtonHeight,
+          ),
+          child: Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.all(_calculatePadding(context)),
+            child: sizedContent,
+          ),
         ),
       ),
     );

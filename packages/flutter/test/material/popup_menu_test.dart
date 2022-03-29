@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
+import 'dart:ui' show SemanticsFlag, DisplayFeature, DisplayFeatureType, DisplayFeatureState;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -851,6 +851,66 @@ void main() {
 
     final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
     expect(tester.getTopLeft(popupFinder), buttonTopLeft);
+  });
+
+  testWidgets('PopupMenu positioning around display features', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(800, 600),
+            displayFeatures: <DisplayFeature>[
+              // A 20-pixel wide vertical display feature, similar to a foldable
+              // with a visible hinge. Splits the display into two "virtual screens"
+              // and the popup menu should never overlap the display feature.
+              DisplayFeature(
+                bounds: Rect.fromLTRB(390, 0, 410, 600),
+                type: DisplayFeatureType.cutout,
+                state: DisplayFeatureState.unknown,
+              )
+            ]
+          ),
+          child: Scaffold(
+            body: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<dynamic>(
+                  builder: (BuildContext context) {
+                    return Padding(
+                      // Position the button in the top-right of the first "virtual screen"
+                      padding: const EdgeInsets.only(right:390.0),
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: PopupMenuButton<int>(
+                          key: buttonKey,
+                          itemBuilder: (_) => <PopupMenuItem<int>>[
+                            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+                          ],
+                          child: const Text('Show Menu'),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    final Finder popupFinder = find.bySemanticsLabel('Popup menu');
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    // Since the display feature splits the display into 2 sub-screens, popup
+    // menu should be positioned to fit in the first virtual screen, where the
+    // originating button is.
+    // The 8 pixels is [_kMenuScreenPadding].
+    expect(tester.getTopRight(popupFinder), const Offset(390 - 8, 8));
   });
 
   testWidgets('PopupMenu removes MediaQuery padding', (WidgetTester tester) async {
@@ -2568,6 +2628,180 @@ void main() {
 
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).width, 500);
+  });
+
+  testWidgets('Can change menu position and offset', (WidgetTester tester) async {
+    PopupMenuButton<int> buildMenuButton({required PopupMenuPosition position}) {
+      return PopupMenuButton<int>(
+        position: position,
+        itemBuilder: (BuildContext context) {
+          return <PopupMenuItem<int>>[
+            PopupMenuItem<int>(
+              value: 1,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return const Text('AAA');
+                },
+              ),
+            ),
+          ];
+        },
+      );
+    }
+
+    // Popup menu with `MenuPosition.over (default) with default offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: buildMenuButton(position: PopupMenuPosition.over),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 8.0));
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.under`(custom) with default offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: buildMenuButton(position: PopupMenuPosition.under),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 40.0));
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.over (default) with custom offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: PopupMenuButton<int>(
+              offset: const Offset(0.0, 50),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<int>>[
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return const Text('AAA');
+                      },
+                    ),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 50.0));
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.under (custom) with custom offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: PopupMenuButton<int>(
+              offset: const Offset(0.0, 50),
+              position: PopupMenuPosition.under,
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<int>>[
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return const Text('AAA');
+                      },
+                    ),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 90.0));
+  });
+
+  testWidgets("PopupMenuButton icon inherits IconTheme's size", (WidgetTester tester) async {
+    Widget _buildPopupMenu({double? themeIconSize, double? iconSize}) {
+      return MaterialApp(
+        theme: ThemeData(
+          iconTheme: IconThemeData(
+            size: themeIconSize,
+          ),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              iconSize: iconSize,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Popup menu with default icon size.
+    await tester.pumpWidget(_buildPopupMenu());
+    IconButton iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
+    // Default PopupMenuButton icon size is 24.0.
+    expect(iconButton.iconSize, 24.0);
+
+    // Popup menu with custom theme icon size.
+    await tester.pumpWidget(_buildPopupMenu(themeIconSize: 30.0));
+    await tester.pumpAndSettle();
+    iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
+    // PopupMenuButton icon inherits IconTheme's size.
+    expect(iconButton.iconSize, 30.0);
+
+    // Popup menu with custom icon size.
+    await tester.pumpWidget(_buildPopupMenu(themeIconSize: 30.0, iconSize: 50.0));
+    await tester.pumpAndSettle();
+    iconButton = tester.widget(find.widgetWithIcon(IconButton, Icons.more_vert));
+    // PopupMenuButton icon size overrides IconTheme's size.
+    expect(iconButton.iconSize, 50.0);
   });
 }
 
