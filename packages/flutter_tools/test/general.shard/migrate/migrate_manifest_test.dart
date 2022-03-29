@@ -4,7 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/migrate/migrate_compute.dart';
 import 'package:flutter_tools/src/migrate/migrate_manifest.dart';
 import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 
@@ -12,12 +12,10 @@ import '../../src/common.dart';
 
 void main() {
   late FileSystem fileSystem;
-  late BufferLogger logger;
   late File manifestFile;
 
   setUpAll(() {
     fileSystem = MemoryFileSystem.test();
-    logger = BufferLogger.test();
     manifestFile = fileSystem.file('.migrate_manifest');
   });
 
@@ -26,7 +24,7 @@ void main() {
       manifestFile.writeAsStringSync('');
       bool exceptionFound = false;
       try {
-        final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+        MigrateManifest.fromFile(manifestFile);
       } catch (e) {
         exceptionFound = true;
         expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. File is not a Yaml map.');
@@ -43,7 +41,7 @@ void main() {
       ''');
       bool exceptionFound = false;
       try {
-        final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+       MigrateManifest.fromFile(manifestFile);
       } catch (e) {
         exceptionFound = true;
         expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. File is missing an entry. Fix the manifest or abandon the migration and try again.');
@@ -59,7 +57,7 @@ void main() {
       ''');
       bool exceptionFound = false;
       try {
-        final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+        MigrateManifest.fromFile(manifestFile);
       } catch (e) {
         exceptionFound = true;
         expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. File is missing an entry. Fix the manifest or abandon the migration and try again.');
@@ -77,7 +75,7 @@ void main() {
       ''');
       bool exceptionFound = false;
       try {
-        final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+        MigrateManifest.fromFile(manifestFile);
       } catch (e) {
         exceptionFound = true;
         expect(e.toString(), 'Exception: Invalid .migrate_manifest file in the migrate working directory. Entry is not a Yaml list. Fix the manifest or abandon the migration and try again.');
@@ -167,6 +165,59 @@ void main() {
       expect(manifest.mergedFiles[1], 'file2');
       expect(manifest.deletedFiles[0], 'file3');
       expect(manifest.deletedFiles[1], 'file4');
+    });
+  });
+
+  group('manifest MigrateResult creation', () {
+    testWithoutContext('empty MigrateResult', () async {
+      final MigrateManifest manifest = MigrateManifest(migrateRootDir: fileSystem.directory('root'), migrateResult: MigrateResult(
+        mergeResults: <MergeResult>[],
+        addedFiles: <FilePendingMigration>[],
+        deletedFiles: <FilePendingMigration>[],
+        tempDirectories: <Directory>[],
+        sdkDirs: <String, Directory>{},
+      ));
+      expect(manifest.mergedFiles.isEmpty, true);
+      expect(manifest.conflictFiles.isEmpty, true);
+      expect(manifest.addedFiles.isEmpty, true);
+      expect(manifest.deletedFiles.isEmpty, true);
+    });
+
+    testWithoutContext('simple MigrateResult', () async {
+      final MigrateManifest manifest = MigrateManifest(migrateRootDir: fileSystem.directory('root'), migrateResult: MigrateResult(
+        mergeResults: <MergeResult>[
+          MergeResult.explicit(
+            localPath: 'merged_file',
+            mergedString: 'str',
+            hasConflict: false,
+            exitCode: 0,
+          ),
+          MergeResult.explicit(
+            localPath: 'conflict_file',
+            mergedString: '<<<<<<<<<<<',
+            hasConflict: true,
+            exitCode: 1,
+          ),
+        ],
+        addedFiles: <FilePendingMigration>[FilePendingMigration('added_file', fileSystem.file('added_file'))],
+        deletedFiles: <FilePendingMigration>[FilePendingMigration('deleted_file', fileSystem.file('deleted_file'))],
+        tempDirectories: <Directory>[],
+        sdkDirs: <String, Directory>{},
+      ));
+      expect(manifest.mergedFiles.isEmpty, false);
+      expect(manifest.conflictFiles.isEmpty, false);
+      expect(manifest.addedFiles.isEmpty, false);
+      expect(manifest.deletedFiles.isEmpty, false);
+
+      expect(manifest.mergedFiles.length, 1);
+      expect(manifest.conflictFiles.length, 1);
+      expect(manifest.addedFiles.length, 1);
+      expect(manifest.deletedFiles.length, 1);
+
+      expect(manifest.mergedFiles[0], 'merged_file');
+      expect(manifest.conflictFiles[0], 'conflict_file');
+      expect(manifest.addedFiles[0], 'added_file');
+      expect(manifest.deletedFiles[0], 'deleted_file');
     });
   });
 }

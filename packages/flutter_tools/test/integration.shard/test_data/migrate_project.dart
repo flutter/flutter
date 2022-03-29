@@ -17,6 +17,7 @@ class MigrateProject extends Project {
   final String version;
 
   /// Manually set main.dart
+  @override
   final String? main;
 
   /// Non-vanilla is a set of changed files that guarantee a merge conflict.
