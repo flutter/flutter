@@ -8,6 +8,8 @@ impeller_component("display_list") {
   sources = [
     "display_list_dispatcher.cc",
     "display_list_dispatcher.h",
+    "display_list_image_impeller.cc",
+    "display_list_image_impeller.h",
   ]
 
   public_deps = [

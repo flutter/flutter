@@ -166,7 +166,7 @@ static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
   texture_descriptor.size = ISize::MakeWH(atlas_size, atlas_size);
 
   if (pixmap.rowBytes() * pixmap.height() !=
-      texture_descriptor.GetSizeOfBaseMipLevel()) {
+      texture_descriptor.GetByteSizeOfBaseMipLevel()) {
     return nullptr;
   }
 

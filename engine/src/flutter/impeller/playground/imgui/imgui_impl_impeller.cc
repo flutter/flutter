@@ -78,7 +78,7 @@ bool ImGui_ImplImpeller_Init(std::shared_ptr<impeller::Context> context) {
               "Could not allocate ImGui font texture.");
 
     [[maybe_unused]] bool uploaded = bd->font_texture->SetContents(
-        pixels, texture_descriptor.GetSizeOfBaseMipLevel());
+        pixels, texture_descriptor.GetByteSizeOfBaseMipLevel());
     IM_ASSERT(uploaded &&
               "Could not upload ImGui font texture to device memory.");
   }

@@ -35,7 +35,7 @@ std::shared_ptr<Contents> PaintPassDelegate::CreateContentsForSubpassTarget(
     std::shared_ptr<Texture> target) {
   auto contents = std::make_shared<TextureContents>();
   contents->SetTexture(target);
-  contents->SetSourceRect(IRect::MakeSize(target->GetSize()));
+  contents->SetSourceRect(Rect::MakeSize(Size(target->GetSize())));
   contents->SetOpacity(paint_.color.alpha);
   return contents;
 }

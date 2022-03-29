@@ -2,8 +2,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("tools/impeller.gni")
+
 config("impeller_public_config") {
   include_dirs = [ ".." ]
+
+  defines = []
+
+  if (impeller_supports_platform) {
+    defines += [ "IMPELLER_SUPPORTS_PLATFORM=1" ]
+  }
 }
 
 group("impeller") {
