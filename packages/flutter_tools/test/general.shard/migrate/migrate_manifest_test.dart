@@ -174,6 +174,8 @@ void main() {
         mergeResults: <MergeResult>[],
         addedFiles: <FilePendingMigration>[],
         deletedFiles: <FilePendingMigration>[],
+        mergeTypeMap: <String, MergeType>{},
+        diffMap: <String, DiffResult>{},
         tempDirectories: <Directory>[],
         sdkDirs: <String, Directory>{},
       ));
@@ -201,6 +203,9 @@ void main() {
         ],
         addedFiles: <FilePendingMigration>[FilePendingMigration('added_file', fileSystem.file('added_file'))],
         deletedFiles: <FilePendingMigration>[FilePendingMigration('deleted_file', fileSystem.file('deleted_file'))],
+        // The following are ignored by the manifest.
+        mergeTypeMap: <String, MergeType>{'test': MergeType.threeWay},
+        diffMap: <String, DiffResult>{},
         tempDirectories: <Directory>[],
         sdkDirs: <String, Directory>{},
       ));

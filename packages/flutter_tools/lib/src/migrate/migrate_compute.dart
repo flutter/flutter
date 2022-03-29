@@ -87,6 +87,8 @@ class MigrateResult {
     required this.deletedFiles,
     required this.tempDirectories,
     required this.sdkDirs,
+    required this.mergeTypeMap,
+    required this.diffMap,
     this.generatedBaseTemplateDirectory,
     this.generatedTargetTemplateDirectory});
 
@@ -96,12 +98,16 @@ class MigrateResult {
       addedFiles = <FilePendingMigration>[],
       deletedFiles = <FilePendingMigration>[],
       tempDirectories = <Directory>[],
+      mergeTypeMap = <String, MergeType>{},
+      diffMap = <String, DiffResult>{},
       sdkDirs = <String, Directory>{};
 
   final List<MergeResult> mergeResults;
   final List<FilePendingMigration> addedFiles;
   final List<FilePendingMigration> deletedFiles;
   final List<Directory> tempDirectories;
+  final Map<String, MergeType> mergeTypeMap;
+  final Map<String, DiffResult> diffMap;
   Directory? generatedBaseTemplateDirectory;
   Directory? generatedTargetTemplateDirectory;
   Map<String, Directory> sdkDirs;
@@ -227,14 +233,139 @@ Future<MigrateResult?> computeMigration({
   await MigrateUtils.gitInit(migrateResult.generatedBaseTemplateDirectory!.absolute.path);
   await MigrateUtils.gitInit(migrateResult.generatedTargetTemplateDirectory!.absolute.path);
 
-  final Map<String, MergeType> mergeTypeMap = <String, MergeType>{};
-
-  // Create base
   final String name = flutterProject.manifest.appName;
   final String androidLanguage = flutterProject.android.isKotlin ? 'kotlin' : 'java';
   final String iosLanguage = flutterProject.ios.isSwift ? 'swift' : 'objc';
 
   final Directory targetFlutterDirectory = fileSystem.directory(Cache.flutterRoot);
+
+  // Create the base reference vanilla app.
+  await createBase(
+    migrateResult,
+    flutterProject,
+    baseAppPath,
+    revisionsList,
+    revisionToConfigs,
+    fallbackRevision,
+    targetRevision,
+    name,
+    androidLanguage,
+    iosLanguage,
+    targetFlutterDirectory,
+    logger,
+    fileSystem,
+    status
+  );
+
+  // Create target reference app when not provided.
+  if (targetAppPath == null) {
+    // Create target
+    status.pause();
+    logger.printStatus('Creating target app with revision $targetRevision.', indent: 2, color: TerminalColor.grey);
+    status.resume();
+    if (verbose) {
+      logger.printStatus('Creating target app.');
+    }
+    await MigrateUtils.createFromTemplates(
+      targetFlutterDirectory.childDirectory('bin').absolute.path,
+      name: name,
+      androidLanguage: androidLanguage,
+      iosLanguage: iosLanguage,
+      outputDirectory: migrateResult.generatedTargetTemplateDirectory!.absolute.path
+    );
+  }
+
+  await MigrateUtils.gitInit(flutterProject.directory.absolute.path);
+
+  // Generate diffs. These diffs are used to determine if a file is newly added, needs merging, or deleted (rare).
+  status.pause();
+  logger.printStatus('Diffing base and target reference app.', indent: 2, color: TerminalColor.grey);
+  status.resume();
+  await diffBaseAndTarget(
+    migrateResult,
+    flutterProject,
+    logger,
+    verbose,
+    fileSystem,
+    status
+  );
+
+  // Check for any new files that were added in the new template
+  status.pause();
+  logger.printStatus('Finding newly added files', indent: 2, color: TerminalColor.grey);
+  status.resume();
+  await computeNewlyAddedFiles(
+    migrateResult,
+    flutterProject,
+    logger,
+    verbose,
+    fileSystem,
+    status
+  );
+
+
+  status.pause();
+  logger.printStatus('Merging changes with existing project.', indent: 2, color: TerminalColor.grey);
+  status.resume();
+  await computeMerge(
+    migrateResult,
+    flutterProject,
+    unmanagedFiles,
+    unmanagedDirectories,
+    preferTwoWayMerge,
+    logger,
+    verbose,
+    fileSystem,
+    status
+  );
+
+  status.pause();
+  logger.printStatus('Cleaning up temp directories.', indent: 2, color: TerminalColor.grey);
+  status.resume();
+  if (deleteTempDirectories) {
+    // Don't delete user-provided directories
+    if (!customBaseAppDir) {
+      migrateResult.tempDirectories.add(migrateResult.generatedBaseTemplateDirectory!);
+    }
+    if (!customTargetAppDir) {
+      migrateResult.tempDirectories.add(migrateResult.generatedTargetTemplateDirectory!);
+    }
+    migrateResult.tempDirectories.addAll(migrateResult.sdkDirs.values);
+  }
+  status.stop();
+  return migrateResult;
+}
+
+String getLocalPath(String path, String basePath, FileSystem fileSystem) {
+  return path.replaceFirst(basePath + fileSystem.path.separator, '');
+}
+
+/// Returns a base revision to fallback to in case a true base revision is unknown.
+String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion version) {
+  if (metadata.versionRevision != null) {
+    return metadata.versionRevision!;
+  }
+  return version.frameworkRevision;
+}
+
+/// Creates the base reference app based off of the migrate config in the .metadata file.
+Future<void> createBase(
+  MigrateResult migrateResult,
+  FlutterProject flutterProject,
+  String? baseAppPath,
+  List<String> revisionsList, 
+  Map<String, List<MigratePlatformConfig>> revisionToConfigs,
+  String fallbackRevision,
+  String targetRevision,
+  String name,
+  String androidLanguage,
+  String iosLanguage,
+  Directory targetFlutterDirectory,
+  Logger logger,
+  FileSystem fileSystem,
+  Status status,
+) async {
+  // Create base
   // Clone base flutter
   if (baseAppPath == null) {
     final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
@@ -299,41 +430,26 @@ Future<MigrateResult?> computeMigration({
         }
         final File baseTemplateFile = entity.absolute;
         final String localPath = getLocalPath(baseTemplateFile.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path, fileSystem);
-        if (!mergeTypeMap.containsKey(localPath)) {
+        if (!migrateResult.mergeTypeMap.containsKey(localPath)) {
           // Use two way merge when the base revision is the same as the target revision.
-          mergeTypeMap[localPath] = revision == targetRevision ? MergeType.twoWay : MergeType.threeWay;
+          migrateResult.mergeTypeMap[localPath] = revision == targetRevision ? MergeType.twoWay : MergeType.threeWay;
         }
       }
     }
   }
+}
 
-  if (targetAppPath == null) {
-    // Create target
-    status.pause();
-    logger.printStatus('Creating target app with revision $targetRevision.', indent: 2, color: TerminalColor.grey);
-    status.resume();
-    if (verbose) {
-      logger.printStatus('Creating target app.');
-    }
-    await MigrateUtils.createFromTemplates(
-      targetFlutterDirectory.childDirectory('bin').absolute.path,
-      name: name,
-      androidLanguage: androidLanguage,
-      iosLanguage: iosLanguage,
-      outputDirectory: migrateResult.generatedTargetTemplateDirectory!.absolute.path
-    );
-  }
-
-  await MigrateUtils.gitInit(flutterProject.directory.absolute.path);
-
-  // Generate diffs. These diffs are used to determine if a file is newly added, needs merging, or deleted (rare).
-  status.pause();
-  logger.printStatus('Diffing base and target reference app.', indent: 2, color: TerminalColor.grey);
-  status.resume();
+Future<void> diffBaseAndTarget(
+  MigrateResult migrateResult,
+  FlutterProject flutterProject,
+  Logger logger,
+  bool verbose,
+  FileSystem fileSystem,
+  Status status
+) async {
   final List<FileSystemEntity> generatedBaseFiles = migrateResult.generatedBaseTemplateDirectory!.listSync(recursive: true);
   final List<FileSystemEntity> generatedTargetFiles = migrateResult.generatedTargetTemplateDirectory!.listSync(recursive: true);
   int modifiedFilesCount = 0;
-  final Map<String, DiffResult> diffMap = <String, DiffResult>{};
   for (final FileSystemEntity entity in generatedBaseFiles) {
     if (entity is! File) {
       continue;
@@ -344,56 +460,77 @@ Future<MigrateResult?> computeMigration({
       continue;
     }
     if (await MigrateUtils.isGitIgnored(baseTemplateFile.absolute.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path)) {
-      diffMap[localPath] = DiffResult.ignored();
+      migrateResult.diffMap[localPath] = DiffResult.ignored();
     }
     final File targetTemplateFile = migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
     if (targetTemplateFile.existsSync()) {
       final DiffResult diff = await MigrateUtils.diffFiles(baseTemplateFile, targetTemplateFile);
-      diffMap[localPath] = diff;
+      migrateResult.diffMap[localPath] = diff;
       if (verbose && diff.diff != '') {
-        logger.printStatus('  Found ${diff.exitCode} changes in $localPath ');
+        status.pause();
+        logger.printStatus('Found ${diff.exitCode} changes in $localPath', indent: 4, color: TerminalColor.grey);
+        status.resume();
         modifiedFilesCount++;
       }
     } else {
       // Current file has no new template counterpart, which is equivalent to a deletion.
       // This could also indicate a renaming if there is an addition with equivalent contents.
-      diffMap[localPath] = DiffResult.deletion();
+      migrateResult.diffMap[localPath] = DiffResult.deletion();
     }
   }
   if (verbose) {
+    status.pause();
     logger.printStatus('$modifiedFilesCount files were modified between base and target apps.');
+    status.resume();
   }
+}
 
-  // Check for any new files that were added in the new template
-  status.pause();
-  logger.printStatus('Finding newly added files', indent: 2, color: TerminalColor.grey);
-  status.resume();
+Future<void> computeNewlyAddedFiles(
+  MigrateResult migrateResult,
+  FlutterProject flutterProject,
+  Logger logger,
+  bool verbose,
+  FileSystem fileSystem,
+  Status status
+) async {
+  final List<FileSystemEntity> generatedTargetFiles = migrateResult.generatedTargetTemplateDirectory!.listSync(recursive: true);
   for (final FileSystemEntity entity in generatedTargetFiles) {
     if (entity is! File) {
       continue;
     }
     final File targetTemplateFile = entity.absolute;
     final String localPath = getLocalPath(targetTemplateFile.path, migrateResult.generatedTargetTemplateDirectory!.absolute.path, fileSystem);
-    if (diffMap.containsKey(localPath) || _skipped(localPath)) {
+    if (migrateResult.diffMap.containsKey(localPath) || _skipped(localPath)) {
       continue;
     }
     if (await MigrateUtils.isGitIgnored(targetTemplateFile.absolute.path, migrateResult.generatedTargetTemplateDirectory!.absolute.path)) {
-      diffMap[localPath] = DiffResult.ignored();
+      migrateResult.diffMap[localPath] = DiffResult.ignored();
     }
-    diffMap[localPath] = DiffResult.addition();
+    migrateResult.diffMap[localPath] = DiffResult.addition();
     migrateResult.addedFiles.add(FilePendingMigration(localPath, targetTemplateFile));
   }
   if (verbose) {
+    status.pause();
     logger.printStatus('${migrateResult.addedFiles.length} files were newly added in the target app.');
+    status.resume();
   }
+}
 
+/// Loops through each existing file and intelligently merges it with the base->target changes.
+Future<void> computeMerge(
+  MigrateResult migrateResult,
+  FlutterProject flutterProject,
+  List<String> unmanagedFiles,
+  List<String> unmanagedDirectories,
+  bool preferTwoWayMerge,
+  Logger logger,
+  bool verbose,
+  FileSystem fileSystem,
+  Status status
+) async {
   final List<CustomMerge> customMerges = <CustomMerge>[
     MetadataCustomMerge(logger: logger),
   ];
-
-  status.pause();
-  logger.printStatus('Merging changes with existing project.', indent: 2, color: TerminalColor.grey);
-  status.resume();
   // For each existing file in the project, we attampt to 3 way merge if it is changed by the user.
   final List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
   final String projectRootPath = flutterProject.directory.absolute.path;
@@ -420,7 +557,7 @@ Future<MigrateResult?> computeMigration({
     }
     // Diff the current file against the old generated template
     final String localPath = getLocalPath(currentFile.path, projectRootPath, fileSystem);
-    if (diffMap.containsKey(localPath) && diffMap[localPath]!.isIgnored ||
+    if (migrateResult.diffMap.containsKey(localPath) && migrateResult.diffMap[localPath]!.isIgnored ||
         await MigrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path) ||
         _skipped(localPath) ||
         _skippedMerge(localPath)) {
@@ -437,13 +574,13 @@ Future<MigrateResult?> computeMigration({
 
     if (userDiff.exitCode == 0) {
       // Current file unchanged by user
-      if (diffMap.containsKey(localPath)) {
+      if (migrateResult.diffMap.containsKey(localPath)) {
         // File changed between base and target
-        if (diffMap[localPath]!.isDeletion) {
+        if (migrateResult.diffMap[localPath]!.isDeletion) {
           // File is deleted in new template
           migrateResult.deletedFiles.add(FilePendingMigration(localPath, currentFile));
         }
-        if (diffMap[localPath]!.exitCode != 0) {
+        if (migrateResult.diffMap[localPath]!.exitCode != 0) {
           // Accept the target version wholesale
           MergeResult result;
           try {
@@ -469,7 +606,7 @@ Future<MigrateResult?> computeMigration({
     }
 
     // File changed by user
-    if (diffMap.containsKey(localPath)) {
+    if (migrateResult.diffMap.containsKey(localPath)) {
       MergeResult? result;
       for (final CustomMerge customMerge in customMerges) {
         if (customMerge.localPath == localPath) {
@@ -479,7 +616,7 @@ Future<MigrateResult?> computeMigration({
       }
       if (result == null) {
         // Default to two way merge as it does not require the base file to exist.
-        MergeType mergeType = mergeTypeMap[localPath] ?? MergeType.twoWay;
+        MergeType mergeType = migrateResult.mergeTypeMap[localPath] ?? MergeType.twoWay;
         // Use two way merge if diff between base and target are the same.
         // This prevents the three way merge re-deleting the base->target changes.
         if (preferTwoWayMerge || userDiff.diff.substring(userDiff.diff.indexOf('@@')) == targetDiff.diff.substring(targetDiff.diff.indexOf('@@'))) {
@@ -513,34 +650,6 @@ Future<MigrateResult?> computeMigration({
       continue;
     }
   }
-
-  status.pause();
-  logger.printStatus('Cleaning up temp directories.', indent: 2, color: TerminalColor.grey);
-  status.resume();
-  if (deleteTempDirectories) {
-    // Don't delete user-provided directories
-    if (!customBaseAppDir) {
-      migrateResult.tempDirectories.add(migrateResult.generatedBaseTemplateDirectory!);
-    }
-    if (!customTargetAppDir) {
-      migrateResult.tempDirectories.add(migrateResult.generatedTargetTemplateDirectory!);
-    }
-    migrateResult.tempDirectories.addAll(migrateResult.sdkDirs.values);
-  }
-  status.stop();
-  return migrateResult;
-}
-
-String getLocalPath(String path, String basePath, FileSystem fileSystem) {
-  return path.replaceFirst(basePath + fileSystem.path.separator, '');
-}
-
-/// Returns a base revision to fallback to in case a true base revision is unknown.
-String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion version) {
-  if (metadata.versionRevision != null) {
-    return metadata.versionRevision!;
-  }
-  return version.frameworkRevision;
 }
 
 /// Writes the files into the working directory for the developer to review and resolve any conflicts.
