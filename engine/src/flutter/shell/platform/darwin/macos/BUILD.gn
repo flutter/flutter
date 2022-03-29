@@ -323,26 +323,30 @@ if (build_glfw_shell) {
 }
 
 zip_bundle("zip_macos_flutter_framework") {
-  output = "FlutterMacOS.framework.zip"
-  visibility = [ ":*" ]
   deps = [ ":_generate_symlinks" ]
+  output = "tmp/FlutterMacOS.framework.zip"
+  visibility = [ ":*" ]
   files = [
     {
       source = "$root_out_dir/FlutterMacOS.framework"
-      destination = "FlutterMacOS.framework.zip"
+      destination = "FlutterMacOS.framework"
     },
   ]
 }
 
 zip_bundle("macos_flutter_framework_archive") {
-  output = "$full_platform_name/FlutterMacOS.framework.zip"
   deps = [
     ":copy_framework_podspec",
     ":zip_macos_flutter_framework",
   ]
+  prefix = "$full_platform_name-$flutter_runtime_mode/"
+  if (flutter_runtime_mode == "debug") {
+    prefix = "$full_platform_name/"
+  }
+  output = "${prefix}FlutterMacOS.framework.zip"
   files = [
     {
-      source = "$root_out_dir/zip_archives/FlutterMacOS.framework.zip"
+      source = "$root_out_dir/zip_archives/tmp/FlutterMacOS.framework.zip"
       destination = "FlutterMacOS.framework.zip"
     },
     {
