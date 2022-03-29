@@ -61,44 +61,58 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
           ),
           if (_lastTestStatus != _LastTestStatus.pending) _statusWidget(),
           if (viewChannel != null) ... <Widget>[
-            ElevatedButton(
-              key: const ValueKey<String>('ShowAlertDialog'),
-              onPressed: onShowAlertDialogPressed,
-              child: const Text('SHOW ALERT DIALOG'),
-            ),
-            ElevatedButton(
-              key: const ValueKey<String>('TogglePlatformView'),
-              onPressed: onTogglePlatformView,
-              child: const Text('TOGGLE PLATFORM VIEW'),
-            ),
-            ElevatedButton(
-              key: const ValueKey<String>('ToggleHybridComposition'),
-              child: const Text('TOGGLE HYBRID COMPOSITION'),
-              onPressed: () {
-                setState(() {
-                  useHybridComposition = !useHybridComposition;
-                });
-              },
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: ElevatedButton(
+                    key: const ValueKey<String>('ShowAlertDialog'),
+                    onPressed: onShowAlertDialogPressed,
+                    child: const Text('SHOW ALERT DIALOG'),
+                  ),
+                ),
+                Expanded(
+                  child: ElevatedButton(
+                    key: const ValueKey<String>('TogglePlatformView'),
+                    onPressed: onTogglePlatformView,
+                    child: const Text('TOGGLE PLATFORM VIEW'),
+                  ),
+                ),
+              ],
             ),
             Row(
               children: <Widget>[
-                ElevatedButton(
-                  key: const ValueKey<String>('AddChildView'),
-                  onPressed: onChildViewPressed,
-                  child: const Text('ADD CHILD VIEW'),
-                ),
-                ElevatedButton(
-                  key: const ValueKey<String>('TapChildView'),
-                  onPressed: onTapChildViewPressed,
-                  child: const Text('TAP CHILD VIEW'),
-                ),
-                if (nestedViewClickCount > 0)
-                  Text(
-                      'Click count: $nestedViewClickCount',
-                      key: const ValueKey<String>('NestedViewClickCount'),
+                Expanded(
+                  child: ElevatedButton(
+                    key: const ValueKey<String>('ToggleHybridComposition'),
+                    child: const Text('TOGGLE HC'),
+                    onPressed: () {
+                      setState(() {
+                        useHybridComposition = !useHybridComposition;
+                      });
+                    },
                   ),
+                ),
+                Expanded(
+                  child: ElevatedButton(
+                    key: const ValueKey<String>('AddChildView'),
+                    onPressed: onChildViewPressed,
+                    child: const Text('ADD CHILD VIEW'),
+                  ),
+                ),
+                Expanded(
+                  child: ElevatedButton(
+                    key: const ValueKey<String>('TapChildView'),
+                    onPressed: onTapChildViewPressed,
+                    child: const Text('TAP CHILD VIEW'),
+                  ),
+                ),
               ],
             ),
+            if (nestedViewClickCount > 0)
+              Text(
+                'Click count: $nestedViewClickCount',
+                key: const ValueKey<String>('NestedViewClickCount'),
+              ),
           ],
         ],
       ),
