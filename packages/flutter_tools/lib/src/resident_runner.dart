@@ -1300,8 +1300,8 @@ abstract class ResidentRunner extends ResidentHandlers {
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
         ipv6: ipv6,
-        disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes
-        cacheStartupSamples: debuggingOptions.cacheStartupSamples,
+        disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
+        cacheStartupProfile: debuggingOptions.cacheStartupProfile,
       );
       await device.vmService.getFlutterViews();
 
