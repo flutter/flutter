@@ -40,16 +40,6 @@ const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMarginWithHeader = EdgeInse
 // TODO(edrisian): This should be a rounded rectangle once that shape is added.
 const BorderRadius _kDefaultInsetGroupedBorderRadius = BorderRadius.all(Radius.circular(10.0));
 
-// Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
-// iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
-
-// Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultHeaderMargin = EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
-
-// Standard footer margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultFooterMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
-
 // The margin of divider used in base list section. Estimated from iOS 14.4 SDK
 // Settings app.
 const double _kBaseDividerMargin = 20.0;
@@ -82,7 +72,16 @@ const Color _kHeaderFooterColor = CupertinoDynamicColor(
   darkHighContrastElevatedColor: Color.fromRGBO(142, 142, 146, 1.0),
 );
 
-enum _CupertinoListSectionType { base, insetGrouped }
+/// Denotes what type of the list section a [CupertinoListSection] is.
+/// 
+/// This is for internal use only.
+enum CupertinoListSectionType {
+  /// A basic form of [CupertinoListSection].
+  base,
+  
+  /// An inset-grouped style of [CupertinoListSection].
+  insetGrouped,
+}
 
 /// An iOS-style list section.
 ///
@@ -303,7 +302,7 @@ class CupertinoListSection extends StatelessWidget {
     this.topMargin = _kMarginTop,
     bool hasLeading = true,
   }) : assert((children != null && children.length > 0) || header != null),
-       _type = _CupertinoListSectionType.base,
+       _type = CupertinoListSectionType.base,
        additionalDividerMargin = additionalDividerMargin ??
            (hasLeading ? _kBaseAdditionalDividerMargin : 0.0),
        super(key: key);
@@ -367,7 +366,7 @@ class CupertinoListSection extends StatelessWidget {
     this.topMargin,
     bool hasLeading = true,
   }) : assert((children != null && children.length > 0) || header != null),
-       _type = _CupertinoListSectionType.insetGrouped,
+       _type = CupertinoListSectionType.insetGrouped,
        additionalDividerMargin = additionalDividerMargin ??
            (hasLeading
                ? _kInsetAdditionalDividerMargin
@@ -375,7 +374,7 @@ class CupertinoListSection extends StatelessWidget {
        margin = margin ?? (header == null ? _kDefaultInsetGroupedRowsMargin : _kDefaultInsetGroupedRowsMarginWithHeader),
        super(key: key);
 
-  final _CupertinoListSectionType _type;
+  final CupertinoListSectionType _type;
 
   /// Sets the form section header. The section header lies above the [children]
   /// rows. Usually a [Text] widget.
@@ -438,7 +437,7 @@ class CupertinoListSection extends StatelessWidget {
     final double dividerHeight = 1.0 / MediaQuery.of(context).devicePixelRatio;
 
     // Long divider is used for wrapping the top and bottom of rows.
-    // Only used in _CupertinoListSectionType.base mode.
+    // Only used in CupertinoListSectionType.base mode.
     final Widget longDivider = Container(
       color: dividerColor,
       height: dividerHeight,
@@ -456,7 +455,7 @@ class CupertinoListSection extends StatelessWidget {
     if (header != null) {
       _header = DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle.merge(
-              _type == _CupertinoListSectionType.base
+              _type == CupertinoListSectionType.base
                   ? TextStyle(
                       fontSize: 13.0,
                       color: CupertinoDynamicColor.resolve(
@@ -471,7 +470,7 @@ class CupertinoListSection extends StatelessWidget {
     Widget? _footer;
     if (footer != null) {
       _footer = DefaultTextStyle(
-        style: _type == _CupertinoListSectionType.base
+        style: _type == CupertinoListSectionType.base
             ? CupertinoTheme.of(context).textTheme.textStyle.merge(TextStyle(
                   fontSize: 13.0,
                   color: CupertinoDynamicColor.resolve(
@@ -487,11 +486,11 @@ class CupertinoListSection extends StatelessWidget {
     if (children != null && children!.isNotEmpty) {
       // We construct childrenWithDividers as follows:
       // Insert a short divider between all rows.
-      // If it is a `_CupertinoListSectionType.base` type, add a long divider
+      // If it is a `CupertinoListSectionType.base` type, add a long divider
       // to the top and bottom of the rows.
       final List<Widget> childrenWithDividers = <Widget>[];
 
-      if (_type == _CupertinoListSectionType.base) {
+      if (_type == CupertinoListSectionType.base) {
         childrenWithDividers.add(longDivider);
       }
 
@@ -501,15 +500,15 @@ class CupertinoListSection extends StatelessWidget {
       });
 
       childrenWithDividers.add(children!.last);
-      if (_type == _CupertinoListSectionType.base) {
+      if (_type == CupertinoListSectionType.base) {
         childrenWithDividers.add(longDivider);
       }
 
       switch (_type) {
-        case _CupertinoListSectionType.insetGrouped:
+        case CupertinoListSectionType.insetGrouped:
           childrenGroupBorderRadius = _kDefaultInsetGroupedBorderRadius;
           break;
-        case _CupertinoListSectionType.base:
+        case CupertinoListSectionType.base:
           childrenGroupBorderRadius = BorderRadius.zero;
           break;
       }
@@ -534,13 +533,13 @@ class CupertinoListSection extends StatelessWidget {
           color: CupertinoDynamicColor.resolve(backgroundColor, context)),
       child: Column(
         children: <Widget>[
-          if (_type == _CupertinoListSectionType.base)
+          if (_type == CupertinoListSectionType.base)
             SizedBox(height: topMargin),
           if (_header != null)
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: _type == _CupertinoListSectionType.base
+                padding: _type == CupertinoListSectionType.base
                     ? _kDefaultHeaderMargin
                     : _kInsetGroupedDefaultHeaderMargin,
                 child: _header,
@@ -561,7 +560,7 @@ class CupertinoListSection extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: _type == _CupertinoListSectionType.base
+                padding: _type == CupertinoListSectionType.base
                     ? _kDefaultFooterMargin
                     : _kInsetGroupedDefaultFooterMargin,
                 child: _footer,
@@ -570,234 +569,5 @@ class CupertinoListSection extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-/// An iOS-style form section.
-///
-/// The base constructor for [CupertinoFormSection] constructs an
-/// edge-to-edge style section which includes an iOS-style header, rows,
-/// the dividers between rows, and borders on top and bottom of the rows.
-///
-/// The [CupertinoFormSection.insetGrouped] constructor creates a round-edged and
-/// padded section that is commonly seen in notched-displays like iPhone X and
-/// beyond. Creates an iOS-style header, rows, and the dividers
-/// between rows. Does not create borders on top and bottom of the rows.
-///
-/// The [header] parameter sets the form section header. The section header lies
-/// above the [children] rows, with margins that match the iOS style.
-///
-/// The [footer] parameter sets the form section footer. The section footer
-/// lies below the [children] rows.
-///
-/// The [children] parameter is required and sets the list of rows shown in
-/// the section. The [children] parameter takes a list, as opposed to a more
-/// efficient builder function that lazy builds, because forms are intended to
-/// be short in row count. It is recommended that only [CupertinoFormRow] and
-/// [CupertinoTextFormFieldRow] widgets be included in the [children] list in
-/// order to retain the iOS look.
-///
-/// The [margin] parameter sets the spacing around the content area of the
-/// section encapsulating [children].
-///
-/// The [decoration] parameter sets the decoration around [children].
-/// If null, defaults to [CupertinoColors.secondarySystemGroupedBackground].
-/// If null, defaults to 10.0 circular radius when constructing with
-/// [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
-/// standard [CupertinoFormSection] constructor.
-///
-/// The [backgroundColor] parameter sets the background color behind the section.
-/// If null, defaults to [CupertinoColors.systemGroupedBackground].
-///
-/// {@macro flutter.material.Material.clipBehavior}
-///
-/// See also:
-///
-///  * [CupertinoFormRow], an iOS-style list tile, a typical child of
-///    [CupertinoFormSection].
-///  * [CupertinoListSection], an iOS-style list section.
-class CupertinoFormSection extends StatelessWidget {
-  /// Creates a section that mimicks standard iOS forms.
-  ///
-  /// The base constructor for [CupertinoFormSection] constructs an
-  /// edge-to-edge style section which includes an iOS-style header,
-  /// rows, the dividers between rows, and borders on top and bottom of the rows.
-  ///
-  /// The [header] parameter sets the form section header. The section header
-  /// lies above the [children] rows, with margins that match the iOS style.
-  ///
-  /// The [footer] parameter sets the form section footer. The section footer
-  /// lies below the [children] rows.
-  ///
-  /// The [children] parameter is required and sets the list of rows shown in
-  /// the section. The [children] parameter takes a list, as opposed to a more
-  /// efficient builder function that lazy builds, because forms are intended to
-  /// be short in row count. It is recommended that only [CupertinoFormRow] and
-  /// [CupertinoTextFormFieldRow] widgets be included in the [children] list in
-  /// order to retain the iOS look.
-  ///
-  /// The [margin] parameter sets the spacing around the content area of the
-  /// section encapsulating [children], and defaults to zero padding.
-  ///
-  /// The [decoration] parameter sets the decoration around [children].
-  /// If null, defaults to [CupertinoColors.secondarySystemGroupedBackground].
-  /// If null, defaults to 10.0 circular radius when constructing with
-  /// [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
-  /// standard [CupertinoFormSection] constructor.
-  ///
-  /// The [backgroundColor] parameter sets the background color behind the
-  /// section. If null, defaults to [CupertinoColors.systemGroupedBackground].
-  ///
-  /// {@macro flutter.material.Material.clipBehavior}
-  const CupertinoFormSection({
-    Key? key,
-    required this.children,
-    this.header,
-    this.footer,
-    this.margin = EdgeInsets.zero,
-    this.backgroundColor = CupertinoColors.systemGroupedBackground,
-    this.decoration,
-    this.clipBehavior = Clip.none,
-  })  : _type = _CupertinoListSectionType.base,
-        assert(children.length > 0),
-        super(key: key);
-
-  /// Creates a section that mimicks standard "Inset Grouped" iOS forms.
-  ///
-  /// The [CupertinoFormSection.insetGrouped] constructor creates a round-edged and
-  /// padded section that is commonly seen in notched-displays like iPhone X and
-  /// beyond. Creates an iOS-style header, rows, and the dividers
-  /// between rows. Does not create borders on top and bottom of the rows.
-  ///
-  /// The [header] parameter sets the form section header. The section header
-  /// lies above the [children] rows, with margins that match the iOS style.
-  ///
-  /// The [footer] parameter sets the form section footer. The section footer
-  /// lies below the [children] rows.
-  ///
-  /// The [children] parameter is required and sets the list of rows shown in
-  /// the section. The [children] parameter takes a list, as opposed to a more
-  /// efficient builder function that lazy builds, because forms are intended to
-  /// be short in row count. It is recommended that only [CupertinoFormRow] and
-  /// [CupertinoTextFormFieldRow] widgets be included in the [children] list in
-  /// order to retain the iOS look.
-  ///
-  /// The [margin] parameter sets the spacing around the content area of the
-  /// section encapsulating [children], and defaults to the standard
-  /// notched-style iOS form padding.
-  ///
-  /// The [decoration] parameter sets the decoration around [children].
-  /// If null, defaults to [CupertinoColors.secondarySystemGroupedBackground].
-  /// If null, defaults to 10.0 circular radius when constructing with
-  /// [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
-  /// standard [CupertinoFormSection] constructor.
-  ///
-  /// The [backgroundColor] parameter sets the background color behind the
-  /// section. If null, defaults to [CupertinoColors.systemGroupedBackground].
-  ///
-  /// {@macro flutter.material.Material.clipBehavior}
-  const CupertinoFormSection.insetGrouped({
-    Key? key,
-    required this.children,
-    this.header,
-    this.footer,
-    this.margin = _kFormDefaultInsetGroupedRowsMargin,
-    this.backgroundColor = CupertinoColors.systemGroupedBackground,
-    this.decoration,
-    this.clipBehavior = Clip.none,
-  })  : _type = _CupertinoListSectionType.insetGrouped,
-        assert(children.length > 0),
-        super(key: key);
-
-  final _CupertinoListSectionType _type;
-
-  /// Sets the form section header. The section header lies above the
-  /// [children] rows.
-  final Widget? header;
-
-  /// Sets the form section footer. The section footer lies below the
-  /// [children] rows.
-  final Widget? footer;
-
-  /// Margin around the content area of the section encapsulating [children].
-  ///
-  /// Defaults to zero padding if constructed with standard
-  /// [CupertinoFormSection] constructor. Defaults to the standard notched-style
-  /// iOS margin when constructing with [CupertinoFormSection.insetGrouped].
-  final EdgeInsetsGeometry margin;
-
-  /// The list of rows in the section.
-  ///
-  /// This takes a list, as opposed to a more efficient builder function that
-  /// lazy builds, because forms are intended to be short in row count. It is
-  /// recommended that only [CupertinoFormRow] and [CupertinoTextFormFieldRow]
-  /// widgets be included in the [children] list in order to retain the iOS look.
-  final List<Widget> children;
-
-  /// Sets the decoration around [children].
-  ///
-  /// If null, background color defaults to
-  /// [CupertinoColors.secondarySystemGroupedBackground].
-  ///
-  /// If null, border radius defaults to 10.0 circular radius when constructing
-  /// with [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
-  /// standard [CupertinoFormSection] constructor.
-  final BoxDecoration? decoration;
-
-  /// Sets the background color behind the section.
-  ///
-  /// Defaults to [CupertinoColors.systemGroupedBackground].
-  final Color backgroundColor;
-
-  /// {@macro flutter.material.Material.clipBehavior}
-  ///
-  /// Defaults to [Clip.none], and must not be null.
-  final Clip clipBehavior;
-
-  @override
-  Widget build(BuildContext context) {
-    final Widget? _header = header == null
-        ? null
-        : DefaultTextStyle(
-            style: TextStyle(
-              fontSize: 13.0,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-            child: Padding(
-              padding: _kFormDefaultHeaderMargin,
-              child: header,
-            ));
-
-    final Widget? _footer = footer == null
-        ? null
-        : DefaultTextStyle(
-            style: TextStyle(
-              fontSize: 13.0,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-            child: Padding(
-              padding: _kFormDefaultFooterMargin,
-              child: footer,
-            ));
-
-    return _type == _CupertinoListSectionType.base
-        ? CupertinoListSection(
-            header: _header,
-            footer: _footer,
-            margin: margin,
-            backgroundColor: backgroundColor,
-            decoration: decoration,
-            clipBehavior: clipBehavior,
-            hasLeading: false,
-            children: children)
-        : CupertinoListSection.insetGrouped(
-            header: _header,
-            footer: _footer,
-            margin: margin,
-            backgroundColor: backgroundColor,
-            decoration: decoration,
-            clipBehavior: clipBehavior,
-            hasLeading: false,
-            children: children);
   }
 }
