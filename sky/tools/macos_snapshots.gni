@@ -1,0 +1,45 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/common/config.gni")
+
+# Generates macos gen snapshots $root_build_dir/zip_archives folder.
+#
+
+# The output variable specifies the name of the zip file to create.
+# The files variable is an array of scopes that specify a source file or
+# directory and a destination path in the archive to create.
+#
+# For example, to create a zip file named archive.zip with all files in the
+# root directory of the archive:
+#
+# zip_bundle("sample") {
+#   output = "archive.zip"
+#   files = [
+#     {
+#       source = "$root_build_dir/some/path/to/lib.so"
+#       destination = "lib.so"
+#     },
+#     {
+#       source = "$root_build_dir/some/other/path/with/files"
+#       destination = "other_files"
+#     },
+#   ]
+# }
+template("macos_gen_snapshots") {
+  action(target_name) {
+    forward_variables_from(invoker, [ "visibility" ])
+    deps = invoker.deps
+    outputs = [ "$root_build_dir/gen_snapshot_${invoker.arch}" ]
+    script = "//flutter/sky/tools/gen_snapshots.py"
+    args = [
+      "--dst",
+      rebase_path("$root_out_dir/"),
+      "--out-dir",
+      rebase_path("$root_out_dir"),
+      "--arch",
+      invoker.arch,
+    ]
+  }
+}

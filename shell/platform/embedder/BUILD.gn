@@ -379,7 +379,13 @@ if (is_mac && !embedder_for_target) {
   action("generate_symlinks") {
     visibility = [ ":*" ]
     script = "//build/config/mac/package_framework.py"
-    outputs = [ "$root_build_dir/FlutterEmbedder.stamp" ]
+    outputs = [
+      "$root_build_dir/FlutterEmbedder.stamp",
+      _flutter_embedder_framework_dir,
+      "$_flutter_embedder_framework_dir/Resources",
+      "$_flutter_embedder_framework_dir/Headers",
+      "$_flutter_embedder_framework_dir/Modules",
+    ]
     args = [
       "--framework",
       "FlutterEmbedder.framework",
@@ -425,6 +431,31 @@ group("flutter_engine") {
     if (is_mac && !embedder_for_target) {
       deps += [ ":flutter_embedder_framework" ]
     }
+  }
+}
+
+if (is_mac) {
+  zip_bundle("flutter_embedder_framework_archive") {
+    deps = [ ":generate_symlinks" ]
+    output = "$full_platform_name/FlutterEmbedder.framework.zip"
+    files = [
+      {
+        source = "$root_out_dir/FlutterEmbedder.framework"
+        destination = "FlutterEmbedder.framework"
+      },
+      {
+        source = "$root_out_dir/FlutterEmbedder.framework/Resources"
+        destination = "FlutterEmbedder.framework/Resources"
+      },
+      {
+        source = "$root_out_dir/FlutterEmbedder.framework/Headers"
+        destination = "FlutterEmbedder.framework/Headers"
+      },
+      {
+        source = "$root_out_dir/FlutterEmbedder.framework/Modules"
+        destination = "FlutterEmbedder.framework/Modules"
+      },
+    ]
   }
 }
 
