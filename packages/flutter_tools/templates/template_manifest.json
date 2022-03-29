@@ -135,8 +135,6 @@
         "templates/app_shared/windows.tmpl/runner/resources/app_icon.ico.img.tmpl",
         "templates/app_shared/windows.tmpl/runner/runner.exe.manifest",
         "templates/app_shared/windows.tmpl/runner/Runner.rc.tmpl",
-        "templates/app_shared/windows.tmpl/runner/run_loop.cpp",
-        "templates/app_shared/windows.tmpl/runner/run_loop.h",
         "templates/app_shared/windows.tmpl/runner/utils.cpp",
         "templates/app_shared/windows.tmpl/runner/utils.h",
         "templates/app_shared/windows.tmpl/runner/win32_window.cpp",
