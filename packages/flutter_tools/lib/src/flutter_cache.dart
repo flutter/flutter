@@ -115,10 +115,12 @@ class PubDependencies extends ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    [bool offline = false]
   ) async {
     await _pub().get(
       context: PubContext.pubGet,
       directory: fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
+      offline: offline
     );
   }
 }
@@ -418,6 +420,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    [bool offline = false]
   ) async {
     if (globals.androidSdk == null) {
       return;
@@ -931,3 +934,4 @@ const List<List<String>> _dartSdks = <List<String>> [
   <String>['linux-x64', 'dart-sdk-linux-x64.zip'],
   <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
 ];
+
