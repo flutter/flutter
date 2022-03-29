@@ -26,17 +26,28 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAf({
-    super.localeName = 'af',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'af',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Meer oor $applicationName';
@@ -501,17 +512,28 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAm({
-    super.localeName = 'am',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'am',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'ስለ $applicationName';
@@ -976,17 +998,28 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAr({
-    super.localeName = 'ar',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ar',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'لمحة عن "$applicationName"';
@@ -1451,17 +1484,28 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAs({
-    super.localeName = 'as',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'as',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationNameৰ বিষয়ে';
@@ -1926,17 +1970,28 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAz({
-    super.localeName = 'az',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'az',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName haqqında';
@@ -2401,17 +2456,28 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBe({
-    super.localeName = 'be',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'be',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Інфармацыя пра праграму "$applicationName"';
@@ -2876,17 +2942,28 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBg({
-    super.localeName = 'bg',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'bg',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Всичко за $applicationName';
@@ -3351,17 +3428,28 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBn({
-    super.localeName = 'bn',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'bn',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName সম্পর্কে';
@@ -3826,17 +3914,28 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBs({
-    super.localeName = 'bs',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'bs',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -4301,17 +4400,28 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationCa({
-    super.localeName = 'ca',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ca',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Sobre $applicationName';
@@ -4776,17 +4886,28 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationCs({
-    super.localeName = 'cs',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'cs',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaci $applicationName';
@@ -5251,17 +5372,28 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationDa({
-    super.localeName = 'da',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'da',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -5726,17 +5858,28 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationDe({
-    super.localeName = 'de',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'de',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Über $applicationName';
@@ -6201,17 +6344,28 @@ class MaterialLocalizationDeCh extends MaterialLocalizationDe {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationDeCh({
-    super.localeName = 'de_CH',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'de_CH',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get invalidTimeLabel => 'Gib eine gültige Uhrzeit ein';
@@ -6238,17 +6392,28 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEl({
-    super.localeName = 'el',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'el',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Σχετικά με την εφαρμογή $applicationName';
@@ -6713,17 +6878,28 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEn({
-    super.localeName = 'en',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'en',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'About $applicationName';
@@ -7188,17 +7364,28 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnAu({
-    super.localeName = 'en_AU',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'en_AU',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7246,17 +7433,28 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnCa({
-    super.localeName = 'en_CA',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'en_CA',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7304,17 +7502,28 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnGb({
-    super.localeName = 'en_GB',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'en_GB',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7365,17 +7574,28 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnIe({
-    super.localeName = 'en_IE',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'en_IE',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7426,17 +7646,28 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnIn({
-    super.localeName = 'en_IN',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'en_IN',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7484,17 +7715,28 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnNz({
-    super.localeName = 'en_NZ',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'en_NZ',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7542,17 +7784,28 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnSg({
-    super.localeName = 'en_SG',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'en_SG',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7600,17 +7853,28 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnZa({
-    super.localeName = 'en_ZA',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'en_ZA',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7661,17 +7925,28 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEs({
-    super.localeName = 'es',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Sobre $applicationName';
@@ -8136,17 +8411,28 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEs419({
-    super.localeName = 'es_419',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_419',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8254,17 +8540,28 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsAr({
-    super.localeName = 'es_AR',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_AR',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8372,17 +8669,28 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsBo({
-    super.localeName = 'es_BO',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_BO',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8490,17 +8798,28 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsCl({
-    super.localeName = 'es_CL',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_CL',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8608,17 +8927,28 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsCo({
-    super.localeName = 'es_CO',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_CO',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8726,17 +9056,28 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsCr({
-    super.localeName = 'es_CR',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_CR',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8844,17 +9185,28 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsDo({
-    super.localeName = 'es_DO',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_DO',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8962,17 +9314,28 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsEc({
-    super.localeName = 'es_EC',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_EC',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9080,17 +9443,28 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsGt({
-    super.localeName = 'es_GT',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_GT',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9198,17 +9572,28 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsHn({
-    super.localeName = 'es_HN',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_HN',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9316,17 +9701,28 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsMx({
-    super.localeName = 'es_MX',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_MX',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9434,17 +9830,28 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsNi({
-    super.localeName = 'es_NI',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_NI',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9552,17 +9959,28 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPa({
-    super.localeName = 'es_PA',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_PA',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9670,17 +10088,28 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPe({
-    super.localeName = 'es_PE',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_PE',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9788,17 +10217,28 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPr({
-    super.localeName = 'es_PR',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_PR',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9906,17 +10346,28 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPy({
-    super.localeName = 'es_PY',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_PY',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10024,17 +10475,28 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsSv({
-    super.localeName = 'es_SV',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_SV',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10142,17 +10604,28 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsUs({
-    super.localeName = 'es_US',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_US',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10263,17 +10736,28 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsUy({
-    super.localeName = 'es_UY',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_UY',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10381,17 +10865,28 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsVe({
-    super.localeName = 'es_VE',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'es_VE',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10499,17 +10994,28 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEt({
-    super.localeName = 'et',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'et',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Teave rakenduse $applicationName kohta';
@@ -10974,17 +11480,28 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEu({
-    super.localeName = 'eu',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'eu',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName aplikazioari buruz';
@@ -11449,17 +11966,28 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFa({
-    super.localeName = 'fa',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'fa',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'درباره $applicationName';
@@ -11924,17 +12452,28 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFi({
-    super.localeName = 'fi',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'fi',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Tietoja: $applicationName';
@@ -12399,17 +12938,28 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFil({
-    super.localeName = 'fil',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'fil',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Tungkol sa $applicationName';
@@ -12874,17 +13424,28 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFr({
-    super.localeName = 'fr',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'fr',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'À propos de $applicationName';
@@ -13349,17 +13910,28 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFrCa({
-    super.localeName = 'fr_CA',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'fr_CA',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get invalidTimeLabel => 'Entrez une heure valide';
@@ -13440,17 +14012,28 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationGl({
-    super.localeName = 'gl',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'gl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de: $applicationName';
@@ -13915,17 +14498,28 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationGsw({
-    super.localeName = 'gsw',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'gsw',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Über $applicationName';
@@ -14390,17 +14984,28 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationGu({
-    super.localeName = 'gu',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'gu',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName વિશે';
@@ -14865,17 +15470,28 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHe({
-    super.localeName = 'he',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'he',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'מידע על $applicationName';
@@ -15340,17 +15956,28 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHi({
-    super.localeName = 'hi',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'hi',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName के बारे में जानकारी';
@@ -15815,17 +16442,28 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHr({
-    super.localeName = 'hr',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'hr',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -16290,17 +16928,28 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHu({
-    super.localeName = 'hu',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'hu',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'A(z) $applicationName névjegye';
@@ -16765,17 +17414,28 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHy({
-    super.localeName = 'hy',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'hy',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName հավելվածի մասին';
@@ -17240,17 +17900,28 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationId({
-    super.localeName = 'id',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'id',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Tentang $applicationName';
@@ -17715,17 +18386,28 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationIs({
-    super.localeName = 'is',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'is',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Um $applicationName';
@@ -18190,17 +18872,28 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationIt({
-    super.localeName = 'it',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'it',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Informazioni su $applicationName';
@@ -18665,17 +19358,28 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationJa({
-    super.localeName = 'ja',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ja',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName について';
@@ -19140,17 +19844,28 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKa({
-    super.localeName = 'ka',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ka',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName-ის შესახებ';
@@ -19615,17 +20330,28 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKk({
-    super.localeName = 'kk',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'kk',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName туралы';
@@ -20090,17 +20816,28 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKm({
-    super.localeName = 'km',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'km',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'អំពី $applicationName';
@@ -20565,17 +21302,28 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKn({
-    super.localeName = 'kn',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'kn',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => '\u{24}\u{61}\u{70}\u{70}\u{6c}\u{69}\u{63}\u{61}\u{74}\u{69}\u{6f}\u{6e}\u{4e}\u{61}\u{6d}\u{65}\u{20}\u{cac}\u{c97}\u{ccd}\u{c97}\u{cc6}';
@@ -21040,17 +21788,28 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKo({
-    super.localeName = 'ko',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ko',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName 정보';
@@ -21515,17 +22274,28 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKy({
-    super.localeName = 'ky',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ky',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName каналы жөнүндө';
@@ -21990,17 +22760,28 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationLo({
-    super.localeName = 'lo',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'lo',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'ກ່ຽວກັບ $applicationName';
@@ -22465,17 +23246,28 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationLt({
-    super.localeName = 'lt',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'lt',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Apie „$applicationName“';
@@ -22940,17 +23732,28 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationLv({
-    super.localeName = 'lv',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'lv',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Par $applicationName';
@@ -23415,17 +24218,28 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMk({
-    super.localeName = 'mk',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'mk',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'За $applicationName';
@@ -23890,17 +24704,28 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMl({
-    super.localeName = 'ml',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ml',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName എന്നതിനെക്കുറിച്ച്';
@@ -24365,17 +25190,28 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMn({
-    super.localeName = 'mn',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'mn',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName-н тухай';
@@ -24840,17 +25676,28 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMr({
-    super.localeName = 'mr',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'mr',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName बद्दल';
@@ -25315,17 +26162,28 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMs({
-    super.localeName = 'ms',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ms',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Perihal $applicationName';
@@ -25790,17 +26648,28 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMy({
-    super.localeName = 'my',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'my',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName အကြောင်း';
@@ -26265,17 +27134,28 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNb({
-    super.localeName = 'nb',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'nb',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -26740,17 +27620,28 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNe({
-    super.localeName = 'ne',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ne',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName बारे';
@@ -27215,17 +28106,28 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNl({
-    super.localeName = 'nl',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'nl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Over $applicationName';
@@ -27690,17 +28592,28 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNo({
-    super.localeName = 'no',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'no',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -28165,17 +29078,28 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationOr({
-    super.localeName = 'or',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'or',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName ବିଷୟରେ';
@@ -28640,17 +29564,28 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPa({
-    super.localeName = 'pa',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'pa',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName ਬਾਰੇ';
@@ -29115,17 +30050,28 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPl({
-    super.localeName = 'pl',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'pl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName – informacje';
@@ -29590,17 +30536,28 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPs({
-    super.localeName = 'ps',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ps',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'د $applicationName په اړه';
@@ -30065,17 +31022,28 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPt({
-    super.localeName = 'pt',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'pt',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Sobre o app $applicationName';
@@ -30540,17 +31508,28 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPtPt({
-    super.localeName = 'pt_PT',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'pt_PT',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get dialModeButtonLabel => 'Mude para o modo de seletor de mostrador';
@@ -30658,17 +31637,28 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationRo({
-    super.localeName = 'ro',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ro',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Despre $applicationName';
@@ -31133,17 +32123,28 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationRu({
-    super.localeName = 'ru',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ru',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName: сведения';
@@ -31608,17 +32609,28 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSi({
-    super.localeName = 'si',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'si',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName ගැන';
@@ -32083,17 +33095,28 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSk({
-    super.localeName = 'sk',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'sk',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName – informácie';
@@ -32558,17 +33581,28 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSl({
-    super.localeName = 'sl',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'sl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -33033,17 +34067,28 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSq({
-    super.localeName = 'sq',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'sq',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Rreth $applicationName';
@@ -33508,17 +34553,28 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSr({
-    super.localeName = 'sr',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'sr',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'О апликацији $applicationName';
@@ -33983,17 +35039,28 @@ class MaterialLocalizationSrCyrl extends MaterialLocalizationSr {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSrCyrl({
-    super.localeName = 'sr_Cyrl',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'sr_Cyrl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 }
 
 /// The translations for Serbian, using the Latin script (`sr_Latn`).
@@ -34002,17 +35069,28 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSrLatn({
-    super.localeName = 'sr_Latn',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'sr_Latn',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -34267,17 +35345,28 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSv({
-    super.localeName = 'sv',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'sv',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -34742,17 +35831,28 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSw({
-    super.localeName = 'sw',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'sw',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Kuhusu $applicationName';
@@ -35217,17 +36317,28 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTa({
-    super.localeName = 'ta',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ta',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName பற்றி';
@@ -35692,17 +36803,28 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTe({
-    super.localeName = 'te',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'te',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName గురించి';
@@ -36167,17 +37289,28 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTh({
-    super.localeName = 'th',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'th',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'เกี่ยวกับ $applicationName';
@@ -36642,17 +37775,28 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTl({
-    super.localeName = 'tl',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'tl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Tungkol sa $applicationName';
@@ -37117,17 +38261,28 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTr({
-    super.localeName = 'tr',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'tr',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName Hakkında';
@@ -37592,17 +38747,28 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationUk({
-    super.localeName = 'uk',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'uk',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Про додаток $applicationName';
@@ -38067,17 +39233,28 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationUr({
-    super.localeName = 'ur',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'ur',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName کے بارے میں';
@@ -38542,17 +39719,28 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationUz({
-    super.localeName = 'uz',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'uz',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName haqida';
@@ -39017,17 +40205,28 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationVi({
-    super.localeName = 'vi',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'vi',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Giới thiệu về $applicationName';
@@ -39492,17 +40691,28 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZh({
-    super.localeName = 'zh',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'zh',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'关于$applicationName';
@@ -39967,17 +41177,28 @@ class MaterialLocalizationZhHans extends MaterialLocalizationZh {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHans({
-    super.localeName = 'zh_Hans',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'zh_Hans',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -39986,17 +41207,28 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHant({
-    super.localeName = 'zh_Hant',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'zh_Hant',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'關於$applicationName';
@@ -40224,17 +41456,28 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHantHk({
-    super.localeName = 'zh_Hant_HK',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'zh_Hant_HK',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -40243,17 +41486,28 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHantTw({
-    super.localeName = 'zh_Hant_TW',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'zh_Hant_TW',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get dialModeButtonLabel => '切換至鐘面挑選器模式';
@@ -40337,17 +41591,28 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZu({
-    super.localeName = 'zu',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
+    String localeName = 'zu',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
 
   @override
   String get aboutListTileTitleRaw => r'Mayelana no-$applicationName';

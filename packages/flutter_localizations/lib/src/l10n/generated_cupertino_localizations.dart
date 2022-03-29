@@ -26,16 +26,26 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationAf({
-    super.localeName = 'af',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'af',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Opletberig';
@@ -173,16 +183,26 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationAm({
-    super.localeName = 'am',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'am',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'ማንቂያ';
@@ -320,16 +340,26 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationAr({
-    super.localeName = 'ar',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ar',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'تنبيه';
@@ -467,16 +497,26 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationAs({
-    super.localeName = 'as',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'as',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'সতৰ্কবাৰ্তা';
@@ -614,16 +654,26 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationAz({
-    super.localeName = 'az',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'az',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Bildiriş';
@@ -761,16 +811,26 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationBe({
-    super.localeName = 'be',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'be',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Абвестка';
@@ -908,16 +968,26 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationBg({
-    super.localeName = 'bg',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'bg',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Сигнал';
@@ -1055,16 +1125,26 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationBn({
-    super.localeName = 'bn',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'bn',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'সতর্কতা';
@@ -1202,16 +1282,26 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationBs({
-    super.localeName = 'bs',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'bs',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Upozorenje';
@@ -1349,16 +1439,26 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationCa({
-    super.localeName = 'ca',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ca',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -1496,16 +1596,26 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationCs({
-    super.localeName = 'cs',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'cs',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Upozornění';
@@ -1643,16 +1753,26 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationDa({
-    super.localeName = 'da',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'da',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Underretning';
@@ -1790,16 +1910,26 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationDe({
-    super.localeName = 'de',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'de',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Benachrichtigung';
@@ -1937,16 +2067,26 @@ class CupertinoLocalizationDeCh extends CupertinoLocalizationDe {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationDeCh({
-    super.localeName = 'de_CH',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'de_CH',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get modalBarrierDismissLabel => 'Schliessen';
@@ -1958,16 +2098,26 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEl({
-    super.localeName = 'el',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'el',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Ειδοποίηση';
@@ -2105,16 +2255,26 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEn({
-    super.localeName = 'en',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'en',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Alert';
@@ -2252,16 +2412,26 @@ class CupertinoLocalizationEnAu extends CupertinoLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEnAu({
-    super.localeName = 'en_AU',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'en_AU',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2276,16 +2446,26 @@ class CupertinoLocalizationEnCa extends CupertinoLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEnCa({
-    super.localeName = 'en_CA',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'en_CA',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2300,16 +2480,26 @@ class CupertinoLocalizationEnGb extends CupertinoLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEnGb({
-    super.localeName = 'en_GB',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'en_GB',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2324,16 +2514,26 @@ class CupertinoLocalizationEnIe extends CupertinoLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEnIe({
-    super.localeName = 'en_IE',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'en_IE',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2348,16 +2548,26 @@ class CupertinoLocalizationEnIn extends CupertinoLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEnIn({
-    super.localeName = 'en_IN',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'en_IN',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2372,16 +2582,26 @@ class CupertinoLocalizationEnNz extends CupertinoLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEnNz({
-    super.localeName = 'en_NZ',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'en_NZ',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2396,16 +2616,26 @@ class CupertinoLocalizationEnSg extends CupertinoLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEnSg({
-    super.localeName = 'en_SG',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'en_SG',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2420,16 +2650,26 @@ class CupertinoLocalizationEnZa extends CupertinoLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEnZa({
-    super.localeName = 'en_ZA',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'en_ZA',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get datePickerDateOrderString => 'dmy';
@@ -2444,16 +2684,26 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEs({
-    super.localeName = 'es',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -2591,16 +2841,26 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEs419({
-    super.localeName = 'es_419',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_419',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2624,16 +2884,26 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsAr({
-    super.localeName = 'es_AR',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_AR',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2657,16 +2927,26 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsBo({
-    super.localeName = 'es_BO',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_BO',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2690,16 +2970,26 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsCl({
-    super.localeName = 'es_CL',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_CL',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2723,16 +3013,26 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsCo({
-    super.localeName = 'es_CO',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_CO',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2756,16 +3056,26 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsCr({
-    super.localeName = 'es_CR',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_CR',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2789,16 +3099,26 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsDo({
-    super.localeName = 'es_DO',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_DO',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2822,16 +3142,26 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsEc({
-    super.localeName = 'es_EC',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_EC',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2855,16 +3185,26 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsGt({
-    super.localeName = 'es_GT',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_GT',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2888,16 +3228,26 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsHn({
-    super.localeName = 'es_HN',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_HN',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2921,16 +3271,26 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsMx({
-    super.localeName = 'es_MX',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_MX',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2954,16 +3314,26 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsNi({
-    super.localeName = 'es_NI',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_NI',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -2987,16 +3357,26 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsPa({
-    super.localeName = 'es_PA',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_PA',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3020,16 +3400,26 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsPe({
-    super.localeName = 'es_PE',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_PE',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3053,16 +3443,26 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsPr({
-    super.localeName = 'es_PR',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_PR',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3086,16 +3486,26 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsPy({
-    super.localeName = 'es_PY',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_PY',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3119,16 +3529,26 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsSv({
-    super.localeName = 'es_SV',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_SV',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3152,16 +3572,26 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsUs({
-    super.localeName = 'es_US',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_US',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3185,16 +3615,26 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsUy({
-    super.localeName = 'es_UY',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_UY',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3218,16 +3658,26 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEsVe({
-    super.localeName = 'es_VE',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'es_VE',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour en punto';
@@ -3251,16 +3701,26 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEt({
-    super.localeName = 'et',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'et',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Märguanne';
@@ -3398,16 +3858,26 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationEu({
-    super.localeName = 'eu',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'eu',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -3545,16 +4015,26 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationFa({
-    super.localeName = 'fa',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'fa',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'هشدار';
@@ -3692,16 +4172,26 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationFi({
-    super.localeName = 'fi',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'fi',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Ilmoitus';
@@ -3839,16 +4329,26 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationFil({
-    super.localeName = 'fil',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'fil',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Alerto';
@@ -3986,16 +4486,26 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationFr({
-    super.localeName = 'fr',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'fr',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Alerte';
@@ -4133,16 +4643,26 @@ class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationFrCa({
-    super.localeName = 'fr_CA',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'fr_CA',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String? get datePickerHourSemanticsLabelOne => r'$hour heure';
@@ -4175,16 +4695,26 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationGl({
-    super.localeName = 'gl',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'gl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -4322,16 +4852,26 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationGsw({
-    super.localeName = 'gsw',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'gsw',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Benachrichtigung';
@@ -4469,16 +5009,26 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationGu({
-    super.localeName = 'gu',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'gu',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'અલર્ટ';
@@ -4616,16 +5166,26 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationHe({
-    super.localeName = 'he',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'he',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'התראה';
@@ -4763,16 +5323,26 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationHi({
-    super.localeName = 'hi',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'hi',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'अलर्ट';
@@ -4910,16 +5480,26 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationHr({
-    super.localeName = 'hr',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'hr',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Upozorenje';
@@ -5057,16 +5637,26 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationHu({
-    super.localeName = 'hu',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'hu',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Értesítés';
@@ -5204,16 +5794,26 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationHy({
-    super.localeName = 'hy',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'hy',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Ծանուցում';
@@ -5351,16 +5951,26 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationId({
-    super.localeName = 'id',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'id',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Notifikasi';
@@ -5498,16 +6108,26 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationIs({
-    super.localeName = 'is',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'is',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Tilkynning';
@@ -5645,16 +6265,26 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationIt({
-    super.localeName = 'it',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'it',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Avviso';
@@ -5792,16 +6422,26 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationJa({
-    super.localeName = 'ja',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ja',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => '通知';
@@ -5939,16 +6579,26 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationKa({
-    super.localeName = 'ka',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ka',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'გაფრთხილება';
@@ -6086,16 +6736,26 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationKk({
-    super.localeName = 'kk',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'kk',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Дабыл';
@@ -6233,16 +6893,26 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationKm({
-    super.localeName = 'km',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'km',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'ជូនដំណឹង';
@@ -6380,16 +7050,26 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationKn({
-    super.localeName = 'kn',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'kn',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => '\u{c8e}\u{c9a}\u{ccd}\u{c9a}\u{cb0}\u{cbf}\u{c95}\u{cc6}';
@@ -6527,16 +7207,26 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationKo({
-    super.localeName = 'ko',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ko',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => '알림';
@@ -6674,16 +7364,26 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationKy({
-    super.localeName = 'ky',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ky',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Эскертүү';
@@ -6821,16 +7521,26 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationLo({
-    super.localeName = 'lo',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'lo',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'ການເຕືອນ';
@@ -6968,16 +7678,26 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationLt({
-    super.localeName = 'lt',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'lt',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Įspėjimas';
@@ -7115,16 +7835,26 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationLv({
-    super.localeName = 'lv',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'lv',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Brīdinājums';
@@ -7262,16 +7992,26 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationMk({
-    super.localeName = 'mk',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'mk',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Предупредување';
@@ -7409,16 +8149,26 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationMl({
-    super.localeName = 'ml',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ml',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'മുന്നറിയിപ്പ്';
@@ -7556,16 +8306,26 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationMn({
-    super.localeName = 'mn',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'mn',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Сэрэмжлүүлэг';
@@ -7703,16 +8463,26 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationMr({
-    super.localeName = 'mr',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'mr',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'सूचना';
@@ -7850,16 +8620,26 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationMs({
-    super.localeName = 'ms',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ms',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Makluman';
@@ -7997,16 +8777,26 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationMy({
-    super.localeName = 'my',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'my',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'သတိပေးချက်';
@@ -8144,16 +8934,26 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationNb({
-    super.localeName = 'nb',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'nb',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Varsel';
@@ -8291,16 +9091,26 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationNe({
-    super.localeName = 'ne',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ne',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'अलर्ट';
@@ -8438,16 +9248,26 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationNl({
-    super.localeName = 'nl',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'nl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Melding';
@@ -8585,16 +9405,26 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationNo({
-    super.localeName = 'no',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'no',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Varsel';
@@ -8732,16 +9562,26 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationOr({
-    super.localeName = 'or',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'or',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'ଆଲର୍ଟ';
@@ -8879,16 +9719,26 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationPa({
-    super.localeName = 'pa',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'pa',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'ਸੁਚੇਤਨਾ';
@@ -9026,16 +9876,26 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationPl({
-    super.localeName = 'pl',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'pl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Alert';
@@ -9173,16 +10033,26 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationPt({
-    super.localeName = 'pt',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'pt',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Alerta';
@@ -9320,16 +10190,26 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationPtPt({
-    super.localeName = 'pt_PT',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'pt_PT',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get searchTextFieldPlaceholderLabel => 'Pesquise';
@@ -9359,16 +10239,26 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationRo({
-    super.localeName = 'ro',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ro',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Alertă';
@@ -9506,16 +10396,26 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationRu({
-    super.localeName = 'ru',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ru',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Оповещение';
@@ -9653,16 +10553,26 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationSi({
-    super.localeName = 'si',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'si',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'ඇඟවීම';
@@ -9800,16 +10710,26 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationSk({
-    super.localeName = 'sk',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'sk',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Upozornenie';
@@ -9947,16 +10867,26 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationSl({
-    super.localeName = 'sl',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'sl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Opozorilo';
@@ -10094,16 +11024,26 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationSq({
-    super.localeName = 'sq',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'sq',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Sinjalizim';
@@ -10241,16 +11181,26 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationSr({
-    super.localeName = 'sr',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'sr',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Обавештење';
@@ -10388,16 +11338,26 @@ class CupertinoLocalizationSrCyrl extends CupertinoLocalizationSr {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationSrCyrl({
-    super.localeName = 'sr_Cyrl',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'sr_Cyrl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 }
 
 /// The translations for Serbian, using the Latin script (`sr_Latn`).
@@ -10406,16 +11366,26 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationSrLatn({
-    super.localeName = 'sr_Latn',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'sr_Latn',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Obaveštenje';
@@ -10502,16 +11472,26 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationSv({
-    super.localeName = 'sv',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'sv',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Varning';
@@ -10649,16 +11629,26 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationSw({
-    super.localeName = 'sw',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'sw',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Arifa';
@@ -10796,16 +11786,26 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationTa({
-    super.localeName = 'ta',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ta',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'விழிப்பூட்டல்';
@@ -10943,16 +11943,26 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationTe({
-    super.localeName = 'te',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'te',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'అలర్ట్';
@@ -11090,16 +12100,26 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationTh({
-    super.localeName = 'th',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'th',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'การแจ้งเตือน';
@@ -11237,16 +12257,26 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationTl({
-    super.localeName = 'tl',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'tl',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Alerto';
@@ -11384,16 +12414,26 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationTr({
-    super.localeName = 'tr',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'tr',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Uyarı';
@@ -11531,16 +12571,26 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationUk({
-    super.localeName = 'uk',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'uk',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Сповіщення';
@@ -11678,16 +12728,26 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationUr({
-    super.localeName = 'ur',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'ur',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'الرٹ';
@@ -11825,16 +12885,26 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationUz({
-    super.localeName = 'uz',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'uz',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Ogohlantirish';
@@ -11972,16 +13042,26 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationVi({
-    super.localeName = 'vi',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'vi',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Thông báo';
@@ -12119,16 +13199,26 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationZh({
-    super.localeName = 'zh',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'zh',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => '提醒';
@@ -12266,16 +13356,26 @@ class CupertinoLocalizationZhHans extends CupertinoLocalizationZh {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationZhHans({
-    super.localeName = 'zh_Hans',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'zh_Hans',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -12284,16 +13384,26 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationZhHant({
-    super.localeName = 'zh_Hant',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'zh_Hant',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => '通知';
@@ -12353,16 +13463,26 @@ class CupertinoLocalizationZhHantHk extends CupertinoLocalizationZhHant {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationZhHantHk({
-    super.localeName = 'zh_Hant_HK',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'zh_Hant_HK',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -12371,16 +13491,26 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationZhHantTw({
-    super.localeName = 'zh_Hant_TW',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'zh_Hant_TW',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get tabSemanticsLabelRaw => r'第 $tabIndex 個分頁標籤，共 $tabCount 個';
@@ -12413,16 +13543,26 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalizationZu({
-    super.localeName = 'zu',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
+    String localeName = 'zu',
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
 
   @override
   String get alertDialogLabel => 'Isexwayiso';
