@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -206,15 +208,21 @@ class Doctor {
         // onError callback to it and translate errors into ValidationResults.
         asyncGuard<ValidationResult>(
           () {
-            // This future can only complete with a ToolExit.
-            final Future<ValidationResult> timeoutFuture = Future<ValidationResult>.delayed(doctorDuration, () {
-              throwToolExit('${validator.title} exceeded maximum allowed duration of $doctorDuration');
+            final Completer<ValidationResult> timeoutCompleter = Completer<ValidationResult>();
+            final Timer timer = Timer(doctorDuration, () {
+              timeoutCompleter.completeError(
+                Exception('${validator.title} exceeded maximum allowed duration of $doctorDuration'),
+              );
             });
             final Future<ValidationResult> validatorFuture = validator.validate();
             return Future.any<ValidationResult>(<Future<ValidationResult>>[
               validatorFuture,
-              timeoutFuture,
-            ]);
+              // This future can only complete with a ToolExit.
+              timeoutCompleter.future,
+            ]).then((ValidationResult result) async {
+              timer.cancel();
+              return result;
+            });
           },
           onError: (Object exception, StackTrace stackTrace) {
             return ValidationResult.crash(exception, stackTrace);

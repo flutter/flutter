@@ -361,7 +361,7 @@ void main() {
 
     testUsingContext('validate tool exit when exceeding timeout', () async {
       FakeAsync().run<void>((FakeAsync time) {
-        final Doctor doctor = FakeAsyncStuckDoctor(time, logger);
+        final Doctor doctor = FakeAsyncStuckDoctor(logger);
         doctor.diagnose(verbose: false);
         time.elapse(Doctor.doctorDuration + const Duration(seconds: 1));
         time.flushMicrotasks();
@@ -990,9 +990,7 @@ class FakeCrashingDoctor extends Doctor {
 
 /// A doctor with a validator that will never finish.
 class FakeAsyncStuckDoctor extends Doctor {
-  FakeAsyncStuckDoctor(this._time, Logger logger) : super(logger: logger);
-
-  final FakeAsync _time;
+  FakeAsyncStuckDoctor(Logger logger) : super(logger: logger);
 
   List<DoctorValidator> _validators;
   @override
