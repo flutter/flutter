@@ -1051,6 +1051,7 @@ class RenderTable extends RenderBox {
     if (rows * columns == 0) {
       // TODO(ianh): if columns is zero, this should be zero width
       // TODO(ianh): if columns is not zero, this should be based on the column width specifications
+      _tableWidth = 0.0;
       size = constraints.constrain(Size.zero);
       return;
     }
