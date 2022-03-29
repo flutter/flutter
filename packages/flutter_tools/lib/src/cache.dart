@@ -665,7 +665,7 @@ class Cache {
   }
 
   /// Update the cache to contain all `requiredArtifacts`.
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, [bool offline = false]) async {
     if (!_lockEnabled) {
       return;
     }
@@ -678,7 +678,7 @@ class Cache {
         continue;
       }
       try {
-        await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils);
+        await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils, offline);
       } on SocketException catch (e) {
         if (_hostsBlockedInChina.contains(e.address?.host)) {
           _logger.printError(
@@ -744,6 +744,7 @@ abstract class ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    [bool offline = false]
   );
 
   /// The canonical name of the artifact.
@@ -797,6 +798,7 @@ abstract class CachedArtifact extends ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    [bool offline = false]
   ) async {
     if (!location.existsSync()) {
       try {
