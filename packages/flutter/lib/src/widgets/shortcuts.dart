@@ -216,9 +216,9 @@ abstract class ShortcutActivator {
   ///
   /// If the keyboard `state` isn't supplied, then it defaults to using
   /// [RawKeyboard.instance].
-  static bool isActivatedBy(ShortcutActivator activator, RawKeyEvent event, [RawKeyboard? state]) {
+  static bool isActivatedBy(ShortcutActivator activator, RawKeyEvent event) {
     return (activator.triggers?.contains(event.logicalKey) ?? true)
-        && activator.accepts(event, state ?? RawKeyboard.instance);
+        && activator.accepts(event, RawKeyboard.instance);
   }
 
   /// Returns a description of the key set that is short and readable.
@@ -1026,7 +1026,7 @@ class CallbackShortcuts extends StatelessWidget {
   // throws, by providing the activator and event as arguments that will appear
   // in the stack trace.
   bool _applyKeyBinding(ShortcutActivator activator, RawKeyEvent event) {
-    if (ShortcutActivator.isActivatedBy(activator, event, RawKeyboard.instance)) {
+    if (ShortcutActivator.isActivatedBy(activator, event)) {
       bindings[activator]!.call();
       return true;
     }

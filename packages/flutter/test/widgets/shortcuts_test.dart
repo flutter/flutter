@@ -339,10 +339,10 @@ void main() {
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
-      expect(ShortcutActivator.isActivatedBy(set, events[0], RawKeyboard.instance), isTrue);
+      expect(ShortcutActivator.isActivatedBy(set, events[0]), isTrue);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-      expect(ShortcutActivator.isActivatedBy(set, events[0], RawKeyboard.instance), isFalse);
+      expect(ShortcutActivator.isActivatedBy(set, events[0]), isFalse);
     });
 
     test('LogicalKeySet diagnostics work.', () {
@@ -584,11 +584,11 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-      expect(ShortcutActivator.isActivatedBy(singleActivator, events[1], RawKeyboard.instance), isTrue);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events[1]), isTrue);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-      expect(ShortcutActivator.isActivatedBy(singleActivator, events[1], RawKeyboard.instance), isFalse);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events[1]), isFalse);
     });
-    
+
     group('diagnostics.', () {
       test('single key', () {
         final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -1235,7 +1235,7 @@ void main() {
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-      expect(ShortcutActivator.isActivatedBy(characterActivator, events[0], RawKeyboard.instance), isTrue);
+      expect(ShortcutActivator.isActivatedBy(characterActivator, events[0]), isTrue);
     });
   });
 
