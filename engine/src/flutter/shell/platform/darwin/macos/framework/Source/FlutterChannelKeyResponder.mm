@@ -57,11 +57,14 @@
       } else {
         // ignore duplicate modifiers; This can happen in situations like switching
         // between application windows when MacOS only sends the up event to new window.
+        callback(true);
         return;
       }
       break;
-    default:
+    default: {
       NSAssert(false, @"Unexpected key event type (got %lu).", event.type);
+      callback(false);
+    }
   }
   _previouslyPressedFlags = modifierFlags;
   NSMutableDictionary* keyMessage = [@{
