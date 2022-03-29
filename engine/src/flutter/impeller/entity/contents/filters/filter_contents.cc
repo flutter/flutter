@@ -99,7 +99,7 @@ bool FilterContents::Render(const ContentContext& renderer,
 
   auto contents = std::make_shared<TextureContents>();
   contents->SetTexture(snapshot.texture);
-  contents->SetSourceRect(IRect::MakeSize(snapshot.texture->GetSize()));
+  contents->SetSourceRect(Rect::MakeSize(Size(snapshot.texture->GetSize())));
 
   Entity e;
   e.SetPath(PathBuilder{}.AddRect(GetBounds(entity)).GetCurrentPath());
@@ -162,7 +162,7 @@ static std::optional<Contents::Snapshot> ResolveSnapshotForInput(
             const ContentContext& renderer, RenderPass& pass) -> bool {
           TextureContents contents;
           contents.SetTexture(texture);
-          contents.SetSourceRect(IRect::MakeSize(texture->GetSize()));
+          contents.SetSourceRect(Rect::MakeSize(Size(texture->GetSize())));
           Entity sub_entity;
           sub_entity.SetPath(entity.GetPath());
           sub_entity.SetBlendMode(Entity::BlendMode::kSource);

@@ -67,7 +67,7 @@ TEST_F(AiksTest, CanRenderImageRect) {
   Canvas canvas;
   Paint paint;
   auto image = std::make_shared<Image>(CreateTextureForFixture("kalimba.jpg"));
-  auto source_rect = IRect::MakeSize(image->GetSize());
+  auto source_rect = Rect::MakeSize(Size(image->GetSize()));
 
   // Render the bottom right quarter of the source image in a stretched rect.
   source_rect.size.width /= 2;

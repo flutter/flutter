@@ -58,7 +58,7 @@ struct TRect {
     auto right = points[0].x;
     auto bottom = points[0].y;
     if (points.size() > 1) {
-      for (uint i = 1; i < points.size(); i++) {
+      for (size_t i = 1; i < points.size(); i++) {
         left = std::min(left, points[i].x);
         top = std::min(top, points[i].y);
         right = std::max(right, points[i].x);

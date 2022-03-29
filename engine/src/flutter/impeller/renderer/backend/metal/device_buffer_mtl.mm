@@ -29,7 +29,7 @@ std::shared_ptr<Texture> DeviceBufferMTL::MakeTexture(TextureDescriptor desc,
   }
 
   // Avoid overruns.
-  if (offset + desc.GetSizeOfBaseMipLevel() > size_) {
+  if (offset + desc.GetByteSizeOfBaseMipLevel() > size_) {
     VALIDATION_LOG << "Avoiding buffer overrun when creating texture.";
     return nullptr;
   }

@@ -18,6 +18,7 @@
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/vector.h"
+#include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_frame.h"
 
@@ -65,12 +66,16 @@ class Canvas {
 
   void DrawCircle(Point center, Scalar radius, Paint paint);
 
-  void DrawImage(std::shared_ptr<Image> image, Point offset, Paint paint);
+  void DrawImage(std::shared_ptr<Image> image,
+                 Point offset,
+                 Paint paint,
+                 SamplerDescriptor sampler = {});
 
   void DrawImageRect(std::shared_ptr<Image> image,
-                     IRect source,
+                     Rect source,
                      Rect dest,
-                     Paint paint);
+                     Paint paint,
+                     SamplerDescriptor sampler = {});
 
   void ClipPath(
       Path path,

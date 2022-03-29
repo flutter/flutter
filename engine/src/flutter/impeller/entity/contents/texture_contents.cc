@@ -96,20 +96,28 @@ bool TextureContents::Render(const ContentContext& renderer,
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
-  FS::BindTextureSampler(
-      cmd, texture_,
-      renderer.GetContext()->GetSamplerLibrary()->GetSampler({}));
+  FS::BindTextureSampler(cmd, texture_,
+                         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+                             sampler_descriptor_));
   pass.AddCommand(std::move(cmd));
 
   return true;
 }
 
-void TextureContents::SetSourceRect(const IRect& source_rect) {
+void TextureContents::SetSourceRect(const Rect& source_rect) {
   source_rect_ = source_rect;
 }
 
-const IRect& TextureContents::GetSourceRect() const {
+const Rect& TextureContents::GetSourceRect() const {
   return source_rect_;
+}
+
+void TextureContents::SetSamplerDescriptor(SamplerDescriptor desc) {
+  sampler_descriptor_ = std::move(desc);
+}
+
+const SamplerDescriptor& TextureContents::GetSamplerDescriptor() const {
+  return sampler_descriptor_;
 }
 
 }  // namespace impeller

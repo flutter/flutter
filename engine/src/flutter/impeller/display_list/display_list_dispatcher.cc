@@ -564,28 +564,71 @@ void DisplayListDispatcher::drawVertices(const sk_sp<SkVertices> vertices,
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawImage(const sk_sp<SkImage> image,
+void DisplayListDispatcher::drawImage(const sk_sp<flutter::DlImage> image,
                                       const SkPoint point,
                                       const SkSamplingOptions& sampling,
                                       bool render_with_attributes) {
-  // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
+  if (!image) {
+    return;
+  }
+
+  auto texture = image->impeller_texture();
+  if (!texture) {
+    return;
+  }
+
+  const auto size = texture->GetSize();
+  const auto src = SkRect::MakeWH(size.width, size.height);
+  const auto dest =
+      SkRect::MakeXYWH(point.fX, point.fY, size.width, size.height);
+
+  drawImageRect(
+      image,                   // image
+      src,                     // source rect
+      dest,                    // destination rect
+      sampling,                // sampling options
+      render_with_attributes,  // render with attributes
+      SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint  // constraint
+  );
+}
+
+static impeller::SamplerDescriptor ToSamplerDescriptor(
+    const SkSamplingOptions& options) {
+  impeller::SamplerDescriptor desc;
+  switch (options.filter) {
+    case SkFilterMode::kNearest:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kNearest;
+      desc.label = "Nearest Sampler";
+      break;
+    case SkFilterMode::kLinear:
+      desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
+      desc.label = "Linear Sampler";
+      break;
+    default:
+      break;
+  }
+  return desc;
 }
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawImageRect(
-    const sk_sp<SkImage> image,
+    const sk_sp<flutter::DlImage> image,
     const SkRect& src,
     const SkRect& dst,
     const SkSamplingOptions& sampling,
     bool render_with_attributes,
     SkCanvas::SrcRectConstraint constraint) {
-  // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
+  canvas_.DrawImageRect(
+      std::make_shared<Image>(image->impeller_texture()),  // image
+      ToRect(src),                                         // source  rect
+      ToRect(dst),                                         // destination rect
+      paint_,                                              // paint
+      ToSamplerDescriptor(sampling)                        // sampling
+  );
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawImageNine(const sk_sp<SkImage> image,
+void DisplayListDispatcher::drawImageNine(const sk_sp<flutter::DlImage> image,
                                           const SkIRect& center,
                                           const SkRect& dst,
                                           SkFilterMode filter,
@@ -595,17 +638,18 @@ void DisplayListDispatcher::drawImageNine(const sk_sp<SkImage> image,
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawImageLattice(const sk_sp<SkImage> image,
-                                             const SkCanvas::Lattice& lattice,
-                                             const SkRect& dst,
-                                             SkFilterMode filter,
-                                             bool render_with_attributes) {
+void DisplayListDispatcher::drawImageLattice(
+    const sk_sp<flutter::DlImage> image,
+    const SkCanvas::Lattice& lattice,
+    const SkRect& dst,
+    SkFilterMode filter,
+    bool render_with_attributes) {
   // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawAtlas(const sk_sp<SkImage> atlas,
+void DisplayListDispatcher::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                                       const SkRSXform xform[],
                                       const SkRect tex[],
                                       const SkColor colors[],
