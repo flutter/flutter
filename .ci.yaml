@@ -395,7 +395,7 @@ targets:
           {"dependency": "clang"},
           {"dependency": "cmake"},
           {"dependency": "ninja"},
-          {"dependency": "open_jdk", "version": 11},
+          {"dependency": "open_jdk", "version": "11"},
           {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       shard: framework_tests
