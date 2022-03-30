@@ -3001,8 +3001,9 @@ Future<void> _ensureFlutterToolsSnapshot() async {
     'cache',
     'flutter_tools.snapshot',
   ));
-  final String dotPackages = globals.fs.path.absolute(globals.fs.path.join(
-    '.packages',
+  final String packageConfig = globals.fs.path.absolute(globals.fs.path.join(
+    '.dart_tool',
+    'package_config.json'
   ));
 
   final File snapshotFile = globals.fs.file(flutterToolsSnapshotPath);
@@ -3012,7 +3013,7 @@ Future<void> _ensureFlutterToolsSnapshot() async {
 
   final List<String> snapshotArgs = <String>[
     '--snapshot=$flutterToolsSnapshotPath',
-    '--packages=$dotPackages',
+    '--packages=$packageConfig',
     flutterToolsPath,
   ];
   final ProcessResult snapshotResult = await Process.run(
