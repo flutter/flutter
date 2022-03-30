@@ -503,18 +503,12 @@ class _AboutProgram extends StatelessWidget {
               ),
             ),
           if (legalese != null && legalese != '')
-            Padding(
-              padding: const EdgeInsets.only(bottom: _textVerticalSeparation),
-              child: Text(
-                legalese!,
-                style: Theme.of(context).textTheme.caption,
-                textAlign: TextAlign.center,
-              ),
+            Text(
+              legalese!,
+              style: Theme.of(context).textTheme.caption,
+              textAlign: TextAlign.center,
             ),
-          // When both app version and legalese are missing, the padding is provided between the
-          // app icon and powered by line.
-          if ((version == null || version == '') && (legalese == null || legalese == ''))
-            const SizedBox(height: _textVerticalSeparation),
+          const SizedBox(height: _textVerticalSeparation),
           Text(
             'Powered by Flutter',
             style: Theme.of(context).textTheme.bodyText2,
