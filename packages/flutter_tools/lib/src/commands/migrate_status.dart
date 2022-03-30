@@ -26,7 +26,7 @@ class MigrateStatusCommand extends FlutterCommand {
       valueHelp: 'path',
     );
     argParser.addFlag(
-      'show-diff',
+      'diff',
       defaultsTo: true,
       negatable: true,
       help: 'Shows the diff output when enabled. Enabled by default.',
@@ -70,7 +70,7 @@ class MigrateStatusCommand extends FlutterCommand {
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
-    if (boolArg('show-diff')) {
+    if (boolArg('diff')) {
       for (final String localPath in manifest.mergedFiles) {
         final DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
         if (result.diff != '') {
