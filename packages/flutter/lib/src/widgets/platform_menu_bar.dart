@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -26,6 +27,7 @@ const String _kEnabledKey = 'enabled';
 const String _kChildrenKey = 'children';
 const String _kIsDividerKey = 'isDivider';
 const String _kPlatformDefaultMenuKey = 'platformProvidedMenu';
+const String _kShortcutEquivalentKey = 'shortcutEquivalent';
 const String _kShortcutTriggerKey = 'shortcutTrigger';
 const String _kShortcutModifiersKey = 'shortcutModifiers';
 
@@ -38,17 +40,42 @@ const int _kFlutterShortcutModifierControl = 1 << 3;
 /// An abstract class for describing cascading menu hierarchies that are part of
 /// a [PlatformMenuBar].
 ///
-/// This type is used by the [PlatformMenuDelegate.setMenus] to accept the menu
+/// This type is used by [PlatformMenuDelegate.setMenus] to accept the menu
 /// hierarchy to be sent to the platform, and by [PlatformMenuBar] to define the
 /// menu hierarchy.
 ///
 /// See also:
 ///
-///  * [PlatformMenuBar], a widget that renders menu items using
-///    platform APIs instead of Flutter.
+///  * [PlatformMenuBar], a widget that renders menu items using platform APIs
+///    instead of Flutter.
 abstract class MenuItem with Diagnosticable {
   /// Allows subclasses to have const constructors.
   const MenuItem();
+
+  /// Converts the representation of this item into a map suitable for sending
+  /// over the default "flutter/menu" channel used by
+  /// [DefaultPlatformMenuDelegate].
+  ///
+  /// The `delegate` is the [DefaultPlatformMenuDelegate] that is requesting the
+  /// serialization. The `index` is the position of this menu item in the list
+  /// of children of the [PlatformMenu] it belongs to, and `count` is the number
+  /// of children in the [PlatformMenu] it belongs to.
+  ///
+  /// The `getId` parameter is a [MenuItemSerializableIdGenerator] function that
+  /// generates a unique ID for each menu item, which is to be returned in the
+  /// "id" field of the menu item data.
+  Iterable<Map<String, Object?>> toChannelRepresentation(
+    DefaultPlatformMenuDelegate delegate, {
+    required int index,
+    required int count,
+    required MenuItemSerializableIdGenerator getId,
+  });
+
+  /// Returns all descendant [MenuItem]s of this item.
+  ///
+  /// Returns an empty list if this type of menu item doesn't have
+  /// descendants.
+  List<MenuItem> get descendants => const <MenuItem>[];
 }
 
 /// An abstract delegate class that can be used to set
@@ -139,28 +166,7 @@ abstract class PlatformMenuDelegate {
 
 /// The signature for a function that generates unique menu item IDs for
 /// serialization of a [DefaultPlatformMenuDelegateSerializable].
-typedef DefaultPlatformMenuDelegateSerializableIdGenerator = int Function(MenuItem item);
-
-/// A mixin for doing serialization of [MenuItem] objects.
-///
-/// This is used by the [DefaultPlatformMenuDelegate] to serialize menu
-/// hierarchies for sending to the platform for rendering.
-mixin DefaultPlatformMenuDelegateSerializable {
-  /// Converts the representation of this item into a map suitable for sending
-  /// over the default "flutter/menu" channel used by
-  /// [DefaultPlatformMenuDelegate].
-  ///
-  /// The `delegate` is a [DefaultPlatformMenuDelegate] that is requesting the
-  /// serialization. The `index` is the position of this menu item in the list
-  /// of children of the [PlatformMenu] it belongs to, and `count` is the number
-  /// of children in the [PlatformMenu] it belongs to.
-  Iterable<Map<String, Object?>> toChannelRepresentation(
-    DefaultPlatformMenuDelegate delegate, {
-    required int index,
-    required int count,
-    required DefaultPlatformMenuDelegateSerializableIdGenerator getId,
-  });
-}
+typedef MenuItemSerializableIdGenerator = int Function(MenuItem item);
 
 /// The platform menu delegate that handles the built-in macOS platform menu
 /// generation using the 'flutter/menu' channel.
@@ -205,16 +211,17 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
     if (topLevelMenus.isNotEmpty) {
       int index = 0;
       for (final MenuItem childItem in topLevelMenus) {
-        if (childItem is! DefaultPlatformMenuDelegateSerializable) {
-          throw UnimplementedError(
-              'Tried to serialize a menu item that was not a DefaultPlatformMenuDelegateSerializer');
-        }
-        representation.addAll((childItem as DefaultPlatformMenuDelegateSerializable)
-            .toChannelRepresentation(this, index: index, count: topLevelMenus.length, getId: _getId));
+        representation
+            .addAll(childItem.toChannelRepresentation(this, index: index, count: topLevelMenus.length, getId: _getId));
         index += 1;
       }
     }
-    channel.invokeMethod<void>(_kMenuSetMethod, representation);
+    // Currently there's only ever one window, but the channel's format allows
+    // more than one window's menu hierarchy to be defined.
+    final Map<String, Object?> windowMenu = <String, Object?>{
+      '0': representation,
+    };
+    channel.invokeMethod<void>(_kMenuSetMethod, windowMenu);
   }
 
   /// Defines the channel that the [DefaultPlatformMenuDelegate] uses to
@@ -265,8 +272,10 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   // open/close callbacks.
   Future<void> _methodCallHandler(MethodCall call) async {
     final int id = call.arguments as int;
-    assert(_idMap.containsKey(id),
-        'Received a menu ${call.method} for a menu item with an ID that was not recognized: $id');
+    assert(
+      _idMap.containsKey(id),
+      'Received a menu ${call.method} for a menu item with an ID that was not recognized: $id',
+    );
     if (!_idMap.containsKey(id)) {
       return;
     }
@@ -383,7 +392,7 @@ class _PlatformMenuBarState extends State<PlatformMenuBar> {
     final List<MenuItem> newDescendants = <MenuItem>[
       for (final MenuItem item in widget.children) ...<MenuItem>[
         item,
-        if (item is PlatformMenu) ...item.descendants,
+        ...item.descendants,
       ],
     ];
     if (!listEquals(newDescendants, descendants)) {
@@ -412,25 +421,19 @@ class _PlatformMenuBarState extends State<PlatformMenuBar> {
 ///
 ///  * [PlatformMenuItem], a class representing a leaf menu item in a
 ///    [PlatformMenuBar].
-class PlatformMenu extends MenuItem with DiagnosticableTreeMixin, DefaultPlatformMenuDelegateSerializable {
+class PlatformMenu extends MenuItem with DiagnosticableTreeMixin {
   /// Creates a const [PlatformMenu].
   ///
-  /// The [label] and [children] fields are required.
+  /// The [label] and [menus] fields are required.
   const PlatformMenu({
     required this.label,
-    this.enabled = true,
     this.onOpen,
     this.onClose,
-    required this.children,
+    required this.menus,
   });
 
   /// The label that will appear on the menu.
   final String label;
-
-  /// Whether or not this submenu is enabled.
-  ///
-  /// If the menu is disabled, then it can't be opened.
-  final bool enabled;
 
   /// The callback that is called when this menu is opened.
   final VoidCallback? onOpen;
@@ -440,10 +443,11 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin, DefaultPlatfor
 
   /// The menu items in the submenu opened by this menu item.
   ///
-  /// If empty, this menu item will act as if [enabled] were false.
-  final List<MenuItem> children;
+  /// If this is an empty list, this [PlatformMenu] will be disabled.
+  final List<MenuItem> menus;
 
   /// Returns all descendant [MenuItem]s of this item.
+  @override
   List<MenuItem> get descendants => getDescendants(this);
 
   /// Returns all descendants of the given item.
@@ -452,9 +456,9 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin, DefaultPlatfor
   /// this implementation.
   static List<MenuItem> getDescendants(PlatformMenu item) {
     return <MenuItem>[
-      for (final MenuItem child in item.children) ...<MenuItem>[
+      for (final MenuItem child in item.menus) ...<MenuItem>[
         child,
-        if (child is PlatformMenu) ...child.descendants,
+        ...child.descendants,
       ],
     ];
   }
@@ -464,7 +468,7 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin, DefaultPlatfor
     DefaultPlatformMenuDelegate delegate, {
     required int index,
     required int count,
-    required DefaultPlatformMenuDelegateSerializableIdGenerator getId,
+    required MenuItemSerializableIdGenerator getId,
   }) {
     return <Map<String, Object?>>[serialize(this, delegate, getId)];
   }
@@ -477,18 +481,15 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin, DefaultPlatfor
   static Map<String, Object?> serialize(
     PlatformMenu item,
     DefaultPlatformMenuDelegate delegate,
-    DefaultPlatformMenuDelegateSerializableIdGenerator getId,
+    MenuItemSerializableIdGenerator getId,
   ) {
     final List<Map<String, Object?>> result = <Map<String, Object?>>[];
     int index = 0;
-    for (final MenuItem childItem in item.children) {
-      if (childItem is! DefaultPlatformMenuDelegateSerializable) {
-        throw UnimplementedError('Tried to serialize a menu item that was not a DefaultPlatformMenuDelegateSerializer');
-      }
-      result.addAll((childItem as DefaultPlatformMenuDelegateSerializable).toChannelRepresentation(
+    for (final MenuItem childItem in item.menus) {
+      result.addAll(childItem.toChannelRepresentation(
         delegate,
         index: index,
-        count: item.children.length,
+        count: item.menus.length,
         getId: getId,
       ));
       index += 1;
@@ -496,31 +497,30 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin, DefaultPlatfor
     return <String, Object?>{
       _kIdKey: getId(item),
       _kLabelKey: item.label,
-      _kEnabledKey: item.enabled,
+      _kEnabledKey: item.menus.isNotEmpty,
       _kChildrenKey: result,
     };
   }
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return children.map<DiagnosticsNode>((MenuItem child) => child.toDiagnosticsNode()).toList();
+    return menus.map<DiagnosticsNode>((MenuItem child) => child.toDiagnosticsNode()).toList();
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('label', label));
-    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED'));
+    properties.add(FlagProperty('enabled', value: menus.isNotEmpty, ifFalse: 'DISABLED'));
   }
 }
 
-/// An interface for [MenuItem]s that group other menu items into sections
-/// delineated by dividers.
+/// A class that groups other menu items into sections delineated by dividers.
 ///
 /// Visual dividers will be added before and after this group if other menu
 /// items appear in the [PlatformMenu], and the leading one omitted if it is
 /// first and the trailing one omitted if it is last in the menu.
-class PlatformMenuItemGroup extends MenuItem with DefaultPlatformMenuDelegateSerializable {
+class PlatformMenuItemGroup extends MenuItem {
   /// Creates a const [PlatformMenuItemGroup].
   ///
   /// The [members] field is required.
@@ -536,7 +536,7 @@ class PlatformMenuItemGroup extends MenuItem with DefaultPlatformMenuDelegateSer
     DefaultPlatformMenuDelegate delegate, {
     required int index,
     required int count,
-    required DefaultPlatformMenuDelegateSerializableIdGenerator getId,
+    required MenuItemSerializableIdGenerator getId,
   }) {
     assert(members.isNotEmpty, 'There must be at least one member in a PlatformMenuItemGroup');
     final List<Map<String, Object?>> result = <Map<String, Object?>>[];
@@ -547,10 +547,7 @@ class PlatformMenuItemGroup extends MenuItem with DefaultPlatformMenuDelegateSer
       });
     }
     for (final MenuItem item in members) {
-      if (item is! DefaultPlatformMenuDelegateSerializable) {
-        throw UnimplementedError('Tried to serialize a menu item that was not a DefaultPlatformMenuDelegateSerializer');
-      }
-      result.addAll((item as DefaultPlatformMenuDelegateSerializable).toChannelRepresentation(
+      result.addAll(item.toChannelRepresentation(
         delegate,
         index: index,
         count: count,
@@ -573,12 +570,17 @@ class PlatformMenuItemGroup extends MenuItem with DefaultPlatformMenuDelegateSer
   }
 }
 
-/// A class for [MenuItem]s that do not have submenus, but can be selected.
+/// A class for [MenuItem]s that do not have submenus (as a [PlatformMenu]
+/// would), but can be selected.
 ///
 /// These [MenuItem]s are the leaves of the menu item tree, and [onSelected]
 /// will be called when they are selected by clicking on them, or via an
 /// optional keyboard [shortcut].
-class PlatformMenuItem extends MenuItem with DefaultPlatformMenuDelegateSerializable {
+///
+/// See also:
+///
+///  * [PlatformMenu], a menu item that opens a submenu.
+class PlatformMenuItem extends MenuItem {
   /// Creates a const [PlatformMenuItem].
   ///
   /// The [label] attribute is required.
@@ -607,7 +609,7 @@ class PlatformMenuItem extends MenuItem with DefaultPlatformMenuDelegateSerializ
     DefaultPlatformMenuDelegate delegate, {
     required int index,
     required int count,
-    required DefaultPlatformMenuDelegateSerializableIdGenerator getId,
+    required MenuItemSerializableIdGenerator getId,
   }) {
     return <Map<String, Object?>>[PlatformMenuItem.serialize(this, delegate, getId)];
   }
@@ -620,31 +622,41 @@ class PlatformMenuItem extends MenuItem with DefaultPlatformMenuDelegateSerializ
   static Map<String, Object?> serialize(
     PlatformMenuItem item,
     DefaultPlatformMenuDelegate delegate,
-    DefaultPlatformMenuDelegateSerializableIdGenerator getId,
+    MenuItemSerializableIdGenerator getId,
   ) {
     int modifiers = 0;
     int? logicalKeyId;
+    String? shortcutEquivalent;
     final ShortcutActivator? shortcut = item.shortcut;
-    if (item.shortcut != null && shortcut is SingleActivator) {
-      if (shortcut.shift) {
-        modifiers |= _kFlutterShortcutModifierShift;
+    if (item.shortcut != null) {
+      if (shortcut is SingleActivator) {
+        if (shortcut.shift) {
+          modifiers |= _kFlutterShortcutModifierShift;
+        }
+        if (shortcut.alt) {
+          modifiers |= _kFlutterShortcutModifierAlt;
+        }
+        if (shortcut.meta) {
+          modifiers |= _kFlutterShortcutModifierMeta;
+        }
+        if (shortcut.control) {
+          modifiers |= _kFlutterShortcutModifierControl;
+        }
+        logicalKeyId = shortcut.trigger.keyId;
+      } else if (shortcut is CharacterActivator) {
+        shortcutEquivalent = shortcut.character;
+        modifiers = 0;
+      } else {
+        throw UnimplementedError('Menu shortcuts can only be SingleActivators or '
+            'CharacterActivators. Other ShortcutActivator types are unsupported');
       }
-      if (shortcut.alt) {
-        modifiers |= _kFlutterShortcutModifierAlt;
-      }
-      if (shortcut.meta) {
-        modifiers |= _kFlutterShortcutModifierMeta;
-      }
-      if (shortcut.control) {
-        modifiers |= _kFlutterShortcutModifierControl;
-      }
-      logicalKeyId = shortcut.trigger.keyId;
     }
     return <String, Object?>{
       _kIdKey: getId(item),
       _kLabelKey: item.label,
       _kEnabledKey: item.onSelected != null,
-      if (shortcut != null) _kShortcutTriggerKey: logicalKeyId,
+      if (shortcutEquivalent != null) _kShortcutEquivalentKey: shortcutEquivalent,
+      if (logicalKeyId != null) _kShortcutTriggerKey: logicalKeyId,
       if (shortcut != null) _kShortcutModifiersKey: modifiers,
     };
   }
@@ -679,7 +691,7 @@ class PlatformMenuItem extends MenuItem with DefaultPlatformMenuDelegateSerializ
 ///
 ///  * [PlatformMenuBar] which takes these items for inclusion in a
 ///    platform-rendered menu bar.
-class PlatformProvidedMenuItem extends PlatformMenuItem with DefaultPlatformMenuDelegateSerializable {
+class PlatformProvidedMenuItem extends PlatformMenuItem {
   /// Creates a const [PlatformProvidedMenuItem] of the appropriate type. Throws if the
   /// platform doesn't support the given default menu type.
   ///
@@ -737,7 +749,7 @@ class PlatformProvidedMenuItem extends PlatformMenuItem with DefaultPlatformMenu
     DefaultPlatformMenuDelegate delegate, {
     required int index,
     required int count,
-    required DefaultPlatformMenuDelegateSerializableIdGenerator getId,
+    required MenuItemSerializableIdGenerator getId,
   }) {
     assert(() {
       if (!hasMenu(type)) {

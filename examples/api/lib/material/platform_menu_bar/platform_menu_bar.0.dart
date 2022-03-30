@@ -10,6 +10,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(const SampleApp());
 
@@ -76,7 +77,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
       children: <MenuItem>[
         PlatformMenu(
           label: 'Flutter API Sample',
-          children: <MenuItem>[
+          menus: <MenuItem>[
             PlatformMenuItemGroup(
               members: <MenuItem>[
                 PlatformMenuItem(
@@ -93,13 +94,15 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                   onSelected: () {
                     _handleMenuSelection(MenuSelection.showMessage);
                   },
+                  shortcut: CharacterActivator('m'),
                   label: _showMessage ? 'Hide Message' : 'Show Message',
                 ),
                 PlatformMenu(
                   label: 'Messages',
-                  children: <MenuItem>[
+                  menus: <MenuItem>[
                     PlatformMenuItem(
                       label: 'I am not throwing away my shot.',
+                      shortcut: SingleActivator(LogicalKeyboardKey.digit1, meta: true),
                       onSelected: () {
                         setState(() {
                           _message = 'I am not throwing away my shot.';
@@ -108,6 +111,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                     ),
                     PlatformMenuItem(
                       label: "There's a million things I haven't done, but just you wait.",
+                      shortcut: SingleActivator(LogicalKeyboardKey.digit2, meta: true),
                       onSelected: () {
                         setState(() {
                           _message = "There's a million things I haven't done, but just you wait.";
