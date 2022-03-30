@@ -5,7 +5,7 @@
 import 'template.dart';
 
 class TypographyTemplate extends TokenTemplate {
-  const TypographyTemplate(String fileName, Map<String, dynamic> tokens) : super(fileName, tokens);
+  const TypographyTemplate(super.fileName, super.tokens);
 
   @override
   String generate() => '''
