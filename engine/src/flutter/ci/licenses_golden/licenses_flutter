@@ -853,6 +853,7 @@ FILE: ../../../flutter/lib/web_ui/lib/pointer.dart
 FILE: ../../../flutter/lib/web_ui/lib/semantics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/alarm_clock.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/app_bootstrap.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/assets.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/browser_detection.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvas_pool.dart
@@ -937,6 +938,8 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/surface_stats.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/transform.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html_image_codec.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/initialization.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_loader.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_promise.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/key_map.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard_binding.dart
