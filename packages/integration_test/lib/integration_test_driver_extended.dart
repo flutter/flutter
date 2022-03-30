@@ -99,6 +99,7 @@ Future<void> integrationDriver(
     final List<String> failures = <String>[];
     for (final dynamic screenshot in screenshots) {
       final Map<String, dynamic> data = screenshot as Map<String, dynamic>;
+      if (data['screenshotName'] == null) continue;
       final List<dynamic> screenshotBytes = data['bytes'] as List<dynamic>;
       final String screenshotName = data['screenshotName'] as String;
 
