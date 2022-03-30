@@ -168,7 +168,11 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
                   const SkPoint points[]) override;
 
   // |flutter::Dispatcher|
-  void drawVertices(const sk_sp<SkVertices> vertices,
+  void drawSkVertices(const sk_sp<SkVertices> vertices,
+                      SkBlendMode mode) override;
+
+  // |flutter::Dispatcher|
+  void drawVertices(const flutter::DlVertices* vertices,
                     flutter::DlBlendMode mode) override;
 
   // |flutter::Dispatcher|
