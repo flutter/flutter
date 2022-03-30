@@ -225,4 +225,68 @@ void main() {
       expect(manifest.deletedFiles[0], 'deleted_file');
     });
   });
+
+  group('manifest write', () {
+    testWithoutContext('empty', () async {
+      manifestFile.writeAsStringSync('''
+        merged_files:
+        conflict_files:
+        added_files:
+        deleted_files:
+      ''');
+      final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+      expect(manifest.mergedFiles.isEmpty, true);
+      expect(manifest.conflictFiles.isEmpty, true);
+      expect(manifest.addedFiles.isEmpty, true);
+      expect(manifest.deletedFiles.isEmpty, true);
+
+      manifest.writeFile();
+      expect(manifestFile.readAsStringSync(), '''
+merged_files:
+conflict_files:
+added_files:
+deleted_files:
+''');
+    });
+
+    testWithoutContext('basic multi-list', () async {
+      manifestFile.writeAsStringSync('''
+        merged_files:
+          - file1
+          - file2
+        conflict_files:
+        added_files:
+        deleted_files:
+          - file3
+          - file4
+      ''');
+      final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+      expect(manifest.mergedFiles.isEmpty, false);
+      expect(manifest.conflictFiles.isEmpty, true);
+      expect(manifest.addedFiles.isEmpty, true);
+      expect(manifest.deletedFiles.isEmpty, false);
+
+      expect(manifest.mergedFiles.length, 2);
+      expect(manifest.conflictFiles.length, 0);
+      expect(manifest.addedFiles.length, 0);
+      expect(manifest.deletedFiles.length, 2);
+
+      expect(manifest.mergedFiles[0], 'file1');
+      expect(manifest.mergedFiles[1], 'file2');
+      expect(manifest.deletedFiles[0], 'file3');
+      expect(manifest.deletedFiles[1], 'file4');
+
+      manifest.writeFile();
+      expect(manifestFile.readAsStringSync(), '''
+merged_files:
+  - file1
+  - file2
+conflict_files:
+added_files:
+deleted_files:
+  - file3
+  - file4
+''');
+    });
+  });
 }
