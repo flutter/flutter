@@ -71,24 +71,30 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // The platform views.
   private final SparseArray<PlatformView> platformViews;
 
-  // The platform view parents that are appended to `FlutterView`.
+  // The platform view wrappers that are appended to FlutterView.
+  //
+  // These platform views use a PlatformViewLayer in the framework. This is different than
+  // the platform views that use a TextureLayer.
+  //
+  // This distinction is necessary because a PlatformViewLayer allows to embed Android's
+  // SurfaceViews in a Flutter app whereas the texture layer is unable to support such native views.
+  //
   // If an entry in `platformViews` doesn't have an entry in this array, the platform view isn't
   // in the view hierarchy.
   //
   // This view provides a wrapper that applies scene builder operations to the platform view.
   // For example, a transform matrix, or setting opacity on the platform view layer.
-  //
-  // This is only applies to hybrid composition (PlatformViewLayer render).
-  // TODO(egarciad): Eliminate this.
-  // https://github.com/flutter/flutter/issues/96679
   private final SparseArray<FlutterMutatorView> platformViewParent;
 
   // Map of unique IDs to views that render overlay layers.
   private final SparseArray<FlutterImageView> overlayLayerViews;
 
-  // View wrappers are FrameLayouts that contain a single child view.
-  // This child view is the platform view.
-  // This only applies to hybrid composition (TextureLayer render).
+  // The platform view wrappers that are appended to FlutterView.
+  //
+  // These platform views use a TextureLayer in the framework. This is different than
+  // the platform views that use a PlatformViewLayer.
+  //
+  // This is the default mode, and recommended for better performance.
   private final SparseArray<PlatformViewWrapper> viewWrappers;
 
   // Next available unique ID for use in overlayLayerViews.
@@ -235,7 +241,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                   textInputPlugin.clearPlatformViewClient(viewId);
                 }
               });
-
           flutterView.addView(wrapperView);
           viewWrappers.append(viewId, wrapperView);
           return txId;
@@ -263,8 +268,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             return;
           }
           // The platform view is displayed using a PlatformViewLayer.
-          // TODO(egarciad): Eliminate this case.
-          // https://github.com/flutter/flutter/issues/96679
           final FlutterMutatorView parentView = platformViewParent.get(viewId);
           if (parentView != null) {
             parentView.removeAllViews();
@@ -530,38 +533,54 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   /**
-   * This {@code PlatformViewsController} and its {@code FlutterEngine} is now attached to an
-   * Android {@code View} that renders a Flutter UI.
+   * Attaches the controller to a {@link FlutterView}.
+   *
+   * <p>When {@link io.flutter.embedding.android.FlutterFragment} is used, this method is called
+   * after the device rotates since the FlutterView is recreated after a rotation.
    */
   public void attachToView(@NonNull FlutterView newFlutterView) {
     flutterView = newFlutterView;
-
-    // Inform all existing platform views that they are now associated with
-    // a Flutter View.
-    for (int i = 0; i < platformViews.size(); i++) {
-      final PlatformView view = platformViews.valueAt(i);
+    // Add wrapper for platform views that use GL texture.
+    for (int viewId = 0; viewId < viewWrappers.size(); viewId++) {
+      flutterView.addView(viewWrappers.get(viewId));
+    }
+    // Add wrapper for platform views that are composed at the view hierarchy level.
+    for (int viewId = 0; viewId < platformViewParent.size(); viewId++) {
+      flutterView.addView(platformViewParent.get(viewId));
+    }
+    // Notify platform views that they are now attached to a FlutterView.
+    for (int platformViewId = 0; platformViewId < platformViews.size(); platformViewId++) {
+      final PlatformView view = platformViews.valueAt(platformViewId);
       view.onFlutterViewAttached(flutterView);
     }
   }
 
   /**
-   * This {@code PlatformViewController} and its {@code FlutterEngine} are no longer attached to an
-   * Android {@code View} that renders a Flutter UI.
+   * Detaches the controller from {@link FlutterView}.
    *
-   * <p>All platform views controlled by this {@code PlatformViewController} will be detached from
-   * the previously attached {@code View}.
+   * <p>When {@link io.flutter.embedding.android.FlutterFragment} is used, this method is called
+   * when the device rotates since the FlutterView is detached from the fragment. The next time the
+   * fragment needs to be displayed, a new Flutter view is created, so attachToView is called again.
    */
   public void detachFromView() {
-    for (int i = 0; i < platformViews.size(); i++) {
-      final PlatformView view = platformViews.valueAt(i);
-      view.onFlutterViewDetached();
+    // Remove wrapper for platform views that use GL texture.
+    for (int viewId = 0; viewId < viewWrappers.size(); viewId++) {
+      flutterView.removeView(viewWrappers.get(viewId));
     }
-    // TODO(egarciad): Remove this.
-    // https://github.com/flutter/flutter/issues/96679
+    // Remove wrapper for platform views that are composed at the view hierarchy level.
+    for (int viewId = 0; viewId < platformViewParent.size(); viewId++) {
+      flutterView.removeView(platformViewParent.get(viewId));
+    }
     destroyOverlaySurfaces();
     removeOverlaySurfaces();
     flutterView = null;
     flutterViewConvertedToImageView = false;
+
+    // Notify that the platform view have been detached from FlutterView.
+    for (int platformViewId = 0; platformViewId < platformViews.size(); platformViewId++) {
+      final PlatformView view = platformViews.valueAt(platformViewId);
+      view.onFlutterViewDetached();
+    }
   }
 
   @Override
@@ -943,8 +962,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    * <p>This method is used only internally by {@code FlutterJNI}.
    */
   public void destroyOverlaySurfaces() {
-    for (int i = 0; i < overlayLayerViews.size(); i++) {
-      final FlutterImageView overlayView = overlayLayerViews.valueAt(i);
+    for (int viewId = 0; viewId < overlayLayerViews.size(); viewId++) {
+      final FlutterImageView overlayView = overlayLayerViews.valueAt(viewId);
       overlayView.detachFromRenderer();
       overlayView.closeImageReader();
       // Don't remove overlayView from the view hierarchy since this method can
@@ -959,8 +978,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       Log.e(TAG, "removeOverlaySurfaces called while flutter view is null");
       return;
     }
-    for (int i = 0; i < overlayLayerViews.size(); i++) {
-      flutterView.removeView(overlayLayerViews.valueAt(i));
+    for (int viewId = 0; viewId < overlayLayerViews.size(); viewId++) {
+      flutterView.removeView(overlayLayerViews.valueAt(viewId));
     }
     overlayLayerViews.clear();
   }
