@@ -881,6 +881,83 @@ void main() {
     expect(find.byType(RawScrollbar), findsNothing);
 
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('LicensePage padding', (WidgetTester tester) async {
+    const FlutterLogo logo = FlutterLogo();
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        title: 'Pirate app',
+        home: Center(
+          child: LicensePage(
+            applicationName: 'LicensePage test app',
+            applicationIcon: logo,
+            applicationVersion: '0.1.2',
+            applicationLegalese: 'I am the very model of a modern major general.',
+          ),
+        ),
+      ),
+    );
+
+    final Finder appName = find.text('LicensePage test app');
+    final Finder appIcon = find.byType(FlutterLogo);
+    final Finder appVersion = find.text('0.1.2');
+    final Finder appLegalese = find.text('I am the very model of a modern major general.');
+    final Finder appPowered = find.text('Powered by Flutter');
+
+    expect(appName, findsOneWidget);
+    expect(appIcon, findsOneWidget);
+    expect(appVersion, findsOneWidget);
+    expect(appLegalese, findsOneWidget);
+    expect(appPowered, findsOneWidget);
+
+    // Bottom padding is applied to the app version and app legalese text.
+    final double appNameBottomPadding = tester.getTopLeft(appIcon).dy - tester.getBottomLeft(appName).dy;
+    expect(appNameBottomPadding, 0.0);
+
+    final double appIconBottomPadding = tester.getTopLeft(appVersion).dy - tester.getBottomLeft(appIcon).dy;
+    expect(appIconBottomPadding, 0.0);
+
+    final double appVersionBottomPadding = tester.getTopLeft(appLegalese).dy - tester.getBottomLeft(appVersion).dy;
+    expect(appVersionBottomPadding, 18.0);
+
+    final double appLegaleseBottomPadding = tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appLegalese).dy;
+    expect(appLegaleseBottomPadding, 18.0);
+  });
+
+  testWidgets('LicensePage has no extra padding between app icon and app powered text', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/99559
+
+    const FlutterLogo logo = FlutterLogo();
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        title: 'Pirate app',
+        home: Center(
+          child: LicensePage(
+            applicationIcon: logo,
+          ),
+        ),
+      ),
+    );
+
+    final Finder appName = find.text('LicensePage test app');
+    final Finder appIcon = find.byType(FlutterLogo);
+    final Finder appVersion = find.text('0.1.2');
+    final Finder appLegalese = find.text('I am the very model of a modern major general.');
+    final Finder appPowered = find.text('Powered by Flutter');
+
+    expect(appName, findsNothing);
+    expect(appIcon, findsOneWidget);
+    expect(appVersion, findsNothing);
+    expect(appLegalese, findsNothing);
+    expect(appPowered, findsOneWidget);
+
+    // Padding between app icon and app powered text.
+    final double appIconBottomPadding = tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appIcon).dy;
+    expect(appIconBottomPadding, 18.0);
+  });
+
 }
 
 class FakeLicenseEntry extends LicenseEntry {
