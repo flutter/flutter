@@ -74,7 +74,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
     //  │  └ There's a million things I haven't done, but just you wait.
     //  └ Quit
     return PlatformMenuBar(
-      children: <MenuItem>[
+      menus: <MenuItem>[
         PlatformMenu(
           label: 'Flutter API Sample',
           menus: <MenuItem>[
@@ -94,7 +94,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                   onSelected: () {
                     _handleMenuSelection(MenuSelection.showMessage);
                   },
-                  shortcut: CharacterActivator('m'),
+                  shortcut: const CharacterActivator('m'),
                   label: _showMessage ? 'Hide Message' : 'Show Message',
                 ),
                 PlatformMenu(
@@ -102,7 +102,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                   menus: <MenuItem>[
                     PlatformMenuItem(
                       label: 'I am not throwing away my shot.',
-                      shortcut: SingleActivator(LogicalKeyboardKey.digit1, meta: true),
+                      shortcut: const SingleActivator(LogicalKeyboardKey.digit1, meta: true),
                       onSelected: () {
                         setState(() {
                           _message = 'I am not throwing away my shot.';
@@ -111,7 +111,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                     ),
                     PlatformMenuItem(
                       label: "There's a million things I haven't done, but just you wait.",
-                      shortcut: SingleActivator(LogicalKeyboardKey.digit2, meta: true),
+                      shortcut: const SingleActivator(LogicalKeyboardKey.digit2, meta: true),
                       onSelected: () {
                         setState(() {
                           _message = "There's a million things I haven't done, but just you wait.";

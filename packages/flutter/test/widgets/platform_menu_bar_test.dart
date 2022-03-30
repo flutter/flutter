@@ -53,7 +53,7 @@ void main() {
           home: Material(
             child: PlatformMenuBar(
               body: const Center(child: Text('Body')),
-              children: createTestMenus(
+              menus: createTestMenus(
                 onActivate: onActivate,
                 onOpen: onOpen,
                 onClose: onClose,
@@ -177,9 +177,9 @@ void main() {
             child: PlatformMenuBar(
               body: PlatformMenuBar(
                 body: SizedBox(),
-                children: <MenuItem>[],
+                menus: <MenuItem>[],
               ),
-              children: <MenuItem>[],
+              menus: <MenuItem>[],
             ),
           ),
         ),
@@ -193,7 +193,7 @@ void main() {
       );
       const PlatformMenuBar menuBar = PlatformMenuBar(
         body: SizedBox(),
-        children: <MenuItem>[item],
+        menus: <MenuItem>[item],
       );
 
       await tester.pumpWidget(

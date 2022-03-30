@@ -299,7 +299,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
 /// the box, but support for other platforms may be provided via plugins that
 /// set [WidgetsBinding.platformMenuDelegate] in their initialization.
 ///
-/// The [children] member contains [MenuItem]s. They will not be part of the
+/// The [menus] member contains [MenuItem]s. They will not be part of the
 /// widget tree, since they are not required to be widgets (even if they happen
 /// to be widgets that implement [MenuItem], they still won't be part of the
 /// widget tree). They are provided to configure the properties of the menus on
@@ -328,11 +328,11 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
 class PlatformMenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// Creates a const [PlatformMenuBar].
   ///
-  /// The [body] and [children] attributes are required.
+  /// The [body] and [menus] attributes are required.
   const PlatformMenuBar({
     Key? key,
     required this.body,
-    required this.children,
+    required this.menus,
   }) : super(key: key);
 
   /// The widget to be rendered in the Flutter window that these platform menus
@@ -344,23 +344,23 @@ class PlatformMenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   /// The list of menu items that are the top level children of the
   /// [PlatformMenuBar].
   ///
-  /// The `children` member contains [MenuItem]s. They will not be part
+  /// The `menus` member contains [MenuItem]s. They will not be part
   /// of the widget tree, since they are not widgets. They are provided to
   /// configure the properties of the menus on the platform menu bar.
   ///
   /// Also, a Widget in Flutter is immutable, so directly modifying the
-  /// `children` with `List` APIs such as
-  /// `somePlatformMenuBarWidget.children.add(...)` will result in incorrect
-  /// behaviors. Whenever the children list is modified, a new list object
+  /// `menus` with `List` APIs such as
+  /// `somePlatformMenuBarWidget.menus.add(...)` will result in incorrect
+  /// behaviors. Whenever the menus list is modified, a new list object
   /// should be provided.
-  final List<MenuItem> children;
+  final List<MenuItem> menus;
 
   @override
   State<PlatformMenuBar> createState() => _PlatformMenuBarState();
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return children.map<DiagnosticsNode>((MenuItem child) => child.toDiagnosticsNode()).toList();
+    return menus.map<DiagnosticsNode>((MenuItem child) => child.toDiagnosticsNode()).toList();
   }
 }
 
@@ -390,7 +390,7 @@ class _PlatformMenuBarState extends State<PlatformMenuBar> {
   void didUpdateWidget(PlatformMenuBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     final List<MenuItem> newDescendants = <MenuItem>[
-      for (final MenuItem item in widget.children) ...<MenuItem>[
+      for (final MenuItem item in widget.menus) ...<MenuItem>[
         item,
         ...item.descendants,
       ],
@@ -404,7 +404,7 @@ class _PlatformMenuBarState extends State<PlatformMenuBar> {
   // Updates the data structures for the menu and send them to the platform
   // plugin.
   void _updateMenu() {
-    WidgetsBinding.instance.platformMenuDelegate.setMenus(widget.children);
+    WidgetsBinding.instance.platformMenuDelegate.setMenus(widget.menus);
   }
 
   @override
