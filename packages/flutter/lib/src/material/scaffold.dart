@@ -3093,13 +3093,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
     // extendBody locked when keyboard is open
     final bool extendBody = minInsets.bottom <= 0 && widget.extendBody;
+    // TODO(justinmc): Move this into the app. I don't think there's a default
+    // desktop menu item that we want to include in all apps by default.
     // TODO(justinmc): This is not the best place in the tree for this.
     // TODO(justinmc): Something is wrong with the captured theme here, even
     // though buildMenu gets theme info from the user's MaterialApp...
     return ContextualMenuArea(
-      buildMenu: (BuildContext context, Offset anchor) {
+      buildMenu: (BuildContext context, Offset primaryAnchor, Offset? secondaryAnchor) {
         return CupertinoDesktopTextSelectionToolbar(
-          anchor: anchor,
+          anchor: primaryAnchor,
           children: const <Widget>[
             // TODO(justinmc): Should expose the buttons.
             Text('Root menu!'),

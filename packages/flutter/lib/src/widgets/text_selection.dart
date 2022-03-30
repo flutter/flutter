@@ -396,8 +396,51 @@ class TextSelectionOverlay {
       anchor: renderObject.lastSecondaryTapDownPosition!,
     );
     */
-    // TODO(justinmc): How did this originally position itself?
-    _contextualMenuAreaState.showContextualMenu(renderObject.lastSecondaryTapDownPosition!);
+    // If right clicking, use the right click position as the only anchor.
+    if (renderObject.lastSecondaryTapDownPosition != null) {
+      _contextualMenuAreaState.showContextualMenu(renderObject.lastSecondaryTapDownPosition!);
+      return;
+    }
+
+    // Otherwise, calculate the anchors as the upper and lower horizontal center
+    // of the selection.
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+
+    final Rect editingRegion = Rect.fromPoints(
+      renderBox.localToGlobal(Offset.zero),
+      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+    );
+    List<TextSelectionPoint> selectionEndPoints = renderObject.getEndpointsForSelection(_selection);
+    final bool isMultiline = selectionEndPoints.last.point.dy - selectionEndPoints.first.point.dy >
+        _getEndGlyphHeight() / 2;
+
+    // If the selected text spans more than 1 line, horizontally center the toolbar.
+    // Derived from both iOS and Android.
+    final double midX = isMultiline
+      ? editingRegion.width / 2
+      : (selectionEndPoints.first.point.dx + selectionEndPoints.last.point.dx) / 2;
+
+    final double lineHeightAtStart = _getStartGlyphHeight();
+    final Offset midpoint = Offset(
+      midX,
+      // The y-coordinate won't be made use of most likely.
+      selectionEndPoints.first.point.dy - lineHeightAtStart,
+    );
+
+    final TextSelectionPoint startTextSelectionPoint = selectionEndPoints[0];
+    final TextSelectionPoint endTextSelectionPoint = selectionEndPoints.length > 1
+      ? selectionEndPoints[1]
+      : selectionEndPoints[0];
+    final Offset anchorAbove = Offset(
+      editingRegion.left + midpoint.dx,
+      editingRegion.top + startTextSelectionPoint.point.dy - lineHeightAtStart,
+    );
+    final Offset anchorBelow = Offset(
+      editingRegion.left + midpoint.dx,
+      editingRegion.top + endTextSelectionPoint.point.dy,
+    );
+
+    _contextualMenuAreaState.showContextualMenu(anchorAbove, anchorBelow);
   }
 
   /// Updates the overlay after the selection has changed.

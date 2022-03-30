@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection' show LinkedHashMap;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
@@ -21,6 +22,8 @@ import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
 import 'text_selection_theme.dart';
+import 'text_selection_toolbar.dart';
+import 'text_selection_toolbar_text_button.dart';
 import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
@@ -1213,49 +1216,20 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       child: UnmanagedRestorationScope(
         bucket: bucket,
         // TODO(justinmc): This can't be overridden by users.
-        // TODO(justinmc): Can't just pass anchor b/c Material needs to know
-        // bottom and top anchor.
-        // TODO(justinmc): Tie this into TextSelectionGestureDetectorBuilder.
         child: ContextualMenuArea(
-          buildMenu: (BuildContext context, Offset anchor) {
-            // TODO(justinmc): I would like to define this inside of EditableText
-            // rather than looking this stuff up, but it seems like I couldn't
-            // access Cupertino and Material toolbar stuff there.
+          buildMenu: (BuildContext context, Offset primaryAnchor, Offset? secondaryAnchor) {
             if (_editableText == null || textSelectionControls == null) {
               return const SizedBox.shrink();
             }
 
-            // TODO(justinmc): I would like to define this inside of EditableText
-            // rather than looking this stuff up, but it seems like I couldn't
-            // access Cupertino and Material toolbar stuff there.
-            //final TextSelectionDelegate delegate = _editableText!;
-
-            // TODO(justinmc): Calculate the anchor like this if not right clicked,
-            // such as on mobile.
-            /*
-            final Offset midpointAnchor = Offset(
-              (widget.selectionMidpoint.dx - widget.globalEditableRegion.left).clamp(
-                mediaQuery.padding.left,
-                mediaQuery.size.width - mediaQuery.padding.right,
-              ),
-              widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
-            );
-            */
+            // TODO(justinmc): Bug: This only gets shown once, then never again
+            // despite long pressing or right clicking.
             return _PlatformTextSelectionControlsToolbar(
-              anchor: anchor,
+              primaryAnchor: primaryAnchor,
+              secondaryAnchor: secondaryAnchor,
               controls: textSelectionControls,
               editableText: _editableText!,
             );
-            /*
-            return _CupertinoDesktopTextSelectionControlsToolbar(
-              anchor: anchor,
-              clipboardStatus: clipboardStatus,
-              handleCut: textSelectionControls.canCut(delegate) ? () => textSelectionControls!.handleCut(delegate, clipboardStatus) : null,
-              handleCopy: textSelectionControls.canCopy(delegate) ? () => textSelectionControls!.handleCopy(delegate, clipboardStatus) : null,
-              handlePaste: textSelectionControls.canPaste(delegate) ? () => textSelectionControls!.handlePaste(delegate) : null,
-              handleSelectAll: textSelectionControls.canSelectAll(delegate) ? () => textSelectionControls!.handleSelectAll(delegate) : null,
-            );
-            */
           },
           child: EditableText(
             key: editableTextKey,
@@ -1393,17 +1367,19 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 }
 
-// TODO(justinmc): Share this with CupertinoTextField somehow, or ideally, with
-// EditableText!
+// TODO(justinmc): CupertinoTextField. You can't just share this Material
+// stuff there, so I think I need to create a Cupertino one.
 class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
   const _PlatformTextSelectionControlsToolbar({
-    required this.anchor,
+    required this.primaryAnchor,
+    this.secondaryAnchor,
     required this.controls,
     required this.editableText,
     Key? key,
   }) : super(key: key);
 
-  final Offset anchor;
+  final Offset primaryAnchor;
+  final Offset? secondaryAnchor;
   final EditableTextState editableText;
   final TextSelectionControls controls;
 
@@ -1411,17 +1387,6 @@ class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextSelectionDelegate delegate = editableText;
 
-    // TODO(justinmc): Calculate the anchor like this if not right clicked,
-    // such as on mobile.
-    /*
-    final Offset midpointAnchor = Offset(
-      (widget.selectionMidpoint.dx - widget.globalEditableRegion.left).clamp(
-        mediaQuery.padding.left,
-        mediaQuery.size.width - mediaQuery.padding.right,
-      ),
-      widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
-    );
-    */
     final ClipboardStatusNotifier? clipboardStatus = editableText.clipboardStatus;
 
     final VoidCallback? handleCut = controls.canCut(delegate) ? () => controls.handleCut(delegate, clipboardStatus) : null;
@@ -1429,30 +1394,74 @@ class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
     final VoidCallback? handlePaste = controls.canPaste(delegate) ? () => controls.handlePaste(delegate) : null;
     final VoidCallback? handleSelectAll = controls.canSelectAll(delegate) ? () => controls.handleSelectAll(delegate) : null;
 
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return _DesktopTextSelectionControlsToolbar(
-          anchor: anchor,
-          clipboardStatus: clipboardStatus,
-          handleCut: handleCut,
-          handleCopy: handleCopy,
-          handlePaste: handlePaste,
-          handleSelectAll: handleSelectAll,
-        );
-      case TargetPlatform.macOS:
-        return _CupertinoDesktopTextSelectionControlsToolbar(
-          anchor: anchor,
-          clipboardStatus: clipboardStatus,
-          handleCut: handleCut,
-          handleCopy: handleCopy,
-          handlePaste: handlePaste,
-          handleSelectAll: handleSelectAll,
-        );
-    }
+    // TODO(justinmc): I need to think about handleCut, handleCopy, etc.
+    // The visibility of those buttons depends on the platform. Should that
+    // logic go in the switch statement below instead of wherever these methods
+    // are being passed in?
+    int buttonIndex = 0;
+    return TextSelectionToolbarButtons(
+      clipboardStatus: clipboardStatus,
+      handleCut: handleCut,
+      handleCopy: handleCopy,
+      handlePaste: handlePaste,
+      handleSelectAll: handleSelectAll,
+      builder: (BuildContext context, LinkedHashMap<DefaultContextualMenuButtonType, ContextualMenuButtonData> buttonDatas) {
+        // If there aren't any buttons to build, build an empty toolbar.
+        if (buttonDatas.isEmpty) {
+          return const SizedBox(width: 0.0, height: 0.0);
+        }
+
+        switch (Theme.of(context).platform) {
+          case TargetPlatform.iOS:
+            return CupertinoTextSelectionToolbar(
+              anchorAbove: primaryAnchor,
+              anchorBelow: secondaryAnchor!,
+              children: buttonDatas.values.map((ContextualMenuButtonData buttonData) {
+                return CupertinoTextSelectionToolbarButton.text(
+                  onPressed: buttonData.onPressed,
+                  text: buttonData.label,
+                );
+              }).toList(),
+            );
+          case TargetPlatform.android:
+            return TextSelectionToolbar(
+              anchorAbove: primaryAnchor,
+              anchorBelow: secondaryAnchor!,
+              children: buttonDatas.values.map((ContextualMenuButtonData buttonData) {
+                return TextSelectionToolbarTextButton(
+                  padding: TextSelectionToolbarTextButton.getPadding(buttonIndex++, buttonDatas.length),
+                  onPressed: buttonData.onPressed,
+                  child: Text(buttonData.label),
+                );
+              }).toList(),
+            );
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            return DesktopTextSelectionToolbar(
+              anchor: primaryAnchor,
+              children: buttonDatas.values.map((ContextualMenuButtonData buttonData) {
+                return DesktopTextSelectionToolbarButton.text(
+                  context: context,
+                  onPressed: buttonData.onPressed,
+                  text: buttonData.label,
+                );
+              }).toList(),
+            );
+          case TargetPlatform.macOS:
+            return CupertinoDesktopTextSelectionToolbar(
+              anchor: primaryAnchor,
+              children: buttonDatas.values.map((ContextualMenuButtonData buttonData) {
+                return CupertinoDesktopTextSelectionToolbarButton.text(
+                  context: context,
+                  onPressed: buttonData.onPressed,
+                  text: buttonData.label,
+                );
+              }).toList(),
+            );
+        }
+      },
+    );
   }
 }
 
@@ -1777,128 +1786,6 @@ class _CupertinoDesktopTextSelectionToolbarButtonState extends State<CupertinoDe
           child: widget.child,
         ),
       ),
-    );
-  }
-}
-
-// Generates the child that's passed into DesktopTextSelectionToolbar.
-class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
-  const _DesktopTextSelectionControlsToolbar({
-    Key? key,
-    required this.anchor,
-    required this.clipboardStatus,
-    required this.handleCopy,
-    required this.handleCut,
-    required this.handlePaste,
-    required this.handleSelectAll,
-  }) : super(key: key);
-
-  final Offset anchor;
-  final ClipboardStatusNotifier? clipboardStatus;
-  final VoidCallback? handleCopy;
-  final VoidCallback? handleCut;
-  final VoidCallback? handlePaste;
-  final VoidCallback? handleSelectAll;
-
-  @override
-  _DesktopTextSelectionControlsToolbarState createState() => _DesktopTextSelectionControlsToolbarState();
-}
-
-class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelectionControlsToolbar> {
-  ClipboardStatusNotifier? _clipboardStatus;
-
-  void _onChangedClipboardStatus() {
-    setState(() {
-      // Inform the widget that the value of clipboardStatus has changed.
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.handlePaste != null) {
-      _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-      _clipboardStatus!.addListener(_onChangedClipboardStatus);
-      _clipboardStatus!.update();
-    }
-  }
-
-  @override
-  void didUpdateWidget(_DesktopTextSelectionControlsToolbar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.clipboardStatus != widget.clipboardStatus) {
-      if (_clipboardStatus != null) {
-        _clipboardStatus!.removeListener(_onChangedClipboardStatus);
-        _clipboardStatus!.dispose();
-      }
-      _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-      _clipboardStatus!.addListener(_onChangedClipboardStatus);
-      if (widget.handlePaste != null) {
-        _clipboardStatus!.update();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    // When used in an Overlay, this can be disposed after its creator has
-    // already disposed _clipboardStatus.
-    if (_clipboardStatus != null && !_clipboardStatus!.disposed) {
-      _clipboardStatus!.removeListener(_onChangedClipboardStatus);
-      if (widget.clipboardStatus == null) {
-        _clipboardStatus!.dispose();
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Don't render the menu until the state of the clipboard is known.
-    if (widget.handlePaste != null && _clipboardStatus!.value == ClipboardStatus.unknown) {
-      return const SizedBox(width: 0.0, height: 0.0);
-    }
-
-    assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-
-    assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<Widget> items = <Widget>[];
-
-    void addToolbarButton(
-      String text,
-      VoidCallback onPressed,
-    ) {
-      items.add(DesktopTextSelectionToolbarButton.text(
-        context: context,
-        onPressed: onPressed,
-        text: text,
-      ));
-    }
-
-    if (widget.handleCut != null) {
-      addToolbarButton(localizations.cutButtonLabel, widget.handleCut!);
-    }
-    if (widget.handleCopy != null) {
-      addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
-    }
-    if (widget.handlePaste != null
-        && _clipboardStatus!.value == ClipboardStatus.pasteable) {
-      addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
-    }
-    if (widget.handleSelectAll != null) {
-      addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll!);
-    }
-
-    // If there is no option available, build an empty widget.
-    if (items.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
-    }
-
-    return DesktopTextSelectionToolbar(
-      anchor: widget.anchor,
-      children: items,
     );
   }
 }

@@ -9,7 +9,7 @@ import 'navigator.dart';
 import 'overlay.dart';
 
 /// A function that builds a widget to use as a contextual menu.
-typedef ContextualMenuBuilder = Widget Function(BuildContext, Offset);
+typedef ContextualMenuBuilder = Widget Function(BuildContext, Offset, Offset?);
 
 // TODO(justinmc): Figure out all the platforms and nested packages.
 // Should a CupertinoTextField on Android show the iOS toolbar?? It seems to now
@@ -37,6 +37,8 @@ class ContextualMenuConfiguration extends InheritedWidget {
 }
 */
 
+/// Designates a part of the Widget tree to have the contextual menu given by
+/// [buildMenu].
 class ContextualMenuArea extends StatefulWidget {
   const ContextualMenuArea({
     Key? key,
@@ -66,10 +68,11 @@ class ContextualMenuAreaState extends State<ContextualMenuArea> {
 
   // TODO(justinmc): This kills any existing menu then creates a new one. Is
   // that ok? Do I ever need to move an existing menu?
-  void showContextualMenu(Offset anchor) {
+  void showContextualMenu(Offset primaryAnchor, [Offset? secondaryAnchor]) {
     _contextualMenuController?.dispose();
     _contextualMenuController = ContextualMenuController(
-      anchor: anchor,
+      primaryAnchor: primaryAnchor,
+      secondaryAnchor: secondaryAnchor,
       context: context,
       buildMenu: widget.buildMenu,
     );
@@ -101,17 +104,30 @@ class ContextualMenuController {
   ContextualMenuController({
     // TODO(justinmc): Accept these or just BuildContext?
     required ContextualMenuBuilder buildMenu,
-    required Offset anchor,
+    required Offset primaryAnchor,
     required BuildContext context,
+    Offset? secondaryAnchor,
     Widget? debugRequiredFor
   }) {
-    _insert(context, anchor, buildMenu, debugRequiredFor);
+    _insert(
+      context: context,
+      buildMenu: buildMenu,
+      primaryAnchor: primaryAnchor,
+      secondaryAnchor: secondaryAnchor,
+      debugRequiredFor: debugRequiredFor,
+    );
   }
 
   OverlayEntry? _menuOverlayEntry;
 
   // Insert the ContextualMenu into the given OverlayState.
-  void _insert(BuildContext context, Offset anchor, ContextualMenuBuilder buildMenu, [Widget? debugRequiredFor]) {
+  void _insert({
+    required ContextualMenuBuilder buildMenu,
+    required BuildContext context,
+    required Offset primaryAnchor,
+    Offset? secondaryAnchor,
+    Widget? debugRequiredFor,
+  }) {
     final OverlayState? overlayState = Overlay.of(
       context,
       rootOverlay: true,
@@ -139,7 +155,7 @@ class ContextualMenuController {
             onTap: () {},
             onSecondaryTap: () {},
             //child: capturedThemes.wrap(contextualMenuConfiguration.buildMenu(context, anchor)),
-            child: capturedThemes.wrap(buildMenu(context, anchor)),
+            child: capturedThemes.wrap(buildMenu(context, primaryAnchor, secondaryAnchor)),
           ),
         );
       },

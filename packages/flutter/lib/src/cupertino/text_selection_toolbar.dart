@@ -21,6 +21,10 @@ const double _kToolbarContentDistance = 8.0;
 const double _kToolbarScreenPadding = 8.0;
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
 
+// Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
+// screen. Eyeballed value.
+const double _kArrowScreenPadding = 26.0;
+
 // Values extracted from https://developer.apple.com/design/resources/.
 const Radius _kToolbarBorderRadius = Radius.circular(8);
 
@@ -44,6 +48,13 @@ typedef CupertinoToolbarBuilder = Widget Function(
   bool isAbove,
   Widget child,
 );
+
+class _CupertinoToolbarButtonDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+  }
+}
 
 /// An iOS-style text selection toolbar.
 ///
@@ -92,6 +103,19 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// default Cupertino toolbar.
   final CupertinoToolbarBuilder toolbarBuilder;
 
+  // Add the visial vertical line spacer between children buttons.
+  static List<Widget> _addChildrenSpacers(List<Widget> children) {
+    final List<Widget> nextChildren = <Widget>[];
+    for (int i = 0; i < children.length; i++) {
+      final Widget child = children[i];
+      if (i != 0) {
+        nextChildren.add(_CupertinoToolbarButtonDivider());
+      }
+      nextChildren.add(child);
+    }
+    return nextChildren;
+  }
+
   // Builds a toolbar just like the default iOS toolbar, with the right color
   // background and a rounded cutout with an arrow.
   static Widget _defaultToolbarBuilder(BuildContext context, Offset anchor, bool isAbove, Widget child) {
@@ -116,8 +140,24 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
         + _kToolbarHeight;
     final bool fitsAbove = anchorAbove.dy >= toolbarHeightNeeded;
 
+    // The distance between the toolbar and the content.
     const Offset contentPaddingAdjustment = Offset(0.0, _kToolbarContentDistance);
+    // Makes up for the Padding on the screen.
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
+
+    // The arrow, which points to the anchor, has some margin so it can't get
+    // too close to the horizontal edges of the screen.
+    final double leftMargin = _kArrowScreenPadding + mediaQuery.padding.left;
+    final double rightMargin = mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding;
+
+    final Offset anchorAboveAdjusted = Offset(
+      (anchorAbove.dx - localAdjustment.dx - contentPaddingAdjustment.dx).clamp(leftMargin, rightMargin),
+      anchorAbove.dy - localAdjustment.dy - contentPaddingAdjustment.dy,
+    );
+    final Offset anchorBelowAdjusted = Offset(
+      (anchorBelow.dx - localAdjustment.dx + contentPaddingAdjustment.dx).clamp(leftMargin, rightMargin),
+      anchorBelow.dy - localAdjustment.dy + contentPaddingAdjustment.dy,
+    );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -128,14 +168,14 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       ),
       child: CustomSingleChildLayout(
         delegate: TextSelectionToolbarLayoutDelegate(
-          anchorAbove: anchorAbove - localAdjustment - contentPaddingAdjustment,
-          anchorBelow: anchorBelow - localAdjustment + contentPaddingAdjustment,
+          anchorAbove: anchorAboveAdjusted,
+          anchorBelow: anchorBelowAdjusted,
         ),
         child: _CupertinoTextSelectionToolbarContent(
-          anchor: fitsAbove ? anchorAbove : anchorBelow,
+          anchor: fitsAbove ? anchorAboveAdjusted : anchorBelowAdjusted,
           isAbove: fitsAbove,
           toolbarBuilder: toolbarBuilder,
-          children: children,
+          children: _addChildrenSpacers(children),
         ),
       ),
     );

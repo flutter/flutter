@@ -38,18 +38,8 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
     ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
-    return _DesktopTextSelectionControlsToolbar(
-      clipboardStatus: clipboardStatus,
-      endpoints: endpoints,
-      globalEditableRegion: globalEditableRegion,
-      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
-      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-      handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-      selectionMidpoint: selectionMidpoint,
-      lastSecondaryTapDownPosition: lastSecondaryTapDownPosition,
-      textLineHeight: textLineHeight,
-    );
+    // TODO(justinmc): This should never be called now. Deprecate buildToolbar?
+    return const SizedBox.shrink();
   }
 
   /// Builds the text selection handles, but desktop has none.
@@ -84,124 +74,6 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
 /// Text selection controls that loosely follows Material design conventions.
 final TextSelectionControls desktopTextSelectionControls =
     _DesktopTextSelectionControls();
-
-// Generates the child that's passed into DesktopTextSelectionToolbar.
-class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
-  const _DesktopTextSelectionControlsToolbar({
-    Key? key,
-    required this.clipboardStatus,
-    required this.endpoints,
-    required this.globalEditableRegion,
-    required this.handleCopy,
-    required this.handleCut,
-    required this.handlePaste,
-    required this.handleSelectAll,
-    required this.selectionMidpoint,
-    required this.textLineHeight,
-    required this.lastSecondaryTapDownPosition,
-  }) : super(key: key);
-
-  final ClipboardStatusNotifier? clipboardStatus;
-  final List<TextSelectionPoint> endpoints;
-  final Rect globalEditableRegion;
-  final VoidCallback? handleCopy;
-  final VoidCallback? handleCut;
-  final VoidCallback? handlePaste;
-  final VoidCallback? handleSelectAll;
-  final Offset? lastSecondaryTapDownPosition;
-  final Offset selectionMidpoint;
-  final double textLineHeight;
-
-  @override
-  _DesktopTextSelectionControlsToolbarState createState() => _DesktopTextSelectionControlsToolbarState();
-}
-
-class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelectionControlsToolbar> {
-  void _onChangedClipboardStatus() {
-    setState(() {
-      // Inform the widget that the value of clipboardStatus has changed.
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
-  }
-
-  @override
-  void didUpdateWidget(_DesktopTextSelectionControlsToolbar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.clipboardStatus != widget.clipboardStatus) {
-      oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
-      widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Don't render the menu until the state of the clipboard is known.
-    if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
-      return const SizedBox(width: 0.0, height: 0.0);
-    }
-
-    assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-
-    final Offset midpointAnchor = Offset(
-      (widget.selectionMidpoint.dx - widget.globalEditableRegion.left).clamp(
-        mediaQuery.padding.left,
-        mediaQuery.size.width - mediaQuery.padding.right,
-      ),
-      widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
-    );
-
-    assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<Widget> items = <Widget>[];
-
-    void addToolbarButton(
-      String text,
-      VoidCallback onPressed,
-    ) {
-      items.add(DesktopTextSelectionToolbarButton.text(
-        context: context,
-        onPressed: onPressed,
-        text: text,
-      ));
-    }
-
-    if (widget.handleCut != null) {
-      addToolbarButton(localizations.cutButtonLabel, widget.handleCut!);
-    }
-    if (widget.handleCopy != null) {
-      addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
-    }
-    if (widget.handlePaste != null
-        && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
-      addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
-    }
-    if (widget.handleSelectAll != null) {
-      addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll!);
-    }
-
-    // If there is no option available, build an empty widget.
-    if (items.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
-    }
-
-    return DesktopTextSelectionToolbar(
-      anchor: widget.lastSecondaryTapDownPosition ?? midpointAnchor,
-      children: items,
-    );
-  }
-}
 
 /// A Material-style desktop text selection toolbar.
 ///
