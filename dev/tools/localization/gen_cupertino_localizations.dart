@@ -38,26 +38,16 @@ String generateCupertinoConstructor(LocaleInfo locale) {
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
   const CupertinoLocalization${locale.camelCase()}({
-    String localeName = '$localeName',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat dayFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat singleDigitHourFormat,
-    required intl.DateFormat singleDigitMinuteFormat,
-    required intl.DateFormat doubleDigitMinuteFormat,
-    required intl.DateFormat singleDigitSecondFormat,
-    required intl.NumberFormat decimalFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );''';
+    super.localeName = '$localeName',
+    required super.fullYearFormat,
+    required super.dayFormat,
+    required super.mediumDateFormat,
+    required super.singleDigitHourFormat,
+    required super.singleDigitMinuteFormat,
+    required super.doubleDigitMinuteFormat,
+    required super.singleDigitSecondFormat,
+    required super.decimalFormat,
+  });''';
 }
 
 const String cupertinoFactoryName = 'getCupertinoTranslation';
