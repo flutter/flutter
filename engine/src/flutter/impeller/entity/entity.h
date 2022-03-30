@@ -65,6 +65,8 @@ class Entity {
 
   void SetPath(Path path);
 
+  Rect GetTransformedPathBounds() const;
+
   void SetAddsToCoverage(bool adds);
 
   bool AddsToCoverage() const;

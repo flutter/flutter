@@ -8,6 +8,7 @@
 #include <variant>
 #include <vector>
 
+#include "impeller/entity/contents/filters/filter_input.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/formats.h"
 
@@ -17,35 +18,26 @@ class Pipeline;
 
 class FilterContents : public Contents {
  public:
-  using InputVariant =
-      std::variant<std::shared_ptr<Texture>, std::shared_ptr<Contents>>;
-  using InputTextures = std::vector<InputVariant>;
-
-  static std::shared_ptr<FilterContents> MakeBlend(
-      Entity::BlendMode blend_mode,
-      InputTextures input_textures);
+  static std::shared_ptr<FilterContents> MakeBlend(Entity::BlendMode blend_mode,
+                                                   FilterInput::Vector inputs);
 
   static std::shared_ptr<FilterContents> MakeDirectionalGaussianBlur(
-      InputVariant input_texture,
+      FilterInput::Ref input,
       Vector2 blur_vector);
 
   static std::shared_ptr<FilterContents>
-  MakeGaussianBlur(InputVariant input_texture, Scalar sigma_x, Scalar sigma_y);
-
-  static Rect GetBoundsForInput(const Entity& entity,
-                                const InputVariant& input);
+  MakeGaussianBlur(FilterInput::Ref input, Scalar sigma_x, Scalar sigma_y);
 
   FilterContents();
 
   ~FilterContents() override;
 
-  /// @brief The input texture sources for this filter. All texture sources are
-  ///        expected to have or produce premultiplied alpha colors.
-  ///        Any input can either be a `Texture` or another `FilterContents`.
+  /// @brief The input texture sources for this filter. Each input's emitted
+  ///        texture is expected to have premultiplied alpha colors.
   ///
   ///        The number of required or optional textures depends on the
   ///        particular filter's implementation.
-  void SetInputTextures(InputTextures input_textures);
+  void SetInputs(FilterInput::Vector inputs);
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -63,12 +55,13 @@ class FilterContents : public Contents {
  private:
   /// @brief Takes a set of zero or more input textures and writes to an output
   ///        texture.
-  virtual bool RenderFilter(const std::vector<Snapshot>& input_textures,
+  virtual bool RenderFilter(const FilterInput::Vector& inputs,
                             const ContentContext& renderer,
+                            const Entity& entity,
                             RenderPass& pass,
-                            const Matrix& transform) const = 0;
+                            const Rect& bounds) const = 0;
 
-  InputTextures input_textures_;
+  FilterInput::Vector inputs_;
   Rect destination_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FilterContents);

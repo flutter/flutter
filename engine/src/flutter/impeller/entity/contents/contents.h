@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/entity/contents/snapshot.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/texture.h"
 
@@ -27,14 +28,6 @@ ContentContextOptions OptionsFromPassAndEntity(const RenderPass& pass,
 
 class Contents {
  public:
-  /// Represents a screen space texture and it's intended draw position.
-  struct Snapshot {
-    std::shared_ptr<Texture> texture;
-    /// The offset from the origin where this texture is intended to be
-    /// rendered.
-    Vector2 position;
-  };
-
   Contents();
 
   virtual ~Contents();
@@ -53,13 +46,6 @@ class Contents {
   virtual std::optional<Snapshot> RenderToTexture(
       const ContentContext& renderer,
       const Entity& entity) const;
-
-  using SubpassCallback =
-      std::function<bool(const ContentContext&, RenderPass&)>;
-  static std::optional<std::shared_ptr<Texture>> MakeSubpass(
-      const ContentContext& renderer,
-      ISize texture_size,
-      SubpassCallback subpass_callback);
 
  protected:
 
