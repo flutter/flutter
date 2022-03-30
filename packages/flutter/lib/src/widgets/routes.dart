@@ -2242,6 +2242,11 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     }
     final BoxHitTestResult? result = cachedResults[entry];
     final FocusNode? focusNode = _focusScopeNode.focusedChild;
+
+    if (event.kind == PointerDeviceKind.touch && focusNode is FocusScopeNode)
+      // Avoid exception occurs when querying Drawer in an inactive state.
+      return;
+
     if (focusNode == null || result == null)
       return;
     final RenderObject? renderObject = focusNode.context?.findRenderObject();
