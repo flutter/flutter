@@ -15,12 +15,11 @@ class AndroidPlatformView extends StatelessWidget {
   /// native view.
   /// `viewType` identifies the type of Android view to create.
   const AndroidPlatformView({
-    Key? key,
+    super.key,
     this.onPlatformViewCreated,
     this.useHybridComposition = false,
     required this.viewType,
-  })  : assert(viewType != null),
-        super(key: key);
+  })  : assert(viewType != null);
 
   /// The unique identifier for the view type to be embedded by this widget.
   ///
