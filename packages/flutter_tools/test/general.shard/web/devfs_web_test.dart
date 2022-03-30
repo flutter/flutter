@@ -685,13 +685,14 @@ void main() {
     expect(webDevFS.webAssetServer.getFile('stack_trace_mapper.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('flutter.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('flutter_service_worker.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('version.json'),isNotNull);
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'HELLO');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 
     // Update to the SDK.
-   globals.fs.file(webPrecompiledSdk).writeAsStringSync('BELLOW');
+    globals.fs.file(webPrecompiledSdk).writeAsStringSync('BELLOW');
 
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
@@ -795,6 +796,7 @@ void main() {
     expect(webDevFS.webAssetServer.getFile('stack_trace_mapper.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('flutter.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('flutter_service_worker.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('version.json'), isNotNull);
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'HELLO');
