@@ -35,6 +35,7 @@ ShellIOManager::ShellIOManager(
     sk_sp<GrDirectContext> resource_context,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     fml::RefPtr<fml::TaskRunner> unref_queue_task_runner,
+    std::shared_ptr<impeller::Context> impeller_context,
     fml::TimeDelta unref_queue_drain_delay)
     : resource_context_(std::move(resource_context)),
       resource_context_weak_factory_(
@@ -47,6 +48,7 @@ ShellIOManager::ShellIOManager(
           unref_queue_drain_delay,
           resource_context_)),
       is_gpu_disabled_sync_switch_(is_gpu_disabled_sync_switch),
+      impeller_context_(std::move(impeller_context)),
       weak_factory_(this) {
   if (!resource_context_) {
 #ifndef OS_FUCHSIA
@@ -111,5 +113,14 @@ std::shared_ptr<const fml::SyncSwitch>
 ShellIOManager::GetIsGpuDisabledSyncSwitch() {
   return is_gpu_disabled_sync_switch_;
 }
+
+// |IOManager|
+std::shared_ptr<impeller::Context> ShellIOManager::GetImpellerContext() const {
+  return impeller_context_;
+}
+
+sk_sp<GrDirectContext> ShellIOManager::GetSharedResourceContext() const {
+  return resource_context_;
+};
 
 }  // namespace flutter

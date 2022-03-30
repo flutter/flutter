@@ -933,7 +933,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   std::string initial_route_;
   std::shared_ptr<AssetManager> asset_manager_;
   std::shared_ptr<FontCollection> font_collection_;
-  ImageDecoder image_decoder_;
+  const std::unique_ptr<ImageDecoder> image_decoder_;
   ImageGeneratorRegistry image_generator_registry_;
   TaskRunners task_runners_;
   fml::WeakPtrFactory<Engine> weak_factory_;  // Must be the last member.

@@ -7,9 +7,13 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface.h"
+#include "flutter/shell/platform/darwin/ios/ios_surface.h"
 
 @class CAMetalLayer;
+
+namespace impeller {
+class Context;
+}  // namespace impeller
 
 namespace flutter {
 
@@ -25,6 +29,7 @@ class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetalImpeller final
 
  private:
   fml::scoped_nsobject<CAMetalLayer> layer_;
+  const std::shared_ptr<impeller::Context> impeller_context_;
   bool is_valid_ = false;
 
   // |IOSSurface|

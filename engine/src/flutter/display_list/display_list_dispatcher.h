@@ -9,6 +9,7 @@
 #include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_color_filter.h"
 #include "flutter/display_list/display_list_color_source.h"
+#include "flutter/display_list/display_list_image.h"
 #include "flutter/display_list/display_list_image_filter.h"
 #include "flutter/display_list/display_list_mask_filter.h"
 
@@ -206,27 +207,27 @@ class Dispatcher {
                           const SkPoint points[]) = 0;
   virtual void drawVertices(const sk_sp<SkVertices> vertices,
                             DlBlendMode mode) = 0;
-  virtual void drawImage(const sk_sp<SkImage> image,
+  virtual void drawImage(const sk_sp<DlImage> image,
                          const SkPoint point,
                          const SkSamplingOptions& sampling,
                          bool render_with_attributes) = 0;
-  virtual void drawImageRect(const sk_sp<SkImage> image,
+  virtual void drawImageRect(const sk_sp<DlImage> image,
                              const SkRect& src,
                              const SkRect& dst,
                              const SkSamplingOptions& sampling,
                              bool render_with_attributes,
                              SkCanvas::SrcRectConstraint constraint) = 0;
-  virtual void drawImageNine(const sk_sp<SkImage> image,
+  virtual void drawImageNine(const sk_sp<DlImage> image,
                              const SkIRect& center,
                              const SkRect& dst,
                              SkFilterMode filter,
                              bool render_with_attributes) = 0;
-  virtual void drawImageLattice(const sk_sp<SkImage> image,
+  virtual void drawImageLattice(const sk_sp<DlImage> image,
                                 const SkCanvas::Lattice& lattice,
                                 const SkRect& dst,
                                 SkFilterMode filter,
                                 bool render_with_attributes) = 0;
-  virtual void drawAtlas(const sk_sp<SkImage> atlas,
+  virtual void drawAtlas(const sk_sp<DlImage> atlas,
                          const SkRSXform xform[],
                          const SkRect tex[],
                          const SkColor colors[],

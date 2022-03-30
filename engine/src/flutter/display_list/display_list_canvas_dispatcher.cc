@@ -177,41 +177,56 @@ void DisplayListCanvasDispatcher::drawVertices(const sk_sp<SkVertices> vertices,
                                                DlBlendMode mode) {
   canvas_->drawVertices(vertices, ToSk(mode), paint());
 }
-void DisplayListCanvasDispatcher::drawImage(const sk_sp<SkImage> image,
+void DisplayListCanvasDispatcher::drawImage(const sk_sp<DlImage> image,
                                             const SkPoint point,
                                             const SkSamplingOptions& sampling,
                                             bool render_with_attributes) {
-  canvas_->drawImage(image, point.fX, point.fY, sampling,
-                     safe_paint(render_with_attributes));
+  canvas_->drawImage(image ? image->skia_image() : nullptr, point.fX, point.fY,
+                     sampling, safe_paint(render_with_attributes));
 }
 void DisplayListCanvasDispatcher::drawImageRect(
-    const sk_sp<SkImage> image,
+    const sk_sp<DlImage> image,
     const SkRect& src,
     const SkRect& dst,
     const SkSamplingOptions& sampling,
     bool render_with_attributes,
     SkCanvas::SrcRectConstraint constraint) {
-  canvas_->drawImageRect(image, src, dst, sampling,
-                         safe_paint(render_with_attributes), constraint);
+  canvas_->drawImageRect(image ? image->skia_image() : nullptr, src, dst,
+                         sampling, safe_paint(render_with_attributes),
+                         constraint);
 }
-void DisplayListCanvasDispatcher::drawImageNine(const sk_sp<SkImage> image,
+void DisplayListCanvasDispatcher::drawImageNine(const sk_sp<DlImage> image,
                                                 const SkIRect& center,
                                                 const SkRect& dst,
                                                 SkFilterMode filter,
                                                 bool render_with_attributes) {
-  canvas_->drawImageNine(image.get(), center, dst, filter,
+  if (!image) {
+    return;
+  }
+  auto skia_image = image->skia_image();
+  if (!skia_image) {
+    return;
+  }
+  canvas_->drawImageNine(skia_image.get(), center, dst, filter,
                          safe_paint(render_with_attributes));
 }
 void DisplayListCanvasDispatcher::drawImageLattice(
-    const sk_sp<SkImage> image,
+    const sk_sp<DlImage> image,
     const SkCanvas::Lattice& lattice,
     const SkRect& dst,
     SkFilterMode filter,
     bool render_with_attributes) {
-  canvas_->drawImageLattice(image.get(), lattice, dst, filter,
+  if (!image) {
+    return;
+  }
+  auto skia_image = image->skia_image();
+  if (!skia_image) {
+    return;
+  }
+  canvas_->drawImageLattice(skia_image.get(), lattice, dst, filter,
                             safe_paint(render_with_attributes));
 }
-void DisplayListCanvasDispatcher::drawAtlas(const sk_sp<SkImage> atlas,
+void DisplayListCanvasDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
                                             const SkRSXform xform[],
                                             const SkRect tex[],
                                             const SkColor colors[],
@@ -220,7 +235,14 @@ void DisplayListCanvasDispatcher::drawAtlas(const sk_sp<SkImage> atlas,
                                             const SkSamplingOptions& sampling,
                                             const SkRect* cullRect,
                                             bool render_with_attributes) {
-  canvas_->drawAtlas(atlas.get(), xform, tex, colors, count, ToSk(mode),
+  if (!atlas) {
+    return;
+  }
+  auto skia_atlas = atlas->skia_image();
+  if (!skia_atlas) {
+    return;
+  }
+  canvas_->drawAtlas(skia_atlas.get(), xform, tex, colors, count, ToSk(mode),
                      sampling, cullRect, safe_paint(render_with_attributes));
 }
 void DisplayListCanvasDispatcher::drawPicture(const sk_sp<SkPicture> picture,

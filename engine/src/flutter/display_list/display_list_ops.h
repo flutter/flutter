@@ -614,14 +614,14 @@ struct DrawVerticesOp final : DLOp {
   struct name##Op final : DLOp {                                       \
     static const auto kType = DisplayListOpType::k##name;              \
                                                                        \
-    name##Op(const sk_sp<SkImage> image,                               \
+    name##Op(const sk_sp<DlImage> image,                               \
              const SkPoint& point,                                     \
              const SkSamplingOptions& sampling)                        \
         : point(point), sampling(sampling), image(std::move(image)) {} \
                                                                        \
     const SkPoint point;                                               \
     const SkSamplingOptions sampling;                                  \
-    const sk_sp<SkImage> image;                                        \
+    const sk_sp<DlImage> image;                                        \
                                                                        \
     void dispatch(Dispatcher& dispatcher) const {                      \
       dispatcher.drawImage(image, point, sampling, with_attributes);   \
@@ -635,7 +635,7 @@ DEFINE_DRAW_IMAGE_OP(DrawImageWithAttr, true)
 struct DrawImageRectOp final : DLOp {
   static const auto kType = DisplayListOpType::kDrawImageRect;
 
-  DrawImageRectOp(const sk_sp<SkImage> image,
+  DrawImageRectOp(const sk_sp<DlImage> image,
                   const SkRect& src,
                   const SkRect& dst,
                   const SkSamplingOptions& sampling,
@@ -653,7 +653,7 @@ struct DrawImageRectOp final : DLOp {
   const SkSamplingOptions sampling;
   const bool render_with_attributes;
   const SkCanvas::SrcRectConstraint constraint;
-  const sk_sp<SkImage> image;
+  const sk_sp<DlImage> image;
 
   void dispatch(Dispatcher& dispatcher) const {
     dispatcher.drawImageRect(image, src, dst, sampling, render_with_attributes,
@@ -666,7 +666,7 @@ struct DrawImageRectOp final : DLOp {
   struct name##Op final : DLOp {                                               \
     static const auto kType = DisplayListOpType::k##name;                      \
                                                                                \
-    name##Op(const sk_sp<SkImage> image,                                       \
+    name##Op(const sk_sp<DlImage> image,                                       \
              const SkIRect& center,                                            \
              const SkRect& dst,                                                \
              SkFilterMode filter)                                              \
@@ -675,7 +675,7 @@ struct DrawImageRectOp final : DLOp {
     const SkIRect center;                                                      \
     const SkRect dst;                                                          \
     const SkFilterMode filter;                                                 \
-    const sk_sp<SkImage> image;                                                \
+    const sk_sp<DlImage> image;                                                \
                                                                                \
     void dispatch(Dispatcher& dispatcher) const {                              \
       dispatcher.drawImageNine(image, center, dst, filter,                     \
@@ -690,7 +690,7 @@ DEFINE_DRAW_IMAGE_NINE_OP(DrawImageNineWithAttr, true)
 struct DrawImageLatticeOp final : DLOp {
   static const auto kType = DisplayListOpType::kDrawImageLattice;
 
-  DrawImageLatticeOp(const sk_sp<SkImage> image,
+  DrawImageLatticeOp(const sk_sp<DlImage> image,
                      int x_count,
                      int y_count,
                      int cell_count,
@@ -714,7 +714,7 @@ struct DrawImageLatticeOp final : DLOp {
   const SkFilterMode filter;
   const SkIRect src;
   const SkRect dst;
-  const sk_sp<SkImage> image;
+  const sk_sp<DlImage> image;
 
   void dispatch(Dispatcher& dispatcher) const {
     const int* xDivs = reinterpret_cast<const int*>(this + 1);
@@ -740,7 +740,7 @@ struct DrawImageLatticeOp final : DLOp {
 // SkColor list only packs well if the count is even, otherwise there
 // can be 4 unusued bytes at the end.
 struct DrawAtlasBaseOp : DLOp {
-  DrawAtlasBaseOp(const sk_sp<SkImage> atlas,
+  DrawAtlasBaseOp(const sk_sp<DlImage> atlas,
                   int count,
                   DlBlendMode mode,
                   const SkSamplingOptions& sampling,
@@ -758,7 +758,7 @@ struct DrawAtlasBaseOp : DLOp {
   const uint8_t has_colors;
   const uint8_t render_with_attributes;
   const SkSamplingOptions sampling;
-  const sk_sp<SkImage> atlas;
+  const sk_sp<DlImage> atlas;
 };
 
 // Packs as efficiently into 40 bytes as per DrawAtlasBaseOp
@@ -766,7 +766,7 @@ struct DrawAtlasBaseOp : DLOp {
 struct DrawAtlasOp final : DrawAtlasBaseOp {
   static const auto kType = DisplayListOpType::kDrawAtlas;
 
-  DrawAtlasOp(const sk_sp<SkImage> atlas,
+  DrawAtlasOp(const sk_sp<DlImage> atlas,
               int count,
               DlBlendMode mode,
               const SkSamplingOptions& sampling,
@@ -797,7 +797,7 @@ struct DrawAtlasOp final : DrawAtlasBaseOp {
 struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
   static const auto kType = DisplayListOpType::kDrawAtlasCulled;
 
-  DrawAtlasCulledOp(const sk_sp<SkImage> atlas,
+  DrawAtlasCulledOp(const sk_sp<DlImage> atlas,
                     int count,
                     DlBlendMode mode,
                     const SkSamplingOptions& sampling,

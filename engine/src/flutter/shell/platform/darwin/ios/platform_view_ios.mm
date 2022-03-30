@@ -156,6 +156,11 @@ sk_sp<GrDirectContext> PlatformViewIOS::CreateResourceContext() const {
 }
 
 // |PlatformView|
+std::shared_ptr<impeller::Context> PlatformViewIOS::GetImpellerContext() const {
+  return ios_context_->GetImpellerContext();
+}
+
+// |PlatformView|
 void PlatformViewIOS::SetSemanticsEnabled(bool enabled) {
   if (!owner_controller_) {
     FML_LOG(WARNING) << "Could not set semantics to enabled, this "

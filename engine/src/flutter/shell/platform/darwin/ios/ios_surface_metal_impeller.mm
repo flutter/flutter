@@ -10,9 +10,15 @@ namespace flutter {
 
 IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(fml::scoped_nsobject<CAMetalLayer> layer,
                                                  std::shared_ptr<IOSContext> context)
-    : IOSSurface(std::move(context)),
+    : IOSSurface(context),
       GPUSurfaceMetalDelegate(MTLRenderTargetType::kCAMetalLayer),
-      layer_(std::move(layer)) {}
+      layer_(std::move(layer)),
+      impeller_context_(context ? context->GetImpellerContext() : nullptr) {
+  if (!impeller_context_) {
+    return;
+  }
+  is_valid_ = true;
+}
 
 // |IOSSurface|
 IOSSurfaceMetalImpeller::~IOSSurfaceMetalImpeller() = default;
@@ -29,7 +35,10 @@ void IOSSurfaceMetalImpeller::UpdateStorageSizeIfNecessary() {
 
 // |IOSSurface|
 std::unique_ptr<Surface> IOSSurfaceMetalImpeller::CreateGPUSurface(GrDirectContext*) {
-  return std::make_unique<GPUSurfaceMetalImpeller>(this /* delegate */);
+  return std::make_unique<GPUSurfaceMetalImpeller>(this,              //
+                                                   impeller_context_  //
+
+  );
 }
 
 // |GPUSurfaceMetalDelegate|

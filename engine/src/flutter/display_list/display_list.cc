@@ -8,6 +8,7 @@
 #include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/display_list/display_list_ops.h"
 #include "flutter/display_list/display_list_utils.h"
+#include "flutter/fml/trace_event.h"
 
 namespace flutter {
 
@@ -69,6 +70,7 @@ void DisplayList::ComputeBounds() {
 void DisplayList::Dispatch(Dispatcher& dispatcher,
                            uint8_t* ptr,
                            uint8_t* end) const {
+  TRACE_EVENT0("flutter", "DisplayList::Dispatch");
   while (ptr < end) {
     auto op = reinterpret_cast<const DLOp*>(ptr);
     ptr += op->size;
@@ -178,6 +180,15 @@ static bool CompareOps(uint8_t* ptrA,
     }
   }
   return true;
+}
+
+void DisplayList::RenderTo(DisplayListBuilder* builder,
+                           SkScalar opacity) const {
+  // TODO(100983): Opacity is not respected and attributes are not reset.
+  if (!builder) {
+    return;
+  }
+  Dispatch(*builder);
 }
 
 void DisplayList::RenderTo(SkCanvas* canvas, SkScalar opacity) const {

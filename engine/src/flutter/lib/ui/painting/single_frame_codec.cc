@@ -81,7 +81,7 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
 
         tonic::DartState::Scope scope(state.get());
 
-        if (image.skia_object()) {
+        if (image) {
           auto canvas_image = fml::MakeRefCounted<CanvasImage>();
           canvas_image->set_image(std::move(image));
 

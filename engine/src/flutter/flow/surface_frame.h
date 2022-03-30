@@ -50,7 +50,8 @@ class SurfaceFrame {
   SurfaceFrame(sk_sp<SkSurface> surface,
                FramebufferInfo framebuffer_info,
                const SubmitCallback& submit_callback,
-               std::unique_ptr<GLContextResult> context_result = nullptr);
+               std::unique_ptr<GLContextResult> context_result = nullptr,
+               bool display_list_fallback = false);
 
   ~SurfaceFrame();
 
@@ -83,6 +84,8 @@ class SurfaceFrame {
     submit_info_ = submit_info;
   }
   const SubmitInfo& submit_info() const { return submit_info_; }
+
+  sk_sp<DisplayListBuilder> GetDisplayListBuilder();
 
   sk_sp<DisplayList> BuildDisplayList();
 

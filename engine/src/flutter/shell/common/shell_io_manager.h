@@ -28,6 +28,7 @@ class ShellIOManager final : public IOManager {
       sk_sp<GrDirectContext> resource_context,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
       fml::RefPtr<fml::TaskRunner> unref_queue_task_runner,
+      std::shared_ptr<impeller::Context> impeller_context,
       fml::TimeDelta unref_queue_drain_delay =
           fml::TimeDelta::FromMilliseconds(8));
 
@@ -58,21 +59,20 @@ class ShellIOManager final : public IOManager {
   // |IOManager|
   std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() override;
 
-  sk_sp<GrDirectContext> GetSharedResourceContext() const {
-    return resource_context_;
-  };
+  // |IOManager|
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
+
+  sk_sp<GrDirectContext> GetSharedResourceContext() const;
 
  private:
   // Resource context management.
   sk_sp<GrDirectContext> resource_context_;
   std::unique_ptr<fml::WeakPtrFactory<GrDirectContext>>
       resource_context_weak_factory_;
-
   // Unref queue management.
   fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue_;
-
   std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch_;
-
+  std::shared_ptr<impeller::Context> impeller_context_;
   fml::WeakPtrFactory<ShellIOManager> weak_factory_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShellIOManager);

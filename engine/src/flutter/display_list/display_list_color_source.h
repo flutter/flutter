@@ -199,6 +199,7 @@ class DlMatrixColorSourceBase : public DlColorSource {
 class DlImageColorSource final : public SkRefCnt,
                                  public DlMatrixColorSourceBase {
  public:
+  // TODO(100984): Color sources must be DlImages instead of SkImages.
   DlImageColorSource(sk_sp<const SkImage> image,
                      DlTileMode horizontal_tile_mode,
                      DlTileMode vertical_tile_mode,

@@ -132,8 +132,13 @@ void DisplayListLayer::Paint(PaintContext& context) const {
     }
   }
 
-  display_list()->RenderTo(context.leaf_nodes_canvas,
-                           context.inherited_opacity);
+  if (context.leaf_nodes_builder) {
+    display_list()->RenderTo(context.leaf_nodes_builder,
+                             context.inherited_opacity);
+  } else {
+    display_list()->RenderTo(context.leaf_nodes_canvas,
+                             context.inherited_opacity);
+  }
 }
 
 }  // namespace flutter

@@ -158,6 +158,9 @@ class PlatformViewIOS final : public PlatformView {
   sk_sp<GrDirectContext> CreateResourceContext() const override;
 
   // |PlatformView|
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
+
+  // |PlatformView|
   void SetAccessibilityFeatures(int32_t flags) override;
 
   // |PlatformView|

@@ -4,9 +4,25 @@
 
 #import "flutter/shell/platform/darwin/ios/ios_context_metal_impeller.h"
 
+#include "flutter/impeller/entity/entity_shaders.h"
+#include "flutter/impeller/renderer/backend/metal/context_mtl.h"
+
 namespace flutter {
 
-IOSContextMetalImpeller::IOSContextMetalImpeller() = default;
+static std::shared_ptr<impeller::Context> CreateImpellerContext() {
+  std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
+      std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_data,
+                                             impeller_entity_shaders_length),
+  };
+  auto context = impeller::ContextMTL::Create(shader_mappings, "Impeller Library");
+  if (!context) {
+    FML_LOG(ERROR) << "Could not create Metal Impeller Context.";
+    return nullptr;
+  }
+  return context;
+}
+
+IOSContextMetalImpeller::IOSContextMetalImpeller() : context_(CreateImpellerContext()) {}
 
 IOSContextMetalImpeller::~IOSContextMetalImpeller() = default;
 
@@ -29,6 +45,11 @@ sk_sp<GrDirectContext> IOSContextMetalImpeller::GetResourceContext() const {
 // |IOSContext|
 sk_sp<GrDirectContext> IOSContextMetalImpeller::CreateResourceContext() {
   return nullptr;
+}
+
+// |IOSContext|
+std::shared_ptr<impeller::Context> IOSContextMetalImpeller::GetImpellerContext() const {
+  return context_;
 }
 
 // |IOSContext|

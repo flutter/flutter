@@ -557,8 +557,9 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
       root_surface_transformation,    // root surface transformation
       true,                           // instrumentation enabled
       frame->framebuffer_info()
-          .supports_readback,  // surface supports pixel reads
-      raster_thread_merger_    // thread merger
+          .supports_readback,               // surface supports pixel reads
+      raster_thread_merger_,                // thread merger
+      frame->GetDisplayListBuilder().get()  // display list builder
   );
   if (compositor_frame) {
     compositor_context_->raster_cache().PrepareNewFrame();
@@ -639,7 +640,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
   // https://github.com/flutter/flutter/issues/23435
   auto frame = compositor_context.AcquireFrame(
       nullptr, recorder.getRecordingCanvas(), nullptr,
-      root_surface_transformation, false, true, nullptr);
+      root_surface_transformation, false, true, nullptr, nullptr);
   frame->Raster(*tree, true, nullptr);
 
 #if defined(OS_FUCHSIA)
@@ -704,9 +705,16 @@ sk_sp<SkData> Rasterizer::ScreenshotLayerTreeAsImage(
     return nullptr;
   }
 
-  auto frame = compositor_context.AcquireFrame(surface_context, canvas, nullptr,
-                                               root_surface_transformation,
-                                               false, true, nullptr);
+  auto frame = compositor_context.AcquireFrame(
+      surface_context,              // skia context
+      canvas,                       // canvas
+      nullptr,                      // view embedder
+      root_surface_transformation,  // root surface transformation
+      false,                        // instrumentation enabled
+      true,                         // render buffer readback supported
+      nullptr,                      // thread merger
+      nullptr                       // display list builder
+  );
   canvas->clear(SK_ColorTRANSPARENT);
   frame->Raster(*tree, true, nullptr);
   canvas->flush();
