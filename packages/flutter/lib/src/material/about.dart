@@ -493,7 +493,7 @@ class _AboutProgram extends StatelessWidget {
           ),
           if (icon != null)
             IconTheme(data: Theme.of(context).iconTheme, child: icon!),
-          if (version != null && version != '')
+          if (version != '')
             Padding(
               padding: const EdgeInsets.only(bottom: _textVerticalSeparation),
               child: Text(
