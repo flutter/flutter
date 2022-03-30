@@ -1469,11 +1469,11 @@ void main() {
     if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
       expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
     } else {
-      expect(buttonInkWell.splashFactory, equals(InkSplash.splashFactory));
+      expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('OutlinedButton uses InkSparkle only for Android non-web when useMaterial3 is false', (WidgetTester tester) async {
+  testWidgets('OutlinedButton uses InkRipple when useMaterial3 is false', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
 
     await tester.pumpWidget(
@@ -1495,7 +1495,7 @@ void main() {
     expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('OultinedButton.icon does not overflow', (WidgetTester tester) async {
+  testWidgets('OutlinedButton.icon does not overflow', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/77815
     await tester.pumpWidget(
       MaterialApp(

@@ -1262,11 +1262,11 @@ void main() {
     if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
       expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
     } else {
-      expect(buttonInkWell.splashFactory, equals(InkSplash.splashFactory));
+      expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('TextButton uses InkSparkle only for Android non-web when useMaterial3 is false', (WidgetTester tester) async {
+  testWidgets('TextButton uses InkRipple when useMaterial3 is false', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
 
     await tester.pumpWidget(
