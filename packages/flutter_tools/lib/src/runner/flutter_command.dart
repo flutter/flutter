@@ -1297,8 +1297,8 @@ abstract class FlutterCommand extends Command<void> {
       else {
         offline = false;
       }
-      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal}, offline);
-      await globals.cache.updateAll(await requiredArtifacts, offline);
+      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal}, offline: offline);
+      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
     }
     globals.cache.releaseLock();
 
