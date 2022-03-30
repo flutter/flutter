@@ -561,7 +561,14 @@ void DisplayListDispatcher::drawPoints(SkCanvas::PointMode mode,
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::drawVertices(const sk_sp<SkVertices> vertices,
+void DisplayListDispatcher::drawSkVertices(const sk_sp<SkVertices> vertices,
+                                           SkBlendMode mode) {
+  // Needs https://github.com/flutter/flutter/issues/95434
+  UNIMPLEMENTED;
+}
+
+// |flutter::Dispatcher|
+void DisplayListDispatcher::drawVertices(const flutter::DlVertices* vertices,
                                          flutter::DlBlendMode mode) {
   // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
