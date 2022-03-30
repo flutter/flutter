@@ -2023,6 +2023,7 @@ targets:
   - name: Linux_android hybrid_android_views_integration_test
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/100991
     timeout: 60
     properties:
       tags: >
