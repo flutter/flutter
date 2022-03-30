@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
+/// Generates the flutter.js file.
+///
+/// flutter.js should be completely static, so **do not use any parameter or
+/// environment variable to generate this file**.
+String generateFlutterJsFile() {
+  return '''
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 /**
  * This script installs service_worker.js to provide PWA functionality to
  *     application. For more information, see:
@@ -33,7 +44,7 @@ _flutter.loader = null;
      */
     loadEntrypoint(options) {
       const {
-        entrypointUrl = 'main.dart.js',
+        entrypointUrl = "main.dart.js",
         serviceWorker,
       } = (options || {});
       return this._loadWithServiceWorker(entrypointUrl, serviceWorker);
@@ -46,8 +57,8 @@ _flutter.loader = null;
      * @param {*} engineInitializer
      */
     didCreateEngineInitializer = (function(engineInitializer) {
-      if (typeof this._didCreateEngineInitializerResolve != 'function') {
-        console.warn('Do not call didCreateEngineInitializer by hand. Start with loadEntrypoint instead.');
+      if (typeof this._didCreateEngineInitializerResolve != "function") {
+        console.warn("Do not call didCreateEngineInitializer by hand. Start with loadEntrypoint instead.");
       }
       this._didCreateEngineInitializerResolve(engineInitializer);
     }).bind(this);
@@ -60,11 +71,11 @@ _flutter.loader = null;
       this._scriptLoaded = true;
 
       return new Promise((resolve, reject) => {
-        let scriptTag = document.createElement('script');
+        let scriptTag = document.createElement("script");
         scriptTag.src = entrypointUrl;
-        scriptTag.type = 'application/javascript';
+        scriptTag.type = "application/javascript";
         this._didCreateEngineInitializerResolve = resolve; // Cache the resolve, so it can be called from Flutter.
-        scriptTag.addEventListener('error', reject);
+        scriptTag.addEventListener("error", reject);
         document.body.append(scriptTag);
       });
     }
@@ -72,9 +83,9 @@ _flutter.loader = null;
     _waitForServiceWorkerActivation(serviceWorker, entrypointUrl) {
       if (!serviceWorker) return;
       return new Promise((resolve, _) => {
-        serviceWorker.addEventListener('statechange', () => {
-          if (serviceWorker.state == 'activated') {
-            console.log('Installed new service worker.');
+        serviceWorker.addEventListener("statechange", () => {
+          if (serviceWorker.state == "activated") {
+            console.log("Installed new service worker.");
             resolve(this._loadEntrypoint(entrypointUrl));
           }
         });
@@ -82,8 +93,8 @@ _flutter.loader = null;
     }
 
     _loadWithServiceWorker(entrypointUrl, serviceWorkerOptions) {
-      if (!('serviceWorker' in navigator) || serviceWorkerOptions == null) {
-        console.warn('Service worker not supported (or configured). Falling back to plain <script> tag.', serviceWorkerOptions);
+      if (!("serviceWorker" in navigator) || serviceWorkerOptions == null) {
+        console.warn("Service worker not supported (or configured). Falling back to plain <script> tag.", serviceWorkerOptions);
         return this._loadEntrypoint(entrypointUrl);
       }
 
@@ -92,7 +103,7 @@ _flutter.loader = null;
         timeoutMillis = 4000,
       } = serviceWorkerOptions;
 
-      var serviceWorkerUrl = 'flutter_service_worker.js?v=' + serviceWorkerVersion;
+      var serviceWorkerUrl = "flutter_service_worker.js?v=" + serviceWorkerVersion;
       let loader = navigator.serviceWorker.register(serviceWorkerUrl)
           .then((reg) => {
             if (!reg.active && (reg.installing || reg.waiting)) {
@@ -102,12 +113,12 @@ _flutter.loader = null;
             } else if (!reg.active.scriptURL.endsWith(serviceWorkerVersion)) {
               // When the app updates the serviceWorkerVersion changes, so we
               // need to ask the service worker to update.
-              console.log('New service worker available.');
+              console.log("New service worker available.");
               reg.update();
               return this._waitForServiceWorkerActivation(reg.installing, entrypointUrl);
             } else {
               // Existing service worker is still good.
-              console.log('Loading app from service worker.');
+              console.log("Loading app from service worker.");
               return this._loadEntrypoint(entrypointUrl);
             }
           });
@@ -118,7 +129,7 @@ _flutter.loader = null;
         timeout = new Promise((resolve, _) => {
           setTimeout(() => {
             if (!this._scriptLoaded) {
-              console.warn('Failed to load app from service worker. Falling back to plain <script> tag.');
+              console.warn("Failed to load app from service worker. Falling back to plain <script> tag.");
               resolve(this._loadEntrypoint(entrypointUrl));
             }
           }, timeoutMillis);
@@ -131,3 +142,5 @@ _flutter.loader = null;
 
   _flutter.loader = new FlutterLoader();
 }());
+''';
+}

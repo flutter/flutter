@@ -17,6 +17,7 @@ import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
+import '../../web/flutter_js.dart' as flutter_js;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -455,6 +456,10 @@ class WebBuiltInAssets extends Target {
       final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);
       file.copySync(targetPath);
     }
+
+    // Write the flutter.js file
+    final File flutterJsFile = environment.outputDir.childFile('flutter.js');
+    flutterJsFile.writeAsStringSync(flutter_js.generateFlutterJsFile());
   }
 }
 
