@@ -4,6 +4,8 @@
 
 #include "path_builder.h"
 
+#include <cmath>
+
 namespace impeller {
 
 PathBuilder::PathBuilder() = default;
@@ -288,10 +290,69 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
   return *this;
 }
 
+PathBuilder& PathBuilder::AddArc(const Rect& oval_bounds,
+                                 Radians start,
+                                 Radians sweep,
+                                 bool use_center) {
+  if (sweep.radians < 0) {
+    start.radians += sweep.radians;
+    sweep.radians *= -1;
+  }
+  sweep.radians = std::min(k2Pi, sweep.radians);
+  start.radians = std::fmod(start.radians, k2Pi);
+
+  const Point radius = {oval_bounds.size.width * 0.5f,
+                        oval_bounds.size.height * 0.5f};
+  const Point center = {oval_bounds.origin.x + radius.x,
+                        oval_bounds.origin.y + radius.y};
+
+  Vector2 p1_unit(std::cos(start.radians), std::sin(start.radians));
+
+  if (use_center) {
+    MoveTo(center);
+    LineTo(center + p1_unit * radius);
+  } else {
+    MoveTo(center + p1_unit * radius);
+  }
+
+  while (sweep.radians > 0) {
+    Vector2 p2_unit;
+    Scalar quadrant_angle;
+    if (sweep.radians < kPiOver2) {
+      quadrant_angle = sweep.radians;
+      p2_unit = Vector2(std::cos(start.radians + quadrant_angle),
+                        std::sin(start.radians + quadrant_angle));
+    } else {
+      quadrant_angle = kPiOver2;
+      p2_unit = Vector2(-p1_unit.y, p1_unit.x);
+    }
+
+    Vector2 arc_cp_lengths =
+        (quadrant_angle / kPiOver2) * kArcApproximationMagic * radius;
+
+    Point p1 = center + p1_unit * radius;
+    Point p2 = center + p2_unit * radius;
+    Point cp1 = p1 + Vector2(-p1_unit.y, p1_unit.x) * arc_cp_lengths;
+    Point cp2 = p2 + Vector2(p2_unit.y, -p2_unit.x) * arc_cp_lengths;
+
+    prototype_.AddCubicComponent(p1, cp1, cp2, p2);
+    current_ = p2;
+
+    start.radians += quadrant_angle;
+    sweep.radians -= quadrant_angle;
+    p1_unit = p2_unit;
+  }
+
+  if (use_center) {
+    Close();
+  }
+
+  return *this;
+}
+
 PathBuilder& PathBuilder::AddOval(const Rect& container) {
   const Point r = {container.size.width * 0.5f, container.size.height * 0.5f};
-  const Point c = {container.origin.x + (container.size.width * 0.5f),
-                   container.origin.y + (container.size.height * 0.5f)};
+  const Point c = {container.origin.x + r.x, container.origin.y + r.y};
   const Point m = {kArcApproximationMagic * r.x, kArcApproximationMagic * r.y};
 
   MoveTo({c.x, c.y - r.y});
