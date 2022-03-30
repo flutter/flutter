@@ -339,8 +339,6 @@ abstract class TextStyle {
     Paint? foreground,
     List<Shadow>? shadows,
     List<FontFeature>? fontFeatures,
-    // TODO(jsimmons): implement fontVariations for web
-    // ignore: avoid_unused_constructor_parameters
     List<FontVariation>? fontVariations,
   }) {
     if (engine.useCanvasKit) {
@@ -387,6 +385,7 @@ abstract class TextStyle {
         foreground: foreground,
         shadows: shadows,
         fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       );
     }
   }

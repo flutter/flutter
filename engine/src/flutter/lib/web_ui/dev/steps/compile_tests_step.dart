@@ -52,6 +52,7 @@ class CompileTestsStep implements PipelineStep {
 const Map<String, String> _kTestFonts = <String, String>{
   'Ahem': 'ahem.ttf',
   'Roboto': 'Roboto-Regular.ttf',
+  'RobotoVariable': 'RobotoSlab-VariableFont_wght.ttf',
   'Noto Naskh Arabic UI': 'NotoNaskhArabic-Regular.ttf',
   'Noto Color Emoji': 'NotoColorEmoji.ttf',
 };
