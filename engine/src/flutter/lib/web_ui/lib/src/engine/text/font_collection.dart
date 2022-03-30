@@ -17,6 +17,8 @@ const String ahemFontFamily = 'Ahem';
 const String ahemFontUrl = '/assets/fonts/ahem.ttf';
 const String robotoFontFamily = 'Roboto';
 const String robotoTestFontUrl = '/assets/fonts/Roboto-Regular.ttf';
+const String robotoVariableFontFamily = 'RobotoVariable';
+const String robotoVariableTestFontUrl = '/assets/fonts/RobotoSlab-VariableFont_wght.ttf';
 
 /// This class is responsible for registering and loading fonts.
 ///
@@ -87,6 +89,8 @@ class FontCollection {
         ahemFontFamily, 'url($ahemFontUrl)', const <String, String>{});
     _testFontManager!.registerAsset(robotoFontFamily,
         'url($robotoTestFontUrl)', const <String, String>{});
+    _testFontManager!.registerAsset(robotoVariableFontFamily,
+        'url($robotoVariableTestFontUrl)', const <String, String>{});
   }
 
   /// Returns a [Future] that completes when the registered fonts are loaded

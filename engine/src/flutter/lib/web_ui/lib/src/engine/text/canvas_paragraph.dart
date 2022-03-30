@@ -369,6 +369,7 @@ abstract class StyleNode {
         fontFamily: _fontFamily,
         fontFamilyFallback: _fontFamilyFallback,
         fontFeatures: _fontFeatures,
+        fontVariations: _fontVariations,
         fontSize: _fontSize,
         letterSpacing: _letterSpacing,
         wordSpacing: _wordSpacing,
@@ -393,6 +394,7 @@ abstract class StyleNode {
   String get _fontFamily;
   List<String>? get _fontFamilyFallback;
   List<ui.FontFeature>? get _fontFeatures;
+  List<ui.FontVariation>? get _fontVariations;
   double get _fontSize;
   double? get _letterSpacing;
   double? get _wordSpacing;
@@ -446,6 +448,9 @@ class ChildStyleNode extends StyleNode {
 
   @override
   List<ui.FontFeature>? get _fontFeatures => style.fontFeatures ?? parent._fontFeatures;
+
+  @override
+  List<ui.FontVariation>? get _fontVariations => style.fontVariations ?? parent._fontVariations;
 
   @override
   double get _fontSize => style.fontSize ?? parent._fontSize;
@@ -520,6 +525,9 @@ class RootStyleNode extends StyleNode {
 
   @override
   List<ui.FontFeature>? get _fontFeatures => null;
+
+  @override
+  List<ui.FontVariation>? get _fontVariations => null;
 
   @override
   double get _fontSize => paragraphStyle.fontSize ?? FlutterViewEmbedder.defaultFontSize;
@@ -634,6 +642,13 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
     if (_drawOnCanvas) {
       final List<ui.FontFeature>? fontFeatures = style.fontFeatures;
       if (fontFeatures != null && fontFeatures.isNotEmpty) {
+        _drawOnCanvas = false;
+      }
+    }
+
+    if (_drawOnCanvas) {
+      final List<ui.FontVariation>? fontVariations = style.fontVariations;
+      if (fontVariations != null && fontVariations.isNotEmpty) {
         _drawOnCanvas = false;
       }
     }

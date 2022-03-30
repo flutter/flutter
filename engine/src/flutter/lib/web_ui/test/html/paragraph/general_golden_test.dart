@@ -467,6 +467,49 @@ Future<void> testMain() async {
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_font_features_dom');
   });
 
+  void testFontVariations(EngineCanvas canvas) {
+    const String text = 'ABCDE 12345\n';
+    FontVariation weight(double w) => FontVariation('wght', w);
+
+    final CanvasParagraph paragraph = rich(
+      EngineParagraphStyle(fontFamily: 'RobotoVariable'),
+      (CanvasParagraphBuilder builder) {
+        builder.pushStyle(EngineTextStyle.only(
+          fontSize: 48.0,
+        ));
+        builder.addText(text);
+        builder.pushStyle(EngineTextStyle.only(
+          fontSize: 48.0,
+          fontVariations: <FontVariation>[weight(900)],
+        ));
+        builder.addText(text);
+        builder.pushStyle(EngineTextStyle.only(
+          fontSize: 48.0,
+          fontVariations: <FontVariation>[weight(200)],
+        ));
+        builder.addText(text);
+        builder.pop();
+        builder.pop();
+        builder.pop();
+      },
+    )..layout(constrain(double.infinity));
+    canvas.drawParagraph(paragraph, Offset.zero);
+  }
+
+  test('font variations', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 600, 500);
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
+    testFontVariations(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_font_variations');
+  });
+
+  test('font variations (DOM)', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 600, 500);
+    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
+    testFontVariations(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_font_variations_dom');
+  });
+
   void testBackgroundStyle(EngineCanvas canvas) {
     final CanvasParagraph paragraph = rich(
       EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 40.0),

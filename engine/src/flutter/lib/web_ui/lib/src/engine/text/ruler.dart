@@ -56,12 +56,14 @@ class TextHeightStyle {
     required this.fontSize,
     required this.height,
     required this.fontFeatures,
+    required this.fontVariations,
   });
 
   final String fontFamily;
   final double fontSize;
   final double? height;
   final List<ui.FontFeature>? fontFeatures;
+  final List<ui.FontVariation>? fontVariations;
 
   @override
   bool operator ==(Object other) {
@@ -77,6 +79,7 @@ class TextHeightStyle {
     fontSize,
     height,
     ui.hashList(fontFeatures),
+    ui.hashList(fontVariations),
   );
 }
 

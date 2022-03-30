@@ -333,6 +333,7 @@ class EngineTextStyle implements ui.TextStyle {
     required ui.Paint? foreground,
     required List<ui.Shadow>? shadows,
     required List<ui.FontFeature>? fontFeatures,
+    required List<ui.FontVariation>? fontVariations,
   }) = EngineTextStyle.only;
 
   /// Constructs an [EngineTextStyle] with only the given properties.
@@ -359,6 +360,7 @@ class EngineTextStyle implements ui.TextStyle {
     this.foreground,
     this.shadows,
     this.fontFeatures,
+    this.fontVariations,
   })  : assert(
             color == null || foreground == null,
             'Cannot provide both a color and a foreground\n'
@@ -393,6 +395,7 @@ class EngineTextStyle implements ui.TextStyle {
   final String fontFamily;
   final List<String>? fontFamilyFallback;
   final List<ui.FontFeature>? fontFeatures;
+  final List<ui.FontVariation>? fontVariations;
   final double? fontSize;
   final double? letterSpacing;
   final double? wordSpacing;
@@ -440,6 +443,7 @@ class EngineTextStyle implements ui.TextStyle {
       // TODO(mdebbar): Pass the actual value when font features become supported
       //                https://github.com/flutter/flutter/issues/64595
       fontFeatures: null,
+      fontVariations: null,
     );
   }
 
@@ -518,7 +522,8 @@ class EngineTextStyle implements ui.TextStyle {
           'background: ${background ?? "unspecified"}, '
           'foreground: ${foreground ?? "unspecified"}, '
           'shadows: ${shadows ?? "unspecified"}, '
-          'fontFeatures: ${fontFeatures ?? "unspecified"}'
+          'fontFeatures: ${fontFeatures ?? "unspecified"}, '
+          'fontVariations: ${fontVariations ?? "unspecified"}'
           ')';
     } else {
       return super.toString();
@@ -754,6 +759,11 @@ void applyTextStyleToElement({
   if (fontFeatures != null && fontFeatures.isNotEmpty) {
     cssStyle.fontFeatureSettings = _fontFeatureListToCss(fontFeatures);
   }
+
+  final List<ui.FontVariation>? fontVariations = style.fontVariations;
+  if (fontVariations != null && fontVariations.isNotEmpty) {
+    cssStyle.setProperty('font-variation-settings', _fontVariationListToCss(fontVariations));
+  }
 }
 
 String _shadowListToCss(List<ui.Shadow> shadows) {
@@ -791,6 +801,21 @@ String _fontFeatureListToCss(List<ui.FontFeature> fontFeatures) {
     }
     final ui.FontFeature fontFeature = fontFeatures[i];
     sb.write('"${fontFeature.feature}" ${fontFeature.value}');
+  }
+  return sb.toString();
+}
+
+String _fontVariationListToCss(List<ui.FontVariation> fontVariations) {
+  assert(fontVariations.isNotEmpty);
+
+  final StringBuffer sb = StringBuffer();
+  final int len = fontVariations.length;
+  for (int i = 0; i < len; i++) {
+    if (i != 0) {
+      sb.write(',');
+    }
+    final ui.FontVariation fontVariation = fontVariations[i];
+    sb.write('"${fontVariation.axis}" ${fontVariation.value}');
   }
   return sb.toString();
 }
