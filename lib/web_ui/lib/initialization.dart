@@ -30,6 +30,72 @@ Future<void> webOnlyInitializePlatform() async {
   await engine.initializeEngine();
 }
 
+/// Initializes essential bits of the engine before it fully initializes.
+/// When [didCreateEngineInitializer] is set, it delegates engine initialization
+/// and app startup to the programmer.
+/// Else, it immediately triggers the full engine + app bootstrap.
+///
+/// This method is called by the flutter_tools package, from the entrypoint that
+/// it generates around the main method provided by the programmer. See:
+/// * https://github.com/flutter/flutter/blob/2bd3e0d914854aa8c12e933f25c5fd8532ae5571/packages/flutter_tools/lib/src/build_system/targets/web.dart#L135-L163
+/// * https://github.com/flutter/flutter/blob/61fb2de52c7bdac19b7f2f74eaf3f11237e1e91d/packages/flutter_tools/lib/src/isolated/resident_web_runner.dart#L460-L485
+///
+/// This function first calls [engine.initializeEngineServices] so the engine
+/// can prepare the js-interop layer that is used by web apps (instead of the
+/// old `ui.webOnlyFoo` methods/getters).
+///
+/// It then creates a JsObject that is passed to the [didCreateEngineInitializer]
+/// JS callback, to delegate bootstrapping the app to the programmer.
+///
+/// If said callback is not defined, this assumes that the Flutter Web app is
+/// initializing "automatically", as was normal before this feature was
+/// introduced. This will immediately run the initEngine and runApp methods
+/// (via [engine.AppBootstrap.now]).
+///
+/// This is the only bit of `dart:ui` that should be directly called by Flutter
+/// web apps. Everything else should go through the JS-interop layer created in
+/// `engine.warmup`.
+///
+/// This method should NOT trigger the download of any additional resources
+/// (except when the app is in "autoStart" mode).
+Future<void> webOnlyWarmupEngine({
+  Function? registerPlugins,
+  Function? runApp,
+}) async {
+  // Create the object that knows how to bootstrap an app from JS and Dart.
+  final engine.AppBootstrap bootstrap = engine.AppBootstrap(
+    initEngine: () async {
+      await engine.initializeEngineServices();
+    }, runApp: () async {
+      if (registerPlugins != null) {
+        registerPlugins();
+      }
+      await engine.initializeEngineUi();
+      if (runApp != null) {
+        runApp();
+      }
+    },
+  );
+
+  // Should the app "autoStart"?
+  bool autoStart = true;
+  try {
+    autoStart = engine.didCreateEngineInitializer == null;
+  } catch (e) {
+    // Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'loader')
+    autoStart = true;
+  }
+  if (autoStart) {
+    // The user does not want control of the app, bootstrap immediately.
+    print('Flutter Web Bootstrap: Auto');
+    await bootstrap.autoStart();
+  } else {
+    // Yield control of the bootstrap procedure to the user.
+    print('Flutter Web Bootstrap: Programmatic');
+    engine.didCreateEngineInitializer!(bootstrap.prepareEngineInitializer());
+  }
+}
+
 /// Emulates the `flutter test` environment.
 ///
 /// When set to true, the engine will emulate a specific screen size, and always
