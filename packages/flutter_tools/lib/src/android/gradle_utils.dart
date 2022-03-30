@@ -29,7 +29,7 @@ import 'android_sdk.dart';
 // https://kotlinlang.org/docs/gradle.html#plugin-and-versions
 const String templateDefaultGradleVersion = '7.4';
 const String templateAndroidGradlePluginVersion = '7.1.2';
-// TODO(egarciad): Gradle 7.1.2 breaks flutter build aar.
+// TODO(egarciad): Gradle 7 breaks AARs builds: https://github.com/flutter/flutter/issues/101083
 const String templateAndroidGradlePluginVersionForModule = '4.1.0';
 const String templateKotlinGradlePluginVersion = '1.6.10';
 
