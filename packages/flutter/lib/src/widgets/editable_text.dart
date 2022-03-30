@@ -1605,7 +1605,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   SpellCheckConfiguration? _spellCheckConfiguration;
 
-  bool? get _spellCheckEnabled => (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance?.platformDispatcher.defaultSpellCheckEnabled : widget.spellCheckEnabled;
+  bool? get _spellCheckEnabled => (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance?.platformDispatcher.nativeSpellCheckServiceDefined : widget.spellCheckEnabled;
 
 
   /// Whether to create an input connection with the platform for text editing
