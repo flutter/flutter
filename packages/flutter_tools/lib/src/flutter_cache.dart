@@ -115,7 +115,7 @@ class PubDependencies extends ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
-    [bool offline = false]
+    {bool offline = false}
   ) async {
     await _pub().get(
       context: PubContext.pubGet,
@@ -420,7 +420,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
-    [bool offline = false]
+    {bool offline = false}
   ) async {
     if (globals.androidSdk == null) {
       return;

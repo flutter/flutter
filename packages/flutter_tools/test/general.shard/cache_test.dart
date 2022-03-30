@@ -1098,7 +1098,7 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
 
   @override
-  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils, [bool offline = false]) async {
+  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils, {bool offline = false}) async {
     if (updateException != null) {
       throw updateException;
     }

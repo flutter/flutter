@@ -171,14 +171,7 @@ class PrecacheCommand extends FlutterCommand {
       }
     }
     if (!await _cache.isUpToDate()) {
-      bool offline;
-      if (argParser.options.containsKey('offline')) {
-        offline = boolArg('offline');
-      }
-      else {
-        offline = false;
-      }
-      await _cache.updateAll(requiredArtifacts, offline);
+      await _cache.updateAll(requiredArtifacts);
     } else {
       _logger.printStatus('Already up-to-date.');
     }
