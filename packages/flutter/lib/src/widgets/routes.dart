@@ -2244,13 +2244,6 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     final FocusNode? focusNode = _focusScopeNode.focusedChild;
     if (focusNode == null || result == null)
       return;
-
-    if (event.kind == PointerDeviceKind.touch && focusNode is FocusScopeNode)
-      // If a controller is initially provided then the parent stops doing so for rebuilds,
-      // a new instance of CupertinoTabController should be created and used by the widget,
-      // while preserving the previous controller's tab index.
-      return;
-
     final RenderObject? renderObject = focusNode.context?.findRenderObject();
     if (renderObject == null)
       return;
