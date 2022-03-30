@@ -467,7 +467,11 @@ void main() {
       home: Material(child: buildTable()),
     ));
     // The `tester.widget` ensures that there is exactly one upward arrow.
-    Transform transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    final Finder iconFinder = find.descendant(
+      of: find.byType(DataTable),
+      matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
+    );
+    Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
       equals(Matrix3.identity()),
@@ -479,7 +483,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     // The `tester.widget` ensures that there is exactly one upward arrow.
-    transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
       equals(Matrix3.rotationZ(math.pi)),
@@ -515,7 +519,10 @@ void main() {
       home: Material(child: buildTable()),
     ));
     // The `tester.widget` ensures that there is exactly one upward arrow.
-    final Finder iconFinder = find.widgetWithIcon(Transform, Icons.arrow_upward);
+    final Finder iconFinder = find.descendant(
+      of: find.byType(DataTable),
+      matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
+    );
     Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
@@ -565,7 +572,10 @@ void main() {
       home: Material(child: buildTable()),
     ));
     // The `tester.widget` ensures that there is exactly one upward arrow.
-    final Finder iconFinder = find.widgetWithIcon(Transform, Icons.arrow_upward);
+    final Finder iconFinder = find.descendant(
+      of: find.byType(DataTable),
+      matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
+    );
     Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),

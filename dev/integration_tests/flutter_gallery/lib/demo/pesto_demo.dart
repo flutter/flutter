@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class PestoDemo extends StatelessWidget {
-  const PestoDemo({ Key? key }) : super(key: key);
+  const PestoDemo({ super.key });
 
   static const String routeName = '/pesto';
 
@@ -28,7 +28,7 @@ final ThemeData _kTheme = ThemeData(
 );
 
 class PestoHome extends StatelessWidget {
-  const PestoHome({Key? key}) : super(key: key);
+  const PestoHome({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class PestoHome extends StatelessWidget {
 }
 
 class PestoFavorites extends StatelessWidget {
-  const PestoFavorites({Key? key}) : super(key: key);
+  const PestoFavorites({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,26 +47,21 @@ class PestoFavorites extends StatelessWidget {
 
 class PestoStyle extends TextStyle {
   const PestoStyle({
-    double fontSize = 12.0,
-    FontWeight? fontWeight,
-    Color color = Colors.black87,
-    double? letterSpacing,
-    double? height,
+    double super.fontSize = 12.0,
+    super.fontWeight,
+    Color super.color = Colors.black87,
+    super.letterSpacing,
+    super.height,
   }) : super(
     inherit: false,
-    color: color,
     fontFamily: 'Raleway',
-    fontSize: fontSize,
-    fontWeight: fontWeight,
     textBaseline: TextBaseline.alphabetic,
-    letterSpacing: letterSpacing,
-    height: height,
   );
 }
 
 // Displays a grid of recipe cards.
 class RecipeGridPage extends StatefulWidget {
-  const RecipeGridPage({ Key? key, this.recipes }) : super(key: key);
+  const RecipeGridPage({ super.key, this.recipes });
 
   final List<Recipe?>? recipes;
 
@@ -189,7 +184,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
 }
 
 class PestoLogo extends StatefulWidget {
-  const PestoLogo({Key? key, this.height, this.t}) : super(key: key);
+  const PestoLogo({super.key, this.height, this.t});
 
   final double? height;
   final double? t;
@@ -252,7 +247,7 @@ class _PestoLogoState extends State<PestoLogo> {
 
 // A card with the recipe's image, author, and title.
 class RecipeCard extends StatelessWidget {
-  const RecipeCard({ Key? key, this.recipe, this.onTap }) : super(key: key);
+  const RecipeCard({ super.key, this.recipe, this.onTap });
 
   final Recipe? recipe;
   final VoidCallback? onTap;
@@ -314,7 +309,7 @@ class RecipeCard extends StatelessWidget {
 
 // Displays one recipe. Includes the recipe sheet with a background image.
 class RecipePage extends StatefulWidget {
-  const RecipePage({ Key? key, this.recipe }) : super(key: key);
+  const RecipePage({ super.key, this.recipe });
 
   final Recipe? recipe;
 
@@ -433,7 +428,7 @@ class _RecipePageState extends State<RecipePage> {
 
 /// Displays the recipe's name and instructions.
 class RecipeSheet extends StatelessWidget {
-  RecipeSheet({ Key? key, this.recipe }) : super(key: key);
+  RecipeSheet({ super.key, this.recipe });
 
   final TextStyle titleStyle = const PestoStyle(fontSize: 34.0);
   final TextStyle descriptionStyle = const PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);

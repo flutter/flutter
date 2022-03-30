@@ -56,26 +56,6 @@ String _toMethodString(HttpMethod method) {
   }
 }
 
-/// Override the creation of all [HttpClient] objects with a zone injection.
-///
-/// This should only be used when the http client cannot be set directly, such as
-/// when testing `package:http` code.
-Future<void> overrideHttpClients(Future<void> Function() callback,  FakeHttpClient httpClient) async {
-  final HttpOverrides overrides = _FakeHttpClientOverrides(httpClient);
-  await HttpOverrides.runWithHttpOverrides(callback, overrides);
-}
-
-class _FakeHttpClientOverrides extends HttpOverrides {
-  _FakeHttpClientOverrides(this.httpClient);
-
-  final FakeHttpClient httpClient;
-
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return httpClient;
-  }
-}
-
 /// Create a fake request that configures the [FakeHttpClient] to respond
 /// with the provided [response].
 ///
@@ -161,6 +141,9 @@ class FakeHttpClient implements HttpClient {
   }
 
   @override
+  Future<ConnectionTask<Socket>> Function(Uri url, String? proxyHost, int? proxyPort)? connectionFactory;
+
+  @override
   Future<bool> Function(Uri url, String scheme, String realm)? authenticate;
 
   @override
@@ -168,6 +151,9 @@ class FakeHttpClient implements HttpClient {
 
   @override
   bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
+
+  @override
+  Function(String line)? keyLog;
 
   @override
   void close({bool force = false}) { }

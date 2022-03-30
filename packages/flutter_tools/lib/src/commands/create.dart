@@ -320,6 +320,7 @@ class CreateCommand extends CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
+          projectType: template,
         );
         break;
       case FlutterProjectType.skeleton:
@@ -329,6 +330,7 @@ class CreateCommand extends CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
+          generateMetadata: false,
         );
         break;
       case FlutterProjectType.module:
@@ -353,6 +355,7 @@ class CreateCommand extends CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
+          projectType: template,
         );
         break;
       case FlutterProjectType.ffiPlugin:
@@ -361,6 +364,7 @@ class CreateCommand extends CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
+          projectType: template,
         );
         break;
     }
@@ -436,7 +440,7 @@ Your $application code is in $relativeAppMain.
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? stringArg('description')
-        : 'A new flutter module project.';
+        : 'A new Flutter module project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
       globals.fs.path.join('module', 'common'),
@@ -495,6 +499,7 @@ Your $application code is in $relativeAppMain.
     Map<String, dynamic> templateContext, {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
+    FlutterProjectType projectType,
   }) async {
     // Plugins only add a platform if it was requested explicitly by the user.
     if (!argResults.wasParsed('platforms')) {
@@ -515,7 +520,7 @@ Your $application code is in $relativeAppMain.
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? stringArg('description')
-        : 'A new flutter plugin project.';
+        : 'A new Flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(
       <String>['plugin', 'plugin_shared'],
@@ -561,6 +566,7 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       pluginExampleApp: true,
       printStatusWhenWriting: printStatusWhenWriting,
+      projectType: projectType,
     );
     return generatedCount;
   }
@@ -570,6 +576,7 @@ Your $application code is in $relativeAppMain.
     Map<String, dynamic> templateContext, {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
+    FlutterProjectType projectType,
   }) async {
     // Plugins only add a platform if it was requested explicitly by the user.
     if (!argResults.wasParsed('platforms')) {
@@ -637,6 +644,7 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       pluginExampleApp: true,
       printStatusWhenWriting: printStatusWhenWriting,
+      projectType: projectType,
     );
     return generatedCount;
   }

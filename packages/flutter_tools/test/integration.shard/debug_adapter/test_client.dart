@@ -76,7 +76,7 @@ class DapTestClient {
   /// Returns a Future that completes with the next [event] event.
   Future<Event> event(String event) => _eventController.stream.firstWhere(
       (Event e) => e.event == event,
-      orElse: () => throw 'Did not receive $event event before stream closed');
+      orElse: () => throw Exception('Did not receive $event event before stream closed'));
 
   /// Returns a stream for [event] events.
   Stream<Event> events(String event) {
@@ -133,7 +133,7 @@ class DapTestClient {
     return responses[1] as Response; // Return the initialize response.
   }
 
-  /// Send a launchRequest to the server, asking it to start a Dart program.
+  /// Send a launchRequest to the server, asking it to start a Flutter app.
   Future<Response> launch({
     String? program,
     List<String>? args,
@@ -141,7 +141,6 @@ class DapTestClient {
     String? cwd,
     bool? noDebug,
     List<String>? additionalProjectPaths,
-    String? console,
     bool? debugSdkLibraries,
     bool? debugExternalPackageLibraries,
     bool? evaluateGettersInDebugViews,
@@ -165,8 +164,40 @@ class DapTestClient {
         sendLogsToClient: captureVmServiceTraffic,
       ),
       // We can't automatically pick the command when using a custom type
-      // (DartLaunchRequestArguments).
+      // (FlutterLaunchRequestArguments).
       overrideCommand: 'launch',
+    );
+  }
+
+  /// Send an attachRequest to the server, asking it to attach to an already-running Flutter app.
+  Future<Response> attach({
+    List<String>? toolArgs,
+    String? vmServiceUri,
+    String? cwd,
+    List<String>? additionalProjectPaths,
+    bool? debugSdkLibraries,
+    bool? debugExternalPackageLibraries,
+    bool? evaluateGettersInDebugViews,
+    bool? evaluateToStringInDebugViews,
+  }) {
+    return sendRequest(
+      FlutterAttachRequestArguments(
+        cwd: cwd,
+        toolArgs: toolArgs,
+        vmServiceUri: vmServiceUri,
+        additionalProjectPaths: additionalProjectPaths,
+        debugSdkLibraries: debugSdkLibraries,
+        debugExternalPackageLibraries: debugExternalPackageLibraries,
+        evaluateGettersInDebugViews: evaluateGettersInDebugViews,
+        evaluateToStringInDebugViews: evaluateToStringInDebugViews,
+        // When running out of process, VM Service traffic won't be available
+        // to the client-side logger, so force logging on which sends VM Service
+        // traffic in a custom event.
+        sendLogsToClient: captureVmServiceTraffic,
+      ),
+      // We can't automatically pick the command when using a custom type
+      // (FlutterAttachRequestArguments).
+      overrideCommand: 'attach',
     );
   }
 
@@ -190,13 +221,13 @@ class DapTestClient {
   /// event for [extension].
   Future<Map<String, Object?>> serviceExtensionAdded(String extension) => serviceExtensionAddedEvents.firstWhere(
       (Map<String, Object?> body) => body['extensionRPC'] == extension,
-      orElse: () => throw 'Did not receive $extension extension added event before stream closed');
+      orElse: () => throw Exception('Did not receive $extension extension added event before stream closed'));
 
   /// Returns a Future that completes with the next serviceExtensionStateChanged
   /// event for [extension].
   Future<Map<String, Object?>> serviceExtensionStateChanged(String extension) => serviceExtensionStateChangedEvents.firstWhere(
       (Map<String, Object?> body) => body['extension'] == extension,
-      orElse: () => throw 'Did not receive $extension extension state changed event before stream closed');
+      orElse: () => throw Exception('Did not receive $extension extension state changed event before stream closed'));
 
   /// Initializes the debug adapter and launches [program]/[cwd] or calls the
   /// custom [launch] method.
@@ -354,6 +385,35 @@ extension DapTestClientExtension on DapTestClient {
     return TestEvents(
       output: await outputEventsFuture,
       testNotifications: await testNotificationEventsFuture,
+    );
+  }
+
+  /// Sets a breakpoint at [line] in [file].
+  Future<void> setBreakpoint(String filePath, int line) async {
+    await sendRequest(
+      SetBreakpointsArguments(
+        source: Source(path: filePath),
+        breakpoints: <SourceBreakpoint>[
+          SourceBreakpoint(line: line),
+        ],
+      ),
+    );
+  }
+
+  /// Sends a continue request for the given thread.
+  ///
+  /// Returns a Future that completes when the server returns a corresponding
+  /// response.
+  Future<Response> continue_(int threadId) =>
+      sendRequest(ContinueArguments(threadId: threadId));
+
+  /// Clears breakpoints in [file].
+  Future<void> clearBreakpoints(String filePath) async {
+    await sendRequest(
+      SetBreakpointsArguments(
+        source: Source(path: filePath),
+        breakpoints: <SourceBreakpoint>[],
+      ),
     );
   }
 

@@ -451,7 +451,7 @@ void main() {
           FakeAsync().run((FakeAsync time) {
             final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
               stdio: mockStdio,
-              stopwatch: stopwatchFactory.createStopwatch(),
+              stopwatch: mockStopwatch,
               terminal: terminal,
             )..start();
             doWhileAsync(time, () => spinner.ticks < 10);
@@ -475,6 +475,35 @@ void main() {
             expect(spinner.stop, throwsAssertionError);
             expect(spinner.cancel, throwsAssertionError);
             done = true;
+          });
+          expect(done, isTrue);
+        });
+
+        testWithoutContext('AnonymousSpinnerStatus logs warning after timeout', () async {
+          mockStopwatch = FakeStopwatch();
+          const String warningMessage = 'a warning message.';
+          final bool done = FakeAsync().run<bool>((FakeAsync time) {
+            final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
+              stdio: mockStdio,
+              stopwatch: mockStopwatch,
+              terminal: terminal,
+              slowWarningCallback: () => warningMessage,
+              timeout: const Duration(milliseconds: 100),
+            )..start();
+            // must be greater than the spinner timer duration
+            const Duration timeLapse = Duration(milliseconds: 101);
+            mockStopwatch.elapsed += timeLapse;
+            time.elapse(timeLapse);
+
+            List<String> lines = outputStdout();
+            expect(
+              lines.join(),
+              contains(warningMessage),
+            );
+
+            spinner.stop();
+            lines = outputStdout();
+            return true;
           });
           expect(done, isTrue);
         });
@@ -1267,7 +1296,7 @@ void main() {
 /// A fake [Logger] that throws the [Invocation] for any method call.
 class FakeLogger implements Logger {
   @override
-  dynamic noSuchMethod(Invocation invocation) => throw invocation;
+  dynamic noSuchMethod(Invocation invocation) => throw invocation; // ignore: only_throw_errors
 }
 
 /// Returns the [Invocation] thrown from a call to [FakeLogger].
@@ -1309,14 +1338,14 @@ class FakeStdout extends Fake implements Stdout {
   @override
   void write(Object object) {
     if (syncError) {
-      throw 'Error!';
+      throw Exception('Error!');
     }
     Zone.current.runUnaryGuarded<void>((_) {
       if (completeWithError) {
         _completer.completeError(Exception('Some pipe error'));
       } else {
         _completer.complete();
-        throw 'Error!';
+        throw Exception('Error!');
       }
     }, null);
   }

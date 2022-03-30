@@ -5,7 +5,10 @@
 import 'dart:io';
 
 abstract class TokenTemplate {
-  const TokenTemplate(this.fileName, this.tokens);
+  const TokenTemplate(this.fileName, this.tokens, {
+    this.colorSchemePrefix = 'Theme.of(context).colorScheme.',
+    this.textThemePrefix = 'Theme.of(context).textTheme.'
+  });
 
   static const String beginGeneratedComment = '''
 
@@ -27,6 +30,8 @@ abstract class TokenTemplate {
 
   final String fileName;
   final Map<String, dynamic> tokens;
+  final String colorSchemePrefix;
+  final String textThemePrefix;
 
   /// Replace or append the contents of the file with the text from [generate].
   ///
@@ -54,38 +59,88 @@ abstract class TokenTemplate {
   /// bottom of the file.
   String generate();
 
-  String color(String tokenName) {
-    final String tokenColor = '$tokenName.color';
-    final String tokenOpacity = '$tokenName.opacity';
-    String value = '${tokens[tokenColor]!}';
+  /// Generate a [ColorScheme] color name for the given token.
+  ///
+  /// If there is a value for the given token, this will return
+  /// the value prepended with [colorSchemePrefix].
+  ///
+  /// Otherwise it will return 'null'.
+  ///
+  /// See also:
+  ///   * [componentColor], that provides support for an optional opacity.
+  String color(String colorToken) {
+    return tokens.containsKey(colorToken)
+        ? '$colorSchemePrefix${tokens[colorToken]}'
+        : 'null';
+  }
+
+  /// Generate a [ColorScheme] color name for the given component's color
+  /// with opacity if available.
+  ///
+  /// If there is a value for the given component's color, this will return
+  /// the value prepended with [colorSchemePrefix]. If there is also
+  /// an opacity specified for the component, then the returned value
+  /// will include this opacity calculation.
+  ///
+  /// If there is no value for the component's color, 'null' will be returned.
+  ///
+  /// See also:
+  ///   * [color], that provides support for looking up a raw color token.
+  String componentColor(String componentToken) {
+    final String colorToken = '$componentToken.color';
+    if (!tokens.containsKey(colorToken))
+      return 'null';
+    String value = color(colorToken);
+    final String tokenOpacity = '$componentToken.opacity';
     if (tokens.containsKey(tokenOpacity)) {
-      final String opacity = tokens[tokens[tokenOpacity]!]!.toString();
+      final dynamic opacityValue = tokens[tokenOpacity];
+      final String opacity = opacityValue is double
+       ? opacityValue.toString()
+       : tokens[tokens[tokenOpacity]!]!.toString();
       value += '.withOpacity($opacity)';
     }
     return value;
   }
 
-  String elevation(String tokenName) {
-    final String elevationName = '$tokenName.elevation';
-    final Map<String, dynamic> elevationValue = tokens[tokens[elevationName]!]! as Map<String, dynamic>;
-    return elevationValue['value']!.toString();
+  /// Generate an elevation value for the given component token.
+  String elevation(String componentToken) {
+    return tokens[tokens['$componentToken.elevation']!]!.toString();
   }
 
-  String shape(String tokenName) {
-    // TODO(darrenaustin): handle more than just rounded rectangle shapes
-    final String shapeToken = tokens[tokenName]! as String;
-    final Map<String, dynamic> shape = tokens[shapeToken]! as Map<String, dynamic>;
-    final Map<String, dynamic> shapeValue = shape['value']! as Map<String, dynamic>;
-    return 'const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(${shapeValue['value']!})))';
+  /// Generate a shape constant for the given component token.
+  ///
+  /// Currently supports family:
+  ///   - "SHAPE_FAMILY_ROUNDED_CORNERS" which maps to [RoundedRectangleBorder].
+  ///   - "SHAPE_FAMILY_CIRCULAR" which maps to a [StadiumBorder].
+  String shape(String componentToken) {
+    final Map<String, dynamic> shape = tokens[tokens['$componentToken.shape']!]! as Map<String, dynamic>;
+    switch (shape['family']) {
+      case 'SHAPE_FAMILY_ROUNDED_CORNERS':
+        return 'const RoundedRectangleBorder(borderRadius: '
+            'BorderRadius.only('
+            'topLeft: Radius.circular(${shape['topLeft']}), '
+            'topRight: Radius.circular(${shape['topRight']}), '
+            'bottomLeft: Radius.circular(${shape['bottomLeft']}), '
+            'bottomRight: Radius.circular(${shape['bottomRight']})))';
+      case 'SHAPE_FAMILY_CIRCULAR':
+        return 'const StadiumBorder()';
+    }
+    print('Unsupported shape family type: ${shape['family']} for $componentToken');
+    return '';
   }
 
-  String value(String tokenName) {
-    final Map<String, dynamic> value = tokens[tokenName]! as Map<String, dynamic>;
-    return value['value'].toString();
+  /// Generate a [BorderSide] for the given component.
+  String border(String componentToken) {
+    if (!tokens.containsKey('$componentToken.color')) {
+      return 'null';
+    }
+    final String borderColor = componentColor(componentToken);
+    final double width = tokens['$componentToken.width'] as double;
+    return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 
-  String textStyle(String tokenName) {
-    final String fontName = '$tokenName.font';
-    return tokens[fontName]!.toString();
+  /// Generate a [TextTheme] text style name for the given component token.
+  String textStyle(String componentToken) {
+    return '$textThemePrefix${tokens["$componentToken.text-style"]!.toString()}';
   }
 }

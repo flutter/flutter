@@ -15,6 +15,7 @@ library widgets;
 export 'package:characters/characters.dart';
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+export 'foundation.dart' show UniqueKey;
 export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_list.dart';
@@ -37,6 +38,7 @@ export 'src/widgets/debug.dart';
 export 'src/widgets/default_text_editing_shortcuts.dart';
 export 'src/widgets/desktop_text_selection_toolbar_layout_delegate.dart';
 export 'src/widgets/dismissible.dart';
+export 'src/widgets/display_feature_sub_screen.dart';
 export 'src/widgets/disposable_build_context.dart';
 export 'src/widgets/drag_target.dart';
 export 'src/widgets/draggable_scrollable_sheet.dart';

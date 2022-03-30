@@ -42,7 +42,7 @@ class _HomePage extends State<HomePage> {
 
     // Trigger the second route.
     // https://github.com/flutter/flutter/issues/40126
-    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (_) => const SecondPage()));
     });

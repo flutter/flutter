@@ -9,23 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void _ensureTooltipVisible(GlobalKey key) {
-  // This function uses "as dynamic" to defeat the static analysis. In general
-  // you want to avoid using this style in your code, as it will cause the
-  // analyzer to be unable to help you catch errors.
-  //
-  // In this case, we do it because we are trying to call internal methods of
-  // the tooltip code in order to test it. Normally, the state of a tooltip is a
-  // private class, but by using a GlobalKey we can get a handle to that object
-  // and by using "as dynamic" we can bypass the analyzer's type checks and call
-  // methods that we aren't supposed to be able to know about.
-  //
-  // It's ok to do this in tests, but you really don't want to do it in
-  // production code.
-  // ignore: avoid_dynamic_calls
-  (key.currentState as dynamic).ensureTooltipVisible();
-}
-
 const String tooltipText = 'TIP';
 
 void main() {
@@ -162,13 +145,13 @@ void main() {
   });
 
   testWidgets('Tooltip does not trigger manually when in TooltipVisibility with visible = false', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       MaterialApp(
         home: TooltipVisibility(
           visible: false,
           child: Tooltip(
-            key: key,
+            key: tooltipKey,
             message: tooltipText,
             child: const SizedBox(width: 100.0, height: 100.0),
           ),
@@ -176,19 +159,19 @@ void main() {
       ),
     );
 
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump();
     expect(find.text(tooltipText), findsNothing);
   });
 
   testWidgets('Tooltip triggers manually when in TooltipVisibility with visible = true', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       MaterialApp(
         home: TooltipVisibility(
           visible: true,
           child: Tooltip(
-            key: key,
+            key: tooltipKey,
             message: tooltipText,
             child: const SizedBox(width: 100.0, height: 100.0),
           ),
@@ -196,7 +179,7 @@ void main() {
       ),
     );
 
-    _ensureTooltipVisible(key);
+    tooltipKey.currentState?.ensureTooltipVisible();
     await tester.pump();
     expect(find.text(tooltipText), findsOneWidget);
   });

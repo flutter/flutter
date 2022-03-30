@@ -281,3 +281,7 @@ PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const N
 
 // TODO(fujino): Migrate to 'main' https://github.com/flutter/flutter/issues/95041
 const String kDefaultFrameworkChannel = 'master';
+
+// Used to build RegExp instances which can detect the VM service message.
+const String kServicePrefixRegExp = '(?:Observatory|The Dart VM service is)';
+final RegExp kVMServiceMessageRegExp = RegExp(kServicePrefixRegExp + r' listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');

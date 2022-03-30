@@ -169,7 +169,7 @@ class KeyEventSimulator {
   static _WebKeyLocationPair _getWebKeyLocation(LogicalKeyboardKey key, String keyLabel) {
     String? result;
     for (final MapEntry<String, List<LogicalKeyboardKey?>> entry in kWebLocationMap.entries) {
-      final int foundIndex = entry.value.indexOf(key);
+      final int foundIndex = entry.value.lastIndexOf(key);
       // If foundIndex is -1, then the key is not defined in kWebLocationMap.
       // If foundIndex is 0, then the key is in the standard part of the keyboard,
       // but we have to check `keyLabel` to see if it's remapped or modified.
@@ -768,7 +768,7 @@ class KeyEventSimulator {
         return _simulateByRawEvent();
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
-        final bool resultByKeyEvent = ServicesBinding.instance!.keyEventManager.handleKeyData(
+        final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
           ui.KeyData(
             type: ui.KeyEventType.down,
             physical: (physicalKey ?? _findPhysicalKey(logicalKey)).usbHidUsage,
@@ -813,7 +813,7 @@ class KeyEventSimulator {
         return _simulateByRawEvent();
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
-        final bool resultByKeyEvent = ServicesBinding.instance!.keyEventManager.handleKeyData(
+        final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
           ui.KeyData(
             type: ui.KeyEventType.up,
             physical: (physicalKey ?? _findPhysicalKey(logicalKey)).usbHidUsage,
@@ -859,7 +859,7 @@ class KeyEventSimulator {
         return _simulateByRawEvent();
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
-        final bool resultByKeyEvent = ServicesBinding.instance!.keyEventManager.handleKeyData(
+        final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
           ui.KeyData(
             type: ui.KeyEventType.repeat,
             physical: (physicalKey ?? _findPhysicalKey(logicalKey)).usbHidUsage,
@@ -999,7 +999,7 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
     // ignore: invalid_use_of_visible_for_testing_member
     HardwareKeyboard.instance.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
-    ServicesBinding.instance!.keyEventManager.clearState();
+    ServicesBinding.instance.keyEventManager.clearState();
     debugKeyEventSimulatorTransitModeOverride = memento;
   }
 }

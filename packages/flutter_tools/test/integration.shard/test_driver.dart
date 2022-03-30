@@ -158,7 +158,7 @@ abstract class FlutterTestDriver {
       _vmService!.streamListen('Debug'),
     ]);
 
-    if ((await _vmService!.getVM()).isolates?.isEmpty != false) {
+    if ((await _vmService!.getVM()).isolates?.isEmpty ?? true) {
       await isolateStarted.future;
     }
 
@@ -287,7 +287,7 @@ abstract class FlutterTestDriver {
     return _vmService!.onDebugEvent
       .where((Event event) {
         return event.isolate?.id == isolateId
-            && event.kind?.startsWith(kind) == true;
+            && (event.kind?.startsWith(kind) ?? false);
       }).first;
   }
 
@@ -302,7 +302,7 @@ abstract class FlutterTestDriver {
         // don't need to wait for the event.
         final VmService vmService = _vmService!;
         final Isolate isolate = await vmService.getIsolate(isolateId);
-        if (isolate.pauseEvent?.kind?.startsWith(kind) == true) {
+        if (isolate.pauseEvent?.kind?.startsWith(kind) ?? false) {
           _debugPrint('Isolate was already at "$kind" (${isolate.pauseEvent!.kind}).');
           event.ignore();
         } else {
@@ -324,7 +324,7 @@ abstract class FlutterTestDriver {
 
   Future<bool> isAtAsyncSuspension() async {
     final Isolate isolate = await getFlutterIsolate();
-    return isolate.pauseEvent?.atAsyncSuspension == true;
+    return isolate.pauseEvent?.atAsyncSuspension ?? false;
   }
 
   Future<Isolate?> stepOverOrOverAsyncSuspension({ bool waitForNextPause = true }) async {
@@ -482,7 +482,7 @@ abstract class FlutterTestDriver {
         timeoutExpired = true;
         _debugPrint(messages.toString());
       }
-      throw error;
+      throw error; // ignore: only_throw_errors
     }).whenComplete(() => subscription.cancel());
   }
 }
@@ -753,7 +753,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   void _throwErrorResponse(String message) {
-    throw '$message\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim();
+    throw Exception('$message\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim());
   }
 
   final bool spawnDdsInstance;

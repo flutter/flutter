@@ -31,7 +31,7 @@ const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
 /// (see https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart)
 const int _kPubExitCodeUnavailable = 69;
 
-typedef MessageFilter = String Function(String message);
+typedef MessageFilter = String? Function(String message);
 
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
 /// environment variable and allows understanding the type of requests made to
@@ -96,7 +96,7 @@ abstract class Pub {
   /// Defaults to true.
   Future<void> get({
     required PubContext context,
-    String directory,
+    String? directory,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
@@ -122,11 +122,11 @@ abstract class Pub {
   Future<void> batch(
     List<String> arguments, {
     required PubContext context,
-    String directory,
-    MessageFilter filter,
+    String? directory,
+    MessageFilter? filter,
     String failureMessage = 'pub failed',
     required bool retry,
-    bool showTraceForErrors,
+    bool? showTraceForErrors,
   });
 
   /// Runs pub in 'interactive' mode.
@@ -311,7 +311,7 @@ class _DefaultPub implements Pub {
 
     String lastPubMessage = 'no message';
     bool versionSolvingFailed = false;
-    String filterWrapper(String line) {
+    String? filterWrapper(String line) {
       lastPubMessage = line;
       if (line.contains('version solving failed')) {
         versionSolvingFailed = true;

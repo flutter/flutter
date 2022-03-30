@@ -47,6 +47,10 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// without the fade animation. This requires that a [ScrollController] is
 /// provided to controller, or that the [PrimaryScrollController] is available.
 ///
+/// When a [ScrollView.scrollDirection] is [Axis.horizontal], it is recommended
+/// that the [Scrollbar] is always visible, since scrolling in the horizontal
+/// axis is less discoverable.
+///
 /// ** See code in examples/api/lib/material/scrollbar/scrollbar.1.dart **
 /// {@end-tool}
 ///

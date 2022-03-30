@@ -26,6 +26,7 @@ const String baseUrl = 'https://storage.googleapis.com/flutter_infra_release';
 const int shortCacheSeconds = 60;
 const String frameworkVersionTag = 'frameworkVersionFromGit';
 const String dartVersionTag = 'dartSdkVersion';
+const String dartTargetArchTag = 'dartTargetArch';
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
@@ -191,31 +192,71 @@ class ArchiveCreator {
   ///
   /// If subprocessOutput is true, then output from processes invoked during
   /// archive creation is echoed to stderr and stdout.
-  ArchiveCreator(
-    this.tempDir,
-    this.outputDir,
-    this.revision,
-    this.branch, {
-    this.strict = true,
+  factory ArchiveCreator(
+    Directory tempDir,
+    Directory outputDir,
+    String revision,
+    Branch branch, {
+    bool strict = true,
     ProcessManager? processManager,
     bool subprocessOutput = true,
-    this.platform = const LocalPlatform(),
+    Platform platform = const LocalPlatform(),
     HttpReader? httpReader,
-  })  : assert(revision.length == 40),
-        flutterRoot = Directory(path.join(tempDir.path, 'flutter')),
-        httpReader = httpReader ?? http.readBytes,
-        _processRunner = ProcessRunner(
-          processManager: processManager,
-          subprocessOutput: subprocessOutput,
-          platform: platform,
-        ) {
-    _flutter = path.join(
+  }) {
+    final Directory flutterRoot = Directory(path.join(tempDir.path, 'flutter'));
+    final ProcessRunner processRunner = ProcessRunner(
+      processManager: processManager,
+      subprocessOutput: subprocessOutput,
+      platform: platform,
+    )..environment['PUB_CACHE'] = path.join(
+      flutterRoot.absolute.path, '.pub-cache',
+    );
+    final String flutterExecutable = path.join(
       flutterRoot.absolute.path,
       'bin',
       'flutter',
     );
-    _processRunner.environment['PUB_CACHE'] = path.join(flutterRoot.absolute.path, '.pub-cache');
+    final String dartExecutable = path.join(
+      flutterRoot.absolute.path,
+      'bin',
+      'cache',
+      'dart-sdk',
+      'bin',
+      'dart',
+    );
+
+    return ArchiveCreator._(
+      tempDir: tempDir,
+      platform: platform,
+      flutterRoot: flutterRoot,
+      outputDir: outputDir,
+      revision: revision,
+      branch: branch,
+      strict: strict,
+      processRunner: processRunner,
+      httpReader: httpReader ?? http.readBytes,
+      flutterExecutable: flutterExecutable,
+      dartExecutable: dartExecutable,
+    );
   }
+
+  ArchiveCreator._({
+    required this.tempDir,
+    required this.platform,
+    required this.flutterRoot,
+    required this.outputDir,
+    required this.revision,
+    required this.branch,
+    required this.strict,
+    required ProcessRunner processRunner,
+    required this.httpReader,
+    required String flutterExecutable,
+    required String dartExecutable,
+  }) :
+    assert(revision.length == 40),
+    _processRunner = processRunner,
+    _flutter = flutterExecutable,
+    _dart = dartExecutable;
 
   /// The platform to use for the environment and determining which
   /// platform we're running on.
@@ -252,17 +293,25 @@ class ArchiveCreator {
   /// [http.readBytes].
   final HttpReader httpReader;
 
-  late File _outputFile;
   final Map<String, String> _version = <String, String>{};
   late String _flutter;
+  late String _dart;
+
+  late final Future<String> _dartArch = (() async {
+    // Parse 'arch' out of a string like '... "os_arch"\n'.
+    return (await _runDart(<String>['--version']))
+        .trim().split(' ').last.replaceAll('"', '').split('_')[1];
+  })();
 
   /// Get the name of the channel as a string.
   String get branchName => getBranchName(branch);
 
   /// Returns a default archive name when given a Git revision.
   /// Used when an output filename is not given.
-  String get _archiveName {
+  Future<String> get _archiveName async {
     final String os = platform.operatingSystem.toLowerCase();
+    // Include the intended host archetecture in the file name for non-x64.
+    final String arch = await _dartArch == 'x64' ? '' : '${await _dartArch}_';
     // We don't use .tar.xz on Mac because although it can unpack them
     // on the command line (with tar), the "Archive Utility" that runs
     // when you double-click on them just does some crazy behavior (it
@@ -271,7 +320,7 @@ class ArchiveCreator {
     // unpacking it!) So, we use .zip for Mac, and the files are about
     // 220MB larger than they need to be. :-(
     final String suffix = platform.isLinux ? 'tar.xz' : 'zip';
-    return 'flutter_${os}_${_version[frameworkVersionTag]}-$branchName.$suffix';
+    return 'flutter_${os}_$arch${_version[frameworkVersionTag]}-$branchName.$suffix';
   }
 
   /// Checks out the flutter repo and prepares it for other operations.
@@ -289,12 +338,15 @@ class ArchiveCreator {
   /// Performs all of the steps needed to create an archive.
   Future<File> createArchive() async {
     assert(_version.isNotEmpty, 'Must run initializeRepo before createArchive');
-    _outputFile = File(path.join(outputDir.absolute.path, _archiveName));
+    final File outputFile = File(path.join(
+      outputDir.absolute.path,
+      await _archiveName,
+    ));
     await _installMinGitIfNeeded();
     await _populateCaches();
     await _validate();
-    await _archiveFiles(_outputFile);
-    return _outputFile;
+    await _archiveFiles(outputFile);
+    return outputFile;
   }
 
   /// Validates the integrity of the release package.
@@ -307,14 +359,6 @@ class ArchiveCreator {
       return;
     }
     // Validate that the dart binary is codesigned
-    final String dartPath = path.join(
-      flutterRoot.absolute.path,
-      'bin',
-      'cache',
-      'dart-sdk',
-      'bin',
-      'dart',
-    );
     try {
       // TODO(fujino): Use the conductor https://github.com/flutter/flutter/issues/81701
       await _processRunner.runProcess(
@@ -322,13 +366,13 @@ class ArchiveCreator {
           'codesign',
           '-vvvv',
           '--check-notarization',
-          dartPath,
+          _dart,
         ],
         workingDirectory: flutterRoot,
       );
     } on PreparePackageException catch (e) {
       throw PreparePackageException(
-        'The binary $dartPath was not codesigned!\n${e.message}',
+        'The binary $_dart was not codesigned!\n${e.message}',
       );
     }
   }
@@ -370,6 +414,7 @@ class ArchiveCreator {
     final Map<String, dynamic> result = json.decode(versionJson) as Map<String, dynamic>;
     result.forEach((String key, dynamic value) => versionMap[key] = value.toString());
     versionMap[frameworkVersionTag] = gitVersion;
+    versionMap[dartTargetArchTag] = await _dartArch;
     return versionMap;
   }
 
@@ -462,6 +507,13 @@ class ArchiveCreator {
     } else if (outputFile.path.toLowerCase().endsWith('.tar.xz')) {
       await _createTarArchive(outputFile, flutterRoot);
     }
+  }
+
+  Future<String> _runDart(List<String> args, {Directory? workingDirectory}) {
+    return _processRunner.runProcess(
+      <String>[_dart, ...args],
+      workingDirectory: workingDirectory ?? flutterRoot,
+    );
   }
 
   Future<String> _runFlutter(List<String> args, {Directory? workingDirectory}) {
@@ -623,6 +675,7 @@ class ArchivePublisher {
     newEntry['channel'] = branchName;
     newEntry['version'] = version[frameworkVersionTag];
     newEntry['dart_sdk_version'] = version[dartVersionTag];
+    newEntry['dart_sdk_arch'] = version[dartTargetArchTag];
     newEntry['release_date'] = DateTime.now().toUtc().toIso8601String();
     newEntry['archive'] = destinationArchivePath;
     newEntry['sha256'] = await _getChecksum(outputFile);
@@ -631,7 +684,9 @@ class ArchivePublisher {
     final List<dynamic> releases = jsonData['releases'] as List<dynamic>;
     jsonData['releases'] = <Map<String, dynamic>>[
       for (final Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
-        if (entry['hash'] != newEntry['hash'] || entry['channel'] != newEntry['channel'])
+        if (entry['hash'] != newEntry['hash'] ||
+            entry['channel'] != newEntry['channel'] ||
+            entry['dart_sdk_arch'] != newEntry['dart_sdk_arch'])
           entry,
       newEntry,
     ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {
@@ -849,8 +904,16 @@ Future<void> main(List<String> rawArguments) async {
     }
   }
 
+  final bool publish = parsedArguments['publish'] as bool;
+  final bool dryRun = parsedArguments['dry_run'] as bool;
   final Branch branch = fromBranchName(parsedArguments['branch'] as String);
-  final ArchiveCreator creator = ArchiveCreator(tempDir, outputDir, revision, branch, strict: parsedArguments['publish'] as bool);
+  final ArchiveCreator creator = ArchiveCreator(
+    tempDir,
+    outputDir,
+    revision,
+    branch,
+    strict: publish && !dryRun,
+  );
   int exitCode = 0;
   late String message;
   try {
@@ -863,7 +926,7 @@ Future<void> main(List<String> rawArguments) async {
         branch,
         version,
         outputFile,
-        parsedArguments['dry_run'] as bool,
+        dryRun,
       );
       await publisher.publishArchive(parsedArguments['force'] as bool);
     }

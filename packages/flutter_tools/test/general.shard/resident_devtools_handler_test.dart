@@ -20,6 +20,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 final vm_service.Isolate isolate = vm_service.Isolate(
   id: '1',
@@ -106,6 +107,7 @@ void main() {
       processManager: FakeProcessManager.empty(),
       dartExecutable: 'dart',
       logger: BufferLogger.test(),
+      botDetector: const FakeBotDetector(false),
     );
     final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       // Uses real devtools instance which should be a no-op if

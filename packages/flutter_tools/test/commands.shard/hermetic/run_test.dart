@@ -195,6 +195,33 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
+      testUsingContext('exits and lists available devices when specified device not found', () async {
+        final RunCommand command = RunCommand();
+        final FakeDevice device = FakeDevice(isLocalEmulator: true);
+        mockDeviceManager
+          ..devices = <Device>[device]
+          ..hasSpecifiedDeviceId = true;
+
+        await expectLater(
+              () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '-d',
+            'invalid-device-id',
+            '--no-pub',
+            '--no-hot',
+          ]),
+          throwsToolExit(),
+        );
+        expect(testLogger.statusText, contains("No supported devices found with name or id matching 'invalid-device-id'"));
+        expect(testLogger.statusText, contains('The following devices were found:'));
+        expect(testLogger.statusText, contains('FakeDevice (mobile) • fake_device • ios •  (simulator)'));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => mockDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
       testUsingContext('fails when targeted device is not Android with --device-user', () async {
         fs.file('pubspec.yaml').createSync();
         fs.file('.packages').writeAsStringSync('\n');
@@ -367,6 +394,7 @@ void main() {
           TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
             'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'false',
+            'cd56': 'false',
           })
         )));
       }, overrides: <Type, Generator>{
@@ -595,6 +623,22 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('--enable-impeller flag propagates to debugging options', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+      '--enable-impeller',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+
+    expect(options.enableImpeller, true);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('fails when "--web-launch-url" is not supported', () async {
     final RunCommand command = RunCommand();
     await expectLater(
@@ -642,6 +686,9 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   Future<List<Device>> findTargetDevices(FlutterProject flutterProject, {Duration timeout}) async {
     return targetDevices;
   }
+
+  @override
+  Future<List<Device>> getAllConnectedDevices() async => devices;
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {

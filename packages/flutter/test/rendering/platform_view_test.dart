@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:fake_async/fake_async.dart';
@@ -14,12 +15,12 @@ import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  final TestRenderingFlutterBinding binding = TestRenderingFlutterBinding.ensureInitialized();
 
   group('PlatformViewRenderBox', () {
     late FakePlatformViewController fakePlatformViewController;
     late PlatformViewRenderBox platformViewRenderBox;
     setUp(() {
-      renderer; // Initialize bindings
       fakePlatformViewController = FakePlatformViewController(0);
       platformViewRenderBox = PlatformViewRenderBox(
         controller: fakePlatformViewController,
@@ -46,7 +47,7 @@ void main() {
         child: platformViewRenderBox,
       );
       int semanticsUpdateCount = 0;
-      final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
+      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
           listener: () {
             ++semanticsUpdateCount;
           },
@@ -77,7 +78,7 @@ void main() {
       layout(platformViewRenderBox);
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero),
         _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
@@ -90,7 +91,7 @@ void main() {
       layout(platformViewRenderBox);
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero),
         _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
@@ -103,7 +104,6 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/69431
   test('multi-finger touch test', () {
-    renderer; // Initialize bindings.
     final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
     viewsController.registerViewType('webview');
     final AndroidViewController viewController =
@@ -124,7 +124,7 @@ void main() {
 
     FakeAsync().run((FakeAsync async) {
       // Put one pointer down.
-      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.down, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
@@ -132,7 +132,7 @@ void main() {
       async.flushMicrotasks();
 
       // Put another pointer down and then cancel it.
-      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero, pointer: 2, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.down, const Offset(20, 10), pointer: 2, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.cancel, const Offset(20, 10), pointer: 2, kind: PointerDeviceKind.touch),
@@ -140,7 +140,7 @@ void main() {
       async.flushMicrotasks();
 
       // The first pointer can still moving without crashing.
-      ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
         _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.move, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
@@ -149,6 +149,77 @@ void main() {
     });
 
     // Passes if no crashes.
+  });
+
+  test('created callback is reset when controller is changed', () {
+    final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+    viewsController.registerViewType('webview');
+    final AndroidViewController firstController = PlatformViewsService.initAndroidView(
+      id: 0,
+      viewType: 'webview',
+      layoutDirection: TextDirection.rtl,
+    );
+    final RenderAndroidView renderBox = RenderAndroidView(
+      viewController: firstController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    layout(renderBox);
+    pumpFrame(phase: EnginePhase.flushSemantics);
+
+    expect(firstController.createdCallbacks, isNotEmpty);
+    expect(firstController.createdCallbacks.length, 1);
+
+    final AndroidViewController secondController = PlatformViewsService.initAndroidView(
+      id: 0,
+      viewType: 'webview',
+      layoutDirection: TextDirection.rtl,
+    );
+    // Reset controller.
+    renderBox.controller = secondController;
+
+    expect(firstController.createdCallbacks, isEmpty);
+    expect(secondController.createdCallbacks, isNotEmpty);
+    expect(secondController.createdCallbacks.length, 1);
+  });
+
+  test('render object changed its visual appearance after texture is created', () {
+    FakeAsync().run((FakeAsync async) {
+      final AndroidViewController viewController =
+        PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
+      final RenderAndroidView renderBox = RenderAndroidView(
+        viewController: viewController,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+      );
+
+      final Completer<void> viewCreation = Completer<void>();
+      const MethodChannel channel = MethodChannel('flutter/platform_views');
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        assert(methodCall.method == 'create', 'Unexpected method call');
+        await viewCreation.future;
+        return /*textureId=*/ 0;
+      });
+
+      layout(renderBox);
+      pumpFrame(phase: EnginePhase.paint);
+
+      expect(renderBox.debugLayer, isNotNull);
+      expect(renderBox.debugLayer!.hasChildren, isFalse);
+      expect(viewController.isCreated, isFalse);
+      expect(renderBox.debugNeedsPaint, isFalse);
+
+      viewCreation.complete();
+      async.flushMicrotasks();
+
+      expect(viewController.isCreated, isTrue);
+      expect(renderBox.debugNeedsPaint, isTrue);
+      expect(renderBox.debugLayer!.hasChildren, isFalse);
+
+      pumpFrame(phase: EnginePhase.paint);
+      expect(renderBox.debugLayer!.hasChildren, isTrue);
+      expect(renderBox.debugLayer!.firstChild, isA<TextureLayer>());
+    });
   });
 }
 
@@ -163,8 +234,8 @@ ui.PointerData _pointerData(
     pointerIdentifier: pointer,
     embedderId: pointer,
     change: change,
-    physicalX: logicalPosition.dx * ui.window.devicePixelRatio,
-    physicalY: logicalPosition.dy * ui.window.devicePixelRatio,
+    physicalX: logicalPosition.dx * RendererBinding.instance.window.devicePixelRatio,
+    physicalY: logicalPosition.dy * RendererBinding.instance.window.devicePixelRatio,
     kind: kind,
     device: device,
   );

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'calculator/home.dart';
 
 class CalculatorDemo extends StatelessWidget {
-  const CalculatorDemo({Key? key}) : super(key: key);
+  const CalculatorDemo({super.key});
 
   static const String routeName = '/calculator';
 

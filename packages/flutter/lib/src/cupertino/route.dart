@@ -999,8 +999,12 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 /// The `routeSettings` argument is used to provide [RouteSettings] to the
 /// created Route.
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// See also:
 ///
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
 ///    `builder` argument.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
@@ -1015,6 +1019,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     bool? semanticsDismissible,
     ImageFilter? filter,
     RouteSettings? settings,
+    this.anchorPoint,
   }) : super(
          filter: filter,
          settings: settings,
@@ -1056,6 +1061,9 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   late Tween<Offset> _offsetTween;
 
+  /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
+  final Offset? anchorPoint;
+
   @override
   Animation<double> createAnimation() {
     assert(_animation == null);
@@ -1078,7 +1086,10 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return CupertinoUserInterfaceLevel(
       data: CupertinoUserInterfaceLevelData.elevated,
-      child: Builder(builder: builder),
+      child: DisplayFeatureSubScreen(
+        anchorPoint: anchorPoint,
+        child: Builder(builder: builder),
+      ),
     );
   }
 
@@ -1127,6 +1138,8 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// [StatefulBuilder] or a custom [StatefulWidget] if the widget needs to
 /// update dynamically.
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// Returns a `Future` that resolves to the value that was passed to
 /// [Navigator.pop] when the popup was closed.
 ///
@@ -1151,6 +1164,8 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// See also:
 ///
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
 ///    `builder` argument to [showCupertinoModalPopup].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
@@ -1163,6 +1178,7 @@ Future<T?> showCupertinoModalPopup<T>({
   bool useRootNavigator = true,
   bool? semanticsDismissible,
   RouteSettings? routeSettings,
+  Offset? anchorPoint,
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
@@ -1173,6 +1189,7 @@ Future<T?> showCupertinoModalPopup<T>({
       barrierDismissible: barrierDismissible,
       semanticsDismissible: semanticsDismissible,
       settings: routeSettings,
+      anchorPoint: anchorPoint,
     ),
   );
 }
@@ -1223,6 +1240,8 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// By default, `useRootNavigator` is `true` and the dialog route created by
 /// this method is pushed to the root navigator.
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
@@ -1254,6 +1273,8 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///  * [CupertinoAlertDialog], an iOS-style alert dialog.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
@@ -1262,6 +1283,7 @@ Future<T?> showCupertinoDialog<T>({
   bool useRootNavigator = true,
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
+  Offset? anchorPoint,
 }) {
   assert(builder != null);
   assert(useRootNavigator != null);
@@ -1273,6 +1295,7 @@ Future<T?> showCupertinoDialog<T>({
     barrierLabel: barrierLabel,
     barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
     settings: routeSettings,
+    anchorPoint: anchorPoint,
   ));
 }
 
@@ -1303,12 +1326,16 @@ Future<T?> showCupertinoDialog<T>({
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// See also:
 ///
 ///  * [showCupertinoDialog], which is a way to display
 ///     an iOS-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * [showDialog], which displays a Material dialog.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route that shows an iOS-style dialog.
   CupertinoDialogRoute({
@@ -1321,6 +1348,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 250),
     RouteTransitionsBuilder? transitionBuilder = _buildCupertinoDialogTransitions,
     RouteSettings? settings,
+    Offset? anchorPoint,
   }) : assert(barrierDismissible != null),
       super(
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -1332,5 +1360,6 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
         transitionDuration: transitionDuration,
         transitionBuilder: transitionBuilder,
         settings: settings,
+        anchorPoint: anchorPoint,
       );
 }

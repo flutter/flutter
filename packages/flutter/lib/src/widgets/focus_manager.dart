@@ -1461,23 +1461,23 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// When this focus manager is no longer needed, calling [dispose] on it will
   /// unregister these handlers.
   void registerGlobalHandlers() {
-    assert(ServicesBinding.instance!.keyEventManager.keyMessageHandler == null);
-    ServicesBinding.instance!.keyEventManager.keyMessageHandler = _handleKeyMessage;
-    GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    assert(ServicesBinding.instance.keyEventManager.keyMessageHandler == null);
+    ServicesBinding.instance.keyEventManager.keyMessageHandler = _handleKeyMessage;
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
   @override
   void dispose() {
-    if (ServicesBinding.instance!.keyEventManager.keyMessageHandler == _handleKeyMessage) {
-      ServicesBinding.instance!.keyEventManager.keyMessageHandler = null;
-      GestureBinding.instance!.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    if (ServicesBinding.instance.keyEventManager.keyMessageHandler == _handleKeyMessage) {
+      ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
+      GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     }
     super.dispose();
   }
 
   /// Provides convenient access to the current [FocusManager] singleton from
   /// the [WidgetsBinding] instance.
-  static FocusManager get instance => WidgetsBinding.instance!.focusManager;
+  static FocusManager get instance => WidgetsBinding.instance.focusManager;
 
   /// Sets the strategy by which [highlightMode] is determined.
   ///
@@ -1520,7 +1520,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
-        if (WidgetsBinding.instance!.mouseTracker.mouseIsConnected) {
+        if (WidgetsBinding.instance.mouseTracker.mouseIsConnected) {
           return FocusHighlightMode.traditional;
         }
         return FocusHighlightMode.touch;
@@ -1649,6 +1649,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         break;
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.unknown:
+      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         _lastInteractionWasTouch = false;
         expectedMode = FocusHighlightMode.traditional;
         break;
@@ -1747,7 +1749,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  // The list of autofocus requests made since the last _appyFocusChange call.
+  // The list of autofocus requests made since the last _applyFocusChange call.
   final List<_Autofocus> _pendingAutofocuses = <_Autofocus>[];
 
   // True indicates that there is an update pending.
@@ -1839,7 +1841,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
 /// Provides convenient access to the current [FocusManager.primaryFocus] from the
 /// [WidgetsBinding] instance.
-FocusNode? get primaryFocus => WidgetsBinding.instance!.focusManager.primaryFocus;
+FocusNode? get primaryFocus => WidgetsBinding.instance.focusManager.primaryFocus;
 
 /// Returns a text representation of the current focus tree, along with the
 /// current attributes on each node.

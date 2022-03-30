@@ -620,6 +620,39 @@ class FrameworkRepository extends Repository {
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
 
+  /// Create a release candidate branch version file.
+  ///
+  /// This file allows for easily traversing what candidadate branch was used
+  /// from a release channel.
+  ///
+  /// Returns [true] if the version file was updated and a commit is needed.
+  Future<bool> updateCandidateBranchVersion(
+    String branch, {
+    @visibleForTesting File? versionFile,
+  }) async {
+    assert(branch.isNotEmpty);
+    versionFile ??= (await checkoutDirectory)
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('release-candidate-branch.version');
+    if (versionFile.existsSync()) {
+      final String oldCandidateBranch = versionFile.readAsStringSync();
+      if (oldCandidateBranch.trim() == branch.trim()) {
+        stdio.printTrace(
+          'Tried to update the candidate branch but version file is already up to date at: $branch',
+        );
+        return false;
+      }
+    }
+    stdio.printStatus('Create ${versionFile.path} containing $branch');
+    versionFile.writeAsStringSync(
+      // Version files have trailing newlines
+      '${branch.trim()}\n',
+      flush: true,
+    );
+    return true;
+  }
+
   /// Update this framework's engine version file.
   ///
   /// Returns [true] if the version file was updated and a commit is needed.

@@ -39,15 +39,11 @@ class Category {
   String toString() => value;
 
   static Category? fromString(String category) {
-    switch (category) {
-      case 'web':
-        return web;
-      case 'desktop':
-        return desktop;
-      case 'mobile':
-        return mobile;
-    }
-    return null;
+    return <String, Category>{
+      'web': web,
+      'desktop': desktop,
+      'mobile': mobile,
+    }[category];
   }
 }
 
@@ -70,25 +66,16 @@ class PlatformType {
   String toString() => value;
 
   static PlatformType? fromString(String platformType) {
-    switch (platformType) {
-      case 'web':
-        return web;
-      case 'android':
-        return android;
-      case 'ios':
-        return ios;
-      case 'linux':
-        return linux;
-      case 'macos':
-        return macos;
-      case 'windows':
-        return windows;
-      case 'fuchsia':
-        return fuchsia;
-      case 'custom':
-        return custom;
-    }
-    return null;
+    return <String, PlatformType>{
+      'web': web,
+      'android': android,
+      'ios': ios,
+      'linux': linux,
+      'macos': macos,
+      'windows': windows,
+      'fuchsia': fuchsia,
+      'custom': custom,
+    }[platformType];
   }
 }
 
@@ -254,7 +241,8 @@ abstract class DeviceManager {
       await refreshAllConnectedDevices(timeout: timeout);
     }
 
-    List<Device> devices = await getDevices();
+    List<Device> devices = (await getDevices())
+        .where((Device device) => device.isSupported()).toList();
 
     // Always remove web and fuchsia devices from `--all`. This setting
     // currently requires devices to share a frontend_server and resident
@@ -464,7 +452,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   String toString() => '$name device discovery';
 }
 
-/// A device is a physical hardware that can run a flutter application.
+/// A device is a physical hardware that can run a Flutter application.
 ///
 /// This may correspond to a connected iOS or Android device, or represent
 /// the host operating system in the case of Flutter Desktop.
@@ -621,7 +609,7 @@ abstract class Device {
   /// Whether this device implements support for hot restart.
   bool get supportsHotRestart => true;
 
-  /// Whether flutter applications running on this device can be terminated
+  /// Whether Flutter applications running on this device can be terminated
   /// from the VM Service.
   bool get supportsFlutterExit => true;
 
@@ -802,6 +790,7 @@ class DebuggingOptions {
     this.fastStart = false,
     this.nullAssertions = false,
     this.nativeNullAssertions = false,
+    this.enableImpeller = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -817,6 +806,7 @@ class DebuggingOptions {
       this.webLaunchUrl,
       this.cacheSkSL = false,
       this.traceAllowlist,
+      this.enableImpeller = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -882,6 +872,7 @@ class DebuggingOptions {
     required this.fastStart,
     required this.nullAssertions,
     required this.nativeNullAssertions,
+    required this.enableImpeller,
   });
 
   final bool debuggingEnabled;
@@ -915,6 +906,7 @@ class DebuggingOptions {
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
+  final bool enableImpeller;
 
   /// Whether to run the browser in headless mode.
   ///
@@ -984,6 +976,7 @@ class DebuggingOptions {
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
+    'enableImpeller': enableImpeller,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -992,7 +985,7 @@ class DebuggingOptions {
       debuggingEnabled: (json['debuggingEnabled'] as bool?)!,
       startPaused: (json['startPaused'] as bool?)!,
       dartFlags: (json['dartFlags'] as String?)!,
-      dartEntrypointArgs: ((json['dartEntrypointArgs'] as List<String>?)?.cast<String>())!,
+      dartEntrypointArgs: ((json['dartEntrypointArgs'] as List<dynamic>?)?.cast<String>())!,
       disableServiceAuthCodes: (json['disableServiceAuthCodes'] as bool?)!,
       enableDds: (json['enableDds'] as bool?)!,
       enableSoftwareRendering: (json['enableSoftwareRendering'] as bool?)!,
@@ -1026,6 +1019,7 @@ class DebuggingOptions {
       fastStart: (json['fastStart'] as bool?)!,
       nullAssertions: (json['nullAssertions'] as bool?)!,
       nativeNullAssertions: (json['nativeNullAssertions'] as bool?)!,
+      enableImpeller: (json['enableImpeller'] as bool?) ?? false,
     );
 }
 
