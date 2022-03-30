@@ -116,8 +116,9 @@ class MigrateStartCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    final List<SupportedPlatform> platforms = <SupportedPlatform>[];
+    List<SupportedPlatform>? platforms;
     if (stringArg('platforms') != null) {
+      platforms = <SupportedPlatform>[];
       for (String platformString in stringArg('platforms')!.split(',')) {
         platformString = platformString.trim();
         platforms.add(SupportedPlatform.values.firstWhere(
