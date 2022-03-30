@@ -45,23 +45,23 @@ class MigrateManifest {
       throwToolExit('Invalid .migrate_manifest file in the migrate working directory. Entry is not a Yaml list. Fix the manifest or abandon the migration and try again.', exitCode: 1);
     }
     // We can fill the maps with partially dummy data as not all properties are used by the manifest.
-    if (map['merged_files'] != null) {
-      for (final String localPath in map['merged_files']) {
+    if (mergedFilesYaml != null) {
+      for (final String localPath in mergedFilesYaml) {
         migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: false, exitCode: 0, localPath: localPath));
       }
     }
-    if (map['conflict_files'] != null) {
-      for (final String localPath in map['conflict_files']) {
+    if (conflictFilesYaml != null) {
+      for (final String localPath in conflictFilesYaml) {
         migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: true, exitCode: 1, localPath: localPath));
       }
     }
-    if (map['added_files'] != null) {
-      for (final String localPath in map['added_files']) {
+    if (addedFilesYaml != null) {
+      for (final String localPath in addedFilesYaml) {
         migrateResult.addedFiles.add(FilePendingMigration(localPath, migrateRootDir.childFile(localPath)));
       }
     }
-    if (map['deleted_files'] != null) {
-      for (final String localPath in map['deleted_files']) {
+    if (deletedFilesYaml != null) {
+      for (final String localPath in deletedFilesYaml) {
         migrateResult.deletedFiles.add(FilePendingMigration(localPath, migrateRootDir.childFile(localPath)));
       }
     }
