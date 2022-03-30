@@ -957,7 +957,6 @@ void main() {
     final double appIconBottomPadding = tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appIcon).dy;
     expect(appIconBottomPadding, 18.0);
   });
-
 }
 
 class FakeLicenseEntry extends LicenseEntry {
