@@ -12,6 +12,8 @@ import 'recording_canvas.dart';
 import 'test_async_utils.dart';
 import 'widget_tester.dart';
 
+// ignore_for_file: only_throw_errors
+
 /// Matches objects or functions that paint a display list that matches the
 /// canvas calls described by the pattern.
 ///
