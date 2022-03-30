@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'picture_cache.dart';
 
 class ShaderMaskCachePage extends StatefulWidget {
-  const ShaderMaskCachePage({Key? key}) : super(key: key);
+  const ShaderMaskCachePage({super.key});
   @override
   State<ShaderMaskCachePage> createState() => _ShaderMaskCachePageState();
 }

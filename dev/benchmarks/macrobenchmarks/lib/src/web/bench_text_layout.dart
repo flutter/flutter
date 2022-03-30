@@ -336,14 +336,13 @@ final List<Palette> allPalettes = <Palette>[
 
 class ColorItem extends StatelessWidget {
   const ColorItem({
-    Key? key,
+    super.key,
     required this.index,
     required this.color,
     this.prefix = '',
   })  : assert(index != null),
         assert(color != null),
-        assert(prefix != null),
-        super(key: key);
+        assert(prefix != null);
 
   final int index;
   final Color color;
@@ -378,9 +377,9 @@ class ColorItem extends StatelessWidget {
 
 class PaletteTabView extends StatelessWidget {
   const PaletteTabView({
-    Key? key,
+    super.key,
     required this.colors,
-  }) : super(key: key);
+  });
 
   final Palette colors;
 
@@ -431,7 +430,7 @@ class PaletteTabView extends StatelessWidget {
 }
 
 class ColorsDemo extends StatelessWidget {
-  const ColorsDemo({Key? key}) : super(key: key);
+  const ColorsDemo({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -26,9 +26,8 @@ void main() {
 
 class _FirstFrameTimings extends StatefulWidget {
   const _FirstFrameTimings({
-    Key? key,
     required this.completer,
-  }) : super(key: key);
+  });
 
   final Completer<List<FrameTiming>> completer;
 
