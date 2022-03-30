@@ -35,8 +35,6 @@ vec4 SampleWithBorder(vec2 uv) {
 }
 
 void main() {
-  vec2 blur_radius_uv = vec2(v_blur_radius) / v_texture_size;
-
   vec4 total = vec4(0);
   float total_gaussian = 0;
   for (float i = -v_blur_radius; i <= v_blur_radius; i++) {

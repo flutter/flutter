@@ -5,6 +5,7 @@
 #pragma once
 
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/filters/filter_input.h"
 #include "impeller/geometry/matrix.h"
 
 namespace impeller {
@@ -22,10 +23,11 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
 
  private:
   // |FilterContents|
-  bool RenderFilter(const std::vector<Snapshot>& input_textures,
+  bool RenderFilter(const FilterInput::Vector& input_textures,
                     const ContentContext& renderer,
+                    const Entity& entity,
                     RenderPass& pass,
-                    const Matrix& transform) const override;
+                    const Rect& bounds) const override;
 
   Vector2 blur_vector_;
 
