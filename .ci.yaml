@@ -3716,7 +3716,6 @@ targets:
 
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
