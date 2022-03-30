@@ -29,6 +29,36 @@ void main() {
     );
   });
 
+  testWidgets('Image filter - dilate', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: ImageFiltered(
+          imageFilter: ImageFilter.dilate(radiusX: 10.0, radiusY: 10.0),
+          child: const Placeholder(),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(ImageFiltered),
+      matchesGoldenFile('image_filter_dilate.png'),
+    );
+  });
+
+  testWidgets('Image filter - erode', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: ImageFiltered(
+          imageFilter: ImageFilter.erode(radiusX: 10.0, radiusY: 10.0),
+          child: const Placeholder(),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(ImageFiltered),
+      matchesGoldenFile('image_filter_erode.png'),
+    );
+  });
+
   testWidgets('Image filter - matrix', (WidgetTester tester) async {
     final ImageFilter matrix = ImageFilter.matrix(Float64List.fromList(<double>[
       0.5, 0.0, 0.0, 0.0, //
