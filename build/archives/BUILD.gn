@@ -1,5 +1,4 @@
 import("//flutter/build/zip_bundle.gni")
-import("//flutter/sky/tools/macos_snapshots.gni")
 
 zip_bundle("artifacts") {
   deps = [
@@ -141,14 +140,8 @@ if (is_mac) {
     ]
   }
 
-  macos_gen_snapshots("create_macos_gen_snapshots") {
-    visibility = [ ":*" ]
-    deps = [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
-    arch = "$target_cpu"
-  }
-
   zip_bundle("archive_gen_snapshot") {
-    deps = [ ":create_macos_gen_snapshots" ]
+    deps = [ "//flutter/lib/snapshot:create_macos_gen_snapshots" ]
     suffix = "-$flutter_runtime_mode"
     if (flutter_runtime_mode == "debug") {
       suffix = ""
