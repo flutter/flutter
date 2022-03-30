@@ -5,15 +5,18 @@
 #pragma once
 
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/filters/filter_input.h"
 
 namespace impeller {
 
 class BlendFilterContents : public FilterContents {
  public:
   using AdvancedBlendProc =
-      std::function<bool(const std::vector<Snapshot>& input_textures,
+      std::function<bool(const FilterInput::Vector& inputs,
                          const ContentContext& renderer,
-                         RenderPass& pass)>;
+                         const Entity& entity,
+                         RenderPass& pass,
+                         const Rect& bounds)>;
 
   BlendFilterContents();
 
@@ -23,10 +26,11 @@ class BlendFilterContents : public FilterContents {
 
  private:
   // |FilterContents|
-  bool RenderFilter(const std::vector<Snapshot>& input_textures,
+  bool RenderFilter(const FilterInput::Vector& inputs,
                     const ContentContext& renderer,
+                    const Entity& entity,
                     RenderPass& pass,
-                    const Matrix& transform) const override;
+                    const Rect& bounds) const override;
 
   Entity::BlendMode blend_mode_;
   AdvancedBlendProc advanced_blend_proc_;

@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
+
 #include "flutter/testing/testing.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/filters/filter_input.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"
@@ -657,11 +660,16 @@ TEST_F(EntityTest, Filters) {
   ASSERT_TRUE(bridge && boston && kalimba);
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
-    auto blend0 = FilterContents::MakeBlend(Entity::BlendMode::kModulate,
-                                            {kalimba, boston});
+    auto fi_bridge = FilterInput::Make(bridge);
+    auto fi_boston = FilterInput::Make(boston);
+    auto fi_kalimba = FilterInput::Make(kalimba);
 
-    auto blend1 = FilterContents::MakeBlend(Entity::BlendMode::kScreen,
-                                            {bridge, blend0, bridge, bridge});
+    auto blend0 = FilterContents::MakeBlend(Entity::BlendMode::kModulate,
+                                            {fi_kalimba, fi_boston});
+
+    auto blend1 = FilterContents::MakeBlend(
+        Entity::BlendMode::kScreen,
+        {fi_bridge, FilterInput::Make(blend0), fi_bridge, fi_bridge});
 
     Entity entity;
     entity.SetPath(PathBuilder{}.AddRect({100, 100, 300, 300}).TakePath());
@@ -681,52 +689,71 @@ TEST_F(EntityTest, GaussianBlurFilter) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     if (first_frame) {
       first_frame = false;
-      ImGui::SetNextWindowSize({500, 170});
+      ImGui::SetNextWindowSize({500, 190});
       ImGui::SetNextWindowPos({300, 550});
     }
 
-    ImGui::Begin("Controls");
     static float blur_amount[2] = {20, 20};
-    ImGui::SliderFloat2("Blur", &blur_amount[0], 0, 200);
     static Color cover_color(1, 0, 0, 0.2);
-    ImGui::ColorEdit4("Cover color", reinterpret_cast<float*>(&cover_color));
+    static Color bounds_color(0, 1, 0, 0.1);
     static float offset[2] = {500, 400};
+    static float rotation = 0;
+    static float scale[2] = {0.8, 0.8};
+    static float skew[2] = {0, 0};
+
+    ImGui::Begin("Controls");
+    ImGui::SliderFloat2("Blur", &blur_amount[0], 0, 200);
+    ImGui::ColorEdit4("Cover color", reinterpret_cast<float*>(&cover_color));
+    ImGui::ColorEdit4("Bounds color", reinterpret_cast<float*>(&bounds_color));
     ImGui::SliderFloat2("Translation", &offset[0], 0,
                         pass.GetRenderTargetSize().width);
-    static float rotation = 0;
     ImGui::SliderFloat("Rotation", &rotation, 0, kPi * 2);
-    static float scale[2] = {0.8, 0.8};
     ImGui::SliderFloat2("Scale", &scale[0], 0, 3);
-    static float skew[2] = {0, 0};
     ImGui::SliderFloat2("Skew", &skew[0], -3, 3);
     ImGui::End();
 
-    auto blend = FilterContents::MakeBlend(Entity::BlendMode::kPlus,
-                                           {boston, bridge, bridge});
+    auto blend = FilterContents::MakeBlend(
+        Entity::BlendMode::kPlus, FilterInput::Make({boston, bridge, bridge}));
 
-    auto blur =
-        FilterContents::MakeGaussianBlur(blend, blur_amount[0], blur_amount[1]);
+    auto blur = FilterContents::MakeGaussianBlur(
+        FilterInput::Make(blend), blur_amount[0], blur_amount[1]);
 
-    auto rect = Rect(-Point(boston->GetSize()) / 2, Size(boston->GetSize()));
+    ISize input_size = boston->GetSize();
+    auto rect = Rect(-Point(input_size) / 2, Size(input_size));
     auto ctm = Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
-               Matrix::MakeRotation(rotation, Vector4(0, 0, 1, 1)) *
+               Matrix::MakeRotationZ(Radians(rotation)) *
                Matrix::MakeScale(Vector3(scale[0], scale[1])) *
                Matrix::MakeSkew(skew[0], skew[1]);
 
+    auto target_contents = blur;
+
     Entity entity;
     entity.SetPath(PathBuilder{}.AddRect(rect).TakePath());
-    entity.SetContents(blur);
+    entity.SetContents(target_contents);
     entity.SetTransformation(ctm);
 
     entity.Render(context, pass);
 
-    // The following entity renders the expected transformed input.
+    // Renders a red "cover" rectangle that shows the original position of the
+    // unfiltered input.
     Entity cover_entity;
     cover_entity.SetPath(PathBuilder{}.AddRect(rect).TakePath());
-    cover_entity.SetContents(SolidColorContents::Make(cover_color));
+    cover_entity.SetContents(
+        SolidColorContents::Make(cover_color.Premultiply()));
     cover_entity.SetTransformation(ctm);
 
     cover_entity.Render(context, pass);
+
+    // Renders a green bounding rect of the target filter.
+    Entity bounds_entity;
+    bounds_entity.SetPath(
+        PathBuilder{}.AddRect(target_contents->GetBounds(entity)).TakePath());
+    bounds_entity.SetContents(
+        SolidColorContents::Make(bounds_color.Premultiply()));
+    bounds_entity.SetTransformation(Matrix());
+
+    bounds_entity.Render(context, pass);
+
     return true;
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));

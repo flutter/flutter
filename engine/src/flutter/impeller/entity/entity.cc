@@ -30,6 +30,16 @@ void Entity::SetPath(Path path) {
   path_ = std::move(path);
 }
 
+Rect Entity::GetTransformedPathBounds() const {
+  auto points = GetPath().GetBoundingBox()->GetPoints();
+
+  const auto& transform = GetTransformation();
+  for (uint i = 0; i < points.size(); i++) {
+    points[i] = transform * points[i];
+  }
+  return Rect::MakePointBounds({points.begin(), points.end()});
+}
+
 void Entity::SetAddsToCoverage(bool adds) {
   adds_to_coverage_ = adds;
 }
