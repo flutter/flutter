@@ -46,23 +46,31 @@ class MigrateManifest {
     }
     // We can fill the maps with partially dummy data as not all properties are used by the manifest.
     if (mergedFilesYaml != null) {
-      for (final String localPath in mergedFilesYaml) {
-        migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: false, exitCode: 0, localPath: localPath));
+      for (final Object? localPath in mergedFilesYaml as YamlList) {
+        if (localPath is String) {
+          migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: false, exitCode: 0, localPath: localPath));
+        }
       }
     }
     if (conflictFilesYaml != null) {
-      for (final String localPath in conflictFilesYaml) {
-        migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: true, exitCode: 1, localPath: localPath));
+      for (final Object? localPath in conflictFilesYaml as YamlList) {
+        if (localPath is String) {
+          migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: true, exitCode: 1, localPath: localPath));
+        }
       }
     }
     if (addedFilesYaml != null) {
-      for (final String localPath in addedFilesYaml) {
-        migrateResult.addedFiles.add(FilePendingMigration(localPath, migrateRootDir.childFile(localPath)));
+      for (final Object? localPath in addedFilesYaml as YamlList) {
+        if (localPath is String) {
+          migrateResult.addedFiles.add(FilePendingMigration(localPath, migrateRootDir.childFile(localPath)));
+        }
       }
     }
     if (deletedFilesYaml != null) {
-      for (final String localPath in deletedFilesYaml) {
-        migrateResult.deletedFiles.add(FilePendingMigration(localPath, migrateRootDir.childFile(localPath)));
+      for (final Object? localPath in deletedFilesYaml as YamlList) {
+        if (localPath is String) {
+          migrateResult.deletedFiles.add(FilePendingMigration(localPath, migrateRootDir.childFile(localPath)));
+        }
       }
     }
   }

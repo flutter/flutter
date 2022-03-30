@@ -465,7 +465,6 @@ Future<void> diffBaseAndTarget(
   Status status
 ) async {
   final List<FileSystemEntity> generatedBaseFiles = migrateResult.generatedBaseTemplateDirectory!.listSync(recursive: true);
-  final List<FileSystemEntity> generatedTargetFiles = migrateResult.generatedTargetTemplateDirectory!.listSync(recursive: true);
   int modifiedFilesCount = 0;
   for (final FileSystemEntity entity in generatedBaseFiles) {
     if (entity is! File) {

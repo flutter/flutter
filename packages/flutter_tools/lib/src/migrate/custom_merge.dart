@@ -13,10 +13,11 @@ import '../migrate/migrate_utils.dart';
 abstract class CustomMerge {
   CustomMerge({
     required this.logger,
+    required this.localPath,
   });
 
   /// The local path (with the project root as the root directory) of the file to merge.
-  final String localPath = '';
+  final String localPath;
   final Logger logger;
 
   /// Called to perform a custom three way merge between the current,
@@ -30,10 +31,7 @@ abstract class CustomMerge {
 class MetadataCustomMerge extends CustomMerge {
   MetadataCustomMerge({
     required Logger logger,
-  }) : super(logger: logger);
-
-  @override
-  final String localPath = '.metadata';
+  }) : super(logger: logger, localPath: '.metadata');
 
   @override
   MergeResult merge(File current, File base, File target) {
