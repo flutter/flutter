@@ -24,6 +24,9 @@
 
 namespace minikin {
 
+#ifdef __clang__
+[[clang::no_destroy]]
+#endif
 std::recursive_mutex gMinikinLock;
 
 void assertMinikinLocked() {
