@@ -29,8 +29,8 @@ class MaterialSpellCheckService implements SpellCheckService {
 
     switch (method) {
       //TODO(camillesimon): Rename all spellcheckER names to spellcheck
-      case 'SpellCheck.updateSpellCheckerResults':
-        List<String> results = args[0].cast<String>();
+      case 'SpellCheck.updateSpellCheckResults':
+        List<String> results = args.cast<String>();
         List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
 
         results.forEach((String result) {
@@ -51,7 +51,7 @@ class MaterialSpellCheckService implements SpellCheckService {
     assert(text != null);
 
     spellCheckChannel.invokeMethod<void>(
-        'SpellCheck.initiateSpellChecking',
+        'SpellCheck.initiateSpellCheck',
         <String>[ locale.toLanguageTag(), text ],
       );
     
