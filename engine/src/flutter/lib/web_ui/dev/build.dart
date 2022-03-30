@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show Platform;
+import 'dart:io' show Directory, Platform;
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
@@ -43,10 +43,17 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
   @override
   FutureOr<bool> run() async {
     final FilePath libPath = FilePath.fromWebUi('lib');
-    final Pipeline buildPipeline = Pipeline(steps: <PipelineStep>[
-      GnPipelineStep(buildCanvasKit),
-      NinjaPipelineStep(buildCanvasKit),
-    ]);
+    final List<PipelineStep> steps = <PipelineStep>[
+      GnPipelineStep(target: 'engine'),
+      NinjaPipelineStep(target: environment.hostDebugUnoptDir),
+    ];
+    if (buildCanvasKit) {
+      steps.addAll(<PipelineStep>[
+        GnPipelineStep(target: 'canvaskit'),
+        NinjaPipelineStep(target: environment.canvasKitOutDir),
+      ]);
+    }
+    final Pipeline buildPipeline = Pipeline(steps: steps);
     await buildPipeline.run();
 
     if (isWatchMode) {
@@ -68,7 +75,8 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 /// Not safe to interrupt as it may leave the `out/` directory in a corrupted
 /// state. GN is pretty quick though, so it's OK to not support interruption.
 class GnPipelineStep extends ProcessStep {
-  GnPipelineStep(this.buildCanvasKit);
+  GnPipelineStep({this.target = 'engine'})
+      : assert(target == 'engine' || target == 'sdk');
 
   @override
   String get description => 'gn';
@@ -76,31 +84,30 @@ class GnPipelineStep extends ProcessStep {
   @override
   bool get isSafeToInterrupt => false;
 
-  /// Whether or not to build CanvasKit.
-  final bool buildCanvasKit;
+  /// The target to build with gn.
+  ///
+  /// Acceptable values: engine, canvaskit
+  final String target;
 
   @override
   Future<ProcessManager> createProcess() {
     print('Running gn...');
-    Future<ProcessManager> gnProcess = startProcess(
-      path.join(environment.flutterDirectory.path, 'tools', 'gn'),
-      <String>[
+    final List<String> gnArgs = <String>[];
+    if (target == 'engine') {
+      gnArgs.addAll(<String>[
         '--unopt',
         if (Platform.isMacOS) '--xcode-symlinks',
         '--full-dart-sdk',
-      ],
-    );
-    if (buildCanvasKit) {
-      gnProcess = gnProcess.then((_) {
-        return startProcess(
-          path.join(environment.flutterDirectory.path, 'tools', 'gn'),
-          <String>[
-            '--wasm',
-          ],
-        );
-      });
+      ]);
+    } else if (target == 'canvaskit') {
+      gnArgs.add('--wasm');
+    } else {
+      throw StateError('Target was not engine or canvaskit: $target');
     }
-    return gnProcess;
+    return startProcess(
+      path.join(environment.flutterDirectory.path, 'tools', 'gn'),
+      gnArgs,
+    );
   }
 }
 
@@ -108,7 +115,7 @@ class GnPipelineStep extends ProcessStep {
 ///
 /// Can be safely interrupted.
 class NinjaPipelineStep extends ProcessStep {
-  NinjaPipelineStep(this.buildCanvasKit);
+  NinjaPipelineStep({required this.target});
 
   @override
   String get description => 'ninja';
@@ -116,30 +123,18 @@ class NinjaPipelineStep extends ProcessStep {
   @override
   bool get isSafeToInterrupt => true;
 
-  /// Whether or not to build CanvasKit.
-  final bool buildCanvasKit;
+  /// The target directory to build.
+  final Directory target;
 
   @override
   Future<ProcessManager> createProcess() {
     print('Running autoninja...');
-    Future<ProcessManager> ninjaProcess = startProcess(
+    return startProcess(
       'autoninja',
       <String>[
         '-C',
-        environment.hostDebugUnoptDir.path,
+        target.path,
       ],
     );
-    if (buildCanvasKit) {
-      ninjaProcess = ninjaProcess.then((_) {
-        return startProcess(
-          'autoninja',
-          <String>[
-            '-C',
-            environment.canvasKitOutDir.path,
-          ],
-        );
-      });
-    }
-    return ninjaProcess;
   }
 }
