@@ -11,6 +11,7 @@
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "third_party/skia/include/core/SkColor.h"
 
@@ -546,7 +547,10 @@ void DisplayListDispatcher::drawArc(const SkRect& oval_bounds,
                                     SkScalar start_degrees,
                                     SkScalar sweep_degrees,
                                     bool use_center) {
-  UNIMPLEMENTED;
+  PathBuilder builder;
+  builder.AddArc(ToRect(oval_bounds), Degrees(start_degrees),
+                 Degrees(sweep_degrees), use_center);
+  canvas_.DrawPath(builder.TakePath(), paint_);
 }
 
 // |flutter::Dispatcher|

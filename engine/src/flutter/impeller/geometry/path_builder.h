@@ -60,6 +60,11 @@ class PathBuilder {
 
   PathBuilder& AddCircle(const Point& center, Scalar radius);
 
+  PathBuilder& AddArc(const Rect& oval_bounds,
+                      Radians start,
+                      Radians sweep,
+                      bool use_center = false);
+
   PathBuilder& AddOval(const Rect& rect);
 
   PathBuilder& AddLine(const Point& p1, const Point& p2);

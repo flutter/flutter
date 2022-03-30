@@ -19,8 +19,11 @@ constexpr float klogE_2 = 0.69314718055994530942;
 // log_e 10
 constexpr float klogE_10 = 2.30258509299404568402;
 
-// pi */
+// pi
 constexpr float kPi = 3.14159265358979323846;
+
+// pi*2
+constexpr float k2Pi = 6.28318530717958647693;
 
 // pi/2
 constexpr float kPiOver2 = 1.57079632679489661923;

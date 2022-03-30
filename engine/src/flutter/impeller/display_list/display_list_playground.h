@@ -14,6 +14,9 @@ namespace impeller {
 
 class DisplayListPlayground : public Playground {
  public:
+  using DisplayListPlaygroundCallback =
+      std::function<sk_sp<flutter::DisplayList>()>;
+
   DisplayListPlayground();
 
   ~DisplayListPlayground();
@@ -21,6 +24,8 @@ class DisplayListPlayground : public Playground {
   bool OpenPlaygroundHere(flutter::DisplayListBuilder& builder);
 
   bool OpenPlaygroundHere(sk_sp<flutter::DisplayList> list);
+
+  bool OpenPlaygroundHere(DisplayListPlaygroundCallback callback);
 
   SkFont CreateTestFontOfSize(SkScalar scalar);
 

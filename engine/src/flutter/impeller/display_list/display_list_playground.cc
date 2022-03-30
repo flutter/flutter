@@ -22,24 +22,27 @@ bool DisplayListPlayground::OpenPlaygroundHere(
 
 bool DisplayListPlayground::OpenPlaygroundHere(
     sk_sp<flutter::DisplayList> list) {
+  return OpenPlaygroundHere([&list]() { return list; });
+}
+
+bool DisplayListPlayground::OpenPlaygroundHere(
+    DisplayListPlaygroundCallback callback) {
   if (!Playground::is_enabled()) {
     return true;
   }
-
-  if (!list) {
-    return false;
-  }
-
-  DisplayListDispatcher dispatcher;
-  list->Dispatch(dispatcher);
-  auto picture = dispatcher.EndRecordingAsPicture();
 
   AiksContext context(GetContext());
   if (!context.IsValid()) {
     return false;
   }
   return Playground::OpenPlaygroundHere(
-      [&picture, &context](RenderPass& pass) -> bool {
+      [&context, &callback](RenderPass& pass) -> bool {
+        auto list = callback();
+
+        DisplayListDispatcher dispatcher;
+        list->Dispatch(dispatcher);
+        auto picture = dispatcher.EndRecordingAsPicture();
+
         return context.Render(picture, pass);
       });
 }
