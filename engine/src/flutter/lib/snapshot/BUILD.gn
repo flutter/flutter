@@ -6,6 +6,7 @@ import("//build/compiled_action.gni")
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/lib/ui/dart_ui.gni")
+import("//flutter/sky/tools/macos_snapshots.gni")
 import("//third_party/dart/utils/compile_platform.gni")
 
 group("generate_snapshot_bins") {
@@ -15,6 +16,9 @@ group("generate_snapshot_bins") {
   ]
   if (host_os == "mac" && (target_cpu == "arm" || target_cpu == "arm64")) {
     deps += [ ":create_arm_gen_snapshot" ]
+  }
+  if (host_os == "mac" && target_os == "mac") {
+    deps += [ ":create_macos_gen_snapshots" ]
   }
 }
 
@@ -220,6 +224,13 @@ if (host_os == "mac" && (target_cpu == "arm" || target_cpu == "arm64")) {
       ]
       outputs = [ "$output_dir/gen_snapshot_arm64" ]
     }
+  }
+}
+
+if (host_os == "mac" && target_os == "mac") {
+  macos_gen_snapshots("create_macos_gen_snapshots") {
+    deps = [ ":generate_snapshot_bin" ]
+    arch = "$target_cpu"
   }
 }
 
