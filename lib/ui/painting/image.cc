@@ -49,14 +49,11 @@ void CanvasImage::dispose() {
 }
 
 size_t CanvasImage::GetAllocationSize() const {
-  if (auto image = image_.skia_object()) {
-    const auto& info = image->imageInfo();
-    const auto kMipmapOverhead = 4.0 / 3.0;
-    const size_t image_byte_size = info.computeMinByteSize() * kMipmapOverhead;
-    return image_byte_size + sizeof(this);
-  } else {
-    return sizeof(CanvasImage);
+  auto size = sizeof(this);
+  if (image_) {
+    size += image_->GetApproximateByteSize();
   }
+  return size;
 }
 
 }  // namespace flutter

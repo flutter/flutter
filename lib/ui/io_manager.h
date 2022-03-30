@@ -10,6 +10,10 @@
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
+namespace impeller {
+class Context;
+}  // namespace impeller
+
 namespace flutter {
 // Interface for methods that manage access to the resource GrDirectContext and
 // Skia unref queue.  Meant to be implemented by the owner of the resource
@@ -26,6 +30,8 @@ class IOManager {
 
   virtual std::shared_ptr<const fml::SyncSwitch>
   GetIsGpuDisabledSyncSwitch() = 0;
+
+  virtual std::shared_ptr<impeller::Context> GetImpellerContext() const;
 };
 
 }  // namespace flutter

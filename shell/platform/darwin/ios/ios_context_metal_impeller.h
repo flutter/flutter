@@ -9,6 +9,12 @@
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
 #include "flutter/shell/platform/darwin/ios/ios_context.h"
 
+namespace impeller {
+
+class Context;
+
+}  // namespace impeller
+
 namespace flutter {
 
 class IOSContextMetalImpeller final : public IOSContext {
@@ -27,6 +33,8 @@ class IOSContextMetalImpeller final : public IOSContext {
   sk_sp<GrDirectContext> GetResourceContext() const;
 
  private:
+  std::shared_ptr<impeller::Context> context_;
+
   // |IOSContext|
   sk_sp<GrDirectContext> CreateResourceContext() override;
 
@@ -37,6 +45,9 @@ class IOSContextMetalImpeller final : public IOSContext {
   std::unique_ptr<Texture> CreateExternalTexture(
       int64_t texture_id,
       fml::scoped_nsobject<NSObject<FlutterTexture>> texture) override;
+
+  // |IOSContext|
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSContextMetalImpeller);
 };

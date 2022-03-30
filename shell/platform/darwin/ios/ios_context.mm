@@ -45,4 +45,8 @@ IOSRenderingBackend IOSContext::GetBackend() const {
   return IOSRenderingBackend::kSkia;
 }
 
+std::shared_ptr<impeller::Context> IOSContext::GetImpellerContext() const {
+  return nullptr;
+}
+
 }  // namespace flutter

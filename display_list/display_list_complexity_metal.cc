@@ -457,7 +457,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawVertices(
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawImage(
-    const sk_sp<SkImage> image,
+    const sk_sp<DlImage> image,
     const SkPoint point,
     const SkSamplingOptions& sampling,
     bool render_with_attributes) {
@@ -538,7 +538,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::ImageRect(
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawImageNine(
-    const sk_sp<SkImage> image,
+    const sk_sp<DlImage> image,
     const SkIRect& center,
     const SkRect& dst,
     SkFilterMode filter,

@@ -93,6 +93,10 @@ sk_sp<GrDirectContext> PlatformView::CreateResourceContext() const {
   return nullptr;
 }
 
+std::shared_ptr<impeller::Context> PlatformView::GetImpellerContext() const {
+  return nullptr;
+}
+
 void PlatformView::ReleaseResourceContext() const {}
 
 PointerDataDispatcherMaker PlatformView::GetDispatcherMaker() {

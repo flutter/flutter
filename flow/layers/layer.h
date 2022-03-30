@@ -174,6 +174,7 @@ class Layer {
     // |saveLayer| with an |SkPaint| initialized to this alphaf value and
     // a |kSrcOver| blend mode.
     SkScalar inherited_opacity = SK_Scalar1;
+    DisplayListBuilder* leaf_nodes_builder = nullptr;
   };
 
   class AutoCachePaint {

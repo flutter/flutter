@@ -61,13 +61,15 @@ void InvokeDataCallback(std::unique_ptr<DartPersistentValue> callback,
 }
 
 void ConvertImageToRaster(
-    sk_sp<SkImage> image,
+    sk_sp<DlImage> dl_image,
     std::function<void(sk_sp<SkImage>)> encode_task,
     fml::RefPtr<fml::TaskRunner> raster_task_runner,
     fml::RefPtr<fml::TaskRunner> io_task_runner,
     fml::WeakPtr<GrDirectContext> resource_context,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch) {
+  auto image = dl_image->skia_image();
+
   // Check validity of the image.
   if (image == nullptr) {
     FML_LOG(ERROR) << "Image was null.";
@@ -195,7 +197,7 @@ sk_sp<SkData> EncodeImage(sk_sp<SkImage> raster_image, ImageByteFormat format) {
 }
 
 void EncodeImageAndInvokeDataCallback(
-    sk_sp<SkImage> image,
+    sk_sp<DlImage> image,
     std::unique_ptr<DartPersistentValue> callback,
     ImageByteFormat format,
     fml::RefPtr<fml::TaskRunner> ui_task_runner,

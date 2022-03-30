@@ -351,7 +351,8 @@ TEST(DisplayListComplexity, DrawImage) {
   auto image = SkImage::MakeFromBitmap(bitmap);
 
   DisplayListBuilder builder;
-  builder.drawImage(image, SkPoint::Make(0, 0), SkSamplingOptions(), false);
+  builder.drawImage(DlImage::Make(image), SkPoint::Make(0, 0),
+                    SkSamplingOptions(), false);
   auto display_list = builder.Build();
 
   auto calculators = AccumulatorCalculators();
@@ -372,7 +373,8 @@ TEST(DisplayListComplexity, DrawImageNine) {
   SkRect dest = SkRect::MakeXYWH(0, 0, 50, 50);
 
   DisplayListBuilder builder;
-  builder.drawImageNine(image, center, dest, SkFilterMode::kNearest, true);
+  builder.drawImageNine(DlImage::Make(image), center, dest,
+                        SkFilterMode::kNearest, true);
   auto display_list = builder.Build();
 
   auto calculators = AccumulatorCalculators();
@@ -393,7 +395,8 @@ TEST(DisplayListComplexity, DrawImageRect) {
   SkRect dest = SkRect::MakeXYWH(0, 0, 50, 50);
 
   DisplayListBuilder builder;
-  builder.drawImageRect(image, src, dest, SkSamplingOptions(), true);
+  builder.drawImageRect(DlImage::Make(image), src, dest, SkSamplingOptions(),
+                        true);
   auto display_list = builder.Build();
 
   auto calculators = AccumulatorCalculators();
@@ -418,8 +421,8 @@ TEST(DisplayListComplexity, DrawAtlas) {
   }
 
   DisplayListBuilder builder;
-  builder.drawAtlas(image, xforms.data(), rects.data(), nullptr, 10,
-                    DlBlendMode::kSrc, SkSamplingOptions(), nullptr, true);
+  builder.drawAtlas(DlImage::Make(image), xforms.data(), rects.data(), nullptr,
+                    10, DlBlendMode::kSrc, SkSamplingOptions(), nullptr, true);
   auto display_list = builder.Build();
 
   auto calculators = AccumulatorCalculators();

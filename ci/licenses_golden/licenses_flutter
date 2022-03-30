@@ -76,9 +76,13 @@ FILE: ../../../flutter/display_list/display_list_dispatcher.h
 FILE: ../../../flutter/display_list/display_list_enum_unittests.cc
 FILE: ../../../flutter/display_list/display_list_flags.cc
 FILE: ../../../flutter/display_list/display_list_flags.h
+FILE: ../../../flutter/display_list/display_list_image.cc
+FILE: ../../../flutter/display_list/display_list_image.h
 FILE: ../../../flutter/display_list/display_list_image_filter.cc
 FILE: ../../../flutter/display_list/display_list_image_filter.h
 FILE: ../../../flutter/display_list/display_list_image_filter_unittests.cc
+FILE: ../../../flutter/display_list/display_list_image_skia.cc
+FILE: ../../../flutter/display_list/display_list_image_skia.h
 FILE: ../../../flutter/display_list/display_list_mask_filter.cc
 FILE: ../../../flutter/display_list/display_list_mask_filter.h
 FILE: ../../../flutter/display_list/display_list_mask_filter_unittests.cc
@@ -436,6 +440,8 @@ FILE: ../../../flutter/impeller/compiler/utilities.cc
 FILE: ../../../flutter/impeller/compiler/utilities.h
 FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.cc
 FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.h
+FILE: ../../../flutter/impeller/display_list/display_list_image_impeller.cc
+FILE: ../../../flutter/impeller/display_list/display_list_image_impeller.h
 FILE: ../../../flutter/impeller/display_list/display_list_playground.cc
 FILE: ../../../flutter/impeller/display_list/display_list_playground.h
 FILE: ../../../flutter/impeller/display_list/display_list_unittests.cc
@@ -703,6 +709,7 @@ FILE: ../../../flutter/lib/ui/geometry.dart
 FILE: ../../../flutter/lib/ui/hash_codes.dart
 FILE: ../../../flutter/lib/ui/hooks.dart
 FILE: ../../../flutter/lib/ui/hooks_unittests.cc
+FILE: ../../../flutter/lib/ui/io_manager.cc
 FILE: ../../../flutter/lib/ui/io_manager.h
 FILE: ../../../flutter/lib/ui/isolate_name_server.dart
 FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server.cc
@@ -719,6 +726,8 @@ FILE: ../../../flutter/lib/ui/painting/codec.cc
 FILE: ../../../flutter/lib/ui/painting/codec.h
 FILE: ../../../flutter/lib/ui/painting/color_filter.cc
 FILE: ../../../flutter/lib/ui/painting/color_filter.h
+FILE: ../../../flutter/lib/ui/painting/display_list_image_gpu.cc
+FILE: ../../../flutter/lib/ui/painting/display_list_image_gpu.h
 FILE: ../../../flutter/lib/ui/painting/engine_layer.cc
 FILE: ../../../flutter/lib/ui/painting/engine_layer.h
 FILE: ../../../flutter/lib/ui/painting/fragment_program.cc
@@ -731,6 +740,10 @@ FILE: ../../../flutter/lib/ui/painting/image.cc
 FILE: ../../../flutter/lib/ui/painting/image.h
 FILE: ../../../flutter/lib/ui/painting/image_decoder.cc
 FILE: ../../../flutter/lib/ui/painting/image_decoder.h
+FILE: ../../../flutter/lib/ui/painting/image_decoder_impeller.cc
+FILE: ../../../flutter/lib/ui/painting/image_decoder_impeller.h
+FILE: ../../../flutter/lib/ui/painting/image_decoder_skia.cc
+FILE: ../../../flutter/lib/ui/painting/image_decoder_skia.h
 FILE: ../../../flutter/lib/ui/painting/image_decoder_unittests.cc
 FILE: ../../../flutter/lib/ui/painting/image_descriptor.cc
 FILE: ../../../flutter/lib/ui/painting/image_descriptor.h
