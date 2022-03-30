@@ -25,7 +25,10 @@ File _getMultiDexApplicationFile(Directory projectDir) {
 void ensureMultiDexApplicationExists(final Directory projectDir) {
   final File applicationFile = _getMultiDexApplicationFile(projectDir);
   if (applicationFile.existsSync()) {
-    if (!applicationFile.readAsStringSync().contains('extends FlutterApplication')) {
+    // This checks for instances of legacy versions of this file. Legacy versions maintained
+    // compatibility with v1 embedding by extending FlutterApplication. If we detect this,
+    // we replace the file with the modern v2 embedding version.
+    if (applicationFile.readAsStringSync().contains('android.app.Application;')) {
       return;
     }
   }
