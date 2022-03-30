@@ -975,7 +975,7 @@ void BM_DrawImage(benchmark::State& state,
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    builder.drawImage(image, dst, options, true);
+    builder.drawImage(DlImage::Make(image), dst, options, true);
 
     dst.offset(offset, offset);
     if (dst.x() + bitmap_size > canvas_size) {
@@ -1058,7 +1058,8 @@ void BM_DrawImageRect(benchmark::State& state,
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    builder.drawImageRect(image, src, dst, options, true, constraint);
+    builder.drawImageRect(DlImage::Make(image), src, dst, options, true,
+                          constraint);
     dst.offset(offset, offset);
     if (dst.right() > canvas_size) {
       dst.offsetTo(0, dst.y());
@@ -1142,7 +1143,7 @@ void BM_DrawImageNine(benchmark::State& state,
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    builder.drawImageNine(image, center, dst, filter, true);
+    builder.drawImageNine(DlImage::Make(image), center, dst, filter, true);
     dst.offset(offset, offset);
     if (dst.right() > canvas_size) {
       dst.offsetTo(0, dst.y());

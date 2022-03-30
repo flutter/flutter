@@ -45,7 +45,13 @@ void ImageShader::initWithImage(CanvasImage* image,
         ToDart("ImageShader constructor called with non-genuine Image."));
     return;
   }
-  sk_image_ = UIDartState::CreateGPUObject(image->image());
+  auto raw_sk_image = image->image()->skia_image();
+  if (!raw_sk_image) {
+    Dart_ThrowException(
+        ToDart("ImageShader constructor with Impeller is not supported."));
+    return;
+  }
+  sk_image_ = UIDartState::CreateGPUObject(std::move(raw_sk_image));
   SkMatrix local_matrix = ToSkMatrix(matrix4);
   sampling_is_locked_ = filter_quality_index >= 0;
   SkSamplingOptions sampling =

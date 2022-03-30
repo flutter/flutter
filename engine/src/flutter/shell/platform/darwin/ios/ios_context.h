@@ -15,6 +15,10 @@
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
+namespace impeller {
+class Context;
+}  // namespace impeller
+
 namespace flutter {
 
 //------------------------------------------------------------------------------
@@ -126,6 +130,8 @@ class IOSContext {
   ///             textures see IOSContext::CreateResourceContext.
   ///
   virtual sk_sp<GrDirectContext> GetMainContext() const = 0;
+
+  virtual std::shared_ptr<impeller::Context> GetImpellerContext() const;
 
  protected:
   IOSContext();

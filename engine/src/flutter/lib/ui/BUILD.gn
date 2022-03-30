@@ -4,6 +4,7 @@
 
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
 source_set("ui") {
@@ -17,6 +18,7 @@ source_set("ui") {
     "dart_ui.cc",
     "dart_ui.h",
     "dart_wrapper.h",
+    "io_manager.cc",
     "io_manager.h",
     "isolate_name_server/isolate_name_server.cc",
     "isolate_name_server/isolate_name_server.h",
@@ -28,6 +30,8 @@ source_set("ui") {
     "painting/codec.h",
     "painting/color_filter.cc",
     "painting/color_filter.h",
+    "painting/display_list_image_gpu.cc",
+    "painting/display_list_image_gpu.h",
     "painting/engine_layer.cc",
     "painting/engine_layer.h",
     "painting/fragment_program.cc",
@@ -40,6 +44,8 @@ source_set("ui") {
     "painting/image.h",
     "painting/image_decoder.cc",
     "painting/image_decoder.h",
+    "painting/image_decoder_skia.cc",
+    "painting/image_decoder_skia.h",
     "painting/image_descriptor.cc",
     "painting/image_descriptor.h",
     "painting/image_encoding.cc",
@@ -147,6 +153,15 @@ source_set("ui") {
     "//third_party/rapidjson",
     "//third_party/skia",
   ]
+
+  if (impeller_supports_platform) {
+    sources += [
+      "painting/image_decoder_impeller.cc",
+      "painting/image_decoder_impeller.h",
+    ]
+
+    deps += [ "//flutter/impeller" ]
+  }
 
   if (!defined(defines)) {
     defines = []

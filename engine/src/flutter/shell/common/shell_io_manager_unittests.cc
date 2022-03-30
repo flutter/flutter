@@ -78,7 +78,8 @@ TEST_F(ShellIOManagerTest,
     gl_surface = std::make_unique<TestGLSurface>(SkISize::Make(1, 1));
     io_manager = std::make_unique<ShellIOManager>(
         gl_surface->CreateGrContext(), std::make_shared<fml::SyncSwitch>(),
-        runners.GetIOTaskRunner(), fml::TimeDelta::FromMilliseconds(0));
+        runners.GetIOTaskRunner(), nullptr,
+        fml::TimeDelta::FromMilliseconds(0));
   });
 
   auto isolate = RunDartCodeInIsolate(vm_ref, settings, runners, "emptyMain",
