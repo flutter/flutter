@@ -28,7 +28,6 @@ std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizePicture(
 std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizeLayer(
     PrerollContext* context,
     Layer* layer,
-    RasterCacheLayerStrategy strategy,
     const SkMatrix& ctm,
     bool checkerboard) const {
   SkRect logical_rect = layer->paint_bounds();

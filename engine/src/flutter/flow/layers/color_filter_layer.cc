@@ -31,12 +31,10 @@ void ColorFilterLayer::Preroll(PrerollContext* context,
   ContainerLayer::Preroll(context, matrix);
 
   if (render_count_ >= kMinimumRendersBeforeCachingFilterLayer) {
-    TryToPrepareRasterCache(context, this, matrix,
-                            RasterCacheLayerStrategy::kLayer);
+    TryToPrepareRasterCache(context, this, matrix);
   } else {
     render_count_++;
-    TryToPrepareRasterCache(context, this, matrix,
-                            RasterCacheLayerStrategy::kLayerChildren);
+    TryToPrepareRasterCache(context, GetCacheableChild(), matrix);
   }
 }
 
@@ -45,16 +43,14 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   if (context.raster_cache) {
-    if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
-                                   RasterCacheLayerStrategy::kLayer)) {
+    if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas)) {
       return;
     }
     SkPaint paint;
     paint.setColorFilter(filter_);
 
-    if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
-                                   RasterCacheLayerStrategy::kLayerChildren,
-                                   &paint)) {
+    if (context.raster_cache->Draw(GetCacheableChild(),
+                                   *context.leaf_nodes_canvas, &paint)) {
       return;
     }
   }

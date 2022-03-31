@@ -6,8 +6,6 @@
 #define FLUTTER_FLOW_RASTER_CACHE_KEY_H_
 
 #include <unordered_map>
-#include <utility>
-#include <vector>
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/logging.h"
@@ -15,55 +13,19 @@
 
 namespace flutter {
 
-class RasterCacheKeyID {
- public:
-  RasterCacheKeyID(const std::vector<uint64_t> ids) : ids_(ids) {}
-
-  const std::vector<uint64_t>& ids() { return ids_; }
-
-  std::size_t GetHash() const {
-    std::size_t seed = fml::HashCombine();
-    for (auto id : ids_) {
-      fml::HashCombineSeed(seed, id);
-    }
-    return seed;
-  }
-
-  bool operator==(const RasterCacheKeyID& other) const {
-    return ids_ == other.ids_;
-  }
-
-  bool operator!=(const RasterCacheKeyID& other) const {
-    return !operator==(other);
-  }
-
- private:
-  const std::vector<uint64_t> ids_;
-};
-
-enum class RasterCacheKeyType {
-  kLayer,
-  kPicture,
-  kDisplayList,
-  kLayerChildren
-};
+enum class RasterCacheKeyType { kLayer, kPicture, kDisplayList };
 
 enum class RasterCacheKeyKind { kLayerMetrics, kPictureMetrics };
 
 class RasterCacheKey {
  public:
   RasterCacheKey(uint64_t id, RasterCacheKeyType type, const SkMatrix& ctm)
-      : RasterCacheKey(RasterCacheKeyID({id}), type, ctm) {}
-
-  RasterCacheKey(RasterCacheKeyID id,
-                 RasterCacheKeyType type,
-                 const SkMatrix& ctm)
-      : id_(std::move(id)), type_(type), matrix_(ctm) {
+      : id_(id), type_(type), matrix_(ctm) {
     matrix_[SkMatrix::kMTransX] = 0;
     matrix_[SkMatrix::kMTransY] = 0;
   }
 
-  const RasterCacheKeyID& id() const { return id_; }
+  uint64_t id() const { return id_; }
   RasterCacheKeyType type() const { return type_; }
   const SkMatrix& matrix() const { return matrix_; }
 
@@ -73,14 +35,13 @@ class RasterCacheKey {
       case RasterCacheKeyType::kDisplayList:
         return RasterCacheKeyKind::kPictureMetrics;
       case RasterCacheKeyType::kLayer:
-      case RasterCacheKeyType::kLayerChildren:
         return RasterCacheKeyKind::kLayerMetrics;
     }
   }
 
   struct Hash {
     std::size_t operator()(RasterCacheKey const& key) const {
-      return fml::HashCombine(key.id_.GetHash(), key.type_);
+      return fml::HashCombine(key.id_, key.type_);
     }
   };
 
@@ -96,7 +57,7 @@ class RasterCacheKey {
   using Map = std::unordered_map<RasterCacheKey, Value, Hash, Equal>;
 
  private:
-  RasterCacheKeyID id_;
+  uint64_t id_;
 
   RasterCacheKeyType type_;
 

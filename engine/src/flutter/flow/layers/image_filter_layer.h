@@ -10,7 +10,7 @@
 
 namespace flutter {
 
-class ImageFilterLayer : public ContainerLayer {
+class ImageFilterLayer : public MergedContainerLayer {
  public:
   explicit ImageFilterLayer(sk_sp<SkImageFilter> filter);
 
@@ -40,7 +40,6 @@ class ImageFilterLayer : public ContainerLayer {
   sk_sp<SkImageFilter> filter_;
   sk_sp<SkImageFilter> transformed_filter_;
   int render_count_;
-  SkRect unfiltered_child_bounds_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageFilterLayer);
 };
