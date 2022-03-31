@@ -35,6 +35,7 @@ void main() {
           multidexErrorHandler,
           incompatibleKotlinVersionHandler,
           minCompileSdkVersionHandler,
+          jvm11Required,
         ])
       );
     });
@@ -955,6 +956,49 @@ Execution failed for task ':app:checkDebugAarMetadata'.
       ProcessManager: () => FakeProcessManager.empty(),
     });
   });
+
+  group('Java 11 requirement', () {
+    testWithoutContext('pattern', () {
+      expect(
+        jvm11Required.test('''
+* What went wrong:
+A problem occurred evaluating project ':flutter'.
+> Failed to apply plugin 'com.android.internal.library'.
+   > Android Gradle plugin requires Java 11 to run. You are currently using Java 1.8.
+     You can try some of the following options:
+       - changing the IDE settings.
+       - changing the JAVA_HOME environment variable.
+       - changing `org.gradle.java.home` in `gradle.properties`.'''
+        ),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await jvm11Required.handler();
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] You need Java 11 or higher to build your app with this version of Gradle. │\n'
+          '│                                                                               │\n'
+          '│ To get Java 11, update to the latest version of Android Studio on             │\n'
+          '│ https://developer.android.com/studio/install.                                 │\n'
+          '│                                                                               │\n'
+          '│ To check the Java version used by Flutter, run `flutter doctor -v`.           │\n'
+          '└───────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
 }
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {
