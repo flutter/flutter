@@ -74,9 +74,9 @@ std::unique_ptr<fml::Mapping> LoadFile(int namespace_fd,
 
 std::unique_ptr<fml::FileMapping> MakeFileMapping(const char* path,
                                                   bool executable) {
-  auto flags = fuchsia::io::OPEN_RIGHT_READABLE;
+  auto flags = fuchsia::io::OpenFlags::RIGHT_READABLE;
   if (executable) {
-    flags |= fuchsia::io::OPEN_RIGHT_EXECUTABLE;
+    flags |= fuchsia::io::OpenFlags::RIGHT_EXECUTABLE;
   }
 
   // The returned file descriptor is compatible with standard posix operations
