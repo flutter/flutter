@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/display_list_blend_mode.h"
 #include "flutter/display_list/display_list_tile_mode.h"
+#include "flutter/display_list/display_list_vertices.h"
 #include "flutter/display_list/types.h"
 #include "gtest/gtest.h"
 
@@ -22,6 +23,24 @@ TEST(DisplayListEnum, ToSkTileMode) {
   ASSERT_EQ(ToSk(DlTileMode::kRepeat), SkTileMode::kRepeat);
   ASSERT_EQ(ToSk(DlTileMode::kMirror), SkTileMode::kMirror);
   ASSERT_EQ(ToSk(DlTileMode::kDecal), SkTileMode::kDecal);
+}
+
+TEST(DisplayListEnum, ToDlVertexMode) {
+  ASSERT_EQ(ToDl(SkVertices::VertexMode::kTriangles_VertexMode),
+            DlVertexMode::kTriangles);
+  ASSERT_EQ(ToDl(SkVertices::VertexMode::kTriangleStrip_VertexMode),
+            DlVertexMode::kTriangleStrip);
+  ASSERT_EQ(ToDl(SkVertices::VertexMode::kTriangleFan_VertexMode),
+            DlVertexMode::kTriangleFan);
+}
+
+TEST(DisplayListEnum, ToSkVertexMode) {
+  ASSERT_EQ(ToSk(DlVertexMode::kTriangles),
+            SkVertices::VertexMode::kTriangles_VertexMode);
+  ASSERT_EQ(ToSk(DlVertexMode::kTriangleStrip),
+            SkVertices::VertexMode::kTriangleStrip_VertexMode);
+  ASSERT_EQ(ToSk(DlVertexMode::kTriangleFan),
+            SkVertices::VertexMode::kTriangleFan_VertexMode);
 }
 
 #define CHECK_TO_DLENUM(V) ASSERT_EQ(ToDl(SkBlendMode::V), DlBlendMode::V);

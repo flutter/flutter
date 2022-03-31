@@ -594,18 +594,38 @@ DEFINE_DRAW_POINTS_OP(Lines, kLines_PointMode);
 DEFINE_DRAW_POINTS_OP(Polygon, kPolygon_PointMode);
 #undef DEFINE_DRAW_POINTS_OP
 
-// 4 byte header + 12 byte payload packs efficiently into 16 bytes
+// 4 byte header + 4 byte payload packs efficiently into 8 bytes
+// The DlVertices object will be pod-allocated after this structure
+// and can take any number of bytes so the final efficiency will
+// depend on the size of the DlVertices.
+// Note that the DlVertices object ends with an array of 16-bit
+// indices so the alignment can be up to 6 bytes off leading to
+// up to 6 bytes of overhead
 struct DrawVerticesOp final : DLOp {
   static const auto kType = DisplayListOpType::kDrawVertices;
 
-  DrawVerticesOp(sk_sp<SkVertices> vertices, DlBlendMode mode)
-      : mode(mode), vertices(std::move(vertices)) {}
+  DrawVerticesOp(DlBlendMode mode) : mode(mode) {}
 
   const DlBlendMode mode;
+
+  void dispatch(Dispatcher& dispatcher) const {
+    const DlVertices* vertices = reinterpret_cast<const DlVertices*>(this + 1);
+    dispatcher.drawVertices(vertices, mode);
+  }
+};
+
+// 4 byte header + 12 byte payload packs efficiently into 16 bytes
+struct DrawSkVerticesOp final : DLOp {
+  static const auto kType = DisplayListOpType::kDrawSkVertices;
+
+  DrawSkVerticesOp(sk_sp<SkVertices> vertices, SkBlendMode mode)
+      : mode(mode), vertices(std::move(vertices)) {}
+
+  const SkBlendMode mode;
   const sk_sp<SkVertices> vertices;
 
   void dispatch(Dispatcher& dispatcher) const {
-    dispatcher.drawVertices(vertices, mode);
+    dispatcher.drawSkVertices(vertices, mode);
   }
 };
 

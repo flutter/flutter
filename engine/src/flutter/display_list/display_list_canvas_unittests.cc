@@ -2487,20 +2487,20 @@ TEST_F(DisplayListCanvas, DrawVerticesWithColors) {
       SK_ColorRED,  SK_ColorBLUE,   SK_ColorGREEN,
       SK_ColorCYAN, SK_ColorYELLOW, SK_ColorMAGENTA,
   };
-  const sk_sp<SkVertices> vertices = SkVertices::MakeCopy(
-      SkVertices::kTriangles_VertexMode, 6, pts, nullptr, colors);
+  const std::shared_ptr<DlVertices> vertices =
+      DlVertices::Make(DlVertexMode::kTriangles, 6, pts, nullptr, colors);
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //
-            canvas->drawVertices(vertices.get(), SkBlendMode::kSrcOver, paint);
+            canvas->drawVertices(vertices->skia_object(), SkBlendMode::kSrcOver,
+                                 paint);
           },
           [=](DisplayListBuilder& builder) {  //
             builder.drawVertices(vertices, DlBlendMode::kSrcOver);
           },
           kDrawVerticesFlags)
           .set_draw_vertices());
-  EXPECT_TRUE(vertices->unique());
 }
 
 TEST_F(DisplayListCanvas, DrawVerticesWithImage) {
@@ -2531,8 +2531,8 @@ TEST_F(DisplayListCanvas, DrawVerticesWithImage) {
       SkPoint::Make(0, 0),
       SkPoint::Make(RenderWidth, 0),
   };
-  const sk_sp<SkVertices> vertices = SkVertices::MakeCopy(
-      SkVertices::kTriangles_VertexMode, 6, pts, tex, nullptr);
+  const std::shared_ptr<DlVertices> vertices =
+      DlVertices::Make(DlVertexMode::kTriangles, 6, pts, tex, nullptr);
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
@@ -2542,7 +2542,7 @@ TEST_F(DisplayListCanvas, DrawVerticesWithImage) {
               v_paint.setShader(
                   CanvasCompareTester::testImageColorSource.skia_object());
             }
-            canvas->drawVertices(vertices.get(), SkBlendMode::kSrcOver,
+            canvas->drawVertices(vertices->skia_object(), SkBlendMode::kSrcOver,
                                  v_paint);
           },
           [=](DisplayListBuilder& builder) {  //
@@ -2554,8 +2554,6 @@ TEST_F(DisplayListCanvas, DrawVerticesWithImage) {
           },
           kDrawVerticesFlags)
           .set_draw_vertices());
-
-  EXPECT_TRUE(vertices->unique());
 }
 
 TEST_F(DisplayListCanvas, DrawImageNearest) {

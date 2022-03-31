@@ -44,6 +44,8 @@ source_set("display_list") {
     "display_list_tile_mode.h",
     "display_list_utils.cc",
     "display_list_utils.h",
+    "display_list_vertices.cc",
+    "display_list_vertices.h",
     "types.h",
   ]
 
@@ -70,6 +72,7 @@ source_set("unittests") {
     "display_list_test_utils.cc",
     "display_list_test_utils.h",
     "display_list_unittests.cc",
+    "display_list_vertices_unittests.cc",
   ]
 
   deps = [

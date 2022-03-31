@@ -6,6 +6,7 @@
 #define FLUTTER_FLOW_DISPLAY_LIST_BENCHMARKS_H_
 
 #include "flutter/display_list/display_list_benchmarks_canvas_provider.h"
+#include "flutter/display_list/display_list_vertices.h"
 
 #include "third_party/benchmark/include/benchmark/benchmark.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -76,7 +77,7 @@ void BM_DrawPoints(benchmark::State& state,
 void BM_DrawVertices(benchmark::State& state,
                      BackendType backend_type,
                      unsigned attributes,
-                     SkVertices::VertexMode mode);
+                     DlVertexMode mode);
 void BM_DrawImage(benchmark::State& state,
                   BackendType backend_type,
                   unsigned attributes,
@@ -238,7 +239,7 @@ void BM_SaveLayer(benchmark::State& state,
                     TriangleStrip/BACKEND,                              \
                     BackendType::k##BACKEND##_Backend,                  \
                     ATTRIBUTES,                                         \
-                    SkVertices::VertexMode::kTriangleStrip_VertexMode)  \
+                    DlVertexMode::kTriangleStrip)                       \
       ->RangeMultiplier(2)                                              \
       ->Range(16, 2048)                                                 \
       ->UseRealTime()                                                   \
@@ -249,7 +250,7 @@ void BM_SaveLayer(benchmark::State& state,
                     TriangleFan/BACKEND,                                \
                     BackendType::k##BACKEND##_Backend,                  \
                     ATTRIBUTES,                                         \
-                    SkVertices::VertexMode::kTriangleFan_VertexMode)    \
+                    DlVertexMode::kTriangleFan)                         \
       ->RangeMultiplier(2)                                              \
       ->Range(16, 2048)                                                 \
       ->UseRealTime()                                                   \
@@ -260,7 +261,7 @@ void BM_SaveLayer(benchmark::State& state,
                     Triangles/BACKEND,                                  \
                     BackendType::k##BACKEND##_Backend,                  \
                     ATTRIBUTES,                                         \
-                    SkVertices::VertexMode::kTriangles_VertexMode)      \
+                    DlVertexMode::kTriangles)                           \
       ->RangeMultiplier(2)                                              \
       ->Range(16, 2048)                                                 \
       ->UseRealTime()                                                   \

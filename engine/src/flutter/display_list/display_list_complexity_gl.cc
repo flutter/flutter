@@ -476,9 +476,9 @@ void DisplayListGLComplexityCalculator::GLHelper::drawPoints(
   AccumulateComplexity(complexity);
 }
 
-void DisplayListGLComplexityCalculator::GLHelper::drawVertices(
+void DisplayListGLComplexityCalculator::GLHelper::drawSkVertices(
     const sk_sp<SkVertices> vertices,
-    DlBlendMode mode) {
+    SkBlendMode mode) {
   // There is currently no way for us to get the VertexMode from the SkVertices
   // object, but for future reference:
   //
@@ -500,6 +500,25 @@ void DisplayListGLComplexityCalculator::GLHelper::drawVertices(
   // m = 1/1600
   // c = 1
   unsigned int complexity = (approximate_vertex_count + 1600) * 250 / 2;
+
+  AccumulateComplexity(complexity);
+}
+
+void DisplayListGLComplexityCalculator::GLHelper::drawVertices(
+    const DlVertices* vertices,
+    DlBlendMode mode) {
+  // There is currently no way for us to get the VertexMode from the SkVertices
+  // object, but for future reference:
+  //
+  // TriangleStrip is roughly 25% more expensive than TriangleFan.
+  // TriangleFan is roughly 5% more expensive than Triangles.
+
+  // For the baseline, it's hard to identify the trend. It might be O(n^1/2)
+  // For now, treat it as linear as an approximation.
+  //
+  // m = 1/1600
+  // c = 1
+  unsigned int complexity = (vertices->vertex_count() + 1600) * 250 / 2;
 
   AccumulateComplexity(complexity);
 }
