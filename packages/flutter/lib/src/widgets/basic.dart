@@ -6122,13 +6122,13 @@ class Listener extends SingleChildRenderObjectWidget {
   /// no longer directed towards this receiver.
   final PointerCancelEventListener? onPointerCancel;
 
-  /// Called when a pan/zoom begins such as from a trackpad gesture
+  /// Called when a pan/zoom begins such as from a trackpad gesture.
   final PointerPanZoomStartEventListener? onPointerPanZoomStart;
 
-  /// Called when a pan/zoom is updated
+  /// Called when a pan/zoom is updated.
   final PointerPanZoomUpdateEventListener? onPointerPanZoomUpdate;
 
-  /// Called when a pan/zoom finishes
+  /// Called when a pan/zoom finishes.
   final PointerPanZoomEndEventListener? onPointerPanZoomEnd;
 
   /// Called when a pointer signal occurs over this object.

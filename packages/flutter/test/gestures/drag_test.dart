@@ -1487,7 +1487,8 @@ void main() {
 
   testGesture('Should recognize pan gestures from platform', (GestureTester tester) {
     final PanGestureRecognizer pan = PanGestureRecognizer();
-    final PanGestureRecognizer competingPan = PanGestureRecognizer(); // No reason
+    // We need a competing gesture recognizer so that the gesture is not immediately claimed.
+    final PanGestureRecognizer competingPan = PanGestureRecognizer();
     addTearDown(pan.dispose);
     addTearDown(competingPan.dispose);
 
@@ -1543,7 +1544,8 @@ void main() {
 
   testGesture('Pointer pan/zooms drags should allow touches to join them', (GestureTester tester) {
     final PanGestureRecognizer pan = PanGestureRecognizer();
-    final PanGestureRecognizer competingPan = PanGestureRecognizer(); // No reason
+    // We need a competing gesture recognizer so that the gesture is not immediately claimed.
+    final PanGestureRecognizer competingPan = PanGestureRecognizer();
     addTearDown(pan.dispose);
     addTearDown(competingPan.dispose);
 

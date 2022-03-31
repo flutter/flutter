@@ -2927,13 +2927,13 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// no longer directed towards this receiver.
   PointerCancelEventListener? onPointerCancel;
 
-  /// Called when a pan/zoom begins such as from a trackpad gesture
+  /// Called when a pan/zoom begins such as from a trackpad gesture.
   PointerPanZoomStartEventListener? onPointerPanZoomStart;
 
-  /// Called when a pan/zoom is updated
+  /// Called when a pan/zoom is updated.
   PointerPanZoomUpdateEventListener? onPointerPanZoomUpdate;
 
-  /// Called when a pan/zoom finishes
+  /// Called when a pan/zoom finishes.
   PointerPanZoomEndEventListener? onPointerPanZoomEnd;
 
   /// Called when a pointer signal occurs over this object.

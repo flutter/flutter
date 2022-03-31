@@ -2022,7 +2022,7 @@ mixin _CopyPointerPanZoomStartEvent on PointerEvent {
   }
 }
 
-/// A pan/zoom has begun on this pointer
+/// A pan/zoom has begun on this pointer.
 ///
 /// See also:
 ///
@@ -2043,7 +2043,10 @@ class PointerPanZoomStartEvent extends PointerEvent with _PointerEventDescriptio
   }) : assert(timeStamp != null),
        assert(kind != null),
        assert(device != null),
+       assert(pointer != null),
        assert(position != null),
+       assert(embedderId != null),
+       assert(synthesized != null),
        super(
          timeStamp: timeStamp,
          kind: kind,
@@ -2161,11 +2164,14 @@ class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescripti
   }) : assert(timeStamp != null),
        assert(kind != null),
        assert(device != null),
+       assert(pointer != null),
        assert(position != null),
+       assert(embedderId != null),
        assert(pan != null),
        assert(panDelta != null),
        assert(scale != null),
        assert(rotation != null),
+       assert(synthesized != null),
        super(
          timeStamp: timeStamp,
          kind: kind,
@@ -2291,7 +2297,10 @@ class PointerPanZoomEndEvent extends PointerEvent with _PointerEventDescription,
   }) : assert(timeStamp != null),
        assert(kind != null),
        assert(device != null),
+       assert(pointer != null),
        assert(position != null),
+       assert(embedderId != null),
+       assert(synthesized != null),
        super(
          timeStamp: timeStamp,
          kind: kind,
