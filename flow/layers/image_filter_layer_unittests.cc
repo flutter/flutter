@@ -267,7 +267,7 @@ TEST_F(ImageFilterLayerTest, Readback) {
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 }
 
-TEST_F(ImageFilterLayerTest, CacheChild) {
+TEST_F(ImageFilterLayerTest, ChildIsCached) {
   auto layer_filter = SkImageFilters::MatrixTransform(
       SkMatrix(),
       SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear), nullptr);
@@ -289,31 +289,15 @@ TEST_F(ImageFilterLayerTest, CacheChild) {
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
   EXPECT_FALSE(raster_cache()->Draw(mock_layer.get(), other_canvas));
   EXPECT_FALSE(raster_cache()->Draw(mock_layer.get(), cache_canvas));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), other_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), other_canvas,
-                                    RasterCacheLayerStrategy::kLayerChildren));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayerChildren));
 
   layer->Preroll(preroll_context(), initial_transform);
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
   EXPECT_FALSE(raster_cache()->Draw(mock_layer.get(), other_canvas));
-  EXPECT_FALSE(raster_cache()->Draw(mock_layer.get(), cache_canvas));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), other_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), other_canvas,
-                                    RasterCacheLayerStrategy::kLayerChildren));
-  EXPECT_TRUE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                   RasterCacheLayerStrategy::kLayerChildren));
+  EXPECT_TRUE(raster_cache()->Draw(mock_layer.get(), cache_canvas));
 }
 
-TEST_F(ImageFilterLayerTest, CacheChildren) {
+TEST_F(ImageFilterLayerTest, ChildrenNotCached) {
   auto layer_filter = SkImageFilters::MatrixTransform(
       SkMatrix(),
       SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear), nullptr);
@@ -340,14 +324,6 @@ TEST_F(ImageFilterLayerTest, CacheChildren) {
   EXPECT_FALSE(raster_cache()->Draw(mock_layer1.get(), cache_canvas));
   EXPECT_FALSE(raster_cache()->Draw(mock_layer2.get(), other_canvas));
   EXPECT_FALSE(raster_cache()->Draw(mock_layer2.get(), cache_canvas));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), other_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), other_canvas,
-                                    RasterCacheLayerStrategy::kLayerChildren));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayerChildren));
 
   layer->Preroll(preroll_context(), initial_transform);
 
@@ -356,14 +332,6 @@ TEST_F(ImageFilterLayerTest, CacheChildren) {
   EXPECT_FALSE(raster_cache()->Draw(mock_layer1.get(), cache_canvas));
   EXPECT_FALSE(raster_cache()->Draw(mock_layer2.get(), other_canvas));
   EXPECT_FALSE(raster_cache()->Draw(mock_layer2.get(), cache_canvas));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), other_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                    RasterCacheLayerStrategy::kLayer));
-  EXPECT_FALSE(raster_cache()->Draw(layer.get(), other_canvas,
-                                    RasterCacheLayerStrategy::kLayerChildren));
-  EXPECT_TRUE(raster_cache()->Draw(layer.get(), cache_canvas,
-                                   RasterCacheLayerStrategy::kLayerChildren));
 }
 
 using ImageFilterLayerDiffTest = DiffContextTest;
