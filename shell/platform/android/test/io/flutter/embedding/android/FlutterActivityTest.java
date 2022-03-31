@@ -30,7 +30,6 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.FlutterInjector;
-import io.flutter.TestUtils;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
@@ -447,9 +446,10 @@ public class FlutterActivityTest {
   }
 
   @Test
-  @Config(shadows = {SplashShadowResources.class})
+  @Config(
+      sdk = Build.VERSION_CODES.KITKAT,
+      shadows = {SplashShadowResources.class})
   public void itLoadsSplashScreenDrawable() throws PackageManager.NameNotFoundException {
-    TestUtils.setApiVersion(19);
     Intent intent = FlutterActivity.createDefaultIntent(RuntimeEnvironment.application);
     ActivityController<FlutterActivity> activityController =
         Robolectric.buildActivity(FlutterActivity.class, intent);
@@ -471,13 +471,14 @@ public class FlutterActivityTest {
   }
 
   @Test
-  @Config(shadows = {SplashShadowResources.class})
+  @Config(
+      sdk = Build.VERSION_CODES.LOLLIPOP,
+      shadows = {SplashShadowResources.class})
   @TargetApi(21) // Theme references in drawables requires API 21+
   public void itLoadsThemedSplashScreenDrawable() throws PackageManager.NameNotFoundException {
     // A drawable with theme references can be parsed only if the app theme is supplied
     // in getDrawable methods. This test verifies it by fetching a (fake) themed drawable.
     // On failure, a Resource.NotFoundException will ocurr.
-    TestUtils.setApiVersion(21);
     Intent intent = FlutterActivity.createDefaultIntent(RuntimeEnvironment.application);
     ActivityController<FlutterActivity> activityController =
         Robolectric.buildActivity(FlutterActivity.class, intent);
@@ -519,7 +520,8 @@ public class FlutterActivityTest {
   }
 
   @Test
-  public void fullyDrawn() {
+  @Config(minSdk = Build.VERSION_CODES.JELLY_BEAN, maxSdk = Build.VERSION_CODES.P)
+  public void fullyDrawn_beforeAndroidQ() {
     Intent intent =
         FlutterActivityWithReportFullyDrawn.createDefaultIntent(RuntimeEnvironment.application);
     ActivityController<FlutterActivityWithReportFullyDrawn> activityController =
@@ -528,21 +530,22 @@ public class FlutterActivityTest {
 
     // See https://github.com/flutter/flutter/issues/46172, and
     // https://github.com/flutter/flutter/issues/88767.
-    for (int version = Build.VERSION_CODES.JELLY_BEAN; version < Build.VERSION_CODES.Q; version++) {
-      TestUtils.setApiVersion(version);
-      flutterActivity.onFlutterUiDisplayed();
-      assertFalse(
-          "reportFullyDrawn isn't used in API level " + version, flutterActivity.isFullyDrawn());
-    }
+    flutterActivity.onFlutterUiDisplayed();
+    assertFalse("reportFullyDrawn isn't used", flutterActivity.isFullyDrawn());
+  }
 
-    final int versionCodeS = 31;
-    for (int version = Build.VERSION_CODES.Q; version < versionCodeS; version++) {
-      TestUtils.setApiVersion(version);
-      flutterActivity.onFlutterUiDisplayed();
-      assertTrue(
-          "reportFullyDrawn is used in API level " + version, flutterActivity.isFullyDrawn());
-      flutterActivity.resetFullyDrawn();
-    }
+  @Test
+  @Config(minSdk = Build.VERSION_CODES.Q)
+  public void fullyDrawn_fromAndroidQ() {
+    Intent intent =
+        FlutterActivityWithReportFullyDrawn.createDefaultIntent(RuntimeEnvironment.application);
+    ActivityController<FlutterActivityWithReportFullyDrawn> activityController =
+        Robolectric.buildActivity(FlutterActivityWithReportFullyDrawn.class, intent);
+    FlutterActivityWithReportFullyDrawn flutterActivity = activityController.get();
+
+    flutterActivity.onFlutterUiDisplayed();
+    assertTrue("reportFullyDrawn is used", flutterActivity.isFullyDrawn());
+    flutterActivity.resetFullyDrawn();
   }
 
   static class FlutterActivityWithProvidedEngine extends FlutterActivity {
