@@ -40,7 +40,6 @@ import androidx.core.util.Consumer;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.window.layout.FoldingFeature;
 import androidx.window.layout.WindowLayoutInfo;
-import io.flutter.TestUtils;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -983,9 +982,8 @@ public class FlutterViewTest {
 
   @Test
   @SuppressLint("PrivateApi")
+  @Config(sdk = Build.VERSION_CODES.P)
   public void findViewByAccessibilityIdTraversal_returnsRootViewOnAndroid28() throws Exception {
-    TestUtils.setApiVersion(28);
-
     FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
 
     Method getAccessibilityViewIdMethod = View.class.getDeclaredMethod("getAccessibilityViewId");
@@ -995,10 +993,9 @@ public class FlutterViewTest {
   }
 
   @Test
+  @Config(sdk = Build.VERSION_CODES.P)
   @SuppressLint("PrivateApi")
   public void findViewByAccessibilityIdTraversal_returnsChildViewOnAndroid28() throws Exception {
-    TestUtils.setApiVersion(28);
-
     FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
     FrameLayout childView1 = new FrameLayout(RuntimeEnvironment.application);
     flutterView.addView(childView1);
@@ -1013,10 +1010,9 @@ public class FlutterViewTest {
   }
 
   @Test
+  @Config(sdk = Build.VERSION_CODES.Q)
   @SuppressLint("PrivateApi")
   public void findViewByAccessibilityIdTraversal_returnsRootViewOnAndroid29() throws Exception {
-    TestUtils.setApiVersion(29);
-
     FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
 
     Method getAccessibilityViewIdMethod = View.class.getDeclaredMethod("getAccessibilityViewId");

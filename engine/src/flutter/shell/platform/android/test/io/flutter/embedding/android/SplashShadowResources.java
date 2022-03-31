@@ -4,7 +4,8 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.RealObject;
 import org.robolectric.shadow.api.Shadow;
@@ -16,14 +17,16 @@ public class SplashShadowResources {
   public static final int SPLASH_DRAWABLE_ID = 191919;
   public static final int THEMED_SPLASH_DRAWABLE_ID = 212121;
 
-  // All other getDrawable() calls, call this method internally.
-  @NonNull
-  public Drawable getDrawableForDensity(int id, int density, @NonNull Resources.Theme theme)
-      throws Exception {
+  @Implementation
+  protected Drawable getDrawable(int id) {
     if (id == SPLASH_DRAWABLE_ID) {
       return new ColorDrawable(Color.BLUE);
     }
+    return Shadow.directlyOn(resources, Resources.class).getDrawable(id);
+  }
 
+  @Implementation
+  protected Drawable getDrawable(int id, @Nullable Resources.Theme theme) {
     if (id == THEMED_SPLASH_DRAWABLE_ID) {
       // We pretend the drawable contains theme references. It can't be parsed without the app
       // theme.
@@ -33,7 +36,6 @@ public class SplashShadowResources {
       }
       return new ColorDrawable(Color.GRAY);
     }
-
-    return Shadow.directlyOn(resources, Resources.class).getDrawableForDensity(id, density, theme);
+    return Shadow.directlyOn(resources, Resources.class).getDrawable(id, theme);
   }
 }

@@ -10,6 +10,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.LocaleList;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.TestUtils;
@@ -31,9 +32,9 @@ import org.robolectric.annotation.Config;
 public class LocalizationPluginTest {
   // This test should be synced with the version for API 24.
   @Test
+  @Config(sdk = Build.VERSION_CODES.O)
   public void computePlatformResolvedLocaleAPI26() {
     // --- Test Setup ---
-    TestUtils.setApiVersion(26);
     FlutterJNI flutterJNI = new FlutterJNI();
 
     Context context = mock(Context.class);
@@ -139,9 +140,9 @@ public class LocalizationPluginTest {
 
   // This test should be synced with the version for API 26.
   @Test
+  @Config(sdk = Build.VERSION_CODES.N)
   public void computePlatformResolvedLocaleAPI24() {
     // --- Test Setup ---
-    TestUtils.setApiVersion(24);
     FlutterJNI flutterJNI = new FlutterJNI();
 
     Context context = mock(Context.class);
@@ -234,9 +235,9 @@ public class LocalizationPluginTest {
 
   // Tests the legacy pre API 24 algorithm.
   @Test
+  @Config(sdk = Build.VERSION_CODES.JELLY_BEAN)
   public void computePlatformResolvedLocaleAPI16() {
     // --- Test Setup ---
-    TestUtils.setApiVersion(16);
     FlutterJNI flutterJNI = new FlutterJNI();
 
     Context context = mock(Context.class);
