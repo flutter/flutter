@@ -1,4 +1,4 @@
-Signature: 4c9302ddb9a2c55225bc8fb99c7fa808
+Signature: 8c3f9580284bd04e4817abab58579317
 
 UNUSED LICENSES:
 
@@ -6327,6 +6327,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/render/TessellateWedge
 FILE: ../../../third_party/skia/gm/bug12866.cpp
 FILE: ../../../third_party/skia/include/core/SkAlphaType.h
 FILE: ../../../third_party/skia/include/core/SkColorType.h
+FILE: ../../../third_party/skia/include/gpu/GpuTypes.h
 FILE: ../../../third_party/skia/include/private/SkUniquePaintParamsID.h
 FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_check_includes/bazel_check_includes.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/check_generated_bazel_files/check_generated_bazel_files.go
