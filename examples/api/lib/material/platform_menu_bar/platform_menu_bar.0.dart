@@ -122,7 +122,8 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                 )
               ],
             ),
-            const PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.quit),
+            if (PlatformProvidedMenuItem.hasMenu(PlatformProvidedMenuItemType.quit))
+              const PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.quit),
           ],
         ),
       ],

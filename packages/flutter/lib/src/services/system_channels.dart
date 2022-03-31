@@ -400,27 +400,29 @@ class SystemChannels {
   ///
   ///  * `Menu.setMenu`: sends the configuration of the platform menu, including
   ///    labels, enable/disable information, and unique integer identifiers for
-  ///    each menu item. The configuration is sent as a `List<Map<String,
-  ///    Object?>>` encoding the list of top level menu items, which each have a
-  ///    hierarchy of `Map<String, Object?>` containing the required data, sent
-  ///    via a [StandardMessageCodec]. It is typically generated from a list of
-  ///    [MenuItem]s like this example:
+  ///    each menu item. The configuration is sent as a `Map<String, Object?>`
+  ///    encoding the list of top level menu items in window "0", which each
+  ///    have a hierarchy of `Map<String, Object?>` containing the required
+  ///    data, sent via a [StandardMessageCodec]. It is typically generated from
+  ///    a list of [MenuItem]s, and ends up looking like this example:
   ///
   /// ```dart
-  /// List<Map<String, Object?>> menu = <Map<String, Object?>>[
-  ///   <String, Object?>{
-  ///     'id': 1,
-  ///     'label': 'First Menu Label',
-  ///     'enabled': true,
-  ///     'children': <Map<String, Object?>>[
-  ///       <String, Object?>{
-  ///         'id': 2,
-  ///         'label': 'Sub Menu Label',
-  ///         'enabled': true,
-  ///       },
-  ///     ]
-  ///   },
-  /// ];
+  /// List<Map<String, Object?>> menu = <String, Object?>{
+  ///   '0': <Map<String, Object?>>[
+  ///     <String, Object?>{
+  ///       'id': 1,
+  ///       'label': 'First Menu Label',
+  ///       'enabled': true,
+  ///       'children': <Map<String, Object?>>[
+  ///         <String, Object?>{
+  ///           'id': 2,
+  ///           'label': 'Sub Menu Label',
+  ///           'enabled': true,
+  ///         },
+  ///       ],
+  ///     },
+  ///   ],
+  /// };
   /// ```
   ///
   /// The following incoming methods are defined for this channel (registered

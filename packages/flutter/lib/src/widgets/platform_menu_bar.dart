@@ -112,7 +112,7 @@ abstract class MenuItem with Diagnosticable {
   /// generates a unique ID for each menu item, which is to be returned in the
   /// "id" field of the menu item data.
   Iterable<Map<String, Object?>> toChannelRepresentation(
-    DefaultPlatformMenuDelegate delegate, {
+    PlatformMenuDelegate delegate, {
     required int index,
     required int count,
     required MenuItemSerializableIdGenerator getId,
@@ -236,7 +236,7 @@ abstract class PlatformMenuDelegate {
 }
 
 /// The signature for a function that generates unique menu item IDs for
-/// serialization of a [DefaultPlatformMenuDelegateSerializable].
+/// serialization of a [MenuItem].
 typedef MenuItemSerializableIdGenerator = int Function(MenuItem item);
 
 /// The platform menu delegate that handles the built-in macOS platform menu
@@ -538,7 +538,7 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin {
 
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
-    DefaultPlatformMenuDelegate delegate, {
+    PlatformMenuDelegate delegate, {
     required int index,
     required int count,
     required MenuItemSerializableIdGenerator getId,
@@ -553,7 +553,7 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin {
   /// this implementation.
   static Map<String, Object?> serialize(
     PlatformMenu item,
-    DefaultPlatformMenuDelegate delegate,
+    PlatformMenuDelegate delegate,
     MenuItemSerializableIdGenerator getId,
   ) {
     final List<Map<String, Object?>> result = <Map<String, Object?>>[];
@@ -606,7 +606,7 @@ class PlatformMenuItemGroup extends MenuItem {
 
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
-    DefaultPlatformMenuDelegate delegate, {
+    PlatformMenuDelegate delegate, {
     required int index,
     required int count,
     required MenuItemSerializableIdGenerator getId,
@@ -680,7 +680,7 @@ class PlatformMenuItem extends MenuItem {
 
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
-    DefaultPlatformMenuDelegate delegate, {
+    PlatformMenuDelegate delegate, {
     required int index,
     required int count,
     required MenuItemSerializableIdGenerator getId,
@@ -695,7 +695,7 @@ class PlatformMenuItem extends MenuItem {
   /// this implementation.
   static Map<String, Object?> serialize(
     PlatformMenuItem item,
-    DefaultPlatformMenuDelegate delegate,
+    PlatformMenuDelegate delegate,
     MenuItemSerializableIdGenerator getId,
   ) {
     final MenuSerializableShortcut? shortcut = item.shortcut;
@@ -792,7 +792,7 @@ class PlatformProvidedMenuItem extends PlatformMenuItem {
 
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
-    DefaultPlatformMenuDelegate delegate, {
+    PlatformMenuDelegate delegate, {
     required int index,
     required int count,
     required MenuItemSerializableIdGenerator getId,
