@@ -133,6 +133,13 @@ SurfaceFrame::FramebufferInfo AndroidSurfaceGL::GLContextFramebufferInfo()
   res.supports_readback = true;
   res.supports_partial_repaint = onscreen_surface_->SupportsPartialRepaint();
   res.existing_damage = onscreen_surface_->InitialDamage();
+  // Some devices (Pixel2 XL) needs EGL_KHR_partial_update rect aligned to 4,
+  // otherwise there are glitches
+  // (https://github.com/flutter/flutter/issues/97482#)
+  // Larger alignment might also be beneficial for tile base renderers.
+  res.horizontal_clip_alignment = 32;
+  res.vertical_clip_alignment = 32;
+
   return res;
 }
 

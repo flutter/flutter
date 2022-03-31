@@ -102,6 +102,7 @@ FILE: ../../../flutter/flow/compositor_context.cc
 FILE: ../../../flutter/flow/compositor_context.h
 FILE: ../../../flutter/flow/diff_context.cc
 FILE: ../../../flutter/flow/diff_context.h
+FILE: ../../../flutter/flow/diff_context_unittests.cc
 FILE: ../../../flutter/flow/embedded_view_params_unittests.cc
 FILE: ../../../flutter/flow/embedded_views.cc
 FILE: ../../../flutter/flow/embedded_views.h
