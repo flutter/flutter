@@ -10,7 +10,7 @@
 
 namespace flutter {
 
-class ColorFilterLayer : public ContainerLayer {
+class ColorFilterLayer : public MergedContainerLayer {
  public:
   explicit ColorFilterLayer(sk_sp<SkColorFilter> filter);
 
