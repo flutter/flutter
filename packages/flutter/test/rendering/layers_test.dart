@@ -365,6 +365,14 @@ void main() {
     );
   });
 
+  test('BackdropFilterLayer prints filter and blendMode in debug info', () {
+    final ImageFilter filter = ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0, tileMode: TileMode.repeated);
+    final BackdropFilterLayer layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
+    final List<String> info = _getDebugInfo(layer);
+    expect(info, contains(isBrowser ? 'filter: ImageFilter.blur(1, 1, TileMode.repeated)' : 'filter: ImageFilter.blur(1.0, 1.0, repeated)'));
+    expect(info, contains('blendMode: BlendMode.clear'));
+  });
+
   test('PictureLayer prints picture, raster cache hints in debug info', () {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);

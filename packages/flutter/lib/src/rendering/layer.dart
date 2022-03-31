@@ -1956,6 +1956,13 @@ class BackdropFilterLayer extends ContainerLayer {
     addChildrenToScene(builder);
     builder.pop();
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter));
+    properties.add(DiagnosticsProperty<BlendMode>('blendMode', blendMode));
+  }
 }
 
 /// A composited layer that uses a physical model to producing lighting effects.
