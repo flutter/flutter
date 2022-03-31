@@ -57,7 +57,7 @@ void main() {
                 onActivate: onActivate,
                 onOpen: onOpen,
                 onClose: onClose,
-                shortcuts: <String, ShortcutActivator>{
+                shortcuts: <String, MenuSerializableShortcut>{
                   subSubMenu10[0]: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
                   subSubMenu10[1]: const SingleActivator(LogicalKeyboardKey.keyB, shift: true),
                   subSubMenu10[2]: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
@@ -274,7 +274,7 @@ List<MenuItem> createTestMenus({
   void Function(String)? onActivate,
   void Function(String)? onOpen,
   void Function(String)? onClose,
-  Map<String, ShortcutActivator> shortcuts = const <String, ShortcutActivator>{},
+  Map<String, MenuSerializableShortcut> shortcuts = const <String, MenuSerializableShortcut>{},
   bool includeStandard = false,
 }) {
   final List<MenuItem> result = <MenuItem>[

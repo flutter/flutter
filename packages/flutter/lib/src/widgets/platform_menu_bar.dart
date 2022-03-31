@@ -37,6 +37,62 @@ const int _kFlutterShortcutModifierShift = 1 << 1;
 const int _kFlutterShortcutModifierAlt = 1 << 2;
 const int _kFlutterShortcutModifierControl = 1 << 3;
 
+/// A mixin allowing a [ShortcutActivator] to provide data for serialization of
+/// the shortcut for sending to the platform.
+///
+/// This is meant for those who have written their own [ShortcutActivator]
+/// subclass, and would like to have it work for menus in a [PlatformMenuBar] as
+/// well.
+mixin MenuSerializableShortcut {
+  /// The bit mask for the [LogicalKeyboardKey.meta] key (or it's left/right
+  /// equivalents) being down.
+  static const int shortcutModifierMeta = _kFlutterShortcutModifierMeta;
+
+  /// The bit mask for the [LogicalKeyboardKey.shift] key (or it's left/right
+  /// equivalents) being down.
+  static const int shortcutModifierShift = _kFlutterShortcutModifierShift;
+
+  /// The bit mask for the [LogicalKeyboardKey.alt] key (or it's left/right
+  /// equivalents) being down.
+  static const int shortcutModifierAlt = _kFlutterShortcutModifierAlt;
+
+  /// The bit mask for the [LogicalKeyboardKey.alt] key (or it's left/right
+  /// equivalents) being down.
+  static const int shortcutModifierControl = _kFlutterShortcutModifierControl;
+
+  /// The key for a string map field returned from [serializeForMenu] containing
+  /// a string that represents the character that the shortcut key should
+  /// represent.
+  ///
+  /// All platforms are limited to a single trigger key that can be represented,
+  /// so this string should only contain a character that can be typed with a
+  /// single keystroke.
+  static const String shortcutEquivalent = _kShortcutEquivalentKey;
+
+  /// The key for the integer map field returned from [serializeForMenu]
+  /// containing the logical key ID for the trigger key on this shortcut.
+  ///
+  /// All platforms are limited to a single trigger key that can be represented.
+  static const String shortcutTrigger = _kShortcutTriggerKey;
+
+  /// The key for the integer map field returned from [serializeForMenu]
+  /// containing a bitfield combination of [shortcutModifierControl],
+  /// [shortcutModifierAlt], [shortcutModifierShift], and/or
+  /// [shortcutModifierMeta].
+  ///
+  /// If the shortcut responds to one of those modifiers, it should be
+  /// represented in the bitfield tagged with this key.
+  static const String shortcutModifiers = _kShortcutModifiersKey;
+
+  /// Implement this in your [ShortcutActivator] subclass to allow it to be
+  /// serialized for use in a [PlatformMenuBar].
+  ///
+  /// It should return a map containing a "shortcutModifiers" field, and either
+  /// containing a "shortcutEquivalent", or one containing a "shortcutTrigger".
+  /// The "shortcutModifiers
+  Map<String, Object?> serializeForMenu();
+}
+
 /// An abstract class for describing cascading menu hierarchies that are part of
 /// a [PlatformMenuBar].
 ///
@@ -596,7 +652,7 @@ class PlatformMenuItem extends MenuItem {
   /// The optional shortcut that selects this [PlatformMenuItem].
   ///
   /// This shortcut is only enabled when [onSelected] is set.
-  final ShortcutActivator? shortcut;
+  final MenuSerializableShortcut? shortcut;
 
   /// An optional callback that is called when this [PlatformMenuItem] is
   /// selected.
@@ -624,40 +680,12 @@ class PlatformMenuItem extends MenuItem {
     DefaultPlatformMenuDelegate delegate,
     MenuItemSerializableIdGenerator getId,
   ) {
-    int modifiers = 0;
-    int? logicalKeyId;
-    String? shortcutEquivalent;
-    final ShortcutActivator? shortcut = item.shortcut;
-    if (item.shortcut != null) {
-      if (shortcut is SingleActivator) {
-        if (shortcut.shift) {
-          modifiers |= _kFlutterShortcutModifierShift;
-        }
-        if (shortcut.alt) {
-          modifiers |= _kFlutterShortcutModifierAlt;
-        }
-        if (shortcut.meta) {
-          modifiers |= _kFlutterShortcutModifierMeta;
-        }
-        if (shortcut.control) {
-          modifiers |= _kFlutterShortcutModifierControl;
-        }
-        logicalKeyId = shortcut.trigger.keyId;
-      } else if (shortcut is CharacterActivator) {
-        shortcutEquivalent = shortcut.character;
-        modifiers = 0;
-      } else {
-        throw UnimplementedError('Menu shortcuts can only be SingleActivators or '
-            'CharacterActivators. Other ShortcutActivator types are unsupported');
-      }
-    }
+    final MenuSerializableShortcut? shortcut = item.shortcut;
     return <String, Object?>{
       _kIdKey: getId(item),
       _kLabelKey: item.label,
       _kEnabledKey: item.onSelected != null,
-      if (shortcutEquivalent != null) _kShortcutEquivalentKey: shortcutEquivalent,
-      if (logicalKeyId != null) _kShortcutTriggerKey: logicalKeyId,
-      if (shortcut != null) _kShortcutModifiersKey: modifiers,
+      if (shortcut != null)...shortcut.serializeForMenu(),
     };
   }
 
@@ -665,7 +693,7 @@ class PlatformMenuItem extends MenuItem {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('label', label));
-    properties.add(DiagnosticsProperty<ShortcutActivator?>('shortcut', shortcut, defaultValue: null));
+    properties.add(DiagnosticsProperty<MenuSerializableShortcut?>('shortcut', shortcut, defaultValue: null));
     properties.add(FlagProperty('enabled', value: onSelected != null, ifFalse: 'DISABLED'));
   }
 }
