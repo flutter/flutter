@@ -148,7 +148,7 @@ void DisplayListCanvasRecorder::onDrawVerticesObject(const SkVertices* vertices,
                                                      SkBlendMode mode,
                                                      const SkPaint& paint) {
   builder_->setAttributesFromPaint(paint, kDrawVerticesFlags);
-  builder_->drawVertices(sk_ref_sp(vertices), ToDl(mode));
+  builder_->drawSkVertices(sk_ref_sp(vertices), mode);
 }
 
 void DisplayListCanvasRecorder::onDrawImage2(const SkImage* image,

@@ -587,9 +587,19 @@ void DisplayListBuilder::drawPoints(SkCanvas::PointMode mode,
   // See: https://fiddle.skia.org/c/228459001d2de8db117ce25ef5cedb0c
   UpdateLayerOpacityCompatibility(false);
 }
-void DisplayListBuilder::drawVertices(const sk_sp<SkVertices> vertices,
+void DisplayListBuilder::drawSkVertices(const sk_sp<SkVertices> vertices,
+                                        SkBlendMode mode) {
+  Push<DrawSkVerticesOp>(0, 1, std::move(vertices), mode);
+  // DrawVertices applies its colors to the paint so we have no way
+  // of controlling opacity using the current paint attributes.
+  // Although, examination of the |mode| might find some predictable
+  // cases.
+  UpdateLayerOpacityCompatibility(false);
+}
+void DisplayListBuilder::drawVertices(const DlVertices* vertices,
                                       DlBlendMode mode) {
-  Push<DrawVerticesOp>(0, 1, std::move(vertices), mode);
+  void* pod = Push<DrawVerticesOp>(vertices->size(), 1, mode);
+  new (pod) DlVertices(vertices);
   // DrawVertices applies its colors to the paint so we have no way
   // of controlling opacity using the current paint attributes.
   // Although, examination of the |mode| might find some predictable

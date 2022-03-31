@@ -448,7 +448,12 @@ void DisplayListBoundsCalculator::drawPoints(SkCanvas::PointMode mode,
     }
   }
 }
-void DisplayListBoundsCalculator::drawVertices(const sk_sp<SkVertices> vertices,
+void DisplayListBoundsCalculator::drawSkVertices(
+    const sk_sp<SkVertices> vertices,
+    SkBlendMode mode) {
+  AccumulateOpBounds(vertices->bounds(), kDrawVerticesFlags);
+}
+void DisplayListBoundsCalculator::drawVertices(const DlVertices* vertices,
                                                DlBlendMode mode) {
   AccumulateOpBounds(vertices->bounds(), kDrawVerticesFlags);
 }
