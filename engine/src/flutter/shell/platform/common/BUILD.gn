@@ -56,6 +56,15 @@ source_set("common_cpp_input") {
   deps = [ "//flutter/fml:fml" ]
 }
 
+source_set("common_cpp_enums") {
+  public = [ "platform_provided_menu.h" ]
+
+  public_configs = [
+    "//flutter:config",
+    "//flutter/common:flutter_config",
+  ]
+}
+
 source_set("common_cpp_switches") {
   public = [ "engine_switches.h" ]
 

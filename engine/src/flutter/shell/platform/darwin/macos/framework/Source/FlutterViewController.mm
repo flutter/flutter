@@ -12,6 +12,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
@@ -452,6 +453,7 @@ static void CommonInit(FlutterViewController* controller) {
 - (void)addInternalPlugins {
   __weak FlutterViewController* weakSelf = self;
   [FlutterMouseCursorPlugin registerWithRegistrar:[self registrarForPlugin:@"mousecursor"]];
+  [FlutterMenuPlugin registerWithRegistrar:[self registrarForPlugin:@"menu"]];
   [self initializeKeyboard];
   _settingsChannel =
       [FlutterBasicMessageChannel messageChannelWithName:@"flutter/settings"

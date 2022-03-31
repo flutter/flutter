@@ -1425,6 +1425,7 @@ FILE: ../../../flutter/shell/platform/common/json_method_codec_unittests.cc
 FILE: ../../../flutter/shell/platform/common/path_utils.cc
 FILE: ../../../flutter/shell/platform/common/path_utils.h
 FILE: ../../../flutter/shell/platform/common/path_utils_unittests.cc
+FILE: ../../../flutter/shell/platform/common/platform_provided_menu.h
 FILE: ../../../flutter/shell/platform/common/public/flutter_export.h
 FILE: ../../../flutter/shell/platform/common/public/flutter_messenger.h
 FILE: ../../../flutter/shell/platform/common/public/flutter_plugin_registrar.h
@@ -1650,6 +1651,10 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeybo
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManagerUnittests.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardViewDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMacOSExternalTexture.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPluginTest.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositor.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositor.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositorUnittests.mm
