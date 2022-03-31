@@ -1,4 +1,3 @@
-io/flutter/app/FlutterApplication.class
 io/flutter/app/FlutterMultiDexApplication.class
 io/flutter/embedding/engine/loader/FlutterLoader.class
 io/flutter/view/FlutterMain.class
