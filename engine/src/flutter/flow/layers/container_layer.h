@@ -27,12 +27,13 @@ class ContainerLayer : public Layer {
 
   virtual void DiffChildren(DiffContext* context,
                             const ContainerLayer* old_layer);
+  void PaintChildren(PaintContext& context) const;
+  const ContainerLayer* as_container_layer() const override { return this; }
 
  protected:
   void PrerollChildren(PrerollContext* context,
                        const SkMatrix& child_matrix,
                        SkRect* child_paint_bounds);
-  void PaintChildren(PaintContext& context) const;
 
   // Try to prepare the raster cache for a given layer.
   //
@@ -46,90 +47,13 @@ class ContainerLayer : public Layer {
   // cache a child layer and one can't access its child's protected method.
   static void TryToPrepareRasterCache(PrerollContext* context,
                                       Layer* layer,
-                                      const SkMatrix& matrix);
+                                      const SkMatrix& matrix,
+                                      RasterCacheLayerStrategy strategy);
 
  private:
   std::vector<std::shared_ptr<Layer>> layers_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ContainerLayer);
-};
-
-//------------------------------------------------------------------------------
-/// Some ContainerLayer objects perform a rendering operation or filter on
-/// the rendered output of their children. Often that operation is changed
-/// slightly from frame to frame as part of an animation. During such an
-/// animation, the children can be cached if they are stable to avoid having
-/// to render them on every frame. Even if the children are not stable,
-/// rendering them into the raster cache during a Preroll operation will save
-/// an extra change of rendering surface during the Paint phase as compared
-/// to using the SaveLayer that would otherwise be needed with no caching.
-///
-/// Typically the Flutter Widget objects that lead to the creation of these
-/// layers will try to enforce only a single child Widget by their design.
-/// Unfortunately, the process of turning Widgets eventually into engine
-/// layers is not a 1:1 process so this layer might end up with multiple
-/// child layers even if the Widget only had a single child Widget.
-///
-/// When such a layer goes to cache the output of its children, it will
-/// need to supply a single layer to the cache mechanism since the raster
-/// cache uses a layer unique_id() as part of the cache key. If this layer
-/// ended up with multiple children, then it must first collect them into
-/// one layer for the cache mechanism. In order to provide a single layer
-/// for all of the children, this utility class will implicitly collect
-/// the children into a secondary ContainerLayer called the child container.
-///
-/// A by-product of creating a hidden child container, though, is that the
-/// child container is created new every time this layer is created with
-/// different properties, such as during an animation. In that scenario,
-/// it would be best to cache the single real child of this layer if it
-/// is unique and if it is stable from frame to frame. To facilitate this
-/// optimal caching strategy, this class implements two accessor methods
-/// to be used for different purposes:
-///
-/// When the layer needs to recurse to perform some operation on its children,
-/// it can call GetChildContainer() to return the hidden container containing
-/// all of the real children.
-///
-/// When the layer wants to cache the rendered contents of its children, it
-/// should call GetCacheableChild() for best performance. This method may
-/// end up returning the same layer as GetChildContainer(), but only if the
-/// conditions for optimal caching of a single child are not met.
-///
-class MergedContainerLayer : public ContainerLayer {
- public:
-  MergedContainerLayer();
-
-  void Add(std::shared_ptr<Layer> layer) override;
-
-  void DiffChildren(DiffContext* context,
-                    const ContainerLayer* old_layer) override;
-
- protected:
-  /**
-   * @brief Returns the ContainerLayer used to hold all of the children of the
-   * MergedContainerLayer. Note that this may not be the best layer to use
-   * for caching the children.
-   *
-   * @see GetCacheableChild()
-   * @return the ContainerLayer child used to hold the children
-   */
-  ContainerLayer* GetChildContainer() const;
-
-  /**
-   * @brief Returns the best choice for a Layer object that can be used
-   * in RasterCache operations to cache the children.
-   *
-   * The returned Layer must represent all children and try to remain stable
-   * if the MergedContainerLayer is reconstructed in subsequent frames of
-   * the scene.
-   *
-   * @see GetChildContainer()
-   * @return the best candidate Layer for caching the children
-   */
-  Layer* GetCacheableChild() const;
-
- private:
-  FML_DISALLOW_COPY_AND_ASSIGN(MergedContainerLayer);
 };
 
 }  // namespace flutter
