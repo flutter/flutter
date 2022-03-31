@@ -118,6 +118,17 @@ class ElevatedButton extends ButtonStyleButton {
   /// fill color and [onSurface] to specify the button's disabled text, icon,
   /// and fill color.
   ///
+  /// With Material 3, the roles for the colors have changed.
+  /// [ButtonStyle.foregroundColor] is now based on [primary] instead of
+  /// [onPrimary] and [ButtonStyle.backgroundColor] is based on [surface]
+  /// instead [primary]. If you are migrating from Material 2, you will
+  /// probably need to change the colors you are using to maintain the colors
+  /// scheme for the button style.
+  ///
+  /// To use these new Material 3 color roles, applications should set
+  /// the [useMaterial3Colors] parameter to true. In addition the app's
+  /// theme should have [ThemeData.useMaterial3] set to true.
+  ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
   /// value, [elevation] + 2 is used when the button is hovered
@@ -146,8 +157,10 @@ class ElevatedButton extends ButtonStyleButton {
   static ButtonStyle styleFrom({
     Color? primary,
     Color? onPrimary,
+    Color? surface,
     Color? onSurface,
     Color? shadowColor,
+    Color? surfaceTintColor,
     double? elevation,
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
@@ -164,16 +177,26 @@ class ElevatedButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    bool useMaterial3Colors = false,
   }) {
-    final MaterialStateProperty<Color?>? backgroundColor = (onSurface == null && primary == null)
-      ? null
-      : _ElevatedButtonDefaultBackground(primary, onSurface);
-    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && onPrimary == null)
-      ? null
-      : _ElevatedButtonDefaultForeground(onPrimary, onSurface);
-    final MaterialStateProperty<Color?>? overlayColor = (onPrimary == null)
-      ? null
-      : _ElevatedButtonDefaultOverlay(onPrimary);
+    late final MaterialStateProperty<Color?>? backgroundColor;
+    late final MaterialStateProperty<Color?>? foregroundColor;
+    late final MaterialStateProperty<Color?>? overlayColor;
+    if (useMaterial3Colors) {
+      backgroundColor = _TokenDefaultsM3.backgroundColorFor(surface, onSurface);
+      foregroundColor = _TokenDefaultsM3.backgroundColorFor(primary, onSurface);
+      overlayColor = _TokenDefaultsM3.overlayColorFor(primary, primary);
+    } else {
+      backgroundColor = (onSurface == null && primary == null)
+        ? null
+        : _ElevatedButtonDefaultBackground(primary, onSurface);
+      foregroundColor = (onSurface == null && onPrimary == null)
+        ? null
+        : _ElevatedButtonDefaultForeground(onPrimary, onSurface);
+      overlayColor = (onPrimary == null)
+        ? null
+        : _ElevatedButtonDefaultOverlay(onPrimary);
+    }
     final MaterialStateProperty<double>? elevationValue = (elevation == null)
       ? null
       : _ElevatedButtonDefaultElevation(elevation);
@@ -187,6 +210,7 @@ class ElevatedButton extends ButtonStyleButton {
       foregroundColor: foregroundColor,
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
+      surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
       elevation: elevationValue,
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -288,26 +312,28 @@ class ElevatedButton extends ButtonStyleButton {
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
     );
 
-    return styleFrom(
-      primary: colorScheme.primary,
-      onPrimary: colorScheme.onPrimary,
-      onSurface: colorScheme.onSurface,
-      shadowColor: theme.shadowColor,
-      elevation: 2,
-      textStyle: theme.textTheme.button,
-      padding: scaledPadding,
-      minimumSize: const Size(64, 36),
-      maximumSize: Size.infinite,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-      enabledMouseCursor: SystemMouseCursors.click,
-      disabledMouseCursor: SystemMouseCursors.basic,
-      visualDensity: theme.visualDensity,
-      tapTargetSize: theme.materialTapTargetSize,
-      animationDuration: kThemeChangeDuration,
-      enableFeedback: true,
-      alignment: Alignment.center,
-      splashFactory: theme.useMaterial3 ? theme.splashFactory : InkRipple.splashFactory,
-    );
+    return Theme.of(context).useMaterial3
+      ? _TokenDefaultsM3(context)
+      : styleFrom(
+          primary: colorScheme.primary,
+          onPrimary: colorScheme.onPrimary,
+          onSurface: colorScheme.onSurface,
+          shadowColor: theme.shadowColor,
+          elevation: 2,
+          textStyle: theme.textTheme.button,
+          padding: scaledPadding,
+          minimumSize: const Size(64, 36),
+          maximumSize: Size.infinite,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+          enabledMouseCursor: SystemMouseCursors.click,
+          disabledMouseCursor: SystemMouseCursors.basic,
+          visualDensity: theme.visualDensity,
+          tapTargetSize: theme.materialTapTargetSize,
+          animationDuration: kThemeChangeDuration,
+          enableFeedback: true,
+          alignment: Alignment.center,
+          splashFactory: InkRipple.splashFactory,
+        );
   }
 
   /// Returns the [ElevatedButtonThemeData.style] of the closest
@@ -457,3 +483,154 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
     );
   }
 }
+
+// BEGIN GENERATED TOKEN PROPERTIES
+
+// Generated code to the end of this file. Do not edit by hand.
+// These defaults are generated from the Material Design Token
+// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Generated version v0_92
+class _TokenDefaultsM3 extends ButtonStyle {
+  _TokenDefaultsM3(this.context);
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  @override
+  MaterialStateProperty<TextStyle?> get textStyle =>
+    MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.labelLarge);
+
+  static MaterialStateProperty<Color?>? backgroundColorFor(Color? enabled, Color? disabled) {
+    return (enabled == null && disabled == null)
+      ? null
+      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled))
+            return disabled?.withOpacity(0.12);
+          return enabled;
+        });
+  }
+
+  @override
+  MaterialStateProperty<Color?>? get backgroundColor {
+    return backgroundColorFor(_colors.surface, _colors.onSurface);
+  }
+
+  static MaterialStateProperty<Color?>? foregroundColorFor(Color? enabled, Color? disabled) {
+    return (enabled == null && disabled == null)
+      ? null
+      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled))
+            return disabled?.withOpacity(0.38);
+          return enabled;
+        });
+  }
+
+  @override
+  MaterialStateProperty<Color?>? get foregroundColor {
+    return foregroundColorFor(_colors.primary, _colors.onSurface);
+  }
+
+  static MaterialStateProperty<Color?>? overlayColorFor(Color? hover, Color? focus) {
+    return (hover == null && focus == null)
+      ? null
+      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.hovered))
+            return hover?.withOpacity(0.08);
+          else if (states.contains(MaterialState.focused))
+            return focus?.withOpacity(0.12);
+          else
+            return null;
+        });
+  }
+
+  @override
+  MaterialStateProperty<Color?>? get overlayColor {
+    return overlayColorFor(_colors.primary, _colors.primary);
+  }
+
+  @override
+  MaterialStateProperty<Color>? get shadowColor =>
+    ButtonStyleButton.allOrNull<Color>(_colors.shadow);
+
+  @override
+  MaterialStateProperty<Color>? get surfaceTintColor =>
+    ButtonStyleButton.allOrNull<Color>(_colors.surfaceTint);
+
+  @override
+  MaterialStateProperty<double>? get elevation {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled))
+        return 0.0;
+      else if (states.contains(MaterialState.hovered))
+        return 3.0;
+      else if (states.contains(MaterialState.focused))
+        return 1.0;
+      else if (states.contains(MaterialState.pressed))
+        return 1.0;
+      return 1.0;
+    });
+  }
+
+  @override
+  MaterialStateProperty<EdgeInsetsGeometry>? get padding {
+    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+      const EdgeInsets.symmetric(horizontal: 16),
+      const EdgeInsets.symmetric(horizontal: 8),
+      const EdgeInsets.symmetric(horizontal: 4),
+      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+    );
+
+    return ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(scaledPadding);
+  }
+
+  @override
+  MaterialStateProperty<Size>? get minimumSize =>
+    ButtonStyleButton.allOrNull<Size>(const Size(64, 40.0));
+
+  @override
+  MaterialStateProperty<Size>? get fixedSize =>
+    ButtonStyleButton.allOrNull<Size>(null);
+
+  @override
+  MaterialStateProperty<Size>? get maximumSize =>
+    ButtonStyleButton.allOrNull<Size>(Size.infinite);
+
+  @override
+  MaterialStateProperty<BorderSide>? get side =>
+    ButtonStyleButton.allOrNull<BorderSide>(null);
+
+  @override
+  MaterialStateProperty<OutlinedBorder>? get shape =>
+    ButtonStyleButton.allOrNull<OutlinedBorder>(const StadiumBorder());
+
+  @override
+  MaterialStateProperty<MouseCursor?>? get mouseCursor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return SystemMouseCursors.basic;
+      }
+      return SystemMouseCursors.click;
+    });
+  }
+
+  @override
+  VisualDensity? get visualDensity => Theme.of(context).visualDensity;
+
+  @override
+  MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
+
+  @override
+  Duration? get animationDuration => kThemeChangeDuration;
+
+  @override
+  bool? get enableFeedback => true;
+
+  @override
+  AlignmentGeometry? get alignment => Alignment.center;
+
+  @override
+  InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+}
+
+// END GENERATED TOKEN PROPERTIES

@@ -105,6 +105,7 @@ class ButtonStyle with Diagnosticable {
     this.foregroundColor,
     this.overlayColor,
     this.shadowColor,
+    this.surfaceTintColor,
     this.elevation,
     this.padding,
     this.minimumSize,
@@ -149,6 +150,11 @@ class ButtonStyle with Diagnosticable {
   /// semi-transparent overlay to indicate elevation. See
   /// [ThemeData.applyElevationOverlayColor].
   final MaterialStateProperty<Color?>? shadowColor;
+
+  /// The surface tint color of the button's [Material].
+  ///
+  /// See [Material.surfaceTint] for more details.
+  final MaterialStateProperty<Color?>? surfaceTintColor;
 
   /// The elevation of the button's [Material].
   final MaterialStateProperty<double?>? elevation;
@@ -267,6 +273,7 @@ class ButtonStyle with Diagnosticable {
     MaterialStateProperty<Color?>? foregroundColor,
     MaterialStateProperty<Color?>? overlayColor,
     MaterialStateProperty<Color?>? shadowColor,
+    MaterialStateProperty<Color?>? surfaceTintColor,
     MaterialStateProperty<double?>? elevation,
     MaterialStateProperty<EdgeInsetsGeometry?>? padding,
     MaterialStateProperty<Size?>? minimumSize,
@@ -288,6 +295,7 @@ class ButtonStyle with Diagnosticable {
       foregroundColor: foregroundColor ?? this.foregroundColor,
       overlayColor: overlayColor ?? this.overlayColor,
       shadowColor: shadowColor ?? this.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       elevation: elevation ?? this.elevation,
       padding: padding ?? this.padding,
       minimumSize: minimumSize ?? this.minimumSize,
@@ -319,6 +327,7 @@ class ButtonStyle with Diagnosticable {
       foregroundColor: foregroundColor ?? style.foregroundColor,
       overlayColor: overlayColor ?? style.overlayColor,
       shadowColor: shadowColor ?? style.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? style.surfaceTintColor,
       elevation: elevation ?? style.elevation,
       padding: padding ?? style.padding,
       minimumSize: minimumSize ?? style.minimumSize,
@@ -343,6 +352,7 @@ class ButtonStyle with Diagnosticable {
     foregroundColor,
     overlayColor,
     shadowColor,
+    surfaceTintColor,
     elevation,
     padding,
     minimumSize,
@@ -371,6 +381,7 @@ class ButtonStyle with Diagnosticable {
         && other.foregroundColor == foregroundColor
         && other.overlayColor == overlayColor
         && other.shadowColor == shadowColor
+        && other.surfaceTintColor == surfaceTintColor
         && other.elevation == elevation
         && other.padding == padding
         && other.minimumSize == minimumSize
@@ -395,6 +406,7 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
@@ -421,6 +433,7 @@ class ButtonStyle with Diagnosticable {
       foregroundColor:  _lerpProperties<Color?>(a?.foregroundColor, b?.foregroundColor, t, Color.lerp),
       overlayColor: _lerpProperties<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
       shadowColor: _lerpProperties<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
+      surfaceTintColor: _lerpProperties<Color?>(a?.surfaceTintColor, b?.surfaceTintColor, t, Color.lerp),
       elevation: _lerpProperties<double?>(a?.elevation, b?.elevation, t, lerpDouble),
       padding:  _lerpProperties<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
       minimumSize: _lerpProperties<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),

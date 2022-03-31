@@ -1201,12 +1201,16 @@ class ThemeData with Diagnosticable {
   ///   * [AlertDialog]
   ///   * [Card]
   ///   * [Dialog]
+  ///   * [ElevatedButton], see [Elevated.styleFrom] for important details on color
+  ///     changes for M3.
   ///   * [FloatingActionButton]
   ///   * [Material]
   ///   * [NavigationBar]
   ///   * [NavigationRail]
+  ///   * [OutlinedButton]
   ///   * [StretchingOverscrollIndicator], replacing the
   ///     [GlowingOverscrollIndicator]
+  ///   * [TextButton]
   ///
   /// See also:
   ///
