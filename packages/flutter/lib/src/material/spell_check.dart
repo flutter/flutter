@@ -35,6 +35,7 @@ class MaterialSpellCheckService implements SpellCheckService {
 
         results.forEach((String result) {
           List<String> resultParsed = result.split(".");
+          print('RAW SPELLCHECK RESULTS: ${resultParsed}');
           spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
         });
 
@@ -46,19 +47,27 @@ class MaterialSpellCheckService implements SpellCheckService {
   }
 
     @override
-    Future<List<SpellCheckerSuggestionSpan>> fetchSpellCheckSuggestions(Locale locale, String text) async {
+    Future<List<SpellCheckerSuggestionSpan>> fetchSpellCheckSuggestions(Locale locale, TextEditingValue value) async {
     assert(locale != null);
-    assert(text != null);
+    assert(value.text != null);
 
     spellCheckChannel.invokeMethod<void>(
         'SpellCheck.initiateSpellCheck',
-        <String>[ locale.toLanguageTag(), text ],
+        <String>[ locale.toLanguageTag(), value.text ],
       );
     
     List<SpellCheckerSuggestionSpan> spellCheckResults = <SpellCheckerSuggestionSpan>[];
 
     await for (final result in controller.stream) {
-      spellCheckResults = result;
+      TextRange composingRange = value.composing;
+      result.forEach((SpellCheckerSuggestionSpan span) {
+          if (composingRange.start == span.start && composingRange.end == span.end) {
+
+          }
+          else {
+            spellCheckResults.add(span);
+          }
+      });
       return spellCheckResults;
     }
 

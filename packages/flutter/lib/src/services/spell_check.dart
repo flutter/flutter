@@ -66,7 +66,7 @@ class SpellCheckConfiguration {
 /// Interface that represents the core functionality needed to support spell check on text input.
 abstract class SpellCheckService {
     // Initiates spell check. Expected to set spellCheckSuggestions in handler if synchronous.
-    Future<List<SpellCheckerSuggestionSpan>> fetchSpellCheckSuggestions(Locale locale, String text);
+    Future<List<SpellCheckerSuggestionSpan>> fetchSpellCheckSuggestions(Locale locale, TextEditingValue value);
 }
 
 /// Interface that represents the core functionality needed to display results of spell check.
@@ -81,12 +81,13 @@ abstract class SpellCheckSuggestionsHandler {
     // Build TextSpans with misspelled words indicated.
     TextSpan buildTextSpanWithSpellCheckSuggestions(
         List<SpellCheckerSuggestionSpan>? spellCheckResults,
-        TextEditingValue value, TextStyle? style, bool ignoreComposing);
+        TextEditingValue value, TextStyle? style, bool composingWithinCurrentTextRange);
 }
 
 class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandler {
     int scssSpans_consumed_index = 0;
     int text_consumed_index = 0;
+    TextSpan ts = TextSpan();
 
     final TargetPlatform platform;
 
@@ -112,7 +113,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
   @override
   TextSpan buildTextSpanWithSpellCheckSuggestions(
       List<SpellCheckerSuggestionSpan>? spellCheckResults,
-      TextEditingValue value, TextStyle? style, bool ignoreComposing) {
+      TextEditingValue value, TextStyle? style, bool composingWithinCurrentTextRange) {
       scssSpans_consumed_index = 0;
       text_consumed_index = 0;
 
@@ -127,7 +128,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
             break;
       }
 
-      if (ignoreComposing) {
+      if (composingWithinCurrentTextRange) {
           return TextSpan(
               style: style,
               children: buildSubtreesWithMisspelledWordsIndicated(spellCheckResults ?? <SpellCheckerSuggestionSpan>[], value.text, style, misspelledStyle, false)
@@ -188,9 +189,11 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
               text_consumed_index = text.length + text_consumed_index;
           }
           scssSpans_consumed_index = scss_pointer;
+          print("IF CASE ${tsTreeChildren}");
           return tsTreeChildren;
       } else {
           text_consumed_index = text.length;
+          print("ELSE CASE: ${ <TextSpan>[TextSpan(text: text, style: isComposing ? composingStyle : style)]}");
           return <TextSpan>[TextSpan(text: text, style: isComposing ? composingStyle : style)];
       }
   }
