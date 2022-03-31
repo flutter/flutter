@@ -19,6 +19,7 @@ import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
+import 'contextual_menu.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -527,6 +528,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.buildContextualMenu,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1387,6 +1389,18 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  // TODO(justinmc): Update the "see also" to the final classes when done.
+  /// {@template flutter.widgets.EditableText.buildContextualMenu}
+  /// Builds the text selection toolbar when requested by the user.
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [_PlatformTextSelectionControlsToolbar], which is built by default.
+  /// {@endtemplate}
+  final ContextualMenuBuilder? buildContextualMenu;
+
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
@@ -1589,6 +1603,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final LayerLink _endHandleLayerLink = LayerLink();
 
   bool _didAutoFocus = false;
+
+  // The BuildContext that contains the ContextualMenuArea built by this widget,
+  // if one exists.
+  //
+  // This is used by TextSelectionOverlay to lookup the ContextualMenuArea.
+  late BuildContext _contextualMenuContext;
 
   AutofillGroupState? _currentAutofillScope;
   @override
@@ -2455,7 +2475,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_selectionOverlay == null) {
         _selectionOverlay = TextSelectionOverlay(
           clipboardStatus: clipboardStatus,
-          context: context,
+          context: _contextualMenuContext,
           value: _value,
           debugRequiredFor: widget,
           toolbarLayerLink: _toolbarLayerLink,
@@ -3253,7 +3273,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
-    return MouseRegion(
+    Widget child = MouseRegion(
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
       child: Actions(
         actions: _actions,
@@ -3348,12 +3368,26 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ),
       ),
     );
+
+    if (widget.buildContextualMenu == null) {
+      _contextualMenuContext = context;
+      return child;
+    }
+    return ContextualMenuArea(
+      buildMenu: widget.buildContextualMenu!,
+      child: Builder(
+        builder: (BuildContext context) {
+          _contextualMenuContext = context;
+          return child;
+        }
+      ),
+    );
   }
 
   /// Builds [TextSpan] from current editing value.
   ///
   /// By default makes text in composing range appear as underlined.
-  /// Descendants can override this method to customize appearance of text.
+  /// Descendants can override this method to customize appearance of text
   TextSpan buildTextSpan() {
     if (widget.obscureText) {
       String text = _value.text;

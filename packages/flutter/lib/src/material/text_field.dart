@@ -332,6 +332,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.buildContextualMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -769,6 +770,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
+
+  /// {@macro flutter.widgets.EditableText.buildContextualMenu}
+  final ContextualMenuBuilder? buildContextualMenu;
 
   @override
   State<TextField> createState() => _TextFieldState();
@@ -1215,9 +1219,66 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     Widget child = RepaintBoundary(
       child: UnmanagedRestorationScope(
         bucket: bucket,
-        // TODO(justinmc): This can't be overridden by users.
-        child: ContextualMenuArea(
-          buildMenu: (BuildContext context, Offset primaryAnchor, Offset? secondaryAnchor) {
+        child: EditableText(
+          key: editableTextKey,
+          readOnly: widget.readOnly || !_isEnabled,
+          toolbarOptions: widget.toolbarOptions,
+          showCursor: widget.showCursor,
+          showSelectionHandles: _showSelectionHandles,
+          controller: controller,
+          focusNode: focusNode,
+          keyboardType: widget.keyboardType,
+          textInputAction: widget.textInputAction,
+          textCapitalization: widget.textCapitalization,
+          style: style,
+          strutStyle: widget.strutStyle,
+          textAlign: widget.textAlign,
+          textDirection: widget.textDirection,
+          autofocus: widget.autofocus,
+          obscuringCharacter: widget.obscuringCharacter,
+          obscureText: widget.obscureText,
+          autocorrect: widget.autocorrect,
+          smartDashesType: widget.smartDashesType,
+          smartQuotesType: widget.smartQuotesType,
+          enableSuggestions: widget.enableSuggestions,
+          maxLines: widget.maxLines,
+          minLines: widget.minLines,
+          expands: widget.expands,
+          // Only show the selection highlight when the text field is focused.
+          selectionColor: focusNode.hasFocus ? selectionColor : null,
+          selectionControls: widget.selectionEnabled ? textSelectionControls : null,
+          onChanged: widget.onChanged,
+          onSelectionChanged: _handleSelectionChanged,
+          onEditingComplete: widget.onEditingComplete,
+          onSubmitted: widget.onSubmitted,
+          onAppPrivateCommand: widget.onAppPrivateCommand,
+          onSelectionHandleTapped: _handleSelectionHandleTapped,
+          inputFormatters: formatters,
+          rendererIgnoresPointer: true,
+          mouseCursor: MouseCursor.defer, // TextField will handle the cursor
+          cursorWidth: widget.cursorWidth,
+          cursorHeight: widget.cursorHeight,
+          cursorRadius: cursorRadius,
+          cursorColor: cursorColor,
+          selectionHeightStyle: widget.selectionHeightStyle,
+          selectionWidthStyle: widget.selectionWidthStyle,
+          cursorOpacityAnimates: cursorOpacityAnimates,
+          cursorOffset: cursorOffset,
+          paintCursorAboveText: paintCursorAboveText,
+          backgroundCursorColor: CupertinoColors.inactiveGray,
+          scrollPadding: widget.scrollPadding,
+          keyboardAppearance: keyboardAppearance,
+          enableInteractiveSelection: widget.enableInteractiveSelection,
+          dragStartBehavior: widget.dragStartBehavior,
+          scrollController: widget.scrollController,
+          scrollPhysics: widget.scrollPhysics,
+          autofillClient: this,
+          autocorrectionTextRectColor: autocorrectionTextRectColor,
+          clipBehavior: widget.clipBehavior,
+          restorationId: 'editable',
+          scribbleEnabled: widget.scribbleEnabled,
+          enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+          buildContextualMenu: widget.buildContextualMenu ?? (BuildContext context, Offset primaryAnchor, Offset? secondaryAnchor) {
             if (_editableText == null || textSelectionControls == null) {
               return const SizedBox.shrink();
             }
@@ -1231,66 +1292,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
               editableText: _editableText!,
             );
           },
-          child: EditableText(
-            key: editableTextKey,
-            readOnly: widget.readOnly || !_isEnabled,
-            toolbarOptions: widget.toolbarOptions,
-            showCursor: widget.showCursor,
-            showSelectionHandles: _showSelectionHandles,
-            controller: controller,
-            focusNode: focusNode,
-            keyboardType: widget.keyboardType,
-            textInputAction: widget.textInputAction,
-            textCapitalization: widget.textCapitalization,
-            style: style,
-            strutStyle: widget.strutStyle,
-            textAlign: widget.textAlign,
-            textDirection: widget.textDirection,
-            autofocus: widget.autofocus,
-            obscuringCharacter: widget.obscuringCharacter,
-            obscureText: widget.obscureText,
-            autocorrect: widget.autocorrect,
-            smartDashesType: widget.smartDashesType,
-            smartQuotesType: widget.smartQuotesType,
-            enableSuggestions: widget.enableSuggestions,
-            maxLines: widget.maxLines,
-            minLines: widget.minLines,
-            expands: widget.expands,
-            // Only show the selection highlight when the text field is focused.
-            selectionColor: focusNode.hasFocus ? selectionColor : null,
-            selectionControls: widget.selectionEnabled ? textSelectionControls : null,
-            onChanged: widget.onChanged,
-            onSelectionChanged: _handleSelectionChanged,
-            onEditingComplete: widget.onEditingComplete,
-            onSubmitted: widget.onSubmitted,
-            onAppPrivateCommand: widget.onAppPrivateCommand,
-            onSelectionHandleTapped: _handleSelectionHandleTapped,
-            inputFormatters: formatters,
-            rendererIgnoresPointer: true,
-            mouseCursor: MouseCursor.defer, // TextField will handle the cursor
-            cursorWidth: widget.cursorWidth,
-            cursorHeight: widget.cursorHeight,
-            cursorRadius: cursorRadius,
-            cursorColor: cursorColor,
-            selectionHeightStyle: widget.selectionHeightStyle,
-            selectionWidthStyle: widget.selectionWidthStyle,
-            cursorOpacityAnimates: cursorOpacityAnimates,
-            cursorOffset: cursorOffset,
-            paintCursorAboveText: paintCursorAboveText,
-            backgroundCursorColor: CupertinoColors.inactiveGray,
-            scrollPadding: widget.scrollPadding,
-            keyboardAppearance: keyboardAppearance,
-            enableInteractiveSelection: widget.enableInteractiveSelection,
-            dragStartBehavior: widget.dragStartBehavior,
-            scrollController: widget.scrollController,
-            scrollPhysics: widget.scrollPhysics,
-            autofillClient: this,
-            autocorrectionTextRectColor: autocorrectionTextRectColor,
-            clipBehavior: widget.clipBehavior,
-            restorationId: 'editable',
-            scribbleEnabled: widget.scribbleEnabled,
-            enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          ),
         ),
       ),
     );
@@ -1369,6 +1370,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
 // TODO(justinmc): CupertinoTextField. You can't just share this Material
 // stuff there, so I think I need to create a Cupertino one.
+// TODO(justinmc): Move this somewhere, consider making it public.
+/// The [ContextualMenu] for text selection for the current platform.
 class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
   const _PlatformTextSelectionControlsToolbar({
     required this.primaryAnchor,

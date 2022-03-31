@@ -389,13 +389,6 @@ class TextSelectionOverlay {
     _selectionOverlay.showToolbar();
     */
 
-    /*
-    _contextualMenuController?.dispose();
-    _contextualMenuController = _ContextualMenuController(
-      context: context,
-      anchor: renderObject.lastSecondaryTapDownPosition!,
-    );
-    */
     // If right clicking, use the right click position as the only anchor.
     if (renderObject.lastSecondaryTapDownPosition != null) {
       _contextualMenuAreaState.showContextualMenu(renderObject.lastSecondaryTapDownPosition!);
@@ -410,7 +403,7 @@ class TextSelectionOverlay {
       renderBox.localToGlobal(Offset.zero),
       renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
     );
-    List<TextSelectionPoint> selectionEndPoints = renderObject.getEndpointsForSelection(_selection);
+    final List<TextSelectionPoint> selectionEndPoints = renderObject.getEndpointsForSelection(_selection);
     final bool isMultiline = selectionEndPoints.last.point.dy - selectionEndPoints.first.point.dy >
         _getEndGlyphHeight() / 2;
 

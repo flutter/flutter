@@ -154,7 +154,6 @@ class ContextualMenuController {
           child: GestureDetector(
             onTap: () {},
             onSecondaryTap: () {},
-            //child: capturedThemes.wrap(contextualMenuConfiguration.buildMenu(context, anchor)),
             child: capturedThemes.wrap(buildMenu(context, primaryAnchor, secondaryAnchor)),
           ),
         );
@@ -163,8 +162,10 @@ class ContextualMenuController {
     overlayState!.insert(_menuOverlayEntry!);
   }
 
+  /// True iff the menu is currently being displayed.
   bool get isVisible => _menuOverlayEntry != null;
 
+  /// Remove the menu.
   void dispose() {
     _menuOverlayEntry?.remove();
     _menuOverlayEntry = null;
