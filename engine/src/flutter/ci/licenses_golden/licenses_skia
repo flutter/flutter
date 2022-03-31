@@ -1,4 +1,4 @@
-Signature: 4a988ae42e4aa9456abb727ef2152b55
+Signature: 4c9302ddb9a2c55225bc8fb99c7fa808
 
 UNUSED LICENSES:
 
@@ -2824,6 +2824,7 @@ FILE: ../../../third_party/skia/include/private/GrDawnTypesPriv.h
 FILE: ../../../third_party/skia/include/private/GrMockTypesPriv.h
 FILE: ../../../third_party/skia/include/private/chromium/GrSlug.h
 FILE: ../../../third_party/skia/include/sksl/DSLSymbols.h
+FILE: ../../../third_party/skia/include/sksl/SkSLOperator.h
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings_gen.cpp
 FILE: ../../../third_party/skia/src/core/SkBlendModeBlender.cpp
 FILE: ../../../third_party/skia/src/core/SkBlendModeBlender.h
@@ -2878,8 +2879,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLIntrinsicList.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
-FILE: ../../../third_party/skia/src/sksl/SkSLOperators.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLOperators.h
+FILE: ../../../third_party/skia/src/sksl/SkSLOperator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLSharedCompiler.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLSharedCompiler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLThreadContext.h
@@ -6289,6 +6289,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/experimental/graphite/src/ClipStack.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/ClipStack_graphite.h
 FILE: ../../../third_party/skia/experimental/graphite/src/DrawGeometry.h
 FILE: ../../../third_party/skia/experimental/graphite/src/GlobalCache.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/GlobalCache.h
