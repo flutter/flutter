@@ -238,17 +238,17 @@ ComponentV2::ComponentV2(
 
   // ComponentStartInfo::runtime_dir (optional).
   if (start_info.has_runtime_dir()) {
-    runtime_dir_->Serve(fuchsia::io::OPEN_RIGHT_READABLE |
-                            fuchsia::io::OPEN_RIGHT_WRITABLE |
-                            fuchsia::io::OPEN_FLAG_DIRECTORY,
+    runtime_dir_->Serve(fuchsia::io::OpenFlags::RIGHT_READABLE |
+                            fuchsia::io::OpenFlags::RIGHT_WRITABLE |
+                            fuchsia::io::OpenFlags::DIRECTORY,
                         start_info.mutable_runtime_dir()->TakeChannel());
   }
 
   // ComponentStartInfo::outgoing_dir (optional).
   if (start_info.has_outgoing_dir()) {
-    outgoing_dir_->Serve(fuchsia::io::OPEN_RIGHT_READABLE |
-                             fuchsia::io::OPEN_RIGHT_WRITABLE |
-                             fuchsia::io::OPEN_FLAG_DIRECTORY,
+    outgoing_dir_->Serve(fuchsia::io::OpenFlags::RIGHT_READABLE |
+                             fuchsia::io::OpenFlags::RIGHT_WRITABLE |
+                             fuchsia::io::OpenFlags::DIRECTORY,
                          start_info.mutable_outgoing_dir()->TakeChannel());
   }
 
@@ -266,9 +266,9 @@ ComponentV2::ComponentV2(
   composed_service_dir->set_fallback(std::move(flutter_public_dir));
 
   // Clone and check if client is servicing the directory.
-  directory_ptr_->Clone(fuchsia::io::OPEN_FLAG_DESCRIBE |
-                            fuchsia::io::OPEN_RIGHT_READABLE |
-                            fuchsia::io::OPEN_RIGHT_WRITABLE,
+  directory_ptr_->Clone(fuchsia::io::OpenFlags::DESCRIBE |
+                            fuchsia::io::OpenFlags::RIGHT_READABLE |
+                            fuchsia::io::OpenFlags::RIGHT_WRITABLE,
                         cloned_directory_ptr_.NewRequest());
 
   // Collect our standard set of directories along with directories that are
