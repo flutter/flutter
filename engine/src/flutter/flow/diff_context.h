@@ -133,7 +133,12 @@ class DiffContext {
   //
   // additional_damage is the previously accumulated frame_damage for
   // current framebuffer
-  Damage ComputeDamage(const SkIRect& additional_damage) const;
+  //
+  // clip_alignment controls the alignment of resulting frame and surface
+  // damage.
+  Damage ComputeDamage(const SkIRect& additional_damage,
+                       int horizontal_clip_alignment = 0,
+                       int vertical_clip_alignment = 0) const;
 
   double frame_device_pixel_ratio() const { return frame_device_pixel_ratio_; };
 
@@ -229,6 +234,10 @@ class DiffContext {
   const PaintRegionMap& last_frame_paint_region_map_;
 
   void AddDamage(const SkRect& rect);
+
+  void AlignRect(SkIRect& rect,
+                 int horizontal_alignment,
+                 int vertical_clip_alignment) const;
 
   struct Readback {
     // Index of rects_ entry that this readback belongs to. Used to

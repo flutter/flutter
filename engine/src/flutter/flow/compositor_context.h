@@ -69,6 +69,12 @@ class FrameDamage {
     additional_damage_.join(damage);
   }
 
+  // Specifies clip rect alignment.
+  void SetClipAlignment(int horizontal, int vertical) {
+    horizontal_clip_alignment_ = horizontal;
+    vertical_clip_alignment_ = vertical;
+  }
+
   // Calculates clip rect for current rasterization. This is diff of layer tree
   // and previous layer tree + any additional provideddamage.
   // If previous layer tree is not specified, clip rect will be nulloptional,
@@ -90,6 +96,8 @@ class FrameDamage {
   SkIRect additional_damage_ = SkIRect::MakeEmpty();
   std::optional<Damage> damage_;
   const LayerTree* prev_layer_tree_ = nullptr;
+  int vertical_clip_alignment_ = 1;
+  int horizontal_clip_alignment_ = 1;
 };
 
 class CompositorContext {

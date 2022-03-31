@@ -36,7 +36,9 @@ std::optional<SkRect> FrameDamage::ComputeClipRect(
       layer_tree.root_layer()->Diff(&context, prev_root_layer);
     }
 
-    damage_ = context.ComputeDamage(additional_damage_);
+    damage_ =
+        context.ComputeDamage(additional_damage_, horizontal_clip_alignment_,
+                              vertical_clip_alignment_);
     return SkRect::Make(damage_->buffer_damage);
   } else {
     return std::nullopt;
