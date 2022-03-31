@@ -37,7 +37,7 @@ class FABExample extends StatelessWidget {
       body: const Center(child: Text('Press the button below!')),
       // An example of the floating action button.
       //
-      // https://m3.material.io/components/floating-action-button/specs#71504201-7bd1-423d-8bb7-07e0291743e5
+      // https://m3.material.io/components/floating-action-button/specs
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Add your onPressed code here!
