@@ -2217,18 +2217,9 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     }
   }
 
-  /// The touch focus dropping behavior is only present on mobile browsers.
+  /// The touch focus dropping behavior is only present on desktop and mobile browsers.
   bool get _shouldIgnoreTouchEvents {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return !kIsWeb;
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-        return true;
-    }
+    return !kIsWeb;
   }
 
   @override
