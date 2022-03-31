@@ -94,6 +94,9 @@ FILE: ../../../flutter/display_list/display_list_tile_mode.h
 FILE: ../../../flutter/display_list/display_list_unittests.cc
 FILE: ../../../flutter/display_list/display_list_utils.cc
 FILE: ../../../flutter/display_list/display_list_utils.h
+FILE: ../../../flutter/display_list/display_list_vertices.cc
+FILE: ../../../flutter/display_list/display_list_vertices.h
+FILE: ../../../flutter/display_list/display_list_vertices_unittests.cc
 FILE: ../../../flutter/display_list/types.h
 FILE: ../../../flutter/flow/compositor_context.cc
 FILE: ../../../flutter/flow/compositor_context.h
@@ -458,10 +461,14 @@ FILE: ../../../flutter/impeller/entity/contents/filters/blend_filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/blend_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/filter_contents.h
+FILE: ../../../flutter/impeller/entity/contents/filters/filter_input.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/filter_input.h
 FILE: ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/linear_gradient_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/linear_gradient_contents.h
+FILE: ../../../flutter/impeller/entity/contents/snapshot.cc
+FILE: ../../../flutter/impeller/entity/contents/snapshot.h
 FILE: ../../../flutter/impeller/entity/contents/solid_color_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/solid_color_contents.h
 FILE: ../../../flutter/impeller/entity/contents/solid_stroke_contents.cc

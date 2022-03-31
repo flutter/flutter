@@ -173,9 +173,14 @@ void DisplayListCanvasDispatcher::drawPoints(SkCanvas::PointMode mode,
                                              const SkPoint pts[]) {
   canvas_->drawPoints(mode, count, pts, paint());
 }
-void DisplayListCanvasDispatcher::drawVertices(const sk_sp<SkVertices> vertices,
+void DisplayListCanvasDispatcher::drawSkVertices(
+    const sk_sp<SkVertices> vertices,
+    SkBlendMode mode) {
+  canvas_->drawVertices(vertices, mode, paint());
+}
+void DisplayListCanvasDispatcher::drawVertices(const DlVertices* vertices,
                                                DlBlendMode mode) {
-  canvas_->drawVertices(vertices, ToSk(mode), paint());
+  canvas_->drawVertices(vertices->skia_object(), ToSk(mode), paint());
 }
 void DisplayListCanvasDispatcher::drawImage(const sk_sp<DlImage> image,
                                             const SkPoint point,

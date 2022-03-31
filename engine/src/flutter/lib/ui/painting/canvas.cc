@@ -610,7 +610,7 @@ void Canvas::drawVertices(const Vertices* vertices,
     builder()->drawVertices(vertices->vertices(), blend_mode);
   } else if (canvas_) {
     SkPaint sk_paint;
-    canvas_->drawVertices(vertices->vertices(), ToSk(blend_mode),
+    canvas_->drawVertices(vertices->vertices()->skia_object(), ToSk(blend_mode),
                           *paint.paint(sk_paint));
   }
 }

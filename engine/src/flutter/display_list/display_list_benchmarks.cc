@@ -688,11 +688,11 @@ void BM_DrawPath(benchmark::State& state,
 // and the final vertex being the center point of the disc.
 //
 // Each vertex colour will alternate through Red, Green, Blue and Cyan.
-sk_sp<SkVertices> GetTestVertices(SkPoint center,
-                                  float radius,
-                                  size_t vertex_count,
-                                  SkVertices::VertexMode mode,
-                                  size_t& final_vertex_count) {
+std::shared_ptr<DlVertices> GetTestVertices(SkPoint center,
+                                            float radius,
+                                            size_t vertex_count,
+                                            DlVertexMode mode,
+                                            size_t& final_vertex_count) {
   size_t outer_vertex_count = vertex_count / 2;
   std::vector<SkPoint> outer_points =
       GetPolygonPoints(outer_vertex_count, center, radius);
@@ -701,7 +701,7 @@ sk_sp<SkVertices> GetTestVertices(SkPoint center,
   std::vector<SkColor> colors;
 
   switch (mode) {
-    case SkVertices::VertexMode::kTriangleFan_VertexMode:
+    case DlVertexMode::kTriangleFan:
       // Calling the points on the outer circle O_0, O_1, O_2, ..., and
       // the center point C, this should create a triangle fan with vertices
       // C, O_0, O_1, O_2, O_3, ...
@@ -718,7 +718,7 @@ sk_sp<SkVertices> GetTestVertices(SkPoint center,
         }
       }
       break;
-    case SkVertices::VertexMode::kTriangles_VertexMode:
+    case DlVertexMode::kTriangles:
       // Calling the points on the outer circle O_0, O_1, O_2, ..., and
       // the center point C, this should create a series of triangles with
       // vertices O_0, O_1, C, O_1, O_2, C, O_2, O_3, C, ...
@@ -731,7 +731,7 @@ sk_sp<SkVertices> GetTestVertices(SkPoint center,
         colors.push_back(SK_ColorBLUE);
       }
       break;
-    case SkVertices::VertexMode::kTriangleStrip_VertexMode:
+    case DlVertexMode::kTriangleStrip:
       // Calling the points on the outer circle O_0, O_1, O_2, ..., and
       // the center point C, this should create a strip with vertices
       // O_0, O_1, C, O_2, O_3, C, O_4, O_5, C, ...
@@ -749,17 +749,17 @@ sk_sp<SkVertices> GetTestVertices(SkPoint center,
   }
 
   final_vertex_count = vertices.size();
-  return SkVertices::MakeCopy(mode, vertices.size(), vertices.data(), nullptr,
-                              colors.data());
+  return DlVertices::Make(mode, vertices.size(), vertices.data(), nullptr,
+                          colors.data());
 }
 
-std::string VertexModeToString(SkVertices::VertexMode mode) {
+std::string VertexModeToString(DlVertexMode mode) {
   switch (mode) {
-    case SkVertices::VertexMode::kTriangleStrip_VertexMode:
+    case DlVertexMode::kTriangleStrip:
       return "TriangleStrip";
-    case SkVertices::VertexMode::kTriangleFan_VertexMode:
+    case DlVertexMode::kTriangleFan:
       return "TriangleFan";
-    case SkVertices::VertexMode::kTriangles_VertexMode:
+    case DlVertexMode::kTriangles:
       return "Triangles";
   }
   return "Unknown";
@@ -776,7 +776,7 @@ std::string VertexModeToString(SkVertices::VertexMode mode) {
 void BM_DrawVertices(benchmark::State& state,
                      BackendType backend_type,
                      unsigned attributes,
-                     SkVertices::VertexMode mode) {
+                     DlVertexMode mode) {
   auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   builder.setAttributesFromPaint(GetPaintForRun(attributes),
@@ -799,7 +799,7 @@ void BM_DrawVertices(benchmark::State& state,
 
   state.counters["DrawCallCount"] = center_points.size();
   for (SkPoint p : center_points) {
-    sk_sp<SkVertices> vertices =
+    std::shared_ptr<DlVertices> vertices =
         GetTestVertices(p, radius, 50, mode, vertex_count);
     total_vertex_count += vertex_count;
     builder.drawVertices(vertices, DlBlendMode::kSrc);

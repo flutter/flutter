@@ -21,7 +21,7 @@ static void TestEquals(T& source1, T& source2) {
   ASSERT_EQ(source1, source2);
   ASSERT_EQ(source2, source1);
   ASSERT_TRUE(Equals(&source1, &source2));
-  ASSERT_TRUE(Equals(source1.shared(), source2.shared()));
+  ASSERT_TRUE(Equals(&source2, &source1));
 }
 
 template <class T>
@@ -33,7 +33,7 @@ static void TestNotEquals(T& source1, T& source2, std::string label) {
   ASSERT_NE(source1, source2) << label;
   ASSERT_NE(source2, source1) << label;
   ASSERT_TRUE(NotEquals(&source1, &source2));
-  ASSERT_TRUE(NotEquals(source1.shared(), source2.shared()));
+  ASSERT_TRUE(NotEquals(&source2, &source1));
 }
 
 }  // namespace testing

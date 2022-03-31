@@ -131,6 +131,7 @@ namespace flutter {
   V(DrawLines)                      \
   V(DrawPolygon)                    \
   V(DrawVertices)                   \
+  V(DrawSkVertices)                 \
                                     \
   V(DrawImage)                      \
   V(DrawImageWithAttr)              \

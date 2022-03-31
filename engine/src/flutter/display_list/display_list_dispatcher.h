@@ -12,6 +12,7 @@
 #include "flutter/display_list/display_list_image.h"
 #include "flutter/display_list/display_list_image_filter.h"
 #include "flutter/display_list/display_list_mask_filter.h"
+#include "flutter/display_list/display_list_vertices.h"
 
 namespace flutter {
 
@@ -205,8 +206,9 @@ class Dispatcher {
   virtual void drawPoints(SkCanvas::PointMode mode,
                           uint32_t count,
                           const SkPoint points[]) = 0;
-  virtual void drawVertices(const sk_sp<SkVertices> vertices,
-                            DlBlendMode mode) = 0;
+  virtual void drawSkVertices(const sk_sp<SkVertices> vertices,
+                              SkBlendMode mode) = 0;
+  virtual void drawVertices(const DlVertices* vertices, DlBlendMode mode) = 0;
   virtual void drawImage(const sk_sp<DlImage> image,
                          const SkPoint point,
                          const SkSamplingOptions& sampling,

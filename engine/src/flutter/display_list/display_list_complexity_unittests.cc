@@ -283,9 +283,8 @@ TEST(DisplayListComplexity, DrawArc) {
 
 TEST(DisplayListComplexity, DrawVertices) {
   auto points = GetTestPoints();
-  auto vertices =
-      SkVertices::MakeCopy(SkVertices::VertexMode::kTriangles_VertexMode,
-                           points.size(), points.data(), nullptr, nullptr);
+  auto vertices = DlVertices::Make(DlVertexMode::kTriangles, points.size(),
+                                   points.data(), nullptr, nullptr);
   DisplayListBuilder builder;
   builder.drawVertices(vertices, DlBlendMode::kSrc);
   auto display_list = builder.Build();

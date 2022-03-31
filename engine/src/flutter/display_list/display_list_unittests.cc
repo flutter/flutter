@@ -191,18 +191,18 @@ static const SkPath TestPath3 =
 static const SkMatrix TestMatrix1 = SkMatrix::Scale(2, 2);
 static const SkMatrix TestMatrix2 = SkMatrix::RotateDeg(45);
 
-static sk_sp<SkVertices> TestVertices1 =
-    SkVertices::MakeCopy(SkVertices::kTriangles_VertexMode,
-                         3,
-                         TestPoints,
-                         nullptr,
-                         colors);
-static sk_sp<SkVertices> TestVertices2 =
-    SkVertices::MakeCopy(SkVertices::kTriangleFan_VertexMode,
-                         3,
-                         TestPoints,
-                         nullptr,
-                         colors);
+static std::shared_ptr<const DlVertices> TestVertices1 =
+    DlVertices::Make(DlVertexMode::kTriangles,  //
+                     3,
+                     TestPoints,
+                     nullptr,
+                     colors);
+static std::shared_ptr<const DlVertices> TestVertices2 =
+    DlVertices::Make(DlVertexMode::kTriangleFan,  //
+                     3,
+                     TestPoints,
+                     nullptr,
+                     colors);
 
 static constexpr int TestDivs1[] = {10, 20, 30};
 static constexpr int TestDivs2[] = {15, 20, 25};
@@ -645,9 +645,9 @@ std::vector<DisplayListInvocationGroup> allGroups = {
     }
   },
   { "DrawVertices", {
-      {1, 16, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices1, DlBlendMode::kSrcIn);}},
-      {1, 16, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices1, DlBlendMode::kDstIn);}},
-      {1, 16, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices2, DlBlendMode::kSrcIn);}},
+      {1, 112, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices1, DlBlendMode::kSrcIn);}},
+      {1, 112, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices1, DlBlendMode::kDstIn);}},
+      {1, 112, 1, 16, [](DisplayListBuilder& b) {b.drawVertices(TestVertices2, DlBlendMode::kSrcIn);}},
     }
   },
   { "DrawImage", {
