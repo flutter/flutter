@@ -635,7 +635,6 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   Map<String, Object?> serializeForMenu() {
     return <String, Object?>{
       MenuSerializableShortcut.shortcutCharacter: character,
-      MenuSerializableShortcut.shortcutModifiers: 0,
     };
   }
 

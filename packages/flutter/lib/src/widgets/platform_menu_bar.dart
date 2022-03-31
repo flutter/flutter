@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -713,12 +712,24 @@ class PlatformMenuItem extends MenuItem {
     final MenuSerializableShortcut? shortcut = item.shortcut;
     final Map<String, Object?> shortcutSerialized = shortcut?.serializeForMenu() ?? <String, Object?>{};
     assert(() {
-      return shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutCharacter) ||
-          (shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutModifiers) &&
-              shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutTrigger));
-    }(), 'Shortcut serialization must contain either a MenuSerializableShortcut.shortcutCharacter '
-         'key, or both a MenuSerializableShortcut.shortcutModifiers and a '
-         'MenuSerializableShortcut.shortcutTrigger key.');
+      if (shortcut == null) {
+        return true;
+      }
+      final bool hasCharacter = shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutCharacter);
+      final bool hasModifiers = shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutModifiers);
+      final bool hasTrigger = shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutTrigger);
+      if ((hasCharacter && !hasModifiers && !hasTrigger) || (hasModifiers && hasTrigger && !hasCharacter)) {
+        if (hasCharacter) {
+          return shortcutSerialized[MenuSerializableShortcut.shortcutCharacter] is String;
+        } else {
+          return shortcutSerialized[MenuSerializableShortcut.shortcutModifiers] is int &&
+              shortcutSerialized[MenuSerializableShortcut.shortcutTrigger] is int;
+        }
+      }
+      return false;
+    }(), 'Shortcut serialization must contain either a String MenuSerializableShortcut.shortcutCharacter '
+         'field, or both an integer MenuSerializableShortcut.shortcutModifiers and an integer '
+         'MenuSerializableShortcut.shortcutTrigger field.');
     return <String, Object?>{
       _kIdKey: getId(item),
       _kLabelKey: item.label,
