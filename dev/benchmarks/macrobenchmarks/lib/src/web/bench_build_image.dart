@@ -52,7 +52,7 @@ class BenchBuildImage extends WidgetRecorder {
 }
 
 class _RotatingWidget extends StatefulWidget {
-  const _RotatingWidget({required this.child, Key? key}) : super(key: key);
+  const _RotatingWidget({required this.child});
 
   final Widget child;
 

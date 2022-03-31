@@ -25,8 +25,7 @@ const double _kCornerRadius = 24.0;
 const double _kWidthForCartIcon = 64.0;
 
 class ExpandingBottomSheet extends StatefulWidget {
-  const ExpandingBottomSheet({Key? key, required this.hideController})
-      : super(key: key);
+  const ExpandingBottomSheet({super.key, required this.hideController});
 
   final AnimationController hideController;
 
@@ -403,7 +402,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
 }
 
 class ProductThumbnailRow extends StatefulWidget {
-  const ProductThumbnailRow({Key? key}) : super(key: key);
+  const ProductThumbnailRow({super.key});
 
   @override
   State<ProductThumbnailRow> createState() => _ProductThumbnailRowState();
@@ -512,7 +511,7 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
 }
 
 class ExtraProductsNumber extends StatelessWidget {
-  const ExtraProductsNumber({Key? key}) : super(key: key);
+  const ExtraProductsNumber({super.key});
 
   // Calculates the number to be displayed at the end of the row if there are
   // more than three products in the cart. This calculates overflow products,
@@ -555,7 +554,7 @@ class ExtraProductsNumber extends StatelessWidget {
 }
 
 class ProductThumbnail extends StatelessWidget {
-  const ProductThumbnail(this.animation, this.opacityAnimation, this.product, {Key? key}) : super(key: key);
+  const ProductThumbnail(this.animation, this.opacityAnimation, this.product, {super.key});
 
   final Animation<double> animation;
   final Animation<double> opacityAnimation;

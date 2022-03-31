@@ -212,7 +212,11 @@ abstract class Logger {
 
   /// A [SilentStatus] or an [AnonymousSpinnerStatus] (depending on whether the
   /// terminal is fancy enough), already started.
-  Status startSpinner({ VoidCallback? onFinish });
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+  });
 
   /// Send an event to be emitted.
   ///
@@ -368,8 +372,16 @@ class DelegatingLogger implements Logger {
   }
 
   @override
-  Status startSpinner({VoidCallback? onFinish}) {
-    return _delegate.startSpinner(onFinish: onFinish);
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+  }) {
+    return _delegate.startSpinner(
+      onFinish: onFinish,
+      timeout: timeout,
+      slowWarningCallback: slowWarningCallback,
+    );
   }
 
   @override
@@ -571,7 +583,11 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  Status startSpinner({ VoidCallback? onFinish }) {
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+  }) {
     if (_status != null || !supportsColor) {
       return SilentStatus(
         onFinish: onFinish,
@@ -588,6 +604,8 @@ class StdoutLogger extends Logger {
       stdio: _stdio,
       stopwatch: _stopwatchFactory.createStopwatch(),
       terminal: terminal,
+      timeout: timeout,
+      slowWarningCallback: slowWarningCallback,
     )..start();
     return _status!;
   }
@@ -859,7 +877,11 @@ class BufferLogger extends Logger {
   }
 
   @override
-  Status startSpinner({VoidCallback? onFinish}) {
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+  }) {
     return SilentStatus(
       stopwatch: _stopwatchFactory.createStopwatch(),
       onFinish: onFinish,
@@ -1111,9 +1133,11 @@ abstract class Status {
   Status({
     this.onFinish,
     required Stopwatch stopwatch,
+    this.timeout,
   }) : _stopwatch = stopwatch;
 
   final VoidCallback? onFinish;
+  final Duration? timeout;
 
   @protected
   final Stopwatch _stopwatch;
@@ -1125,6 +1149,9 @@ abstract class Status {
     }
     return getElapsedAsMilliseconds(_stopwatch.elapsed);
   }
+
+  @visibleForTesting
+  bool get seemsSlow => timeout != null && _stopwatch.elapsed > timeout!;
 
   /// Call to start spinning.
   void start() {
@@ -1247,16 +1274,21 @@ class AnonymousSpinnerStatus extends Status {
     required Stopwatch stopwatch,
     required Stdio stdio,
     required Terminal terminal,
+    this.slowWarningCallback,
+    Duration? timeout,
   }) : _stdio = stdio,
        _terminal = terminal,
        _animation = _selectAnimation(terminal),
        super(
          onFinish: onFinish,
          stopwatch: stopwatch,
-        );
+         timeout: timeout,
+       );
 
   final Stdio _stdio;
   final Terminal _terminal;
+  String _slowWarning = '';
+  final SlowWarningCallback? slowWarningCallback;
 
   static const String _backspaceChar = '\b';
   static const String _clearChar = ' ';
@@ -1300,9 +1332,10 @@ class AnonymousSpinnerStatus extends Status {
   Timer? timer;
   int ticks = 0;
   int _lastAnimationFrameLength = 0;
+  bool timedOut = false;
 
   String get _currentAnimationFrame => _animation[ticks % _animation.length];
-  int get _currentLineLength => _lastAnimationFrameLength;
+  int get _currentLineLength => _lastAnimationFrameLength + _slowWarning.length;
 
   void _writeToStdOut(String message) => _stdio.stdoutWrite(message);
 
@@ -1332,6 +1365,16 @@ class AnonymousSpinnerStatus extends Status {
     assert(timer.isActive);
     _writeToStdOut(_backspaceChar * _lastAnimationFrameLength);
     ticks += 1;
+    if (seemsSlow) {
+      if (!timedOut) {
+        timedOut = true;
+        _clear(_currentLineLength);
+      }
+      if (_slowWarning == '' && slowWarningCallback != null) {
+        _slowWarning = slowWarningCallback!();
+        _writeToStdOut(_slowWarning);
+      }
+    }
     final String newFrame = _currentAnimationFrame;
     _lastAnimationFrameLength = newFrame.runes.length;
     _writeToStdOut(newFrame);

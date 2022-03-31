@@ -948,7 +948,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performance-overlay>
   final bool showPerformanceOverlay;
 
   /// Checkerboards raster cache images.

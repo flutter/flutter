@@ -27,8 +27,10 @@ import 'android_sdk.dart';
 // For more information about the latest version, check:
 // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
 // https://kotlinlang.org/docs/gradle.html#plugin-and-versions
-const String templateDefaultGradleVersion = '6.7';
-const String templateAndroidGradlePluginVersion = '4.1.0';
+const String templateDefaultGradleVersion = '7.4';
+const String templateAndroidGradlePluginVersion = '7.1.2';
+// TODO(egarciad): Gradle 7 breaks AARs builds: https://github.com/flutter/flutter/issues/101083
+const String templateAndroidGradlePluginVersionForModule = '4.1.0';
 const String templateKotlinGradlePluginVersion = '1.6.10';
 
 final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
@@ -191,6 +193,9 @@ String getGradleVersionFor(String androidPluginVersion) {
   }
   if (_isWithinVersionRange(androidPluginVersion, min: '4.0.0', max: '4.1.0')) {
     return '6.7';
+  }
+  if (_isWithinVersionRange(androidPluginVersion, min: '7.0', max: '7.4')) {
+    return '7.4';
   }
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
 }

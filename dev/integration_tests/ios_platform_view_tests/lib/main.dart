@@ -12,7 +12,7 @@ void main() {
 
 /// The main app entrance of the test
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
 ///
 /// On press the button, a page with platform view should be pushed into the scene.
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, this.title}) : super(key: key);
+  const MyHomePage({super.key, this.title});
   final String? title;
 
   @override
@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 /// A page contains the platform view to be tested.
 class PlatformViewPage extends StatelessWidget {
-  const PlatformViewPage({Key? key}) : super(key: key);
+  const PlatformViewPage({super.key});
 
   static Key button = const ValueKey<String>('plus_button');
 

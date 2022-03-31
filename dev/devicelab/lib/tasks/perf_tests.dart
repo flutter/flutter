@@ -378,6 +378,13 @@ TaskFunction createColorFilterCachePerfE2ETest() {
   ).run;
 }
 
+TaskFunction createShaderMaskCachePerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/shader_mask_cache_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createFadingChildAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -815,6 +822,7 @@ class PerfTest {
     String? resultFilename,
     this.device,
     this.flutterDriveCallback,
+    this.enableImpeller = false,
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -829,6 +837,7 @@ class PerfTest {
     String resultFilename = 'e2e_perf_summary',
     this.device,
     this.flutterDriveCallback,
+    this.enableImpeller = false,
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -859,6 +868,9 @@ class PerfTest {
   ///
   /// If it is not `null`, `flutter drive` will not happen in the PerfTests.
   final FlutterDriveCallback? flutterDriveCallback;
+
+  /// Whether the perf test should enable Impeller.
+  final bool enableImpeller;
 
   /// The keys of the values that need to be reported.
   ///
@@ -929,6 +941,7 @@ class PerfTest {
         if (cacheSkSL) '--cache-sksl',
         if (dartDefine.isNotEmpty)
           ...<String>['--dart-define', dartDefine],
+        if (enableImpeller) '--enable-impeller',
         '-d',
         deviceId,
       ];
@@ -1016,35 +1029,23 @@ const List<String> _kCommonScoreKeys = <String>[
 
 class PerfTestWithSkSL extends PerfTest {
   PerfTestWithSkSL(
-    String testDirectory,
-    String testTarget,
-    String timelineFileName, {
-    bool measureCpuGpu = false,
-    String? testDriver,
-    bool needsFullTimeline = true,
-    List<String>? benchmarkScoreKeys,
-  }) : super(
-    testDirectory,
-    testTarget,
-    timelineFileName,
-    measureCpuGpu: measureCpuGpu,
-    testDriver: testDriver,
-    needsFullTimeline: needsFullTimeline,
-    benchmarkScoreKeys: benchmarkScoreKeys,
-  );
+    super.testDirectory,
+    super.testTarget,
+    String super.timelineFileName, {
+    super.measureCpuGpu = false,
+    super.testDriver,
+    super.needsFullTimeline,
+    super.benchmarkScoreKeys,
+  });
 
 
   PerfTestWithSkSL.e2e(
-    String testDirectory,
-    String testTarget, {
-    String testDriver =  'test_driver/e2e_test.dart',
-    String resultFilename = 'e2e_perf_summary',
+    super.testDirectory,
+    super.testTarget, {
+    String super.testDriver,
+    super.resultFilename,
   }) : super.e2e(
-    testDirectory,
-    testTarget,
-    testDriver: testDriver,
     needsFullTimeline: false,
-    resultFilename: resultFilename,
   );
 
   @override

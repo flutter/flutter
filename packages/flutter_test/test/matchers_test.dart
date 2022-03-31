@@ -731,7 +731,7 @@ class _FakeSemanticsNode extends SemanticsNode {
 
 @immutable
 class _CustomColor extends Color {
-  const _CustomColor(int value, {this.isEqual}) : super(value);
+  const _CustomColor(super.value, {this.isEqual});
   final bool? isEqual;
 
   @override

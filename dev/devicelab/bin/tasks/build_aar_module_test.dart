@@ -262,7 +262,7 @@ Future<void> main() async {
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      // rmTree(tempDir);
+      rmTree(tempDir);
     }
   });
 }
