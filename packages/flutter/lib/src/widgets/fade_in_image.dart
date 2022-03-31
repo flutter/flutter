@@ -371,7 +371,7 @@ class FadeInImage extends StatefulWidget {
 
 class _FadeInImageState extends State<FadeInImage> {
   static const Animation<double> _kOpaqueAnimation = AlwaysStoppedAnimation<double>(1.0);
-  Widget? _oldImage;
+  bool targetLoaded = false;
 
   // These ProxyAnimations are changed to the fade in animation by
   // [_AnimatedFadeOutFadeInState]. Otherwise these animations are reset to
@@ -411,24 +411,8 @@ class _FadeInImageState extends State<FadeInImage> {
       opacity: _imageAnimation,
       fit: widget.fit,
       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded) {
-          _oldImage = child;
-          return child;
-        }
-        if (_imageAnimation.isCompleted) {
-          // When animation is complete, _oldImage will be non-null.
-          assert(_oldImage != null);
-          if (frame == null) {
-            // Target image is still loading.
-            return _oldImage!;
-          } else {
-            // Target image has loaded.
-            _oldImage = child;
-            return child;
-          }
-        } else if(frame != null) {
-          // This is the first image.
-          _oldImage = child;
+        if (wasSynchronouslyLoaded || frame != null) {
+          targetLoaded = true;
         }
         return _AnimatedFadeOutFadeIn(
           target: child,
@@ -440,7 +424,8 @@ class _FadeInImageState extends State<FadeInImage> {
             fit: widget.placeholderFit ?? widget.fit,
           ),
           placeholderProxyAnimation: _placeholderAnimation,
-          isTargetLoaded: _oldImage != null,
+          isTargetLoaded: targetLoaded,
+          wasSynchronouslyLoaded: wasSynchronouslyLoaded,
           fadeInDuration: widget.fadeInDuration,
           fadeOutDuration: widget.fadeOutDuration,
           fadeInCurve: widget.fadeInCurve,
@@ -474,6 +459,7 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
     required this.fadeOutCurve,
     required this.fadeInDuration,
     required this.fadeInCurve,
+    required this.wasSynchronouslyLoaded,
   }) : assert(target != null),
        assert(placeholder != null),
        assert(isTargetLoaded != null),
@@ -492,6 +478,7 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
   final Duration fadeOutDuration;
   final Curve fadeInCurve;
   final Curve fadeOutCurve;
+  final bool wasSynchronouslyLoaded;
 
   @override
   _AnimatedFadeOutFadeInState createState() => _AnimatedFadeOutFadeInState();
@@ -519,6 +506,11 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
 
   @override
   void didUpdateTweens() {
+    if (widget.wasSynchronouslyLoaded) {
+      // Opacity animations should not be reset if image was synchronously loaded.
+      return;
+    }
+
     _placeholderOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
@@ -552,7 +544,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
 
   @override
   Widget build(BuildContext context) {
-    if (_placeholderOpacityAnimation!.isCompleted) {
+    if (widget.wasSynchronouslyLoaded || _placeholderOpacityAnimation!.isCompleted) {
       return widget.target;
     }
 

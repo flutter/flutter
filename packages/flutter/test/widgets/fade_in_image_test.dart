@@ -156,7 +156,7 @@ Future<void> main() async {
       expect(findFadeInImage(tester).target.opacity, 1);
     });
 
-    testWidgets('image gapless playback', (WidgetTester tester) async {
+    testWidgets("FadeInImage's image obeys gapless playback", (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
       final TestImageProvider secondImageProvider = TestImageProvider(replacementImage);
@@ -172,7 +172,7 @@ Future<void> main() async {
       placeholderProvider.complete();
       await tester.pump();
       await tester.pump(animationDuration * 2);
-      // call setState after the animation, which removes the placeholder image.
+      // Calls setState after the animation, which removes the placeholder image.
       await tester.pump(const Duration(milliseconds: 100));
 
       await tester.pumpWidget(FadeInImage(
@@ -182,9 +182,9 @@ Future<void> main() async {
       await tester.pump();
 
       FadeInImageParts parts = findFadeInImage(tester);
-      // continually shows previously loaded image.
+      // Continually shows previously loaded image,
       expect(parts.placeholder, isNull);
-      expect(parts.target.rawImage.image!.isCloneOf(targetImage), true);
+      expect(parts.target.rawImage.image!.isCloneOf(targetImage), isTrue);
       expect(parts.target.opacity, 1);
 
       // Until the new image provider provides the image.
@@ -192,11 +192,11 @@ Future<void> main() async {
       await tester.pump();
 
       parts = findFadeInImage(tester);
-      expect(parts.target.rawImage.image!.isCloneOf(replacementImage), true);
+      expect(parts.target.rawImage.image!.isCloneOf(replacementImage), isTrue);
       expect(parts.target.opacity, 1);
     });
 
-    testWidgets('placeholder gapless playback', (WidgetTester tester) async {
+    testWidgets("FadeInImage's placeholder obeys gapless playback", (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider secondPlaceholderProvider = TestImageProvider(replacementImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
