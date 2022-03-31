@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../base/file_system.dart';
-import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
 import '../../xcode_project.dart';
 
@@ -13,9 +12,8 @@ const String _kDisableMinimumFrameDurationKey = 'CADisableMinimumFrameDurationOn
 class MinimumFrameDurationMigration extends ProjectMigrator {
   MinimumFrameDurationMigration(
     IosProject project,
-    Logger logger,
-  ) : _infoPlist = project.defaultHostInfoPlist,
-      super(logger);
+    super.logger,
+  ) : _infoPlist = project.defaultHostInfoPlist;
 
   final File _infoPlist;
 

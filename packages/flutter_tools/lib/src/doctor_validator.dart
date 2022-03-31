@@ -304,7 +304,7 @@ class NoIdeValidator extends DoctorValidator {
 }
 
 class ValidatorWithResult extends DoctorValidator {
-  ValidatorWithResult(String title, this.result) : super(title);
+  ValidatorWithResult(super.title, this.result);
 
   final ValidationResult result;
 

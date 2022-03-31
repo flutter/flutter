@@ -4,40 +4,28 @@
 
 import 'dart:async';
 
-import 'package:args/args.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../dart/analysis.dart';
 import 'analyze_base.dart';
 
 class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
-    ArgResults argResults,
+    super.argResults,
     List<String> repoRoots,
     List<Directory> repoPackages, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-    required Terminal terminal,
-    required Artifacts artifacts,
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+    required super.terminal,
+    required super.artifacts,
     this.workingDirectory,
   }) : super(
-        argResults,
         repoRoots: repoRoots,
         repoPackages: repoPackages,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        terminal: terminal,
-        artifacts: artifacts,
       );
 
   /// The working directory for testing analysis using dartanalyzer.

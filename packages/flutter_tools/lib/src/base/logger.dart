@@ -706,16 +706,11 @@ int _getColumnSize(String line) {
 /// they will show up as the unrepresentable character symbol '�'.
 class WindowsStdoutLogger extends StdoutLogger {
   WindowsStdoutLogger({
-    required Terminal terminal,
-    required Stdio stdio,
-    required OutputPreferences outputPreferences,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  }) : super(
-      terminal: terminal,
-      stdio: stdio,
-      outputPreferences: outputPreferences,
-      stopwatchFactory: stopwatchFactory,
-    );
+    required super.terminal,
+    required super.stdio,
+    required super.outputPreferences,
+    super.stopwatchFactory,
+  });
 
   @override
   void writeToStdOut(String message) {
@@ -906,11 +901,10 @@ class BufferLogger extends Logger {
 }
 
 class VerboseLogger extends DelegatingLogger {
-  VerboseLogger(Logger parent, {
+  VerboseLogger(super.parent, {
     StopwatchFactory stopwatchFactory = const StopwatchFactory()
   }) : _stopwatch = stopwatchFactory.createStopwatch(),
-       _stopwatchFactory = stopwatchFactory,
-       super(parent) {
+       _stopwatchFactory = stopwatchFactory {
     _stopwatch.start();
   }
 
@@ -1081,7 +1075,7 @@ class VerboseLogger extends DelegatingLogger {
 }
 
 class PrefixedErrorLogger extends DelegatingLogger {
-  PrefixedErrorLogger(Logger parent) : super(parent);
+  PrefixedErrorLogger(super.parent);
 
   @override
   void printError(
@@ -1186,12 +1180,9 @@ abstract class Status {
 /// A [Status] that shows nothing.
 class SilentStatus extends Status {
   SilentStatus({
-    required Stopwatch stopwatch,
-    VoidCallback? onFinish,
-  }) : super(
-    onFinish: onFinish,
-    stopwatch: stopwatch,
-  );
+    required super.stopwatch,
+    super.onFinish,
+  });
 
   @override
   void finish() {
@@ -1206,15 +1197,11 @@ const int _kTimePadding = 8; // should fit "99,999ms"
 class SummaryStatus extends Status {
   SummaryStatus({
     this.message = '',
-    required Stopwatch stopwatch,
+    required super.stopwatch,
     this.padding = kDefaultStatusPadding,
-    VoidCallback? onFinish,
+    super.onFinish,
     required Stdio stdio,
-  }) : _stdio = stdio,
-       super(
-         onFinish: onFinish,
-         stopwatch: stopwatch,
-        );
+  }) : _stdio = stdio;
 
   final String message;
   final int padding;
@@ -1270,20 +1257,15 @@ class SummaryStatus extends Status {
 /// Call [pause] before outputting any text while this is running.
 class AnonymousSpinnerStatus extends Status {
   AnonymousSpinnerStatus({
-    VoidCallback? onFinish,
-    required Stopwatch stopwatch,
+    super.onFinish,
+    required super.stopwatch,
     required Stdio stdio,
     required Terminal terminal,
     this.slowWarningCallback,
-    Duration? timeout,
+    super.timeout,
   }) : _stdio = stdio,
        _terminal = terminal,
-       _animation = _selectAnimation(terminal),
-       super(
-         onFinish: onFinish,
-         stopwatch: stopwatch,
-         timeout: timeout,
-       );
+       _animation = _selectAnimation(terminal);
 
   final Stdio _stdio;
   final Terminal _terminal;
@@ -1425,16 +1407,11 @@ class SpinnerStatus extends AnonymousSpinnerStatus {
   SpinnerStatus({
     required this.message,
     this.padding = kDefaultStatusPadding,
-    VoidCallback? onFinish,
-    required Stopwatch stopwatch,
-    required Stdio stdio,
-    required Terminal terminal,
-  }) : super(
-         onFinish: onFinish,
-         stopwatch: stopwatch,
-         stdio: stdio,
-         terminal: terminal,
-        );
+    super.onFinish,
+    required super.stopwatch,
+    required super.stdio,
+    required super.terminal,
+  });
 
   final String message;
   final int padding;
