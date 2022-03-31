@@ -2,7 +2,6 @@
 #
 # Flutter infra uses this file to generate a checklist of tasks to be performed
 # for every commit.
-    scheduler: luci
 #
 # More information at:
 #  * https://github.com/flutter/cocoon/blob/main/CI_YAML.md
