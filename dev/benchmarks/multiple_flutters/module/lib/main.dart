@@ -15,7 +15,7 @@ void topMain() => runApp(const MyApp(Colors.green));
 void bottomMain() => runApp(const MyApp(Colors.purple));
 
 class MyApp extends StatelessWidget {
-  const MyApp(this.color, {Key? key}) : super(key: key);
+  const MyApp(this.color, {super.key});
 
   final Color color;
 
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, this.title}) : super(key: key);
+  const MyHomePage({super.key, this.title});
   final String? title;
 
   @override

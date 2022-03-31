@@ -224,6 +224,7 @@ class FlutterDevice {
     int hostVmServicePort,
     int ddsPort,
     bool disableServiceAuthCodes = false,
+    bool cacheStartupProfile = false,
     bool enableDds = true,
     @required bool allowExistingDdsInstance,
     bool ipv6 = false,
@@ -269,6 +270,7 @@ class FlutterDevice {
             ipv6: ipv6,
             disableServiceAuthCodes: disableServiceAuthCodes,
             logger: globals.logger,
+            cacheStartupProfile: cacheStartupProfile,
           );
         } on dds.DartDevelopmentServiceException catch (e, st) {
           if (!allowExistingDdsInstance ||
@@ -1298,7 +1300,8 @@ abstract class ResidentRunner extends ResidentHandlers {
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
         ipv6: ipv6,
-        disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes
+        disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
+        cacheStartupProfile: debuggingOptions.cacheStartupProfile,
       );
       await device.vmService.getFlutterViews();
 
