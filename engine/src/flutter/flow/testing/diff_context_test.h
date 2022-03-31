@@ -38,7 +38,9 @@ class DiffContextTest : public ThreadTest {
 
   Damage DiffLayerTree(MockLayerTree& layer_tree,
                        const MockLayerTree& old_layer_tree,
-                       const SkIRect& additional_damage = SkIRect::MakeEmpty());
+                       const SkIRect& additional_damage = SkIRect::MakeEmpty(),
+                       int horizontal_clip_alignment = 0,
+                       int vertical_alignment = 0);
 
   // Create picture consisting of filled rect with given color; Being able
   // to specify different color is useful to test deep comparison of pictures

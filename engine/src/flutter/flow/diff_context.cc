@@ -67,8 +67,33 @@ SkRect DiffContext::ApplyFilterBoundsAdjustment(SkRect rect) const {
   return rect;
 }
 
-Damage DiffContext::ComputeDamage(
-    const SkIRect& accumulated_buffer_damage) const {
+void DiffContext::AlignRect(SkIRect& rect,
+                            int horizontal_alignment,
+                            int vertical_alignment) const {
+  auto top = rect.top();
+  auto left = rect.left();
+  auto right = rect.right();
+  auto bottom = rect.bottom();
+  if (top % vertical_alignment != 0) {
+    top -= top % vertical_alignment;
+  }
+  if (left % horizontal_alignment != 0) {
+    left -= left % horizontal_alignment;
+  }
+  if (right % horizontal_alignment != 0) {
+    right += horizontal_alignment - right % horizontal_alignment;
+  }
+  if (bottom % vertical_alignment != 0) {
+    bottom += vertical_alignment - bottom % vertical_alignment;
+  }
+  right = std::min(right, frame_size_.width());
+  bottom = std::min(bottom, frame_size_.height());
+  rect = SkIRect::MakeLTRB(left, top, right, bottom);
+}
+
+Damage DiffContext::ComputeDamage(const SkIRect& accumulated_buffer_damage,
+                                  int horizontal_clip_alignment,
+                                  int vertical_clip_alignment) const {
   SkRect buffer_damage = SkRect::Make(accumulated_buffer_damage);
   buffer_damage.join(damage_);
   SkRect frame_damage(damage_);
@@ -90,6 +115,13 @@ Damage DiffContext::ComputeDamage(
   SkIRect frame_clip = SkIRect::MakeSize(frame_size_);
   res.buffer_damage.intersect(frame_clip);
   res.frame_damage.intersect(frame_clip);
+
+  if (horizontal_clip_alignment > 1 || vertical_clip_alignment > 1) {
+    AlignRect(res.buffer_damage, horizontal_clip_alignment,
+              vertical_clip_alignment);
+    AlignRect(res.frame_damage, horizontal_clip_alignment,
+              vertical_clip_alignment);
+  }
   return res;
 }
 

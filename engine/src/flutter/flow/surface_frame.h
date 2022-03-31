@@ -33,6 +33,12 @@ class SurfaceFrame {
     // this means that the surface will provide valid existing damage.
     bool supports_partial_repaint = false;
 
+    // For some targets it may be beneficial or even required to snap clip
+    // rect to tile grid. I.e. repainting part of a tile may cause performance
+    // degradation if the tile needs to be decompressed first.
+    int vertical_clip_alignment = 1;
+    int horizontal_clip_alignment = 1;
+
     // This is the area of framebuffer that lags behind the front buffer.
     //
     // Correctly providing exiting_damage is necessary for supporting double and
