@@ -14,7 +14,6 @@ class PackageAutoroller {
     required this.githubClient,
     required this.token,
     required this.framework,
-    this.featureBranchname = 'package-autoroller',
     required this.orgName,
   }) {
     if (token.trim().isEmpty) {
@@ -35,7 +34,18 @@ class PackageAutoroller {
 
   static const String hostname = 'github.com';
 
-  final String featureBranchname;
+  late final Future<String> featureBranchname = (() async {
+    final List<String> remoteBranches = await framework.listRemoteBranches(framework.mirrorRemote!.name);
+
+    int x = 1;
+    String name(int index) => 'packages-autoroller-branch-$index';
+
+    while (remoteBranches.contains(name(x))) {
+      x += 1;
+    }
+
+    return name(x);
+  })();
 
   /// Name of the GitHub organization to push the feature branch to.
   final String orgName;
@@ -52,7 +62,7 @@ class PackageAutoroller {
   }
 
   Future<void> updatePackages({ required bool verbose }) async {
-    await framework.newBranch(featureBranchname);
+    await framework.newBranch(await featureBranchname);
     final io.Process flutterProcess = await framework.streamFlutter(<String>[
       if (verbose) '--verbose',
       'update-packages',
@@ -67,8 +77,8 @@ class PackageAutoroller {
 
   Future<void> pushBranch() async {
     await framework.pushRef(
-      fromRef: featureBranchname,
-      toRef: featureBranchname,
+      fromRef: await featureBranchname,
+      toRef: await featureBranchname,
       remote: framework.mirrorRemote!.url,
     );
   }
@@ -147,18 +157,17 @@ class PackageAutoroller {
     String body = 'A PR Body',
     String base = 'master',
   }) async {
-    // TODO ensure title and body don't have quotes
     assert(orgName.isNotEmpty);
     await cli(
       <String>[
         'pr',
         'create',
         '--title',
-        '"$title"',
+        title,
         '--body',
-        '"$body"',
+        body,
         '--head',
-        '$orgName:$featureBranchname',
+        '$orgName:${await featureBranchname}',
         '--base',
         base,
         '--draft', // TODO delete

@@ -166,7 +166,7 @@ abstract class Repository {
     final String output = await git.getOutput(
       <String>['ls-remote', '--heads', remote],
       'get remote branches',
-      workingDirectory: parentDirectory.path,
+      workingDirectory: (await checkoutDirectory).path,
     );
 
     final List<String> remoteBranches = <String>[];

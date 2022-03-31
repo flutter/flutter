@@ -13,8 +13,8 @@ import 'package:process/process.dart';
 
 const String kTokenOption = 'token';
 const String kGithubClient = 'github-client';
-const String kOrgName = 'organization-name';
-const String kRepoName = 'repository-name';
+const String kMirrorRemote = 'mirror-remote';
+const String kUpstreamRemote = 'upstream-remote';
 
 Future<void> main(List<String> args) async {
   final ArgParser parser = ArgParser();
@@ -29,14 +29,15 @@ Future<void> main(List<String> args) async {
       'present on the PATH.',
   );
   parser.addOption(
-    kOrgName,
-    help: 'Name of the GitHub organization to push the feature branch to.',
-    defaultsTo: 'christopherfujino', // TODO remove default, make mandatory
+    kMirrorRemote,
+    help: 'The mirror git remote that the feature branch will be pushed to.',
+    defaultsTo: 'https://github.com/christopherfujino/flutter.git', // TODO remove default, make mandatory
   );
   parser.addOption(
-    kRepoName,
-    help: 'Name of the repository to push the feature branch to.',
-    defaultsTo: 'flutter.git',
+    kUpstreamRemote,
+    help: 'The upstream git remote that the feature branch will be merged to.',
+    hide: true,
+    defaultsTo: 'https://github.com/flutter/flutter.git',
   );
 
   late final ArgResults results;
@@ -50,13 +51,14 @@ ${parser.usage}
 ''');
     rethrow;
   }
-  final String orgName = results[kOrgName] as String;
 
-  final String mirrorUrl = 'https://github.com/$orgName/${results[kRepoName]}';
+  final String mirrorUrl = results[kMirrorRemote]!;
+  final String upstreamUrl = results[kUpstreamRemote]!;
 
   final FrameworkRepository framework = FrameworkRepository(
     _localCheckouts,
     mirrorRemote: Remote.mirror(mirrorUrl),
+    upstreamRemote: Remote.upstream(upstreamUrl),
   );
 
   await PackageAutoroller(
