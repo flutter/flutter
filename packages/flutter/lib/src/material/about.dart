@@ -493,17 +493,21 @@ class _AboutProgram extends StatelessWidget {
           ),
           if (icon != null)
             IconTheme(data: Theme.of(context).iconTheme, child: icon!),
-          Text(
-            version,
-            style: Theme.of(context).textTheme.bodyText2,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: _textVerticalSeparation),
-          Text(
-            legalese ?? '',
-            style: Theme.of(context).textTheme.caption,
-            textAlign: TextAlign.center,
-          ),
+          if (version != '')
+            Padding(
+              padding: const EdgeInsets.only(bottom: _textVerticalSeparation),
+              child: Text(
+                version,
+                style: Theme.of(context).textTheme.bodyText2,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          if (legalese != null && legalese != '')
+            Text(
+              legalese!,
+              style: Theme.of(context).textTheme.caption,
+              textAlign: TextAlign.center,
+            ),
           const SizedBox(height: _textVerticalSeparation),
           Text(
             'Powered by Flutter',

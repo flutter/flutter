@@ -12,7 +12,7 @@ void main() {
 }
 
 class DemoButton extends StatelessWidget {
-  const DemoButton({Key? key, required this.name}) : super(key: key);
+  const DemoButton({super.key, required this.name});
 
   final String name;
 
@@ -30,7 +30,7 @@ class DemoButton extends StatelessWidget {
 }
 
 class HoverDemo extends StatefulWidget {
-  const HoverDemo({Key? key}) : super(key: key);
+  const HoverDemo({super.key});
 
   @override
   State<HoverDemo> createState() => _HoverDemoState();

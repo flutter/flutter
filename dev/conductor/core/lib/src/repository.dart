@@ -467,26 +467,20 @@ abstract class Repository {
 class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
-    String name = 'framework',
-    Remote upstreamRemote = const Remote(
+    super.name = 'framework',
+    super.upstreamRemote = const Remote(
         name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
-    bool localUpstream = false,
-    String? previousCheckoutLocation,
-    String initialRef = FrameworkRepository.defaultBranch,
-    Remote? mirrorRemote,
+    super.localUpstream,
+    super.previousCheckoutLocation,
+    String super.initialRef = FrameworkRepository.defaultBranch,
+    super.mirrorRemote,
     List<String>? additionalRequiredLocalBranches,
   }) : super(
-          name: name,
-          upstreamRemote: upstreamRemote,
-          mirrorRemote: mirrorRemote,
-          initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
-          localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          previousCheckoutLocation: previousCheckoutLocation,
           requiredLocalBranches: <String>[
             ...?additionalRequiredLocalBranches,
             ...kReleaseChannels,
@@ -757,26 +751,20 @@ class HostFrameworkRepository extends FrameworkRepository {
 class EngineRepository extends Repository {
   EngineRepository(
     this.checkouts, {
-    String name = 'engine',
-    String initialRef = EngineRepository.defaultBranch,
-    Remote upstreamRemote = const Remote(
+    super.name = 'engine',
+    String super.initialRef = EngineRepository.defaultBranch,
+    super.upstreamRemote = const Remote(
         name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
-    bool localUpstream = false,
-    String? previousCheckoutLocation,
-    Remote? mirrorRemote,
+    super.localUpstream,
+    super.previousCheckoutLocation,
+    super.mirrorRemote,
     List<String>? additionalRequiredLocalBranches,
   }) : super(
-          name: name,
-          upstreamRemote: upstreamRemote,
-          mirrorRemote: mirrorRemote,
-          initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
-          localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          previousCheckoutLocation: previousCheckoutLocation,
           requiredLocalBranches: additionalRequiredLocalBranches ?? const <String>[],
         );
 

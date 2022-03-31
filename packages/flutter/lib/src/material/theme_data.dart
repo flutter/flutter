@@ -26,6 +26,7 @@ import 'drawer_theme.dart';
 import 'elevated_button_theme.dart';
 import 'expansion_tile_theme.dart';
 import 'floating_action_button_theme.dart';
+import 'ink_ripple.dart';
 import 'ink_sparkle.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
@@ -431,7 +432,9 @@ class ThemeData with Diagnosticable {
     visualDensity ??= VisualDensity.adaptivePlatformDensity;
     useMaterial3 ??= false;
     final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
-    splashFactory ??= (useMaterial3 && useInkSparkle) ? InkSparkle.splashFactory : InkSplash.splashFactory;
+    splashFactory ??= useMaterial3
+      ? useInkSparkle ? InkSparkle.splashFactory : InkRipple.splashFactory
+      : InkSplash.splashFactory;
 
     // COLOR
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);

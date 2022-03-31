@@ -395,7 +395,12 @@ void main() {
           '--no-link-platform',
           '--packages',
           '.packages',
-          '.dart_tools/flutter_build/generated_main.dart',
+          '--source',
+          '.dart_tools/flutter_build/dart_plugin_registrant.dart',
+          '--source',
+          'package:flutter/src/dart_plugin_registrant.dart',
+          '-Dflutter.dart_plugin_registrant=.dart_tools/flutter_build/dart_plugin_registrant.dart',
+          'scheme:///main.dart',
         ], completer: completer),
       ]),
       stdoutHandler: stdoutHandler,
@@ -405,7 +410,7 @@ void main() {
         .childDirectory('flutter_build')
         .childDirectory('test');
 
-    buildDir.parent.childFile('generated_main.dart').createSync(recursive: true);
+    buildDir.parent.childFile('dart_plugin_registrant.dart').createSync(recursive: true);
 
     final Future<CompilerOutput?> output = kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/foo/bar/fizz/main.dart',

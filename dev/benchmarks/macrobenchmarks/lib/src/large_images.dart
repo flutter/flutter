@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 class LargeImagesPage extends StatelessWidget {
-  const LargeImagesPage({Key? key}) : super(key: key);
+  const LargeImagesPage({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -373,6 +373,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
+      if (debuggingOptions.enableImpeller) '--enable-impeller',
     ];
 
     final Status installStatus = _logger.startProgress(

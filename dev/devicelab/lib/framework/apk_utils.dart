@@ -37,7 +37,8 @@ Future<void> runProjectTest(Future<void> Function(FlutterProject project) testFu
   try {
     await testFunction(project);
   } finally {
-    rmTree(tempDir);
+    print('tempDir=$tempDir');
+    // rmTree(tempDir);
   }
 }
 
@@ -270,26 +271,6 @@ android {
             initWith $initWith
         }
     }
-}
-    ''');
-  }
-
-  Future<void> addGlobalBuildType(String name, {required String initWith}) async {
-    final File buildScript = File(
-      path.join(androidPath, 'build.gradle'),
-    );
-
-    buildScript.openWrite(mode: FileMode.append).write('''
-subprojects {
-  afterEvaluate {
-    android {
-        buildTypes {
-            $name {
-                initWith $initWith
-            }
-        }
-    }
-  }
 }
     ''');
   }
