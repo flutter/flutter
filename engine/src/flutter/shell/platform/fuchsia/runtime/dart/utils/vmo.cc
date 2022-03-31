@@ -59,9 +59,9 @@ bool VmoFromFilename(const std::string& filename,
   // Note: the implementation here cannot be shared with VmoFromFilenameAt
   // because fdio_open_fd_at does not aim to provide POSIX compatibility, and
   // thus does not handle AT_FDCWD as dirfd.
-  auto flags = fuchsia::io::OPEN_RIGHT_READABLE;
+  auto flags = fuchsia::io::OpenFlags::RIGHT_READABLE;
   if (executable) {
-    flags |= fuchsia::io::OPEN_RIGHT_EXECUTABLE;
+    flags |= fuchsia::io::OpenFlags::RIGHT_EXECUTABLE;
   }
 
   int fd;
@@ -81,9 +81,9 @@ bool VmoFromFilenameAt(int dirfd,
                        const std::string& filename,
                        bool executable,
                        fuchsia::mem::Buffer* buffer) {
-  auto flags = fuchsia::io::OPEN_RIGHT_READABLE;
+  auto flags = fuchsia::io::OpenFlags::RIGHT_READABLE;
   if (executable) {
-    flags |= fuchsia::io::OPEN_RIGHT_EXECUTABLE;
+    flags |= fuchsia::io::OpenFlags::RIGHT_EXECUTABLE;
   }
 
   int fd;

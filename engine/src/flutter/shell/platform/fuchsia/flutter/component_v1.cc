@@ -196,9 +196,9 @@ ComponentV1::ComponentV1(
 
   // LaunchInfo::service_request optional.
   if (launch_info.directory_request) {
-    outgoing_dir_->Serve(fuchsia::io::OPEN_RIGHT_READABLE |
-                             fuchsia::io::OPEN_RIGHT_WRITABLE |
-                             fuchsia::io::OPEN_FLAG_DIRECTORY,
+    outgoing_dir_->Serve(fuchsia::io::OpenFlags::RIGHT_READABLE |
+                             fuchsia::io::OpenFlags::RIGHT_WRITABLE |
+                             fuchsia::io::OpenFlags::DIRECTORY,
                          std::move(launch_info.directory_request));
   }
 
@@ -216,9 +216,9 @@ ComponentV1::ComponentV1(
   composed_service_dir->set_fallback(std::move(flutter_public_dir));
 
   // Clone and check if client is servicing the directory.
-  directory_ptr_->Clone(fuchsia::io::OPEN_FLAG_DESCRIBE |
-                            fuchsia::io::OPEN_RIGHT_READABLE |
-                            fuchsia::io::OPEN_RIGHT_WRITABLE,
+  directory_ptr_->Clone(fuchsia::io::OpenFlags::DESCRIBE |
+                            fuchsia::io::OpenFlags::RIGHT_READABLE |
+                            fuchsia::io::OpenFlags::RIGHT_WRITABLE,
                         cloned_directory_ptr_.NewRequest());
 
   cloned_directory_ptr_.events().OnOpen =
