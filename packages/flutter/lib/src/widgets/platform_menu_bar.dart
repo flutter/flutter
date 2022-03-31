@@ -27,15 +27,6 @@ const String _kEnabledKey = 'enabled';
 const String _kChildrenKey = 'children';
 const String _kIsDividerKey = 'isDivider';
 const String _kPlatformDefaultMenuKey = 'platformProvidedMenu';
-const String _kShortcutEquivalentKey = 'shortcutEquivalent';
-const String _kShortcutTriggerKey = 'shortcutTrigger';
-const String _kShortcutModifiersKey = 'shortcutModifiers';
-
-// Bit masks for modifier keys sent in channel communication.
-const int _kFlutterShortcutModifierMeta = 1 << 0;
-const int _kFlutterShortcutModifierShift = 1 << 1;
-const int _kFlutterShortcutModifierAlt = 1 << 2;
-const int _kFlutterShortcutModifierControl = 1 << 3;
 
 /// A mixin allowing a [ShortcutActivator] to provide data for serialization of
 /// the shortcut for sending to the platform.
@@ -46,19 +37,19 @@ const int _kFlutterShortcutModifierControl = 1 << 3;
 mixin MenuSerializableShortcut {
   /// The bit mask for the [LogicalKeyboardKey.meta] key (or it's left/right
   /// equivalents) being down.
-  static const int shortcutModifierMeta = _kFlutterShortcutModifierMeta;
+  static const int shortcutModifierMeta = 1 << 0;
 
   /// The bit mask for the [LogicalKeyboardKey.shift] key (or it's left/right
   /// equivalents) being down.
-  static const int shortcutModifierShift = _kFlutterShortcutModifierShift;
+  static const int shortcutModifierShift = 1 << 1;
 
   /// The bit mask for the [LogicalKeyboardKey.alt] key (or it's left/right
   /// equivalents) being down.
-  static const int shortcutModifierAlt = _kFlutterShortcutModifierAlt;
+  static const int shortcutModifierAlt = 1 << 2;
 
   /// The bit mask for the [LogicalKeyboardKey.alt] key (or it's left/right
   /// equivalents) being down.
-  static const int shortcutModifierControl = _kFlutterShortcutModifierControl;
+  static const int shortcutModifierControl = 1 << 3;
 
   /// The key for a string map field returned from [serializeForMenu] containing
   /// a string that represents the character that the shortcut key should
@@ -67,13 +58,13 @@ mixin MenuSerializableShortcut {
   /// All platforms are limited to a single trigger key that can be represented,
   /// so this string should only contain a character that can be typed with a
   /// single keystroke.
-  static const String shortcutEquivalent = _kShortcutEquivalentKey;
+  static const String shortcutEquivalent = 'shortcutEquivalent';
 
   /// The key for the integer map field returned from [serializeForMenu]
   /// containing the logical key ID for the trigger key on this shortcut.
   ///
   /// All platforms are limited to a single trigger key that can be represented.
-  static const String shortcutTrigger = _kShortcutTriggerKey;
+  static const String shortcutTrigger = 'shortcutTrigger';
 
   /// The key for the integer map field returned from [serializeForMenu]
   /// containing a bitfield combination of [shortcutModifierControl],
@@ -82,7 +73,7 @@ mixin MenuSerializableShortcut {
   ///
   /// If the shortcut responds to one of those modifiers, it should be
   /// represented in the bitfield tagged with this key.
-  static const String shortcutModifiers = _kShortcutModifiersKey;
+  static const String shortcutModifiers = 'shortcutModifiers';
 
   /// Implement this in your [ShortcutActivator] subclass to allow it to be
   /// serialized for use in a [PlatformMenuBar].
@@ -132,6 +123,30 @@ abstract class MenuItem with Diagnosticable {
   /// Returns an empty list if this type of menu item doesn't have
   /// descendants.
   List<MenuItem> get descendants => const <MenuItem>[];
+
+  /// Returns a callback, if any, to be invoked if the platform menu receives a
+  /// "Menu.selectedCallback" method call from the platform for this item.
+  ///
+  /// Only items that do not have submenus will have this callback invoked.
+  ///
+  /// The default implementation returns null.
+  VoidCallback? get onSelected => null;
+
+  /// Returns a callback, if any, to be invoked if the platform menu receives a
+  /// "Menu.opened" method call from the platform for this item.
+  ///
+  /// Only items that have submenus will have this callback invokes
+  ///
+  /// The default implementation returns null.
+  VoidCallback? get onOpen => null;
+
+  /// Returns a callback, if any, to be invoked if the platform menu receives a
+  /// "Menu.opened" method call from the platform for this item.
+  ///
+  /// Only items that have submenus will have this callback invoked.
+  ///
+  /// The default implementation returns null.
+  VoidCallback? get onClose => null;
 }
 
 /// An abstract delegate class that can be used to set
@@ -336,11 +351,11 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
       return;
     }
     final MenuItem item = _idMap[id]!;
-    if (item is PlatformMenuItem && call.method == _kMenuSelectedCallbackMethod) {
+    if (call.method == _kMenuSelectedCallbackMethod) {
       item.onSelected?.call();
-    } else if (item is PlatformMenu && call.method == _kMenuItemOpenedMethod) {
+    } else if (call.method == _kMenuItemOpenedMethod) {
       item.onOpen?.call();
-    } else if (item is PlatformMenu && call.method == _kMenuItemClosedMethod) {
+    } else if (call.method == _kMenuItemClosedMethod) {
       item.onClose?.call();
     }
     return;
@@ -492,9 +507,11 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin {
   final String label;
 
   /// The callback that is called when this menu is opened.
+  @override
   final VoidCallback? onOpen;
 
   /// The callback that is called when this menu is closed.
+  @override
   final VoidCallback? onClose;
 
   /// The menu items in the submenu opened by this menu item.
@@ -658,6 +675,7 @@ class PlatformMenuItem extends MenuItem {
   /// selected.
   ///
   /// If unset, this menu item will be disabled.
+  @override
   final VoidCallback? onSelected;
 
   @override
