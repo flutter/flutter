@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +26,6 @@ import androidx.annotation.Nullable;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.FlutterInjector;
-import io.flutter.TestUtils;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -268,9 +268,10 @@ public class FlutterFragmentActivityTest {
   }
 
   @Test
-  @Config(shadows = {SplashShadowResources.class})
+  @Config(
+      sdk = Build.VERSION_CODES.KITKAT,
+      shadows = {SplashShadowResources.class})
   public void itLoadsSplashScreenDrawable() throws PackageManager.NameNotFoundException {
-    TestUtils.setApiVersion(19);
     Intent intent = FlutterFragmentActivity.createDefaultIntent(RuntimeEnvironment.application);
     ActivityController<FlutterFragmentActivity> activityController =
         Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
@@ -292,13 +293,14 @@ public class FlutterFragmentActivityTest {
   }
 
   @Test
-  @Config(shadows = {SplashShadowResources.class})
+  @Config(
+      sdk = Build.VERSION_CODES.LOLLIPOP,
+      shadows = {SplashShadowResources.class})
   @TargetApi(21) // Theme references in drawables requires API 21+
   public void itLoadsThemedSplashScreenDrawable() throws PackageManager.NameNotFoundException {
     // A drawable with theme references can be parsed only if the app theme is supplied
     // in getDrawable methods. This test verifies it by fetching a (fake) themed drawable.
     // On failure, a Resource.NotFoundException will ocurr.
-    TestUtils.setApiVersion(21);
     Intent intent = FlutterFragmentActivity.createDefaultIntent(RuntimeEnvironment.application);
     ActivityController<FlutterFragmentActivity> activityController =
         Robolectric.buildActivity(FlutterFragmentActivity.class, intent);

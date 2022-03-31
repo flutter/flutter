@@ -7,29 +7,12 @@ package io.flutter;
 import static org.junit.Assert.assertTrue;
 
 import android.content.res.Configuration;
-import android.os.Build;
 import androidx.annotation.NonNull;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Locale;
 
 public class TestUtils {
-
-  public static void setApiVersion(int apiVersion) {
-    try {
-      Field field = Build.VERSION.class.getField("SDK_INT");
-
-      field.setAccessible(true);
-      Field modifiersField = Field.class.getDeclaredField("modifiers");
-      modifiersField.setAccessible(true);
-      modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-
-      field.set(null, apiVersion);
-    } catch (Exception e) {
-      assertTrue(false);
-    }
-  }
-
   public static void setLegacyLocale(@NonNull Configuration config, @NonNull Locale locale) {
     try {
       Field field = config.getClass().getField("locale");
