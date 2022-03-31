@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -52,13 +53,13 @@ mixin MenuSerializableShortcut {
   static const int shortcutModifierControl = 1 << 3;
 
   /// The key for a string map field returned from [serializeForMenu] containing
-  /// a string that represents the character that the shortcut key should
-  /// represent.
+  /// a string that represents the character that, when typed, will trigger the
+  /// shortcut.
   ///
   /// All platforms are limited to a single trigger key that can be represented,
   /// so this string should only contain a character that can be typed with a
   /// single keystroke.
-  static const String shortcutEquivalent = 'shortcutEquivalent';
+  static const String shortcutCharacter = 'shortcutEquivalent';
 
   /// The key for the integer map field returned from [serializeForMenu]
   /// containing the logical key ID for the trigger key on this shortcut.
@@ -75,12 +76,23 @@ mixin MenuSerializableShortcut {
   /// represented in the bitfield tagged with this key.
   static const String shortcutModifiers = 'shortcutModifiers';
 
-  /// Implement this in your [ShortcutActivator] subclass to allow it to be
+  /// Implement this in a [ShortcutActivator] subclass to allow it to be
   /// serialized for use in a [PlatformMenuBar].
   ///
-  /// It should return a map containing a "shortcutModifiers" field, and either
-  /// containing a "shortcutEquivalent", or one containing a "shortcutTrigger".
-  /// The "shortcutModifiers
+  /// It should return a map containing a [shortcutModifiers] field, and a
+  /// [shortcutTrigger] field, or just a [shortcutCharacter] field.
+  ///
+  /// The [shortcutModifiers] field should contain a bitfield combination of
+  /// [shortcutModifierControl], [shortcutModifierAlt], [shortcutModifierShift],
+  /// and/or [shortcutModifierMeta] to describe the modifiers that need to be
+  /// down to trigger the shortcut.
+  ///
+  /// The [shortcutTrigger] field should contain the logical key id of the
+  /// trigger key for this shortcut.
+  ///
+  /// The [shortcutCharacter] should contain a character that will trigger the
+  /// shortcut on its own. If this field is supplied, a [shortcutModifiers]
+  /// field should not be included.
   Map<String, Object?> serializeForMenu();
 }
 
@@ -699,11 +711,19 @@ class PlatformMenuItem extends MenuItem {
     MenuItemSerializableIdGenerator getId,
   ) {
     final MenuSerializableShortcut? shortcut = item.shortcut;
+    final Map<String, Object?> shortcutSerialized = shortcut?.serializeForMenu() ?? <String, Object?>{};
+    assert(() {
+      return shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutCharacter) ||
+          (shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutModifiers) &&
+              shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutTrigger));
+    }(), 'Shortcut serialization must contain either a MenuSerializableShortcut.shortcutCharacter '
+         'key, or both a MenuSerializableShortcut.shortcutModifiers and a '
+         'MenuSerializableShortcut.shortcutTrigger key.');
     return <String, Object?>{
       _kIdKey: getId(item),
       _kLabelKey: item.label,
       _kEnabledKey: item.onSelected != null,
-      if (shortcut != null)...shortcut.serializeForMenu(),
+      ...shortcutSerialized,
     };
   }
 

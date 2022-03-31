@@ -634,7 +634,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   @override
   Map<String, Object?> serializeForMenu() {
     return <String, Object?>{
-      MenuSerializableShortcut.shortcutEquivalent: character,
+      MenuSerializableShortcut.shortcutCharacter: character,
       MenuSerializableShortcut.shortcutModifiers: 0,
     };
   }
