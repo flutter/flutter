@@ -4,9 +4,6 @@ on:
   branch_protection_rule:
   push:
     branches: [ main ]
-  pull_request:
-    branches:
-      - main
 
 # Declare default permissions as read only.
 permissions: read-all
