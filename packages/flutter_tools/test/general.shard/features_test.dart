@@ -382,6 +382,10 @@ void main() {
       expect(featureFlags.isWindowsUwpEnabled, true);
     });
 
+    testWithoutContext('Flutter Windows UWP desktop config includes removal warning', () {
+      expect(windowsUwpEmbedding.extraHelpText, contains('Windows UWP support is obsolete and will be removed'));
+    });
+
     testWithoutContext('Flutter Windows UWP desktop off by default on stable', () {
       final FeatureFlags featureFlags = createFlags('stable');
 
