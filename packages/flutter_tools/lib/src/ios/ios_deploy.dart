@@ -435,6 +435,7 @@ class IOSDeployDebugger {
 
   Future<void> stopAndDumpBacktrace() async {
     if (!debuggerAttached) {
+      throw 'whoops'; // TODO
       return;
     }
 
