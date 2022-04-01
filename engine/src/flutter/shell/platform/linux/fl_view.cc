@@ -82,8 +82,9 @@ static gboolean text_input_im_filter_by_gtk(GtkIMContext* im_context,
   return gtk_im_context_filter_keypress(im_context, event);
 }
 
-static void redispatch_key_event_by_gtk(gpointer raw_event) {
-  GdkEvent* gdk_event = reinterpret_cast<GdkEvent*>(raw_event);
+static void redispatch_key_event_by_gtk(std::unique_ptr<FlKeyEvent> in_event) {
+  g_autofree FlKeyEvent* event = in_event.release();
+  GdkEvent* gdk_event = reinterpret_cast<GdkEvent*>(event->origin);
   GdkEventType type = gdk_event->type;
   g_return_if_fail(type == GDK_KEY_PRESS || type == GDK_KEY_RELEASE);
   gdk_event_put(gdk_event);

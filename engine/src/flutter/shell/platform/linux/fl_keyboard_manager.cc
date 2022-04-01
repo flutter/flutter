@@ -28,7 +28,7 @@ struct _FlKeyboardPendingEvent {
   // The target event.
   //
   // This is freed by #FlKeyboardPendingEvent.
-  FlKeyEvent* event;
+  std::unique_ptr<FlKeyEvent> event;
 
   // Self-incrementing ID attached to an event sent to the framework.
   //
@@ -52,7 +52,9 @@ static void fl_keyboard_pending_event_dispose(GObject* object) {
   g_return_if_fail(FL_IS_KEYBOARD_PENDING_EVENT(object));
 
   FlKeyboardPendingEvent* self = FL_KEYBOARD_PENDING_EVENT(object);
-  fl_key_event_dispose(self->event);
+  if (self->event != nullptr) {
+    fl_key_event_dispose(self->event.release());
+  }
   G_OBJECT_CLASS(fl_keyboard_pending_event_parent_class)->dispose(object);
 }
 
@@ -81,17 +83,18 @@ static uint64_t fl_keyboard_manager_get_event_hash(FlKeyEvent* event) {
 // the sequence ID, and the number of responders that will reply.
 //
 // This will acquire the ownership of the event.
-FlKeyboardPendingEvent* fl_keyboard_pending_event_new(FlKeyEvent* event,
-                                                      uint64_t sequence_id,
-                                                      size_t to_reply) {
+FlKeyboardPendingEvent* fl_keyboard_pending_event_new(
+    std::unique_ptr<FlKeyEvent> event,
+    uint64_t sequence_id,
+    size_t to_reply) {
   FlKeyboardPendingEvent* self = FL_KEYBOARD_PENDING_EVENT(
       g_object_new(fl_keyboard_pending_event_get_type(), nullptr));
 
-  self->event = event;
+  self->event = std::move(event);
   self->sequence_id = sequence_id;
   self->unreplied = to_reply;
   self->any_handled = false;
-  self->hash = fl_keyboard_manager_get_event_hash(event);
+  self->hash = fl_keyboard_manager_get_event_hash(self->event.get());
   return self;
 }
 
@@ -313,12 +316,13 @@ static void responder_handle_event_callback(bool handled,
         g_ptr_array_remove_index_fast(self->pending_responds, result_index);
     g_return_if_fail(removed == pending);
     bool should_redispatch =
-        !pending->any_handled && (self->text_input_plugin == nullptr ||
-                                  !fl_text_input_plugin_filter_keypress(
-                                      self->text_input_plugin, pending->event));
+        !pending->any_handled &&
+        (self->text_input_plugin == nullptr ||
+         !fl_text_input_plugin_filter_keypress(self->text_input_plugin,
+                                               pending->event.get()));
     if (should_redispatch) {
       g_ptr_array_add(self->pending_redispatches, pending);
-      self->redispatch_callback(pending->event->origin);
+      self->redispatch_callback(std::move(pending->event));
     } else {
       g_object_unref(pending);
     }
@@ -337,7 +341,7 @@ FlKeyboardManager* fl_keyboard_manager_new(
       g_object_new(fl_keyboard_manager_get_type(), nullptr));
 
   self->text_input_plugin = text_input_plugin;
-  self->redispatch_callback = redispatch_callback;
+  self->redispatch_callback = std::move(redispatch_callback);
   self->responder_list = g_ptr_array_new_with_free_func(g_object_unref);
 
   self->pending_responds = g_ptr_array_new();
@@ -378,7 +382,8 @@ gboolean fl_keyboard_manager_handle_event(FlKeyboardManager* self,
   }
 
   FlKeyboardPendingEvent* pending = fl_keyboard_pending_event_new(
-      event, ++self->last_sequence_id, self->responder_list->len);
+      std::unique_ptr<FlKeyEvent>(event), ++self->last_sequence_id,
+      self->responder_list->len);
 
   g_ptr_array_add(self->pending_responds, pending);
   FlKeyboardManagerUserData* user_data =
