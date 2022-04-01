@@ -128,7 +128,7 @@ void main() {
     await tester.pumpWidget(
       Theme(
         data: lightTheme.copyWith(
-          disabledColor: disabledColor, // disabled RaisedButton fill color
+          disabledColor: disabledColor,
           buttonTheme: const ButtonThemeData(disabledColor: disabledColor),
           textTheme: lightTheme.textTheme.copyWith(
             button: lightTheme.textTheme.button!.copyWith(
@@ -181,14 +181,14 @@ void main() {
     await tester.pumpWidget(
       Theme(
         data: ThemeData.light().copyWith(
-          buttonColor: const Color(0xFF00FF00), // enabled RaisedButton fill color
+          buttonColor: const Color(0xFF00FF00),
         ),
         child: ButtonTheme(
           textTheme: ButtonTextTheme.primary,
           minWidth: 100.0,
           height: 200.0,
           padding: EdgeInsets.zero,
-          buttonColor: const Color(0xFF00FF00), // enabled RaisedButton fill color
+          buttonColor: const Color(0xFF00FF00),
           shape: const RoundedRectangleBorder(),
           child: Builder(
             builder: (BuildContext context) {
