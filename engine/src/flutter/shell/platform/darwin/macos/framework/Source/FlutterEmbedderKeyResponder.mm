@@ -52,16 +52,16 @@ static bool IsUnprintableKey(uint64_t character) {
  * for more information.
  */
 static uint64_t KeyOfPlane(uint64_t baseKey, uint64_t plane) {
-  return plane | (baseKey & kValueMask);
+  return plane | (baseKey & flutter::kValueMask);
 }
 
 /**
  * Returns the physical key for a key code.
  */
 static uint64_t GetPhysicalKeyForKeyCode(unsigned short keyCode) {
-  NSNumber* physicalKey = [keyCodeToPhysicalKey objectForKey:@(keyCode)];
+  NSNumber* physicalKey = [flutter::keyCodeToPhysicalKey objectForKey:@(keyCode)];
   if (physicalKey == nil) {
-    return KeyOfPlane(keyCode, kMacosPlane);
+    return KeyOfPlane(keyCode, flutter::kMacosPlane);
   }
   return physicalKey.unsignedLongLongValue;
 }
@@ -70,11 +70,11 @@ static uint64_t GetPhysicalKeyForKeyCode(unsigned short keyCode) {
  * Returns the logical key for a modifier physical key.
  */
 static uint64_t GetLogicalKeyForModifier(unsigned short keyCode, uint64_t hidCode) {
-  NSNumber* fromKeyCode = [keyCodeToLogicalKey objectForKey:@(keyCode)];
+  NSNumber* fromKeyCode = [flutter::keyCodeToLogicalKey objectForKey:@(keyCode)];
   if (fromKeyCode != nil) {
     return fromKeyCode.unsignedLongLongValue;
   }
-  return KeyOfPlane(hidCode, kMacosPlane);
+  return KeyOfPlane(hidCode, flutter::kMacosPlane);
 }
 
 /**
@@ -147,7 +147,7 @@ static uint32_t* DecodeUtf16(NSString* target, size_t* out_length) {
  */
 static uint64_t GetLogicalKeyForEvent(NSEvent* event, uint64_t physicalKey) {
   // Look to see if the keyCode can be mapped from keycode.
-  NSNumber* fromKeyCode = [keyCodeToLogicalKey objectForKey:@(event.keyCode)];
+  NSNumber* fromKeyCode = [flutter::keyCodeToLogicalKey objectForKey:@(event.keyCode)];
   if (fromKeyCode != nil) {
     return fromKeyCode.unsignedLongLongValue;
   }
@@ -175,12 +175,12 @@ static uint64_t GetLogicalKeyForEvent(NSEvent* event, uint64_t physicalKey) {
     delete[] keyLabel;
   }
   if (character != 0) {
-    return KeyOfPlane(toLower(character), kUnicodePlane);
+    return KeyOfPlane(toLower(character), flutter::kUnicodePlane);
   }
 
   // We can't represent this key with a single printable unicode, so a new code
   // is minted to the macOS plane.
-  return KeyOfPlane(event.keyCode, kMacosPlane);
+  return KeyOfPlane(event.keyCode, flutter::kMacosPlane);
 }
 
 /**
@@ -199,7 +199,7 @@ static double GetFlutterTimestampFrom(NSTimeInterval timestamp) {
  */
 static NSUInteger computeModifierFlagOfInterestMask() {
   __block NSUInteger modifierFlagOfInterestMask = NSEventModifierFlagCapsLock;
-  [keyCodeToModifierFlag
+  [flutter::keyCodeToModifierFlag
       enumerateKeysAndObjectsUsingBlock:^(NSNumber* keyCode, NSNumber* flag, BOOL* stop) {
         modifierFlagOfInterestMask = modifierFlagOfInterestMask | [flag unsignedLongValue];
       }];
@@ -472,6 +472,8 @@ struct FlutterKeyPendingResponse {
 
 @implementation FlutterEmbedderKeyResponder
 
+@synthesize layoutMap;
+
 - (nonnull instancetype)initWithSendEvent:(FlutterSendEmbedderKeyEvent)sendEvent {
   self = [super init];
   if (self != nil) {
@@ -542,7 +544,7 @@ struct FlutterKeyPendingResponse {
       break;
     }
     flagDifference = flagDifference & ~currentFlag;
-    NSNumber* keyCode = [modifierFlagToKeyCode objectForKey:@(currentFlag)];
+    NSNumber* keyCode = [flutter::modifierFlagToKeyCode objectForKey:@(currentFlag)];
     NSAssert(keyCode != nil, @"Invalid modifier flag 0x%lx", currentFlag);
     if (keyCode == nil) {
       continue;
@@ -595,8 +597,8 @@ struct FlutterKeyPendingResponse {
       .struct_size = sizeof(FlutterKeyEvent),
       .timestamp = GetFlutterTimestampFrom(timestamp),
       .type = kFlutterKeyEventTypeDown,
-      .physical = kCapsLockPhysicalKey,
-      .logical = kCapsLockLogicalKey,
+      .physical = flutter::kCapsLockPhysicalKey,
+      .logical = flutter::kCapsLockLogicalKey,
       .character = nil,
       .synthesized = synthesizeDown,
   };
@@ -642,7 +644,9 @@ struct FlutterKeyPendingResponse {
 
 - (void)handleDownEvent:(NSEvent*)event callback:(FlutterKeyCallbackGuard*)callback {
   uint64_t physicalKey = GetPhysicalKeyForKeyCode(event.keyCode);
-  uint64_t logicalKey = GetLogicalKeyForEvent(event, physicalKey);
+  NSNumber* logicalKeyFromMap = self.layoutMap[@(event.keyCode)];
+  uint64_t logicalKey = logicalKeyFromMap != nil ? [logicalKeyFromMap unsignedLongLongValue]
+                                                 : GetLogicalKeyForEvent(event, physicalKey);
   [self synchronizeModifiers:event.modifierFlags
                ignoringFlags:0
                    timestamp:event.timestamp
@@ -733,11 +737,11 @@ struct FlutterKeyPendingResponse {
 }
 
 - (void)handleFlagEvent:(NSEvent*)event callback:(FlutterKeyCallbackGuard*)callback {
-  NSNumber* targetModifierFlagObj = keyCodeToModifierFlag[@(event.keyCode)];
+  NSNumber* targetModifierFlagObj = flutter::keyCodeToModifierFlag[@(event.keyCode)];
   NSUInteger targetModifierFlag =
       targetModifierFlagObj == nil ? 0 : [targetModifierFlagObj unsignedLongValue];
   uint64_t targetKey = GetPhysicalKeyForKeyCode(event.keyCode);
-  if (targetKey == kCapsLockPhysicalKey) {
+  if (targetKey == flutter::kCapsLockPhysicalKey) {
     return [self handleCapsLockEvent:event callback:callback];
   }
 

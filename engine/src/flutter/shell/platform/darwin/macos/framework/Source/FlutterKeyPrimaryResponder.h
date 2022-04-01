@@ -24,4 +24,13 @@ typedef void (^FlutterAsyncKeyCallback)(BOOL handled);
 @required
 - (void)handleEvent:(nonnull NSEvent*)event callback:(nonnull FlutterAsyncKeyCallback)callback;
 
+/* A map from macOS key code to logical keyboard.
+ *
+ * The map is assigned on initialization, and updated when the user changes
+ * keyboard type or layout. The responder should prioritize this map when
+ * deriving logical keys.
+ */
+@required
+@property(nonatomic) NSMutableDictionary<NSNumber*, NSNumber*>* _Nullable layoutMap;
+
 @end

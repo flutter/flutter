@@ -5,6 +5,8 @@
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 
+#include <Carbon/Carbon.h>
+
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
@@ -22,6 +24,8 @@
 #import "flutter/shell/platform/embedder/embedder.h"
 
 namespace {
+using flutter::LayoutClue;
+using flutter::KeyboardLayoutNotifier;
 
 /// Clipboard plain text format.
 constexpr char kTextPlainFormat[] = "text/plain";
@@ -73,6 +77,27 @@ struct MouseState {
   }
 };
 
+/**
+ * Returns the current Unicode layout data (kTISPropertyUnicodeKeyLayoutData).
+ *
+ * To use the returned data, convert it to CFDataRef first, finds its bytes
+ * with CFDataGetBytePtr, then reinterpret it into const UCKeyboardLayout*.
+ * It's returned in NSData* to enable auto reference count.
+ */
+NSData* currentKeyboardLayoutData() {
+  TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
+  CFTypeRef layout_data = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData);
+  if (layout_data == nil) {
+    CFRelease(source);
+    // TISGetInputSourceProperty returns null with Japanese keyboard layout.
+    // Using TISCopyCurrentKeyboardLayoutInputSource to fix NULL return.
+    // https://github.com/microsoft/node-native-keymap/blob/5f0699ded00179410a14c0e1b0e089fe4df8e130/src/keyboard_mac.mm#L91
+    source = TISCopyCurrentKeyboardLayoutInputSource();
+    layout_data = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData);
+  }
+  return (__bridge_transfer NSData*)CFRetain(layout_data);
+}
+
 }  // namespace
 
 #pragma mark - Private interface declaration.
@@ -120,6 +145,10 @@ struct MouseState {
  * propagated to the next NSResponder.
  */
 @property(nonatomic) FlutterKeyboardManager* keyboardManager;
+
+@property(nonatomic) KeyboardLayoutNotifier keyboardLayoutNotifier;
+
+@property(nonatomic) NSData* keyboardLayoutData;
 
 /**
  * Starts running |engine|, including any initial setup.
@@ -169,6 +198,9 @@ struct MouseState {
  */
 - (void)onAccessibilityStatusChanged:(NSNotification*)notification;
 
+// TODO
+- (void)onKeyboardLayoutChanged;
+
 /**
  * Handles messages received from the Flutter engine on the _*Channel channels.
  */
@@ -198,6 +230,21 @@ struct MouseState {
 - (BOOL)clipboardHasStrings;
 
 @end
+
+#pragma mark - Private dependant functions
+
+namespace {
+void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
+                             void* observer,
+                             CFStringRef name,
+                             const void* object,
+                             CFDictionaryRef userInfo) {
+  FlutterViewController* controller = (__bridge FlutterViewController*)observer;
+  if (controller != nil) {
+    [controller onKeyboardLayoutChanged];
+  }
+}
+}  // namespace
 
 #pragma mark - FlutterViewWrapper implementation.
 
@@ -257,6 +304,12 @@ static void CommonInit(FlutterViewController* controller) {
              selector:@selector(applicationWillTerminate:)
                  name:NSApplicationWillTerminateNotification
                object:nil];
+  // macOS fires this message when changing IMEs.
+  CFNotificationCenterRef cfCenter = CFNotificationCenterGetDistributedCenter();
+  __weak FlutterViewController* weakSelf = controller;
+  CFNotificationCenterAddObserver(cfCenter, (__bridge void*)weakSelf, OnKeyboardLayoutChanged,
+                                  kTISNotifySelectedKeyboardInputSourceChanged, NULL,
+                                  CFNotificationSuspensionBehaviorDeliverImmediately);
 }
 
 - (instancetype)initWithCoder:(NSCoder*)coder {
@@ -354,6 +407,8 @@ static void CommonInit(FlutterViewController* controller) {
 
 - (void)dealloc {
   _engine.viewController = nil;
+  CFNotificationCenterRef cfCenter = CFNotificationCenterGetDistributedCenter();
+  CFNotificationCenterRemoveEveryObserver(cfCenter, (__bridge void*)self);
 }
 
 #pragma mark - Public methods
@@ -585,6 +640,13 @@ static void CommonInit(FlutterViewController* controller) {
   }];
 }
 
+- (void)onKeyboardLayoutChanged {
+  _keyboardLayoutData = nil;
+  if (_keyboardLayoutNotifier != nil) {
+    _keyboardLayoutNotifier();
+  }
+}
+
 - (void)sendInitialSettings {
   // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/32015.
   [[NSDistributedNotificationCenter defaultCenter]
@@ -679,6 +741,42 @@ static void CommonInit(FlutterViewController* controller) {
 
 - (BOOL)onTextInputKeyEvent:(nonnull NSEvent*)event {
   return [_textInputPlugin handleKeyEvent:event];
+}
+
+- (void)subscribeToKeyboardLayoutChange:(nullable KeyboardLayoutNotifier)callback {
+  _keyboardLayoutNotifier = callback;
+}
+
+- (LayoutClue)lookUpLayoutForKeyCode:(uint16_t)keyCode shift:(BOOL)shift {
+  if (_keyboardLayoutData == nil) {
+    _keyboardLayoutData = currentKeyboardLayoutData();
+  }
+  const UCKeyboardLayout* layout = reinterpret_cast<const UCKeyboardLayout*>(
+      CFDataGetBytePtr((__bridge CFDataRef)_keyboardLayoutData));
+
+  UInt32 deadKeyState = 0;
+  UniCharCount stringLength = 0;
+  UniChar resultChar;
+
+  UInt32 modifierState = ((shift ? shiftKey : 0) >> 8) & 0xFF;
+  UInt32 keyboardType = LMGetKbdLast();
+
+  bool isDeadKey = false;
+  OSStatus status =
+      UCKeyTranslate(layout, keyCode, kUCKeyActionDown, modifierState, keyboardType,
+                     kUCKeyTranslateNoDeadKeysBit, &deadKeyState, 1, &stringLength, &resultChar);
+  // For dead keys, press the same key again to get the printable representation of the key.
+  if (status == noErr && stringLength == 0 && deadKeyState != 0) {
+    isDeadKey = true;
+    status =
+        UCKeyTranslate(layout, keyCode, kUCKeyActionDown, modifierState, keyboardType,
+                       kUCKeyTranslateNoDeadKeysBit, &deadKeyState, 1, &stringLength, &resultChar);
+  }
+
+  if (status == noErr && stringLength == 1 && !std::iscntrl(resultChar)) {
+    return LayoutClue{resultChar, isDeadKey};
+  }
+  return LayoutClue{0, false};
 }
 
 #pragma mark - NSResponder

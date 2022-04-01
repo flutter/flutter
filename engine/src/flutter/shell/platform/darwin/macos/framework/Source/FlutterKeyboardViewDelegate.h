@@ -7,6 +7,29 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 
+namespace flutter {
+
+// Signature used to notify that a keyboard layout has changed.
+typedef void (^KeyboardLayoutNotifier)();
+
+// The printable result of a key under certain modifiers, used to derive key
+// mapping.
+typedef struct {
+  // The printable character.
+  //
+  // If `isDeadKey` is true, then this is the character when pressing the same
+  // dead key twice.
+  uint32_t character;
+
+  // Whether this character is a dead key.
+  //
+  // A dead key is a key that is not counted as text per se, but holds a
+  // diacritics to be added to the next key.
+  bool isDeadKey;
+} LayoutClue;
+
+}  // namespace flutter
+
 /**
  * An interface for a class that can provides |FlutterKeyboardManager| with
  * platform-related features.
@@ -16,7 +39,6 @@
 @protocol FlutterKeyboardViewDelegate
 
 @required
-
 /**
  * Get the next responder to dispatch events that the keyboard system
  * (including text input) do not handle.
@@ -60,5 +82,18 @@
 // TODO (LongCatIsLooong): remove this method and implement a long-term fix for
 // https://github.com/flutter/flutter/issues/85328.
 - (BOOL)isComposing;
+
+/**
+ * Add a listener that is called whenever the user changes keyboard layout.
+ *
+ * Only one listeners is supported. Adding new ones overwrites the current one.
+ * Assigning nil unsubscribes.
+ */
+- (void)subscribeToKeyboardLayoutChange:(nullable flutter::KeyboardLayoutNotifier)callback;
+
+/**
+ * Querying the printable result of a key under the given modifier state.
+ */
+- (flutter::LayoutClue)lookUpLayoutForKeyCode:(uint16_t)keyCode shift:(BOOL)shift;
 
 @end
