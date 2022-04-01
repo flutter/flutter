@@ -13,8 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<void> endOfAnimation() async {
   do {
-    await SchedulerBinding.instance!.endOfFrame;
-  } while (SchedulerBinding.instance!.hasScheduledFrame);
+    await SchedulerBinding.instance.endOfFrame;
+  } while (SchedulerBinding.instance.hasScheduledFrame);
 }
 
 Rect boundsFor(WidgetController controller, Finder item) {
@@ -31,11 +31,10 @@ Future<void> main() async {
     },
     behavior: HitTestBehavior.opaque,
     child: const IgnorePointer(
-      ignoring: true,
       child: GalleryApp(testMode: true),
     ),
   ));
-  await SchedulerBinding.instance!.endOfFrame;
+  await SchedulerBinding.instance.endOfFrame;
   await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
 
@@ -49,9 +48,9 @@ Future<void> main() async {
       child: GalleryApp(testMode: true),
     ),
   ));
-  await SchedulerBinding.instance!.endOfFrame;
+  await SchedulerBinding.instance.endOfFrame;
 
-  final WidgetController controller = LiveWidgetController(WidgetsBinding.instance!);
+  final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
 
   debugPrint('Navigating...');
   await controller.tap(find.text('Material'));

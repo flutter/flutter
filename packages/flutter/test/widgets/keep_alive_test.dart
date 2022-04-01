@@ -226,6 +226,11 @@ void main() {
       '     │ parentData: <none> (can use size)\n'
       '     │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '     │ size: Size(800.0, 600.0)\n'
+      '     │ painter: null\n'
+      '     │ foregroundPainter:\n'
+      '     │   _GlowingOverscrollIndicatorPainter(_GlowController(color:\n'
+      '     │   Color(0xffffffff), axis: vertical), _GlowController(color:\n'
+      '     │   Color(0xffffffff), axis: vertical))\n'
       '     │\n'
       '     └─child: RenderRepaintBoundary#00000\n'
       '       │ needs compositing\n'
@@ -322,6 +327,8 @@ void main() {
       '                       │     parentData: <none> (can use size)\n'
       '                       │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │     size: Size(800.0, 400.0)\n'
+      '                       │     painter: _PlaceholderPainter#00000()\n'
+      '                       │     preferredSize: Size(Infinity, Infinity)\n'
       '                       │\n'
       '                       ├─child with index 1: RenderLimitedBox#00000\n'                                     // <----- no dashed line starts here
       '                       │ │ parentData: index=1; layoutOffset=400.0\n'
@@ -334,6 +341,8 @@ void main() {
       '                       │     parentData: <none> (can use size)\n'
       '                       │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │     size: Size(800.0, 400.0)\n'
+      '                       │     painter: _PlaceholderPainter#00000()\n'
+      '                       │     preferredSize: Size(Infinity, Infinity)\n'
       '                       │\n'
       '                       └─child with index 2: RenderLimitedBox#00000 NEEDS-PAINT\n'
       '                         │ parentData: index=2; layoutOffset=800.0\n'
@@ -345,7 +354,9 @@ void main() {
       '                         └─child: RenderCustomPaint#00000 NEEDS-PAINT\n'
       '                             parentData: <none> (can use size)\n'
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
-      '                             size: Size(800.0, 400.0)\n',
+      '                             size: Size(800.0, 400.0)\n'
+      '                             painter: _PlaceholderPainter#00000()\n'
+      '                             preferredSize: Size(Infinity, Infinity)\n',
     ));
     const GlobalObjectKey<_LeafState>(0).currentState!.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
@@ -375,6 +386,11 @@ void main() {
       '     │ parentData: <none> (can use size)\n'
       '     │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '     │ size: Size(800.0, 600.0)\n'
+      '     │ painter: null\n'
+      '     │ foregroundPainter:\n'
+      '     │   _GlowingOverscrollIndicatorPainter(_GlowController(color:\n'
+      '     │   Color(0xffffffff), axis: vertical), _GlowController(color:\n'
+      '     │   Color(0xffffffff), axis: vertical))\n'
       '     │\n'
       '     └─child: RenderRepaintBoundary#00000\n'
       '       │ needs compositing\n'
@@ -471,6 +487,8 @@ void main() {
       '                       │     parentData: <none> (can use size)\n'
       '                       │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │     size: Size(800.0, 400.0)\n'
+      '                       │     painter: _PlaceholderPainter#00000()\n'
+      '                       │     preferredSize: Size(Infinity, Infinity)\n'
       '                       │\n'
       '                       ├─child with index 5: RenderLimitedBox#00000\n'                                     // <----- this is index 5, not 0
       '                       │ │ parentData: index=5; layoutOffset=2000.0\n'
@@ -483,6 +501,8 @@ void main() {
       '                       │     parentData: <none> (can use size)\n'
       '                       │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │     size: Size(800.0, 400.0)\n'
+      '                       │     painter: _PlaceholderPainter#00000()\n'
+      '                       │     preferredSize: Size(Infinity, Infinity)\n'
       '                       │\n'
       '                       ├─child with index 6: RenderLimitedBox#00000\n'
       '                       │ │ parentData: index=6; layoutOffset=2400.0\n'
@@ -495,6 +515,8 @@ void main() {
       '                       │     parentData: <none> (can use size)\n'
       '                       │     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       │     size: Size(800.0, 400.0)\n'
+      '                       │     painter: _PlaceholderPainter#00000()\n'
+      '                       │     preferredSize: Size(Infinity, Infinity)\n'
       '                       │\n'
       '                       ├─child with index 7: RenderLimitedBox#00000 NEEDS-PAINT\n'
       '                       ╎ │ parentData: index=7; layoutOffset=2800.0\n'
@@ -507,6 +529,8 @@ void main() {
       '                       ╎     parentData: <none> (can use size)\n'
       '                       ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       ╎     size: Size(800.0, 400.0)\n'
+      '                       ╎     painter: _PlaceholderPainter#00000()\n'
+      '                       ╎     preferredSize: Size(Infinity, Infinity)\n'
       '                       ╎\n'
       '                       ╎╌child with index 0 (kept alive but not laid out): RenderLimitedBox#00000\n'               // <----- this one is index 0 and is marked as being kept alive but not laid out
       '                       ╎ │ parentData: index=0; keepAlive; layoutOffset=0.0\n'
@@ -519,6 +543,8 @@ void main() {
       '                       ╎     parentData: <none> (can use size)\n'
       '                       ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       ╎     size: Size(800.0, 400.0)\n'
+      '                       ╎     painter: _PlaceholderPainter#00000()\n'
+      '                       ╎     preferredSize: Size(Infinity, Infinity)\n'
       '                       ╎\n'                                                                                // <----- dashed line ends here
       '                       └╌child with index 3 (kept alive but not laid out): RenderLimitedBox#00000\n'
       '                         │ parentData: index=3; keepAlive; layoutOffset=1200.0\n'
@@ -530,7 +556,9 @@ void main() {
       '                         └─child: RenderCustomPaint#00000\n'
       '                             parentData: <none> (can use size)\n'
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
-      '                             size: Size(800.0, 400.0)\n',
+      '                             size: Size(800.0, 400.0)\n'
+      '                             painter: _PlaceholderPainter#00000()\n'
+      '                             preferredSize: Size(Infinity, Infinity)\n',
     ));
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87876
 

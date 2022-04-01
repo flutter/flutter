@@ -67,7 +67,7 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
   @override
   void paint(PaintingContext context, Offset offset) {
     // This renderObject does not introduce additional offset to child's position.
-    if (child?.geometry?.visible == true)
+    if (child?.geometry?.visible ?? false)
       context.paintChild(child!, offset);
   }
 

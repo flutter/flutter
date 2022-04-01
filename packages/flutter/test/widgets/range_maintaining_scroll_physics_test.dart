@@ -230,7 +230,7 @@ void main() {
     expect(bike2.center, bike1.shift(const Offset(100.0, 0.0)).center);
   });
 
-  testWidgets('Changing the size of the viewport while you are overdragged', (WidgetTester tester) async {
+  testWidgets('changing the size of the viewport when overscrolled', (WidgetTester tester) async {
     Widget build(double height) {
       return Directionality(
         textDirection: TextDirection.rtl,
@@ -262,6 +262,82 @@ void main() {
     await tester.pumpWidget(build(220.0));
     final Rect newPosition = tester.getRect(find.byType(Placeholder));
     expect(oldPosition, newPosition);
+  });
+
+  testWidgets('inserting and removing an item when overscrolled', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/62890
+
+    const double itemExtent = 100.0;
+    final UniqueKey key = UniqueKey();
+    final Finder finder = find.byKey(key);
+    Widget build({required bool twoItems}) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: ScrollConfiguration(
+          behavior: const RangeMaintainingTestScrollBehavior(),
+          child: Align(
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+              child: ListView(
+                children: <Widget>[
+                  SizedBox(height: itemExtent, child: Placeholder(key: key)),
+                  if (twoItems)
+                    const SizedBox(height: itemExtent, child: Placeholder()),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(twoItems: false));
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+    // overscroll bottom
+    final TestGesture drag1 = await tester.startGesture(tester.getCenter(finder));
+    await tester.pump();
+    await drag1.moveBy(const Offset(0.0, -50.0));
+    await tester.pump();
+
+    final double oldOverscroll1 = position.pixels - position.maxScrollExtent;
+    final Rect oldPosition1 = tester.getRect(finder);
+    await tester.pumpWidget(build(twoItems: true));
+    // verify inserting new item didn't change the position of the first one
+    expect(oldPosition1, tester.getRect(finder));
+    // verify the overscroll changed by the size of the added item
+    final double newOverscroll1 = position.pixels - position.maxScrollExtent;
+    expect(oldOverscroll1, isPositive);
+    expect(newOverscroll1, isNegative);
+    expect(newOverscroll1, oldOverscroll1 - itemExtent);
+
+    await drag1.up();
+
+    // verify there's no ballistic animation, because we weren't overscrolled
+    expect(await tester.pumpAndSettle(), 1);
+
+    // overscroll bottom
+    final TestGesture drag2 = await tester.startGesture(tester.getCenter(finder));
+    await tester.pump();
+    await drag2.moveBy(const Offset(0.0, -100.0));
+    await tester.pump();
+
+    final double oldOverscroll2 = position.pixels - position.maxScrollExtent;
+    // should find nothing because item is not visible
+    expect(finder, findsNothing);
+    await tester.pumpWidget(build(twoItems: false));
+    // verify removing an item changed the position of the first one, because prior it was not visible
+    expect(oldPosition1, tester.getRect(finder));
+    // verify the overscroll was maintained
+    final double newOverscroll2 = position.pixels - position.maxScrollExtent;
+    expect(oldOverscroll2, isPositive);
+    expect(oldOverscroll2, newOverscroll2);
+
+    await drag2.up();
+
+    // verify there's a ballistic animation from overscroll
+    expect(await tester.pumpAndSettle(), 9);
   });
 }
 

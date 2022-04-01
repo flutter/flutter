@@ -43,8 +43,3 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   @override
   String toString() => '${describeIdentity(this)}()';
 }
-
-class FakeImageConfiguration implements ImageConfiguration {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}

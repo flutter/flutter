@@ -7,8 +7,10 @@
 @Tags(<String>['reduced-test-set'])
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -53,6 +55,7 @@ void main() {
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -93,6 +96,7 @@ void main() {
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -160,6 +164,7 @@ void main() {
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -198,6 +203,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -331,7 +337,6 @@ void main() {
             return Center(
               child: CupertinoSwitch(
                 value: value,
-                dragStartBehavior: DragStartBehavior.start,
                 onChanged: (bool newValue) {
                   setState(() {
                     value = newValue;
@@ -756,6 +761,63 @@ void main() {
     await expectLater(
       find.byKey(switchKey),
       matchesGoldenFile('switch.tap.on.dark.png'),
+    );
+  });
+
+  testWidgets('Hovering over Cupertino switch updates cursor to clickable on Web', (WidgetTester tester) async {
+    const bool value = false;
+    // Disabled CupertinoSwitch does not update cursor on Web.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return const Center(
+              child: CupertinoSwitch(
+                value: value,
+                dragStartBehavior: DragStartBehavior.down,
+                onChanged: null,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final Offset cupertinoSwitch = tester.getCenter(find.byType(CupertinoSwitch));
+    await gesture.addPointer(location: cupertinoSwitch);
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Enabled CupertinoSwitch updates cursor when hovering on Web.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: CupertinoSwitch(
+                value: value,
+                dragStartBehavior: DragStartBehavior.down,
+                onChanged: (bool newValue) { },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await gesture.moveTo(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    await gesture.moveTo(cupertinoSwitch);
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
 }

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -833,7 +832,7 @@ class _DialPainter extends CustomPainter {
     required this.theta,
     required this.textDirection,
     required this.selectedValue,
-  }) : super(repaint: PaintingBinding.instance!.systemFonts);
+  }) : super(repaint: PaintingBinding.instance.systemFonts);
 
   final List<_TappableLabel> primaryLabels;
   final List<_TappableLabel> secondaryLabels;
@@ -1203,7 +1202,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   ];
 
   List<_TappableLabel> _buildMinutes(TextTheme textTheme, Color color) {
-    const List<TimeOfDay> _minuteMarkerValues = <TimeOfDay>[
+    const List<TimeOfDay> minuteMarkerValues = <TimeOfDay>[
       TimeOfDay(hour: 0, minute: 0),
       TimeOfDay(hour: 0, minute: 5),
       TimeOfDay(hour: 0, minute: 10),
@@ -1219,7 +1218,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     ];
 
     return <_TappableLabel>[
-      for (final TimeOfDay timeOfDay in _minuteMarkerValues)
+      for (final TimeOfDay timeOfDay in minuteMarkerValues)
         _buildTappableLabel(
           textTheme,
           color,
@@ -1746,7 +1745,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     //
     // TODO(rami-a): Once https://github.com/flutter/flutter/issues/67571 is
     // resolved, remove the window check for semantics being enabled on web.
-    final String? hintText = MediaQuery.of(context).accessibleNavigation || ui.window.semanticsEnabled
+    final String? hintText = MediaQuery.of(context).accessibleNavigation || WidgetsBinding.instance.window.semanticsEnabled
         ? widget.semanticHintText
         : (focusNode.hasFocus ? null : _formattedValue);
     inputDecoration = inputDecoration.copyWith(
@@ -1915,6 +1914,32 @@ class _RestorableTimePickerMode extends RestorableValue<_TimePickerMode> {
   Object? toPrimitives() => value.index;
 }
 
+// A restorable [AutovalidateMode] value.
+//
+// This serializes each entry as a unique `int` value.
+class _RestorableAutovalidateMode extends RestorableValue<AutovalidateMode> {
+  _RestorableAutovalidateMode(
+      AutovalidateMode defaultValue,
+      ) : _defaultValue = defaultValue;
+
+  final AutovalidateMode _defaultValue;
+
+  @override
+  AutovalidateMode createDefaultValue() => _defaultValue;
+
+  @override
+  void didUpdateValue(AutovalidateMode? oldValue) {
+    assert(debugIsSerializableForRestoration(value.index));
+    notifyListeners();
+  }
+
+  @override
+  AutovalidateMode fromPrimitives(Object? data) => AutovalidateMode.values[data! as int];
+
+  @override
+  Object? toPrimitives() => value.index;
+}
+
 // A restorable [_RestorableTimePickerEntryMode] value.
 //
 // This serializes each entry as a unique `int` value.
@@ -1949,7 +1974,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   late final _RestorableTimePickerEntryMode _entryMode = _RestorableTimePickerEntryMode(widget.initialEntryMode);
   final _RestorableTimePickerMode _mode = _RestorableTimePickerMode(_TimePickerMode.hour);
   final _RestorableTimePickerModeN _lastModeAnnounced = _RestorableTimePickerModeN(null);
-  final RestorableBool _autoValidate = RestorableBool(false);
+  final _RestorableAutovalidateMode _autovalidateMode = _RestorableAutovalidateMode(AutovalidateMode.disabled);
   final RestorableBoolN _autofocusHour = RestorableBoolN(null);
   final RestorableBoolN _autofocusMinute = RestorableBoolN(null);
   final RestorableBool _announcedInitialTime = RestorableBool(false);
@@ -1979,7 +2004,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     registerForRestoration(_entryMode, 'entry_mode');
     registerForRestoration(_mode, 'mode');
     registerForRestoration(_lastModeAnnounced, 'last_mode_announced');
-    registerForRestoration(_autoValidate, 'autovalidate');
+    registerForRestoration(_autovalidateMode, 'autovalidateMode');
     registerForRestoration(_autofocusHour, 'autofocus_hour');
     registerForRestoration(_autofocusMinute, 'autofocus_minute');
     registerForRestoration(_announcedInitialTime, 'announced_initial_time');
@@ -2022,7 +2047,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     setState(() {
       switch (_entryMode.value) {
         case TimePickerEntryMode.dial:
-          _autoValidate.value = false;
+          _autovalidateMode.value = AutovalidateMode.disabled;
           _entryMode.value = TimePickerEntryMode.input;
           break;
         case TimePickerEntryMode.input:
@@ -2096,7 +2121,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     if (_entryMode.value == TimePickerEntryMode.input) {
       final FormState form = _formKey.currentState!;
       if (!form.validate()) {
-        setState(() { _autoValidate.value = true; });
+        setState(() { _autovalidateMode.value = AutovalidateMode.always; });
         return;
       }
       form.save();
@@ -2257,7 +2282,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
       case TimePickerEntryMode.input:
         picker = Form(
           key: _formKey,
-          autovalidate: _autoValidate.value,
+          autovalidateMode: _autovalidateMode.value,
           child: SingleChildScrollView(
             restorationId: 'time_picker_scroll_view',
             child: Column(
@@ -2340,6 +2365,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 /// [hourLabelText], [minuteLabelText] and [confirmText] can be provided to
 /// override the default values.
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// By default, the time picker gets its colors from the overall theme's
 /// [ColorScheme]. The time picker can be further customized by providing a
 /// [TimePickerThemeData] to the overall theme.
@@ -2384,6 +2411,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 ///    date picker.
 ///  * [TimePickerThemeData], which allows you to customize the colors,
 ///    typography, and shape of the time picker.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 Future<TimeOfDay?> showTimePicker({
   required BuildContext context,
   required TimeOfDay initialTime,
@@ -2398,6 +2427,7 @@ Future<TimeOfDay?> showTimePicker({
   String? minuteLabelText,
   RouteSettings? routeSettings,
   EntryModeChangeCallback? onEntryModeChanged,
+  Offset? anchorPoint,
 }) async {
   assert(context != null);
   assert(initialTime != null);
@@ -2423,6 +2453,7 @@ Future<TimeOfDay?> showTimePicker({
       return builder == null ? dialog : builder(context, dialog);
     },
     routeSettings: routeSettings,
+    anchorPoint: anchorPoint,
   );
 }
 

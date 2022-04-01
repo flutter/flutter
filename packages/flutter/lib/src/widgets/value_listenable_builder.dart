@@ -164,12 +164,12 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
 
   @override
   void didUpdateWidget(ValueListenableBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget.valueListenable != widget.valueListenable) {
       oldWidget.valueListenable.removeListener(_valueChanged);
       value = widget.valueListenable.value;
       widget.valueListenable.addListener(_valueChanged);
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override

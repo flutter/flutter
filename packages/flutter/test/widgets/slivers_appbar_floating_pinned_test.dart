@@ -391,7 +391,6 @@ void main() {
               physics: const BouncingScrollPhysics(),
               slivers: <Widget>[
                 const SliverAppBar(
-                  pinned: false,
                   floating: true,
                   expandedHeight: 100.0,
                 ),
@@ -426,7 +425,6 @@ void main() {
               slivers: <Widget>[
                 const SliverAppBar(
                   pinned: true,
-                  floating: false,
                   expandedHeight: 100.0,
                 ),
                 SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),

@@ -53,8 +53,9 @@ void main() {
       ];
       final ProcessResult result = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
 
-      print(result.stdout);
-      print(result.stderr);
+      printOnFailure('Output of flutter build macos:');
+      printOnFailure(result.stdout.toString());
+      printOnFailure(result.stderr.toString());
       expect(result.exitCode, 0);
 
       expect(result.stdout, contains('Running pod install'));
@@ -78,7 +79,21 @@ void main() {
         'App.framework',
       ));
 
-      expect(outputAppFramework.childFile('App'), exists);
+      final File outputAppFrameworkBinary = outputAppFramework.childFile('App');
+      final String archs = processManager.runSync(
+        <String>['file', outputAppFrameworkBinary.path],
+      ).stdout as String;
+
+      final bool containsX64 = archs.contains('Mach-O 64-bit dynamically linked shared library x86_64');
+      final bool containsArm = archs.contains('Mach-O 64-bit dynamically linked shared library arm64');
+      if (buildModeLower == 'debug') {
+        // Only build the architecture matching the machine running this test, not both.
+        expect(containsX64 ^ containsArm, isTrue, reason: 'Unexpected architecture $archs');
+      } else {
+        expect(containsX64, isTrue, reason: 'Unexpected architecture $archs');
+        expect(containsArm, isTrue, reason: 'Unexpected architecture $archs');
+      }
+
       expect(outputAppFramework.childLink('Resources'), exists);
 
       final File vmSnapshot = fileSystem.file(fileSystem.path.join(
@@ -134,8 +149,9 @@ void main() {
       // Build again without cleaning.
       final ProcessResult secondBuild = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
 
-      print(secondBuild.stdout);
-      print(secondBuild.stderr);
+      printOnFailure('Output of second build:');
+      printOnFailure(secondBuild.stdout.toString());
+      printOnFailure(secondBuild.stderr.toString());
       expect(secondBuild.exitCode, 0);
 
       expect(secondBuild.stdout, isNot(contains('Running pod install')));
@@ -145,8 +161,6 @@ void main() {
         ...getLocalEngineArguments(),
         'clean',
       ], workingDirectory: workingDirectory);
-    }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
-       timeout: const Timeout(Duration(minutes: 5)),
-    );
+    }, skip: !platform.isMacOS); // [intended] only makes sense for macos platform.
   }
 }

@@ -211,8 +211,8 @@ void main() {
     }
 
     Color bannerColor() {
-      return tester.widget<Container>(
-        find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first,
+      return tester.widget<Material>(
+        find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Material)).first,
       ).color!;
     }
 
@@ -342,14 +342,11 @@ void main() {
             ListTile(
               leading: Icon(Icons.computer, key: selectedIconKey),
               title: const Text('selected'),
-              enabled: true,
               selected: true,
             ),
             ListTile(
               leading: Icon(Icons.add, key: unselectedIconKey),
               title: const Text('unselected'),
-              enabled: true,
-              selected: false,
             ),
           ],
         ),

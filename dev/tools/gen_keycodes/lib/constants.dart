@@ -22,7 +22,7 @@ class MaskConstant {
     return name
       .split(' ')
       .map<String>((String word) => lowerCamelToUpperCamel(word.toLowerCase()))
-      .join('');
+      .join();
   }
 
   String get lowerCamelName {

@@ -80,6 +80,17 @@
       "xkb": 641
     }
   },
+  "MicrophoneMuteToggle": {
+    "names": {
+      "name": "MicrophoneMuteToggle",
+      "chromium": "MicrophoneMuteToggle"
+    },
+    "scanCodes": {
+      "usb": 24,
+      "linux": 248,
+      "xkb": 256
+    }
+  },
   "Sleep": {
     "names": {
       "name": "Sleep",

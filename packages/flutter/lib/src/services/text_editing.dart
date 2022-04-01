@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues, TextAffinity, TextPosition, TextRange;
+import 'dart:ui' show TextAffinity, TextPosition, TextRange;
 
 import 'package:flutter/foundation.dart';
 
@@ -80,8 +80,31 @@ class TextSelection extends TextRange {
 
   /// The position at which the selection originates.
   ///
+  /// {@template flutter.services.TextSelection.TextAffinity}
+  /// The [TextAffinity] of the resulting [TextPosition] is based on the
+  /// relative logical position in the text to the other selection endpoint:
+  ///  * if [baseOffset] < [extentOffset], [base] will have
+  ///    [TextAffinity.downstream] and [extent] will have
+  ///    [TextAffinity.upstream].
+  ///  * if [baseOffset] > [extentOffset], [base] will have
+  ///    [TextAffinity.upstream] and [extent] will have
+  ///    [TextAffinity.downstream].
+  ///  * if [baseOffset] == [extentOffset], [base] and [extent] will both have
+  ///    the collapsed selection's [affinity].
+  /// {@endtemplate}
+  ///
   /// Might be larger than, smaller than, or equal to extent.
-  TextPosition get base => TextPosition(offset: baseOffset, affinity: affinity);
+  TextPosition get base {
+    final TextAffinity affinity;
+    if (!isValid || baseOffset == extentOffset) {
+      affinity = this.affinity;
+    } else if (baseOffset < extentOffset) {
+      affinity = TextAffinity.downstream;
+    } else {
+      affinity = TextAffinity.upstream;
+    }
+    return TextPosition(offset: baseOffset, affinity: affinity);
+  }
 
   /// The position at which the selection terminates.
   ///
@@ -89,8 +112,20 @@ class TextSelection extends TextRange {
   /// value that changes. Similarly, if the current theme paints a caret on one
   /// side of the selection, this is the location at which to paint the caret.
   ///
+  /// {@macro flutter.services.TextSelection.TextAffinity}
+  ///
   /// Might be larger than, smaller than, or equal to base.
-  TextPosition get extent => TextPosition(offset: extentOffset, affinity: affinity);
+  TextPosition get extent {
+    final TextAffinity affinity;
+    if (!isValid || baseOffset == extentOffset) {
+      affinity = this.affinity;
+    } else if (baseOffset < extentOffset) {
+      affinity = TextAffinity.upstream;
+    } else {
+      affinity = TextAffinity.downstream;
+    }
+    return TextPosition(offset: extentOffset, affinity: affinity);
+  }
 
   @override
   String toString() {
@@ -121,11 +156,11 @@ class TextSelection extends TextRange {
   @override
   int get hashCode {
     if (!isValid) {
-      return hashValues(-1.hashCode, -1.hashCode, TextAffinity.downstream.hashCode);
+      return Object.hash(-1.hashCode, -1.hashCode, TextAffinity.downstream.hashCode);
     }
 
     final int affinityHash = isCollapsed ? affinity.hashCode : TextAffinity.downstream.hashCode;
-    return hashValues(baseOffset.hashCode, extentOffset.hashCode, affinityHash, isDirectional.hashCode);
+    return Object.hash(baseOffset.hashCode, extentOffset.hashCode, affinityHash, isDirectional.hashCode);
   }
 
 
@@ -203,8 +238,8 @@ class TextSelection extends TextRange {
   /// [TextSelection.extentOffset] to the given [TextPosition].
   ///
   /// In some cases, the [TextSelection.baseOffset] and
-  /// [TextSelection.extentOffset] may flip during this operation, or the size
-  /// of the selection may shrink.
+  /// [TextSelection.extentOffset] may flip during this operation, and/or the
+  /// size of the selection may shrink.
   ///
   /// ## Difference with [expandTo]
   /// In contrast with this method, [expandTo] is strictly growth; the

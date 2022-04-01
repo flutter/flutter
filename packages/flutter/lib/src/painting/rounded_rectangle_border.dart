@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -141,7 +140,7 @@ class RoundedRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  int get hashCode => hashValues(side, borderRadius);
+  int get hashCode => Object.hash(side, borderRadius);
 
   @override
   String toString() {
@@ -310,7 +309,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
   }
 
   @override
-  int get hashCode => hashValues(side, borderRadius, circleness);
+  int get hashCode => Object.hash(side, borderRadius, circleness);
 
   @override
   String toString() {

@@ -119,7 +119,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     return originalString
       .split('_')
       .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
-      .join('');
+      .join();
   }
 
   @override
@@ -156,7 +156,7 @@ Map<String, List<String>> _parseSection(String section) {
     }
     final int colon = line.indexOf(':');
     if (colon <= 0) {
-      throw 'not sure how to deal with "$line"';
+      throw Exception('not sure how to deal with "$line"');
     }
     final String name = line.substring(0, colon);
     final String value = line.substring(colon + 2);

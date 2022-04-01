@@ -17,7 +17,7 @@ class NotifyMaterial extends StatelessWidget {
   const NotifyMaterial({ Key? key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    LayoutChangedNotification().dispatch(context);
+    const LayoutChangedNotification().dispatch(context);
     return Container();
   }
 }
@@ -25,6 +25,7 @@ class NotifyMaterial extends StatelessWidget {
 Widget buildMaterial({
   double elevation = 0.0,
   Color shadowColor = const Color(0xFF00FF00),
+  Color? surfaceTintColor,
   Color color = const Color(0xFF0000FF),
 }) {
   return Center(
@@ -34,6 +35,7 @@ Widget buildMaterial({
       child: Material(
         color: color,
         shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
         elevation: elevation,
         shape: const CircleBorder(),
       ),
@@ -97,9 +99,9 @@ void main() {
   testWidgets('Material implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Material(
-      type: MaterialType.canvas,
       color: Color(0xFFFFFFFF),
       shadowColor: Color(0xffff0000),
+      surfaceTintColor: Color(0xff0000ff),
       textStyle: TextStyle(color: Color(0xff00ff00)),
       borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
     ).debugFillProperties(builder);
@@ -113,6 +115,7 @@ void main() {
       'type: canvas',
       'color: Color(0xffffffff)',
       'shadowColor: Color(0xffff0000)',
+      'surfaceTintColor: Color(0xff0000ff)',
       'textStyle.inherit: true',
       'textStyle.color: Color(0xff00ff00)',
       'borderRadius: BorderRadiusDirectional.circular(10.0)',
@@ -190,7 +193,7 @@ void main() {
     // This code verifies that the PhysicalModel's elevation animates over
     // a kThemeChangeDuration time interval.
 
-    await tester.pumpWidget(buildMaterial(elevation: 0.0));
+    await tester.pumpWidget(buildMaterial());
     final RenderPhysicalShape modelA = getModel(tester);
     expect(modelA.elevation, equals(0.0));
 
@@ -215,7 +218,7 @@ void main() {
     // This code verifies that the PhysicalModel's shadowColor animates over
     // a kThemeChangeDuration time interval.
 
-    await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFF00FF00)));
+    await tester.pumpWidget(buildMaterial());
     final RenderPhysicalShape modelA = getModel(tester);
     expect(modelA.shadowColor, equals(const Color(0xFF00FF00)));
 
@@ -266,12 +269,72 @@ void main() {
     expect(pressed, isTrue);
   });
 
-  group('Elevation Overlay', () {
+  group('Surface Tint Overlay', () {
+    testWidgets('applyElevationOverlayColor does not effect anything with useMaterial3 set to true', (WidgetTester tester) async {
+      const Color surfaceColor = Color(0xFF121212);
+      await tester.pumpWidget(Theme(
+        data: ThemeData(
+          useMaterial3: true,
+          applyElevationOverlayColor: true,
+          colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
+        ),
+        child: buildMaterial(color: surfaceColor, elevation: 8.0),
+      ));
+      final RenderPhysicalShape model = getModel(tester);
+      expect(model.color, equals(surfaceColor));
+    });
 
+    testWidgets('surfaceTintColor is used to as an overlay to indicate elevation', (WidgetTester tester) async {
+      const Color baseColor = Color(0xFF121212);
+      const Color surfaceTintColor = Color(0xff44CCFF);
+
+      // With no surfaceTintColor specified, it should not apply an overlay
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildMaterial(
+            color: baseColor,
+            elevation: 12.0,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderPhysicalShape noTintModel = getModel(tester);
+      expect(noTintModel.color, equals(baseColor));
+
+      // With surfaceTintColor specified, it should not apply an overlay based
+      // on the elevation.
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildMaterial(
+            color: baseColor,
+            surfaceTintColor: surfaceTintColor,
+            elevation: 12.0,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderPhysicalShape tintModel = getModel(tester);
+
+      // Final color should be the base with a tint of 0.14 opacity or 0xff192c33
+      expect(tintModel.color, equals(const Color(0xff192c33)));
+    });
+
+  }); // Surface Tint Overlay group
+
+  group('Elevation Overlay M2', () {
+    // These tests only apply to the Material 2 overlay mechanism. This group
+    // can be removed after migration to Material 3 is complete.
     testWidgets('applyElevationOverlayColor set to false does not change surface color', (WidgetTester tester) async {
       const Color surfaceColor = Color(0xFF121212);
       await tester.pumpWidget(Theme(
           data: ThemeData(
+            useMaterial3: false,
             applyElevationOverlayColor: false,
             colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
           ),
@@ -304,6 +367,7 @@ void main() {
         await tester.pumpWidget(
             Theme(
               data: ThemeData(
+                useMaterial3: false,
                 applyElevationOverlayColor: true,
                 colorScheme: const ColorScheme.dark().copyWith(
                   surface: surfaceColor,
@@ -326,6 +390,7 @@ void main() {
       await tester.pumpWidget(
         Theme(
           data: ThemeData(
+            useMaterial3: false,
             applyElevationOverlayColor: true,
             colorScheme: const ColorScheme.dark(),
           ),
@@ -344,6 +409,7 @@ void main() {
       await tester.pumpWidget(
           Theme(
             data: ThemeData(
+              useMaterial3: false,
               applyElevationOverlayColor: true,
               colorScheme: const ColorScheme.light(),
             ),
@@ -365,8 +431,9 @@ void main() {
       await tester.pumpWidget(
         Theme(
           data: ThemeData(
+            useMaterial3: false,
             applyElevationOverlayColor: true,
-            colorScheme: const ColorScheme.dark(surface: surfaceColor),
+            colorScheme: const ColorScheme.dark(),
           ),
           child: buildMaterial(
             color: surfaceColor.withOpacity(.75),
@@ -391,6 +458,7 @@ void main() {
       await tester.pumpWidget(
         Theme(
           data: ThemeData(
+            useMaterial3: false,
             applyElevationOverlayColor: true,
             colorScheme: const ColorScheme.dark(
               surface: surfaceColor,
@@ -408,7 +476,8 @@ void main() {
       expect(model.color, equals(surfaceColorWithOverlay));
       expect(model.color, isNot(equals(surfaceColor)));
     });
-  });
+
+  }); // Elevation Overlay M2 group
 
   group('Transparency clipping', () {
     testWidgets('No clip by default', (WidgetTester tester) async {
@@ -421,7 +490,8 @@ void main() {
           ),
       );
 
-      expect(find.byKey(materialKey), hasNoImmediateClip);
+      final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
+      expect(renderClip.clipBehavior, equals(Clip.none));
     });
 
     testWidgets('clips to bounding rect by default given Clip.antiAlias', (WidgetTester tester) async {
@@ -548,7 +618,6 @@ void main() {
       await tester.pumpWidget(
         Material(
           key: materialKey,
-          type: MaterialType.canvas,
           child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
@@ -565,7 +634,6 @@ void main() {
       await tester.pumpWidget(
         Material(
           key: materialKey,
-          type: MaterialType.canvas,
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           elevation: 1.0,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -584,7 +652,6 @@ void main() {
       await tester.pumpWidget(
         Material(
           key: materialKey,
-          type: MaterialType.canvas,
           shape: const StadiumBorder(),
           elevation: 1.0,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -796,10 +863,9 @@ void main() {
                 height: 300,
                 child: Material(
                   clipBehavior: Clip.hardEdge,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    side: const BorderSide(color: Colors.grey, width: 6),
-                    borderRadius: BorderRadius.circular(8),
+                  shape: const RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey, width: 6),
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
                   child: Column(
                     children: <Widget>[
@@ -835,10 +901,9 @@ void main() {
                 height: 300,
                 child: Material(
                   clipBehavior: Clip.hardEdge,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    side: const BorderSide(color: Colors.grey, width: 6),
-                    borderRadius: BorderRadius.circular(8),
+                  shape: const RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey, width: 6),
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
                   borderOnForeground: false,
                   child: Column(

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -278,7 +277,7 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   }
 
   @override
-  int get hashCode => hashValues(side, circleness);
+  int get hashCode => Object.hash(side, circleness);
 
   @override
   String toString() {
@@ -429,7 +428,7 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  int get hashCode => hashValues(side, borderRadius, rectness);
+  int get hashCode => Object.hash(side, borderRadius, rectness);
 
   @override
   String toString() {

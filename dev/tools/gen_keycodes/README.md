@@ -124,7 +124,7 @@ The planes are planned as follows:
   breaking change. Therefore, when handling an unrecognized key on a platform
   managed by Flutter, it is recommended to file a new issue to add this value
   to `keyboard_key.dart` instead of using the platform-plane value. However,
-  for a custom platform (see below), since the platfrom author has full control
+  for a custom platform (see below), since the platform author has full control
   over key mapping, such change will not cause breakage and it is recommended
   to use the platform-plane value to avoid adding platform-exclusive values
   to the framework.

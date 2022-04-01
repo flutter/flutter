@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@import UIKit;
-
 #import "IntegrationTestPlugin.h"
+
+@import UIKit;
 
 static NSString *const kIntegrationTestPluginChannel = @"plugins.flutter.io/integration_test";
 static NSString *const kMethodTestFinished = @"allTestsFinished";
@@ -16,10 +16,13 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 
 @property(nonatomic, readwrite) NSDictionary<NSString *, NSString *> *testResults;
 
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
+
 @end
 
 @implementation IntegrationTestPlugin {
   NSDictionary<NSString *, NSString *> *_testResults;
+  NSMutableDictionary<NSString *, UIImage *> *_capturedScreenshotsByName;
 }
 
 + (IntegrationTestPlugin *)instance {
@@ -32,7 +35,13 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 }
 
 - (instancetype)initForRegistration {
-  return [super init];
+  return [self init];
+}
+
+- (instancetype)init {
+  self = [super init];
+  _capturedScreenshotsByName = [NSMutableDictionary new];
+  return self;
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
@@ -59,7 +68,7 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
     // If running as a native Xcode test, attach to test.
     UIImage *screenshot = [self capturePngScreenshot];
     NSString *name = call.arguments[@"name"];
-    [self.screenshotDelegate didTakeScreenshot:screenshot attachmentName:name];
+    _capturedScreenshotsByName[name] = screenshot;
 
     // Also pass back along the channel for the driver to handle.
     NSData *pngData = UIImagePNGRepresentation(screenshot);

@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window;
-
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -57,6 +56,7 @@ void main() {
       rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
       showValueIndicator: ShowValueIndicator.always,
       valueIndicatorTextStyle: TextStyle(color: Colors.black),
+      mouseCursor: MaterialStateMouseCursor.clickable,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -90,6 +90,7 @@ void main() {
       "rangeValueIndicatorShape: Instance of 'PaddleRangeSliderValueIndicatorShape'",
       'showValueIndicator: always',
       'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
+      'mouseCursor: MaterialStateMouseCursor(clickable)'
     ]);
   });
 
@@ -375,7 +376,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScale),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
             child: Material(
               child: Row(
                 children: <Widget>[
@@ -552,7 +553,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScale),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
             child: Material(
               child: Row(
                 children: <Widget>[
@@ -1136,17 +1137,13 @@ void main() {
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 24.0, 302.0,
           topLeft: const Radius.circular(2.0),
-          topRight: Radius.zero,
-          bottomRight: Radius.zero,
           bottomLeft: const Radius.circular(2.0),
         ))
         ..rect(rect: const Rect.fromLTRB(24.0, 297.0, 24.0, 303.0))
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 776.0, 302.0,
-          topLeft: Radius.zero,
           topRight: const Radius.circular(2.0),
           bottomRight: const Radius.circular(2.0),
-          bottomLeft: Radius.zero,
         ))
         ..circle(x: 24.0, y: 300.0)
         ..shadow(elevation: 1.0)
@@ -1246,6 +1243,21 @@ void main() {
     );
   });
 
+  testWidgets('The mouse cursor is themeable', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        mouseCursor: MaterialStateProperty.all(SystemMouseCursors.text),
+      )
+    ));
+
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Slider)));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
 }
 
 class RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight extends RoundedRectSliderTrackShape {

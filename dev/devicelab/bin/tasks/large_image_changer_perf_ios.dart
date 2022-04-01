@@ -13,8 +13,6 @@ Future<void> main() async {
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/large_image_changer.dart',
     'large_image_changer',
-    measureCpuGpu: true,
-    measureMemory: true,
     // This benchmark doesn't care about frame times, frame times will be heavily
     // impacted by IO time for loading the image initially.
     benchmarkScoreKeys: <String>[

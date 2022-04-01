@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
@@ -75,7 +75,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       Config: () => config,
     });
 
@@ -95,7 +95,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       Config: () => config,
     });
 
@@ -112,7 +112,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       Config: () => config,
     });
 
@@ -129,7 +129,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       Config: () => config,
     });
 
@@ -191,7 +191,7 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Config: () => config,
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
     });
 
     testUsingContext('returns validate sdk is well formed', () {
@@ -214,7 +214,7 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Config: () => config,
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
     });
 
     testUsingContext('does not throw on sdkmanager version check failure', () {
@@ -239,7 +239,7 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Config: () => config,
-      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+      Platform: () => FakePlatform(environment: <String, String>{}),
     });
 
     testUsingContext('throws on sdkmanager version check if sdkmanager not found', () {
@@ -253,7 +253,7 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Config: () => config,
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
     });
 
     testUsingContext('returns avdmanager path under cmdline tools', () {
@@ -269,7 +269,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       Config: () => config,
     });
 
@@ -303,7 +303,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       Config: () => config,
     });
 

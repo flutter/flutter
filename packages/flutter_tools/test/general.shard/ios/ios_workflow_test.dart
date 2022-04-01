@@ -27,9 +27,9 @@ void main() {
 
   testWithoutContext('iOS workflow is disabled on Linux', () {
     final IOSWorkflow iosWorkflow = IOSWorkflow(
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       xcode: Xcode.test(processManager: FakeProcessManager.any()),
-      featureFlags: TestFeatureFlags(isIOSEnabled: true),
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(iosWorkflow.appliesToHostPlatform, false);
@@ -41,7 +41,7 @@ void main() {
     final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'windows'),
       xcode: Xcode.test(processManager: FakeProcessManager.any()),
-      featureFlags: TestFeatureFlags(isIOSEnabled: true),
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(iosWorkflow.appliesToHostPlatform, false);
@@ -58,7 +58,7 @@ void main() {
           version: null,
         ),
       ),
-      featureFlags: TestFeatureFlags(isIOSEnabled: true),
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(iosWorkflow.appliesToHostPlatform, true);
@@ -79,7 +79,7 @@ void main() {
     final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macos'),
       xcode: xcode,
-      featureFlags: TestFeatureFlags(isIOSEnabled: true),
+      featureFlags: TestFeatureFlags(),
     );
 
     // Make sure we're testing the right Xcode state.

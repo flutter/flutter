@@ -57,7 +57,7 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
   }
 
   @override
-  int get hashCode => hashValues(PlaceholderSpanIndexSemanticsTag, index);
+  int get hashCode => Object.hash(PlaceholderSpanIndexSemanticsTag, index);
 }
 
 /// A render object that displays a paragraph of text.
@@ -288,7 +288,7 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   ui.TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
   set textHeightBehavior(ui.TextHeightBehavior? value) {
     if (_textPainter.textHeightBehavior == value)
@@ -380,7 +380,7 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenWidthWithMaxIntrinsics(double height) {
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     while (child != null) {
       // Height and baseline is irrelevant as all text will be laid
@@ -398,7 +398,7 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenWidthWithMinIntrinsics(double height) {
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     while (child != null) {
       // Height and baseline is irrelevant; only looking for the widest word or
@@ -416,7 +416,7 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenHeightWithMinIntrinsics(double width) {
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
     // span will be scaled up when it paints.
@@ -465,13 +465,13 @@ class RenderParagraph extends RenderBox
       final bool isHit = result.addWithPaintTransform(
         transform: transform,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? transformed) {
+        hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(() {
             final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
-            return (transformed!.dx - manualPosition.dx).abs() < precisionErrorTolerance
+            return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
               && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
           }());
-          return child!.hitTest(result, position: transformed!);
+          return child!.hitTest(result, position: transformed);
         },
       );
       if (isHit) {
@@ -530,7 +530,7 @@ class RenderParagraph extends RenderBox
       return <PlaceholderDimensions>[];
     }
     RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
     // Only constrain the width to the maximum width of the paragraph.
     // Leave height unconstrained, which will overflow if expanded past.
@@ -554,7 +554,11 @@ class RenderParagraph extends RenderBox
               _placeholderSpans[childIndex].baseline!,
             );
             break;
-          default:
+          case ui.PlaceholderAlignment.aboveBaseline:
+          case ui.PlaceholderAlignment.belowBaseline:
+          case ui.PlaceholderAlignment.bottom:
+          case ui.PlaceholderAlignment.middle:
+          case ui.PlaceholderAlignment.top:
             baselineOffset = null;
             break;
         }
@@ -904,7 +908,7 @@ class RenderParagraph extends RenderBox
   // can be re-used when [assembleSemanticsNode] is called again. This ensures
   // stable ids for the [SemanticsNode]s of [TextSpan]s across
   // [assembleSemanticsNode] invocations.
-  Queue<SemanticsNode>? _cachedChildNodes;
+  LinkedHashMap<Key, SemanticsNode>? _cachedChildNodes;
 
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
@@ -917,7 +921,7 @@ class RenderParagraph extends RenderBox
     int placeholderIndex = 0;
     int childIndex = 0;
     RenderBox? child = firstChild;
-    final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
+    final LinkedHashMap<Key, SemanticsNode> newChildCache = LinkedHashMap<Key, SemanticsNode>();
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       final TextSelection selection = TextSelection(
@@ -1000,13 +1004,24 @@ class RenderParagraph extends RenderBox
             assert(false, '${recognizer.runtimeType} is not supported.');
           }
         }
-        final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
-            ? _cachedChildNodes!.removeFirst()
-            : SemanticsNode();
+        if (node.parentPaintClipRect != null) {
+          final Rect paintRect = node.parentPaintClipRect!.intersect(currentRect);
+          configuration.isHidden = paintRect.isEmpty && !currentRect.isEmpty;
+        }
+        late final SemanticsNode newChild;
+        if (_cachedChildNodes?.isNotEmpty ?? false) {
+          newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first)!;
+        } else {
+          final UniqueKey key = UniqueKey();
+          newChild = SemanticsNode(
+            key: key,
+            showOnScreen: _createShowOnScreenFor(key),
+          );
+        }
         newChild
           ..updateWith(config: configuration)
           ..rect = currentRect;
-        newChildCache.addLast(newChild);
+        newChildCache[newChild.key!] = newChild;
         newChildren.add(newChild);
       }
     }
@@ -1016,6 +1031,13 @@ class RenderParagraph extends RenderBox
 
     _cachedChildNodes = newChildCache;
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
+  }
+
+  VoidCallback? _createShowOnScreenFor(Key key) {
+    return () {
+      final SemanticsNode node = _cachedChildNodes![key]!;
+      showOnScreen(descendant: this, rect: node.rect);
+    };
   }
 
   @override

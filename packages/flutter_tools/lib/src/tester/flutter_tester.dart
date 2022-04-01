@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
@@ -39,9 +36,6 @@ class FlutterTesterApp extends ApplicationPackage {
 
   @override
   String get name => _directory.basename;
-
-  @override
-  File get packagesFile => _directory.childFile('.packages');
 }
 
 /// The device interface for running on the flutter_tester shell.
@@ -50,13 +44,13 @@ class FlutterTesterApp extends ApplicationPackage {
 /// also be used as a regular device when `--show-test-device` is provided
 /// to the flutter command.
 class FlutterTesterDevice extends Device {
-  FlutterTesterDevice(String deviceId, {
-    @required ProcessManager processManager,
-    @required FlutterVersion flutterVersion,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required Artifacts artifacts,
-    @required OperatingSystemUtils operatingSystemUtils,
+  FlutterTesterDevice(super.deviceId, {
+    required ProcessManager processManager,
+    required FlutterVersion flutterVersion,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Artifacts artifacts,
+    required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _flutterVersion = flutterVersion,
        _logger = logger,
@@ -64,7 +58,6 @@ class FlutterTesterDevice extends Device {
        _artifacts = artifacts,
        _operatingSystemUtils = operatingSystemUtils,
        super(
-        deviceId,
         platformType: null,
         category: null,
         ephemeral: false,
@@ -77,14 +70,14 @@ class FlutterTesterDevice extends Device {
   final Artifacts _artifacts;
   final OperatingSystemUtils _operatingSystemUtils;
 
-  Process _process;
+  Process? _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
 
   @override
   Future<bool> get isLocalEmulator async => false;
 
   @override
-  Future<String> get emulatorId async => null;
+  Future<String?> get emulatorId async => null;
 
   @override
   String get name => 'Flutter test device';
@@ -111,7 +104,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   DeviceLogReader getLogReader({
-    ApplicationPackage app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) {
     return _logReader;
@@ -120,13 +113,13 @@ class FlutterTesterDevice extends Device {
   @override
   Future<bool> installApp(
     ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => true;
 
   @override
   Future<bool> isAppInstalled(
     ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => false;
 
   @override
@@ -138,13 +131,13 @@ class FlutterTesterDevice extends Device {
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
-    @required String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    String? mainPath,
+    String? route,
+    required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (!buildInfo.isDebug) {
@@ -184,7 +177,7 @@ class FlutterTesterDevice extends Device {
       applicationKernelFilePath
     ];
 
-    ProtocolDiscovery observatoryDiscovery;
+    ProtocolDiscovery? observatoryDiscovery;
     try {
       _logger.printTrace(command.join(' '));
       _process = await _processManager.start(command,
@@ -203,9 +196,9 @@ class FlutterTesterDevice extends Device {
         ipv6: ipv6,
         logger: _logger,
       );
-      _logReader.initializeProcess(_process);
+      _logReader.initializeProcess(_process!);
 
-      final Uri observatoryUri = await observatoryDiscovery.uri;
+      final Uri? observatoryUri = await observatoryDiscovery.uri;
       if (observatoryUri != null) {
         return LaunchResult.succeeded(observatoryUri: observatoryUri);
       }
@@ -224,7 +217,7 @@ class FlutterTesterDevice extends Device {
   @override
   Future<bool> stopApp(
     ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     _process?.kill();
     _process = null;
@@ -234,7 +227,7 @@ class FlutterTesterDevice extends Device {
   @override
   Future<bool> uninstallApp(
     ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => true;
 
   @override
@@ -243,7 +236,7 @@ class FlutterTesterDevice extends Device {
   @override
   DevFSWriter createDevFSWriter(
     covariant ApplicationPackage app,
-    String userIdentifier,
+    String? userIdentifier,
   ) {
     return LocalDevFSWriter(
       fileSystem: _fileSystem,
@@ -252,19 +245,19 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    _logReader?.dispose();
-    await _portForwarder?.dispose();
+    _logReader.dispose();
+    await _portForwarder.dispose();
   }
 }
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
   FlutterTesterDevices({
-    @required FileSystem fileSystem,
-    @required Artifacts artifacts,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FlutterVersion flutterVersion,
-    @required OperatingSystemUtils operatingSystemUtils,
+    required FileSystem fileSystem,
+    required Artifacts artifacts,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FlutterVersion flutterVersion,
+    required OperatingSystemUtils operatingSystemUtils,
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
         fileSystem: fileSystem,
@@ -289,7 +282,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
   bool get supportsPlatform => true;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
     return showFlutterTesterDevice ? <Device>[_testerDevice] : <Device>[];
   }
 

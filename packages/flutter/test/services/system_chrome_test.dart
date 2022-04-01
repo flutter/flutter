@@ -10,17 +10,61 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      log.add(methodCall);
+      return null;
+    });
+
     // The first call is a cache miss and will queue a microtask
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
     expect(tester.binding.microtaskCount, equals(1));
 
     // Flush all microtasks
     await tester.idle();
+    expect(log, hasLength(1));
+    expect(log.single, isMethodCall(
+      'SystemChrome.setSystemUIOverlayStyle',
+      arguments: <String, dynamic>{
+        'systemNavigationBarColor': 4278190080,
+        'systemNavigationBarDividerColor': null,
+        'systemStatusBarContrastEnforced': null,
+        'statusBarColor': null,
+        'statusBarBrightness': 'Brightness.dark',
+        'statusBarIconBrightness': 'Brightness.light',
+        'systemNavigationBarIconBrightness': 'Brightness.light',
+        'systemNavigationBarContrastEnforced': null
+      },
+    ));
+    log.clear();
     expect(tester.binding.microtaskCount, equals(0));
+    expect(log.isEmpty, isTrue);
 
     // The second call with the same value should be a no-op
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
     expect(tester.binding.microtaskCount, equals(0));
+
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: true
+    ));
+    expect(tester.binding.microtaskCount, equals(1));
+    await tester.idle();
+    expect(log, hasLength(1));
+    expect(log.single, isMethodCall(
+      'SystemChrome.setSystemUIOverlayStyle',
+      arguments: <String, dynamic>{
+        'systemNavigationBarColor': null,
+        'systemNavigationBarDividerColor': null,
+        'systemStatusBarContrastEnforced': false,
+        'statusBarColor': null,
+        'statusBarBrightness': null,
+        'statusBarIconBrightness': null,
+        'systemNavigationBarIconBrightness': null,
+        'systemNavigationBarContrastEnforced': true
+      },
+    ));
   });
 
   test('setPreferredOrientations control test', () async {
@@ -28,6 +72,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
@@ -46,6 +91,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
@@ -64,6 +110,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
       log.add(message);
+      return null;
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
@@ -78,6 +125,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top]);
@@ -94,6 +142,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
@@ -122,6 +171,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[SystemUiOverlay.top]);
@@ -138,6 +188,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await SystemChrome.setSystemUIChangeCallback(null);
@@ -157,12 +208,12 @@ void main() {
     expect(systemUiOverlayStyle.toString(), 'SystemUiOverlayStyle({'
       'systemNavigationBarColor: null, '
       'systemNavigationBarDividerColor: null, '
-      'systemStatusBarContrastEnforced: true, '
+      'systemStatusBarContrastEnforced: null, '
       'statusBarColor: null, '
       'statusBarBrightness: null, '
       'statusBarIconBrightness: null, '
       'systemNavigationBarIconBrightness: null, '
-      'systemNavigationBarContrastEnforced: true})',
+      'systemNavigationBarContrastEnforced: null})',
     );
   });
 }

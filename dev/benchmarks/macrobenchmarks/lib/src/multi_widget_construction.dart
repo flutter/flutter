@@ -5,8 +5,7 @@
 import 'package:flutter/material.dart';
 
 class MultiWidgetConstructTable extends StatefulWidget {
-  const MultiWidgetConstructTable(this.columnCount, this.rowCount, {Key? key})
-      : super(key: key);
+  const MultiWidgetConstructTable(this.columnCount, this.rowCount, {super.key});
 
   final int columnCount;
   final int rowCount;
@@ -32,7 +31,6 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 10000),
-      lowerBound: 0,
       upperBound: colorList.length + 1.0,
     )..repeat();
   }
@@ -99,8 +97,7 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
 
 // This class is intended to break the original Widget tree
 class MyContainer extends StatelessWidget {
-  const MyContainer({required this.color, required this.child, required this.constraints, Key? key})
-      : super(key: key);
+  const MyContainer({required this.color, required this.child, required this.constraints, super.key});
   final Color color;
   final Widget child;
   final BoxConstraints constraints;

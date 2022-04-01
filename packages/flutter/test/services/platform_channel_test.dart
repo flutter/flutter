@@ -217,7 +217,7 @@ void main() {
 
     test('can handle method call with expressive error result', () async {
       channel.setMethodCallHandler((MethodCall call) async {
-        throw PlatformException(code: 'bad', message: 'sayHello failed', details: null);
+        throw PlatformException(code: 'bad', message: 'sayHello failed');
       });
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData? envelope;
@@ -256,7 +256,7 @@ void main() {
     });
 
     test('can check the mock handler', () async {
-      Future<dynamic> handler(MethodCall call) => Future<dynamic>.value(null);
+      Future<dynamic> handler(MethodCall call) => Future<dynamic>.value();
 
       const MethodChannel channel = MethodChannel('test_handler');
       expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.checkMockMessageHandler(channel.name, null), true);

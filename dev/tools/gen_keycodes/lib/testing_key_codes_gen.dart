@@ -16,14 +16,14 @@ String _toUpperCammel(String lowerCammel) {
 /// Generates the common/testing/key_codes.h based on the information in the key
 /// data structure given to it.
 class KeyCodesCcGenerator extends BaseCodeGenerator {
-  KeyCodesCcGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData) : super(keyData, logicalData);
+  KeyCodesCcGenerator(super.keyData, super.logicalData);
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {
     final OutputLines<int> lines = OutputLines<int>('Physical Key list');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(entry.usbHidCode, '''
-constexpr uint64_t kPhysical${_toUpperCammel(entry.constantName)} = ${toHex(entry.usbHidCode, digits: 8)};''');
+constexpr uint64_t kPhysical${_toUpperCammel(entry.constantName)} = ${toHex(entry.usbHidCode)};''');
     }
     return lines.sortedJoin().trimRight();
   }

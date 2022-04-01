@@ -583,7 +583,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
                 Step(
                   title: const Text('Step 2'),
                   content:  Stepper(
-                    type: StepperType.vertical,
                     steps: const <Step>[
                       Step(
                         title: Text('Nested step 1'),
@@ -702,8 +701,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       MaterialApp(
         home: Material(
           child: Stepper(
-            currentStep: 0,
-            type: StepperType.vertical,
             steps: const <Step>[
               Step(
                 title: Text('Step 0'),
@@ -728,7 +725,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       MaterialApp(
         home: Material(
           child: Stepper(
-            currentStep: 0,
             type: StepperType.horizontal,
             steps: const <Step>[
               Step(
@@ -966,7 +962,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
     // Light theme
     final ColorScheme light = ThemeData.light().colorScheme;
-    await tester.pumpWidget(buildFrame(isActive: true, brightness: Brightness.light));
+    await tester.pumpWidget(buildFrame(brightness: Brightness.light));
     expect(circleFillColor(), light.primary);
     await tester.pumpWidget(buildFrame(isActive: false, brightness: Brightness.light));
     await tester.pumpAndSettle();
@@ -974,7 +970,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
     // Dark theme
     final ColorScheme dark = ThemeData.dark().colorScheme;
-    await tester.pumpWidget(buildFrame(isActive: true, brightness: Brightness.dark));
+    await tester.pumpWidget(buildFrame(brightness: Brightness.dark));
     await tester.pumpAndSettle();
     expect(circleFillColor(), dark.secondary);
     await tester.pumpWidget(buildFrame(isActive: false, brightness: Brightness.dark));
@@ -1134,7 +1130,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
              height: 75,
              child: Stepper(
                margin: margin,
-               type: StepperType.vertical,
                steps: const <Step>[
                  Step(
                    title: Text('Regular title'),

@@ -57,7 +57,8 @@ Future<void> _rebuildApp({ required int version }) async {
 /// test zone.
 void expect(Object? actual, Object? expected) {
   final Matcher matcher = wrapMatcher(expected);
-  final Map<Object, Object> matchState = <Object, Object>{};
+  // matchState needs to be of type <Object?, Object?>, see https://github.com/flutter/flutter/issues/99522
+  final Map<Object?, Object?> matchState = <Object?, Object?>{};
   if (matcher.matches(actual, matchState)) {
     return;
   }
@@ -135,7 +136,6 @@ Future<void> runWebServiceWorkerTest({
     });
 
     expectRequestCounts(<String, int>{
-      '': 1,
       // Even though the server is caching index.html is downloaded twice,
       // once by the initial page load, and once by the service worker.
       // Other resources are loaded once only by the service worker.
@@ -182,7 +182,6 @@ Future<void> runWebServiceWorkerTest({
     expectRequestCounts(<String, int>{
       'index.html': 2,
       'flutter_service_worker.js': 2,
-      '': 1,
       'main.dart.js': 1,
       'assets/NOTICES': 1,
       'assets/AssetManifest.json': 1,
@@ -209,7 +208,6 @@ Future<void> runWebServiceWorkerTest({
     });
 
     expectRequestCounts(<String, int>{
-      '': 1,
       'index.html': 2,
       // We still download some resources multiple times if the server is non-caching.
       'main.dart.js': 2,
@@ -259,7 +257,6 @@ Future<void> runWebServiceWorkerTest({
       'flutter_service_worker.js': 1,
     });
     expectRequestCounts(<String, int>{
-      '': 1,
       'index.html': 2,
       'flutter_service_worker.js': 2,
       'main.dart.js': 2,

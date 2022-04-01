@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '_bitfield_io.dart'
-  if (dart.library.html) '_bitfield_web.dart' as _bitfield;
+  if (dart.library.html) '_bitfield_web.dart' as bitfield;
 
 /// The largest SMI value.
 ///
@@ -11,7 +11,7 @@ import '_bitfield_io.dart'
 ///
 /// When compiling to JavaScript, this value is not supported since it is
 /// larger than the maximum safe 32bit integer.
-const int kMaxUnsignedSMI = _bitfield.kMaxUnsignedSMI;
+const int kMaxUnsignedSMI = bitfield.kMaxUnsignedSMI;
 
 /// A BitField over an enum (or other class whose values implement "index").
 /// Only the first 62 values of the enum can be used as indices.
@@ -21,7 +21,7 @@ abstract class BitField<T extends dynamic> {
   /// Creates a bit field of all zeros.
   ///
   /// The given length must be at most 62.
-  factory BitField(int length) = _bitfield.BitField<T>;
+  factory BitField(int length) = bitfield.BitField<T>;
 
   /// Creates a bit field filled with a particular value.
   ///
@@ -29,7 +29,7 @@ abstract class BitField<T extends dynamic> {
   /// the bits are filled with zeros.
   ///
   /// The given length must be at most 62.
-  factory BitField.filled(int length, bool value) = _bitfield.BitField<T>.filled;
+  factory BitField.filled(int length, bool value) = bitfield.BitField<T>.filled;
 
   /// Returns whether the bit with the given index is set to one.
   bool operator [](T index);

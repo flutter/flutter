@@ -11,6 +11,7 @@
 @Tags(<String>['no-shuffle'])
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -105,32 +106,25 @@ void main() {
     testWithoutContext('skipped based on environment.generateDartPluginRegistry',
         () async {
       final Environment environment = Environment.test(
-          fileSystem.currentDirectory,
-          artifacts: null,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
-          generateDartPluginRegistry: false,
-          defines: <String, String>{
-            kTargetPlatform: 'darwin-x64',
-          });
+        fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.any(),
+      );
 
       expect(const DartPluginRegistrantTarget().canSkip(environment), isTrue);
 
       final Environment environment2 = Environment.test(
           fileSystem.currentDirectory,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
-          generateDartPluginRegistry: true,
-          defines: <String, String>{
-            kTargetPlatform: 'darwin-x64',
-          });
+          generateDartPluginRegistry: true);
 
       expect(const DartPluginRegistrantTarget().canSkip(environment2), isFalse);
     });
-
     testWithoutContext('skipped based on platform', () async {
       const Map<String, bool> canSkip = <String, bool>{
         'darwin-x64': false,
@@ -139,8 +133,8 @@ void main() {
         'windows-x64': false,
         'windows-uwp-x64': false,
         'web-javascript': true,
-        'ios': true,
-        'android': true,
+        'ios': false,
+        'android': false,
         'fuchsia-arm64': true,
         'fuchsia-x64': true,
       };
@@ -150,7 +144,7 @@ void main() {
           const DartPluginRegistrantTarget().canSkip(
             Environment.test(
               fileSystem.currentDirectory,
-              artifacts: null,
+              artifacts: Artifacts.test(),
               fileSystem: fileSystem,
               logger: BufferLogger.test(),
               processManager: FakeProcessManager.any(),
@@ -165,12 +159,12 @@ void main() {
       }
     });
 
-    testUsingContext("doesn't generate generated_main.dart if there aren't Dart plugins", () async {
+    testUsingContext("doesn't generate dart_plugin_registrant.dart if there aren't Dart plugins", () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -195,16 +189,16 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
       expect(generatedMain.existsSync(), isFalse);
     });
 
-    testUsingContext('regenerates generated_main.dart', () async {
+    testUsingContext('regenerates dart_plugin_registrant.dart', () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -237,7 +231,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
       final String mainContent = generatedMain.readAsStringSync();
       expect(
         mainContent,
@@ -249,7 +243,6 @@ void main() {
           '\n'
           '// @dart = 2.12\n'
           '\n'
-          "import 'package:path_provider_example/main.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:path_provider_linux/path_provider_linux.dart';\n"
           '\n'
@@ -258,7 +251,9 @@ void main() {
           '\n'
           "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
-          '    if (Platform.isLinux) {\n'
+          '    if (Platform.isAndroid) {\n'
+          '    } else if (Platform.isIOS) {\n'
+          '    } else if (Platform.isLinux) {\n'
           '      try {\n'
           '        PathProviderLinux.registerWith();\n'
           '      } catch (err) {\n'
@@ -273,29 +268,17 @@ void main() {
           '    } else if (Platform.isWindows) {\n'
           '    }\n'
           '  }\n'
-          '\n'
-          '}\n'
-          '\n'
-          'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
-          'typedef _NullaryFunction = dynamic Function();\n'
-          '\n'
-          'void main(List<String> args) {\n'
-          '  if (entrypoint.main is _UnaryFunction) {\n'
-          '    (entrypoint.main as _UnaryFunction)(args);\n'
-          '  } else {\n'
-          '    (entrypoint.main as _NullaryFunction)();\n'
-          '  }\n'
           '}\n'
         ),
       );
     });
 
-    testUsingContext('removes generated_main.dart if plugins are removed from pubspec.yaml', () async {
+    testUsingContext('removes dart_plugin_registrant.dart if plugins are removed from pubspec.yaml', () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -322,7 +305,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
 
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
@@ -342,7 +325,7 @@ void main() {
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
-          artifacts: null,
+          artifacts: Artifacts.test(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -373,7 +356,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
 
       final String mainContent = generatedMain.readAsStringSync();
       expect(
@@ -386,7 +369,6 @@ void main() {
           '\n'
           '// @dart = 2.12\n'
           '\n'
-          "import 'file:///root/external.dart' as entrypoint;\n"
           "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
           "import 'package:path_provider_linux/path_provider_linux.dart';\n"
           '\n'
@@ -395,7 +377,9 @@ void main() {
           '\n'
           "  @pragma('vm:entry-point')\n"
           '  static void register() {\n'
-          '    if (Platform.isLinux) {\n'
+          '    if (Platform.isAndroid) {\n'
+          '    } else if (Platform.isIOS) {\n'
+          '    } else if (Platform.isLinux) {\n'
           '      try {\n'
           '        PathProviderLinux.registerWith();\n'
           '      } catch (err) {\n'
@@ -409,18 +393,6 @@ void main() {
           '    } else if (Platform.isMacOS) {\n'
           '    } else if (Platform.isWindows) {\n'
           '    }\n'
-          '  }\n'
-          '\n'
-          '}\n'
-          '\n'
-          'typedef _UnaryFunction = dynamic Function(List<String> args);\n'
-          'typedef _NullaryFunction = dynamic Function();\n'
-          '\n'
-          'void main(List<String> args) {\n'
-          '  if (entrypoint.main is _UnaryFunction) {\n'
-          '    (entrypoint.main as _UnaryFunction)(args);\n'
-          '  } else {\n'
-          '    (entrypoint.main as _NullaryFunction)();\n'
           '  }\n'
           '}\n'
         ),

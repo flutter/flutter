@@ -5,13 +5,13 @@ found in the LICENSE file. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.integration_test_example">
 
-    <!-- io.flutter.app.FlutterApplication is an android.app.Application that
-         calls FlutterMain.startInitialization(this); in its onCreate method.
+    <!-- ${applicationName} is used by the Flutter tool to select the Application
+         class to use. For most apps, this is the default Android application.
          In most cases you can leave this as-is, but you if you want to provide
          additional functionality it is fine to subclass or reimplement
-         FlutterApplication and put your custom class here. -->
+         Application and put your custom class here. -->
     <application
-        android:name="io.flutter.app.FlutterApplication"
+        android:name="${applicationName}"
         android:label="integration_test_example"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 
 import '../test_utils.dart';
 import 'project.dart';
@@ -230,6 +227,8 @@ class Home extends StatelessWidget {
               "${localizations.doubleQuoteSelect('cabriolet')}",
               "${localizations.pluralInString(1)}",
               "${localizations.selectInString('he')}",
+              "${localizations.selectWithPlaceholder('male', 'ice cream')}",
+              "${localizations.selectWithPlaceholder('female', 'chocolate')}",
             ]);
           },
         ),
@@ -658,6 +657,15 @@ void main() {
     "placeholders": {
       "gender": {}
     }
+  },
+
+  "selectWithPlaceholder": "Indeed, {gender, select, male {he likes {preference}} female {she likes {preference}} other {they like {preference}}}!",
+  "@selectWithPlaceholder": {
+    "description": "A select message with prefix, suffix strings, and a placeholder.",
+    "placeholders": {
+      "gender": {},
+      "preference": {}
+    }
   }
 }
 ''';
@@ -750,8 +758,8 @@ void main() {
 ''';
 
   String l10nYaml({
-    @required bool useDeferredLoading,
-    @required bool useSyntheticPackage,
+    required bool useDeferredLoading,
+    required bool useSyntheticPackage,
   }) {
     String l10nYamlString = '';
 

@@ -26,7 +26,7 @@ class BenchPageViewScrollLineThrough extends WidgetRecorder {
 }
 
 class _MyScrollContainer extends StatefulWidget {
-  const _MyScrollContainer({Key? key}) : super(key: key);
+  const _MyScrollContainer();
 
   @override
   State<_MyScrollContainer> createState() => _MyScrollContainerState();
@@ -113,7 +113,7 @@ class _CustomPainter extends CustomPainter {
 
       _textPainter.text = span;
 
-      _textPainter.layout(minWidth: 0, maxWidth: width);
+      _textPainter.layout(maxWidth: width);
       _linePainter.style = PaintingStyle.fill;
       canvas.drawRect(
           Rect.fromLTWH(xPosition, yPosition - viewPadding, width, height),

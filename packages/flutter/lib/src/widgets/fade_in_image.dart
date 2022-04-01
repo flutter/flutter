@@ -17,7 +17,7 @@ import 'implicit_animations.dart';
 /// An image that shows a [placeholder] image while the target [image] is
 /// loading, then fades in the new image when it loads.
 ///
-/// Use this class to display long-loading images, such as [new NetworkImage],
+/// Use this class to display long-loading images, such as [NetworkImage.new],
 /// so that the image appears on screen with a graceful animation rather than
 /// abruptly popping onto the screen.
 ///
@@ -67,6 +67,9 @@ class FadeInImage extends StatefulWidget {
   /// The [placeholder] and [image] may be composed in a [ResizeImage] to provide
   /// a custom decode/cache size.
   ///
+  /// The [placeholder] and [image] may be have their own BoxFit settings via [fit]
+  /// and [placeholderFit].
+  ///
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
   /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and
   /// [matchTextDirection] arguments must not be null.
@@ -87,6 +90,7 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
+    this.placeholderFit,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
@@ -125,9 +129,9 @@ class FadeInImage extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [new Image.memory], which has more details about loading images from
+  ///  * [Image.memory], which has more details about loading images from
   ///    memory.
-  ///  * [new Image.network], which has more details about loading images from
+  ///  * [Image.network], which has more details about loading images from
   ///    the network.
   FadeInImage.memoryNetwork({
     Key? key,
@@ -146,6 +150,7 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
+    this.placeholderFit,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
@@ -195,9 +200,9 @@ class FadeInImage extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [new Image.asset], which has more details about loading images from
+  ///  * [Image.asset], which has more details about loading images from
   ///    asset bundles.
-  ///  * [new Image.network], which has more details about loading images from
+  ///  * [Image.network], which has more details about loading images from
   ///    the network.
   FadeInImage.assetNetwork({
     Key? key,
@@ -217,6 +222,7 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
+    this.placeholderFit,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
@@ -294,6 +300,11 @@ class FadeInImage extends StatefulWidget {
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
   final BoxFit? fit;
+
+  /// How to inscribe the placeholder image into the space allocated during layout.
+  ///
+  /// If not value set, it will fallback to [fit].
+  final BoxFit? placeholderFit;
 
   /// How to align the image within its bounds.
   ///
@@ -376,6 +387,7 @@ class _FadeInImageState extends State<FadeInImage> {
     required ImageProvider image,
     ImageErrorWidgetBuilder? errorBuilder,
     ImageFrameBuilder? frameBuilder,
+    BoxFit? fit,
     required Animation<double> opacity,
   }) {
     assert(image != null);
@@ -386,7 +398,7 @@ class _FadeInImageState extends State<FadeInImage> {
       opacity: opacity,
       width: widget.width,
       height: widget.height,
-      fit: widget.fit,
+      fit: fit,
       alignment: widget.alignment,
       repeat: widget.repeat,
       matchTextDirection: widget.matchTextDirection,
@@ -401,6 +413,7 @@ class _FadeInImageState extends State<FadeInImage> {
       image: widget.image,
       errorBuilder: widget.imageErrorBuilder,
       opacity: _imageAnimation,
+      fit: widget.fit,
       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded) {
           _resetAnimations();
@@ -413,6 +426,7 @@ class _FadeInImageState extends State<FadeInImage> {
             image: widget.placeholder,
             errorBuilder: widget.placeholderErrorBuilder,
             opacity: _placeholderAnimation,
+            fit: widget.placeholderFit ?? widget.fit,
           ),
           placeholderProxyAnimation: _placeholderAnimation,
           isTargetLoaded: frame != null,

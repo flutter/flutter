@@ -9,19 +9,13 @@ void main() {
   test('BorderSide - asserts when constructed incorrectly', () {
     expect(
       const BorderSide(),
-      const BorderSide(
-        color: Color(0xFF000000),
-        width: 1.0,
-        style: BorderStyle.solid,
-      ),
+      const BorderSide(),
     );
     expect(() => BorderSide(width: nonconst(-1.0)), throwsAssertionError);
     expect(
       const BorderSide(width: -0.0),
       const BorderSide(
-        color: Color(0xFF000000),
         width: 0.0,
-        style: BorderStyle.solid,
       ),
     );
   });
@@ -38,7 +32,7 @@ void main() {
     const BorderSide side2 = BorderSide(width: 2.0);
     const BorderSide side3 = BorderSide(width: 3.0);
     const BorderSide side5 = BorderSide(width: 5.0);
-    const BorderSide solid = BorderSide(style: BorderStyle.solid);
+    const BorderSide solid = BorderSide();
     const BorderSide yellowNone = BorderSide(style: BorderStyle.none, color: Color(0xFFFFFF00), width: 0.0);
     // canMerge
     expect(      BorderSide.canMerge(BorderSide.none, BorderSide.none), isTrue);
@@ -101,7 +95,7 @@ void main() {
     expect(none.scale(2.0), none);
   });
   test('BorderSide - toPaint', () {
-    final Paint paint1 = const BorderSide(width: 2.5, color: Color(0xFFFFFF00), style: BorderStyle.solid).toPaint();
+    final Paint paint1 = const BorderSide(width: 2.5, color: Color(0xFFFFFF00)).toPaint();
     expect(paint1.strokeWidth, 2.5);
     expect(paint1.style, PaintingStyle.stroke);
     expect(paint1.color, const Color(0xFFFFFF00));
@@ -114,7 +108,7 @@ void main() {
   });
   test("BorderSide - won't lerp into negative widths", () {
     const BorderSide side0 = BorderSide(width: 0.0);
-    const BorderSide side1 = BorderSide(width: 1.0);
+    const BorderSide side1 = BorderSide();
     const BorderSide side2 = BorderSide(width: 2.0);
     expect(BorderSide.lerp(side2, side1, 10.0), BorderSide.none);
     expect(BorderSide.lerp(side1, side2, -10.0), BorderSide.none);

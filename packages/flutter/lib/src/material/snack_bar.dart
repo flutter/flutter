@@ -157,14 +157,14 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// A SnackBar with an action will not time out when TalkBack or VoiceOver are
 /// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// Here is an example of a [SnackBar] with an [action] button implemented using
 /// [SnackBarAction].
 ///
 /// ** See code in examples/api/lib/material/snack_bar/snack_bar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// Here is an example of a customized [SnackBar]. It utilizes
 /// [behavior], [shape], [padding], [width], and [duration] to customize the
 /// location, appearance, and the duration for which the [SnackBar] is visible.
@@ -204,6 +204,7 @@ class SnackBar extends StatefulWidget {
     this.animation,
     this.onVisible,
     this.dismissDirection = DismissDirection.down,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(
@@ -211,6 +212,7 @@ class SnackBar extends StatefulWidget {
          'Width and margin can not be used together',
        ),
        assert(duration != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The primary content of the snack bar.
@@ -336,6 +338,11 @@ class SnackBar extends StatefulWidget {
   /// Cannot be null, defaults to [DismissDirection.down].
   final DismissDirection dismissDirection;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  final Clip clipBehavior;
+
   // API for ScaffoldMessengerState.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
@@ -367,6 +374,7 @@ class SnackBar extends StatefulWidget {
       animation: newAnimation,
       onVisible: onVisible,
       dismissDirection: dismissDirection,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -385,11 +393,11 @@ class _SnackBarState extends State<SnackBar> {
 
   @override
   void didUpdateWidget(SnackBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation!.removeStatusListener(_onAnimationStatusChanged);
       widget.animation!.addStatusListener(_onAnimationStatusChanged);
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -421,7 +429,7 @@ class _SnackBarState extends State<SnackBar> {
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
-    final Color buttonColor = isThemeDark ? colorScheme.primaryVariant : colorScheme.secondary;
+    final Color buttonColor = isThemeDark ? colorScheme.primary : colorScheme.secondary;
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
@@ -433,8 +441,6 @@ class _SnackBarState extends State<SnackBar> {
       colorScheme: ColorScheme(
         primary: colorScheme.onPrimary,
         primaryVariant: colorScheme.onPrimary,
-        // For the button color, the spec says it should be primaryVariant, but for
-        // backward compatibility on light themes we are leaving it as secondary.
         secondary: buttonColor,
         secondaryVariant: colorScheme.onSecondary,
         surface: colorScheme.onSurface,
@@ -489,7 +495,6 @@ class _SnackBarState extends State<SnackBar> {
     Widget snackBar = Padding(
       padding: padding,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Expanded(
             child: Container(
@@ -528,7 +533,7 @@ class _SnackBarState extends State<SnackBar> {
     final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.colorScheme.background;
     final ShapeBorder? shape = widget.shape
       ?? snackBarTheme.shape
-      ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
+      ?? (isFloatingSnackBar ? const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))) : null);
 
     snackBar = Material(
       shape: shape,
@@ -615,7 +620,10 @@ class _SnackBarState extends State<SnackBar> {
 
     return Hero(
       tag: '<SnackBar Hero tag - ${widget.content}>',
-      child: ClipRect(child: snackBarTransition),
+      child: ClipRect(
+        clipBehavior: widget.clipBehavior,
+        child: snackBarTransition,
+      ),
     );
   }
 }

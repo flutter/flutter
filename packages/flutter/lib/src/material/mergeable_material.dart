@@ -151,14 +151,13 @@ class _AnimationTuple {
     required this.startAnimation,
     required this.endAnimation,
     required this.gapAnimation,
-    this.gapStart = 0.0,
   });
 
   final AnimationController controller;
   final CurvedAnimation startAnimation;
   final CurvedAnimation endAnimation;
   final CurvedAnimation gapAnimation;
-  double gapStart;
+  double gapStart = 0.0;
 }
 
 class _MergeableMaterialState extends State<MergeableMaterial> with TickerProviderStateMixin {
@@ -168,7 +167,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   @override
   void initState() {
     super.initState();
-    _children = List<MergeableMaterialItem>.from(widget.children);
+    _children = List<MergeableMaterialItem>.of(widget.children);
 
     for (int i = 0; i < _children.length; i += 1) {
       final MergeableMaterialItem child = _children[i];
@@ -592,7 +591,6 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             decoration: BoxDecoration(
               color: (_children[i] as MaterialSlice).color ?? Theme.of(context).cardColor,
               borderRadius: _borderRadius(i, i == 0, i == _children.length - 1),
-              shape: BoxShape.rectangle,
             ),
             child: Material(
               type: MaterialType.transparency,

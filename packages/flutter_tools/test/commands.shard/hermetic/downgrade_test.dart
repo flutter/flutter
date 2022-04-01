@@ -43,7 +43,7 @@ void main() {
   });
 
   testUsingContext('Downgrade exits on unknown channel', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'unknown');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -60,7 +60,7 @@ void main() {
   });
 
   testUsingContext('Downgrade exits on no recorded version', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'dev');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'beta');
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"abcd"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -70,7 +70,6 @@ void main() {
           command: <String>[
             'git', 'describe', '--tags', 'abcd'
           ],
-          exitCode: 0,
           stdout: 'v1.2.3'
         )
       ]),
@@ -82,7 +81,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(const <String>['downgrade']),
       throwsToolExit(message:
-        'There is no previously recorded version for channel "dev".\n'
+        'There is no previously recorded version for channel "beta".\n'
         'Channel "master" was previously on: v1.2.3.'
       ),
     );

@@ -11,10 +11,11 @@ found in the LICENSE file. -->
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <application android:label="Gallery" android:icon="@mipmap/ic_launcher">
+    <application android:label="Gallery" android:icon="@mipmap/ic_launcher" android:name="${applicationName}">
         <activity android:name=".MainActivity"
                   android:theme="@android:style/Theme.Light.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+                  android:exported="true"
                   android:hardwareAccelerated="true"
                   android:windowSoftInputMode="adjustResize">
             <intent-filter>

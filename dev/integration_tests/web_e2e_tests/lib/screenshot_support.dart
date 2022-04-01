@@ -5,7 +5,6 @@
 import 'dart:math';
 
 import 'package:flutter_driver/flutter_driver.dart';
-
 import 'package:integration_test/integration_test_driver_extended.dart' as test;
 
 /// Browser screen dimensions for the FlutterDriver test.

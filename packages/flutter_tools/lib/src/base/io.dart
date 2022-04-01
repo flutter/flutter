@@ -25,6 +25,12 @@
 /// about any additional exports that you add to this file, as doing so will
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
+
+// We allow `print()` in this file as a fallback for writing to the terminal via
+// regular stdout/stderr/stdio paths. Everything else in the flutter_tools
+// library should route terminal I/O through the [Stdio] class defined below.
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:io' as io
   show
@@ -203,8 +209,7 @@ class ProcessSignal {
 @visibleForTesting
 class PosixProcessSignal extends ProcessSignal {
 
-  const PosixProcessSignal(io.ProcessSignal wrappedSignal, {@visibleForTesting Platform platform = const LocalPlatform()})
-    : super(wrappedSignal, platform: platform);
+  const PosixProcessSignal(super.wrappedSignal, {@visibleForTesting super.platform});
 
   @override
   Stream<ProcessSignal> watch() {

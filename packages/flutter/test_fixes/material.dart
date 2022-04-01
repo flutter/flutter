@@ -30,7 +30,7 @@ void main() {
   element.rootAncestorStateOfType(TypeMatcher<targetType>());
   element.ancestorRenderObjectOfType(TypeMatcher<targetType>());
 
-  // Changes made in https://github.com/flutter/flutter/pull/45941
+  // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
   final WidgetsBinding binding = WidgetsBinding.instance!;
   binding.deferFirstFrameReport();
   binding.allowFirstFrameReport();
@@ -500,4 +500,58 @@ void main() {
 
   AppBarTheme appBarTheme = AppBarTheme();
   appBarTheme.color;
+
+  // Changes made in https://github.com/flutter/flutter/pull/93396
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(primaryColorBrightness: Brightness.dark);
+  themeData = ThemeData.raw(primaryColorBrightness: Brightness.dark);
+  themeData = themeData.copyWith(primaryColorBrightness: Brightness.dark);
+  themeData.primaryColorBrightness; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/93427
+  ColorScheme colorScheme = ColorScheme();
+  colorScheme = ColorScheme(primaryVariant: Colors.black, secondaryVariant: Colors.white);
+  colorScheme = ColorScheme.light(primaryVariant: Colors.black, secondaryVariant: Colors.white);
+  colorScheme = ColorScheme.dark(primaryVariant: Colors.black, secondaryVariant: Colors.white);
+  colorScheme = ColorScheme.highContrastLight(primaryVariant: Colors.black, secondaryVariant: Colors.white);
+  colorScheme = ColorScheme.highContrastDark(primaryVariant: Colors.black, secondaryVariant: Colors.white);
+  colorScheme = colorScheme.copyWith(primaryVariant: Colors.black, secondaryVariant: Colors.white);
+  colorScheme.primaryVariant;
+  colorScheme.secondaryVariant;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96115
+  Icon icon = Icons.pie_chart_outlined;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96957
+  Scrollbar scrollbar = Scrollbar(isAlwaysShown: true);
+  bool nowShowing = scrollbar.isAlwaysShown;
+  ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(isAlwaysShown: nowShowing);
+  scrollbarTheme.copyWith(isAlwaysShown: nowShowing);
+  scrollbarTheme.isAlwaysShown;
+  RawScrollbar rawScrollbar = RawScrollbar(isAlwaysShown: true);
+  nowShowing = rawScrollbar.isAlwaysShown;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  Chip chip = Chip();
+  chip = Chip(useDeleteButtonTooltip: false);
+  chip = Chip(useDeleteButtonTooltip: true);
+  chip = Chip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
+  chip.useDeleteButtonTooltip;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  InputChip inputChip = InputChip();
+  inputChip = InputChip(useDeleteButtonTooltip: false);
+  inputChip = InputChip(useDeleteButtonTooltip: true);
+  inputChip = InputChip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
+  inputChip.useDeleteButtonTooltip;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  RawChip rawChip = Rawchip();
+  rawChip = RawChip(useDeleteButtonTooltip: false);
+  rawChip = RawChip(useDeleteButtonTooltip: true);
+  rawChip = RawChip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
+  rawChip.useDeleteButtonTooltip;
+
+  // Change made in https://github.com/flutter/flutter/pull/100381
+  TextSelectionOverlay.fadeDuration;
 }

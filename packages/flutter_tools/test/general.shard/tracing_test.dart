@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -90,19 +91,19 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameBuiltEventName,
               'ts': 2,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameRasterizedEventName,
               'ts': 3,
-            }),
+            })!,
           ],
         ).toJson(),
       ),
@@ -183,6 +184,59 @@ void main() {
     ), throwsToolExit(message: 'Engine start event is missing in the timeline'));
   });
 
+  testWithoutContext('prints when first frame is taking a long time', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Completer<void> completer = Completer<void>();
+    await FakeAsync().run((FakeAsync time) {
+      final Map<String, String> extensionData = <String, String>{
+        'test': 'data',
+        'renderedErrorText': 'error text',
+      };
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': vm_service.EventKind.kExtension,
+          }
+        ),
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[
+              <String, Object?>{
+              'id': '1',
+              // No isolate, no views.
+              'isolate': null,
+              }
+            ],
+          },
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Extension',
+          event: vm_service.Event(
+            timestamp: 0,
+            extensionKind: 'Flutter.Error',
+            extensionData: vm_service.ExtensionData.parse(extensionData),
+            kind: vm_service.EventStreams.kExtension,
+          ),
+        ),
+      ]);
+      unawaited(downloadStartupTrace(fakeVmServiceHost.vmService,
+        output: fileSystem.currentDirectory,
+        logger: logger,
+      ));
+      time.elapse(const Duration(seconds: 11));
+      time.flushMicrotasks();
+      completer.complete();
+      return completer.future;
+    });
+    expect(logger.statusText, contains('First frame is taking longer than expected'));
+    expect(logger.traceText, contains('View ID: 1'));
+    expect(logger.traceText, contains('No isolate ID associated with the view'));
+    expect(logger.traceText, contains('Flutter.Error: [ExtensionData {test: data, renderedErrorText: error text}]'));
+  });
+
   testWithoutContext('throws tool exit if first frame events are missing', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -197,11 +251,11 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            }),
+            })!,
           ],
         ).toJson(),
       ),
@@ -232,11 +286,11 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            }),
+            })!,
           ],
         ).toJson(),
       ),
@@ -277,19 +331,19 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameBuiltEventName,
               'ts': 2,
-            }),
+            })!,
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameRasterizedEventName,
               'ts': 3,
-            }),
+            })!,
           ],
         ).toJson(),
       ),
@@ -310,25 +364,25 @@ void main() {
       logger: logger,
     );
 
-    final Map<String, dynamic> expectedTimeline = <String, dynamic>{
+    final Map<String, Object> expectedTimeline = <String, Object>{
       'type': 'Timeline',
-      'traceEvents': <dynamic>[
-        <String, dynamic>{
+      'traceEvents': <Object>[
+        <String, Object>{
           'name': 'FlutterEngineMainEnter',
           'ts': 0,
           'type': 'TimelineEvent',
         },
-        <String, dynamic>{
+        <String, Object>{
           'name': 'Framework initialization',
           'ts': 1,
           'type': 'TimelineEvent',
         },
-        <String, dynamic>{
+        <String, Object>{
           'name': 'Widgets built first useful frame',
           'ts': 2,
           'type': 'TimelineEvent',
         },
-        <String, dynamic>{
+        <String, Object>{
           'name': 'Rasterized first useful frame',
           'ts': 3,
           'type': 'TimelineEvent',

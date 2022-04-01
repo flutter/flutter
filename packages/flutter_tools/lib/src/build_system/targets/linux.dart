@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
@@ -49,7 +47,11 @@ class UnpackLinux extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.linuxDesktopPath,
@@ -117,10 +119,11 @@ abstract class BundleLinuxAssets extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_linux_assets');
     }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets');
     if (!outputDirectory.existsSync()) {
@@ -190,7 +193,7 @@ class LinuxAotBundle extends Target {
 }
 
 class DebugBundleLinuxAssets extends BundleLinuxAssets {
-  const DebugBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
+  const DebugBundleLinuxAssets(super.targetPlatform);
 
   @override
   String get name => 'debug_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
@@ -207,7 +210,7 @@ class DebugBundleLinuxAssets extends BundleLinuxAssets {
 }
 
 class ProfileBundleLinuxAssets extends BundleLinuxAssets {
-  const ProfileBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
+  const ProfileBundleLinuxAssets(super.targetPlatform);
 
   @override
   String get name => 'profile_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
@@ -223,7 +226,7 @@ class ProfileBundleLinuxAssets extends BundleLinuxAssets {
 }
 
 class ReleaseBundleLinuxAssets extends BundleLinuxAssets {
-  const ReleaseBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
+  const ReleaseBundleLinuxAssets(super.targetPlatform);
 
   @override
   String get name => 'release_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';

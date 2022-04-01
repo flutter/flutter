@@ -65,7 +65,7 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     table.add(RenderPadding(child: paragraph, padding: const EdgeInsets.only(top: 20.0)));
-    final RenderFlex row = RenderFlex(direction: Axis.horizontal, textDirection: TextDirection.ltr);
+    final RenderFlex row = RenderFlex(textDirection: TextDirection.ltr);
     row.add(RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: const Size(80.0, 60.0)));
     row.add(RenderSolidColorBox(const Color(0xFFCCFFCC), desiredSize: const Size(64.0, 60.0)));
     row.add(RenderSolidColorBox(const Color(0xFFCCCCFF), desiredSize: const Size(160.0, 60.0)));

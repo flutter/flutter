@@ -6,7 +6,9 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:path/path.dart' as path;
-import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as _goldens;
+import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
+
+import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as goldens;
 
 /// Compares image pixels against a golden image file.
 ///
@@ -38,6 +40,8 @@ import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as _goldens
 /// |  Golden Master Image           | ![A golden master image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_masterImage.png)  |
 /// |  Difference                    | ![The pixel difference](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_isolatedDiff.png)  |
 /// |  Test image after modification | ![Test image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_testImage.png) |
+///
+/// {@macro flutter.flutter_test.matchesGoldenFile.custom_fonts}
 ///
 /// See also:
 ///
@@ -92,7 +96,7 @@ abstract class GoldenFileComparator {
   /// Returns a [ComparisonResult] to describe the pixel differential of the
   /// [test] and [master] image bytes provided.
   static Future<ComparisonResult> compareLists(List<int> test, List<int> master) {
-    return _goldens.compareLists(test, master);
+    return goldens.compareLists(test, master);
   }
 }
 
@@ -268,6 +272,10 @@ class TrivialComparator implements GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) {
+    // Ideally we would use markTestSkipped here but in some situations,
+    // comparators are called outside of tests.
+    // See also: https://github.com/flutter/flutter/issues/91285
+    // ignore: avoid_print
     print('Golden file comparison requested for "$golden"; skipping...');
     return Future<bool>.value(true);
   }
@@ -288,6 +296,10 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
 
   @override
   Future<bool> compare(double width, double height, Uri golden) {
+    // Ideally we would use markTestSkipped here but in some situations,
+    // comparators are called outside of tests.
+    // See also: https://github.com/flutter/flutter/issues/91285
+    // ignore: avoid_print
     print('Golden comparison requested for "$golden"; skipping...');
     return Future<bool>.value(true);
   }

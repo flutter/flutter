@@ -275,18 +275,18 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   void _loadRootBucketIfNecessary() {
     if (_isWaitingForRootBucket && !_isLoadingRootBucket) {
       _isLoadingRootBucket = true;
-      RendererBinding.instance!.deferFirstFrame();
-      ServicesBinding.instance!.restorationManager.rootBucket.then((RestorationBucket? bucket) {
+      RendererBinding.instance.deferFirstFrame();
+      ServicesBinding.instance.restorationManager.rootBucket.then((RestorationBucket? bucket) {
         _isLoadingRootBucket = false;
         if (mounted) {
-          ServicesBinding.instance!.restorationManager.addListener(_replaceRootBucket);
+          ServicesBinding.instance.restorationManager.addListener(_replaceRootBucket);
           setState(() {
             _rootBucket = bucket;
             _rootBucketValid = true;
             _okToRenderBlankContainer = false;
           });
         }
-        RendererBinding.instance!.allowFirstFrame();
+        RendererBinding.instance.allowFirstFrame();
       });
     }
   }
@@ -294,7 +294,7 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   void _replaceRootBucket() {
     _rootBucketValid = false;
     _rootBucket = null;
-    ServicesBinding.instance!.restorationManager.removeListener(_replaceRootBucket);
+    ServicesBinding.instance.restorationManager.removeListener(_replaceRootBucket);
     _loadRootBucketIfNecessary();
     assert(!_isWaitingForRootBucket); // Ensure that load finished synchronously.
   }
@@ -302,7 +302,7 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
   @override
   void dispose() {
     if (_rootBucketValid) {
-      ServicesBinding.instance!.restorationManager.removeListener(_replaceRootBucket);
+      ServicesBinding.instance.restorationManager.removeListener(_replaceRootBucket);
     }
     super.dispose();
   }
@@ -598,108 +598,11 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 /// [didUpdateRestorationId] must be called (unless the change already triggers
 /// a call to [didUpdateWidget]).
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example demonstrates how to make a simple counter app restorable by
 /// using the [RestorationMixin] and a [RestorableInt].
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
-/// ```dart main
-/// void main() => runApp(const RestorationExampleApp());
-/// ```
-///
-/// ```dart preamble
-/// class RestorationExampleApp extends StatelessWidget {
-///   const RestorationExampleApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return const MaterialApp(
-///       restorationScopeId: 'app',
-///       title: 'Restorable Counter',
-///       home: RestorableCounter(restorationId: 'counter'),
-///     );
-///   }
-/// }
-/// ```
-///
-/// ```dart
-/// class RestorableCounter extends StatefulWidget {
-///   const RestorableCounter({Key? key, this.restorationId}) : super(key: key);
-///
-///   final String? restorationId;
-///
-///   @override
-///   State<RestorableCounter> createState() => _RestorableCounterState();
-/// }
-///
-/// // The [State] object uses the [RestorationMixin] to make the current value
-/// // of the counter restorable.
-/// class _RestorableCounterState extends State<RestorableCounter> with RestorationMixin {
-///   // The current value of the counter is stored in a [RestorableProperty].
-///   // During state restoration it is automatically restored to its old value.
-///   // If no restoration data is available to restore the counter from, it is
-///   // initialized to the specified default value of zero.
-///   final RestorableInt _counter = RestorableInt(0);
-///
-///   // In this example, the restoration ID for the mixin is passed in through
-///   // the [StatefulWidget]'s constructor.
-///   @override
-///   String? get restorationId => widget.restorationId;
-///
-///   @override
-///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-///     // All restorable properties must be registered with the mixin. After
-///     // registration, the counter either has its old value restored or is
-///     // initialized to its default value.
-///     registerForRestoration(_counter, 'count');
-///   }
-///
-///   void _incrementCounter() {
-///     setState(() {
-///       // The current value of the property can be accessed and modified via
-///       // the value getter and setter.
-///       _counter.value++;
-///     });
-///   }
-///
-///   @override
-///   void dispose() {
-///     _counter.dispose();
-///     super.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: const Text('Restorable Counter'),
-///       ),
-///       body: Center(
-///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.center,
-///           children: <Widget>[
-///             const Text(
-///               'You have pushed the button this many times:',
-///             ),
-///             Text(
-///               '${_counter.value}',
-///               style: Theme.of(context).textTheme.headline4,
-///             ),
-///           ],
-///         ),
-///       ),
-///       floatingActionButton: FloatingActionButton(
-///         onPressed: _incrementCounter,
-///         tooltip: 'Increment',
-///         child: const Icon(Icons.add),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/restoration/restoration_mixin.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -718,7 +621,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// The restoration ID is used to claim a child [RestorationScope] from the
   /// surrounding [RestorationScope] (accessed via [RestorationScope.of]) and
   /// the ID must be unique in that scope (otherwise an exception is triggered
-  /// in debug move).
+  /// in debug mode).
   ///
   /// State restoration for this mixin is turned off when this getter returns
   /// null or when there is no surrounding [RestorationScope] available. When
@@ -844,7 +747,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     assert(_debugDoingRestore || !_properties.keys.map((RestorableProperty<Object?> r) => r._restorationId).contains(restorationId),
            '"$restorationId" is already registered to another property.',
     );
-    final bool hasSerializedValue = bucket?.contains(restorationId) == true;
+    final bool hasSerializedValue = bucket?.contains(restorationId) ?? false;
     final Object? initialValue = hasSerializedValue
         ? property.fromPrimitives(bucket!.read<Object>(restorationId))
         : property.createDefaultValue();
@@ -947,7 +850,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
       return false;
     }
     final RestorationBucket? potentialNewParent = RestorationScope.of(context);
-    return potentialNewParent != _currentParent && potentialNewParent?.isReplacing == true;
+    return potentialNewParent != _currentParent && (potentialNewParent?.isReplacing ?? false);
   }
 
   List<RestorableProperty<Object?>>? _debugPropertiesWaitingForReregistration;

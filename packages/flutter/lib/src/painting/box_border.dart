@@ -560,7 +560,7 @@ class Border extends BoxBorder {
   }
 
   @override
-  int get hashCode => hashValues(top, right, bottom, left);
+  int get hashCode => Object.hash(top, right, bottom, left);
 
   @override
   String toString() {
@@ -864,7 +864,7 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  int get hashCode => hashValues(top, start, end, bottom);
+  int get hashCode => Object.hash(top, start, end, bottom);
 
   @override
   String toString() {

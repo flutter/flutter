@@ -1,6 +1,6 @@
 {
-    "name": "dartpad_curve2_d_0",
-    "short_name": "dartpad_curve2_d_0",
+    "name": "flutter_api_samples",
+    "short_name": "flutter_api_samples",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

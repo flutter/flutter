@@ -14,7 +14,6 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
     required this.maxExtent,
     required this.child,
     this.vsync = const TestVSync(),
-    this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
   });
 
   final Widget child;
@@ -29,7 +28,7 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
   final TickerProvider? vsync;
 
   @override
-  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration();
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child;
@@ -233,7 +232,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Material(
@@ -383,12 +382,11 @@ void main() {
               height: 600.0,
               width: 600.0,
               child: CustomScrollView(
-                controller: controller = ScrollController(initialScrollOffset: 0),
+                controller: controller = ScrollController(),
                 slivers: List<Widget>.generate(50, (int i) {
                   return i == 10
                   ? SliverPersistentHeader(
                     pinned: true,
-                    floating: false,
                     delegate: _TestSliverPersistentHeaderDelegate(
                       minExtent: 50,
                       maxExtent: 50,
@@ -446,12 +444,11 @@ void main() {
               height: 600.0,
               width: 600.0,
               child: CustomScrollView(
-                controller: controller = ScrollController(initialScrollOffset: 0),
+                controller: controller = ScrollController(),
                 slivers: List<Widget>.generate(50, (int i) {
                   return i == 10
                     ? SliverPersistentHeader(
                       pinned: true,
-                      floating: false,
                       delegate: _TestSliverPersistentHeaderDelegate(
                         minExtent: 50,
                         maxExtent: 50,

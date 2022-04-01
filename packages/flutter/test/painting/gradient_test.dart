@@ -184,14 +184,48 @@ void main() {
       const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomLeft,
+        transform: GradientRotation(1.6),
         colors: <Color>[
           Color(0x33333333),
           Color(0x66666666),
         ],
       ).toString(),
       equals(
-        'LinearGradient(Alignment.topLeft, Alignment.bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
+        'LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomLeft, colors: [Color(0x33333333), Color(0x66666666)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 1.6))',
       ),
+    );
+  });
+
+  test('LinearGradient with different transforms', () {
+    const LinearGradient testGradient1 = LinearGradient(
+      transform: GradientRotation(math.pi/4),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+    );
+    const LinearGradient testGradient1Copy = LinearGradient(
+      transform: GradientRotation(math.pi/4),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+    );
+    const LinearGradient testGradient2 = LinearGradient(
+      transform: GradientRotation(math.pi/2),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+    );
+
+    expect(
+      testGradient1,
+      equals(testGradient1Copy),
+    );
+    expect(
+      testGradient1,
+      isNot(equals(testGradient2)),
     );
   });
 
@@ -490,7 +524,6 @@ void main() {
   test('SweepGradient lerp test', () {
     const SweepGradient testGradient1 = SweepGradient(
       center: Alignment.topLeft,
-      startAngle: 0.0,
       endAngle: math.pi / 2,
       colors: <Color>[
         Color(0x33333333),
@@ -526,7 +559,6 @@ void main() {
   test('SweepGradient lerp test with stops', () {
     const SweepGradient testGradient1 = SweepGradient(
       center: Alignment.topLeft,
-      startAngle: 0.0,
       endAngle: math.pi / 2,
       colors: <Color>[
         Color(0x33333333),
@@ -643,7 +675,6 @@ void main() {
   test('SweepGradient scale test)', () {
     const SweepGradient testGradient = SweepGradient(
       center: Alignment.topLeft,
-      startAngle: 0.0,
       endAngle: math.pi / 2,
       colors: <Color>[
         Color(0xff333333),
@@ -655,7 +686,6 @@ void main() {
 
     expect(actual, const SweepGradient(
       center: Alignment.topLeft,
-      startAngle: 0.0,
       endAngle: math.pi / 2,
       colors: <Color>[
         Color(0x80333333),
@@ -720,7 +750,6 @@ void main() {
       ],
     );
     const RadialGradient testGradient2 = RadialGradient(
-      center: Alignment.center,
       radius: 20.0,
       colors: <Color>[
         Color(0x44444444),

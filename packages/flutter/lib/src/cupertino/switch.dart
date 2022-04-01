@@ -298,19 +298,22 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   Widget build(BuildContext context) {
     if (needsPositionAnimation)
       _resumePositionAnimation();
-    return Opacity(
-      opacity: widget.onChanged == null ? _kCupertinoSwitchDisabledOpacity : 1.0,
-      child: _CupertinoSwitchRenderObjectWidget(
-        value: widget.value,
-        activeColor: CupertinoDynamicColor.resolve(
-          widget.activeColor ?? CupertinoColors.systemGreen,
-          context,
+    return MouseRegion(
+      cursor: isInteractive && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: Opacity(
+        opacity: widget.onChanged == null ? _kCupertinoSwitchDisabledOpacity : 1.0,
+        child: _CupertinoSwitchRenderObjectWidget(
+          value: widget.value,
+          activeColor: CupertinoDynamicColor.resolve(
+            widget.activeColor ?? CupertinoColors.systemGreen,
+            context,
+          ),
+          trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
+          thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
+          onChanged: widget.onChanged,
+          textDirection: Directionality.of(context),
+          state: this,
         ),
-        trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
-        thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
-        onChanged: widget.onChanged,
-        textDirection: Directionality.of(context),
-        state: this,
       ),
     );
   }

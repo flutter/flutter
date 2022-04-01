@@ -46,9 +46,9 @@ class Calculator {
       final List<dynamic> result = decoder.convert(_data) as List<dynamic>;
       final int n = result.length;
       onResultListener('Decoded $n results');
-    } catch (e, stack) {
-      print('Invalid JSON file: $e');
-      print(stack);
+    } on FormatException catch (e, stack) {
+      debugPrint('Invalid JSON file: $e');
+      debugPrint('$stack');
     }
   }
 
@@ -197,7 +197,7 @@ class CalculationManager {
 // This is a StatefulWidget in order to hold the CalculationManager and
 // the AnimationController for the running animation.
 class IsolateExampleWidget extends StatefulWidget {
-  const IsolateExampleWidget({Key? key}) : super(key: key);
+  const IsolateExampleWidget({super.key});
 
   @override
   IsolateExampleState createState() => IsolateExampleState();
@@ -281,7 +281,6 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
       case CalculationState.calculating:
         return 'In Progress';
       case CalculationState.idle:
-      default:
         return 'Idle';
     }
   }

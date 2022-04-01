@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoCard extends StatelessWidget {
-  const VideoCard({ Key? key, this.controller, this.title, this.subtitle }) : super(key: key);
+  const VideoCard({ super.key, this.controller, this.title, this.subtitle });
 
   final VideoPlayerController? controller;
   final String? title;
@@ -93,7 +93,7 @@ class VideoCard extends StatelessWidget {
 }
 
 class VideoPlayerLoading extends StatefulWidget {
-  const VideoPlayerLoading(this.controller, {Key? key}) : super(key: key);
+  const VideoPlayerLoading(this.controller, {super.key});
 
   final VideoPlayerController? controller;
 
@@ -137,7 +137,7 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
 }
 
 class VideoPlayPause extends StatefulWidget {
-  const VideoPlayPause(this.controller, {Key? key}) : super(key: key);
+  const VideoPlayPause(this.controller, {super.key});
 
   final VideoPlayerController? controller;
 
@@ -203,10 +203,10 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
 
 class FadeAnimation extends StatefulWidget {
   const FadeAnimation({
-    Key? key,
+    super.key,
     this.child,
     this.duration = const Duration(milliseconds: 500),
-  }) : super(key: key);
+  });
 
   final Widget? child;
   final Duration duration;
@@ -266,10 +266,10 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
 
 class ConnectivityOverlay extends StatefulWidget {
   const ConnectivityOverlay({
-    Key? key,
+    super.key,
     this.child,
     this.connectedCompleter,
-  }) : super(key: key);
+  });
 
   final Widget? child;
   final Completer<void>? connectedCompleter;
@@ -343,7 +343,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
 }
 
 class VideoDemo extends StatefulWidget {
-  const VideoDemo({ Key? key }) : super(key: key);
+  const VideoDemo({ super.key });
 
   static const String routeName = '/video';
 
@@ -382,14 +382,12 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
     super.initState();
 
     Future<void> initController(VideoPlayerController controller, String name) async {
-      print('> VideoDemo initController "$name" ${isDisposed ? "DISPOSED" : ""}');
       controller.setLooping(true);
       controller.setVolume(0.0);
       controller.play();
       await connectedCompleter.future;
       await controller.initialize();
       if (mounted) {
-        print('< VideoDemo initController "$name" done ${isDisposed ? "DISPOSED" : ""}');
         setState(() { });
       }
     }
@@ -403,11 +401,9 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
 
   @override
   void dispose() {
-    print('> VideoDemo dispose');
     isDisposed  = true;
     butterflyController.dispose();
     beeController.dispose();
-    print('< VideoDemo dispose');
     super.dispose();
   }
 

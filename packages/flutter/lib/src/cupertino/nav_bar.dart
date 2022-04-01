@@ -43,8 +43,7 @@ const Color _kDefaultNavBarBorderColor = Color(0x4D000000);
 const Border _kDefaultNavBarBorder = Border(
   bottom: BorderSide(
     color: _kDefaultNavBarBorderColor,
-    width: 0.0, // One physical pixel.
-    style: BorderStyle.solid,
+    width: 0.0, // 0.0 means one physical pixel
   ),
 );
 
@@ -75,9 +74,7 @@ class _HeroTag {
   }
 
   @override
-  int get hashCode {
-    return identityHashCode(navigator);
-  }
+  int get hashCode => identityHashCode(navigator);
 }
 
 // An `AnimatedWidget` that imposes a fixed size on its child widget, and
@@ -153,7 +150,6 @@ Widget _wrapWithBackground({
     }
     result = AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
-      sized: true,
       child: result,
     );
   }
@@ -228,7 +224,7 @@ bool _isTransitionable(BuildContext context) {
 /// value from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
 ///
-/// {@tool dartpad --template=stateful_widget_cupertino}
+/// {@tool dartpad}
 /// This example shows a [CupertinoNavigationBar] placed in a [CupertinoPageScaffold].
 /// Since [backgroundColor]'s opacity is not 1.0, there is a blur effect and
 /// content slides underneath.
@@ -568,10 +564,17 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// user scrolls, but it will also stretch when the user over-scrolls if the
 /// [stretch] value is `true`. Defaults to `false`.
 ///
+/// {@tool dartpad}
+/// This example shows [CupertinoSliverNavigationBar] in action inside a [CustomScrollView].
+///
+/// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_sliver_nav_bar.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
 ///    pages.
+///  * [CustomScrollView], a ScrollView that creates custom scroll effects using slivers.
 class CupertinoSliverNavigationBar extends StatefulWidget {
   /// Creates a navigation bar for scrolling lists.
   ///
@@ -960,7 +963,6 @@ class _PersistentNavigationBar extends StatelessWidget {
       leading: leading,
       middle: middle,
       trailing: components.trailing,
-      centerMiddle: true,
       middleSpacing: 6.0,
     );
 
@@ -1333,7 +1335,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
     final ModalRoute<dynamic>? currentRoute = ModalRoute.of(context);
     if (onPressed == null) {
       assert(
-        currentRoute?.canPop == true,
+        currentRoute?.canPop ?? false,
         'CupertinoNavigationBarBackButton should only be used in routes that can be popped',
       );
     }
@@ -1356,7 +1358,6 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
             constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
                 _backChevron ?? const _BackChevron(),

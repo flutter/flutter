@@ -3,17 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/shrine/colors.dart';
-import 'package:flutter_gallery/demo/shrine/expanding_bottom_sheet.dart';
-import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
-import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:intl/intl.dart';
 import 'package:scoped_model/scoped_model.dart';
+
+import 'colors.dart';
+import 'expanding_bottom_sheet.dart';
+import 'model/app_state_model.dart';
+import 'model/product.dart';
 
 const double _leftColumnWidth = 60.0;
 
 class ShoppingCartPage extends StatefulWidget {
-  const ShoppingCartPage({Key? key}) : super(key: key);
+  const ShoppingCartPage({super.key});
 
   @override
   State<ShoppingCartPage> createState() => _ShoppingCartPageState();
@@ -102,7 +103,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 }
 
 class ShoppingCartSummary extends StatelessWidget {
-  const ShoppingCartSummary({Key? key, this.model}) : super(key: key);
+  const ShoppingCartSummary({super.key, this.model});
 
   final AppStateModel? model;
 
@@ -124,7 +125,6 @@ class ShoppingCartSummary extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     const Expanded(
                       child: Text('TOTAL'),
@@ -182,11 +182,11 @@ class ShoppingCartSummary extends StatelessWidget {
 
 class ShoppingCartRow extends StatelessWidget {
   const ShoppingCartRow({
-    Key? key,
+    super.key,
     required this.product,
     required this.quantity,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final Product product;
   final int? quantity;

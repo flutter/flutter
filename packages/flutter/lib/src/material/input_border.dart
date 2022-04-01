@@ -416,14 +416,15 @@ class OutlineInputBorder extends InputBorder {
       scaledRRect.blRadiusX * 2.0,
     );
 
+    // This assumes that the radius is circular (x and y radius are equal).
+    // Currently, BorderRadius only supports circular radii.
     const double cornerArcSweep = math.pi / 2.0;
-    final double tlCornerArcSweep = start < scaledRRect.tlRadiusX
-      ? math.asin((start / scaledRRect.tlRadiusX).clamp(-1.0, 1.0))
-      : math.pi / 2.0;
+    final double tlCornerArcSweep = math.acos(
+      (1 - start / scaledRRect.tlRadiusX).clamp(0.0, 1.0),
+    );
 
     final Path path = Path()
-      ..addArc(tlCorner, math.pi, tlCornerArcSweep)
-      ..moveTo(scaledRRect.left + scaledRRect.tlRadiusX, scaledRRect.top);
+      ..addArc(tlCorner, math.pi, tlCornerArcSweep);
 
     if (start > scaledRRect.tlRadiusX)
       path.lineTo(scaledRRect.left + start, scaledRRect.top);
@@ -431,13 +432,14 @@ class OutlineInputBorder extends InputBorder {
     const double trCornerArcStart = (3 * math.pi) / 2.0;
     const double trCornerArcSweep = cornerArcSweep;
     if (start + extent < scaledRRect.width - scaledRRect.trRadiusX) {
-      path
-        ..relativeMoveTo(extent, 0.0)
-        ..lineTo(scaledRRect.right - scaledRRect.trRadiusX, scaledRRect.top)
-        ..addArc(trCorner, trCornerArcStart, trCornerArcSweep);
+      path.moveTo(scaledRRect.left + start + extent, scaledRRect.top);
+      path.lineTo(scaledRRect.right - scaledRRect.trRadiusX, scaledRRect.top);
+      path.addArc(trCorner, trCornerArcStart, trCornerArcSweep);
     } else if (start + extent < scaledRRect.width) {
       final double dx = scaledRRect.width - (start + extent);
-      final double sweep = math.acos(dx / scaledRRect.trRadiusX);
+      final double sweep = math.asin(
+        (1 - dx / scaledRRect.trRadiusX).clamp(0.0, 1.0),
+      );
       path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
     }
 
@@ -505,5 +507,5 @@ class OutlineInputBorder extends InputBorder {
   }
 
   @override
-  int get hashCode => hashValues(borderSide, borderRadius, gapPadding);
+  int get hashCode => Object.hash(borderSide, borderRadius, gapPadding);
 }

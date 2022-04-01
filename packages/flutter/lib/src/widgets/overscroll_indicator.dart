@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'notification_listener.dart';
 import 'scroll_notification.dart';
 import 'ticker_provider.dart';
@@ -47,7 +48,7 @@ import 'transitions.dart';
 /// [OverscrollIndicatorNotification.paintOffset] to the
 /// notification, or use a [NestedScrollView].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This example demonstrates how to use a [NotificationListener] to manipulate
 /// the placement of a [GlowingOverscrollIndicator] when building a
 /// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
@@ -56,7 +57,7 @@ import 'transitions.dart';
 /// ** See code in examples/api/lib/widgets/overscroll_indicator/glowing_overscroll_indicator.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This example demonstrates how to use a [NestedScrollView] to manipulate the
 /// placement of a [GlowingOverscrollIndicator] when building a
 /// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
@@ -525,6 +526,11 @@ class _GlowController extends ChangeNotifier {
     canvas.drawCircle(center, radius, paint);
     canvas.restore();
   }
+
+  @override
+  String toString() {
+    return '_GlowController(color: $color, axis: ${describeEnum(axis)})';
+  }
 }
 
 class _GlowingOverscrollIndicatorPainter extends CustomPainter {
@@ -594,6 +600,11 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
     return oldDelegate.leadingController != leadingController
         || oldDelegate.trailingController != trailingController;
   }
+
+  @override
+  String toString() {
+    return '_GlowingOverscrollIndicatorPainter($leadingController, $trailingController)';
+  }
 }
 
 /// A Material Design visual indication that a scroll view has overscrolled.
@@ -612,6 +623,9 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
 /// [ScrollBehavior.androidOverscrollIndicator] is
 /// [AndroidOverscrollIndicator.stretch]. Otherwise, the default
 /// [GlowingOverscrollIndicator] is applied.
+/// [ScrollBehavior.androidOverscrollIndicator] is deprecated, use
+/// [ThemeData.useMaterial3], or override
+/// [ScrollBehavior.buildOverscrollIndicator] to choose the desired indicator.
 ///
 /// See also:
 ///
@@ -658,6 +672,9 @@ class StretchingOverscrollIndicator extends StatefulWidget {
   /// [ScrollBehavior.buildOverscrollIndicator] method when opted-in using the
   /// [ScrollBehavior.androidOverscrollIndicator] flag. In this case
   /// the child is usually the one provided as an argument to that method.
+  /// [ScrollBehavior.androidOverscrollIndicator] is deprecated, use
+  /// [ThemeData.useMaterial3], or override
+  /// [ScrollBehavior.buildOverscrollIndicator] to choose the desired indicator.
   final Widget? child;
 
   @override
@@ -696,7 +713,15 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         } else {
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
-            _stretchController.pull(notification.overscroll.abs() / notification.metrics.viewportDimension);
+            // We clamp the overscroll amount relative to the length of the viewport,
+            // which is the furthest distance a single pointer could pull on the
+            // screen. This is because more than one pointer will multiply the
+            // amount of overscroll - https://github.com/flutter/flutter/issues/11884
+            final double viewportDimension = notification.metrics.viewportDimension;
+            final double distanceForPull =
+              (notification.overscroll.abs() / viewportDimension) + _stretchController.pullDistance;
+            final double clampedOverscroll = distanceForPull.clamp(0, 1.0);
+            _stretchController.pull(clampedOverscroll);
           }
         }
       }
@@ -737,6 +762,8 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
+    double mainAxisSize;
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: AnimatedBuilder(
@@ -749,9 +776,11 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           switch (widget.axis) {
             case Axis.horizontal:
               x += stretch;
+              mainAxisSize = size.width;
               break;
             case Axis.vertical:
               y += stretch;
+              mainAxisSize = size.height;
               break;
           }
 
@@ -759,12 +788,21 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             _lastOverscrollNotification?.overscroll ?? 0.0
           );
 
+          final double viewportDimension = _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
+
+          final Widget transform = Transform(
+            alignment: alignment,
+            transform: Matrix4.diagonal3Values(x, y, 1.0),
+            child: widget.child,
+          );
+
+          // Only clip if the viewport dimension is smaller than that of the
+          // screen size in the main axis. If the viewport takes up the whole
+          // screen, overflow from transforming the viewport is irrelevant.
           return ClipRect(
-            child: Transform(
-              alignment: alignment,
-              transform: Matrix4.diagonal3Values(x, y, 1.0),
-              child: widget.child,
-            ),
+            clipBehavior: stretch != 0.0 && viewportDimension != mainAxisSize
+              ? Clip.hardEdge : Clip.none,
+            child: transform,
           );
         },
       ),
@@ -794,6 +832,8 @@ class _StretchController extends ChangeNotifier {
   late final Animation<double> _stretchSize;
   final Tween<double> _stretchSizeTween = Tween<double>(begin: 0.0, end: 0.0);
   _StretchState _state = _StretchState.idle;
+
+  double get pullDistance => _pullDistance;
   double _pullDistance = 0.0;
 
   // Constants from Android.
@@ -824,7 +864,7 @@ class _StretchController extends ChangeNotifier {
   /// in the main axis.
   void pull(double normalizedOverscroll) {
     assert(normalizedOverscroll >= 0.0);
-    _pullDistance = normalizedOverscroll + _pullDistance;
+    _pullDistance = normalizedOverscroll;
     _stretchSizeTween.begin = _stretchSize.value;
     final double linearIntensity =_stretchIntensity * _pullDistance;
     final double exponentialIntensity = _stretchIntensity * (1 - math.exp(-_pullDistance * _exponentialScalar));
@@ -878,6 +918,9 @@ class _StretchController extends ChangeNotifier {
     _stretchController.dispose();
     super.dispose();
   }
+
+  @override
+  String toString() => '_StretchController()';
 }
 
 /// A notification that either a [GlowingOverscrollIndicator] or a

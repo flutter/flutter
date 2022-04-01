@@ -31,8 +31,8 @@ void main() {
   element.findRootAncestorStateOfType<targetType>();
   element.findAncestorRenderObjectOfType<targetType>();
 
-  // Changes made in https://github.com/flutter/flutter/pull/45941
-  final WidgetsBinding binding = WidgetsBinding.instance!;
+  // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
+  final WidgetsBinding binding = WidgetsBinding.instance;
   binding.deferFirstFrame();
   binding.allowFirstFrame();
 
@@ -473,4 +473,58 @@ void main() {
 
   AppBarTheme appBarTheme = AppBarTheme();
   appBarTheme.backgroundColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/93396
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.primaryColorBrightness; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/93427
+  ColorScheme colorScheme = ColorScheme();
+  colorScheme = ColorScheme();
+  colorScheme = ColorScheme.light();
+  colorScheme = ColorScheme.dark();
+  colorScheme = ColorScheme.highContrastLight();
+  colorScheme = ColorScheme.highContrastDark();
+  colorScheme = colorScheme.copyWith();
+  colorScheme.primaryContainer;
+  colorScheme.secondaryContainer;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96115
+  Icon icon = Icons.pie_chart_outline;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96957
+  Scrollbar scrollbar = Scrollbar(thumbVisibility: true);
+  bool nowShowing = scrollbar.thumbVisibility;
+  ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(thumbVisibility: nowShowing);
+  scrollbarTheme.copyWith(thumbVisibility: nowShowing);
+  scrollbarTheme.thumbVisibility;
+  RawScrollbar rawScrollbar = RawScrollbar(thumbVisibility: true);
+  nowShowing = rawScrollbar.thumbVisibility;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  Chip chip = Chip();
+  chip = Chip(deleteButtonTooltipMessage: '');
+  chip = Chip();
+  chip = Chip(deleteButtonTooltipMessage: 'Delete Tooltip');
+  chip.deleteButtonTooltipMessage;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  InputChip inputChip = InputChip();
+  inputChip = InputChip(deleteButtonTooltipMessage: '');
+  inputChip = InputChip();
+  inputChip = InputChip(deleteButtonTooltipMessage: 'Delete Tooltip');
+  inputChip.deleteButtonTooltipMessage;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  RawChip rawChip = Rawchip();
+  rawChip = RawChip(deleteButtonTooltipMessage: '');
+  rawChip = RawChip();
+  rawChip = RawChip(deleteButtonTooltipMessage: 'Delete Tooltip');
+  rawChip.deleteButtonTooltipMessage;
+
+  // Change made in https://github.com/flutter/flutter/pull/100381
+  SelectionOverlay.fadeDuration;
 }

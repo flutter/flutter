@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -31,6 +33,7 @@ class MaterialBannerThemeData with Diagnosticable {
   const MaterialBannerThemeData({
     this.backgroundColor,
     this.contentTextStyle,
+    this.elevation,
     this.padding,
     this.leadingPadding,
   });
@@ -41,6 +44,11 @@ class MaterialBannerThemeData with Diagnosticable {
   /// Used to configure the [DefaultTextStyle] for the [MaterialBanner.content]
   /// widget.
   final TextStyle? contentTextStyle;
+
+  /// Default value for [MaterialBanner.elevation].
+  //
+  // If null, MaterialBanner uses a default of 0.0.
+  final double? elevation;
 
   /// The amount of space by which to inset [MaterialBanner.content].
   final EdgeInsetsGeometry? padding;
@@ -53,12 +61,14 @@ class MaterialBannerThemeData with Diagnosticable {
   MaterialBannerThemeData copyWith({
     Color? backgroundColor,
     TextStyle? contentTextStyle,
+    double? elevation,
     EdgeInsetsGeometry? padding,
     EdgeInsetsGeometry? leadingPadding,
   }) {
     return MaterialBannerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       contentTextStyle: contentTextStyle ?? this.contentTextStyle,
+      elevation: elevation ?? this.elevation,
       padding: padding ?? this.padding,
       leadingPadding: leadingPadding ?? this.leadingPadding,
     );
@@ -74,20 +84,20 @@ class MaterialBannerThemeData with Diagnosticable {
     return MaterialBannerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
+      elevation: lerpDouble(a?.elevation, b?.elevation, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       leadingPadding: EdgeInsetsGeometry.lerp(a?.leadingPadding, b?.leadingPadding, t),
     );
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      contentTextStyle,
-      padding,
-      leadingPadding,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    contentTextStyle,
+    elevation,
+    padding,
+    leadingPadding,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -98,6 +108,7 @@ class MaterialBannerThemeData with Diagnosticable {
     return other is MaterialBannerThemeData
         && other.backgroundColor == backgroundColor
         && other.contentTextStyle == contentTextStyle
+        && other.elevation == elevation
         && other.padding == padding
         && other.leadingPadding == leadingPadding;
   }
@@ -107,6 +118,7 @@ class MaterialBannerThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('leadingPadding', leadingPadding, defaultValue: null));
   }

@@ -95,15 +95,13 @@ class DividerThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      color,
-      space,
-      thickness,
-      indent,
-      endIndent,
-    );
-  }
+  int get hashCode => Object.hash(
+    color,
+    space,
+    thickness,
+    indent,
+    endIndent,
+  );
 
   @override
   bool operator ==(Object other) {

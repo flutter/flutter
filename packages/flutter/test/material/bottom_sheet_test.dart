@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,6 +25,214 @@ void main() {
     // If the animation were linear, these two values would be the same.
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
+
+  testWidgets('Throw if enable drag without an animation controller', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/89168
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BottomSheet(
+          onClosing: () {},
+          builder: (_) => Container(
+            height: 200,
+            color: Colors.red,
+            child: const Text('BottomSheet'),
+          ),
+        ),
+      ),
+    );
+
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+
+    expect(error, isNotNull);
+    FlutterError.onError = handler;
+  });
+
+  testWidgets('Disposing app while bottom sheet is disappearing does not crash', (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(find.text('BottomSheet'), findsNothing);
+
+    // Bring up bottom sheet.
+    bool showBottomSheetThenCalled = false;
+    showModalBottomSheet<void>(
+      context: savedContext,
+      builder: (BuildContext context) => const Text('BottomSheet'),
+    ).then<void>((void value) {
+      showBottomSheetThenCalled = true;
+    });
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet'), findsOneWidget);
+    expect(showBottomSheetThenCalled, isFalse);
+
+    // Start closing animation of Bottom sheet.
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+
+    // Dispose app by replacing it with a container. This shouldn't crash.
+    await tester.pumpWidget(Container());
+  });
+
+
+  testWidgets('Swiping down a BottomSheet should dismiss it by default', (WidgetTester tester) async {
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    bool showBottomSheetThenCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    await tester.pump();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsNothing);
+
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return const SizedBox(
+        height: 200.0,
+        child:  Text('BottomSheet'),
+      );
+    }).closed.whenComplete(() {
+      showBottomSheetThenCalled = true;
+    });
+
+    await tester.pumpAndSettle();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    // Swipe the bottom sheet to dismiss it.
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    expect(showBottomSheetThenCalled, isTrue);
+    expect(find.text('BottomSheet'), findsNothing);
+  });
+
+  testWidgets('Swiping down a BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    bool showBottomSheetThenCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    await tester.pump();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsNothing);
+
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return const SizedBox(
+        height: 200.0,
+        child: Text('BottomSheet'),
+      );
+    },
+    enableDrag: false
+    ).closed.whenComplete(() {
+      showBottomSheetThenCalled = true;
+    });
+
+    await tester.pumpAndSettle();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    // Swipe the bottom sheet, attempting to dismiss it.
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+    await tester.pumpAndSettle(); // Bottom sheet should not dismiss.
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsOneWidget);
+  });
+
+  testWidgets('Swiping down a BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    bool showBottomSheetThenCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    await tester.pump();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsNothing);
+
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return const SizedBox(
+        height: 200.0,
+        child: Text('BottomSheet'),
+      );
+    },
+     enableDrag: true
+    ).closed.whenComplete(() {
+      showBottomSheetThenCalled = true;
+    });
+
+    await tester.pumpAndSettle();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    // Swipe the bottom sheet to dismiss it.
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    expect(showBottomSheetThenCalled, isTrue);
+    expect(find.text('BottomSheet'), findsNothing);
+  });
+
+  testWidgets('Modal BottomSheet builder should only be called once', (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          savedContext = context;
+          return Container();
+        },
+      ),
+    ));
+
+    int numBuilderCalls = 0;
+    showModalBottomSheet<void>(
+      context: savedContext,
+      isDismissible: false,
+      enableDrag: true,
+      builder: (BuildContext context) {
+        numBuilderCalls++;
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pumpAndSettle();
+    expect(numBuilderCalls, 1);
+
+    // Swipe the bottom sheet to dismiss it.
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    expect(numBuilderCalls, 1);
+  });
 
   testWidgets('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {
     late BuildContext savedContext;
@@ -527,7 +738,7 @@ void main() {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color color = Colors.pink;
     const double elevation = 9.0;
-    final ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.circular(12));
+    const ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)));
     const Clip clipBehavior = Clip.antiAlias;
     const Color barrierColor = Colors.red;
 
@@ -938,6 +1149,50 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/99627
+  testWidgets('The old route entry should be removed when a new sheet popup', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
+    PersistentBottomSheetController<void>? sheetController;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    final ModalRoute<dynamic> route = ModalRoute.of(scaffoldKey.currentContext!)!;
+    expect(route.canPop, false);
+
+    scaffoldKey.currentState!.showBottomSheet<void>((_) {
+      return Builder(
+        builder: (BuildContext context) {
+          return Container(height: 200.0);
+        },
+      );
+    });
+
+    await tester.pump();
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(route.canPop, true);
+
+    // Trigger the second sheet will remove the first sheet from tree.
+    sheetController = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+      return Builder(
+        builder: (BuildContext context) {
+          return Container(height: 200.0);
+        },
+      );
+    });
+    await tester.pump();
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(route.canPop, true);
+
+    sheetController.close();
+
+    expect(route.canPop, false);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/87708
   testWidgets('The framework does not dispose of the transitionAnimationController provided by user.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
@@ -993,6 +1248,175 @@ void main() {
 
     // Double dispose will throw.
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Calling PersistentBottomSheetController.close does not crash when it is not the current bottom sheet', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/93717
+    PersistentBottomSheetController<void>? sheetController1;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(builder: (BuildContext context) {
+          return SafeArea(
+            child: Column(
+              children: <Widget>[
+                ElevatedButton(
+                  child: const Text('show 1'),
+                  onPressed: () {
+                    sheetController1 = Scaffold.of(context).showBottomSheet<void>(
+                      (BuildContext context) => const Text('BottomSheet 1'),
+                    );
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('show 2'),
+                  onPressed: () {
+                    Scaffold.of(context).showBottomSheet<void>(
+                      (BuildContext context) => const Text('BottomSheet 2'),
+                    );
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('close 1'),
+                  onPressed: (){
+                    sheetController1!.close();
+                  },
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('show 1'));
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet 1'), findsOneWidget);
+
+    await tester.tap(find.text('show 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet 2'), findsOneWidget);
+
+    // This will throw an assertion if regressed
+    await tester.tap(find.text('close 1'));
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet 2'), findsOneWidget);
+    });
+
+  group('Modal BottomSheet avoids overlapping display features', () {
+    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+        anchorPoint: const Offset(1000, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // Should take the right side of the screen
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, 410);
+      expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
+    });
+
+    testWidgets('positioning using Directionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: child!,
+              ),
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // This is RTL, so it should place the dialog on the right screen
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, 410);
+      expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
+    });
+
+    testWidgets('default positioning', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the left screen
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
+      expect(tester.getBottomRight(find.byType(Placeholder)).dx, 390.0);
+    });
   });
 
   group('constraints', () {
