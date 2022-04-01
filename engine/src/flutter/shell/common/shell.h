@@ -38,6 +38,7 @@
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
+#include "flutter/shell/common/resource_cache_limit_calculator.h"
 #include "flutter/shell/common/shell_io_manager.h"
 
 namespace flutter {
@@ -108,7 +109,8 @@ class Shell final : public PlatformView::Delegate,
                     public Animator::Delegate,
                     public Engine::Delegate,
                     public Rasterizer::Delegate,
-                    public ServiceProtocol::Handler {
+                    public ServiceProtocol::Handler,
+                    public ResourceCacheLimitItem {
  public:
   template <class T>
   using CreateCallback = std::function<std::unique_ptr<T>(Shell&)>;
@@ -410,6 +412,9 @@ class Shell final : public PlatformView::Delegate,
 
   const TaskRunners task_runners_;
   const fml::RefPtr<fml::RasterThreadMerger> parent_raster_thread_merger_;
+  std::shared_ptr<ResourceCacheLimitCalculator>
+      resource_cache_limit_calculator_;
+  size_t resource_cache_limit_;
   const Settings settings_;
   DartVMRef vm_;
   mutable std::mutex time_recorder_mutex_;
@@ -476,6 +481,8 @@ class Shell final : public PlatformView::Delegate,
   Shell(DartVMRef vm,
         TaskRunners task_runners,
         fml::RefPtr<fml::RasterThreadMerger> parent_merger,
+        const std::shared_ptr<ResourceCacheLimitCalculator>&
+            resource_cache_limit_calculator,
         Settings settings,
         std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
         bool is_gpu_disabled);
@@ -484,6 +491,8 @@ class Shell final : public PlatformView::Delegate,
       DartVMRef vm,
       fml::RefPtr<fml::RasterThreadMerger> parent_merger,
       std::shared_ptr<ShellIOManager> parent_io_manager,
+      const std::shared_ptr<ResourceCacheLimitCalculator>&
+          resource_cache_limit_calculator,
       TaskRunners task_runners,
       const PlatformData& platform_data,
       Settings settings,
@@ -492,11 +501,14 @@ class Shell final : public PlatformView::Delegate,
       const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
       const EngineCreateCallback& on_create_engine,
       bool is_gpu_disabled);
+
   static std::unique_ptr<Shell> CreateWithSnapshot(
       const PlatformData& platform_data,
       TaskRunners task_runners,
       fml::RefPtr<fml::RasterThreadMerger> parent_thread_merger,
       std::shared_ptr<ShellIOManager> parent_io_manager,
+      const std::shared_ptr<ResourceCacheLimitCalculator>&
+          resource_cache_limit_calculator,
       Settings settings,
       DartVMRef vm,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
@@ -693,6 +705,9 @@ class Shell final : public PlatformView::Delegate,
   bool OnServiceProtocolEstimateRasterCacheMemory(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
+
+  // |ResourceCacheLimitItem|
+  size_t GetResourceCacheLimit() override { return resource_cache_limit_; };
 
   // Creates an asset bundle from the original settings asset path or
   // directory.

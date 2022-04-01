@@ -470,6 +470,16 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
     settings.old_gen_heap_size = std::stoi(old_gen_heap_size);
   }
 
+  if (command_line.HasOption(
+          FlagForSwitch(Switch::ResourceCacheMaxBytesThreshold))) {
+    std::string resource_cache_max_bytes_threshold;
+    command_line.GetOptionValue(
+        FlagForSwitch(Switch::ResourceCacheMaxBytesThreshold),
+        &resource_cache_max_bytes_threshold);
+    settings.resource_cache_max_bytes_threshold =
+        std::stoi(resource_cache_max_bytes_threshold);
+  }
+
   if (command_line.HasOption(FlagForSwitch(Switch::MsaaSamples))) {
     std::string msaa_samples;
     command_line.GetOptionValue(FlagForSwitch(Switch::MsaaSamples),

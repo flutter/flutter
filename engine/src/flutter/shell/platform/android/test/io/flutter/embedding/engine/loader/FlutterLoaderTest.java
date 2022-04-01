@@ -22,6 +22,7 @@ import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
 import java.util.Arrays;
@@ -85,6 +86,36 @@ public class FlutterLoaderTest {
             anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(oldGenHeapArg));
+  }
+
+  @Test
+  public void itDefaultsTheResourceCacheMaxBytesThresholdAppropriately() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(RuntimeEnvironment.application);
+    flutterLoader.ensureInitializationComplete(RuntimeEnvironment.application, null);
+    shadowOf(getMainLooper()).idle();
+
+    DisplayMetrics displayMetrics =
+        RuntimeEnvironment.application.getResources().getDisplayMetrics();
+    int screenWidth = displayMetrics.widthPixels;
+    int screenHeight = displayMetrics.heightPixels;
+    int resourceCacheMaxBytesThreshold = screenWidth * screenHeight * 12 * 4;
+    final String resourceCacheMaxBytesThresholdArg =
+        "--resource-cache-max-bytes-threshold=" + resourceCacheMaxBytesThreshold;
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(RuntimeEnvironment.application),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertTrue(arguments.contains(resourceCacheMaxBytesThresholdArg));
   }
 
   @Test

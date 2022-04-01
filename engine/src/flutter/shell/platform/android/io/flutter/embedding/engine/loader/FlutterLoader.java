@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -302,8 +303,15 @@ public class FlutterLoader {
         activityManager.getMemoryInfo(memInfo);
         oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
       }
-
       shellArgs.add("--old-gen-heap-size=" + oldGenHeapSizeMegaBytes);
+
+      DisplayMetrics displayMetrics = applicationContext.getResources().getDisplayMetrics();
+      int screenWidth = displayMetrics.widthPixels;
+      int screenHeight = displayMetrics.heightPixels;
+      // This is the formula Android uses.
+      // https://android.googlesource.com/platform/frameworks/base/+/39ae5bac216757bc201490f4c7b8c0f63006c6cd/libs/hwui/renderthread/CacheManager.cpp#45
+      int resourceCacheMaxBytesThreshold = screenWidth * screenHeight * 12 * 4;
+      shellArgs.add("--resource-cache-max-bytes-threshold=" + resourceCacheMaxBytesThreshold);
 
       shellArgs.add("--prefetched-default-font-manager");
 

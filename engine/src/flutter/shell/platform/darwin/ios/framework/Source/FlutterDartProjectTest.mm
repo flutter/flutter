@@ -29,6 +29,16 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(project.settings.old_gen_heap_size, old_gen_heap_size);
 }
 
+- (void)testResourceCacheMaxBytesThresholdSetting {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  CGFloat scale = [UIScreen mainScreen].scale;
+  CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width * scale;
+  CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height * scale;
+  size_t resource_cache_max_bytes_threshold = screenWidth * screenHeight * 12 * 4;
+  XCTAssertEqual(project.settings.resource_cache_max_bytes_threshold,
+                 resource_cache_max_bytes_threshold);
+}
+
 - (void)testMainBundleSettingsAreCorrectlyParsed {
   NSBundle* mainBundle = [NSBundle mainBundle];
   NSDictionary* appTransportSecurity =

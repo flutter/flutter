@@ -107,6 +107,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 };
 
 class MockSurface : public Surface {
+ public:
   MOCK_METHOD0(IsValid, bool());
 
   MOCK_METHOD1(AcquireFrame,
@@ -128,6 +129,13 @@ class MockPlatformView : public PlatformView {
   MOCK_METHOD0(CreateRenderingSurface, std::unique_ptr<Surface>());
   MOCK_CONST_METHOD0(GetPlatformMessageHandler,
                      std::shared_ptr<PlatformMessageHandler>());
+};
+
+class TestPlatformView : public PlatformView {
+ public:
+  TestPlatformView(Shell& shell, TaskRunners task_runners)
+      : PlatformView(shell, task_runners) {}
+  MOCK_METHOD0(CreateRenderingSurface, std::unique_ptr<Surface>());
 };
 
 class MockPlatformMessageHandler : public PlatformMessageHandler {
@@ -1560,6 +1568,128 @@ static size_t GetRasterizerResourceCacheBytesSync(const Shell& shell) {
       });
   latch.Wait();
   return bytes;
+}
+
+TEST_F(ShellTest, MultipleFluttersSetResourceCacheBytes) {
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+  auto settings = CreateSettingsForFixture();
+  settings.resource_cache_max_bytes_threshold = 4000000U;
+  GrMockOptions main_context_options;
+  sk_sp<GrDirectContext> main_context =
+      GrDirectContext::MakeMock(&main_context_options);
+  Shell::CreateCallback<PlatformView> platform_view_create_callback =
+      [task_runners, main_context](flutter::Shell& shell) {
+        auto result = std::make_unique<TestPlatformView>(shell, task_runners);
+        ON_CALL(*result, CreateRenderingSurface())
+            .WillByDefault(::testing::Invoke([main_context] {
+              auto surface = std::make_unique<MockSurface>();
+              ON_CALL(*surface, GetContext())
+                  .WillByDefault(Return(main_context.get()));
+              ON_CALL(*surface, IsValid()).WillByDefault(Return(true));
+              ON_CALL(*surface, MakeRenderContextCurrent())
+                  .WillByDefault(::testing::Invoke([] {
+                    return std::make_unique<GLContextDefaultResult>(true);
+                  }));
+              return surface;
+            }));
+        return result;
+      };
+
+  auto shell = CreateShell(
+      /*settings=*/std::move(settings),
+      /*task_runners=*/task_runners,
+      /*simulate_vsync=*/false,
+      /*shell_test_external_view_embedder=*/nullptr,
+      /*is_gpu_disabled=*/false,
+      /*rendering_backend=*/
+      ShellTestPlatformView::BackendType::kDefaultBackend,
+      /*platform_view_create_callback=*/platform_view_create_callback);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
+    shell->GetPlatformView()->SetViewportMetrics({1.0, 100, 100, 22});
+  });
+
+  // first cache bytes
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
+            static_cast<size_t>(480000U));
+
+  auto shell_spawn_callback = [&]() {
+    std::unique_ptr<Shell> spawn;
+    PostSync(
+        shell->GetTaskRunners().GetPlatformTaskRunner(),
+        [this, &spawn, &spawner = shell, platform_view_create_callback]() {
+          auto configuration =
+              RunConfiguration::InferFromSettings(CreateSettingsForFixture());
+          configuration.SetEntrypoint("emptyMain");
+          spawn = spawner->Spawn(
+              std::move(configuration), "", platform_view_create_callback,
+              [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
+          ASSERT_NE(nullptr, spawn.get());
+          ASSERT_TRUE(ValidateShell(spawn.get()));
+        });
+    return spawn;
+  };
+
+  std::unique_ptr<Shell> second_shell = shell_spawn_callback();
+  PlatformViewNotifyCreated(second_shell.get());
+  PostSync(second_shell->GetTaskRunners().GetPlatformTaskRunner(),
+           [&second_shell]() {
+             second_shell->GetPlatformView()->SetViewportMetrics(
+                 {1.0, 100, 100, 22});
+           });
+  // first cache bytes + second cache bytes
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
+            static_cast<size_t>(960000U));
+
+  PostSync(second_shell->GetTaskRunners().GetPlatformTaskRunner(),
+           [&second_shell]() {
+             second_shell->GetPlatformView()->SetViewportMetrics(
+                 {1.0, 100, 300, 22});
+           });
+  // first cache bytes + second cache bytes
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
+            static_cast<size_t>(1920000U));
+
+  std::unique_ptr<Shell> third_shell = shell_spawn_callback();
+  PlatformViewNotifyCreated(third_shell.get());
+  PostSync(
+      third_shell->GetTaskRunners().GetPlatformTaskRunner(), [&third_shell]() {
+        third_shell->GetPlatformView()->SetViewportMetrics({1.0, 400, 100, 22});
+      });
+  // first cache bytes + second cache bytes + third cache bytes
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
+            static_cast<size_t>(3840000U));
+
+  PostSync(
+      third_shell->GetTaskRunners().GetPlatformTaskRunner(), [&third_shell]() {
+        third_shell->GetPlatformView()->SetViewportMetrics({1.0, 800, 100, 22});
+      });
+  // max bytes threshold
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
+            static_cast<size_t>(4000000U));
+  DestroyShell(std::move(third_shell), std::move(task_runners));
+  // max bytes threshold
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
+            static_cast<size_t>(4000000U));
+
+  PostSync(second_shell->GetTaskRunners().GetPlatformTaskRunner(),
+           [&second_shell]() {
+             second_shell->GetPlatformView()->SetViewportMetrics(
+                 {1.0, 100, 100, 22});
+           });
+  // first cache bytes + second cache bytes
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
+            static_cast<size_t>(960000U));
+
+  DestroyShell(std::move(second_shell), std::move(task_runners));
+  DestroyShell(std::move(shell), std::move(task_runners));
 }
 
 TEST_F(ShellTest, SetResourceCacheSize) {
