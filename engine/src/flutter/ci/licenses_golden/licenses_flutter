@@ -146,6 +146,9 @@ FILE: ../../../flutter/flow/layers/layer.h
 FILE: ../../../flutter/flow/layers/layer_tree.cc
 FILE: ../../../flutter/flow/layers/layer_tree.h
 FILE: ../../../flutter/flow/layers/layer_tree_unittests.cc
+FILE: ../../../flutter/flow/layers/offscreen_surface.cc
+FILE: ../../../flutter/flow/layers/offscreen_surface.h
+FILE: ../../../flutter/flow/layers/offscreen_surface_unittests.cc
 FILE: ../../../flutter/flow/layers/opacity_layer.cc
 FILE: ../../../flutter/flow/layers/opacity_layer.h
 FILE: ../../../flutter/flow/layers/opacity_layer_unittests.cc
