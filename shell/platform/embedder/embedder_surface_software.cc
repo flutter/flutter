@@ -5,6 +5,8 @@
 #include "flutter/shell/platform/embedder/embedder_surface_software.h"
 
 #include "flutter/fml/trace_event.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
+#include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
