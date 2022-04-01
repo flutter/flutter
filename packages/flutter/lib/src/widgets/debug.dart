@@ -124,7 +124,7 @@ bool debugProfileBuildsEnabled = false;
 /// library.
 ///
 /// See also:
-/// 
+///
 ///  * [debugProfileBuildsEnabled], which functions similarly but shows events
 ///    for every widget and has a higher overhead cost.
 bool debugProfileBuildsEnabledUserWidgets = true;
@@ -436,7 +436,8 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintScheduleBuildForStacks ||
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
-        debugHighlightDeprecatedWidgets) {
+        debugHighlightDeprecatedWidgets ||
+        !debugProfileBuildsEnabledUserWidgets) {
       throw FlutterError(reason);
     }
     return true;
