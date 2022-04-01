@@ -61,7 +61,6 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   initTimelineTests();
   test('Timeline', () async {
-    debugProfileBuildsEnabledUserWidgets = false;
     // We don't have expectations around the first frame because there's a race around
     // the warm-up frame that we don't want to get involved in here.
     await runFrame(() { runApp(const TestRoot()); });

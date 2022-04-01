@@ -114,8 +114,8 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 ///  * [debugProfileLayoutsEnabled], which does something similar for layout,
 ///    and [debugPrintLayouts], its console equivalent.
 ///  * [debugProfilePaintsEnabled], which does something similar for painting.
-///  * [debugProfileBuildsEnabledUserWidgets], adds events for user-created
-///    [Widget] build.
+///  * [debugProfileBuildsEnabledUserWidgets], which adds events for user-created
+///    [Widget] build times and incurs less overhead.
 bool debugProfileBuildsEnabled = false;
 
 /// Adds [Timeline] events for every user-created [Widget] built.
@@ -127,7 +127,7 @@ bool debugProfileBuildsEnabled = false;
 ///
 ///  * [debugProfileBuildsEnabled], which functions similarly but shows events
 ///    for every widget and has a higher overhead cost.
-bool debugProfileBuildsEnabledUserWidgets = true;
+bool debugProfileBuildsEnabledUserWidgets = false;
 
 /// Show banners for deprecated widgets.
 bool debugHighlightDeprecatedWidgets = false;
@@ -437,7 +437,7 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
         debugHighlightDeprecatedWidgets ||
-        !debugProfileBuildsEnabledUserWidgets) {
+        debugProfileBuildsEnabledUserWidgets) {
       throw FlutterError(reason);
     }
     return true;
