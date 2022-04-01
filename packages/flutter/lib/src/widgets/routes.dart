@@ -2261,11 +2261,6 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
           hitCurrentFocus = true;
           break;
         }
-        if (target is _RenderFocusTrap && defaultTargetPlatform == TargetPlatform.macOS) {
-          // Fix RenderFocusTrap is not working well on macOS.
-          hitCurrentFocus = true;
-          break;
-        }
       }
     }
     if (!hitCurrentFocus)
