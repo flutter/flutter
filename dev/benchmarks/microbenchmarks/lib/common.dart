@@ -80,7 +80,7 @@ class BenchmarkResultPrinter {
   /// Adds a benchmark result to the list of results and a probability of that
   /// result.
   ///
-  /// The probably is calculated as the probability that the mean is +- 5% of
+  /// The probability is calculated as the probability that the mean is +- 5% of
   /// the true value.
   ///
   /// See also [addResult].
