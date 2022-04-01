@@ -96,7 +96,7 @@ class BenchmarkResultPrinter {
     final double probability = _doProbability(mean: mean, stddev: stddev, margin: margin);
     _results.add(_BenchmarkResult(description, mean, unit, name));
     _results.add(_BenchmarkResult('$description - probability margin of error $margin', probability,
-        'percent', '${name}_probability'));
+        'percent', '${name}_probability_5pct'));
   }
 
   /// Prints the results added via [addResult] to standard output, once as JSON
