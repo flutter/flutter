@@ -2500,7 +2500,6 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "gems"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"}
         ]
@@ -2664,8 +2663,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "xcode"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2771,8 +2769,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "xcode"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2795,8 +2792,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "xcode"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2820,8 +2816,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "xcode"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2845,8 +2840,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "xcode"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2871,8 +2865,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "xcode"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2974,8 +2967,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "xcode"}
         ]
       tags: >
         ["devicelab","hostonly"]
