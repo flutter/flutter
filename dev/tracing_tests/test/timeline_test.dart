@@ -22,7 +22,7 @@ final Set<String> interestingLabels = <String>{
 };
 
 class TestRoot extends StatefulWidget {
-  const TestRoot({ Key? key }) : super(key: key);
+  const TestRoot({ super.key });
 
   static late final TestRootState state;
 

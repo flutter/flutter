@@ -56,7 +56,7 @@ const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
 /// map to specify that they are actually physical devices.
 class AndroidDevice extends Device {
   AndroidDevice(
-    String id, {
+    super.id, {
     this.productID,
     required this.modelID,
     this.deviceCodeName,
@@ -74,7 +74,6 @@ class AndroidDevice extends Device {
        _androidConsoleSocketFactory = androidConsoleSocketFactory,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(
-         id,
          category: Category.mobile,
          platformType: PlatformType.android,
          ephemeral: true,

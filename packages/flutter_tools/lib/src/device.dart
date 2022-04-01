@@ -757,6 +757,7 @@ class DebuggingOptions {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
     this.enableDds = true,
+    this.cacheStartupProfile = false,
     this.dartEntrypointArgs = const <String>[],
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
@@ -813,6 +814,7 @@ class DebuggingOptions {
       dartFlags = '',
       disableServiceAuthCodes = false,
       enableDds = true,
+      cacheStartupProfile = false,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
       traceSkia = false,
@@ -841,6 +843,7 @@ class DebuggingOptions {
     required this.dartEntrypointArgs,
     required this.disableServiceAuthCodes,
     required this.enableDds,
+    required this.cacheStartupProfile,
     required this.enableSoftwareRendering,
     required this.skiaDeterministicRendering,
     required this.traceSkia,
@@ -883,6 +886,7 @@ class DebuggingOptions {
   final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
   final bool enableDds;
+  final bool cacheStartupProfile;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
@@ -945,6 +949,7 @@ class DebuggingOptions {
     'dartEntrypointArgs': dartEntrypointArgs,
     'disableServiceAuthCodes': disableServiceAuthCodes,
     'enableDds': enableDds,
+    'cacheStartupProfile': cacheStartupProfile,
     'enableSoftwareRendering': enableSoftwareRendering,
     'skiaDeterministicRendering': skiaDeterministicRendering,
     'traceSkia': traceSkia,
@@ -988,6 +993,7 @@ class DebuggingOptions {
       dartEntrypointArgs: ((json['dartEntrypointArgs'] as List<dynamic>?)?.cast<String>())!,
       disableServiceAuthCodes: (json['disableServiceAuthCodes'] as bool?)!,
       enableDds: (json['enableDds'] as bool?)!,
+      cacheStartupProfile: (json['cacheStartupProfile'] as bool?)!,
       enableSoftwareRendering: (json['enableSoftwareRendering'] as bool?)!,
       skiaDeterministicRendering: (json['skiaDeterministicRendering'] as bool?)!,
       traceSkia: (json['traceSkia'] as bool?)!,

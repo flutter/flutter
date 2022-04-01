@@ -26,7 +26,7 @@ void main() {
   testWidgets('Initial toggle state is reflected', (WidgetTester tester) async {
     TextStyle buttonTextStyle(String text) {
       return tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(RawMaterialButton, text),
+        of: find.widgetWithText(TextButton, text),
         matching: find.byType(DefaultTextStyle),
       )).style;
     }
@@ -61,11 +61,10 @@ void main() {
     (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
         return tester.widget<DefaultTextStyle>(find.descendant(
-          of: find.widgetWithText(RawMaterialButton, text),
+          of: find.widgetWithText(TextButton, text),
           matching: find.byType(DefaultTextStyle),
         )).style;
       }
-
       final List<bool> isSelected = <bool>[false, true];
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
@@ -123,7 +122,7 @@ void main() {
     (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
         return tester.widget<DefaultTextStyle>(find.descendant(
-          of: find.widgetWithText(RawMaterialButton, text),
+          of: find.widgetWithText(TextButton, text),
           matching: find.byType(DefaultTextStyle),
         )).style;
       }
@@ -220,14 +219,14 @@ void main() {
 
     TextStyle textStyle;
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(RawMaterialButton, 'First child'),
+        of: find.widgetWithText(TextButton, 'First child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
     expect(textStyle.fontFamily, theme.textTheme.bodyText2!.fontFamily);
     expect(textStyle.decoration, theme.textTheme.bodyText2!.decoration);
 
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(RawMaterialButton, 'Second child'),
+        of: find.widgetWithText(TextButton, 'Second child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
     expect(textStyle.fontFamily, theme.textTheme.bodyText2!.fontFamily);
@@ -257,7 +256,7 @@ void main() {
 
     TextStyle textStyle;
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(RawMaterialButton, 'First child'),
+        of: find.widgetWithText(TextButton, 'First child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
@@ -265,7 +264,7 @@ void main() {
     expect(textStyle.color, isNot(Colors.orange));
 
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
-        of: find.widgetWithText(RawMaterialButton, 'Second child'),
+        of: find.widgetWithText(TextButton, 'Second child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
@@ -290,13 +289,13 @@ void main() {
       ),
     );
 
-    final Rect firstRect = tester.getRect(find.byType(RawMaterialButton).at(0));
+    final Rect firstRect = tester.getRect(find.byType(TextButton).at(0));
     expect(firstRect.width, 48.0);
     expect(firstRect.height, 48.0);
-    final Rect secondRect = tester.getRect(find.byType(RawMaterialButton).at(1));
+    final Rect secondRect = tester.getRect(find.byType(TextButton).at(1));
     expect(secondRect.width, 48.0);
     expect(secondRect.height, 48.0);
-    final Rect thirdRect = tester.getRect(find.byType(RawMaterialButton).at(2));
+    final Rect thirdRect = tester.getRect(find.byType(TextButton).at(2));
     expect(thirdRect.width, 48.0);
     expect(thirdRect.height, 48.0);
   });
@@ -307,6 +306,7 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtons(
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             constraints: const BoxConstraints(
               minWidth: 50.0,
               minHeight: 60.0,
@@ -323,13 +323,13 @@ void main() {
       ),
     );
 
-    Rect firstRect = tester.getRect(find.byType(RawMaterialButton).at(0));
+    Rect firstRect = tester.getRect(find.byType(TextButton).at(0));
     expect(firstRect.width, 50.0);
     expect(firstRect.height, 60.0);
-    Rect secondRect = tester.getRect(find.byType(RawMaterialButton).at(1));
+    Rect secondRect = tester.getRect(find.byType(TextButton).at(1));
     expect(secondRect.width, 50.0);
     expect(secondRect.height, 60.0);
-    Rect thirdRect = tester.getRect(find.byType(RawMaterialButton).at(2));
+    Rect thirdRect = tester.getRect(find.byType(TextButton).at(2));
     expect(thirdRect.width, 50.0);
     expect(thirdRect.height, 60.0);
 
@@ -338,6 +338,7 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtons(
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             constraints: const BoxConstraints(
               maxWidth: 20.0,
               maxHeight: 10.0,
@@ -354,13 +355,13 @@ void main() {
       ),
     );
 
-    firstRect = tester.getRect(find.byType(RawMaterialButton).at(0));
+    firstRect = tester.getRect(find.byType(TextButton).at(0));
     expect(firstRect.width, 20.0);
     expect(firstRect.height, 10.0);
-    secondRect = tester.getRect(find.byType(RawMaterialButton).at(1));
+    secondRect = tester.getRect(find.byType(TextButton).at(1));
     expect(secondRect.width, 20.0);
     expect(secondRect.height, 10.0);
-    thirdRect = tester.getRect(find.byType(RawMaterialButton).at(2));
+    thirdRect = tester.getRect(find.byType(TextButton).at(2));
     expect(thirdRect.width, 20.0);
     expect(thirdRect.height, 10.0);
   });
@@ -370,13 +371,13 @@ void main() {
     (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
         return tester.widget<DefaultTextStyle>(find.descendant(
-          of: find.widgetWithText(RawMaterialButton, text),
+          of: find.widgetWithText(TextButton, text),
           matching: find.byType(DefaultTextStyle),
         )).style;
       }
       IconTheme iconTheme(IconData icon) {
         return tester.widget(find.descendant(
-          of: find.widgetWithIcon(RawMaterialButton, icon),
+          of: find.widgetWithIcon(TextButton, icon),
           matching: find.byType(IconTheme),
         ));
       }
@@ -468,13 +469,13 @@ void main() {
     (WidgetTester tester) async {
       TextStyle buttonTextStyle(String text) {
         return tester.widget<DefaultTextStyle>(find.descendant(
-          of: find.widgetWithText(RawMaterialButton, text),
+          of: find.widgetWithText(TextButton, text),
           matching: find.byType(DefaultTextStyle),
         )).style;
       }
       IconTheme iconTheme(IconData icon) {
         return tester.widget(find.descendant(
-          of: find.widgetWithIcon(RawMaterialButton, icon),
+          of: find.widgetWithIcon(TextButton, icon),
           matching: find.byType(IconTheme),
         ));
       }
@@ -574,7 +575,7 @@ void main() {
     );
 
     final Material material = tester.widget<Material>(find.descendant(
-      of: find.byType(RawMaterialButton),
+      of: find.byType(TextButton),
       matching: find.byType(Material),
     ));
     expect(
@@ -603,7 +604,7 @@ void main() {
     );
 
     final Material material = tester.widget<Material>(find.descendant(
-      of: find.byType(RawMaterialButton),
+      of: find.byType(TextButton),
       matching: find.byType(Material),
     ));
     expect(
@@ -631,7 +632,7 @@ void main() {
     );
 
     final Material material = tester.widget<Material>(find.descendant(
-      of: find.byType(RawMaterialButton),
+      of: find.byType(TextButton),
       matching: find.byType(Material),
     ));
     expect(
@@ -661,7 +662,7 @@ void main() {
     );
 
     final Material material = tester.widget<Material>(find.descendant(
-      of: find.byType(RawMaterialButton),
+      of: find.byType(TextButton),
       matching: find.byType(Material),
     ));
     expect(material.color, customFillColor);
@@ -672,7 +673,7 @@ void main() {
     Material buttonColor(String text) {
       return tester.widget<Material>(
         find.descendant(
-          of: find.byType(RawMaterialButton),
+          of: find.byType(TextButton),
           matching: find.widgetWithText(Material, text),
         ),
       );
@@ -727,7 +728,7 @@ void main() {
     Material buttonColor(String text) {
       return tester.widget<Material>(
         find.descendant(
-          of: find.byType(RawMaterialButton),
+          of: find.byType(TextButton),
           matching: find.widgetWithText(Material, text),
         ),
       );
@@ -1615,7 +1616,7 @@ void main() {
 
     final Key key1 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
-    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 48.0));
+    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 50.0));
 
     final Key key2 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
@@ -1644,7 +1645,7 @@ void main() {
 
     final Key key1 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
-    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 48.0));
+    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 50.0));
 
     final Key key2 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
@@ -1674,7 +1675,7 @@ void main() {
 
     final Key key1 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
-    expect(tester.getSize(find.byKey(key1)), const Size(48.0, 100.0));
+    expect(tester.getSize(find.byKey(key1)), const Size(50.0, 148.0));
 
     final Key key2 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
@@ -1909,5 +1910,32 @@ void main() {
     expect(toggleButtonElevation('two'), 0);
 
     await hoverGesture.removePointer();
+  });
+
+  testWidgets('Toggle buttons height matches MaterialTapTargetSize.padded height', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/97302
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            tapTargetSize: MaterialTapTargetSize.padded,
+            isSelected: const <bool>[false, false, false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Icon(Icons.check),
+              Icon(Icons.access_alarm),
+              Icon(Icons.cake),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Rect firstRect = tester.getRect(find.byType(TextButton).at(0));
+    expect(firstRect.height, 48.0);
+    final Rect secondRect = tester.getRect(find.byType(TextButton).at(1));
+    expect(secondRect.height, 48.0);
+    final Rect thirdRect = tester.getRect(find.byType(TextButton).at(2));
+    expect(thirdRect.height, 48.0);
   });
 }

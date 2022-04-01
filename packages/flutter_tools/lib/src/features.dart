@@ -91,7 +91,7 @@ const Feature flutterWebFeature = Feature(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'beta-quality support for desktop on macOS',
+  name: 'support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
   extraHelpText: 'Newer beta versions are available on the beta channel.',
@@ -108,7 +108,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'beta-quality support for desktop on Linux',
+  name: 'support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
   extraHelpText: 'Newer beta versions are available on the beta channel.',
@@ -216,6 +216,7 @@ const Feature singleWidgetReload = Feature(
 const Feature windowsUwpEmbedding = Feature(
   name: 'Flutter for Windows UWP',
   configSetting: 'enable-windows-uwp-desktop',
+  extraHelpText: 'Warning: Windows UWP support is obsolete and will be removed.',
   master: FeatureChannelSetting(
     available: true,
   ),

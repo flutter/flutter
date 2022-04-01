@@ -694,11 +694,10 @@ class ListTile extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
     final ListTileThemeData tileTheme = ListTileTheme.of(context);
+    final IconThemeData iconThemeData = IconThemeData(color: _iconColor(theme, tileTheme));
 
-    IconThemeData? iconThemeData;
     TextStyle? leadingAndTrailingTextStyle;
     if (leading != null || trailing != null) {
-      iconThemeData = IconThemeData(color: _iconColor(theme, tileTheme));
       leadingAndTrailingTextStyle = _trailingAndLeadingTextStyle(theme, tileTheme);
     }
 
@@ -707,10 +706,7 @@ class ListTile extends StatelessWidget {
       leadingIcon = AnimatedDefaultTextStyle(
         style: leadingAndTrailingTextStyle!,
         duration: kThemeChangeDuration,
-        child: IconTheme.merge(
-          data: iconThemeData!,
-          child: leading!,
-        ),
+        child: leading!,
       );
     }
 
@@ -737,10 +733,7 @@ class ListTile extends StatelessWidget {
       trailingIcon = AnimatedDefaultTextStyle(
         style: leadingAndTrailingTextStyle!,
         duration: kThemeChangeDuration,
-        child: IconTheme.merge(
-          data: iconThemeData!,
-          child: trailing!,
-        ),
+        child: trailing!,
       );
     }
 
@@ -782,20 +775,23 @@ class ListTile extends StatelessWidget {
             top: false,
             bottom: false,
             minimum: resolvedContentPadding,
-            child: _ListTile(
-              leading: leadingIcon,
-              title: titleText,
-              subtitle: subtitleText,
-              trailing: trailingIcon,
-              isDense: _isDenseLayout(theme, tileTheme),
-              visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
-              isThreeLine: isThreeLine,
-              textDirection: textDirection,
-              titleBaselineType: titleStyle.textBaseline!,
-              subtitleBaselineType: subtitleStyle?.textBaseline,
-              horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
-              minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? 4,
-              minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? 40,
+            child: IconTheme.merge(
+              data: iconThemeData,
+              child: _ListTile(
+                leading: leadingIcon,
+                title: titleText,
+                subtitle: subtitleText,
+                trailing: trailingIcon,
+                isDense: _isDenseLayout(theme, tileTheme),
+                visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
+                isThreeLine: isThreeLine,
+                textDirection: textDirection,
+                titleBaselineType: titleStyle.textBaseline!,
+                subtitleBaselineType: subtitleStyle?.textBaseline,
+                horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
+                minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? 4,
+                minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? 40,
+              ),
             ),
           ),
         ),
