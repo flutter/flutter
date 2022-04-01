@@ -2256,8 +2256,13 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
         break;
       }
       if (event.kind == PointerDeviceKind.touch) {
-        if (target is _RenderFocusTrap || target is _RenderFocusTrapArea || target is TextSpan) {
+        if (target is _RenderFocusTrapArea || target is TextSpan) {
           // Keep focusing when we switch from one TextField to another.
+          hitCurrentFocus = true;
+          break;
+        }
+        if (target is _RenderFocusTrap && defaultTargetPlatform == TargetPlatform.macOS) {
+          // Fix RenderFocusTrap is not working well on macOS.
           hitCurrentFocus = true;
           break;
         }
