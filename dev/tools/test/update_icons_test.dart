@@ -43,11 +43,11 @@ void main() {
 
   test('usage is correct', () {
     expect(
-      Icon(const MapEntry<String, String>('123', '')).usage, 
+      Icon(const MapEntry<String, String>('123', '')).usage,
       'Icon(Icons.onetwothree),',
     );
     expect(
-      Icon(const MapEntry<String, String>('123_rounded', '')).usage, 
+      Icon(const MapEntry<String, String>('123_rounded', '')).usage,
       'Icon(Icons.onetwothree_rounded),',
     );
   });
