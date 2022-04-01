@@ -25,6 +25,8 @@ import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.util.ViewUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@code Fragment} which displays a Flutter UI that takes up all available {@code Fragment} space.
@@ -107,6 +109,8 @@ public class FlutterFragment extends Fragment
   protected static final String ARG_DART_ENTRYPOINT = "dart_entrypoint";
   /** The Dart entrypoint method's URI that is executed upon initialization. */
   protected static final String ARG_DART_ENTRYPOINT_URI = "dart_entrypoint_uri";
+  /** The Dart entrypoint arguments that is executed upon initialization. */
+  protected static final String ARG_DART_ENTRYPOINT_ARGS = "dart_entrypoint_args";
   /** Initial Flutter route that is rendered in a Navigator widget. */
   protected static final String ARG_INITIAL_ROUTE = "initial_route";
   /** Whether the activity delegate should handle the deeplinking request. */
@@ -226,6 +230,7 @@ public class FlutterFragment extends Fragment
     private final Class<? extends FlutterFragment> fragmentClass;
     private String dartEntrypoint = "main";
     private String dartLibraryUri = null;
+    private List<String> dartEntrypointArgs;
     private String initialRoute = "/";
     private boolean handleDeeplinking = false;
     private String appBundlePath = null;
@@ -262,6 +267,13 @@ public class FlutterFragment extends Fragment
     @NonNull
     public NewEngineFragmentBuilder dartLibraryUri(@NonNull String dartLibraryUri) {
       this.dartLibraryUri = dartLibraryUri;
+      return this;
+    }
+
+    /** Arguments passed as a list of string to Dart's entrypoint function. */
+    @NonNull
+    public NewEngineFragmentBuilder dartEntrypointArgs(@NonNull List<String> dartEntrypointArgs) {
+      this.dartEntrypointArgs = dartEntrypointArgs;
       return this;
     }
 
@@ -420,6 +432,9 @@ public class FlutterFragment extends Fragment
       args.putString(ARG_APP_BUNDLE_PATH, appBundlePath);
       args.putString(ARG_DART_ENTRYPOINT, dartEntrypoint);
       args.putString(ARG_DART_ENTRYPOINT_URI, dartLibraryUri);
+      args.putStringArrayList(
+          ARG_DART_ENTRYPOINT_ARGS,
+          dartEntrypointArgs != null ? new ArrayList(dartEntrypointArgs) : null);
       // TODO(mattcarroll): determine if we should have an explicit FlutterTestFragment instead of
       // conflating.
       if (null != shellArgs) {
@@ -1043,6 +1058,19 @@ public class FlutterFragment extends Fragment
   @NonNull
   public String getDartEntrypointFunctionName() {
     return getArguments().getString(ARG_DART_ENTRYPOINT, "main");
+  }
+
+  /**
+   * The Dart entrypoint arguments will be passed as a list of string to Dart's entrypoint function.
+   *
+   * <p>A value of null means do not pass any arguments to Dart's entrypoint function.
+   *
+   * <p>Subclasses may override this method to directly control the Dart entrypoint arguments.
+   */
+  @Override
+  @Nullable
+  public List<String> getDartEntrypointArgs() {
+    return getArguments().getStringArrayList(ARG_DART_ENTRYPOINT_ARGS);
   }
 
   /**
