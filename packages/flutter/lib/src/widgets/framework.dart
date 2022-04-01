@@ -3083,8 +3083,9 @@ class _NotificationNode {
 }
 
 bool _isProfileBuildsEnabledFor(Widget widget) {
-  return debugProfileBuildsEnabled || (debugProfileBuildsEnabledUserWidgets
-      && debugIsWidgetLocalCreation(widget));
+  return debugProfileBuildsEnabled ||
+      (debugProfileBuildsEnabledUserWidgets &&
+          debugIsWidgetLocalCreation(widget));
 }
 
 /// An instantiation of a [Widget] at a particular location in the tree.

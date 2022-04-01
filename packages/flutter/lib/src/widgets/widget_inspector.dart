@@ -3095,7 +3095,7 @@ bool debugIsLocalCreationLocation(Object object) {
 /// Returns true if a [Widget] is user created.
 ///
 /// This is a faster variant of `debugIsLocalCreationLocation` that is available
-/// in debug and profile builds.
+/// in debug and profile builds but only works for [Widget].
 bool debugIsWidgetLocalCreation(Widget widget) {
   final _Location? location = _getObjectCreationLocation(widget);
   return location != null &&
@@ -3124,7 +3124,7 @@ _Location? _getObjectCreationLocation(Object object) {
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 _Location? _getCreationLocation(Object? object) {
-  final Object? candidate =  object is Element && !object.debugIsDefunct ? object.widget : object;
+  final Object? candidate = object is Element && !object.debugIsDefunct ? object.widget : object;
   return candidate == null ? null : _getObjectCreationLocation(candidate);
 }
 

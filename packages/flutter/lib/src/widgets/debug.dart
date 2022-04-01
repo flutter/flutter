@@ -114,15 +114,19 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 ///  * [debugProfileLayoutsEnabled], which does something similar for layout,
 ///    and [debugPrintLayouts], its console equivalent.
 ///  * [debugProfilePaintsEnabled], which does something similar for painting.
-///  * [debugProfileBuildsEnabledUserWidgets], adds events for user generated
+///  * [debugProfileBuildsEnabledUserWidgets], adds events for user-created
 ///    [Widget] build.
 bool debugProfileBuildsEnabled = false;
 
-/// Adds [Timeline] events for every user created [Widget] built.
+/// Adds [Timeline] events for every user-created [Widget] built.
+///
+/// A user-created [Widget] is any [Widget] that is constructed in the root
+/// library.
 ///
 /// See also:
-///  * [debugProfileBuildsEnabled], functions similarly but shows events for
-///    every widget and has a higher overhead cost.
+/// 
+///  * [debugProfileBuildsEnabled], which functions similarly but shows events
+///    for every widget and has a higher overhead cost.
 bool debugProfileBuildsEnabledUserWidgets = true;
 
 /// Show banners for deprecated widgets.
