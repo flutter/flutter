@@ -17,6 +17,11 @@ import 'globals.dart' as globals;
 
 const String _unknownFrameworkVersion = '0.0.0-unknown';
 
+/// A git shortcut for the branch that is being tracked by the current one.
+///
+/// See `man gitrevisions` for more information.
+const String kGitTrackingUpstream = '@{upstream}';
+
 /// This maps old branch names to the names of branches that replaced them.
 ///
 /// For example, in 2021 we deprecated the "dev" channel and transitioned "dev"
@@ -106,7 +111,7 @@ class FlutterVersion {
     String? channel = _channel;
     if (channel == null) {
       final String gitChannel = _runGit(
-        'git rev-parse --abbrev-ref --symbolic @{u}',
+        'git rev-parse --abbrev-ref --symbolic $kGitTrackingUpstream',
         globals.processUtils,
         _workingDirectory,
       );
@@ -270,8 +275,9 @@ class FlutterVersion {
   /// remote git repository is not reachable due to a network issue.
   static Future<String> fetchRemoteFrameworkCommitDate(String branch) async {
     try {
+      // Fetch upstream branch's commit and tags
       await _run(<String>['git', 'fetch', '--tags']);
-      return _gitCommitDate(gitRef: '@{u}');
+      return _gitCommitDate(gitRef: kGitTrackingUpstream);
     } on VersionCheckError catch (error) {
       globals.printError(error.message);
       rethrow;
@@ -697,10 +703,10 @@ class GitTagVersion {
   static GitTagVersion determine(
     ProcessUtils processUtils,
     Platform platform, {
-      String? workingDirectory,
-      bool fetchTags = false,
-      String gitRef = 'HEAD'
-    }) {
+    String? workingDirectory,
+    bool fetchTags = false,
+    String gitRef = 'HEAD'
+  }) {
     if (fetchTags) {
       final String channel = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
       if (channel == 'dev' || channel == 'beta' || channel == 'stable') {

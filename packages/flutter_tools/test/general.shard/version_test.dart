@@ -70,7 +70,7 @@ void main() {
             stdout: '0.1.2-3-1234abcd',
           ),
           FakeCommand(
-            command: const <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'],
+            command: const <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
             stdout: 'origin/$channel',
           ),
           const FakeCommand(
@@ -85,7 +85,7 @@ void main() {
             command: <String>['git', 'fetch', '--tags'],
           ),
           FakeCommand(
-            command: const <String>['git', '-c', 'log.showSignature=false', 'log', '@{u}', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+            command: const <String>['git', '-c', 'log.showSignature=false', 'log', '@{upstream}', '-n', '1', '--pretty=format:%ad', '--date=iso'],
             stdout: getChannelOutOfDateVersion().toString(),
           ),
           const FakeCommand(
@@ -415,7 +415,7 @@ void main() {
         stdout: '0.1.2-3-1234abcd',
       ),
       const FakeCommand(
-        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'],
+        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
         stdout: 'feature-branch',
       ),
       const FakeCommand(
