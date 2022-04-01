@@ -23,6 +23,7 @@ public class FlutterActivityLaunchConfigs {
   /* package */ static final String EXTRA_INITIAL_ROUTE = "route";
   /* package */ static final String EXTRA_BACKGROUND_MODE = "background_mode";
   /* package */ static final String EXTRA_CACHED_ENGINE_ID = "cached_engine_id";
+  /* package */ static final String EXTRA_DART_ENTRYPOINT_ARGS = "dart_entrypoint_args";
   /* package */ static final String EXTRA_DESTROY_ENGINE_WITH_ACTIVITY =
       "destroy_engine_with_activity";
   /* package */ static final String EXTRA_ENABLE_STATE_RESTORATION = "enable_state_restoration";
