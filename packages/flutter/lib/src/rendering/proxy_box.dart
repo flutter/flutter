@@ -1507,7 +1507,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     BorderRadiusGeometry borderRadius = BorderRadius.zero,
     CustomClipper<RRect>? clipper,
     Clip clipBehavior = Clip.antiAlias,
-    TextDirection? textDirection, 
+    TextDirection? textDirection,
   }) : assert(clipBehavior != null),
        _borderRadius = borderRadius,
        _textDirection = textDirection,
