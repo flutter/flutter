@@ -23,7 +23,7 @@ void main() {
     {{pluginDartClass}} {{pluginClassLowerCamelCase}} = {{pluginDartClass}}();
     Mock{{pluginDartClass}}Platform fakePlatform = Mock{{pluginDartClass}}Platform();
     {{pluginDartClass}}Platform.instance = fakePlatform;
- 
+
     expect(await {{pluginClassLowerCamelCase}}.getPlatformVersion(), '42');
   });
 }
