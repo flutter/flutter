@@ -7,7 +7,6 @@
 #include <utility>
 
 #include <Foundation/Foundation.h>
-#include <QuartzCore/CADisplayLink.h>
 #include <UIKit/UIKit.h>
 #include <mach/mach_time.h>
 
@@ -64,6 +63,8 @@ double VsyncWaiterIOS::GetRefreshRate() const {
     };
     display_link_.get().paused = YES;
 
+    [self setMaxRefreshRateIfEnabled];
+
     task_runner->PostTask([client = [self retain]]() {
       [client->display_link_.get() addToRunLoop:[NSRunLoop currentRunLoop]
                                         forMode:NSRunLoopCommonModes];
@@ -72,6 +73,23 @@ double VsyncWaiterIOS::GetRefreshRate() const {
   }
 
   return self;
+}
+
+- (void)setMaxRefreshRateIfEnabled {
+  NSNumber* minimumFrameRateDisabled =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"];
+  if (![minimumFrameRateDisabled boolValue]) {
+    return;
+  }
+  double maxFrameRate = fmax([DisplayLinkManager displayRefreshRate], 60);
+  double minFrameRate = fmax(maxFrameRate / 2, 60);
+
+  if (@available(iOS 15.0, *)) {
+    display_link_.get().preferredFrameRateRange =
+        CAFrameRateRangeMake(minFrameRate, maxFrameRate, maxFrameRate);
+  } else if (@available(iOS 10.0, *)) {
+    display_link_.get().preferredFramesPerSecond = maxFrameRate;
+  }
 }
 
 - (void)await {
@@ -99,7 +117,6 @@ double VsyncWaiterIOS::GetRefreshRate() const {
 
   recorder->RecordVsync(frame_start_time, frame_target_time);
   display_link_.get().paused = YES;
-
   callback_(std::move(recorder));
 }
 
@@ -115,6 +132,10 @@ double VsyncWaiterIOS::GetRefreshRate() const {
 
 - (double)getRefreshRate {
   return current_refresh_rate_;
+}
+
+- (CADisplayLink*)getDisplayLink {
+  return display_link_.get();
 }
 
 @end

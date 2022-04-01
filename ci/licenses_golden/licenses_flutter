@@ -1553,6 +1553,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap_Int
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObjectTest.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/VsyncWaiterIosTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge_ios.h
