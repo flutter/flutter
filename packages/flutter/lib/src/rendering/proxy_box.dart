@@ -1504,11 +1504,13 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// [Clip.none], no clipping will be applied.
   RenderClipRRect({
     RenderBox? child,
-    BorderRadius borderRadius = BorderRadius.zero,
+    BorderRadiusGeometry borderRadius = BorderRadius.zero,
     CustomClipper<RRect>? clipper,
     Clip clipBehavior = Clip.antiAlias,
+    TextDirection? textDirection, 
   }) : assert(clipBehavior != null),
        _borderRadius = borderRadius,
+       _textDirection = textDirection,
        super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
   }
@@ -1519,9 +1521,9 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// exceed width/height.
   ///
   /// This value is ignored if [clipper] is non-null.
-  BorderRadius get borderRadius => _borderRadius;
-  BorderRadius _borderRadius;
-  set borderRadius(BorderRadius value) {
+  BorderRadiusGeometry get borderRadius => _borderRadius;
+  BorderRadiusGeometry _borderRadius;
+  set borderRadius(BorderRadiusGeometry value) {
     assert(value != null);
     if (_borderRadius == value)
       return;
@@ -1529,8 +1531,18 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     _markNeedsClip();
   }
 
+  /// The text direction with which to resolve [borderRadius].
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    _markNeedsClip();
+  }
+
   @override
-  RRect get _defaultClip => _borderRadius.toRRect(Offset.zero & size);
+  RRect get _defaultClip => _borderRadius.resolve(textDirection).toRRect(Offset.zero & size);
 
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
