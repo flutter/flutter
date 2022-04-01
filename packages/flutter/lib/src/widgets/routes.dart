@@ -2217,19 +2217,9 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     }
   }
 
-  /// The touch focus dropping behavior is only present on desktop (exclude macOS)
-  /// and mobile browsers.
+  /// The touch focus dropping behavior is present on all platform browsers.
   bool get _shouldIgnoreTouchEvents {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-        return !kIsWeb;
-      case TargetPlatform.macOS:
-        return true;
-    }
+    return !kIsWeb;
   }
 
   @override
@@ -2266,7 +2256,7 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
         break;
       }
       if (event.kind == PointerDeviceKind.touch) {
-        if (target is _RenderFocusTrapArea || target is TextSpan) {
+        if (target is _RenderFocusTrap || target is _RenderFocusTrapArea || target is TextSpan) {
           // Keep focusing when we switch from one TextField to another.
           hitCurrentFocus = true;
           break;
