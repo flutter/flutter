@@ -773,10 +773,10 @@ class _GtkViewState extends State<GtkView> {
   void initState() {
     super.initState();
 
-    _mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
+    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
 
     // Listen to see when a mouse is added.
-    RendererBinding.instance!.mouseTracker
+    RendererBinding.instance.mouseTracker
         .addListener(_handleMouseTrackerChange);
   }
 
@@ -786,7 +786,7 @@ class _GtkViewState extends State<GtkView> {
       return;
     }
     final bool mouseIsConnected =
-        RendererBinding.instance!.mouseTracker.mouseIsConnected;
+        RendererBinding.instance.mouseTracker.mouseIsConnected;
     if (mouseIsConnected != _mouseIsConnected) {
       setState(() {
         _mouseIsConnected = mouseIsConnected;
@@ -874,7 +874,7 @@ class _GtkViewState extends State<GtkView> {
   @override
   void dispose() {
     _controller?.dispose();
-    RendererBinding.instance!.mouseTracker
+    RendererBinding.instance.mouseTracker
         .removeListener(_handleMouseTrackerChange);
     super.dispose();
   }
