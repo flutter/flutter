@@ -152,6 +152,7 @@ source_set("flutter_framework_source") {
   cflags_objcc = flutter_cflags_objcc_arc
 
   frameworks = [
+    "Carbon.framework",
     "Cocoa.framework",
     "CoreVideo.framework",
     "IOSurface.framework",
