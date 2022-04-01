@@ -268,7 +268,10 @@ def to_gn_args(args):
       # Overrides whether Boring SSL is compiled with system as. Only meaningful
       # on Android.
       gn_args['bssl_use_clang_integrated_as'] = True
-    
+
+    if args.allow_deprecated_api_calls:
+      gn_args['allow_deprecated_api_calls'] = args.allow_deprecated_api_calls
+
     # DBC is not supported anymore.
     if args.interpreter:
       raise Exception('--interpreter is no longer needed on any supported platform.')
@@ -528,6 +531,9 @@ def parse_args(args):
                       help='The IDE files to generate using GN. Use `gn gen help` and look for the --ide flag to' +
                       ' see supported IDEs. If this flag is not specified, a platform specific default is selected.')
 
+  parser.add_argument('--allow-deprecated-api-calls', action='store_true', default=False,
+                      help='Turns off warnings about the usage of deprecated APIs.')
+
   parser.add_argument('--disable-desktop-embeddings', default=False, action='store_true',
                       help='Do not include desktop embeddings in the build.')
   parser.add_argument('--build-glfw-shell', action='store_const', const=True,
@@ -559,7 +565,7 @@ def parse_args(args):
 
   # Impeller flags.
   parser.add_argument('--enable-impeller-playground', default=False, action='store_true',
-                      help='Whether impeller unit tests run in playground mode')
+                      help='Whether impeller unit tests run in playground mode.')
 
   # Sanitizers.
   parser.add_argument('--asan', default=False, action='store_true')
