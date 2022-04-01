@@ -147,10 +147,14 @@ std::unique_ptr<Shell> Shell::Create(
   if (!isolate_snapshot) {
     isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
   }
+  auto resource_cache_limit_calculator =
+      std::make_shared<ResourceCacheLimitCalculator>(
+          settings.resource_cache_max_bytes_threshold);
   return CreateWithSnapshot(std::move(platform_data),            //
                             std::move(task_runners),             //
                             /*parent_merger=*/nullptr,           //
                             /*parent_io_manager=*/nullptr,       //
+                            resource_cache_limit_calculator,     //
                             std::move(settings),                 //
                             std::move(vm),                       //
                             std::move(isolate_snapshot),         //
@@ -163,6 +167,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     DartVMRef vm,
     fml::RefPtr<fml::RasterThreadMerger> parent_merger,
     std::shared_ptr<ShellIOManager> parent_io_manager,
+    const std::shared_ptr<ResourceCacheLimitCalculator>&
+        resource_cache_limit_calculator,
     TaskRunners task_runners,
     const PlatformData& platform_data,
     Settings settings,
@@ -177,7 +183,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   }
 
   auto shell = std::unique_ptr<Shell>(
-      new Shell(std::move(vm), task_runners, parent_merger, settings,
+      new Shell(std::move(vm), task_runners, parent_merger,
+                resource_cache_limit_calculator, settings,
                 std::make_shared<VolatilePathTracker>(
                     task_runners.GetUITaskRunner(),
                     !settings.skia_deterministic_rendering_on_cpu),
@@ -313,6 +320,8 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
     TaskRunners task_runners,
     fml::RefPtr<fml::RasterThreadMerger> parent_thread_merger,
     std::shared_ptr<ShellIOManager> parent_io_manager,
+    const std::shared_ptr<ResourceCacheLimitCalculator>&
+        resource_cache_limit_calculator,
     Settings settings,
     DartVMRef vm,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
@@ -340,6 +349,7 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
            &shell,                                                        //
            parent_thread_merger,                                          //
            parent_io_manager,                                             //
+           resource_cache_limit_calculator,                               //
            task_runners = std::move(task_runners),                        //
            platform_data = std::move(platform_data),                      //
            settings = std::move(settings),                                //
@@ -353,6 +363,7 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
                 std::move(vm),                       //
                 parent_thread_merger,                //
                 parent_io_manager,                   //
+                resource_cache_limit_calculator,     //
                 std::move(task_runners),             //
                 std::move(platform_data),            //
                 std::move(settings),                 //
@@ -369,11 +380,14 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
 Shell::Shell(DartVMRef vm,
              TaskRunners task_runners,
              fml::RefPtr<fml::RasterThreadMerger> parent_merger,
+             const std::shared_ptr<ResourceCacheLimitCalculator>&
+                 resource_cache_limit_calculator,
              Settings settings,
              std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
              bool is_gpu_disabled)
     : task_runners_(std::move(task_runners)),
       parent_raster_thread_merger_(parent_merger),
+      resource_cache_limit_calculator_(resource_cache_limit_calculator),
       settings_(std::move(settings)),
       vm_(std::move(vm)),
       is_gpu_disabled_sync_switch_(new fml::SyncSwitch(is_gpu_disabled)),
@@ -385,6 +399,8 @@ Shell::Shell(DartVMRef vm,
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
   display_manager_ = std::make_unique<DisplayManager>();
+  resource_cache_limit_calculator->AddResourceCacheLimitItem(
+      weak_factory_.GetWeakPtr());
 
   // Generate a WeakPtrFactory for use with the raster thread. This does not
   // need to wait on a latch because it can only ever be used from the raster
@@ -502,8 +518,9 @@ std::unique_ptr<Shell> Shell::Spawn(
           .SetIfTrue([&is_gpu_disabled] { is_gpu_disabled = true; }));
   std::unique_ptr<Shell> result = CreateWithSnapshot(
       PlatformData{}, task_runners_, rasterizer_->GetRasterThreadMerger(),
-      io_manager_, GetSettings(), vm_, vm_->GetVMData()->GetIsolateSnapshot(),
-      on_create_platform_view, on_create_rasterizer,
+      io_manager_, resource_cache_limit_calculator_, GetSettings(), vm_,
+      vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
+      on_create_rasterizer,
       [engine = this->engine_.get(), initial_route](
           Engine::Delegate& delegate,
           const PointerDataDispatcherMaker& dispatcher_maker, DartVM& vm,
@@ -911,12 +928,15 @@ void Shell::OnPlatformViewSetViewportMetrics(const ViewportMetrics& metrics) {
   }
 
   // This is the formula Android uses.
-  // https://android.googlesource.com/platform/frameworks/base/+/master/libs/hwui/renderthread/CacheManager.cpp#41
-  size_t max_bytes = metrics.physical_width * metrics.physical_height * 12 * 4;
+  // https://android.googlesource.com/platform/frameworks/base/+/39ae5bac216757bc201490f4c7b8c0f63006c6cd/libs/hwui/renderthread/CacheManager.cpp#45
+  resource_cache_limit_ =
+      metrics.physical_width * metrics.physical_height * 12 * 4;
+  size_t resource_cache_max_bytes =
+      resource_cache_limit_calculator_->GetResourceCacheMaxBytes();
   task_runners_.GetRasterTaskRunner()->PostTask(
-      [rasterizer = rasterizer_->GetWeakPtr(), max_bytes] {
+      [rasterizer = rasterizer_->GetWeakPtr(), resource_cache_max_bytes] {
         if (rasterizer) {
-          rasterizer->SetResourceCacheMaxBytes(max_bytes, false);
+          rasterizer->SetResourceCacheMaxBytes(resource_cache_max_bytes, false);
         }
       });
 
