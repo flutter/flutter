@@ -519,25 +519,14 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   }
 
   @override
-  Map<String, Object?> serializeForMenu() {
-    int modifiers = 0;
-    if (shift) {
-      modifiers |= MenuSerializableShortcut.shortcutModifierShift;
-    }
-    if (alt) {
-      modifiers |= MenuSerializableShortcut.shortcutModifierAlt;
-    }
-    if (meta) {
-      modifiers |= MenuSerializableShortcut.shortcutModifierMeta;
-    }
-    if (control) {
-      modifiers |= MenuSerializableShortcut.shortcutModifierControl;
-    }
-
-    return <String, Object?>{
-      MenuSerializableShortcut.shortcutTrigger: trigger.keyId,
-      MenuSerializableShortcut.shortcutModifiers: modifiers,
-    };
+  ShortcutSerialization serializeForMenu() {
+    return ShortcutSerialization.modifier(
+      trigger,
+      shift: shift,
+      alt: alt,
+      meta: meta,
+      control: control,
+    );
   }
 
   /// Returns a short and readable description of the key combination.
@@ -632,10 +621,8 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   }
 
   @override
-  Map<String, Object?> serializeForMenu() {
-    return <String, Object?>{
-      MenuSerializableShortcut.shortcutCharacter: character,
-    };
+  ShortcutSerialization serializeForMenu() {
+    return ShortcutSerialization.character(character);
   }
 
   @override

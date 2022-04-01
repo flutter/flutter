@@ -28,28 +28,73 @@ const String _kChildrenKey = 'children';
 const String _kIsDividerKey = 'isDivider';
 const String _kPlatformDefaultMenuKey = 'platformProvidedMenu';
 
-/// A mixin allowing a [ShortcutActivator] to provide data for serialization of
-/// the shortcut for sending to the platform.
+/// A class used by [MenuSerializableShortcut] to describe the shortcut for
+/// serialization to send to the platform for rendering a [PlatformMenuBar].
 ///
-/// This is meant for those who have written their own [ShortcutActivator]
-/// subclass, and would like to have it work for menus in a [PlatformMenuBar] as
-/// well.
-mixin MenuSerializableShortcut {
+/// See also:
+///
+///  * [PlatformMenuBar], a widget that defines a menu bar for the platform to
+///    render natively.
+///  * [MenuSerializableShortcut], a mixin allowing a [ShortcutActivator] to
+///    provide data for serialization of the shortcut for sending to the
+///    platform.
+class ShortcutSerialization {
+  /// Creates a [ShortcutSerialization] representing a single character.
+  ///
+  /// This is used by a [CharacterActivator] to serialize itself.
+  ShortcutSerialization.character(String character)
+      : _internal = <String, Object?>{_shortcutCharacter: character},
+        assert(character.length == 1);
+
+  /// Creates a [ShortcutSerialization] representing a specific
+  /// [LogicalKeyboardKey] and modifiers.
+  ///
+  /// This is used by a [SingleActivator] to serialize itself.
+  ShortcutSerialization.modifier(
+    LogicalKeyboardKey trigger, {
+    bool control = false,
+    bool shift = false,
+    bool alt = false,
+    bool meta = false,
+  })  : assert(trigger != LogicalKeyboardKey.shift &&
+               trigger != LogicalKeyboardKey.shiftLeft &&
+               trigger != LogicalKeyboardKey.shiftRight &&
+               trigger != LogicalKeyboardKey.alt &&
+               trigger != LogicalKeyboardKey.altLeft &&
+               trigger != LogicalKeyboardKey.altRight &&
+               trigger != LogicalKeyboardKey.control &&
+               trigger != LogicalKeyboardKey.controlLeft &&
+               trigger != LogicalKeyboardKey.controlRight &&
+               trigger != LogicalKeyboardKey.meta &&
+               trigger != LogicalKeyboardKey.metaLeft &&
+               trigger != LogicalKeyboardKey.metaRight,
+               'Specifying a modifier key as a trigger is not allowed. '
+               'Use provided boolean parameters instead.'),
+        _internal = <String, Object?>{
+          _shortcutTrigger: trigger.keyId,
+          _shortcutModifiers: (control ? _shortcutModifierControl : 0) |
+              (alt ? _shortcutModifierAlt : 0) |
+              (shift ? _shortcutModifierShift : 0) |
+              (meta ? _shortcutModifierMeta : 0),
+        };
+
+  final Map<String, Object?> _internal;
+
   /// The bit mask for the [LogicalKeyboardKey.meta] key (or it's left/right
   /// equivalents) being down.
-  static const int shortcutModifierMeta = 1 << 0;
+  static const int _shortcutModifierMeta = 1 << 0;
 
   /// The bit mask for the [LogicalKeyboardKey.shift] key (or it's left/right
   /// equivalents) being down.
-  static const int shortcutModifierShift = 1 << 1;
+  static const int _shortcutModifierShift = 1 << 1;
 
   /// The bit mask for the [LogicalKeyboardKey.alt] key (or it's left/right
   /// equivalents) being down.
-  static const int shortcutModifierAlt = 1 << 2;
+  static const int _shortcutModifierAlt = 1 << 2;
 
   /// The bit mask for the [LogicalKeyboardKey.alt] key (or it's left/right
   /// equivalents) being down.
-  static const int shortcutModifierControl = 1 << 3;
+  static const int _shortcutModifierControl = 1 << 3;
 
   /// The key for a string map field returned from [serializeForMenu] containing
   /// a string that represents the character that, when typed, will trigger the
@@ -58,13 +103,13 @@ mixin MenuSerializableShortcut {
   /// All platforms are limited to a single trigger key that can be represented,
   /// so this string should only contain a character that can be typed with a
   /// single keystroke.
-  static const String shortcutCharacter = 'shortcutEquivalent';
+  static const String _shortcutCharacter = 'shortcutEquivalent';
 
   /// The key for the integer map field returned from [serializeForMenu]
   /// containing the logical key ID for the trigger key on this shortcut.
   ///
   /// All platforms are limited to a single trigger key that can be represented.
-  static const String shortcutTrigger = 'shortcutTrigger';
+  static const String _shortcutTrigger = 'shortcutTrigger';
 
   /// The key for the integer map field returned from [serializeForMenu]
   /// containing a bitfield combination of [shortcutModifierControl],
@@ -73,26 +118,31 @@ mixin MenuSerializableShortcut {
   ///
   /// If the shortcut responds to one of those modifiers, it should be
   /// represented in the bitfield tagged with this key.
-  static const String shortcutModifiers = 'shortcutModifiers';
+  static const String _shortcutModifiers = 'shortcutModifiers';
 
+  /// Converts the internal representation to the format needed for a [MenuItem]
+  /// to include it in its serialized form for sending to the platform.
+  Map<String, Object?> toChannelRepresentation() => _internal;
+}
+
+/// A mixin allowing a [ShortcutActivator] to provide data for serialization of
+/// the shortcut when sending to the platform.
+///
+/// This is meant for those who have written their own [ShortcutActivator]
+/// subclass, and would like to have it work for menus in a [PlatformMenuBar] as
+/// well.
+///
+/// Keep in mind that there are limits to the capabilities of the platform APIs,
+/// and not all kinds of [ShortcutActivator]s will work with them.
+///
+/// See also:
+///
+///  * [SingleActivator], a [ShortcutActivator] which implements this mixin.
+///  * [CharacterActivator], another [ShortcutActivator] which implements this mixin.
+mixin MenuSerializableShortcut {
   /// Implement this in a [ShortcutActivator] subclass to allow it to be
   /// serialized for use in a [PlatformMenuBar].
-  ///
-  /// It should return a map containing a [shortcutModifiers] field, and a
-  /// [shortcutTrigger] field, or just a [shortcutCharacter] field.
-  ///
-  /// The [shortcutModifiers] field should contain a bitfield combination of
-  /// [shortcutModifierControl], [shortcutModifierAlt], [shortcutModifierShift],
-  /// and/or [shortcutModifierMeta] to describe the modifiers that need to be
-  /// down to trigger the shortcut.
-  ///
-  /// The [shortcutTrigger] field should contain the logical key id of the
-  /// trigger key for this shortcut.
-  ///
-  /// The [shortcutCharacter] should contain a character that will trigger the
-  /// shortcut on its own. If this field is supplied, a [shortcutModifiers]
-  /// field should not be included.
-  Map<String, Object?> serializeForMenu();
+  ShortcutSerialization serializeForMenu();
 }
 
 /// An abstract class for describing cascading menu hierarchies that are part of
@@ -111,10 +161,9 @@ abstract class MenuItem with Diagnosticable {
   const MenuItem();
 
   /// Converts the representation of this item into a map suitable for sending
-  /// over the default "flutter/menu" channel used by
-  /// [DefaultPlatformMenuDelegate].
+  /// over the default "flutter/menu" channel used by [DefaultPlatformMenuDelegate].
   ///
-  /// The `delegate` is the [DefaultPlatformMenuDelegate] that is requesting the
+  /// The `delegate` is the [PlatformMenuDelegate] that is requesting the
   /// serialization. The `index` is the position of this menu item in the list
   /// of children of the [PlatformMenu] it belongs to, and `count` is the number
   /// of children in the [PlatformMenu] it belongs to.
@@ -369,7 +418,6 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
     } else if (call.method == _kMenuItemClosedMethod) {
       item.onClose?.call();
     }
-    return;
   }
 }
 
@@ -710,31 +758,11 @@ class PlatformMenuItem extends MenuItem {
     MenuItemSerializableIdGenerator getId,
   ) {
     final MenuSerializableShortcut? shortcut = item.shortcut;
-    final Map<String, Object?> shortcutSerialized = shortcut?.serializeForMenu() ?? <String, Object?>{};
-    assert(() {
-      if (shortcut == null) {
-        return true;
-      }
-      final bool hasCharacter = shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutCharacter);
-      final bool hasModifiers = shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutModifiers);
-      final bool hasTrigger = shortcutSerialized.containsKey(MenuSerializableShortcut.shortcutTrigger);
-      if ((hasCharacter && !hasModifiers && !hasTrigger) || (hasModifiers && hasTrigger && !hasCharacter)) {
-        if (hasCharacter) {
-          return shortcutSerialized[MenuSerializableShortcut.shortcutCharacter] is String;
-        } else {
-          return shortcutSerialized[MenuSerializableShortcut.shortcutModifiers] is int &&
-              shortcutSerialized[MenuSerializableShortcut.shortcutTrigger] is int;
-        }
-      }
-      return false;
-    }(), 'Shortcut serialization must contain either a String MenuSerializableShortcut.shortcutCharacter '
-         'field, or both an integer MenuSerializableShortcut.shortcutModifiers and an integer '
-         'MenuSerializableShortcut.shortcutTrigger field.');
     return <String, Object?>{
       _kIdKey: getId(item),
       _kLabelKey: item.label,
       _kEnabledKey: item.onSelected != null,
-      ...shortcutSerialized,
+      if (shortcut != null)...shortcut.serializeForMenu().toChannelRepresentation(),
     };
   }
 
