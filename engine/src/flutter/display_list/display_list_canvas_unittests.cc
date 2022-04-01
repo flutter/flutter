@@ -268,8 +268,8 @@ class RenderSurface {
 class RenderEnvironment {
  public:
   static RenderEnvironment Make565() {
-    return RenderEnvironment(SkImageInfo::Make({1, 1}, kRGB_565_SkColorType,
-                                               kOpaque_SkAlphaType, nullptr));
+    return RenderEnvironment(
+        SkImageInfo::Make({1, 1}, kRGB_565_SkColorType, kOpaque_SkAlphaType));
   }
 
   static RenderEnvironment MakeN32() {

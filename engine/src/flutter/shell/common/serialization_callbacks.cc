@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/logging.h"
+#include "include/core/SkColorSpace.h"
 #include "include/core/SkImage.h"
+#include "include/core/SkImageInfo.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkSerialProcs.h"
 #include "include/core/SkStream.h"
