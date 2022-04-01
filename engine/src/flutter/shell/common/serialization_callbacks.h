@@ -8,7 +8,6 @@
 #include "flutter/fml/logging.h"
 #include "include/core/SkImage.h"
 #include "include/core/SkPicture.h"
-#include "include/core/SkStream.h"
 #include "include/core/SkTypeface.h"
 
 namespace flutter {

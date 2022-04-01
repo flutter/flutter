@@ -5,6 +5,8 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer.h"
 
 #include "flutter/fml/logging.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
+#include "third_party/skia/include/core/SkColorType.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
