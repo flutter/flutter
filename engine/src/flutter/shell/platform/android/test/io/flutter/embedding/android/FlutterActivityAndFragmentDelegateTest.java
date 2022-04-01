@@ -46,6 +46,9 @@ import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,6 +78,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(mockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
     when(mockHost.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
     when(mockHost.getDartEntrypointFunctionName()).thenReturn("main");
+    when(mockHost.getDartEntrypointArgs()).thenReturn(null);
     when(mockHost.getAppBundlePath()).thenReturn("/fake/path");
     when(mockHost.getInitialRoute()).thenReturn("/");
     when(mockHost.getRenderMode()).thenReturn(RenderMode.surface);
@@ -343,7 +347,35 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onStart();
 
     // Verify that the host's Dart entrypoint was used.
-    verify(mockFlutterEngine.getDartExecutor(), times(1)).executeDartEntrypoint(eq(dartEntrypoint));
+    verify(mockFlutterEngine.getDartExecutor(), times(1))
+        .executeDartEntrypoint(eq(dartEntrypoint), isNull());
+  }
+
+  @Test
+  public void itExecutesDartEntrypointWithArgsProvidedByHost() {
+    // ---- Test setup ----
+    // Set Dart entrypoint parameters on fake host.
+    when(mockHost.getAppBundlePath()).thenReturn("/my/bundle/path");
+    when(mockHost.getDartEntrypointFunctionName()).thenReturn("myEntrypoint");
+    List<String> dartEntrypointArgs = new ArrayList<String>(Arrays.asList("foo", "bar"));
+    when(mockHost.getDartEntrypointArgs()).thenReturn(dartEntrypointArgs);
+
+    // Create the DartEntrypoint that we expect to be executed
+    DartExecutor.DartEntrypoint dartEntrypoint =
+        new DartExecutor.DartEntrypoint("/my/bundle/path", "myEntrypoint");
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // Dart is executed in onStart().
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onCreateView(null, null, null, 0, true);
+    delegate.onStart();
+
+    // Verify that the host's Dart entrypoint was used.
+    verify(mockFlutterEngine.getDartExecutor(), times(1))
+        .executeDartEntrypoint(any(DartExecutor.DartEntrypoint.class), eq(dartEntrypointArgs));
   }
 
   @Test
@@ -362,7 +394,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onStart();
 
     verify(mockFlutterEngine.getDartExecutor(), times(1))
-        .executeDartEntrypoint(eq(expectedEntrypoint));
+        .executeDartEntrypoint(eq(expectedEntrypoint), isNull());
   }
 
   @Test
@@ -391,7 +423,8 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onStart();
 
     // Verify that the host's Dart entrypoint was used.
-    verify(mockFlutterEngine.getDartExecutor(), times(1)).executeDartEntrypoint(eq(dartEntrypoint));
+    verify(mockFlutterEngine.getDartExecutor(), times(1))
+        .executeDartEntrypoint(eq(dartEntrypoint), isNull());
   }
 
   // "Attaching" to the surrounding Activity refers to Flutter being able to control

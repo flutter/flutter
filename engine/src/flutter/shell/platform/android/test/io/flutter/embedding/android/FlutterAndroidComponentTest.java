@@ -32,6 +32,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.plugin.platform.PlatformPlugin;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -308,6 +309,12 @@ public class FlutterAndroidComponentTest {
     @Nullable
     @Override
     public String getDartEntrypointLibraryUri() {
+      return null;
+    }
+
+    @Nullable
+    @Override
+    public List<String> getDartEntrypointArgs() {
       return null;
     }
 
