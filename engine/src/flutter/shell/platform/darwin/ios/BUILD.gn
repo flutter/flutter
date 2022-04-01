@@ -208,6 +208,7 @@ source_set("ios_test_flutter_mrc") {
     "framework/Source/FlutterPlatformPluginTest.mm",
     "framework/Source/FlutterPlatformViewsTest.mm",
     "framework/Source/FlutterViewTest.mm",
+    "framework/Source/VsyncWaiterIosTest.mm",
     "framework/Source/accessibility_bridge_test.mm",
     "platform_message_handler_ios_test.mm",
   ]
