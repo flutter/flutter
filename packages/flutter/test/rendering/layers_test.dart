@@ -370,7 +370,7 @@ void main() {
     final BackdropFilterLayer layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
     final List<String> info = _getDebugInfo(layer);
     expect(info, contains(isBrowser ? 'filter: ImageFilter.blur(1, 1, TileMode.repeated)' : 'filter: ImageFilter.blur(1.0, 1.0, repeated)'));
-    expect(info, contains('blendMode: BlendMode.clear'));
+    expect(info, contains('blendMode: clear'));
   });
 
   test('PictureLayer prints picture, raster cache hints in debug info', () {

@@ -1897,7 +1897,7 @@ class ShaderMaskLayer extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Shader>('shader', shader));
     properties.add(DiagnosticsProperty<Rect>('maskRect', maskRect));
-    properties.add(DiagnosticsProperty<BlendMode>('blendMode', blendMode));
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
   }
 }
 
@@ -1961,7 +1961,7 @@ class BackdropFilterLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter));
-    properties.add(DiagnosticsProperty<BlendMode>('blendMode', blendMode));
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
   }
 }
 
