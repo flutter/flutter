@@ -137,7 +137,7 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
   ],
 };
 
-const String kSmokeTestShardName = 'smoke_tests';
+const String kTestHarnessShardName = 'test_harness_tests';
 const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
 // The seed used to shuffle tests.  If not passed with
@@ -171,7 +171,6 @@ Future<void> main(List<String> args) async {
   try {
     flutterTestArgs.addAll(args);
     final Set<String> removeArgs = <String>{};
-    bool runSmokeTests = true;
     for (final String arg in args) {
       if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
@@ -184,17 +183,13 @@ Future<void> main(List<String> args) async {
         removeArgs.add(arg);
       }
       if (arg == '--no-smoke-tests') {
-        runSmokeTests = false;
+        // This flag is deprecated, ignore it.
         removeArgs.add(arg);
       }
     }
     flutterTestArgs.removeWhere((String arg) => removeArgs.contains(arg));
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
       print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
-    print('═' * 80);
-    if (runSmokeTests) {
-      await _runSmokeTests();
-    }
     print('═' * 80);
     await selectShard(<String, ShardRunner>{
       'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
@@ -213,7 +208,7 @@ Future<void> main(List<String> args) async {
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPluginsTests,
       'skp_generator': _runSkpGeneratorTests,
-      kSmokeTestShardName: () async {}, // No-op, the smoke tests already ran. Used for testing this script.
+      kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script.
     });
   } on ExitException catch (error) {
     error.apply();
@@ -248,8 +243,8 @@ Future<void> _validateEngineHash() async {
   }
 }
 
-Future<void> _runSmokeTests() async {
-  print('${green}Running smoketests...$reset');
+Future<void> _runTestHarnessTests() async {
+  print('${green}Running test harness tests...$reset');
 
   await _validateEngineHash();
 
@@ -257,7 +252,7 @@ Future<void> _runSmokeTests() async {
   // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
 
-  // We want to run the smoketests in parallel, because they each take some time
+  // We want to run these tests in parallel, because they each take some time
   // to run (e.g. compiling), so we don't want to run them in series, especially
   // on 20-core machines. However, we have a race condition, so for now...
   // Race condition issue: https://github.com/flutter/flutter/issues/90026
@@ -319,11 +314,9 @@ Future<void> _runSmokeTests() async {
 
   List<ShardRunner> testsToRun;
 
-  // Smoke tests are special and run first for all test shards.
-  // Run all smoke tests for other shards.
-  // Only shard smoke tests when explicitly specified.
+  // Run all tests unless sharding is explicitly specified.
   final String? shardName = Platform.environment[kShardKey];
-  if (shardName == kSmokeTestShardName) {
+  if (shardName == kTestHarnessShardName) {
     testsToRun = _selectIndexOfTotalSubshard<ShardRunner>(tests);
   } else {
     testsToRun = tests;
@@ -871,6 +864,7 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
+    await _runTestHarnessTests();
     await runExampleTests();
     await _dartRunTest(path.join(flutterRoot, 'dev', 'bots'));
     await _dartRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
