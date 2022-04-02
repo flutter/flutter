@@ -73,12 +73,12 @@ const Color _kHeaderFooterColor = CupertinoDynamicColor(
 );
 
 /// Denotes what type of the list section a [CupertinoListSection] is.
-/// 
+///
 /// This is for internal use only.
 enum CupertinoListSectionType {
   /// A basic form of [CupertinoListSection].
   base,
-  
+
   /// An inset-grouped style of [CupertinoListSection].
   insetGrouped,
 }
@@ -133,52 +133,7 @@ enum CupertinoListSectionType {
 /// Creates a base [CupertinoListSection] containing [CupertinoListTile]s with
 /// `leading`, `title`, `additionalInfo` and `trailing` widgets.
 ///
-/// ```dart
-/// class MyStatelessWidget extends StatelessWidget {
-///   const MyStatelessWidget({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoPageScaffold(
-///       child: CupertinoListSection(
-///         header: const Text('My Reminders'),
-///         children: <CupertinoListTile>[
-///           CupertinoListTile(
-///             title: const Text('Open pull request'),
-///             leading: Container(
-///               width: double.infinity,
-///               height: double.infinity,
-///               color: CupertinoColors.activeGreen,
-///             ),
-///             trailing: const CupertinoListTileChevron(),
-///             onTap: () => Navigator.of(context).pushNamed('openPR'),
-///           ),
-///           CupertinoListTile(
-///             title: const Text('Push to master'),
-///             leading: Container(
-///               width: double.infinity,
-///               height: double.infinity,
-///               color: CupertinoColors.systemRed,
-///             ),
-///             additionalInfo: const Text('Not available'),
-///           ),
-///           CupertinoListTile(
-///             title: const Text('View last commit'),
-///             leading: Container(
-///               width: double.infinity,
-///               height: double.infinity,
-///               color: CupertinoColors.activeOrange,
-///             ),
-///             additionalInfo: const Text('12 days ago'),
-///             trailing: const CupertinoListTileChevron(),
-///             onTap: () => Navigator.of(context).pushNamed('lastCommit'),
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/list_section/list_section_base.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
@@ -186,52 +141,7 @@ enum CupertinoListSectionType {
 /// notched [CupertinoListTile]s with `leading`, `title`, `additionalInfo` and
 /// `trailing` widgets.
 ///
-/// ```dart
-/// class MyStatelessWidget extends StatelessWidget {
-///   const MyStatelessWidget({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoPageScaffold(
-///       child: CupertinoListSection.insetGrouped(
-///         header: const Text('My Reminders'),
-///         children: <CupertinoListTile>[
-///           CupertinoListTile.notched(
-///             title: const Text('Open pull request'),
-///             leading: Container(
-///               width: double.infinity,
-///               height: double.infinity,
-///               color: CupertinoColors.activeGreen,
-///             ),
-///             trailing: const CupertinoListTileChevron(),
-///             onTap: () => Navigator.of(context).pushNamed('openPr'),
-///           ),
-///           CupertinoListTile.notched(
-///             title: const Text('Push to master'),
-///             leading: Container(
-///               width: double.infinity,
-///               height: double.infinity,
-///               color: CupertinoColors.systemRed,
-///             ),
-///             additionalInfo: const Text('Not available'),
-///           ),
-///           CupertinoListTile.notched(
-///             title: const Text('View last commit'),
-///             leading: Container(
-///               width: double.infinity,
-///               height: double.infinity,
-///               color: CupertinoColors.activeOrange,
-///             ),
-///             additionalInfo: const Text('12 days ago'),
-///             trailing: const CupertinoListTileChevron(),
-///             onTap: () => Navigator.of(context).pushNamed('lastCommit'),
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/list_section/list_section_inset.0.dart **
 /// {@end-tool}
 ///
 /// See also:
