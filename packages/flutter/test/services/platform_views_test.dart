@@ -465,7 +465,7 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakeGtkView>[
-            const FakeGtkView(0, 'webview', GtkViewController.kGtkTextDirectionRtl, null),
+            const FakeGtkView(0, 'webview', GtkViewController.kGtkTextDirectionRtl),
           ]));
     });
   });

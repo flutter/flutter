@@ -2379,7 +2379,6 @@ void main() {
                   height: 100.0,
                   child: GtkView(
                     viewType: 'webview',
-                    hitTestBehavior: PlatformViewHitTestBehavior.opaque,
                     layoutDirection: TextDirection.ltr,
                   ),
                 ),
