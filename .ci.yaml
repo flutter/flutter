@@ -2500,8 +2500,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk"},
-          {"dependency": "xcode"}
+          {"dependency": "open_jdk"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2663,7 +2662,6 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "xcode"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2768,8 +2766,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2791,8 +2788,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2815,8 +2811,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2839,8 +2834,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2864,8 +2858,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2966,8 +2959,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -3172,7 +3164,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "goldctl"}
         ]
       shard: web_tool_tests
