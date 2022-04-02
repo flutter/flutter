@@ -972,7 +972,6 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 class _GtkPlatformView extends LeafRenderObjectWidget {
   const _GtkPlatformView({
     Key? key,
-    this.id,
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
@@ -981,7 +980,6 @@ class _GtkPlatformView extends LeafRenderObjectWidget {
   final GtkViewController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
-  final int? id;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
