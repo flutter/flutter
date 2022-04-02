@@ -1113,7 +1113,7 @@ void main() {
       )
     );
 
-    // PaginatedDataTable has two scrollable region , first one is the for body
+    // PaginatedDataTable has two scrollable region , first one is for DataTable
     // second one is meant for footer.
 
     final Scrollable bodyScrollView = tester.widget(find.byType(Scrollable).first);
