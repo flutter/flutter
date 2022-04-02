@@ -2661,8 +2661,7 @@ targets:
           {"name":"gradle","path":"gradle"}
         ]
       dependencies: >-
-        [
-        ]
+        []
       tags: >
         ["devicelab","hostonly"]
       task_name: entrypoint_dart_registrant
