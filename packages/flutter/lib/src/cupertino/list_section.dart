@@ -361,9 +361,9 @@ class CupertinoListSection extends StatelessWidget {
       height: dividerHeight,
     );
 
-    Widget? _header;
+    Widget? headerWidget;
     if (header != null) {
-      _header = DefaultTextStyle(
+      headerWidget = DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle.merge(
               _type == CupertinoListSectionType.base
                   ? TextStyle(
@@ -377,9 +377,9 @@ class CupertinoListSection extends StatelessWidget {
       );
     }
 
-    Widget? _footer;
+    Widget? footerWidget;
     if (footer != null) {
-      _footer = DefaultTextStyle(
+      footerWidget = DefaultTextStyle(
         style: _type == CupertinoListSectionType.base
             ? CupertinoTheme.of(context).textTheme.textStyle.merge(TextStyle(
                   fontSize: 13.0,
@@ -445,14 +445,14 @@ class CupertinoListSection extends StatelessWidget {
         children: <Widget>[
           if (_type == CupertinoListSectionType.base)
             SizedBox(height: topMargin),
-          if (_header != null)
+          if (headerWidget != null)
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
                 padding: _type == CupertinoListSectionType.base
                     ? _kDefaultHeaderMargin
                     : _kInsetGroupedDefaultHeaderMargin,
-                child: _header,
+                child: headerWidget,
               ),
             ),
           if (children != null && children!.isNotEmpty)
@@ -466,14 +466,14 @@ class CupertinoListSection extends StatelessWidget {
                       child: decoratedChildrenGroup,
                     ),
             ),
-          if (_footer != null)
+          if (footerWidget != null)
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
                 padding: _type == CupertinoListSectionType.base
                     ? _kDefaultFooterMargin
                     : _kInsetGroupedDefaultFooterMargin,
-                child: _footer,
+                child: footerWidget,
               ),
             ),
         ],

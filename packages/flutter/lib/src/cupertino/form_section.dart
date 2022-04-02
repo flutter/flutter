@@ -200,7 +200,7 @@ class CupertinoFormSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget? _header = header == null
+    final Widget? headerWidget = header == null
         ? null
         : DefaultTextStyle(
             style: TextStyle(
@@ -212,7 +212,7 @@ class CupertinoFormSection extends StatelessWidget {
               child: header,
             ));
 
-    final Widget? _footer = footer == null
+    final Widget? footerWidget = footer == null
         ? null
         : DefaultTextStyle(
             style: TextStyle(
@@ -226,8 +226,8 @@ class CupertinoFormSection extends StatelessWidget {
 
     return _type == CupertinoListSectionType.base
         ? CupertinoListSection(
-            header: _header,
-            footer: _footer,
+            header: headerWidget,
+            footer: footerWidget,
             margin: margin,
             backgroundColor: backgroundColor,
             decoration: decoration,
@@ -235,8 +235,8 @@ class CupertinoFormSection extends StatelessWidget {
             hasLeading: false,
             children: children)
         : CupertinoListSection.insetGrouped(
-            header: _header,
-            footer: _footer,
+            header: headerWidget,
+            footer: footerWidget,
             margin: margin,
             backgroundColor: backgroundColor,
             decoration: decoration,
