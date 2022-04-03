@@ -1634,24 +1634,43 @@ Future<void> _dartRunTest(String workingDirectory, {
     cpus = 1;
   }
 
+  // final List<String> args = <String>[
+  //   'run',
+  //   'test',
+  //   if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
+  //   if (useFlutterTestFormatter)
+  //     '-rjson'
+  //   else
+  //     '-rcompact',
+  //   '-j$cpus',
+  //   if (!hasColor)
+  //     '--no-color',
+  //   if (coverage != null)
+  //     '--coverage=$coverage',
+  //   if (perTestTimeout != null)
+  //     '--timeout=${perTestTimeout.inMilliseconds.toString()}ms',
+  //   if (testPaths != null)
+  //     for (final String testPath in testPaths)
+  //       testPath,
+  // ];
+
   final List<String> args = <String>[
     'run',
     'test',
-    if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
-    if (useFlutterTestFormatter)
-      '-rjson'
-    else
-      '-rcompact',
-    '-j$cpus',
-    if (!hasColor)
-      '--no-color',
-    if (coverage != null)
-      '--coverage=$coverage',
-    if (perTestTimeout != null)
-      '--timeout=${perTestTimeout.inMilliseconds.toString()}ms',
-    if (testPaths != null)
-      for (final String testPath in testPaths)
-        testPath,
+    '--test-randomize-ordering-seed=20211102',
+    '-rcompact',
+    '-j1',
+    '--no-color',
+    'test/integration.shard/single_widget_reload_test.dart',
+    'test/integration.shard/xcode_backend_test.dart',
+    'test/integration.shard/ios_content_validation_test.dart',
+    'test/integration.shard/command_output_test.dart',
+    'test/integration.shard/cache_test.dart',
+    'test/integration.shard/expression_evaluation_test.dart',
+    'test/integration.shard/build_ios_config_only_test.dart',
+    'test/integration.shard/overall_experience_test.dart',
+    'test/integration.shard/macos_content_validation_test.dart',
+    'test/integration.shard/generated_plugin_registrant_test.dart'
   ];
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
