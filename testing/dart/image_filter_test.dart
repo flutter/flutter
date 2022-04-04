@@ -74,6 +74,12 @@ void main() {
   ImageFilter makeBlur(double sigmaX, double sigmaY, [TileMode tileMode = TileMode.clamp]) =>
     ImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
+  ImageFilter makeDilate(double radiusX, double radiusY) =>
+    ImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
+
+  ImageFilter makeErode(double radiusX, double radiusY) =>
+    ImageFilter.erode(radiusX: radiusX, radiusY: radiusY);
+
   ImageFilter makeScale(double scX, double scY,
                         [double trX = 0.0, double trY = 0.0,
                          FilterQuality quality = FilterQuality.low]) {
@@ -105,6 +111,12 @@ void main() {
       makeBlur(10.0, 10.0, TileMode.decal),
       makeBlur(10.0, 20.0),
       makeBlur(20.0, 20.0),
+      makeDilate(10.0, 20.0),
+      makeDilate(20.0, 20.0),
+      makeDilate(20.0, 10.0),
+      makeErode(10.0, 20.0),
+      makeErode(20.0, 20.0),
+      makeErode(20.0, 10.0),
       makeScale(10.0, 10.0),
       makeScale(10.0, 20.0),
       makeScale(20.0, 10.0),
@@ -168,6 +180,24 @@ void main() {
 
     final Uint32List bytes = await getBytesForPaint(paint);
     checkBytes(bytes, greenCenterBlurred, greenSideBlurred, greenCornerBlurred);
+  });
+
+  test('ImageFilter - dilate', () async {
+    final Paint paint = Paint()
+      ..color = green
+      ..imageFilter = makeDilate(1.0, 1.0);
+
+    final Uint32List bytes = await getBytesForPaint(paint);
+    checkBytes(bytes, green.value, green.value, green.value);
+  });
+
+  test('ImageFilter - erode', () async {
+    final Paint paint = Paint()
+      ..color = green
+      ..imageFilter = makeErode(1.0, 1.0);
+
+    final Uint32List bytes = await getBytesForPaint(paint);
+    checkBytes(bytes, 0, 0, 0);
   });
 
   test('ImageFilter - matrix', () async {
