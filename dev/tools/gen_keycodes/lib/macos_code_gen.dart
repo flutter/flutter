@@ -98,7 +98,6 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
 
   String get _layoutGoals {
     final OutputLines<int> lines = OutputLines<int>('macOS layout goals');
-    final StringBuffer modifierKeyMap = StringBuffer();
     final Iterable<LogicalKeyEntry> asciiEntries = logicalData.entries.where(
         (LogicalKeyEntry entry) => entry.value <= 128);
     for (final LogicalKeyEntry logicalEntry in asciiEntries) {
