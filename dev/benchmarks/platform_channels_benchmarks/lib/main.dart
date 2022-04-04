@@ -275,7 +275,7 @@ Future<void> _runTests() async {
 }
 
 class _BenchmarkWidget extends StatefulWidget {
-  const _BenchmarkWidget(this.tests, {Key? key}) : super(key: key);
+  const _BenchmarkWidget(this.tests);
 
   final Future<void> Function() tests;
 

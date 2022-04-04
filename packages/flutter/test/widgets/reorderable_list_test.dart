@@ -7,6 +7,46 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('SliverReorderableList.builder respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return CustomScrollView(
+              slivers: <Widget>[
+                SliverReorderableList(
+                  itemCount: itemCount,
+                  itemBuilder: (BuildContext _, int index) => Container(
+                    key: Key('$index'),
+                    height: 2000.0,
+                  ),
+                  findChildIndexCallback: (Key key) {
+                    finderCalled = true;
+                    return null;
+                  },
+                  onReorder: (int oldIndex, int newIndex) { },
+                ),
+              ],
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/88191
   testWidgets('Do not crash when dragging with two fingers simultaneously', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(3, (int index) => index);

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class ProgressIndicatorDemo extends StatefulWidget {
-  const ProgressIndicatorDemo({Key? key}) : super(key: key);
+  const ProgressIndicatorDemo({super.key});
 
   static const String routeName = '/material/progress-indicator';
 

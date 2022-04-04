@@ -538,7 +538,7 @@ void main() {
         matches(RegExp(r'^The specific RenderFlex in question is: RenderFlex#..... OVERFLOWING:$')),
         startsWith('  creator: Row ← Test ← '),
         contains(' ← '),
-        endsWith(' ← ⋯'),
+        endsWith(' ⋯'),
         '  parentData: <none> (can use size)',
         '  constraints: BoxConstraints(w=800.0, h=600.0)',
         '  size: Size(800.0, 600.0)',

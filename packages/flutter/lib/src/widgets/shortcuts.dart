@@ -211,6 +211,16 @@ abstract class ShortcutActivator {
   ///    modifier key is pressed when the side variation is not important.
   bool accepts(RawKeyEvent event, RawKeyboard state);
 
+  /// Returns true if the event and keyboard state would cause this
+  /// [ShortcutActivator] to be activated.
+  ///
+  /// If the keyboard `state` isn't supplied, then it defaults to using
+  /// [RawKeyboard.instance].
+  static bool isActivatedBy(ShortcutActivator activator, RawKeyEvent event) {
+    return (activator.triggers?.contains(event.logicalKey) ?? true)
+        && activator.accepts(event, RawKeyboard.instance);
+  }
+
   /// Returns a description of the key set that is short and readable.
   ///
   /// Intended to be used in debug mode for logging purposes.
@@ -1016,11 +1026,9 @@ class CallbackShortcuts extends StatelessWidget {
   // throws, by providing the activator and event as arguments that will appear
   // in the stack trace.
   bool _applyKeyBinding(ShortcutActivator activator, RawKeyEvent event) {
-    if (activator.triggers?.contains(event.logicalKey) ?? true) {
-      if (activator.accepts(event, RawKeyboard.instance)) {
-        bindings[activator]!.call();
-        return true;
-      }
+    if (ShortcutActivator.isActivatedBy(activator, event)) {
+      bindings[activator]!.call();
+      return true;
     }
     return false;
   }

@@ -2553,13 +2553,13 @@ class FollowerLayer extends ContainerLayer {
     }
     _establishTransform();
     if (_lastTransform != null) {
+      _lastOffset = unlinkedOffset;
       engineLayer = builder.pushTransform(
         _lastTransform!.storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
       addChildrenToScene(builder);
       builder.pop();
-      _lastOffset = unlinkedOffset;
     } else {
       _lastOffset = null;
       final Matrix4 matrix = Matrix4.translationValues(unlinkedOffset!.dx, unlinkedOffset!.dy, .0);

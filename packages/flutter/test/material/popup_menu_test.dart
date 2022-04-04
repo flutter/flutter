@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
+import 'dart:ui' show SemanticsFlag, DisplayFeature, DisplayFeatureType, DisplayFeatureState;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -851,6 +851,66 @@ void main() {
 
     final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
     expect(tester.getTopLeft(popupFinder), buttonTopLeft);
+  });
+
+  testWidgets('PopupMenu positioning around display features', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(800, 600),
+            displayFeatures: <DisplayFeature>[
+              // A 20-pixel wide vertical display feature, similar to a foldable
+              // with a visible hinge. Splits the display into two "virtual screens"
+              // and the popup menu should never overlap the display feature.
+              DisplayFeature(
+                bounds: Rect.fromLTRB(390, 0, 410, 600),
+                type: DisplayFeatureType.cutout,
+                state: DisplayFeatureState.unknown,
+              )
+            ]
+          ),
+          child: Scaffold(
+            body: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<dynamic>(
+                  builder: (BuildContext context) {
+                    return Padding(
+                      // Position the button in the top-right of the first "virtual screen"
+                      padding: const EdgeInsets.only(right:390.0),
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: PopupMenuButton<int>(
+                          key: buttonKey,
+                          itemBuilder: (_) => <PopupMenuItem<int>>[
+                            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+                          ],
+                          child: const Text('Show Menu'),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    final Finder popupFinder = find.bySemanticsLabel('Popup menu');
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    // Since the display feature splits the display into 2 sub-screens, popup
+    // menu should be positioned to fit in the first virtual screen, where the
+    // originating button is.
+    // The 8 pixels is [_kMenuScreenPadding].
+    expect(tester.getTopRight(popupFinder), const Offset(390 - 8, 8));
   });
 
   testWidgets('PopupMenu removes MediaQuery padding', (WidgetTester tester) async {

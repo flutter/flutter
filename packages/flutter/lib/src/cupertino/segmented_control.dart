@@ -5,6 +5,7 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -351,24 +352,27 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
         child: widget.children[currentKey],
       );
 
-      child = GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (TapDownDetails event) {
-          _onTapDown(currentKey);
-        },
-        onTapCancel: _onTapCancel,
-        onTap: () {
-          _onTap(currentKey);
-        },
-        child: IconTheme(
-          data: iconTheme,
-          child: DefaultTextStyle(
-            style: textStyle,
-            child: Semantics(
-              button: true,
-              inMutuallyExclusiveGroup: true,
-              selected: widget.groupValue == currentKey,
-              child: child,
+      child = MouseRegion(
+        cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (TapDownDetails event) {
+            _onTapDown(currentKey);
+          },
+          onTapCancel: _onTapCancel,
+          onTap: () {
+            _onTap(currentKey);
+          },
+          child: IconTheme(
+            data: iconTheme,
+            child: DefaultTextStyle(
+              style: textStyle,
+              child: Semantics(
+                button: true,
+                inMutuallyExclusiveGroup: true,
+                selected: widget.groupValue == currentKey,
+                child: child,
+              ),
             ),
           ),
         ),

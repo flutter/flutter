@@ -113,7 +113,18 @@ void main() {
           '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],
-      stdout: 'STDOUT STUFF',
+      stdout: '''
+STDOUT STUFF
+note: Using new build system
+note: Planning
+note: Build preparation complete
+note: Building targets in dependency order
+''',
+        stderr: '''
+2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionSentinelHostApplications for extension Xcode.DebuggerFoundation.AppExtensionHosts.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
+2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
+STDERR STUFF
+''',
       onRun: () {
         fileSystem.file(fileSystem.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
           ..createSync(recursive: true)
@@ -183,6 +194,11 @@ void main() {
     expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
     expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
     expect(testLogger.errorText, contains('STDOUT STUFF'));
+    expect(testLogger.errorText, contains('STDERR STUFF'));
+    // Filters out some xcodebuild logging spew.
+    expect(testLogger.errorText, isNot(contains('xcodebuild[2096:1927385]')));
+    expect(testLogger.errorText, isNot(contains('Using new build system')));
+    expect(testLogger.errorText, isNot(contains('Building targets in dependency order')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[

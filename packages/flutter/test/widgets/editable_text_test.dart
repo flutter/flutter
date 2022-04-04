@@ -569,6 +569,58 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
+  testWidgets('EditableText sends enableInteractiveSelection to config', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              enableInteractiveSelection: true,
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              keyboardType: TextInputType.multiline,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textInputConfiguration.enableInteractiveSelection, isTrue);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              enableInteractiveSelection: false,
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              keyboardType: TextInputType.multiline,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textInputConfiguration.enableInteractiveSelection, isFalse);
+  });
+
   testWidgets('selection persists when unfocused', (WidgetTester tester) async {
     const TextEditingValue value = TextEditingValue(
       text: 'test test',
@@ -11804,7 +11856,7 @@ void main() {
     final TextEditingController controller = TextEditingController(text: 'text');
     late StateSetter setState;
     bool showField = true;
-    final _PasteTextSelectionControls controls = _PasteTextSelectionControls(
+    final _CustomTextSelectionControls controls = _CustomTextSelectionControls(
       onPaste: () {
         setState(() {
           showField = false;
@@ -11847,6 +11899,57 @@ void main() {
 
     expect(tester.takeException(), null);
   // On web, the text selection toolbar paste button is handled by the browser.
+  }, skip: kIsWeb); // [intended]
+
+  // Regression test for https://github.com/flutter/flutter/issues/100585.
+  testWidgets('can cut and remove field', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'text');
+    late StateSetter setState;
+    bool showField = true;
+    final _CustomTextSelectionControls controls = _CustomTextSelectionControls(
+      onCut: () {
+        setState(() {
+          showField = false;
+        });
+      },
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          if (!showField) {
+            return const Placeholder();
+          }
+          return EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: controls,
+          );
+        },
+      ),
+    ));
+
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    await tester.tapAt(textOffsetToPosition(tester, 2));
+    state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pump();
+    expect(state.showToolbar(), isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Cut'), findsOneWidget);
+
+    await tester.tap(find.text('Cut'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+  // On web, the text selection toolbar cut button is handled by the browser.
   }, skip: kIsWeb); // [intended]
 }
 
@@ -11962,15 +12065,17 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
 }
 
 // Fake text selection controls that call a callback when paste happens.
-class _PasteTextSelectionControls extends TextSelectionControls {
-  _PasteTextSelectionControls({
-    required this.onPaste,
+class _CustomTextSelectionControls extends TextSelectionControls {
+  _CustomTextSelectionControls({
+    this.onPaste,
+    this.onCut,
   });
 
   static const double _kToolbarContentDistanceBelow = 20.0;
   static const double _kToolbarContentDistance = 8.0;
 
-  final VoidCallback onPaste;
+  final VoidCallback? onPaste;
+  final VoidCallback? onCut;
 
   @override
   Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus, Offset? lastSecondaryTapDownPosition) {
@@ -11987,10 +12092,11 @@ class _PasteTextSelectionControls extends TextSelectionControls {
       globalEditableRegion.left + selectionMidpoint.dx,
       globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
     );
-    return _PasteTextSelectionToolbar(
+    return _CustomTextSelectionToolbar(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
       handlePaste: () => handlePaste(delegate),
+      handleCut: () => handleCut(delegate),
     );
   }
 
@@ -12010,35 +12116,48 @@ class _PasteTextSelectionControls extends TextSelectionControls {
   }
 
   @override
+  bool canCut(TextSelectionDelegate delegate) {
+    return true;
+  }
+
+  @override
   bool canPaste(TextSelectionDelegate delegate) {
     return true;
   }
 
   @override
   Future<void> handlePaste(TextSelectionDelegate delegate) {
-    onPaste();
+    onPaste?.call();
     return super.handlePaste(delegate);
+  }
+
+  @override
+  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
+    onCut?.call();
+    return super.handleCut(delegate, clipboardStatus);
   }
 }
 
 // A fake text selection toolbar with only a paste button.
-class _PasteTextSelectionToolbar extends StatefulWidget {
-  const _PasteTextSelectionToolbar({
+class _CustomTextSelectionToolbar extends StatefulWidget {
+  const _CustomTextSelectionToolbar({
     Key? key,
     required this.anchorAbove,
     required this.anchorBelow,
     this.handlePaste,
+    this.handleCut,
   }) : super(key: key);
 
   final Offset anchorAbove;
   final Offset anchorBelow;
   final VoidCallback? handlePaste;
+  final VoidCallback? handleCut;
 
   @override
-  _PasteTextSelectionToolbarState createState() => _PasteTextSelectionToolbarState();
+  _CustomTextSelectionToolbarState createState() => _CustomTextSelectionToolbarState();
 }
 
-class _PasteTextSelectionToolbarState extends State<_PasteTextSelectionToolbar> {
+class _CustomTextSelectionToolbarState extends State<_CustomTextSelectionToolbar> {
   @override
   Widget build(BuildContext context) {
     return TextSelectionToolbar(
@@ -12052,7 +12171,12 @@ class _PasteTextSelectionToolbarState extends State<_PasteTextSelectionToolbar> 
       },
       children: <Widget>[
         TextSelectionToolbarTextButton(
-          padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+          padding: TextSelectionToolbarTextButton.getPadding(0, 2),
+          onPressed: widget.handleCut,
+          child: const Text('Cut'),
+        ),
+        TextSelectionToolbarTextButton(
+          padding: TextSelectionToolbarTextButton.getPadding(1, 2),
           onPressed: widget.handlePaste,
           child: const Text('Paste'),
         ),

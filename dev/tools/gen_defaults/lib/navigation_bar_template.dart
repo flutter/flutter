@@ -5,9 +5,8 @@
 import 'template.dart';
 
 class NavigationBarTemplate extends TokenTemplate {
-  const NavigationBarTemplate(String fileName, Map<String, dynamic> tokens)
-    : super(fileName, tokens,
-        colorSchemePrefix: '_colors.',
+  const NavigationBarTemplate(super.fileName, super.tokens)
+    : super(colorSchemePrefix: '_colors.',
         textThemePrefix: '_textTheme.',
       );
 

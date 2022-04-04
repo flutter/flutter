@@ -36,7 +36,7 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.packages', // TODO(zanderso): make this required and remove the default.
+    this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
@@ -67,10 +67,10 @@ class BuildInfo {
   /// Mode-Flavor (e.g. Release-Paid).
   final String? flavor;
 
-  /// The path to the .packages file to use for compilation.
+  /// The path to the package configuration file to use for compilation.
   ///
   /// This is used by package:package_config to locate the actual package_config.json
-  /// file. If not provided, defaults to `.packages`.
+  /// file. If not provided, defaults to `.dart_tool/packages`.
   final String packagesPath;
 
   final List<String> fileSystemRoots;
