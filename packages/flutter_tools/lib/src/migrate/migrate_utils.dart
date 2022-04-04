@@ -73,14 +73,18 @@ class MigrateUtils {
 
   /// Calls `flutter create` as a re-entrant command.
   static Future<String> createFromTemplates(String flutterBinPath, {
-    required String name,
+    String? name,
     required String androidLanguage,
     required String iosLanguage,
     required String outputDirectory,
     String? createVersion,
     List<String> platforms = const <String>[],
   }) async {
-    final List<String> cmdArgs = <String>['create', '--no-pub', '--project-name', name];
+    final List<String> cmdArgs = <String>['create'];
+    if (name != null) {
+      cmdArgs.add('project-name');
+      cmdArgs.add(name);
+    }
     if (platforms.isNotEmpty) {
       String platformsArg = '--platforms=';
       for (int i = 0; i < platforms.length; i++) {
@@ -91,17 +95,30 @@ class MigrateUtils {
       }
       cmdArgs.add(platformsArg);
     }
+    cmdArgs.add('--no-pub');
     cmdArgs.add(outputDirectory);
     final ProcessResult result = await Process.run('./flutter', cmdArgs, workingDirectory: flutterBinPath);
     // Old versions of the tool does not include the platforms option. In this case, we will just
     // just call the general create command.
-    if ((result.stderr as String).contains('Could not find an option named "platforms".')) {
+    if ((result.stderr as String).contains('Could not find an option named "platforms".') ||
+        (result.stderr as String).contains('Multiple output directories specified.')) {
       return createFromTemplates(
         flutterBinPath,
         name: name,
         androidLanguage: androidLanguage,
         iosLanguage: iosLanguage,
         outputDirectory: outputDirectory,
+      );
+    }
+    // Old versions of the tool does not include the project-name option. In this case, we will just
+    // just call the general create command.
+    if ((result.stderr as String).contains('Could not find an option named "project-name".')) {
+      return createFromTemplates(
+        flutterBinPath,
+        androidLanguage: androidLanguage,
+        iosLanguage: iosLanguage,
+        outputDirectory: outputDirectory,
+        platforms: platforms,
       );
     }
     checkForErrors(result, commandDescription: '${flutterBinPath}flutter ${cmdArgs.join(' ')}');
