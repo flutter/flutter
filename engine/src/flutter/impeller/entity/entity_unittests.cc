@@ -689,11 +689,18 @@ TEST_F(EntityTest, GaussianBlurFilter) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     if (first_frame) {
       first_frame = false;
-      ImGui::SetNextWindowSize({500, 190});
+      ImGui::SetNextWindowSize({500, 220});
       ImGui::SetNextWindowPos({300, 550});
     }
 
+    const char* blur_style_names[] = {"Normal", "Solid", "Outer", "Inner"};
+    const FilterContents::BlurStyle blur_styles[] = {
+        FilterContents::BlurStyle::kNormal, FilterContents::BlurStyle::kSolid,
+        FilterContents::BlurStyle::kOuter, FilterContents::BlurStyle::kInner};
+
+    // UI state.
     static float blur_amount[2] = {20, 20};
+    static int selected_blur_style = 0;
     static Color cover_color(1, 0, 0, 0.2);
     static Color bounds_color(0, 1, 0, 0.1);
     static float offset[2] = {500, 400};
@@ -702,21 +709,27 @@ TEST_F(EntityTest, GaussianBlurFilter) {
     static float skew[2] = {0, 0};
 
     ImGui::Begin("Controls");
-    ImGui::SliderFloat2("Blur", &blur_amount[0], 0, 200);
-    ImGui::ColorEdit4("Cover color", reinterpret_cast<float*>(&cover_color));
-    ImGui::ColorEdit4("Bounds color", reinterpret_cast<float*>(&bounds_color));
-    ImGui::SliderFloat2("Translation", &offset[0], 0,
-                        pass.GetRenderTargetSize().width);
-    ImGui::SliderFloat("Rotation", &rotation, 0, kPi * 2);
-    ImGui::SliderFloat2("Scale", &scale[0], 0, 3);
-    ImGui::SliderFloat2("Skew", &skew[0], -3, 3);
+    {
+      ImGui::SliderFloat2("Blur", &blur_amount[0], 0, 200);
+      ImGui::Combo("Blur style", &selected_blur_style, blur_style_names,
+                   sizeof(blur_style_names) / sizeof(char*));
+      ImGui::ColorEdit4("Cover color", reinterpret_cast<float*>(&cover_color));
+      ImGui::ColorEdit4("Bounds color",
+                        reinterpret_cast<float*>(&bounds_color));
+      ImGui::SliderFloat2("Translation", &offset[0], 0,
+                          pass.GetRenderTargetSize().width);
+      ImGui::SliderFloat("Rotation", &rotation, 0, kPi * 2);
+      ImGui::SliderFloat2("Scale", &scale[0], 0, 3);
+      ImGui::SliderFloat2("Skew", &skew[0], -3, 3);
+    }
     ImGui::End();
 
     auto blend = FilterContents::MakeBlend(
         Entity::BlendMode::kPlus, FilterInput::Make({boston, bridge, bridge}));
 
     auto blur = FilterContents::MakeGaussianBlur(
-        FilterInput::Make(blend), blur_amount[0], blur_amount[1]);
+        FilterInput::Make(blend), blur_amount[0], blur_amount[1],
+        blur_styles[selected_blur_style]);
 
     ISize input_size = boston->GetSize();
     auto rect = Rect(-Point(input_size) / 2, Size(input_size));

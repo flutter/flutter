@@ -30,6 +30,38 @@ void DirectionalGaussianBlurFilterContents::SetBlurVector(Vector2 blur_vector) {
   blur_vector_ = blur_vector;
 }
 
+void DirectionalGaussianBlurFilterContents::SetBlurStyle(BlurStyle blur_style) {
+  blur_style_ = blur_style;
+
+  switch (blur_style) {
+    case FilterContents::BlurStyle::kNormal:
+      src_color_factor_ = false;
+      inner_blur_factor_ = true;
+      outer_blur_factor_ = true;
+      break;
+    case FilterContents::BlurStyle::kSolid:
+      src_color_factor_ = true;
+      inner_blur_factor_ = false;
+      outer_blur_factor_ = true;
+      break;
+    case FilterContents::BlurStyle::kOuter:
+      src_color_factor_ = false;
+      inner_blur_factor_ = false;
+      outer_blur_factor_ = true;
+      break;
+    case FilterContents::BlurStyle::kInner:
+      src_color_factor_ = false;
+      inner_blur_factor_ = true;
+      outer_blur_factor_ = false;
+      break;
+  }
+}
+
+void DirectionalGaussianBlurFilterContents::SetSourceOverride(
+    FilterInput::Ref alpha_mask) {
+  source_override_ = alpha_mask;
+}
+
 bool DirectionalGaussianBlurFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
     const ContentContext& renderer,
@@ -45,43 +77,59 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
-  // Because this filter is intended to be used with only one input parameter,
-  // and GetBounds just increases the input size by a factor of the direction,
-  // we we can just scale up the UVs by the same amount and don't need to worry
-  // about mapping the UVs to the destination rect (like we do in
-  // BlendFilterContents).
-
   auto input = inputs[0]->GetSnapshot(renderer, entity);
-  auto input_size = input->texture->GetSize();
+  auto input_bounds = inputs[0]->GetBounds(entity);
+  auto filter_bounds = GetBounds(entity);
 
   auto transformed_blur =
       entity.GetTransformation().TransformDirection(blur_vector_);
 
-  auto uv_offset = transformed_blur.Abs() / input_size;
   // LTRB
   Scalar uv[4] = {
-      -uv_offset.x,
-      -uv_offset.y,
-      1 + uv_offset.x,
-      1 + uv_offset.y,
+      (filter_bounds.GetLeft() - input_bounds.GetLeft()) /
+          input_bounds.size.width,
+      (filter_bounds.GetTop() - input_bounds.GetTop()) /
+          input_bounds.size.height,
+      1 + (filter_bounds.GetRight() - input_bounds.GetRight()) /
+              input_bounds.size.width,
+      1 + (filter_bounds.GetBottom() - input_bounds.GetBottom()) /
+              input_bounds.size.height,
+  };
+
+  auto source = source_override_ ? source_override_ : inputs[0];
+  auto source_texture = source->GetSnapshot(renderer, entity);
+  auto source_bounds = source->GetBounds(entity);
+
+  // LTRB
+  Scalar uv_src[4] = {
+      (filter_bounds.GetLeft() - source_bounds.GetLeft()) /
+          source_bounds.size.width,
+      (filter_bounds.GetTop() - source_bounds.GetTop()) /
+          source_bounds.size.height,
+      1 + (filter_bounds.GetRight() - source_bounds.GetRight()) /
+              source_bounds.size.width,
+      1 + (filter_bounds.GetBottom() - source_bounds.GetBottom()) /
+              source_bounds.size.height,
   };
 
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-  auto size = pass.GetRenderTargetSize();
   vtx_builder.AddVertices({
-      {Point(0, 0), Point(uv[0], uv[1])},
-      {Point(size.width, 0), Point(uv[2], uv[1])},
-      {Point(size.width, size.height), Point(uv[2], uv[3])},
-      {Point(0, 0), Point(uv[0], uv[1])},
-      {Point(size.width, size.height), Point(uv[2], uv[3])},
-      {Point(0, size.height), Point(uv[0], uv[3])},
+      {Point(0, 0), Point(uv[0], uv[1]), Point(uv_src[0], uv_src[1])},
+      {Point(1, 0), Point(uv[2], uv[1]), Point(uv_src[2], uv_src[1])},
+      {Point(1, 1), Point(uv[2], uv[3]), Point(uv_src[2], uv_src[3])},
+      {Point(0, 0), Point(uv[0], uv[1]), Point(uv_src[0], uv_src[1])},
+      {Point(1, 1), Point(uv[2], uv[3]), Point(uv_src[2], uv_src[3])},
+      {Point(0, 1), Point(uv[0], uv[3]), Point(uv_src[0], uv_src[3])},
   });
   auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
   VS::FrameInfo frame_info;
-  frame_info.texture_size = Point(input_size);
+  frame_info.texture_size = Point(input_bounds.size);
   frame_info.blur_radius = transformed_blur.GetLength();
   frame_info.blur_direction = transformed_blur.Normalize();
+  frame_info.src_factor = src_color_factor_;
+  frame_info.inner_blur_factor = inner_blur_factor_;
+  frame_info.outer_blur_factor = outer_blur_factor_;
 
   auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
 
@@ -93,8 +141,9 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
   cmd.BindVertices(vtx_buffer);
 
   FS::BindTextureSampler(cmd, input->texture, sampler);
+  FS::BindAlphaMaskSampler(cmd, source_texture->texture, sampler);
 
-  frame_info.mvp = Matrix::MakeOrthographic(size);
+  frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
   auto uniform_view = host_buffer.EmplaceUniform(frame_info);
   VS::BindFrameInfo(cmd, uniform_view);
 
