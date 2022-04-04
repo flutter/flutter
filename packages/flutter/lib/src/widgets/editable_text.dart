@@ -1608,10 +1608,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool _didAutoFocus = false;
 
-  // The BuildContext that contains the ContextualMenuArea built by this widget,
+  // The BuildContext that contains the InheritedContextualMenu built by this widget,
   // if one exists.
   //
-  // This is used by TextSelectionOverlay to lookup the ContextualMenuArea.
+  // This is used by TextSelectionOverlay to lookup the InheritedContextualMenu.
   late BuildContext _contextualMenuContext;
 
   AutofillGroupState? _currentAutofillScope;
@@ -3379,7 +3379,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _contextualMenuContext = context;
       return child;
     }
-    return ContextualMenuArea(
+    return InheritedContextualMenu(
       buildMenu: widget.buildContextualMenu!,
       child: Builder(
         builder: (BuildContext context) {

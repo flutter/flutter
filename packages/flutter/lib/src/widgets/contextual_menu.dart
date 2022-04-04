@@ -46,107 +46,80 @@ class ContextualMenuConfiguration extends InheritedWidget {
 }
 */
 
-/// Designates a part of the Widget tree to have the contextual menu given by
+/// Designates a part of the Widget tree to use the contextual menu given by
 /// [buildMenu].
-class ContextualMenuArea extends StatefulWidget {
-  const ContextualMenuArea({
+class InheritedContextualMenu extends InheritedWidget {
+  /// Creates an instance of [InheritedContextualMenu].
+  InheritedContextualMenu({
     Key? key,
-    required this.buildMenu,
-    required this.child,
-  }) : super(key: key);
+    required ContextualMenuBuilder buildMenu,
+    required Widget child,
+  }) : assert(buildMenu != null),
+       assert(child != null),
+       _contextualMenuController = ContextualMenuController(
+         buildMenu: buildMenu,
+       ),
+       super(key: key, child: child);
 
-  final ContextualMenuBuilder buildMenu;
-  final Widget child;
+  final ContextualMenuController _contextualMenuController;
 
-  // TODO(justinmc): Another option would be to return ContextualMenuController
-  // but make it so that it exists even when the overlay isn't shown.
   /// Returns the nearest [ContextualMenuController] for the given
   /// [BuildContext], if any.
-  static ContextualMenuAreaState? of(BuildContext context) {
-    return context.findAncestorStateOfType<ContextualMenuAreaState>();
+  static ContextualMenuController? of(BuildContext context) {
+    final InheritedContextualMenu? inheritedContextualMenu =
+        context.dependOnInheritedWidgetOfExactType<InheritedContextualMenu>();
+    return inheritedContextualMenu?._contextualMenuController;
   }
 
   @override
-  State<ContextualMenuArea> createState() => ContextualMenuAreaState();
-}
-
-class ContextualMenuAreaState extends State<ContextualMenuArea> {
-  ContextualMenuController? _contextualMenuController;
-
-  bool get contextualMenuIsVisible => _contextualMenuController != null;
-
-  // TODO(justinmc): This kills any existing menu then creates a new one. Is
-  // that ok? Do I ever need to move an existing menu?
-  void showContextualMenu(Offset primaryAnchor, [Offset? secondaryAnchor]) {
-    _contextualMenuController?.dispose();
-    _contextualMenuController = ContextualMenuController(
-      primaryAnchor: primaryAnchor,
-      secondaryAnchor: secondaryAnchor,
-      context: context,
-      buildMenu: widget.buildMenu,
-    );
-  }
-
-  void disposeContextualMenu() {
-    _contextualMenuController?.dispose();
-    _contextualMenuController = null;
+  bool updateShouldNotify(InheritedContextualMenu oldWidget) {
+    return _contextualMenuController != oldWidget._contextualMenuController;
   }
 
   @override
-  void dispose() {
-    disposeContextualMenu();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ContextualMenuBuilder>('buildMenu', _contextualMenuController.buildMenu));
   }
 }
 
-// TODO(justinmc): Ok public? Put in own file?
+// TODO(justinmc): Put in own file?
+/// A contextual menu that can be shown and hidden.
 class ContextualMenuController {
-  // TODO(justinmc): Pass in the anchor, and pass it through to buildMenu.
-  // What other fields would I need to pass in to buildMenu? There are a ton on
-  // buildToolbar...
-  // Also, create an update method.
+  // TODO(justinmc): Update method for efficiency of moving the menu?
+  /// Creates an instance of [ContextualMenuController].
   ContextualMenuController({
     // TODO(justinmc): Accept these or just BuildContext?
-    required ContextualMenuBuilder buildMenu,
-    required Offset primaryAnchor,
-    required BuildContext context,
-    Offset? secondaryAnchor,
-    Widget? debugRequiredFor
-  }) {
-    _insert(
-      context: context,
-      buildMenu: buildMenu,
-      primaryAnchor: primaryAnchor,
-      secondaryAnchor: secondaryAnchor,
-      debugRequiredFor: debugRequiredFor,
-    );
-  }
+    required this.buildMenu,
+    this.debugRequiredFor,
+  });
+
+  /// The function that returns the contextual menu for this part of the widget
+  /// tree.
+  final ContextualMenuBuilder buildMenu;
+
+  /// Debugging information for explaining why the [Overlay] is required.
+  ///
+  /// See also:
+  ///
+  /// * [Overlay.of], which uses this parameter.
+  final Widget? debugRequiredFor;
 
   OverlayEntry? _menuOverlayEntry;
 
-  // Insert the ContextualMenu into the given OverlayState.
-  void _insert({
-    required ContextualMenuBuilder buildMenu,
-    required BuildContext context,
-    required Offset primaryAnchor,
-    Offset? secondaryAnchor,
-    Widget? debugRequiredFor,
-  }) {
+  /// True iff the contextual menu is currently being displayed.
+  bool get isVisible => _menuOverlayEntry != null;
+
+  /// Insert the Widget given by [buildMenu] into the root [Overlay].
+  ///
+  /// Will first remove the previously shown menu, if one exists.
+  void show(BuildContext context, Offset primaryAnchor, [Offset? secondaryAnchor]) {
+    hide();
     final OverlayState? overlayState = Overlay.of(
       context,
       rootOverlay: true,
       debugRequiredFor: debugRequiredFor,
     );
-    // TODO(justinmc): Should I create a default menu here if no ContextualMenuConfiguration?
-    /*
-    final ContextualMenuConfiguration contextualMenuConfiguration =
-      ContextualMenuConfiguration.of(context);
-      */
     final CapturedThemes capturedThemes = InheritedTheme.capture(
       from: context,
       to: Navigator.of(context).context,
@@ -156,8 +129,8 @@ class ContextualMenuController {
       builder: (BuildContext context) {
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: dispose,
-          onSecondaryTap: dispose,
+          onTap: hide,
+          onSecondaryTap: hide,
           // TODO(justinmc): I'm using this to block taps on the menu from being
           // received by the above barrier. Is there a less weird way?
           child: GestureDetector(
@@ -171,17 +144,13 @@ class ContextualMenuController {
     overlayState!.insert(_menuOverlayEntry!);
   }
 
-  /// True iff the menu is currently being displayed.
-  bool get isVisible => _menuOverlayEntry != null;
-
-  /// Remove the menu.
-  void dispose() {
+  /// Remove the contextual menu from the [Overlay].
+  void hide() {
     _menuOverlayEntry?.remove();
     _menuOverlayEntry = null;
   }
 }
 
-// TODO(justinmc): Move to contextual_menu.dart?
 /// The buttons that can appear in a contextual menu by default.
 enum DefaultContextualMenuButtonType {
   /// A button that cuts the current text selection.
@@ -197,7 +166,7 @@ enum DefaultContextualMenuButtonType {
   selectAll,
 }
 
-/// The label and callback for the available default contextual menu buttons.
+/// The type and callback for the available default contextual menu buttons.
 @immutable
 class ContextualMenuButtonData {
   /// Creates an instance of [ContextualMenuButtonData].

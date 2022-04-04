@@ -3401,17 +3401,17 @@ class _DesktopContextualMenuGestureDetector extends StatefulWidget {
 
 class _DesktopContextualMenuGestureDetectorState extends State<_DesktopContextualMenuGestureDetector> {
   void _onSecondaryTapUp(TapUpDetails details) {
-    _contextualMenuAreaState.showContextualMenu(details.globalPosition);
+    _contextualMenuController.show(context, details.globalPosition);
   }
 
   void _onTap() {
-    _contextualMenuAreaState.disposeContextualMenu();
+    _contextualMenuController.hide();
   }
 
-  ContextualMenuAreaState get _contextualMenuAreaState {
-    final ContextualMenuAreaState? state = ContextualMenuArea.of(context);
-    assert(state != null, 'No ContextualMenuArea found above in the Widget tree.');
-    return state!;
+  ContextualMenuController get _contextualMenuController {
+    final ContextualMenuController? contextualMenuController = InheritedContextualMenu.of(context);
+    assert(contextualMenuController != null, 'No InheritedContextualMenu found above in the Widget tree.');
+    return contextualMenuController!;
   }
 
   @override
@@ -3431,7 +3431,7 @@ class _DesktopContextualMenuGestureDetectorState extends State<_DesktopContextua
       // and then fade in to show again at the new location.
       onSecondaryTapUp: _onSecondaryTapUp,
       // TODO(justinmc): Ok to look this up in build?
-      onTap: _contextualMenuAreaState.contextualMenuIsVisible ? _onTap : null,
+      onTap: _contextualMenuController.isVisible ? _onTap : null,
       child: widget.child,
     );
   }

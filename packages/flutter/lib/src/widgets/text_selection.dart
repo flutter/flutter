@@ -20,8 +20,6 @@ import 'contextual_menu.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'inherited_theme.dart';
-import 'navigator.dart';
 import 'overlay.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -387,10 +385,10 @@ class TextSelectionOverlay {
     _effectiveToolbarVisibility.value = renderObject.selectionStartInViewport.value || renderObject.selectionEndInViewport.value;
   }
 
-  ContextualMenuAreaState get _contextualMenuAreaState {
-    final ContextualMenuAreaState? state = ContextualMenuArea.of(context);
-    assert(state != null, 'TextSelectionOverlay must be given a BuildContext that has a ContextualMenuArea above it in the Widget tree.');
-    return state!;
+  ContextualMenuController get _contextualMenuController {
+    final ContextualMenuController? contextualMenuController = InheritedContextualMenu.of(context);
+    assert(contextualMenuController != null, 'TextSelectionOverlay must be given a BuildContext that has an InheritedContextualMenu above it in the Widget tree.');
+    return contextualMenuController!;
   }
 
   /// Whether selection handles are visible.
@@ -429,7 +427,7 @@ class TextSelectionOverlay {
 
     // If right clicking, use the right click position as the only anchor.
     if (renderObject.lastSecondaryTapDownPosition != null) {
-      _contextualMenuAreaState.showContextualMenu(renderObject.lastSecondaryTapDownPosition!);
+      _contextualMenuController.show(context, renderObject.lastSecondaryTapDownPosition!);
       return;
     }
 
@@ -471,7 +469,7 @@ class TextSelectionOverlay {
       editingRegion.top + endTextSelectionPoint.point.dy,
     );
 
-    _contextualMenuAreaState.showContextualMenu(anchorAbove, anchorBelow);
+    _contextualMenuController.show(context, anchorAbove, anchorBelow);
   }
 
   /// Updates the overlay after the selection has changed.
@@ -522,7 +520,7 @@ class TextSelectionOverlay {
   /// Whether the toolbar is currently visible.
   //bool get toolbarIsVisible => _selectionOverlay._toolbar != null;
   //bool get toolbarIsVisible => _contextualMenuController?.isVisible ?? false;
-  bool get toolbarIsVisible => _contextualMenuAreaState.contextualMenuIsVisible;
+  bool get toolbarIsVisible => _contextualMenuController.isVisible;
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
   //void hide() => _selectionOverlay.hide();
@@ -539,7 +537,7 @@ class TextSelectionOverlay {
     _contextualMenuController!.dispose();
     _contextualMenuController = null;
     */
-    _contextualMenuAreaState.disposeContextualMenu();
+    _contextualMenuController.hide();
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}
