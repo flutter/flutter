@@ -18,7 +18,7 @@ class WindowManagerIntegrationsPage extends PageWidget {
 }
 
 class WindowManagerBody extends StatefulWidget {
-  const WindowManagerBody({Key? key}) : super(key: key);
+  const WindowManagerBody({super.key});
 
   @override
   State<WindowManagerBody> createState() => WindowManagerBodyState();

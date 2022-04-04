@@ -320,6 +320,7 @@ class BoxDecoration extends Decoration {
         && other.borderRadius == borderRadius
         && listEquals<BoxShadow>(other.boxShadow, boxShadow)
         && other.gradient == gradient
+        && other.backgroundBlendMode == backgroundBlendMode
         && other.shape == shape;
   }
 
@@ -331,6 +332,7 @@ class BoxDecoration extends Decoration {
     borderRadius,
     boxShadow == null ? null : Object.hashAll(boxShadow!),
     gradient,
+    backgroundBlendMode,
     shape,
   );
 

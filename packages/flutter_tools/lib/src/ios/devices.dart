@@ -145,7 +145,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 }
 
 class IOSDevice extends Device {
-  IOSDevice(String id, {
+  IOSDevice(super.id, {
     required FileSystem fileSystem,
     required this.name,
     required this.cpuArchitecture,
@@ -165,7 +165,6 @@ class IOSDevice extends Device {
       _logger = logger,
       _platform = platform,
         super(
-          id,
           category: Category.mobile,
           platformType: PlatformType.ios,
           ephemeral: true,
@@ -373,6 +372,7 @@ class IOSDevice extends Device {
       if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
       if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
+      if (debuggingOptions.enableImpeller) '--enable-impeller',
     ];
 
     final Status installStatus = _logger.startProgress(

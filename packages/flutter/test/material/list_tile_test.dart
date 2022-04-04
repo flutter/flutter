@@ -2085,6 +2085,8 @@ void main() {
     const ColorScheme lightColorScheme = ColorScheme.light();
     const ColorScheme darkColorScheme = ColorScheme.dark();
     final Key leadingKey = UniqueKey();
+    final Key titleKey = UniqueKey();
+    final Key subtitleKey = UniqueKey();
     final Key trailingKey = UniqueKey();
 
     Widget buildFrame({ required Brightness brightness, required bool selected }) {
@@ -2098,6 +2100,8 @@ void main() {
             child: ListTile(
               selected: selected,
               leading: TestIcon(key: leadingKey),
+              title: TestIcon(key: titleKey),
+              subtitle: TestIcon(key: subtitleKey),
               trailing: TestIcon(key: trailingKey),
             ),
           ),
@@ -2109,21 +2113,29 @@ void main() {
 
     await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: true));
     expect(iconColor(leadingKey), lightColorScheme.primary);
+    expect(iconColor(titleKey), lightColorScheme.primary);
+    expect(iconColor(subtitleKey), lightColorScheme.primary);
     expect(iconColor(trailingKey), lightColorScheme.primary);
 
     await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: false));
     expect(iconColor(leadingKey), Colors.black45);
+    expect(iconColor(titleKey), Colors.black45);
+    expect(iconColor(subtitleKey), Colors.black45);
     expect(iconColor(trailingKey), Colors.black45);
 
     await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: true));
     await tester.pumpAndSettle(); // Animated theme change
     expect(iconColor(leadingKey), darkColorScheme.primary);
+    expect(iconColor(titleKey), darkColorScheme.primary);
+    expect(iconColor(subtitleKey), darkColorScheme.primary);
     expect(iconColor(trailingKey), darkColorScheme.primary);
 
     // For this configuration, ListTile defers to the default IconTheme.
     // The default dark theme's IconTheme has color:white
     await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: false));
     expect(iconColor(leadingKey),  Colors.white);
+    expect(iconColor(titleKey),  Colors.white);
+    expect(iconColor(subtitleKey),  Colors.white);
     expect(iconColor(trailingKey), Colors.white);
   });
 }

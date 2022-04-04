@@ -333,7 +333,7 @@ void main() {
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
         if (kIsWeb) {
-          expect(theme.splashFactory, equals(InkSplash.splashFactory));
+          expect(theme.splashFactory, equals(InkRipple.splashFactory));
         } else {
           expect(theme.splashFactory, equals(InkSparkle.splashFactory));
         }
@@ -343,7 +343,7 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        expect(theme.splashFactory, equals(InkSplash.splashFactory));
+        expect(theme.splashFactory, equals(InkRipple.splashFactory));
      }
   }, variant: TargetPlatformVariant.all());
 

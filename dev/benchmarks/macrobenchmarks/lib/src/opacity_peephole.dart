@@ -12,7 +12,7 @@ import '../common.dart';
 // combinations of children that can apply it themselves.
 // See https://github.com/flutter/flutter/issues/75697
 class OpacityPeepholePage extends StatelessWidget {
-  const OpacityPeepholePage({Key? key}) : super(key: key);
+  const OpacityPeepholePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -419,7 +419,7 @@ Map<String, WidgetBuilder> opacityPeepholeRoutes = <String, WidgetBuilder>{
 };
 
 class VariantPage extends StatefulWidget {
-  const VariantPage({Key? key, required this.variant}) : super(key: key);
+  const VariantPage({super.key, required this.variant});
 
   final OpacityPeepholeCase variant;
 

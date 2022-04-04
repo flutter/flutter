@@ -5,9 +5,8 @@
 import 'template.dart';
 
 class FABTemplate extends TokenTemplate {
-  const FABTemplate(String fileName, Map<String, dynamic> tokens)
-    : super(fileName, tokens,
-        colorSchemePrefix: '_colors.',
+  const FABTemplate(super.fileName, super.tokens)
+    : super(colorSchemePrefix: '_colors.',
         textThemePrefix: '_textTheme.',
       );
 

@@ -15,6 +15,7 @@ library widgets;
 export 'package:characters/characters.dart';
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+export 'foundation.dart' show UniqueKey;
 export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_list.dart';
@@ -82,6 +83,7 @@ export 'src/widgets/page_view.dart';
 export 'src/widgets/pages.dart';
 export 'src/widgets/performance_overlay.dart';
 export 'src/widgets/placeholder.dart';
+export 'src/widgets/platform_menu_bar.dart';
 export 'src/widgets/platform_view.dart';
 export 'src/widgets/preferred_size.dart';
 export 'src/widgets/primary_scroll_controller.dart';

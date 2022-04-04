@@ -948,6 +948,16 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableImpellerFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-impeller',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Whether to enable the experimental Impeller rendering engine. '
+              'Impeller is currently only supported on iOS. This flag will '
+              'be ignored when targeting other platforms.',
+    );
+  }
+
   /// Compute the [BuildInfo] for the current flutter command.
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.

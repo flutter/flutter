@@ -166,16 +166,11 @@ abstract class OperatingSystemUtils {
 
 class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super._private(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  }) : super._private();
 
   @override
   void makeExecutable(File file) {
@@ -295,16 +290,11 @@ class _PosixUtils extends OperatingSystemUtils {
 
 class _LinuxUtils extends _PosixUtils {
   _LinuxUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  });
 
   String? _name;
 
@@ -367,16 +357,11 @@ class _LinuxUtils extends _PosixUtils {
 
 class _MacOSUtils extends _PosixUtils {
   _MacOSUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  });
 
   String? _name;
 
@@ -475,16 +460,11 @@ class _MacOSUtils extends _PosixUtils {
 
 class _WindowsUtils extends OperatingSystemUtils {
   _WindowsUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super._private(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  }) : super._private();
 
   @override
   HostPlatform hostPlatform = HostPlatform.windows_x64;

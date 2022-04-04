@@ -47,8 +47,7 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final Color? color;
 
-  /// Specifies if the barrier will be dismissed when the user taps or
-  /// performs a scroll gesture on it.
+  /// Specifies if the barrier will be dismissed when the user taps on it.
   ///
   /// If true, and [onDismiss] is non-null, [onDismiss] will be called,
   /// otherwise the current route will be popped from the ambient [Navigator].
@@ -229,14 +228,12 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
     : super(debugOwner: debugOwner);
 
   VoidCallback? onAnyTapUp;
-  VoidCallback? onAnyTapCancel;
 
   @protected
   @override
   bool isPointerAllowed(PointerDownEvent event) {
-    if (onAnyTapUp == null && onAnyTapCancel == null) {
+    if (onAnyTapUp == null)
       return false;
-    }
     return super.isPointerAllowed(event);
   }
 
@@ -255,7 +252,7 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   void handleTapCancel({PointerDownEvent? down, PointerCancelEvent? cancel, String? reason}) {
-    onAnyTapCancel?.call();
+    // Do nothing.
   }
 
   @override
@@ -275,10 +272,9 @@ class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
 
 
 class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
-  const _AnyTapGestureRecognizerFactory({this.onAnyTapUp, this.onAnyTapCancel});
+  const _AnyTapGestureRecognizerFactory({this.onAnyTapUp});
 
   final VoidCallback? onAnyTapUp;
-  final VoidCallback? onAnyTapCancel;
 
   @override
   _AnyTapGestureRecognizer constructor() => _AnyTapGestureRecognizer();
@@ -286,7 +282,6 @@ class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGe
   @override
   void initializer(_AnyTapGestureRecognizer instance) {
     instance.onAnyTapUp = onAnyTapUp;
-    instance.onAnyTapCancel = onAnyTapCancel;
   }
 }
 
@@ -312,7 +307,7 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{
-      _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapUp: onDismiss, onAnyTapCancel: onDismiss),
+      _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapUp: onDismiss),
     };
 
     return RawGestureDetector(

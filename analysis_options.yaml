@@ -21,8 +21,6 @@
 analyzer:
   language:
     strict-raw-types: true
-  strong-mode:
-    implicit-casts: false
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning

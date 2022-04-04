@@ -77,6 +77,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   multidexErrorHandler,
   incompatibleKotlinVersionHandler,
   minCompileSdkVersionHandler,
+  jvm11Required,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -537,4 +538,26 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'min-compile-sdk-version',
+);
+
+@visibleForTesting
+final GradleHandledError jvm11Required = GradleHandledError(
+  test: (String line) {
+    return line.contains('Android Gradle plugin requires Java 11 to run');
+  },
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} You need Java 11 or higher to build your app with this version of Gradle.\n\n'
+      'To get Java 11, update to the latest version of Android Studio on https://developer.android.com/studio/install.\n\n'
+      'To check the Java version used by Flutter, run `flutter doctor -v`.',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'java11-required',
 );
