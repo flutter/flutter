@@ -6,6 +6,7 @@
 import java.nio.file.Paths
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.publish.maven.MavenPublication
 
 void configureProject(Project project, String outputDir) {
     if (!project.hasProperty("android")) {
@@ -37,11 +38,26 @@ void configureProject(Project project, String outputDir) {
         }
     }
 
-    project.publishing {
-        publications {
-            mavenAll(MavenPublication) {
-                from project.components.all
+
+    /*
+    Some extra work to keep the publications in the same format as the previous plugin. Instead of
+    using classifiers for the variants, append `_{variant}` to the artifactId
+     */
+
+    // First, create a default MavenPublication for each variant (except "all" since we don't need that here)
+    project.components.forEach { component ->
+        if (component.name != "all") {
+            project.publishing.publications.create(component.name, MavenPublication) {
+                from component
             }
+        }
+    }
+
+    // then, rename the artifactId to include the variant and make sure to remove any classifier data tha gradle has set
+    project.publishing.publications.forEach { pub ->
+        pub.artifactId = "${pub.artifactId}_${pub.name}"
+        pub.publishableArtifacts.forEach { artifact ->
+            artifact.classifier = null
         }
     }
 
