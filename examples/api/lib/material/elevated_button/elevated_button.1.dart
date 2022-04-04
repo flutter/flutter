@@ -65,11 +65,11 @@ class ButtonTypesGroup extends StatelessWidget {
           // 'Filled' type.
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              useMaterial3: true,
-              elevation: 0,
-              baseForegroundColor: Theme.of(context).colorScheme.onPrimary,
-              baseBackgroundColor: Theme.of(context).colorScheme.primary,
-            ),
+              // Foreground color
+              onPrimary: Theme.of(context).colorScheme.onPrimary,
+              // Background color
+              primary: Theme.of(context).colorScheme.primary,
+            ).copyWith(elevation: ButtonStyleButton.allOrNull(0.0)),
             onPressed: onPressed,
             child: const Text('Filled'),
           ),
@@ -77,11 +77,11 @@ class ButtonTypesGroup extends StatelessWidget {
           // 'Filled Tonal' type.
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              useMaterial3: true,
-              elevation: 0,
-              baseForegroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-              baseBackgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-            ),
+              // Foreground color
+              onPrimary: Theme.of(context).colorScheme.onSecondaryContainer,
+              // Background color
+              primary: Theme.of(context).colorScheme.secondaryContainer,
+            ).copyWith(elevation: ButtonStyleButton.allOrNull(0.0)),
             onPressed: onPressed,
             child: const Text('Filled Tonal'),
           ),

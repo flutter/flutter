@@ -142,26 +142,8 @@ class ElevatedButton extends ButtonStyleButton {
   /// ElevatedButton(
   ///   style: ElevatedButton.styleFrom(primary: Colors.green),
   /// )
-  ///
-  /// ## Filled and Filled Tonal styles
-  ///
-  /// Material 3 introduced two new styles that can be achieved with
-  /// [ElevatedButton].
-  ///
-  /// {@tool dartpad}
-  /// This sample will create 'Filled' and 'Filled Tonal' buttons using
-  /// [ElevatedButton].
-  ///
-  /// ** See code in examples/api/lib/material/elevated_button/elevated_button.1.dart **
-  /// {@end-tool}
-  ///
   /// ```
   static ButtonStyle styleFrom({
-    Color? baseForegroundColor,
-    Color? disabledForegroundColor,
-    Color? baseBackgroundColor,
-    Color? disabledBackgroundColor,
-    Color? baseOverlayColor,
     Color? primary,
     Color? onPrimary,
     Color? onSurface,
@@ -183,31 +165,19 @@ class ElevatedButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
-    bool useMaterial3 = false,
   }) {
-    // Fallback to the deprecated colors to preserve backwards compatibility.
-    baseBackgroundColor ??= primary;
-    disabledBackgroundColor ??= onSurface;
-    baseForegroundColor ??= onPrimary;
-    disabledForegroundColor ??= onSurface;
-    baseOverlayColor ??= baseForegroundColor;
-
-    final MaterialStateProperty<Color?>? backgroundColor = useMaterial3
-      ? _TokenDefaultsM3.backgroundColorFor(baseBackgroundColor, disabledBackgroundColor)
-      : _backgroundColorFor(baseBackgroundColor, disabledBackgroundColor);
-
-    final MaterialStateProperty<Color?>? foregroundColor = useMaterial3
-      ? _TokenDefaultsM3.foregroundColorFor(baseForegroundColor, disabledForegroundColor)
-      : _foregroundColorFor(baseForegroundColor, disabledForegroundColor);
-
-    final MaterialStateProperty<Color?>? overlayColor = useMaterial3
-      ? _TokenDefaultsM3.overlayColorFor(baseOverlayColor, baseOverlayColor, baseOverlayColor)
-      : _overlayColorFor(baseOverlayColor, baseOverlayColor, baseOverlayColor);
-
-    final MaterialStateProperty<double?>? elevationValue = useMaterial3
-      ? ButtonStyleButton.allOrNull(elevation)
-      : _elevationFor(elevation);
-
+    final MaterialStateProperty<Color?>? backgroundColor = (onSurface == null && primary == null)
+      ? null
+      : _ElevatedButtonDefaultBackground(primary, onSurface);
+    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && onPrimary == null)
+      ? null
+      : _ElevatedButtonDefaultForeground(onPrimary, onSurface);
+    final MaterialStateProperty<Color?>? overlayColor = (onPrimary == null)
+      ? null
+      : _ElevatedButtonDefaultOverlay(onPrimary);
+    final MaterialStateProperty<double>? elevationValue = (elevation == null)
+      ? null
+      : _ElevatedButtonDefaultElevation(elevation);
     final MaterialStateProperty<MouseCursor?>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
       : _ElevatedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
@@ -350,55 +320,71 @@ class ElevatedButton extends ButtonStyleButton {
   ButtonStyle? themeStyleOf(BuildContext context) {
     return ElevatedButtonTheme.of(context).style;
   }
+}
 
-  static MaterialStateProperty<Color?>? _backgroundColorFor(Color? enabled, Color? disabled) {
-    return (enabled == null && disabled == null)
-      ? null
-      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled))
-            return disabled?.withOpacity(0.12);
-          return enabled;
-        });
+@immutable
+class _ElevatedButtonDefaultBackground extends MaterialStateProperty<Color?> with Diagnosticable {
+  _ElevatedButtonDefaultBackground(this.primary, this.onSurface);
+
+  final Color? primary;
+  final Color? onSurface;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled))
+      return onSurface?.withOpacity(0.12);
+    return primary;
   }
+}
 
-  static MaterialStateProperty<Color?>? _foregroundColorFor(Color? enabled, Color? disabled) {
-    return (enabled == null && disabled == null)
-      ? null
-      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled))
-            return disabled?.withOpacity(0.38);
-          return enabled;
-        });
+@immutable
+class _ElevatedButtonDefaultForeground extends MaterialStateProperty<Color?> with Diagnosticable {
+  _ElevatedButtonDefaultForeground(this.onPrimary, this.onSurface);
+
+  final Color? onPrimary;
+  final Color? onSurface;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled))
+      return onSurface?.withOpacity(0.38);
+    return onPrimary;
   }
+}
 
-  static MaterialStateProperty<Color?>? _overlayColorFor(Color? hover, Color? focus, Color? pressed) {
-    return (hover == null && focus == null)
-      ? null
-      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.hovered))
-            return hover?.withOpacity(0.08);
-          if (states.contains(MaterialState.focused))
-            return focus?.withOpacity(0.24);
-          if (states.contains(MaterialState.pressed))
-            return pressed?.withOpacity(0.24);
-          return null;
-        });
+@immutable
+class _ElevatedButtonDefaultOverlay extends MaterialStateProperty<Color?> with Diagnosticable {
+  _ElevatedButtonDefaultOverlay(this.onPrimary);
+
+  final Color onPrimary;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.hovered))
+      return onPrimary.withOpacity(0.08);
+    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
+      return onPrimary.withOpacity(0.24);
+    return null;
   }
+}
 
-  static MaterialStateProperty<double?>? _elevationFor(double? elevation) {
-    return (elevation == null)
-      ? null
-      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled))
-            return 0;
-          if (states.contains(MaterialState.hovered))
-            return elevation + 2;
-          if (states.contains(MaterialState.focused))
-            return elevation + 2;
-          if (states.contains(MaterialState.pressed))
-            return elevation + 6;
-          return elevation;
-        });
+@immutable
+class _ElevatedButtonDefaultElevation extends MaterialStateProperty<double> with Diagnosticable {
+  _ElevatedButtonDefaultElevation(this.elevation);
+
+  final double elevation;
+
+  @override
+  double resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled))
+      return 0;
+    if (states.contains(MaterialState.hovered))
+      return elevation + 2;
+    if (states.contains(MaterialState.focused))
+      return elevation + 2;
+    if (states.contains(MaterialState.pressed))
+      return elevation + 6;
+    return elevation;
   }
 }
 
