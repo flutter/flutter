@@ -226,11 +226,17 @@ Future<MigrateResult?> computeMigration({
     migrateResult.generatedBaseTemplateDirectory = fileSystem.directory(baseAppPath);
   } else {
     migrateResult.generatedBaseTemplateDirectory = await MigrateUtils.createTempDirectory('generatedBaseTemplate');
+    if (verbose) {
+      logger.printStatus('Created temporary directory: ${migrateResult.generatedBaseTemplateDirectory}', indent: 2, color: TerminalColor.grey);
+    }
   }
   if (customTargetAppDir) {
     migrateResult.generatedTargetTemplateDirectory = fileSystem.directory(targetAppPath);
   } else {
     migrateResult.generatedTargetTemplateDirectory = await MigrateUtils.createTempDirectory('generatedTargetTemplate');
+    if (verbose) {
+      logger.printStatus('Created temporary directory: ${migrateResult.generatedBaseTemplateDirectory}', indent: 2, color: TerminalColor.grey);
+    }
   }
 
   await MigrateUtils.gitInit(migrateResult.generatedBaseTemplateDirectory!.absolute.path);
@@ -361,7 +367,8 @@ String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion v
   if (metadata.versionRevision != null) {
     return metadata.versionRevision!;
   }
-  return version.frameworkRevision;
+  // Earliest version of flutter with .metadata: c17099f474675d8066fec6984c242d8b409ae985
+  return 'c17099f474675d8066fec6984c242d8b409ae985';
 }
 
 /// Creates the base reference app based off of the migrate config in the .metadata file.
@@ -636,7 +643,9 @@ Future<void> computeMerge(
         MergeType mergeType = migrateResult.mergeTypeMap[localPath] ?? MergeType.twoWay;
         // Use two way merge if diff between base and target are the same.
         // This prevents the three way merge re-deleting the base->target changes.
-        if (preferTwoWayMerge || userDiff.diff.substring(userDiff.diff.indexOf('@@')) == targetDiff.diff.substring(targetDiff.diff.indexOf('@@'))) {
+        if (preferTwoWayMerge || (
+              (userDiff.diff.contains('@@') && targetDiff.diff.contains('@@')) &&
+              userDiff.diff.substring(userDiff.diff.indexOf('@@')) == targetDiff.diff.substring(targetDiff.diff.indexOf('@@')))) {
           mergeType = MergeType.twoWay;
         }
         switch (mergeType) {
