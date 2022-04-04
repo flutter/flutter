@@ -15,6 +15,7 @@ enum TerminalColor {
   yellow,
   magenta,
   grey,
+  gray,
 }
 
 /// A class that contains the context settings for command text output to the
@@ -173,7 +174,8 @@ class AnsiTerminal implements Terminal {
   static const String cyan = '\u001b[36m';
   static const String magenta = '\u001b[35m';
   static const String yellow = '\u001b[33m';
-  static const String grey = '\u001b[90m';
+  static const String gray = '\u001b[90m';
+  static const String grey = gray; // Prefer American english spelling as per style guide.
 
   static const Map<TerminalColor, String> _colorMap = <TerminalColor, String>{
     TerminalColor.red: red,
@@ -183,6 +185,7 @@ class AnsiTerminal implements Terminal {
     TerminalColor.magenta: magenta,
     TerminalColor.yellow: yellow,
     TerminalColor.grey: grey,
+    TerminalColor.gray: gray,
   };
 
   static String colorCode(TerminalColor color) => _colorMap[color]!;
