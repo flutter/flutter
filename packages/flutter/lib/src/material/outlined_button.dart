@@ -405,9 +405,8 @@ class _TokenDefaultsM3 extends ButtonStyle {
     MaterialStateProperty.all<TextStyle?>(Theme.of(context).textTheme.labelLarge);
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor {
-    return ButtonStyleButton.allOrNull<Color>(Colors.transparent);
-  }
+  MaterialStateProperty<Color?>? get backgroundColor =>
+    ButtonStyleButton.allOrNull<Color>(Colors.transparent);
 
   static MaterialStateProperty<Color?>? foregroundColorFor(Color? enabled, Color? disabled) {
     return (enabled == null && disabled == null)
@@ -424,7 +423,7 @@ class _TokenDefaultsM3 extends ButtonStyle {
     return foregroundColorFor(_colors.primary, _colors.onSurface);
   }
 
-  static MaterialStateProperty<Color?>? overlayColorFor(Color? hover, Color? focus) {
+  static MaterialStateProperty<Color?>? overlayColorFor(Color? hover, Color? focus, Color? pressed) {
     return (hover == null && focus == null)
       ? null
       : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -432,6 +431,8 @@ class _TokenDefaultsM3 extends ButtonStyle {
             return hover?.withOpacity(0.08);
           else if (states.contains(MaterialState.focused))
             return focus?.withOpacity(0.12);
+          else if (states.contains(MaterialState.pressed))
+            return pressed?.withOpacity(0.12);
           else
             return null;
         });
@@ -439,7 +440,7 @@ class _TokenDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get overlayColor {
-    return overlayColorFor(_colors.primary, _colors.primary);
+    return overlayColorFor(_colors.primary, _colors.primary, _colors.primary);
   }
 
   @override
@@ -451,9 +452,8 @@ class _TokenDefaultsM3 extends ButtonStyle {
     ButtonStyleButton.allOrNull<Color>(null);
 
   @override
-  MaterialStateProperty<double>? get elevation {
-    return ButtonStyleButton.allOrNull<double>(0.0);
-  }
+  MaterialStateProperty<double>? get elevation =>
+    ButtonStyleButton.allOrNull<double>(0.0);
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding {
@@ -480,8 +480,14 @@ class _TokenDefaultsM3 extends ButtonStyle {
     ButtonStyleButton.allOrNull<Size>(Size.infinite);
 
   @override
-  MaterialStateProperty<BorderSide>? get side =>
-    ButtonStyleButton.allOrNull<BorderSide>(BorderSide(color: _colors.outline));
+  MaterialStateProperty<BorderSide>? get side {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return BorderSide(color: _colors.onSurface.withOpacity(0.12));
+      }
+      return BorderSide(color: _colors.outline);
+    });
+  }
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>

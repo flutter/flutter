@@ -6,12 +6,12 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ButtonApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class ButtonApp extends StatelessWidget {
+  const ButtonApp({Key? key}) : super(key: key);
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Button Types';
 
   @override
   Widget build(BuildContext context) {
@@ -20,62 +20,74 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        body: const ButtonTypesExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class ButtonTypesExample extends StatelessWidget {
+  const ButtonTypesExample({Key? key}) : super(key: key);
 
-  @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-}
-
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
-    final ButtonStyle filledStyle = ElevatedButton.styleFrom(
-      useMaterial3Colors: true,
-      elevation: 0,
-      primary: Theme.of(context).colorScheme.onPrimary,
-      surface: Theme.of(context).colorScheme.primary,
-    );
-    final ButtonStyle filledTonalStyle = ElevatedButton.styleFrom(
-      useMaterial3Colors: true,
-      elevation: 0,
-      primary: Theme.of(context).colorScheme.onSecondaryContainer,
-      surface: Theme.of(context).colorScheme.secondaryContainer,
-    );
-
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Column(
+          children: const <Widget>[
+            SizedBox(height: 10),
+            ButtonTypesGroup(enabled: true),
+            ButtonTypesGroup(enabled: false),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ButtonTypesGroup extends StatelessWidget {
+  const ButtonTypesGroup({ Key? key, required this.enabled }) : super(key: key);
+
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final VoidCallback? onPressed = enabled ? () {} : null;
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
+          const SizedBox(width: 10),
+          ElevatedButton(onPressed: onPressed, child: const Text('Elevated')),
+          // Use an ElevatedButton with specific style to implement the
+          // 'Filled' type.
           ElevatedButton(
-            style: filledStyle,
-            onPressed: () {},
-            child: const Text('Filled enabled'),
+            style: ElevatedButton.styleFrom(
+              useMaterial3: true,
+              elevation: 0,
+              baseForegroundColor: Theme.of(context).colorScheme.onPrimary,
+              baseBackgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+            onPressed: onPressed,
+            child: const Text('Filled'),
           ),
-          const SizedBox(height: 30),
+          // Use an ElevatedButton with specific style to implement the
+          // 'Filled Tonal' type.
           ElevatedButton(
-            style: filledStyle,
-            onPressed: null,
-            child: const Text('Filled disabled'),
+            style: ElevatedButton.styleFrom(
+              useMaterial3: true,
+              elevation: 0,
+              baseForegroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+              baseBackgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+            ),
+            onPressed: onPressed,
+            child: const Text('Filled Tonal'),
           ),
-          const SizedBox(height: 30),
-          ElevatedButton(
-            style: filledTonalStyle,
-            onPressed: () {},
-            child: const Text('Filled Tonal enabled'),
-          ),
-          const SizedBox(height: 30),
-          ElevatedButton(
-            style: filledTonalStyle,
-            onPressed: null,
-            child: const Text('Filled Tonal disabled'),
-          ),
+          OutlinedButton(onPressed: onPressed, child: const Text('Outlined')),
+          TextButton(onPressed: onPressed, child: const Text('Text')),
+          const SizedBox(width: 10),
         ],
       ),
     );

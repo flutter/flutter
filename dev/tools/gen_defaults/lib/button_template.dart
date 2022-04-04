@@ -33,13 +33,11 @@ class ButtonTemplate extends TokenTemplate {
   MaterialStateProperty<Color?>? get backgroundColor {
     return backgroundColorFor($enabledColor, $disabledColor);
   }''';
-    } else {
-      return '''
-  @override
-  MaterialStateProperty<Color?>? get backgroundColor {
-    return ButtonStyleButton.allOrNull<Color>(Colors.transparent);
-  }''';
     }
+    return '''
+  @override
+  MaterialStateProperty<Color?>? get backgroundColor =>
+    ButtonStyleButton.allOrNull<Color>(Colors.transparent);''';
   }
 
   String get _foregroundColor {
@@ -69,8 +67,10 @@ class ButtonTemplate extends TokenTemplate {
     final String? hoverOpacity = opacity('$tokenGroup.hover.state-layer.opacity');
     final String focusColor = color('$tokenGroup.focus.state-layer.color');
     final String? focusOpacity = opacity('$tokenGroup.focus.state-layer.opacity');
+    final String pressedColor = color('$tokenGroup.pressed.state-layer.color');
+    final String? pressedOpacity = opacity('$tokenGroup.pressed.state-layer.opacity');
     return '''
-  static MaterialStateProperty<Color?>? overlayColorFor(Color? hover, Color? focus) {
+  static MaterialStateProperty<Color?>? overlayColorFor(Color? hover, Color? focus, Color? pressed) {
     return (hover == null && focus == null)
       ? null
       : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -78,6 +78,8 @@ class ButtonTemplate extends TokenTemplate {
             return hover${hoverOpacity != null ? '?.withOpacity($hoverOpacity)' : ''};
           else if (states.contains(MaterialState.focused))
             return focus${focusOpacity != null ? '?.withOpacity($focusOpacity)' : ''};
+          else if (states.contains(MaterialState.pressed))
+            return pressed${pressedOpacity != null ? '?.withOpacity($pressedOpacity)' : ''};
           else
             return null;
         });
@@ -85,13 +87,15 @@ class ButtonTemplate extends TokenTemplate {
 
   @override
   MaterialStateProperty<Color?>? get overlayColor {
-    return overlayColorFor($hoverColor, $focusColor);
+    return overlayColorFor($hoverColor, $focusColor, $pressedColor);
   }''';
   }
 
   String get _elevation {
     if (tokens.containsKey('$tokenGroup.container.elevation')) {
       return '''
+  @override
+  MaterialStateProperty<double>? get elevation {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled))
         return ${elevation("$tokenGroup.disabled.container")};
@@ -102,10 +106,31 @@ class ButtonTemplate extends TokenTemplate {
       else if (states.contains(MaterialState.pressed))
         return ${elevation("$tokenGroup.pressed.container")};
       return ${elevation("$tokenGroup.container")};
-    });''';
+    });
+  }''';
     }
     return '''
-    return ButtonStyleButton.allOrNull<double>(0.0);''';
+  @override
+  MaterialStateProperty<double>? get elevation =>
+    ButtonStyleButton.allOrNull<double>(0.0);''';
+  }
+
+  String get _side {
+    if (tokens.containsKey('$tokenGroup.outline.color')) {
+      return '''
+  @override
+  MaterialStateProperty<BorderSide>? get side {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return ${border("$tokenGroup.disabled.outline")};
+      }
+      return ${border("$tokenGroup.outline")};
+    });
+  }''';
+    }
+    return '''
+  @override
+  MaterialStateProperty<BorderSide>? get side => null;''';
   }
 
   @override
@@ -135,10 +160,7 @@ $_overlayColor
   MaterialStateProperty<Color>? get surfaceTintColor =>
     ButtonStyleButton.allOrNull<Color>(${color("$tokenGroup.container.surface-tint-layer.color")});
 
-  @override
-  MaterialStateProperty<double>? get elevation {
 $_elevation
-  }
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding {
@@ -164,9 +186,7 @@ $_elevation
   MaterialStateProperty<Size>? get maximumSize =>
     ButtonStyleButton.allOrNull<Size>(Size.infinite);
 
-  @override
-  MaterialStateProperty<BorderSide>? get side =>
-    ButtonStyleButton.allOrNull<BorderSide>(${border("$tokenGroup.outline")});
+$_side
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
