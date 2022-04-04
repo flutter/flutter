@@ -61,20 +61,26 @@ std::shared_ptr<FilterContents> FilterContents::MakeBlend(
 
 std::shared_ptr<FilterContents> FilterContents::MakeDirectionalGaussianBlur(
     FilterInput::Ref input,
-    Vector2 blur_vector) {
+    Vector2 blur_vector,
+    BlurStyle blur_style,
+    FilterInput::Ref source_override) {
   auto blur = std::make_shared<DirectionalGaussianBlurFilterContents>();
   blur->SetInputs({input});
   blur->SetBlurVector(blur_vector);
+  blur->SetBlurStyle(blur_style);
+  blur->SetSourceOverride(source_override);
   return blur;
 }
 
 std::shared_ptr<FilterContents> FilterContents::MakeGaussianBlur(
     FilterInput::Ref input,
     Scalar sigma_x,
-    Scalar sigma_y) {
-  auto x_blur = MakeDirectionalGaussianBlur(input, Point(sigma_x, 0));
-  auto y_blur =
-      MakeDirectionalGaussianBlur(FilterInput::Make(x_blur), Point(0, sigma_y));
+    Scalar sigma_y,
+    BlurStyle blur_style) {
+  auto x_blur =
+      MakeDirectionalGaussianBlur(input, Point(sigma_x, 0), BlurStyle::kNormal);
+  auto y_blur = MakeDirectionalGaussianBlur(
+      FilterInput::Make(x_blur), Point(0, sigma_y), blur_style, input);
   return y_blur;
 }
 

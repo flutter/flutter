@@ -18,15 +18,31 @@ class Pipeline;
 
 class FilterContents : public Contents {
  public:
+  enum class BlurStyle {
+    /// Blurred inside and outside.
+    kNormal,
+    /// Solid inside, blurred outside.
+    kSolid,
+    /// Nothing inside, blurred outside.
+    kOuter,
+    /// Blurred inside, nothing outside.
+    kInner,
+  };
+
   static std::shared_ptr<FilterContents> MakeBlend(Entity::BlendMode blend_mode,
                                                    FilterInput::Vector inputs);
 
   static std::shared_ptr<FilterContents> MakeDirectionalGaussianBlur(
       FilterInput::Ref input,
-      Vector2 blur_vector);
+      Vector2 blur_vector,
+      BlurStyle blur_style = BlurStyle::kNormal,
+      FilterInput::Ref alpha_mask = nullptr);
 
-  static std::shared_ptr<FilterContents>
-  MakeGaussianBlur(FilterInput::Ref input, Scalar sigma_x, Scalar sigma_y);
+  static std::shared_ptr<FilterContents> MakeGaussianBlur(
+      FilterInput::Ref input,
+      Scalar sigma_x,
+      Scalar sigma_y,
+      BlurStyle blur_style = BlurStyle::kNormal);
 
   FilterContents();
 
