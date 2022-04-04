@@ -121,7 +121,10 @@ bool debugProfileBuildsEnabled = false;
 /// Adds [Timeline] events for every user-created [Widget] built.
 ///
 /// A user-created [Widget] is any [Widget] that is constructed in the root
-/// library.
+/// library. Often [Widget]s contain child [Widget]s that are constructed in
+/// libraries (for example, a [TextButton] having a [RichText] child). Timeline
+/// events for those children will be omitted with this flag. This works for any
+/// [Widget] not just ones declared in the root library.
 ///
 /// See also:
 ///
