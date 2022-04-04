@@ -629,6 +629,7 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     _activeModel->BeginComposing();
   }
   flutter::TextRange composingBeforeChange = _activeModel->composing_range();
+  flutter::TextRange selectionBeforeChange = _activeModel->selection();
 
   // Input string may be NSString or NSAttributedString.
   BOOL isAttributedString = [string isKindOfClass:[NSAttributedString class]];
@@ -646,7 +647,10 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
 
   if (_enableDeltaModel) {
     [self updateEditStateWithDelta:flutter::TextEditingDelta(textBeforeChange,
-                                                             composingBeforeChange, marked_text)];
+                                                             selectionBeforeChange.collapsed()
+                                                                 ? composingBeforeChange
+                                                                 : selectionBeforeChange,
+                                                             marked_text)];
   } else {
     [self updateEditState];
   }
