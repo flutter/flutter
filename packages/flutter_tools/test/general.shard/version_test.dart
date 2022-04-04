@@ -379,17 +379,17 @@ void main() {
         ), isNull);
       });
 
-      testWithoutContext('returns error at remote url and FLUTTER_GIT_URL set to different urls', () {
+      testWithoutContext('respects FLUTTER_GIT_URL even if upstream remote url is standard', () {
         final VersionCheckError error = runUpstreamValidator(
-            versionUpstreamUrl: flutterNonStandardUrlDotGit,
-            flutterGitUrl: flutterStandardUrlDotGit,
+            versionUpstreamUrl: flutterStandardUrlDotGit,
+            flutterGitUrl: flutterNonStandardUrlDotGit,
         );
         expect(error, isNotNull);
         expect(
           error.message,
           contains(
-            'The Flutter SDK is tracking "$flutterNonStandardUrlDotGit" but "FLUTTER_GIT_URL" is set to "$flutterStandardUrlDotGit".\n'
-            'Either remove "FLUTTER_GIT_URL" from the environment or set it to "$flutterNonStandardUrlDotGit". '
+            'The Flutter SDK is tracking "$flutterStandardUrlDotGit" but "FLUTTER_GIT_URL" is set to "$flutterNonStandardUrlDotGit".\n'
+            'Either remove "FLUTTER_GIT_URL" from the environment or set it to "$flutterStandardUrlDotGit". '
             'If this is intentional, it is recommended to use "git" directly to manage the SDK.'
           ),
         );

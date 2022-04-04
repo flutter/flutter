@@ -449,15 +449,16 @@ class VersionUpstreamValidator {
 
     // Strip `.git` suffix before comparing the remotes
     final List<String> sanitizedStandardRemotes = <String>[
-      if (flutterGit != null) flutterGit,
-      'https://github.com/flutter/flutter.git',
-      'git@github.com:flutter/flutter.git',
+      // If `FLUTTER_GIT_URL` is set, use that as standard remote.
+      if (flutterGit != null) flutterGit
+      // Else use the predefined standard remotes.
+      else ..._standardRemotes,
     ].map((String remote) => stripDotGit(remote)).toList();
 
     final String sanitizedRepositoryUrl = stripDotGit(repositoryUrl);
 
     if (!sanitizedStandardRemotes.contains(sanitizedRepositoryUrl)) {
-      if (platform.environment.containsKey('FLUTTER_GIT_URL')) {
+      if (flutterGit != null) {
         // If `FLUTTER_GIT_URL` is set, inform to either remove the
         // `FLUTTER_GIT_URL` environment variable or set it to the current
         // tracking remote.
@@ -481,6 +482,12 @@ class VersionUpstreamValidator {
     }
     return null;
   }
+
+  // The predefined list of remotes that are considered to be standard.
+  static final List<String> _standardRemotes = <String>[
+    'https://github.com/flutter/flutter.git',
+    'git@github.com:flutter/flutter.git',
+  ];
 
   // Strips ".git" suffix from a given string, preferably an url.
   // For example, changes 'https://github.com/flutter/flutter.git' to 'https://github.com/flutter/flutter'.

@@ -757,6 +757,7 @@ class DebuggingOptions {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
     this.enableDds = true,
+    this.cacheStartupProfile = false,
     this.dartEntrypointArgs = const <String>[],
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
@@ -790,6 +791,7 @@ class DebuggingOptions {
     this.fastStart = false,
     this.nullAssertions = false,
     this.nativeNullAssertions = false,
+    this.enableImpeller = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -805,12 +807,14 @@ class DebuggingOptions {
       this.webLaunchUrl,
       this.cacheSkSL = false,
       this.traceAllowlist,
+      this.enableImpeller = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
       dartFlags = '',
       disableServiceAuthCodes = false,
       enableDds = true,
+      cacheStartupProfile = false,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
       traceSkia = false,
@@ -839,6 +843,7 @@ class DebuggingOptions {
     required this.dartEntrypointArgs,
     required this.disableServiceAuthCodes,
     required this.enableDds,
+    required this.cacheStartupProfile,
     required this.enableSoftwareRendering,
     required this.skiaDeterministicRendering,
     required this.traceSkia,
@@ -870,6 +875,7 @@ class DebuggingOptions {
     required this.fastStart,
     required this.nullAssertions,
     required this.nativeNullAssertions,
+    required this.enableImpeller,
   });
 
   final bool debuggingEnabled;
@@ -880,6 +886,7 @@ class DebuggingOptions {
   final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
   final bool enableDds;
+  final bool cacheStartupProfile;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
@@ -903,6 +910,7 @@ class DebuggingOptions {
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
+  final bool enableImpeller;
 
   /// Whether to run the browser in headless mode.
   ///
@@ -941,6 +949,7 @@ class DebuggingOptions {
     'dartEntrypointArgs': dartEntrypointArgs,
     'disableServiceAuthCodes': disableServiceAuthCodes,
     'enableDds': enableDds,
+    'cacheStartupProfile': cacheStartupProfile,
     'enableSoftwareRendering': enableSoftwareRendering,
     'skiaDeterministicRendering': skiaDeterministicRendering,
     'traceSkia': traceSkia,
@@ -972,6 +981,7 @@ class DebuggingOptions {
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
+    'enableImpeller': enableImpeller,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -983,6 +993,7 @@ class DebuggingOptions {
       dartEntrypointArgs: ((json['dartEntrypointArgs'] as List<dynamic>?)?.cast<String>())!,
       disableServiceAuthCodes: (json['disableServiceAuthCodes'] as bool?)!,
       enableDds: (json['enableDds'] as bool?)!,
+      cacheStartupProfile: (json['cacheStartupProfile'] as bool?)!,
       enableSoftwareRendering: (json['enableSoftwareRendering'] as bool?)!,
       skiaDeterministicRendering: (json['skiaDeterministicRendering'] as bool?)!,
       traceSkia: (json['traceSkia'] as bool?)!,
@@ -1014,6 +1025,7 @@ class DebuggingOptions {
       fastStart: (json['fastStart'] as bool?)!,
       nullAssertions: (json['nullAssertions'] as bool?)!,
       nativeNullAssertions: (json['nativeNullAssertions'] as bool?)!,
+      enableImpeller: (json['enableImpeller'] as bool?) ?? false,
     );
 }
 

@@ -71,7 +71,11 @@ enum ScrollViewKeyboardDismissBehavior {
 abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
   ///
-  /// If the [primary] argument is true, the [controller] must be null.
+  /// The [ScrollView.primary] argument defaults to true for vertical
+  /// scroll views if no [controller] has been provided. The [controller] argument
+  /// must be null if [primary] is explicitly set to true. If [primary] is true,
+  /// the nearest [PrimaryScrollController] surrounding the widget is attached
+  /// to this scroll view.
   ///
   /// If the [shrinkWrap] argument is true, the [center] argument must be null.
   ///
@@ -1126,6 +1130,8 @@ class ListView extends BoxScrollView {
   /// efficient, however, is to create the instances on demand using this
   /// constructor's `itemBuilder` callback.
   ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
@@ -1133,10 +1139,6 @@ class ListView extends BoxScrollView {
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
   /// null.
-  ///
-  /// [ListView.builder] by default does not support child reordering. If
-  /// you are planning to change child order at a later time, consider using
-  /// [ListView] or [ListView.custom].
   ListView.builder({
     Key? key,
     Axis scrollDirection = Axis.vertical,
@@ -1149,6 +1151,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.prototypeItem,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
@@ -1167,6 +1170,7 @@ class ListView extends BoxScrollView {
        ),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -1211,6 +1215,8 @@ class ListView extends BoxScrollView {
   /// view's children are created in advance, or all at once when the [ListView]
   /// itself is created, it is more efficient to use the [ListView] constructor.
   ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
   /// {@tool snippet}
   ///
   /// This example shows how to create [ListView] whose [ListTile] list items
@@ -1246,6 +1252,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap = false,
     EdgeInsetsGeometry? padding,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     required IndexedWidgetBuilder separatorBuilder,
     required int itemCount,
     bool addAutomaticKeepAlives = true,
@@ -1278,6 +1285,7 @@ class ListView extends BoxScrollView {
            }
            return widget;
          },
+         findChildIndexCallback: findChildIndexCallback,
          childCount: _computeActualChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -1797,6 +1805,8 @@ class GridView extends BoxScrollView {
   /// `itemBuilder` will be called only with indices greater than or equal to
   /// zero and less than `itemCount`.
   ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
   /// The [gridDelegate] argument must not be null.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
@@ -1815,6 +1825,7 @@ class GridView extends BoxScrollView {
     EdgeInsetsGeometry? padding,
     required this.gridDelegate,
     required IndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
@@ -1828,6 +1839,7 @@ class GridView extends BoxScrollView {
   }) : assert(gridDelegate != null),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
