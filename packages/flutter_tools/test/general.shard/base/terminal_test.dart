@@ -53,6 +53,13 @@ void main() {
       }
     });
 
+    testWithoutContext('gray equals grey', () {
+      expect(
+        terminal.color('output', TerminalColor.gray),
+        equals(terminal.color('output', TerminalColor.grey)),
+      );
+    });
+
     testWithoutContext('adding bold works', () {
       expect(
         terminal.bolden('output'),
