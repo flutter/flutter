@@ -625,16 +625,16 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     _currentRouterTransaction = Object();
     widget.routeInformationParser!
       .parseRouteInformation(information)
-      .then<void>(_processParsedRouteInfo(_currentRouterTransaction, delegateRouteSetter));
+      .then<void>(_processParsedRouteInformation(_currentRouterTransaction, delegateRouteSetter));
   }
 
-  _RouteSetter<T> _processParsedRouteInfo(Object? transaction, ValueGetter<_RouteSetter<T>> delegateRouteSetter) {
+  _RouteSetter<T> _processParsedRouteInformation(Object? transaction, ValueGetter<_RouteSetter<T>> delegateRouteSetter) {
     return (T data) async {
       if (_currentRouterTransaction != transaction) {
         return;
       }
       await delegateRouteSetter()(data);
-      if (_currentRouterTransaction != transaction) {
+      if (_currentRouterTransaction == transaction) {
         _rebuild();
       }
     };
