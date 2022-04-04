@@ -58,9 +58,10 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   }
 
   OS="$(uname -s)"
+  # `uname -m` may be running in Rosetta mode, instead query sysctl
   if [ "$OS" = 'Darwin' ]; then
     ARCH="arm64"
-    # `uname -m` may be running in Rosetta mode, instead query sysctl
+    # This will return 1 on x64
     sysctl hw.optional.arm64 >/dev/null 2>&1 || {
       ARCH="x64"
     }
