@@ -34,11 +34,11 @@ class SemanticsAction {
   static const int _kPasteIndex = 1 << 14;
   static const int _kDidGainAccessibilityFocusIndex = 1 << 15;
   static const int _kDidLoseAccessibilityFocusIndex = 1 << 16;
-  static const int _kCustomAction = 1 << 17;
+  static const int _kCustomActionIndex = 1 << 17;
   static const int _kDismissIndex = 1 << 18;
   static const int _kMoveCursorForwardByWordIndex = 1 << 19;
   static const int _kMoveCursorBackwardByWordIndex = 1 << 20;
-  static const int _kSetText = 1 << 21;
+  static const int _kSetTextIndex = 1 << 21;
   // READ THIS: if you add an action here, you MUST update the
   // numSemanticsActions value in testing/dart/semantics_test.dart, or tests
   // will fail.
@@ -122,7 +122,7 @@ class SemanticsAction {
   ///
   /// The action includes a string argument, which is the new text to
   /// replace.
-  static const SemanticsAction setText = SemanticsAction._(_kSetText);
+  static const SemanticsAction setText = SemanticsAction._(_kSetTextIndex);
 
   /// Set the text selection to the given range.
   ///
@@ -174,7 +174,7 @@ class SemanticsAction {
   ///
   /// This handler is added automatically whenever a custom accessibility
   /// action is added to a semantics node.
-  static const SemanticsAction customAction = SemanticsAction._(_kCustomAction);
+  static const SemanticsAction customAction = SemanticsAction._(_kCustomActionIndex);
 
   /// A request that the node should be dismissed.
   ///
@@ -223,11 +223,11 @@ class SemanticsAction {
     _kPasteIndex: paste,
     _kDidGainAccessibilityFocusIndex: didGainAccessibilityFocus,
     _kDidLoseAccessibilityFocusIndex: didLoseAccessibilityFocus,
-    _kCustomAction: customAction,
+    _kCustomActionIndex: customAction,
     _kDismissIndex: dismiss,
     _kMoveCursorForwardByWordIndex: moveCursorForwardByWord,
     _kMoveCursorBackwardByWordIndex: moveCursorBackwardByWord,
-    _kSetText: setText,
+    _kSetTextIndex: setText,
   };
 
   @override
@@ -267,7 +267,7 @@ class SemanticsAction {
         return 'SemanticsAction.didGainAccessibilityFocus';
       case _kDidLoseAccessibilityFocusIndex:
         return 'SemanticsAction.didLoseAccessibilityFocus';
-      case _kCustomAction:
+      case _kCustomActionIndex:
         return 'SemanticsAction.customAction';
       case _kDismissIndex:
         return 'SemanticsAction.dismiss';
@@ -275,7 +275,7 @@ class SemanticsAction {
         return 'SemanticsAction.moveCursorForwardByWord';
       case _kMoveCursorBackwardByWordIndex:
         return 'SemanticsAction.moveCursorBackwardByWord';
-      case _kSetText:
+      case _kSetTextIndex:
         return 'SemanticsAction.setText';
     }
     assert(false, 'Unhandled index: $index (0x${index.toRadixString(8).padLeft(4, "0")})');

@@ -24,11 +24,11 @@ class SemanticsAction {
   static const int _kPasteIndex = 1 << 14;
   static const int _kDidGainAccessibilityFocusIndex = 1 << 15;
   static const int _kDidLoseAccessibilityFocusIndex = 1 << 16;
-  static const int _kCustomAction = 1 << 17;
+  static const int _kCustomActionIndex = 1 << 17;
   static const int _kDismissIndex = 1 << 18;
   static const int _kMoveCursorForwardByWordIndex = 1 << 19;
   static const int _kMoveCursorBackwardByWordIndex = 1 << 20;
-  static const int _kSetText = 1 << 21;
+  static const int _kSetTextIndex = 1 << 21;
 
   final int index;
 
@@ -43,14 +43,14 @@ class SemanticsAction {
   static const SemanticsAction showOnScreen = SemanticsAction._(_kShowOnScreenIndex);
   static const SemanticsAction moveCursorForwardByCharacter = SemanticsAction._(_kMoveCursorForwardByCharacterIndex);
   static const SemanticsAction moveCursorBackwardByCharacter = SemanticsAction._(_kMoveCursorBackwardByCharacterIndex);
-  static const SemanticsAction setText = SemanticsAction._(_kSetText);
+  static const SemanticsAction setText = SemanticsAction._(_kSetTextIndex);
   static const SemanticsAction setSelection = SemanticsAction._(_kSetSelectionIndex);
   static const SemanticsAction copy = SemanticsAction._(_kCopyIndex);
   static const SemanticsAction cut = SemanticsAction._(_kCutIndex);
   static const SemanticsAction paste = SemanticsAction._(_kPasteIndex);
   static const SemanticsAction didGainAccessibilityFocus = SemanticsAction._(_kDidGainAccessibilityFocusIndex);
   static const SemanticsAction didLoseAccessibilityFocus = SemanticsAction._(_kDidLoseAccessibilityFocusIndex);
-  static const SemanticsAction customAction = SemanticsAction._(_kCustomAction);
+  static const SemanticsAction customAction = SemanticsAction._(_kCustomActionIndex);
   static const SemanticsAction dismiss = SemanticsAction._(_kDismissIndex);
   static const SemanticsAction moveCursorForwardByWord = SemanticsAction._(_kMoveCursorForwardByWordIndex);
   static const SemanticsAction moveCursorBackwardByWord = SemanticsAction._(_kMoveCursorBackwardByWordIndex);
@@ -73,11 +73,11 @@ class SemanticsAction {
     _kPasteIndex: paste,
     _kDidGainAccessibilityFocusIndex: didGainAccessibilityFocus,
     _kDidLoseAccessibilityFocusIndex: didLoseAccessibilityFocus,
-    _kCustomAction: customAction,
+    _kCustomActionIndex: customAction,
     _kDismissIndex: dismiss,
     _kMoveCursorForwardByWordIndex: moveCursorForwardByWord,
     _kMoveCursorBackwardByWordIndex: moveCursorBackwardByWord,
-    _kSetText: setText,
+    _kSetTextIndex: setText,
   };
 
   @override
@@ -117,7 +117,7 @@ class SemanticsAction {
         return 'SemanticsAction.didGainAccessibilityFocus';
       case _kDidLoseAccessibilityFocusIndex:
         return 'SemanticsAction.didLoseAccessibilityFocus';
-      case _kCustomAction:
+      case _kCustomActionIndex:
         return 'SemanticsAction.customAction';
       case _kDismissIndex:
         return 'SemanticsAction.dismiss';
@@ -125,7 +125,7 @@ class SemanticsAction {
         return 'SemanticsAction.moveCursorForwardByWord';
       case _kMoveCursorBackwardByWordIndex:
         return 'SemanticsAction.moveCursorBackwardByWord';
-      case _kSetText:
+      case _kSetTextIndex:
         return 'SemanticsAction.setText';
     }
     assert(false, 'Unhandled index: $index (0x${index.toRadixString(8).padLeft(4, "0")})');

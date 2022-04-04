@@ -786,7 +786,7 @@ class SingletonFlutterWindow extends FlutterWindow {
 class AccessibilityFeatures {
   const AccessibilityFeatures._(this._index);
 
-  static const int _kAccessibleNavigation = 1 << 0;
+  static const int _kAccessibleNavigationIndex = 1 << 0;
   static const int _kInvertColorsIndex = 1 << 1;
   static const int _kDisableAnimationsIndex = 1 << 2;
   static const int _kBoldTextIndex = 1 << 3;
@@ -801,7 +801,7 @@ class AccessibilityFeatures {
   /// interaction model of the device.
   ///
   /// For example, TalkBack on Android and VoiceOver on iOS enable this flag.
-  bool get accessibleNavigation => _kAccessibleNavigation & _index != 0;
+  bool get accessibleNavigation => _kAccessibleNavigationIndex & _index != 0;
 
   /// The platform is inverting the colors of the application.
   bool get invertColors => _kInvertColorsIndex & _index != 0;
