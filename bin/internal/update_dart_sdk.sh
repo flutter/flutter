@@ -20,12 +20,13 @@ DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART_SDK_PATH_OLD="$DART_SDK_PATH.old"
 ENGINE_STAMP="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
 ENGINE_VERSION=`cat "$FLUTTER_ROOT/bin/internal/engine.version"`
+OS="$(uname -s)"
 
 if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; then
   command -v curl > /dev/null 2>&1 || {
     >&2 echo
     >&2 echo 'Missing "curl" tool. Unable to download Dart SDK.'
-    case "$(uname -s)" in
+    case "$OS" in
       Darwin)
         >&2 echo 'Consider running "brew install curl".'
         ;;
@@ -42,7 +43,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   command -v unzip > /dev/null 2>&1 || {
     >&2 echo
     >&2 echo 'Missing "unzip" tool. Unable to extract Dart SDK.'
-    case "$(uname -s)" in
+    case "$OS" in
       Darwin)
         echo 'Consider running "brew install unzip".'
         ;;
@@ -57,7 +58,6 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     exit 1
   }
 
-  OS="$(uname -s)"
   # `uname -m` may be running in Rosetta mode, instead query sysctl
   if [ "$OS" = 'Darwin' ]; then
     # Allow non-zero exit so we can do control flow
@@ -76,7 +76,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     elif [ "$QUERY_RESULT" = '1' ]; then
       ARCH='arm64'
     else
-      >&2 echo "$QUERY returned unexpected output: $QUERY_RESULT"
+      >&2 echo "'$QUERY' returned unexpected output: '$QUERY_RESULT'"
       exit 1
     fi
     set -e
