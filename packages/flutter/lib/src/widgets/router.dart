@@ -466,7 +466,7 @@ class Router<T> extends StatefulWidget {
 }
 
 typedef _AsyncPassthrough<Q> = Future<Q> Function(Q);
-typedef _DelegateRouteSetter<T> = Future<void> Function(T);
+typedef _RouteSetter<T> = Future<void> Function(T);
 
 /// The [Router]'s intention when it reports a new [RouteInformation] to the
 /// [RouteInformationProvider].
@@ -491,13 +491,8 @@ enum RouteInformationReportingType {
   navigate,
 }
 
-class _DiscardTransaction implements Exception {
-  const _DiscardTransaction();
-}
-
 class _RouterState<T> extends State<Router<T>> with RestorationMixin {
-  Object? _currentRouteInformationParserTransaction;
-  Object? _currentRouterDelegateTransaction;
+  Object? _currentRouterTransaction;
   RouteInformationReportingType? _currentIntentionToReport;
   final _RestorableRouteInformation _routeInformation = _RestorableRouteInformation();
 
@@ -597,8 +592,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
         widget.backButtonDispatcher != oldWidget.backButtonDispatcher ||
         widget.routeInformationParser != oldWidget.routeInformationParser ||
         widget.routerDelegate != oldWidget.routerDelegate) {
-      _currentRouteInformationParserTransaction = Object();
-      _currentRouterDelegateTransaction = Object();
+      _currentRouterTransaction = Object();
     }
     if (widget.routeInformationProvider != oldWidget.routeInformationProvider) {
       oldWidget.routeInformationProvider?.removeListener(_handleRouteInformationProviderNotification);
@@ -623,23 +617,27 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     widget.routeInformationProvider?.removeListener(_handleRouteInformationProviderNotification);
     widget.backButtonDispatcher?.removeCallback(_handleBackButtonDispatcherNotification);
     widget.routerDelegate.removeListener(_handleRouterDelegateNotification);
-    _currentRouteInformationParserTransaction = null;
-    _currentRouterDelegateTransaction = null;
+    _currentRouterTransaction = null;
     super.dispose();
   }
 
-  void _processRouteInformation(RouteInformation information, ValueGetter<_DelegateRouteSetter<T>> delegateRouteSetter) {
-    _currentRouteInformationParserTransaction = Object();
-    _currentRouterDelegateTransaction = Object();
+  void _processRouteInformation(RouteInformation information, ValueGetter<_RouteSetter<T>> delegateRouteSetter) {
+    _currentRouterTransaction = Object();
     widget.routeInformationParser!
       .parseRouteInformation(information)
-      .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
-      .then<void>(delegateRouteSetter())
-      .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
-      .then<void>(_rebuild)
-      .onError<_DiscardTransaction>((_DiscardTransaction e, StackTrace trace) {
+      .then<void>(_processParsedRouteInfo(_currentRouterTransaction, delegateRouteSetter));
+  }
+
+  _RouteSetter<T> _processParsedRouteInfo(Object? transaction, ValueGetter<_RouteSetter<T>> delegateRouteSetter) {
+    return (T data) async {
+      if (_currentRouterTransaction != transaction) {
         return;
-      });
+      }
+      await delegateRouteSetter()(data);
+      if (_currentRouterTransaction != transaction) {
+        _rebuild();
+      }
+    };
   }
 
   void _handleRouteInformationProviderNotification() {
@@ -648,54 +646,21 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   }
 
   Future<bool> _handleBackButtonDispatcherNotification() {
-    _currentRouteInformationParserTransaction = Object();
-    _currentRouterDelegateTransaction = Object();
+    _currentRouterTransaction = Object();
     return widget.routerDelegate
       .popRoute()
-      .then<bool>(_verifyRouterDelegatePopStillCurrent(_currentRouterDelegateTransaction, widget))
-      .then<bool>((bool data) {
-        _rebuild();
-        return SynchronousFuture<bool>(data);
-      });
+      .then<bool>(_handleRoutePopped(_currentRouterTransaction));
   }
 
-  _AsyncPassthrough<T> _verifyRouteInformationParserStillCurrent(Object? transaction, Router<T> originalWidget) {
-    return (T data) {
-      if (transaction == _currentRouteInformationParserTransaction &&
-          widget.routeInformationProvider == originalWidget.routeInformationProvider &&
-          widget.backButtonDispatcher == originalWidget.backButtonDispatcher &&
-          widget.routeInformationParser == originalWidget.routeInformationParser &&
-          widget.routerDelegate == originalWidget.routerDelegate) {
-        return SynchronousFuture<T>(data);
-      }
-      throw const _DiscardTransaction();
-    };
-  }
-
-  _AsyncPassthrough<void> _verifyRouterDelegatePushStillCurrent(Object? transaction, Router<T> originalWidget) {
-    return (void data) {
-      if (transaction == _currentRouterDelegateTransaction &&
-          widget.routeInformationProvider == originalWidget.routeInformationProvider &&
-          widget.backButtonDispatcher == originalWidget.backButtonDispatcher &&
-          widget.routeInformationParser == originalWidget.routeInformationParser &&
-          widget.routerDelegate == originalWidget.routerDelegate)
-        return SynchronousFuture<void>(data);
-      throw const _DiscardTransaction();
-    };
-  }
-
-  _AsyncPassthrough<bool> _verifyRouterDelegatePopStillCurrent(Object? transaction, Router<T> originalWidget) {
+  _AsyncPassthrough<bool> _handleRoutePopped(Object? transaction) {
     return (bool data) {
-      if (transaction == _currentRouterDelegateTransaction &&
-          widget.routeInformationProvider == originalWidget.routeInformationProvider &&
-          widget.backButtonDispatcher == originalWidget.backButtonDispatcher &&
-          widget.routeInformationParser == originalWidget.routeInformationParser &&
-          widget.routerDelegate == originalWidget.routerDelegate) {
-        return SynchronousFuture<bool>(data);
+      if (transaction != _currentRouterTransaction) {
+        // A rebuilt was trigger from a different source. Returns true to
+        // prevent bubbling.
+        return SynchronousFuture<bool>(true);
       }
-      // A rebuilt was trigger from a different source. Returns true to
-      // prevent bubbling.
-      return SynchronousFuture<bool>(true);
+      _rebuild();
+      return SynchronousFuture<bool>(data);
     };
   }
 
