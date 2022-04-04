@@ -148,7 +148,7 @@ Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime, String? t
 ///
 /// This affects only the metric file name which contains metric data, and does not affect
 /// real host/device tags.
-/// 
+///
 /// For example:
 ///   Old file name: `backdrop_filter_perf__timeline_summary`
 ///   New file name: `backdrop_filter_perf__timeline_summary_intel_linux_motoG4`
@@ -156,17 +156,23 @@ String metricFileName(
   String taskName,
   Map<String, dynamic> benchmarkTagsMap,
 ) {
-  String fileName = taskName;
+  final StringBuffer fileName = StringBuffer(taskName);
   if (benchmarkTagsMap.containsKey('arch')) {
-    fileName = '${fileName}_${_fileNameFormat(benchmarkTagsMap['arch'] as String)}';
+    fileName
+      ..write('_')
+      ..write(_fileNameFormat(benchmarkTagsMap['arch'] as String));
   }
   if (benchmarkTagsMap.containsKey('host_type')) {
-    fileName = '${fileName}_${_fileNameFormat(benchmarkTagsMap['host_type'] as String)}';
+    fileName
+      ..write('_')
+      ..write(_fileNameFormat(benchmarkTagsMap['host_type'] as String));
   }
   if (benchmarkTagsMap.containsKey('device_type')) {
-    fileName = '${fileName}_${_fileNameFormat(benchmarkTagsMap['device_type'] as String)}';
+    fileName
+      ..write('_')
+      ..write(_fileNameFormat(benchmarkTagsMap['device_type'] as String));
   }
-  return fileName;
+  return fileName.toString();
 }
 
 /// Format `fileName` removing non letter and number characters.
