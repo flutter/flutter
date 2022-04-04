@@ -1386,6 +1386,19 @@ class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
   final EditableTextState editableText;
   final TextSelectionControls controls;
 
+  static String _getMaterialButtonLabel(DefaultContextualMenuButtonType type, MaterialLocalizations localizations) {
+    switch (type) {
+      case DefaultContextualMenuButtonType.cut:
+        return localizations.cutButtonLabel;
+      case DefaultContextualMenuButtonType.copy:
+        return localizations.copyButtonLabel;
+      case DefaultContextualMenuButtonType.paste:
+        return localizations.pasteButtonLabel;
+      case DefaultContextualMenuButtonType.selectAll:
+        return localizations.selectAllButtonLabel;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final TextSelectionDelegate delegate = editableText;
@@ -1416,13 +1429,15 @@ class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
 
         switch (Theme.of(context).platform) {
           case TargetPlatform.iOS:
+            assert(debugCheckHasCupertinoLocalizations(context));
+            final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
             return CupertinoTextSelectionToolbar(
               anchorAbove: primaryAnchor,
               anchorBelow: secondaryAnchor!,
               children: buttonDatas.values.map((ContextualMenuButtonData buttonData) {
                 return CupertinoTextSelectionToolbarButton.text(
                   onPressed: buttonData.onPressed,
-                  text: buttonData.label,
+                  text: CupertinoTextSelectionToolbarButton.getButtonLabel(buttonData.type, localizations),
                 );
               }).toList(),
             );
@@ -1431,34 +1446,40 @@ class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
               anchorAbove: primaryAnchor,
               anchorBelow: secondaryAnchor!,
               children: buttonDatas.values.map((ContextualMenuButtonData buttonData) {
+                assert(debugCheckHasMaterialLocalizations(context));
+                final MaterialLocalizations localizations = MaterialLocalizations.of(context);
                 return TextSelectionToolbarTextButton(
                   padding: TextSelectionToolbarTextButton.getPadding(buttonIndex++, buttonDatas.length),
                   onPressed: buttonData.onPressed,
-                  child: Text(buttonData.label),
+                  child: Text(_getMaterialButtonLabel(buttonData.type, localizations)),
                 );
               }).toList(),
             );
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
+            assert(debugCheckHasMaterialLocalizations(context));
+            final MaterialLocalizations localizations = MaterialLocalizations.of(context);
             return DesktopTextSelectionToolbar(
               anchor: primaryAnchor,
               children: buttonDatas.values.map((ContextualMenuButtonData buttonData) {
                 return DesktopTextSelectionToolbarButton.text(
                   context: context,
                   onPressed: buttonData.onPressed,
-                  text: buttonData.label,
+                  text: _getMaterialButtonLabel(buttonData.type, localizations),
                 );
               }).toList(),
             );
           case TargetPlatform.macOS:
+            assert(debugCheckHasCupertinoLocalizations(context));
+            final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
             return CupertinoDesktopTextSelectionToolbar(
               anchor: primaryAnchor,
               children: buttonDatas.values.map((ContextualMenuButtonData buttonData) {
                 return CupertinoDesktopTextSelectionToolbarButton.text(
                   context: context,
                   onPressed: buttonData.onPressed,
-                  text: buttonData.label,
+                  text: CupertinoTextSelectionToolbarButton.getButtonLabel(buttonData.type, localizations),
                 );
               }).toList(),
             );
@@ -1467,26 +1488,6 @@ class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
     );
   }
 }
-
-// Minimal padding from all edges of the selection toolbar to all edges of the
-// screen.
-const double _kToolbarScreenPadding = 8.0;
-
-// These values were measured from a screenshot of TextEdit on MacOS 10.15.7 on
-// a Macbook Pro.
-const double _kToolbarWidth = 222.0;
-const Radius _kToolbarBorderRadius = Radius.circular(4.0);
-
-// These values were measured from a screenshot of TextEdit on MacOS 10.16 on a
-// Macbook Pro.
-const CupertinoDynamicColor _kToolbarBorderColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFBBBBBB),
-  darkColor: Color(0xFF505152),
-);
-const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xffECE8E6),
-  darkColor: Color(0xff302928),
-);
 
 // Generates the child that's passed into CupertinoDesktopTextSelectionToolbar.
 class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {
@@ -1611,184 +1612,6 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     return CupertinoDesktopTextSelectionToolbar(
       anchor: widget.anchor,
       children: items,
-    );
-  }
-}
-
-/// A Mac-style text selection toolbar.
-///
-/// Typically displays buttons for text manipulation, e.g. copying and pasting
-/// text.
-///
-/// Tries to position itself as closely as possible to [anchor] while remaining
-/// fully on-screen.
-///
-/// See also:
-///
-///  * [TextSelectionControls.buildToolbar], where this is used by default to
-///    build a Mac-style toolbar.
-///  * [TextSelectionToolbar], which is similar, but builds an Android-style
-///    toolbar.
-class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
-  /// Creates an instance of CupertinoTextSelectionToolbar.
-  const CupertinoDesktopTextSelectionToolbar({
-    Key? key,
-    required this.anchor,
-    required this.children,
-  }) : assert(children.length > 0),
-       super(key: key);
-
-  /// The point at which the toolbar will attempt to position itself as closely
-  /// as possible.
-  final Offset anchor;
-
-  /// {@macro flutter.material.TextSelectionToolbar.children}
-  ///
-  /// See also:
-  ///   * [CupertinoDesktopTextSelectionToolbarButton], which builds a default
-  ///     Mac-style text selection toolbar text button.
-  final List<Widget> children;
-
-  // Builds a toolbar just like the default Mac toolbar, with the right color
-  // background, padding, and rounded corners.
-  static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
-    return Container(
-      width: _kToolbarWidth,
-      decoration: BoxDecoration(
-        color: _kToolbarBackgroundColor.resolveFrom(context),
-        border: Border.all(
-          color: _kToolbarBorderColor.resolveFrom(context),
-        ),
-        borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          // This value was measured from a screenshot of TextEdit on MacOS
-          // 10.15.7 on a Macbook Pro.
-          vertical: 3.0,
-        ),
-        child: child,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-
-    final double paddingAbove = mediaQuery.padding.top + _kToolbarScreenPadding;
-    final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        _kToolbarScreenPadding,
-        paddingAbove,
-        _kToolbarScreenPadding,
-        _kToolbarScreenPadding,
-      ),
-      child: CustomSingleChildLayout(
-        delegate: DesktopTextSelectionToolbarLayoutDelegate(
-          anchor: anchor - localAdjustment,
-        ),
-        child: _defaultToolbarBuilder(context, Column(
-          mainAxisSize: MainAxisSize.min,
-          children: children,
-        )),
-      ),
-    );
-  }
-}
-
-// These values were measured from a screenshot of TextEdit on MacOS 10.15.7 on
-// a Macbook Pro.
-const TextStyle _kToolbarButtonFontStyle = TextStyle(
-  inherit: false,
-  fontSize: 14.0,
-  letterSpacing: -0.15,
-  fontWeight: FontWeight.w400,
-);
-
-// This value was measured from a screenshot of TextEdit on MacOS 10.15.7 on a
-// Macbook Pro.
-const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
-  20.0,
-  0.0,
-  20.0,
-  3.0,
-);
-
-/// A button in the style of the Mac context menu buttons.
-class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
-  /// Creates an instance of CupertinoDesktopTextSelectionToolbarButton.
-  const CupertinoDesktopTextSelectionToolbarButton({
-    Key? key,
-    required this.onPressed,
-    required this.child,
-  }) : super(key: key);
-
-  /// Create an instance of [CupertinoDesktopTextSelectionToolbarButton] whose child is
-  /// a [Text] widget styled like the default Mac context menu button.
-  CupertinoDesktopTextSelectionToolbarButton.text({
-    Key? key,
-    required BuildContext context,
-    required this.onPressed,
-    required String text,
-  }) : child = Text(
-         text,
-         overflow: TextOverflow.ellipsis,
-         style: _kToolbarButtonFontStyle.copyWith(
-           color: const CupertinoDynamicColor.withBrightness(
-             color: CupertinoColors.black,
-             darkColor: CupertinoColors.white,
-           ).resolveFrom(context),
-         ),
-       ),
-       super(key: key);
-
-  /// {@macro flutter.cupertino.CupertinoTextSelectionToolbarButton.onPressed}
-  final VoidCallback onPressed;
-
-  /// {@macro flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
-  final Widget child;
-
-  @override
-  State<CupertinoDesktopTextSelectionToolbarButton> createState() => _CupertinoDesktopTextSelectionToolbarButtonState();
-}
-
-class _CupertinoDesktopTextSelectionToolbarButtonState extends State<CupertinoDesktopTextSelectionToolbarButton> {
-  bool _isHovered = false;
-
-  void _onEnter(PointerEnterEvent event) {
-    setState(() {
-      _isHovered = true;
-    });
-  }
-
-  void _onExit(PointerExitEvent event) {
-    setState(() {
-      _isHovered = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: MouseRegion(
-        onEnter: _onEnter,
-        onExit: _onExit,
-        child: CupertinoButton(
-          alignment: Alignment.centerLeft,
-          borderRadius: null,
-          color: _isHovered ? CupertinoTheme.of(context).primaryColor : null,
-          minSize: 0.0,
-          onPressed: widget.onPressed,
-          padding: _kToolbarButtonPadding,
-          pressedOpacity: 0.7,
-          child: widget.child,
-        ),
-      ),
     );
   }
 }

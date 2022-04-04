@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection' show LinkedHashMap;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
@@ -11,9 +12,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'debug.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
+import 'localizations.dart';
 import 'text_selection.dart';
+import 'text_selection_toolbar.dart';
+import 'text_selection_toolbar_button.dart';
 import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
@@ -269,6 +274,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.buildContextualMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -430,6 +436,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.buildContextualMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -775,6 +782,9 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
+
+  /// {@macro flutter.widgets.EditableText.buildContextualMenu}
+  final ContextualMenuBuilder? buildContextualMenu;
 
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
@@ -1272,6 +1282,20 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             restorationId: 'editable',
             scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+            buildContextualMenu: widget.buildContextualMenu ?? (BuildContext context, Offset primaryAnchor, Offset? secondaryAnchor) {
+              if (_editableText == null || textSelectionControls == null) {
+                return const SizedBox.shrink();
+              }
+
+              // TODO(justinmc): Bug: This only gets shown once, then never again
+              // despite long pressing or right clicking.
+              return _PlatformTextSelectionControlsToolbar(
+                primaryAnchor: primaryAnchor,
+                secondaryAnchor: secondaryAnchor,
+                controls: textSelectionControls,
+                editableText: _editableText,
+              );
+            },
           ),
         ),
       ),
@@ -1302,6 +1326,88 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           ),
         ),
       ),
+    );
+  }
+}
+
+// TODO(justinmc): Consolidate with same class in TextField.
+class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
+  const _PlatformTextSelectionControlsToolbar({
+    required this.primaryAnchor,
+    this.secondaryAnchor,
+    required this.controls,
+    required this.editableText,
+    Key? key,
+  }) : super(key: key);
+
+  final Offset primaryAnchor;
+  final Offset? secondaryAnchor;
+  final EditableTextState editableText;
+  final TextSelectionControls controls;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextSelectionDelegate delegate = editableText;
+
+    final ClipboardStatusNotifier? clipboardStatus = editableText.clipboardStatus;
+
+    final VoidCallback? handleCut = controls.canCut(delegate) ? () => controls.handleCut(delegate, clipboardStatus) : null;
+    final VoidCallback? handleCopy = controls.canCopy(delegate) ? () => controls.handleCopy(delegate, clipboardStatus) : null;
+    final VoidCallback? handlePaste = controls.canPaste(delegate) ? () => controls.handlePaste(delegate) : null;
+    final VoidCallback? handleSelectAll = controls.canSelectAll(delegate) ? () => controls.handleSelectAll(delegate) : null;
+
+    // TODO(justinmc): I need to think about handleCut, handleCopy, etc.
+    // The visibility of those buttons depends on the platform. Should that
+    // logic go in the switch statement below instead of wherever these methods
+    // are being passed in?
+    return TextSelectionToolbarButtons(
+      clipboardStatus: clipboardStatus,
+      handleCut: handleCut,
+      handleCopy: handleCopy,
+      handlePaste: handlePaste,
+      handleSelectAll: handleSelectAll,
+      builder: (BuildContext context, LinkedHashMap<DefaultContextualMenuButtonType, ContextualMenuButtonData> buttonDatas) {
+        // If there aren't any buttons to build, build an empty toolbar.
+        if (buttonDatas.isEmpty) {
+          return const SizedBox(width: 0.0, height: 0.0);
+        }
+
+        assert(debugCheckHasCupertinoLocalizations(context));
+        final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+
+        // The Cupertino library has no access to the Material library, so it's
+        // not possible to build Material toolbar UI here, and
+        // CupertinoTextField will always display a Cupertino-style toolbar
+        // regardless of the platform.
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.iOS:
+            return CupertinoTextSelectionToolbar(
+              anchorAbove: primaryAnchor,
+              anchorBelow: secondaryAnchor!,
+              children: buttonDatas.values.map((ContextualMenuButtonData buttonData) {
+                return CupertinoTextSelectionToolbarButton.text(
+                  onPressed: buttonData.onPressed,
+                  text: CupertinoTextSelectionToolbarButton.getButtonLabel(buttonData.type, localizations),
+                );
+              }).toList(),
+            );
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+          case TargetPlatform.macOS:
+            return CupertinoDesktopTextSelectionToolbar(
+              anchor: primaryAnchor,
+              children: buttonDatas.values.map((ContextualMenuButtonData buttonData) {
+                return CupertinoDesktopTextSelectionToolbarButton.text(
+                  context: context,
+                  onPressed: buttonData.onPressed,
+                  text: CupertinoTextSelectionToolbarButton.getButtonLabel(buttonData.type, localizations),
+                );
+              }).toList(),
+            );
+        }
+      },
     );
   }
 }

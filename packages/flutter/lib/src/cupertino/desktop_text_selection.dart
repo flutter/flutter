@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
-import 'localizations.dart';
 import 'theme.dart';
 
 // Minimal padding from all edges of the selection toolbar to all edges of the
