@@ -64,9 +64,20 @@ ${parser.usage}
   await PackageAutoroller(
     framework: framework,
     githubClient: results[kGithubClient] as String? ?? 'gh',
-    orgName: orgName,
+    orgName: _parseOrgName(upstreamUrl),
     token: (results[kTokenOption] as String).trim(),
   ).roll();
+}
+
+String _parseOrgName(String remoteUrl) {
+  final RegExp pattern = RegExp(r'^https:\/\/github\.com\/(.*)\/');
+  final RegExpMatch? match = pattern.firstMatch(remoteUrl);
+  if (match == null) {
+    throw FormatException(
+      'Malformed upstream URL "$remoteUrl", should start with "https://github.com/"',
+    );
+  }
+  return match.group(1)!;
 }
 
 Checkouts get _localCheckouts {

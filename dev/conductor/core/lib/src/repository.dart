@@ -454,6 +454,7 @@ abstract class Repository {
   Future<String> commit(
     String message, {
     bool addFirst = false,
+    String? author,
   }) async {
     final bool hasChanges = (await git.getOutput(
       <String>['status', '--porcelain'],
@@ -471,8 +472,28 @@ abstract class Repository {
         workingDirectory: (await checkoutDirectory).path,
       );
     }
+    String? authorArg;
+    if (author != null) {
+      if (author.contains('"')) {
+        throw FormatException(
+          'Commit author cannot contain character \'"\', received $author',
+        );
+      }
+      // verify [author] matches git author convention, e.g. "Jane Doe <jane.doe@email.com>"
+      if (!RegExp(r'.+<.*>').hasMatch(author)) {
+        throw FormatException(
+          'Commit author appears malformed: "$author"',
+        );
+      }
+      authorArg = '--author="$author"';
+    }
     await git.run(
-      <String>['commit', '--message', message],
+      <String>[
+        'commit',
+        '--message',
+        message,
+        if (authorArg != null) authorArg,
+      ],
       'commit changes',
       workingDirectory: (await checkoutDirectory).path,
     );
