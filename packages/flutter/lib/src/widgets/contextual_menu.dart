@@ -1,9 +1,14 @@
 import 'dart:collection' show LinkedHashMap;
 import 'dart:ui' show Offset;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
+import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'inherited_theme.dart';
@@ -239,65 +244,125 @@ class TextSelectionToolbarButtons extends StatefulWidget {
   const TextSelectionToolbarButtons({
     Key? key,
     required this.builder,
-    required this.clipboardStatus,
-    required this.handleCut,
-    required this.handleCopy,
-    required this.handlePaste,
-    required this.handleSelectAll,
+    required this.editableTextState,
   }) : super(key: key);
 
   /// Called with a list of [ContextualMenuButtonData]s so the contextual menu
   /// can be built.
   final ToolbarButtonWidgetBuilder builder;
-  final ClipboardStatusNotifier? clipboardStatus;
-  final VoidCallback? handleCut;
-  final VoidCallback? handleCopy;
-  final VoidCallback? handlePaste;
-  final VoidCallback? handleSelectAll;
+  final EditableTextState editableTextState;
 
   @override
   _TextSelectionToolbarButtonsState createState() => _TextSelectionToolbarButtonsState();
 }
 
 class _TextSelectionToolbarButtonsState extends State<TextSelectionToolbarButtons> with TickerProviderStateMixin {
+  ClipboardStatusNotifier? get _clipboardStatus =>
+      widget.editableTextState.clipboardStatus;
+
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
     });
   }
 
+  bool get _cutEnabled {
+    return !widget.editableTextState.widget.readOnly
+        && !widget.editableTextState.widget.obscureText
+        && !widget.editableTextState.textEditingValue.selection.isCollapsed;
+  }
+
+  bool get _copyEnabled {
+    return !widget.editableTextState.widget.obscureText
+        && !widget.editableTextState.textEditingValue.selection.isCollapsed;
+  }
+
+  bool get _pasteEnabled {
+    return !widget.editableTextState.widget.readOnly;
+  }
+
+  bool get _selectAllEnabled {
+    if (!widget.editableTextState.widget.enableInteractiveSelection
+        || (widget.editableTextState.widget.readOnly
+            && widget.editableTextState.widget.obscureText)) {
+      return false;
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      return widget.editableTextState.textEditingValue.text.isNotEmpty
+          && widget.editableTextState.textEditingValue.selection.isCollapsed;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return true;
+    }
+  }
+
+  void _handleCut() {
+    widget.editableTextState.cutSelection(SelectionChangedCause.toolbar);
+  }
+
+  void _handleCopy() {
+    widget.editableTextState.copySelection(SelectionChangedCause.toolbar);
+  }
+
+  void _handlePaste() {
+    widget.editableTextState.pasteText(SelectionChangedCause.toolbar);
+  }
+
+  void _handleSelectAll() {
+    widget.editableTextState.selectAll(SelectionChangedCause.toolbar);
+    widget.editableTextState.bringIntoView(
+      widget.editableTextState.textEditingValue.selection.extent,
+    );
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        widget.editableTextState.hideToolbar();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
+    _clipboardStatus?.addListener(_onChangedClipboardStatus);
   }
 
   @override
   void didUpdateWidget(TextSelectionToolbarButtons oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.clipboardStatus != oldWidget.clipboardStatus) {
-      widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
-      oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
+    if (_clipboardStatus != oldWidget.editableTextState.clipboardStatus) {
+      _clipboardStatus?.addListener(_onChangedClipboardStatus);
+      oldWidget.editableTextState.clipboardStatus?.removeListener(
+        _onChangedClipboardStatus,
+      );
     }
   }
 
   @override
   void dispose() {
     super.dispose();
-    widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
+    _clipboardStatus?.removeListener(_onChangedClipboardStatus);
   }
 
   @override
   Widget build(BuildContext context) {
     // If there are no buttons to be shown, don't render anything.
-    if (widget.handleCut == null && widget.handleCopy == null
-        && widget.handlePaste == null && widget.handleSelectAll == null) {
+    if (!_cutEnabled && !_copyEnabled && !_pasteEnabled && !_selectAllEnabled) {
       return const SizedBox.shrink();
     }
-    // If the paste button is desired, don't render anything until the state of
+    // If the paste button is enabled, don't render anything until the state of
     // the clipboard is known, since it's used to determine if paste is shown.
-    if (widget.handlePaste != null
-        && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
+    if (_pasteEnabled && _clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox.shrink();
     }
 
@@ -307,25 +372,25 @@ class _TextSelectionToolbarButtonsState extends State<TextSelectionToolbarButton
     final LinkedHashMap<DefaultContextualMenuButtonType, ContextualMenuButtonData> buttonDatas =
         LinkedHashMap<DefaultContextualMenuButtonType, ContextualMenuButtonData>.of(
             <DefaultContextualMenuButtonType, ContextualMenuButtonData>{
-              if (widget.handleCut != null)
+              if (_cutEnabled)
                 DefaultContextualMenuButtonType.cut: ContextualMenuButtonData(
-                  onPressed: widget.handleCut!,
+                  onPressed: _handleCut,
                   type: DefaultContextualMenuButtonType.cut,
                 ),
-              if (widget.handleCopy != null)
+              if (_copyEnabled)
                 DefaultContextualMenuButtonType.copy: ContextualMenuButtonData(
-                  onPressed: widget.handleCopy!,
+                  onPressed: _handleCopy,
                   type: DefaultContextualMenuButtonType.copy,
                 ),
-              if (widget.handlePaste != null
-                  && widget.clipboardStatus?.value == ClipboardStatus.pasteable)
+              if (_pasteEnabled
+                  && _clipboardStatus?.value == ClipboardStatus.pasteable)
                 DefaultContextualMenuButtonType.paste: ContextualMenuButtonData(
-                  onPressed: widget.handlePaste!,
+                  onPressed: _handlePaste,
                   type: DefaultContextualMenuButtonType.paste,
                 ),
-              if (widget.handleSelectAll != null)
+              if (_selectAllEnabled)
                 DefaultContextualMenuButtonType.selectAll: ContextualMenuButtonData(
-                  onPressed: widget.handleSelectAll!,
+                  onPressed: _handleSelectAll,
                   type: DefaultContextualMenuButtonType.selectAll,
                 ),
             });

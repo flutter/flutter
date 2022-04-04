@@ -1287,8 +1287,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
                 return const SizedBox.shrink();
               }
 
-              // TODO(justinmc): Bug: This only gets shown once, then never again
-              // despite long pressing or right clicking.
               return _PlatformTextSelectionControlsToolbar(
                 primaryAnchor: primaryAnchor,
                 secondaryAnchor: secondaryAnchor,
@@ -1347,25 +1345,8 @@ class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextSelectionDelegate delegate = editableText;
-
-    final ClipboardStatusNotifier? clipboardStatus = editableText.clipboardStatus;
-
-    final VoidCallback? handleCut = controls.canCut(delegate) ? () => controls.handleCut(delegate, clipboardStatus) : null;
-    final VoidCallback? handleCopy = controls.canCopy(delegate) ? () => controls.handleCopy(delegate, clipboardStatus) : null;
-    final VoidCallback? handlePaste = controls.canPaste(delegate) ? () => controls.handlePaste(delegate) : null;
-    final VoidCallback? handleSelectAll = controls.canSelectAll(delegate) ? () => controls.handleSelectAll(delegate) : null;
-
-    // TODO(justinmc): I need to think about handleCut, handleCopy, etc.
-    // The visibility of those buttons depends on the platform. Should that
-    // logic go in the switch statement below instead of wherever these methods
-    // are being passed in?
     return TextSelectionToolbarButtons(
-      clipboardStatus: clipboardStatus,
-      handleCut: handleCut,
-      handleCopy: handleCopy,
-      handlePaste: handlePaste,
-      handleSelectAll: handleSelectAll,
+      editableTextState: editableText,
       builder: (BuildContext context, LinkedHashMap<DefaultContextualMenuButtonType, ContextualMenuButtonData> buttonDatas) {
         // If there aren't any buttons to build, build an empty toolbar.
         if (buttonDatas.isEmpty) {

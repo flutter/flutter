@@ -291,6 +291,10 @@ class TextField extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
+    @Deprecated(
+      'Use `buildContextualMenu` instead. '
+      'This feature was deprecated after v2.12.0-4.1.pre.',
+    )
     ToolbarOptions? toolbarOptions,
     this.showCursor,
     this.autofocus = false,
@@ -1283,8 +1287,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
               return const SizedBox.shrink();
             }
 
-            // TODO(justinmc): Bug: This only gets shown once, then never again
-            // despite long pressing or right clicking.
             return _PlatformTextSelectionControlsToolbar(
               primaryAnchor: primaryAnchor,
               secondaryAnchor: secondaryAnchor,
@@ -1368,8 +1370,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 }
 
-// TODO(justinmc): CupertinoTextField. You can't just share this Material
-// stuff there, so I think I need to create a Cupertino one.
 // TODO(justinmc): Move this somewhere, consider making it public.
 /// The [ContextualMenu] for text selection for the current platform.
 class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
@@ -1401,26 +1401,9 @@ class _PlatformTextSelectionControlsToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextSelectionDelegate delegate = editableText;
-
-    final ClipboardStatusNotifier? clipboardStatus = editableText.clipboardStatus;
-
-    final VoidCallback? handleCut = controls.canCut(delegate) ? () => controls.handleCut(delegate, clipboardStatus) : null;
-    final VoidCallback? handleCopy = controls.canCopy(delegate) ? () => controls.handleCopy(delegate, clipboardStatus) : null;
-    final VoidCallback? handlePaste = controls.canPaste(delegate) ? () => controls.handlePaste(delegate) : null;
-    final VoidCallback? handleSelectAll = controls.canSelectAll(delegate) ? () => controls.handleSelectAll(delegate) : null;
-
-    // TODO(justinmc): I need to think about handleCut, handleCopy, etc.
-    // The visibility of those buttons depends on the platform. Should that
-    // logic go in the switch statement below instead of wherever these methods
-    // are being passed in?
     int buttonIndex = 0;
     return TextSelectionToolbarButtons(
-      clipboardStatus: clipboardStatus,
-      handleCut: handleCut,
-      handleCopy: handleCopy,
-      handlePaste: handlePaste,
-      handleSelectAll: handleSelectAll,
+      editableTextState: editableText,
       builder: (BuildContext context, LinkedHashMap<DefaultContextualMenuButtonType, ContextualMenuButtonData> buttonDatas) {
         // If there aren't any buttons to build, build an empty toolbar.
         if (buttonDatas.isEmpty) {

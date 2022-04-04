@@ -138,6 +138,10 @@ abstract class TextSelectionControls {
   /// The [position] is a general calculation midpoint parameter of the toolbar.
   /// If you want more detailed position information, can use [endpoints]
   /// to calculate it.
+  @Deprecated(
+    'Use `buildContextualMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   Widget buildToolbar(
     BuildContext context,
     Rect globalEditableRegion,
@@ -162,6 +166,10 @@ abstract class TextSelectionControls {
   ///
   /// Subclasses can use this to decide if they should expose the cut
   /// functionality to the user.
+  @Deprecated(
+    'Use `buildContextualMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool canCut(TextSelectionDelegate delegate) {
     return delegate.cutEnabled && !delegate.textEditingValue.selection.isCollapsed;
   }
@@ -173,6 +181,10 @@ abstract class TextSelectionControls {
   ///
   /// Subclasses can use this to decide if they should expose the copy
   /// functionality to the user.
+  @Deprecated(
+    'Use `buildContextualMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool canCopy(TextSelectionDelegate delegate) {
     return delegate.copyEnabled && !delegate.textEditingValue.selection.isCollapsed;
   }
@@ -186,6 +198,10 @@ abstract class TextSelectionControls {
   /// This does not consider the contents of the clipboard. Subclasses may want
   /// to, for example, disallow pasting when the clipboard contains an empty
   /// string.
+  @Deprecated(
+    'Use `buildContextualMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool canPaste(TextSelectionDelegate delegate) {
     return delegate.pasteEnabled;
   }
@@ -196,6 +212,10 @@ abstract class TextSelectionControls {
   ///
   /// Subclasses can use this to decide if they should expose the select all
   /// functionality to the user.
+  @Deprecated(
+    'Use `buildContextualMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   bool canSelectAll(TextSelectionDelegate delegate) {
     return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
   }
@@ -206,6 +226,10 @@ abstract class TextSelectionControls {
   /// the user.
   // TODO(chunhtai): remove optional parameter once migration is done.
   // https://github.com/flutter/flutter/issues/99360
+  @Deprecated(
+    'Use `buildContextualMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.cutSelection(SelectionChangedCause.toolbar);
   }
@@ -216,6 +240,10 @@ abstract class TextSelectionControls {
   /// the user.
   // TODO(chunhtai): remove optional parameter once migration is done.
   // https://github.com/flutter/flutter/issues/99360
+  @Deprecated(
+    'Use `buildContextualMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     delegate.copySelection(SelectionChangedCause.toolbar);
   }
@@ -229,6 +257,10 @@ abstract class TextSelectionControls {
   /// asynchronous. Race conditions may exist with this API as currently
   /// implemented.
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
+  @Deprecated(
+    'Use `buildContextualMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
     delegate.pasteText(SelectionChangedCause.toolbar);
   }
@@ -240,6 +272,10 @@ abstract class TextSelectionControls {
   ///
   /// This is called by subclasses when their select-all affordance is activated
   /// by the user.
+  @Deprecated(
+    'Use `buildContextualMenu` instead. '
+    'This feature was deprecated after v2.12.0-4.1.pre.',
+  )
   void handleSelectAll(TextSelectionDelegate delegate) {
     delegate.selectAll(SelectionChangedCause.toolbar);
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
@@ -384,8 +420,10 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
   void showToolbar() {
-    /*
     _updateSelectionOverlay();
+    // TODO(justinmc): For this PR, public API needs to still work, but I should
+    // deprecate it.
+    /*
     _selectionOverlay.showToolbar();
     */
 
@@ -487,7 +525,11 @@ class TextSelectionOverlay {
   bool get toolbarIsVisible => _contextualMenuAreaState.contextualMenuIsVisible;
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
-  void hide() => _selectionOverlay.hide();
+  //void hide() => _selectionOverlay.hide();
+  void hide() {
+    _selectionOverlay.hide();
+    hideToolbar();
+  }
 
   /// {@macro flutter.widgets.SelectionOverlay.hideToolbar}
   //void hideToolbar() => _selectionOverlay.hideToolbar();

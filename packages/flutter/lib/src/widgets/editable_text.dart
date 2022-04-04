@@ -520,6 +520,10 @@ class EditableText extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
+    @Deprecated(
+      'Use `buildContextualMenu` instead. '
+      'This feature was deprecated after v2.12.0-4.1.pre.',
+    )
     ToolbarOptions? toolbarOptions,
     this.autofillHints = const <String>[],
     this.autofillClient,
@@ -2972,6 +2976,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return true;
   }
 
+  // TODO(justinmc): This doesn't work with ContextualMenu because toolbarIsVisible
+  // doesn't work with it.
   @override
   void hideToolbar([bool hideHandles = true]) {
     if (hideHandles) {
