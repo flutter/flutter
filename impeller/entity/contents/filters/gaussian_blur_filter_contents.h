@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <memory>
+#include <optional>
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/filter_input.h"
 #include "impeller/geometry/matrix.h"
@@ -18,6 +20,10 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
 
   void SetBlurVector(Vector2 blur_vector);
 
+  void SetBlurStyle(BlurStyle blur_style);
+
+  void SetSourceOverride(FilterInput::Ref alpha_mask);
+
   // |Contents|
   Rect GetBounds(const Entity& entity) const override;
 
@@ -30,6 +36,11 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
                     const Rect& bounds) const override;
 
   Vector2 blur_vector_;
+  BlurStyle blur_style_ = BlurStyle::kNormal;
+  bool src_color_factor_ = false;
+  bool inner_blur_factor_ = true;
+  bool outer_blur_factor_ = true;
+  FilterInput::Ref source_override_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DirectionalGaussianBlurFilterContents);
 };
