@@ -60,11 +60,26 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   OS="$(uname -s)"
   # `uname -m` may be running in Rosetta mode, instead query sysctl
   if [ "$OS" = 'Darwin' ]; then
-    ARCH="arm64"
-    # This will exit 1 if the CPU arch is not ARM64
-    sysctl hw.optional.arm64 >/dev/null 2>&1 || {
-      ARCH="x64"
-    }
+    # Allow non-zero exit so we can do control flow
+    set +e
+    # -n means only print value, not key
+    QUERY="sysctl -n hw.optional.arm64"
+    # Do not wrap $QUERY in double quotes, otherwise the args will be treated as
+    # part of the command
+    QUERY_RESULT=$($QUERY 2>/dev/null)
+    if [ $? -eq 1 ]; then
+      # If this command fails, we're certainly not on ARM
+      ARCH='x64'
+    elif [ "$QUERY_RESULT" = '0' ]; then
+      # If this returns 0, we are also not on ARM
+      ARCH='x64'
+    elif [ "$QUERY_RESULT" = '1' ]; then
+      ARCH='arm64'
+    else
+      >&2 echo "$QUERY returned unexpected output: $QUERY_RESULT"
+      exit 1
+    fi
+    set -e
   else
     # On x64 stdout is "uname -m: x86_64"
     # On arm64 stdout is "uname -m: aarch64, arm64_v8a"
