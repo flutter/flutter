@@ -56,20 +56,28 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     echo
     exit 1
   }
-  >&2 echo "Downloading Dart SDK from Flutter engine $ENGINE_VERSION..."
 
-  # On x64 stdout is "uname -m: x86_64"
-  # On arm64 stdout is "uname -m: aarch64, arm64_v8a"
-  case "$(uname -m)" in
-    x86_64)
+  OS="$(uname -s)"
+  if [ "$OS" = 'Darwin' ]; then
+    ARCH="arm64"
+    # `uname -m` may be running in Rosetta mode, instead query sysctl
+    sysctl hw.optional.arm64 >/dev/null 2>&1 || {
       ARCH="x64"
-      ;;
-    *)
-      ARCH="arm64"
-      ;;
-  esac
+    }
+  else
+    # On x64 stdout is "uname -m: x86_64"
+    # On arm64 stdout is "uname -m: aarch64, arm64_v8a"
+    case "$(uname -m)" in
+      x86_64)
+        ARCH="x64"
+        ;;
+      *)
+        ARCH="arm64"
+        ;;
+    esac
+  fi
 
-  case "$(uname -s)" in
+  case "$OS" in
     Darwin)
       DART_ZIP_NAME="dart-sdk-darwin-${ARCH}.zip"
       IS_USER_EXECUTABLE="-perm +100"
@@ -87,6 +95,8 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
       exit 1
       ;;
   esac
+
+  >&2 echo "Downloading $OS $ARCH Dart SDK from Flutter engine $ENGINE_VERSION..."
 
   # Use the default find if possible.
   if [ -e /usr/bin/find ]; then
