@@ -268,7 +268,7 @@ def ProcessCIPDPackage(upload, engine_version):
   ])
 
 def BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy,
-                asan, dart_version_git_info, additional_targets=[]):
+                asan, dart_version_git_info, prebuilt_dart_sdk, additional_targets=[]):
   unopt = "_unopt" if not optimized else ""
   out_dir = 'fuchsia_%s%s_%s' % (runtime_mode, unopt, arch)
   flags = [
@@ -290,6 +290,8 @@ def BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy,
     flags.append('--asan')
   if not dart_version_git_info:
     flags.append('--no-dart-version-git-info')
+  if not prebuilt_dart_sdk:
+    flags.append('--no-prebuilt-dart-sdk')
 
   RunGN(out_dir, flags)
   BuildNinjaTargets(out_dir, [ 'flutter' ] + additional_targets)
@@ -368,6 +370,12 @@ def main():
       default=False,
       help='If set, skips building and just creates packages.')
 
+  parser.add_argument(
+      '--no-prebuilt-dart-sdk',
+      action='store_true',
+      default=False,
+      help='If set, builds the Dart SDK locally instead of using the prebuilt Dart SDK.')
+
   args = parser.parse_args()
   RemoveDirectoryIfExists(_bucket_directory)
   build_mode = args.runtime_mode
@@ -389,6 +397,7 @@ def main():
         if not args.skip_build:
           BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy,
                       args.asan, not args.no_dart_version_git_info,
+                      not args.no_prebuilt_dart_sdk,
                       args.targets.split(",") if args.targets else [])
         BuildBucket(runtime_mode, arch, optimized, product)
 
