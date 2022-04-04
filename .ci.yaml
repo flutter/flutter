@@ -2500,9 +2500,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "gems"},
-          {"dependency": "open_jdk"},
-          {"dependency": "xcode"}
+          {"dependency": "open_jdk"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2663,10 +2661,7 @@ targets:
           {"name":"gradle","path":"gradle"}
         ]
       dependencies: >-
-        [
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
-        ]
+        []
       tags: >
         ["devicelab","hostonly"]
       task_name: entrypoint_dart_registrant
@@ -2770,9 +2765,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2794,9 +2787,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2819,9 +2810,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2844,9 +2833,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2870,9 +2857,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2973,9 +2958,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -3180,7 +3163,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "xcode"},
           {"dependency": "goldctl"}
         ]
       shard: web_tool_tests
