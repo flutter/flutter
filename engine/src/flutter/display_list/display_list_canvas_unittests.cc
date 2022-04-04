@@ -1122,6 +1122,65 @@ class CanvasCompareTester {
     }
 
     {
+      // Being able to see a dilate requires some non-default attributes,
+      // like a non-trivial stroke width and a shader rather than a color
+      // (for drawPaint) so we create a new environment for these tests.
+      RenderEnvironment dilate_env = RenderEnvironment::MakeN32();
+      CvSetup cv_dilate_setup = [=](SkCanvas*, SkPaint& p) {
+        p.setShader(testImageColorSource.skia_object());
+        p.setStrokeWidth(5.0);
+      };
+      DlRenderer dl_dilate_setup = [=](DisplayListBuilder& b) {
+        b.setColorSource(&testImageColorSource);
+        b.setStrokeWidth(5.0);
+      };
+      dilate_env.init_ref(cv_dilate_setup, testP.cv_renderer(),
+                          dl_dilate_setup);
+      DlDilateImageFilter filter_5(5.0, 5.0);
+      RenderWith(testP, dilate_env, tolerance,
+                 CaseParameters(
+                     "ImageFilter == Dilate 5",
+                     [=](SkCanvas* cv, SkPaint& p) {
+                       cv_dilate_setup(cv, p);
+                       p.setImageFilter(filter_5.skia_object());
+                     },
+                     [=](DisplayListBuilder& b) {
+                       dl_dilate_setup(b);
+                       b.setImageFilter(&filter_5);
+                     }));
+    }
+
+    {
+      // Being able to see an erode requires some non-default attributes,
+      // like a non-trivial stroke width and a shader rather than a color
+      // (for drawPaint) so we create a new environment for these tests.
+      RenderEnvironment erode_env = RenderEnvironment::MakeN32();
+      CvSetup cv_erode_setup = [=](SkCanvas*, SkPaint& p) {
+        p.setShader(testImageColorSource.skia_object());
+        p.setStrokeWidth(6.0);
+      };
+      DlRenderer dl_erode_setup = [=](DisplayListBuilder& b) {
+        b.setColorSource(&testImageColorSource);
+        b.setStrokeWidth(6.0);
+      };
+      erode_env.init_ref(cv_erode_setup, testP.cv_renderer(), dl_erode_setup);
+      // do not erode too much, because some tests assert there are enough
+      // pixels that are changed.
+      DlErodeImageFilter filter_1(1.0, 1.0);
+      RenderWith(testP, erode_env, tolerance,
+                 CaseParameters(
+                     "ImageFilter == Erode 1",
+                     [=](SkCanvas* cv, SkPaint& p) {
+                       cv_erode_setup(cv, p);
+                       p.setImageFilter(filter_1.skia_object());
+                     },
+                     [=](DisplayListBuilder& b) {
+                       dl_erode_setup(b);
+                       b.setImageFilter(&filter_1);
+                     }));
+    }
+
+    {
       // clang-format off
       constexpr float rotate_color_matrix[20] = {
           0, 1, 0, 0, 0,
