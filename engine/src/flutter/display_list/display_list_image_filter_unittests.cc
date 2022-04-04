@@ -43,6 +43,40 @@ TEST(DisplayListImageFilter, FromSkiaBlurImageFilter) {
 
   // We cannot recapture the blur parameters from an SkBlurImageFilter
   ASSERT_EQ(filter->asBlur(), nullptr);
+  ASSERT_EQ(filter->asDilate(), nullptr);
+  ASSERT_EQ(filter->asErode(), nullptr);
+  ASSERT_EQ(filter->asMatrix(), nullptr);
+  ASSERT_EQ(filter->asCompose(), nullptr);
+  ASSERT_EQ(filter->asColorFilter(), nullptr);
+}
+
+TEST(DisplayListImageFilter, FromSkiaDilateImageFilter) {
+  sk_sp<SkImageFilter> sk_image_filter =
+      SkImageFilters::Dilate(5.0, 5.0, nullptr);
+  std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(sk_image_filter);
+
+  ASSERT_EQ(filter->type(), DlImageFilterType::kUnknown);
+
+  // We cannot recapture the dilate parameters from an SkDilateImageFilter
+  ASSERT_EQ(filter->asBlur(), nullptr);
+  ASSERT_EQ(filter->asDilate(), nullptr);
+  ASSERT_EQ(filter->asErode(), nullptr);
+  ASSERT_EQ(filter->asMatrix(), nullptr);
+  ASSERT_EQ(filter->asCompose(), nullptr);
+  ASSERT_EQ(filter->asColorFilter(), nullptr);
+}
+
+TEST(DisplayListImageFilter, FromSkiaErodeImageFilter) {
+  sk_sp<SkImageFilter> sk_image_filter =
+      SkImageFilters::Erode(5.0, 5.0, nullptr);
+  std::shared_ptr<DlImageFilter> filter = DlImageFilter::From(sk_image_filter);
+
+  ASSERT_EQ(filter->type(), DlImageFilterType::kUnknown);
+
+  // We cannot recapture the erode parameters from an SkErodeImageFilter
+  ASSERT_EQ(filter->asBlur(), nullptr);
+  ASSERT_EQ(filter->asDilate(), nullptr);
+  ASSERT_EQ(filter->asErode(), nullptr);
   ASSERT_EQ(filter->asMatrix(), nullptr);
   ASSERT_EQ(filter->asCompose(), nullptr);
   ASSERT_EQ(filter->asColorFilter(), nullptr);
@@ -57,6 +91,8 @@ TEST(DisplayListImageFilter, FromSkiaMatrixImageFilter) {
 
   // We cannot recapture the blur parameters from an SkMatrixImageFilter
   ASSERT_EQ(filter->asBlur(), nullptr);
+  ASSERT_EQ(filter->asDilate(), nullptr);
+  ASSERT_EQ(filter->asErode(), nullptr);
   ASSERT_EQ(filter->asMatrix(), nullptr);
   ASSERT_EQ(filter->asCompose(), nullptr);
   ASSERT_EQ(filter->asColorFilter(), nullptr);
@@ -75,6 +111,8 @@ TEST(DisplayListImageFilter, FromSkiaComposeImageFilter) {
 
   // We cannot recapture the blur parameters from an SkComposeImageFilter
   ASSERT_EQ(filter->asBlur(), nullptr);
+  ASSERT_EQ(filter->asDilate(), nullptr);
+  ASSERT_EQ(filter->asErode(), nullptr);
   ASSERT_EQ(filter->asMatrix(), nullptr);
   ASSERT_EQ(filter->asCompose(), nullptr);
   ASSERT_EQ(filter->asColorFilter(), nullptr);
@@ -96,6 +134,8 @@ TEST(DisplayListImageFilter, FromSkiaColorFilterImageFilter) {
   ASSERT_EQ(*filter->asColorFilter()->color_filter(), dl_color_filter);
 
   ASSERT_EQ(filter->asBlur(), nullptr);
+  ASSERT_EQ(filter->asDilate(), nullptr);
+  ASSERT_EQ(filter->asErode(), nullptr);
   ASSERT_EQ(filter->asMatrix(), nullptr);
   ASSERT_EQ(filter->asCompose(), nullptr);
   ASSERT_NE(filter->asColorFilter(), nullptr);
@@ -143,6 +183,88 @@ TEST(DisplayListImageFilter, BlurNotEquals) {
   TestNotEquals(filter1, filter2, "Sigma X differs");
   TestNotEquals(filter1, filter3, "Sigma Y differs");
   TestNotEquals(filter1, filter4, "Tile Mode differs");
+}
+
+TEST(DisplayListImageFilter, DilateConstructor) {
+  DlDilateImageFilter filter(5.0, 6.0);
+}
+
+TEST(DisplayListImageFilter, DilateShared) {
+  DlDilateImageFilter filter(5.0, 6.0);
+
+  ASSERT_NE(filter.shared().get(), &filter);
+  ASSERT_EQ(*filter.shared(), filter);
+}
+
+TEST(DisplayListImageFilter, DilateAsDilate) {
+  DlDilateImageFilter filter(5.0, 6.0);
+
+  ASSERT_NE(filter.asDilate(), nullptr);
+  ASSERT_EQ(filter.asDilate(), &filter);
+}
+
+TEST(DisplayListImageFilter, DilateContents) {
+  DlDilateImageFilter filter(5.0, 6.0);
+
+  ASSERT_EQ(filter.radius_x(), 5.0);
+  ASSERT_EQ(filter.radius_y(), 6.0);
+}
+
+TEST(DisplayListImageFilter, DilateEquals) {
+  DlDilateImageFilter filter1(5.0, 6.0);
+  DlDilateImageFilter filter2(5.0, 6.0);
+
+  TestEquals(filter1, filter2);
+}
+
+TEST(DisplayListImageFilter, DilateNotEquals) {
+  DlDilateImageFilter filter1(5.0, 6.0);
+  DlDilateImageFilter filter2(7.0, 6.0);
+  DlDilateImageFilter filter3(5.0, 8.0);
+
+  TestNotEquals(filter1, filter2, "Radius X differs");
+  TestNotEquals(filter1, filter3, "Radius Y differs");
+}
+
+TEST(DisplayListImageFilter, ErodeConstructor) {
+  DlErodeImageFilter filter(5.0, 6.0);
+}
+
+TEST(DisplayListImageFilter, ErodeShared) {
+  DlErodeImageFilter filter(5.0, 6.0);
+
+  ASSERT_NE(filter.shared().get(), &filter);
+  ASSERT_EQ(*filter.shared(), filter);
+}
+
+TEST(DisplayListImageFilter, ErodeAsErode) {
+  DlErodeImageFilter filter(5.0, 6.0);
+
+  ASSERT_NE(filter.asErode(), nullptr);
+  ASSERT_EQ(filter.asErode(), &filter);
+}
+
+TEST(DisplayListImageFilter, ErodeContents) {
+  DlErodeImageFilter filter(5.0, 6.0);
+
+  ASSERT_EQ(filter.radius_x(), 5.0);
+  ASSERT_EQ(filter.radius_y(), 6.0);
+}
+
+TEST(DisplayListImageFilter, ErodeEquals) {
+  DlErodeImageFilter filter1(5.0, 6.0);
+  DlErodeImageFilter filter2(5.0, 6.0);
+
+  TestEquals(filter1, filter2);
+}
+
+TEST(DisplayListImageFilter, ErodeNotEquals) {
+  DlErodeImageFilter filter1(5.0, 6.0);
+  DlErodeImageFilter filter2(7.0, 6.0);
+  DlErodeImageFilter filter3(5.0, 8.0);
+
+  TestNotEquals(filter1, filter2, "Radius X differs");
+  TestNotEquals(filter1, filter3, "Radius Y differs");
 }
 
 TEST(DisplayListImageFilter, MatrixConstructor) {

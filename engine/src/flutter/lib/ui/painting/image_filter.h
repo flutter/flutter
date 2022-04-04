@@ -30,6 +30,8 @@ class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   static SkFilterMode FilterModeFromIndex(int index);
 
   void initBlur(double sigma_x, double sigma_y, SkTileMode tile_mode);
+  void initDilate(double radius_x, double radius_y);
+  void initErode(double radius_x, double radius_y);
   void initMatrix(const tonic::Float64List& matrix4, int filter_quality_index);
   void initColorFilter(ColorFilter* colorFilter);
   void initComposeFilter(ImageFilter* outer, ImageFilter* inner);

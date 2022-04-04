@@ -193,6 +193,20 @@ void DisplayListBuilder::onSetImageFilter(const DlImageFilter* filter) {
         new (pod) DlBlurImageFilter(blur_filter);
         break;
       }
+      case DlImageFilterType::kDilate: {
+        const DlDilateImageFilter* dilate_filter = filter->asDilate();
+        FML_DCHECK(dilate_filter);
+        void* pod = Push<SetPodImageFilterOp>(dilate_filter->size(), 0);
+        new (pod) DlDilateImageFilter(dilate_filter);
+        break;
+      }
+      case DlImageFilterType::kErode: {
+        const DlErodeImageFilter* erode_filter = filter->asErode();
+        FML_DCHECK(erode_filter);
+        void* pod = Push<SetPodImageFilterOp>(erode_filter->size(), 0);
+        new (pod) DlErodeImageFilter(erode_filter);
+        break;
+      }
       case DlImageFilterType::kMatrix: {
         const DlMatrixImageFilter* matrix_filter = filter->asMatrix();
         FML_DCHECK(matrix_filter);

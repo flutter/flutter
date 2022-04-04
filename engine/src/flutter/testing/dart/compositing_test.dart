@@ -396,6 +396,18 @@ void main() {
     });
     testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
       return builder.pushImageFilter(
+        ImageFilter.dilate(radiusX: 10.0, radiusY: 10.0),
+        oldLayer: oldLayer as ImageFilterEngineLayer?,
+      );
+    });
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
+      return builder.pushImageFilter(
+        ImageFilter.erode(radiusX: 10.0, radiusY: 10.0),
+        oldLayer: oldLayer as ImageFilterEngineLayer?,
+      );
+    });
+    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
+      return builder.pushImageFilter(
         ImageFilter.matrix(Float64List.fromList(<double>[
           1, 0, 0, 0,
           0, 1, 0, 0,

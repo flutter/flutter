@@ -28,6 +28,8 @@ namespace flutter {
 // provided as a fallback.
 enum class DlImageFilterType {
   kBlur,
+  kDilate,
+  kErode,
   kMatrix,
   kComposeFilter,
   kColorFilter,
@@ -35,6 +37,8 @@ enum class DlImageFilterType {
 };
 
 class DlBlurImageFilter;
+class DlDilateImageFilter;
+class DlErodeImageFilter;
 class DlMatrixImageFilter;
 class DlComposeImageFilter;
 class DlColorFilterImageFilter;
@@ -63,6 +67,14 @@ class DlImageFilter
   // Return a DlBlurImageFilter pointer to this object iff it is a Blur
   // type of ImageFilter, otherwise return nullptr.
   virtual const DlBlurImageFilter* asBlur() const { return nullptr; }
+
+  // Return a DlDilateImageFilter pointer to this object iff it is a Dilate
+  // type of ImageFilter, otherwise return nullptr.
+  virtual const DlDilateImageFilter* asDilate() const { return nullptr; }
+
+  // Return a DlErodeImageFilter pointer to this object iff it is an Erode
+  // type of ImageFilter, otherwise return nullptr.
+  virtual const DlErodeImageFilter* asErode() const { return nullptr; }
 
   // Return a DlMatrixImageFilter pointer to this object iff it is a Matrix
   // type of ImageFilter, otherwise return nullptr.
@@ -140,7 +152,7 @@ class DlBlurImageFilter final : public DlImageFilter {
   SkIRect* map_device_bounds(const SkIRect& input_bounds,
                              const SkMatrix& ctm,
                              SkIRect& output_bounds) const override {
-    SkVector device_sigma = ctm.mapVector(sigma_x_, sigma_y_);
+    SkVector device_sigma = ctm.mapVector(sigma_x_ * 3, sigma_y_ * 3);
     if (!SkScalarIsFinite(device_sigma.fX)) {
       device_sigma.fX = 0;
     }
@@ -172,6 +184,126 @@ class DlBlurImageFilter final : public DlImageFilter {
   SkScalar sigma_x_;
   SkScalar sigma_y_;
   DlTileMode tile_mode_;
+};
+
+class DlDilateImageFilter final : public DlImageFilter {
+ public:
+  DlDilateImageFilter(SkScalar radius_x, SkScalar radius_y)
+      : radius_x_(radius_x), radius_y_(radius_y) {}
+  explicit DlDilateImageFilter(const DlDilateImageFilter* filter)
+      : DlDilateImageFilter(filter->radius_x_, filter->radius_y_) {}
+  explicit DlDilateImageFilter(const DlDilateImageFilter& filter)
+      : DlDilateImageFilter(&filter) {}
+
+  std::shared_ptr<DlImageFilter> shared() const override {
+    return std::make_shared<DlDilateImageFilter>(this);
+  }
+
+  DlImageFilterType type() const override { return DlImageFilterType::kDilate; }
+  size_t size() const override { return sizeof(*this); }
+
+  const DlDilateImageFilter* asDilate() const override { return this; }
+
+  bool modifies_transparent_black() const override { return false; }
+
+  SkRect* map_local_bounds(const SkRect& input_bounds,
+                           SkRect& output_bounds) const override {
+    output_bounds = input_bounds.makeOutset(radius_x_, radius_y_);
+    return &output_bounds;
+  }
+
+  SkIRect* map_device_bounds(const SkIRect& input_bounds,
+                             const SkMatrix& ctm,
+                             SkIRect& output_bounds) const override {
+    SkVector device_radius = ctm.mapVector(radius_x_, radius_y_);
+    if (!SkScalarIsFinite(device_radius.fX)) {
+      device_radius.fX = 0;
+    }
+    if (!SkScalarIsFinite(device_radius.fY)) {
+      device_radius.fY = 0;
+    }
+    output_bounds = input_bounds.makeOutset(ceil(abs(device_radius.fX)),
+                                            ceil(abs(device_radius.fY)));
+    return &output_bounds;
+  }
+
+  SkScalar radius_x() const { return radius_x_; }
+  SkScalar radius_y() const { return radius_y_; }
+
+  sk_sp<SkImageFilter> skia_object() const override {
+    return SkImageFilters::Dilate(radius_x_, radius_y_, nullptr);
+  }
+
+ protected:
+  bool equals_(const DlImageFilter& other) const override {
+    FML_DCHECK(other.type() == DlImageFilterType::kDilate);
+    auto that = static_cast<const DlDilateImageFilter*>(&other);
+    return (radius_x_ == that->radius_x_ && radius_y_ == that->radius_y_);
+  }
+
+ private:
+  SkScalar radius_x_;
+  SkScalar radius_y_;
+};
+
+class DlErodeImageFilter final : public DlImageFilter {
+ public:
+  DlErodeImageFilter(SkScalar radius_x, SkScalar radius_y)
+      : radius_x_(radius_x), radius_y_(radius_y) {}
+  explicit DlErodeImageFilter(const DlErodeImageFilter* filter)
+      : DlErodeImageFilter(filter->radius_x_, filter->radius_y_) {}
+  explicit DlErodeImageFilter(const DlErodeImageFilter& filter)
+      : DlErodeImageFilter(&filter) {}
+
+  std::shared_ptr<DlImageFilter> shared() const override {
+    return std::make_shared<DlErodeImageFilter>(this);
+  }
+
+  DlImageFilterType type() const override { return DlImageFilterType::kErode; }
+  size_t size() const override { return sizeof(*this); }
+
+  const DlErodeImageFilter* asErode() const override { return this; }
+
+  bool modifies_transparent_black() const override { return false; }
+
+  SkRect* map_local_bounds(const SkRect& input_bounds,
+                           SkRect& output_bounds) const override {
+    output_bounds = input_bounds.makeOutset(radius_x_, radius_y_);
+    return &output_bounds;
+  }
+
+  SkIRect* map_device_bounds(const SkIRect& input_bounds,
+                             const SkMatrix& ctm,
+                             SkIRect& output_bounds) const override {
+    SkVector device_radius = ctm.mapVector(radius_x_, radius_y_);
+    if (!SkScalarIsFinite(device_radius.fX)) {
+      device_radius.fX = 0;
+    }
+    if (!SkScalarIsFinite(device_radius.fY)) {
+      device_radius.fY = 0;
+    }
+    output_bounds = input_bounds.makeOutset(ceil(abs(device_radius.fX)),
+                                            ceil(abs(device_radius.fY)));
+    return &output_bounds;
+  }
+
+  SkScalar radius_x() const { return radius_x_; }
+  SkScalar radius_y() const { return radius_y_; }
+
+  sk_sp<SkImageFilter> skia_object() const override {
+    return SkImageFilters::Erode(radius_x_, radius_y_, nullptr);
+  }
+
+ protected:
+  bool equals_(const DlImageFilter& other) const override {
+    FML_DCHECK(other.type() == DlImageFilterType::kErode);
+    auto that = static_cast<const DlErodeImageFilter*>(&other);
+    return (radius_x_ == that->radius_x_ && radius_y_ == that->radius_y_);
+  }
+
+ private:
+  SkScalar radius_x_;
+  SkScalar radius_y_;
 };
 
 class DlMatrixImageFilter final : public DlImageFilter {
