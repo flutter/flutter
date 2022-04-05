@@ -361,10 +361,7 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-    // This test is expected to be skipped when Platform.isWindows:
-    // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
-  }, skip: true); // Flake: https://github.com/flutter/flutter/issues/92042
-
+  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
   testWithoutContext('flutter run handle SIGUSR1/2', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
     final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
