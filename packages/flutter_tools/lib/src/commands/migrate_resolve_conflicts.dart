@@ -27,10 +27,10 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       help: 'Specifies the custom migration working directory used to stage and edit proposed changes.',
       valueHelp: 'path',
     );
-    argParser.addFlag(
-      'diff',
-      defaultsTo: true,
-      help: 'Shows the diff output when enabled. Enabled by default.',
+    argParser.addOption(
+      'context-lines',
+      defaultsTo: '5',
+      help: 'The number of lines of context to show around the each conflict. Defaults to 5.',
     );
   }
 
@@ -78,7 +78,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
-    logger.printBox('Working directory at `${workingDirectory.path}`');
+    final int contextLineCount = stringArg('context-lines') == null ? 5 : int.parse(stringArg('context-lines')!);
 
     checkAndPrintMigrateStatus(manifest, workingDirectory, logger: logger);
 
@@ -111,30 +111,37 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       for (final Conflict conflict in conflicts) {
         assert(conflict.startLine != null && conflict.dividerLine != null && conflict.endLine != null);
         // Print the conflict for reference
-        logger.printStatus('\n\n\n\n\n\n\n\n'); // Space out diffs
-        for (int lineNumber = (conflict.startLine! - _contextLineCount).abs(); lineNumber < conflict.startLine!; lineNumber++) {
-          logger.printStatus(lines[lineNumber], color: TerminalColor.grey);
+        logger.printStatus(terminal.clearScreen(), newline: false);
+        logger.printStatus('Cyan', color: TerminalColor.cyan, newline: false);
+        logger.printStatus(' = Original lines.  ', newline: false);
+        logger.printStatus('Green', color: TerminalColor.green, newline: false);
+        logger.printStatus(' = New lines.\n', newline: true);
+
+        // Print the conflict for reference
+        for (int lineNumber = (conflict.startLine! - contextLineCount).abs(); lineNumber < conflict.startLine!; lineNumber++) {
+          printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.grey);
         }
-        logger.printStatus(lines[conflict.startLine!]);
+        printConflictLine(lines[conflict.startLine!], conflict.startLine!);
         for (int lineNumber = conflict.startLine! + 1; lineNumber < conflict.dividerLine!; lineNumber++) {
-          logger.printStatus(lines[lineNumber], color: TerminalColor.cyan);
+          printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.cyan);
         }
-        logger.printStatus(lines[conflict.dividerLine!]);
+        printConflictLine(lines[conflict.dividerLine!], conflict.dividerLine!);
         for (int lineNumber = conflict.dividerLine! + 1; lineNumber < conflict.endLine!; lineNumber++) {
-          logger.printStatus(lines[lineNumber], color: TerminalColor.green);
+          printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.green);
         }
-        logger.printStatus(lines[conflict.endLine!]);
-        for (int lineNumber = conflict.endLine! + 1; lineNumber <= (conflict.endLine! + _contextLineCount).clamp(0, lines.length - 1); lineNumber++) {
-          logger.printStatus(lines[lineNumber], color: TerminalColor.grey);
+        printConflictLine(lines[conflict.endLine!], conflict.endLine!);
+        for (int lineNumber = conflict.endLine! + 1; lineNumber <= (conflict.endLine! + contextLineCount).clamp(0, lines.length - 1); lineNumber++) {
+          printConflictLine(lines[lineNumber], lineNumber, color: TerminalColor.grey);
         }
 
+        logger.printStatus('\nConflict in $localPath.');
         // Select action
         String selection = 's';
         try {
           selection = await terminal.promptForCharInput(
             <String>['o', 'n', 's'],
             logger: logger,
-            prompt: 'Keep the (O)riginal lines, (N)ew lines, or (S)kip resolving this conflict?',
+            prompt: 'Keep the (o)riginal lines, (n)ew lines, or (S)kip resolving this conflict?',
             defaultChoiceIndex: 2,
           );
         } on StateError catch(e) {
@@ -195,6 +202,11 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     // MigrateUtils.printCommandText('flutter migrate apply', logger);
 
     return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  void printConflictLine(String text, int lineNumber, {TerminalColor? color}) {
+    logger.printStatus('$lineNumber  ', color: TerminalColor.grey, newline: false, indent: 2);
+    logger.printStatus(text, color: color);
   }
 }
 
