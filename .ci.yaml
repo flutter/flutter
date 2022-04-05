@@ -1475,16 +1475,6 @@ targets:
       task_name: backdrop_filter_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android backdrop_filter_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: backdrop_filter_perf__timeline_summary
-    scheduler: luci
-
   - name: Linux_samsung_s10 backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1523,16 +1513,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: color_filter_and_fade_perf__e2e_summary
-    scheduler: luci
-
-  - name: Linux_android color_filter_and_fade_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: color_filter_and_fade_perf__timeline_summary
     scheduler: luci
 
   - name: Linux_android color_filter_cache_perf__e2e_summary
@@ -1722,26 +1702,6 @@ targets:
       task_name: cubic_bezier_perf_sksl_warmup__e2e_summary
     scheduler: luci
 
-  - name: Linux_android cubic_bezier_perf_sksl_warmup__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: cubic_bezier_perf_sksl_warmup__timeline_summary
-    scheduler: luci
-
-  - name: Linux_android cubic_bezier_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: cubic_bezier_perf__timeline_summary
-    scheduler: luci
-
   - name: Linux_samsung_s10 cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1760,16 +1720,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: cull_opacity_perf__e2e_summary
-    scheduler: luci
-
-  - name: Linux_android cull_opacity_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: cull_opacity_perf__timeline_summary
     scheduler: luci
 
   - name: Linux_samsung_s10 cull_opacity_perf__timeline_summary
@@ -2002,16 +1952,6 @@ targets:
       task_name: fullscreen_textfield_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android fullscreen_textfield_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: fullscreen_textfield_perf__timeline_summary
-    scheduler: luci
-
   - name: Linux_android hello_world__memory
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2204,16 +2144,6 @@ targets:
       task_name: picture_cache_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android picture_cache_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: picture_cache_perf__timeline_summary
-    scheduler: luci
-
   - name: Linux_samsung_s10 picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2322,16 +2252,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: textfield_perf__e2e_summary
-    scheduler: luci
-
-  - name: Linux_android textfield_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: textfield_perf__timeline_summary
     scheduler: luci
 
   - name: Linux_samsung_s10 textfield_perf__timeline_summary
