@@ -5,19 +5,50 @@
 // @dart = 2.8
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:test/fake.dart';
 
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
+class FakePub extends Fake implements Pub {
+  int calledGetOffline = 0;
+
+  @override
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+    bool printProgress = true,
+  }) async {
+    if (offline == true){
+      calledGetOffline += 1;
+    }
+  }
+}
+
 void main() {
+  FileSystem fileSystem;
+  final FakePub fakePub = FakePub();
+
   group('usageValues', () {
     Testbed testbed;
 
@@ -28,6 +59,7 @@ void main() {
 
     setUp(() {
       testbed = Testbed(setup: () {
+        //fileSystem = MemoryFileSystem.test();
         Cache.flutterRoot = 'flutter';
         final List<String> filePaths = <String>[
           globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
@@ -139,6 +171,17 @@ void main() {
       ]);
       expect((await command.usageValues).commandCreateAndroidLanguage, 'java');
     }));
+
+    testUsingContext('create --offline', () => testbed.run(() async {
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['create', 'testy', '--offline']);
+      expect(fakePub.calledGetOffline, 2);
+      //expect((await command.usageValues).commandCreateProjectType, 'plugin');
+    }, overrides: <Type, Generator>{
+      //ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => fakePub
+    }));
   });
 }
 
@@ -148,4 +191,21 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   @override
   List<Workflow> get workflows => <Workflow>[];
+}
+
+FakeCommand getFakeCommand({
+  bool verbose = false,
+  int exitCode = 0,
+  void Function() onRun,
+}) {
+  return FakeCommand(
+    command: const <String>[
+      'flutter',
+      'pub',
+      'get',
+      '--offline'
+    ],
+    exitCode: exitCode,
+    onRun: onRun,
+  );
 }
