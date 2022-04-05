@@ -38,11 +38,8 @@ void configureProject(Project project, String outputDir) {
         }
     }
 
-
-    /*
-    Some extra work to keep the publications in the same format as the previous plugin. Instead of
-    using classifiers for the variants, append `_{variant}` to the artifactId
-     */
+    // Some extra work to keep the publications in the same format as the previous plugin. Instead of
+    // using classifiers for the variants, append `_{variant}` to the artifactId
 
     // First, create a default MavenPublication for each variant (except "all" since we don't need that here)
     project.components.forEach { component ->
@@ -108,9 +105,6 @@ void addAarTask(Project project, variant) {
         if (!project.gradle.startParameter.taskNames.contains(taskName)) {
             return
         }
-        project.project.publishing.publications.forEach { p ->
-            p.artifactId = "${project.name}_${variant.name.toLowerCase()}"
-        }
         overrideDefaultPublishConfig(project, variant)
         // Generate the Maven artifacts.
         finalizedBy "publish"
@@ -137,19 +131,10 @@ void overrideDefaultPublishConfig(Project project, variant) {
     project.artifacts.add("archives", bundle)
 }
 
-Set<Configuration> flattenConfiguration(Configuration configuration) {
-    Set<Configuration> configs = [configuration]
-    for (Configuration extend : configuration.extendsFrom) {
-        configs.addAll(flattenConfiguration(extend))
-    }
-    return configs
-}
+// maven-publish has to be applied _before_ the project gets evaluated, but some of the code in
+// `configureProject` requires the project to be evaluated. Apply the maven plugin to all projects, but
+// only configure it if it matches the conditions in `projectsEvaluated`
 
-/*
-maven-publish has to be applied _before_ the project gets evaluated, but some of the code in
-`configureProject` requires the project to be evaluated. Apply the maven plugin to all projects, but
-only configure it if it matches the conditions in `projectsEvaluated`
-*/
 allprojects {
    apply plugin: "maven-publish"
 }
