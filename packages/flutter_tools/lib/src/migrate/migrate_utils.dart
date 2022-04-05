@@ -73,7 +73,8 @@ class MigrateUtils {
 
   /// Calls `flutter create` as a re-entrant command.
   static Future<String> createFromTemplates(String flutterBinPath, {
-    String? name,
+    required String name,
+    bool legacyNameParameter = false,
     required String androidLanguage,
     required String iosLanguage,
     required String outputDirectory,
@@ -81,10 +82,11 @@ class MigrateUtils {
     List<String> platforms = const <String>[],
   }) async {
     final List<String> cmdArgs = <String>['create'];
-    if (name != null) {
-      cmdArgs.add('project-name');
-      cmdArgs.add(name);
+    if (!legacyNameParameter) {
+      cmdArgs.add('--project-name=$name');
     }
+    cmdArgs.add('--android-language=$androidLanguage');
+    cmdArgs.add('--ios-language=$iosLanguage');
     if (platforms.isNotEmpty) {
       String platformsArg = '--platforms=';
       for (int i = 0; i < platforms.length; i++) {
@@ -96,24 +98,33 @@ class MigrateUtils {
       cmdArgs.add(platformsArg);
     }
     cmdArgs.add('--no-pub');
-    cmdArgs.add(outputDirectory);
-    final ProcessResult result = await Process.run('./flutter', cmdArgs, workingDirectory: flutterBinPath);
+    if (legacyNameParameter) {
+      cmdArgs.add(name);
+    } else {
+      cmdArgs.add(outputDirectory);
+    }
+    ProcessResult result = await Process.run('$flutterBinPath/flutter', ['create', '-h'], workingDirectory: outputDirectory);
+    // print(result.stdout);
+    result = await Process.run('$flutterBinPath/flutter', cmdArgs, workingDirectory: outputDirectory);
+    print(result.stderr);
+    String error = result.stderr;
     // Old versions of the tool does not include the platforms option. In this case, we will just
     // just call the general create command.
-    if ((result.stderr as String).contains('Could not find an option named "platforms".') ||
-        (result.stderr as String).contains('Multiple output directories specified.')) {
+    if (error.contains('Could not find an option named "platforms".')) {
       return createFromTemplates(
         flutterBinPath,
         name: name,
+        legacyNameParameter: legacyNameParameter,
         androidLanguage: androidLanguage,
         iosLanguage: iosLanguage,
         outputDirectory: outputDirectory,
       );
     }
-    // Old versions of the tool does not include the project-name option. In this case, we will just
-    // just call the general create command.
+    // Old versions of the tool does not include the project-name option.
     if ((result.stderr as String).contains('Could not find an option named "project-name".')) {
       return createFromTemplates(
+        name: name,
+        legacyNameParameter: true,
         flutterBinPath,
         androidLanguage: androidLanguage,
         iosLanguage: iosLanguage,
@@ -121,8 +132,30 @@ class MigrateUtils {
         platforms: platforms,
       );
     }
+    if (error.contains('Multiple output directories specified.')) {
+      if (error.contains('Try moving --platforms')) {
+        return createFromTemplates(
+          flutterBinPath,
+          name: name,
+          legacyNameParameter: legacyNameParameter,
+          androidLanguage: androidLanguage,
+          iosLanguage: iosLanguage,
+          outputDirectory: outputDirectory,
+        );
+      }
+    }
     checkForErrors(result, commandDescription: '${flutterBinPath}flutter ${cmdArgs.join(' ')}');
-    return result.stdout as String;
+
+    if (legacyNameParameter) {
+      return globals.fs.path.join(outputDirectory, name);
+      // print('------------');
+      // print(result.stdout);
+      // result = await Process.run('ls', ['-r', '$outputDirectory/$name'], workingDirectory: outputDirectory);
+      // print(result.stdout);
+      // result = await Process.run('mv', ['-f', '$outputDirectory/$name/pubspec.yaml', '$outputDirectory/pubspec.yaml'], workingDirectory: outputDirectory);
+      // checkForErrors(result, commandDescription: 'mv');
+    }
+    return outputDirectory;
   }
 
   /// Runs the git 3-way merge on three files and returns the results as a MergeResult.

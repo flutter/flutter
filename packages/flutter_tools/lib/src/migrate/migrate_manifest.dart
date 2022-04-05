@@ -89,6 +89,17 @@ class MigrateManifest {
     return output;
   }
 
+  /// A list of local paths of files that require conflict resolution.
+  List<String> remainingConflictFiles(Directory workingDir) {
+    final List<String> output = <String>[];
+    for (final String localPath in conflictFiles) {
+      if (!MigrateUtils.conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
+        output.add(localPath);
+      }
+    }
+    return output;
+  }
+
   /// A list of local paths of files that were automatically merged.
   List<String> get mergedFiles {
     final List<String> output = <String>[];

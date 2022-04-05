@@ -57,7 +57,9 @@ class MigrateAbandonCommand extends FlutterCommand {
     if (_verbose) {
       logger.printStatus('Abandoning the existing migration will delete the migration working directory at ${workingDirectory.path}');
     }
+
     workingDirectory.deleteSync(recursive: true);
+    
     logger.printStatus('\nAbandon complete. Start a new migration with:');
     MigrateUtils.printCommandText('flutter migrate start', logger);
     return const FlutterCommandResult(ExitStatus.success);
