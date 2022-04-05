@@ -16,18 +16,10 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     requiresPubspecYaml();
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
-    argParser
-      ..addFlag(
-        'uninstall-only',
-        help: 'Uninstall the app if already on the device. Skip install.',
-      )
-      ..addOption(
-        'use-application-binary',
-        help: 'Specify a pre-built application binary to use when running. For Android applications, '
-            'this must be the path to an APK. For iOS applications, the path to an IPA. Other device types '
-            'do not yet support prebuilt application binaries.',
-        valueHelp: 'path/to/app.apk',
-      );
+    usesApplicationBinaryOption();
+    argParser.addFlag('uninstall-only',
+      help: 'Uninstall the app if already on the device. Skip install.',
+    );
   }
 
   @override
@@ -44,7 +36,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   bool get uninstallOnly => boolArg('uninstall-only');
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
-  String? get _applicationBinaryPath => stringArg('use-application-binary');
+  String? get _applicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
   File? get _applicationBinary => _applicationBinaryPath == null ? null : globals.fs.file(_applicationBinaryPath);
 
   @override
