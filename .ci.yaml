@@ -904,6 +904,7 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: web_benchmarks_canvaskit
+    scheduler: luci
 
   - name: Linux web_benchmarks_html
     recipe: devicelab/devicelab_drone
@@ -1421,6 +1422,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: android_semantics_integration_test
+    scheduler: luci
 
   - name: Linux_android android_stack_size_test
     recipe: devicelab/devicelab_drone
@@ -1697,6 +1699,7 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
+    scheduler: luci
 
   - name: Linux_android cubic_bezier_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2379,6 +2382,7 @@ targets:
         ]
       tags: >
         ["framework","hostonly"]
+    scheduler: luci
     timeout: 60
 
   - name: Linux deferred components
@@ -2393,6 +2397,7 @@ targets:
         ]
       tags: >
         ["framework","hostonly"]
+    scheduler: luci
     timeout: 60
 
   - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
@@ -3745,6 +3750,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+    scheduler: luci
 
   - name: Windows build_aar_module_test
     recipe: devicelab/devicelab_drone
@@ -4048,6 +4054,7 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test
+    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**
