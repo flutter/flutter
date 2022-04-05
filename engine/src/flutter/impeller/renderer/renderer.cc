@@ -57,6 +57,8 @@ bool Renderer::Render(std::unique_ptr<Surface> surface,
     return false;
   }
 
+  render_pass->SetLabel("Onscreen Render Pass");
+
   if (render_callback && !render_callback(*render_pass)) {
     return false;
   }
