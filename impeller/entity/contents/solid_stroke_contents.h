@@ -74,8 +74,6 @@ class SolidStrokeContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
-  SmoothingApproximation arc_smoothing_approximation_;
-
   Color color_;
   Scalar stroke_size_ = 0.0;
   Scalar miter_limit_ = 4.0;
