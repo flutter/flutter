@@ -41,7 +41,14 @@ void main() {
     expect(Icon.generateFlutterId('abc__123'), 'abc_123');
   });
 
-  test('usage is correct', () {
+  test('usage string is correct', () {
+    expect(
+      Icon(const MapEntry<String, String>('abc', '')).usage,
+      'Icon(Icons.abc),',
+    );
+  });
+  
+  test('usage string is correct with replacement', () {
     expect(
       Icon(const MapEntry<String, String>('123', '')).usage,
       'Icon(Icons.onetwothree),',
