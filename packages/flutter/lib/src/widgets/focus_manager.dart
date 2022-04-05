@@ -1749,7 +1749,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  // The list of autofocus requests made since the last _appyFocusChange call.
+  // The list of autofocus requests made since the last _applyFocusChange call.
   final List<_Autofocus> _pendingAutofocuses = <_Autofocus>[];
 
   // True indicates that there is an update pending.

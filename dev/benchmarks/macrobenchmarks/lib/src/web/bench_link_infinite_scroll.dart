@@ -36,7 +36,7 @@ class BenchLinkInfiniteScroll extends WidgetRecorder {
 }
 
 class _InfiniteScrollLinks extends StatefulWidget {
-  const _InfiniteScrollLinks(this.initialOffset, this.finalOffset, {Key? key}) : super(key: key);
+  const _InfiniteScrollLinks(this.initialOffset, this.finalOffset);
 
   final double initialOffset;
   final double finalOffset;

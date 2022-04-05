@@ -430,6 +430,7 @@ class SliverReorderableList extends StatefulWidget {
   const SliverReorderableList({
     Key? key,
     required this.itemBuilder,
+    this.findChildIndexCallback,
     required this.itemCount,
     required this.onReorder,
     this.onReorderStart,
@@ -446,6 +447,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
+
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
+  final ChildIndexGetter? findChildIndexCallback;
 
   /// {@macro flutter.widgets.reorderable_list.itemCount}
   final int itemCount;
@@ -908,6 +912,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       // by a zero height SizedBox, so that the gap can move around. To make the
       // list extent stable we add a dummy entry to the end.
       childCount: widget.itemCount + (_dragInfo != null ? 1 : 0),
+      findChildIndexCallback: widget.findChildIndexCallback,
     );
     if (widget.itemExtent != null) {
       return SliverFixedExtentList(

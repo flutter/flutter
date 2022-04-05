@@ -46,7 +46,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "dev.flutter.flutter_api_samples"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
@@ -57,7 +56,6 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
         }

@@ -587,7 +587,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performance-overlay>
   final bool showPerformanceOverlay;
 
   /// Turns on checkerboarding of raster cache images.
@@ -730,7 +730,10 @@ class MaterialApp extends StatefulWidget {
 /// [MaterialScrollBehavior.androidOverscrollIndicator] specifies the
 /// overscroll indicator that is used on [TargetPlatform.android]. When null,
 /// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
-/// overscroll indicator is the [GlowingOverscrollIndicator].
+/// overscroll indicator is the [GlowingOverscrollIndicator]. These properties
+/// are deprecated. In order to use the [StretchingOverscrollIndicator], use
+/// the [ThemeData.useMaterial3] flag, or override
+/// [ScrollBehavior.buildOverscrollIndicator].
 ///
 /// See also:
 ///
@@ -745,6 +748,10 @@ class MaterialScrollBehavior extends ScrollBehavior {
   /// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
   /// overscroll indicator is the [GlowingOverscrollIndicator].
   const MaterialScrollBehavior({
+    @Deprecated(
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
     AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) : _androidOverscrollIndicator = androidOverscrollIndicator,
        super(androidOverscrollIndicator: androidOverscrollIndicator);
@@ -782,9 +789,14 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
-    final AndroidOverscrollIndicator indicator = _androidOverscrollIndicator
+    late final AndroidOverscrollIndicator indicator;
+    if (Theme.of(context).useMaterial3) {
+      indicator = AndroidOverscrollIndicator.stretch;
+    } else {
+      indicator = _androidOverscrollIndicator
         ?? Theme.of(context).androidOverscrollIndicator
         ?? androidOverscrollIndicator;
+    }
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:

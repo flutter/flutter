@@ -181,9 +181,7 @@ void main() {
           '--commit', '1234',
           '--keys-file', '/workDirectory/keys.json',
           '--failure-file', '/workDirectory/failures.json',
-          // TODO(Piinks): Re-enable once https://github.com/flutter/flutter/issues/100304
-          // is resolved.
-          //'--passfail',
+          '--passfail',
         ],
         null,
       );

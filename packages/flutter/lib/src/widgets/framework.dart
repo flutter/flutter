@@ -54,23 +54,6 @@ const _DebugOnly _debugOnly = _DebugOnly();
 
 // KEYS
 
-/// A key that is only equal to itself.
-///
-/// This cannot be created with a const constructor because that implies that
-/// all instantiated keys would be the same instance and therefore not be unique.
-class UniqueKey extends LocalKey {
-  /// Creates a key that is equal only to itself.
-  ///
-  /// The key cannot be created with a const constructor because that implies
-  /// that all instantiated keys would be the same instance and therefore not
-  /// be unique.
-  // ignore: prefer_const_constructors_in_immutables , never use const for this class
-  UniqueKey();
-
-  @override
-  String toString() => '[#${shortHash(this)}]';
-}
-
 /// A key that takes its identity from the object used as its value.
 ///
 /// Used to tie the identity of a widget to the identity of an object used to
@@ -2446,7 +2429,7 @@ class BuildOwner {
   /// This field will default to a [FocusManager] that has registered its
   /// global input handlers via [FocusManager.registerGlobalHandlers]. Callers
   /// wishing to avoid registering those handlers (and modifying the associated
-  /// static state) can explicitly pass a focus manager to the [new BuildOwner]
+  /// static state) can explicitly pass a focus manager to the [BuildOwner.new]
   /// constructor.
   FocusManager focusManager;
 

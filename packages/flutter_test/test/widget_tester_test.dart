@@ -783,7 +783,7 @@ class FakeMatcher extends AsyncMatcher {
 }
 
 class _SingleTickerTest extends StatefulWidget {
-  const _SingleTickerTest({Key? key}) : super(key: key);
+  const _SingleTickerTest();
 
   @override
   _SingleTickerTestState createState() => _SingleTickerTestState();

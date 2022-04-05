@@ -211,7 +211,7 @@ class LinuxAotBundle extends Target {
 }
 
 class DebugBundleLinuxAssets extends BundleLinuxAssets {
-  const DebugBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
+  const DebugBundleLinuxAssets(super.targetPlatform);
 
   @override
   String get name => 'debug_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
@@ -228,7 +228,7 @@ class DebugBundleLinuxAssets extends BundleLinuxAssets {
 }
 
 class ProfileBundleLinuxAssets extends BundleLinuxAssets {
-  const ProfileBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
+  const ProfileBundleLinuxAssets(super.targetPlatform);
 
   @override
   String get name => 'profile_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
@@ -244,7 +244,7 @@ class ProfileBundleLinuxAssets extends BundleLinuxAssets {
 }
 
 class ReleaseBundleLinuxAssets extends BundleLinuxAssets {
-  const ReleaseBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
+  const ReleaseBundleLinuxAssets(super.targetPlatform);
 
   @override
   String get name => 'release_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';

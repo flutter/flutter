@@ -199,7 +199,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// Some subtypes of [ScrollView] can infer this value automatically. For
   /// example [ListView] will use the number of widgets in the child list,
-  /// while the [new ListView.separated] constructor will use half that amount.
+  /// while the [ListView.separated] constructor will use half that amount.
   ///
   /// For [CustomScrollView] and other types which do not receive a builder
   /// or list of widgets, the child count must be explicitly provided.

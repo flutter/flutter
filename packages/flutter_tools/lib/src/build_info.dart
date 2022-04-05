@@ -36,7 +36,7 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.packages', // TODO(zanderso): make this required and remove the default.
+    this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
@@ -67,10 +67,10 @@ class BuildInfo {
   /// Mode-Flavor (e.g. Release-Paid).
   final String? flavor;
 
-  /// The path to the .packages file to use for compilation.
+  /// The path to the package configuration file to use for compilation.
   ///
   /// This is used by package:package_config to locate the actual package_config.json
-  /// file. If not provided, defaults to `.packages`.
+  /// file. If not provided, defaults to `.dart_tool/packages`.
   final String packagesPath;
 
   final List<String> fileSystemRoots;
@@ -574,6 +574,31 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
   ];
 }
 
+// Returns the Dart SDK's name for the specified target architecture.
+//
+// When building for Darwin platforms, the tool invokes architecture-specific
+// variants of `gen_snapshot`, one for each target architecture. The output
+// instructions are then built into architecture-specific binaries, which are
+// merged into a universal binary using the `lipo` tool.
+String getDartNameForDarwinArch(DarwinArch arch) {
+  switch (arch) {
+    case DarwinArch.armv7:
+      return 'armv7';
+    case DarwinArch.arm64:
+      return 'arm64';
+    case DarwinArch.x86_64:
+      return 'x64';
+  }
+}
+
+// Returns Apple's name for the specified target architecture.
+//
+// When invoking Apple tools such as `xcodebuild` or `lipo`, the tool often
+// passes one or more target architectures as paramters. The names returned by
+// this function reflect Apple's name for the specified architecture.
+//
+// For consistency with developer expectations, Flutter outputs also use these
+// architecture names in its build products for Darwin target platforms.
 String getNameForDarwinArch(DarwinArch arch) {
   switch (arch) {
     case DarwinArch.armv7:

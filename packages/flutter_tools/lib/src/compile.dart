@@ -317,6 +317,9 @@ class KernelCompiler {
       if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) ...<String>[
         '--source',
         dartPluginRegistrant.path,
+        '--source',
+        'package:flutter/src/dart_plugin_registrant.dart',
+        '-Dflutter.dart_plugin_registrant=${dartPluginRegistrant.uri}',
       ],
       ...?extraFrontEndOptions,
       mainUri,
@@ -355,14 +358,14 @@ abstract class _CompilationRequest {
 
 class _RecompileRequest extends _CompilationRequest {
   _RecompileRequest(
-    Completer<CompilerOutput?> completer,
+    super.completer,
     this.mainUri,
     this.invalidatedFiles,
     this.outputPath,
     this.packageConfig,
     this.suppressErrors,
     {this.additionalSource}
-  ) : super(completer);
+  );
 
   Uri mainUri;
   List<Uri>? invalidatedFiles;
@@ -378,14 +381,14 @@ class _RecompileRequest extends _CompilationRequest {
 
 class _CompileExpressionRequest extends _CompilationRequest {
   _CompileExpressionRequest(
-    Completer<CompilerOutput?> completer,
+    super.completer,
     this.expression,
     this.definitions,
     this.typeDefinitions,
     this.libraryUri,
     this.klass,
     this.isStatic,
-  ) : super(completer);
+  );
 
   String expression;
   List<String>? definitions;
@@ -401,7 +404,7 @@ class _CompileExpressionRequest extends _CompilationRequest {
 
 class _CompileExpressionToJsRequest extends _CompilationRequest {
   _CompileExpressionToJsRequest(
-    Completer<CompilerOutput?> completer,
+    super.completer,
     this.libraryUri,
     this.line,
     this.column,
@@ -409,7 +412,7 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
     this.jsFrameValues,
     this.moduleName,
     this.expression,
-  ) : super(completer);
+  );
 
   final String? libraryUri;
   final int line;
@@ -425,7 +428,7 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
 }
 
 class _RejectRequest extends _CompilationRequest {
-  _RejectRequest(Completer<CompilerOutput?> completer) : super(completer);
+  _RejectRequest(super.completer);
 
   @override
   Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async =>
@@ -775,6 +778,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
       if (additionalSource != null) ...<String>[
         '--source',
         additionalSource,
+        '--source',
+        'package:flutter/src/dart_plugin_registrant.dart',
+        '-Dflutter.dart_plugin_registrant=${Uri.file(additionalSource)}',
       ],
       if (platformDill != null) ...<String>[
         '--platform',

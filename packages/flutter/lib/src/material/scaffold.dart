@@ -2357,6 +2357,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     late _StandardBottomSheet bottomSheet;
 
     bool removedEntry = false;
+    bool doingDispose = false;
     void _removeCurrentBottomSheet() {
       removedEntry = true;
       if (_currentBottomSheet == null) {
@@ -2380,10 +2381,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     final LocalHistoryEntry? entry = isPersistent
       ? null
       : LocalHistoryEntry(onRemove: () {
-          if (!removedEntry && _currentBottomSheet?._widget == bottomSheet) {
+          if (!removedEntry && _currentBottomSheet?._widget == bottomSheet && !doingDispose) {
             _removeCurrentBottomSheet();
           }
         });
+
+    void _removeEntryIfNeeded() {
+      if (!isPersistent && !removedEntry) {
+        assert(entry != null);
+        entry!.remove();
+        removedEntry = true;
+      }
+    }
 
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
@@ -2394,11 +2403,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           return;
         }
         assert(_currentBottomSheet!._widget == bottomSheet);
-        if (!isPersistent && !removedEntry) {
-          assert(entry != null);
-          entry!.remove();
-          removedEntry = true;
-        }
+        _removeEntryIfNeeded();
       },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
@@ -2408,6 +2413,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         }
       },
       onDispose: () {
+        doingDispose = true;
+        _removeEntryIfNeeded();
         if (shouldDisposeAnimationController) {
           animationController.dispose();
         }

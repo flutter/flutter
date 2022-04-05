@@ -26,28 +26,17 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAf({
-    String localeName = 'af',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'af',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Meer oor $applicationName';
@@ -317,7 +306,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Spasie';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -512,28 +501,17 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAm({
-    String localeName = 'am',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'am',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'ስለ $applicationName';
@@ -644,16 +622,16 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'የኋሊት መደምሰሻ';
 
   @override
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'ጣቢያ ወደ ታች';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'ጣቢያ ወደ ላይ';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -665,10 +643,10 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'አስወጣ';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'ጨርስ';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -677,40 +655,40 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'የሃንጉል ሁነታ';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'የሃንጃ ሁነታ';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'ሃንካኩ';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'ሂራጋና';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'ሂራጋና ካታካና';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'መነሻ';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'አስገባ';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'የካና ሁነታ';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'የካንጂ ሁነታ';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'ካታካና';
 
   @override
-  String get keyboardKeyMeta => 'Meta';
+  String get keyboardKeyMeta => 'ሜታ';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'ትዕዛዝ';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
@@ -758,7 +736,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadDecimal => 'Num .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => '+NUM';
 
   @override
   String get keyboardKeyNumpadEnter => 'Num Enter';
@@ -785,31 +763,31 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'ኃይል';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'ኃይል አጥፋ';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'ሮማጂ';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'ምረጥ';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'ክፍተት';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'ዜንካኩ';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'ዜንካኩ ሃንካኩ';
 
   @override
   String get lastPageTooltip => 'የመጨረሻው ገጽ';
@@ -998,28 +976,17 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAr({
-    String localeName = 'ar',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ar',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'لمحة عن "$applicationName"';
@@ -1136,10 +1103,10 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'القناة التالية';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'القناة السابقة';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -1163,10 +1130,10 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'وضع Hangul (هانغول)';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'وضع Hanja (هانجا)';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -1184,10 +1151,10 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'وضع Kana (كانا)';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'وضع Kanji (كانجي)';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -1205,64 +1172,64 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'الرقم 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'الرقم 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'الرقم 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'الرقم 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'الرقم 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'الرقم 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'الرقم 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'الرقم 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'الرقم 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'الرقم 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'علامة الجمع +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'الفاصلة ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'النقطة .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'علامة القسمة /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'المفتاح Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'علامة التساوي =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'علامة الضرب *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'القوس الأيسر )';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'القوس الأيمن (';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'علامة الطرح -';
 
   @override
   String get keyboardKeyPageDown => 'PgDown';
@@ -1271,10 +1238,10 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'زر التشغيل';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'زر الإطفاء';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -1286,10 +1253,10 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'مفتاح الاختيار';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'مفتاح المسافة';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -1484,28 +1451,17 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAs({
-    String localeName = 'as',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'as',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationNameৰ বিষয়ে';
@@ -1616,16 +1572,16 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'বেকস্পেচ';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'কেপ্‌ছ লক';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'চেনেল ডাউন';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'চেনেল আপ';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -1637,7 +1593,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'ইজেক্ট';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -1649,19 +1605,19 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'হাঙুল ম’ড';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'হাঞ্জা ম’ড';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'হানকাকু';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'হিৰাগানা';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'হিৰাগানা কাটাকানা';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -1670,16 +1626,16 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'কানা ম’ড';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'কাঞ্জি ম’ড';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'কাটাকানা';
 
   @override
-  String get keyboardKeyMeta => 'Meta';
+  String get keyboardKeyMeta => 'মেটা';
 
   @override
   String get keyboardKeyMetaMacOs => 'Command';
@@ -1691,64 +1647,64 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'নং ০';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'নং ১';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'নং ২';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'নং ৩';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'নং ৪';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'নং ৫';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'নং ৬';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'নং ৭';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'নং ৮';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'নং ৯';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'নং +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'নং ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'নং .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'নং /';
 
   @override
   String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'নং =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'নং *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'নং (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'নং )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'নং -';
 
   @override
   String get keyboardKeyPageDown => 'PgDown';
@@ -1757,31 +1713,31 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'পাৱাৰ';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'পাৱাৰ অফ';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'প্ৰিণ্ট স্ক্ৰীন';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'ৰ’মাজি';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'স্ক্ৰ’ল লক';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'ছিলেক্ট';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'স্পেচ';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'জেনকাকু';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'জেনকাকু হানকাকু';
 
   @override
   String get lastPageTooltip => 'অন্তিম পৃষ্ঠা';
@@ -1970,28 +1926,17 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationAz({
-    String localeName = 'az',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'az',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName haqqında';
@@ -2105,13 +2050,13 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get keyboardKeyBackspace => 'Backspace';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Böyük Hərf';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Aşağıdakı kanala keçin';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Yuxarıdakı kanala keçin';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -2123,10 +2068,10 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Çıxarın';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Son';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -2135,31 +2080,31 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hanqıl rejimi';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja rejimi';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'Hiraqana';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Hiraqana Katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Əsas səhifə';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Daxil edin';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana Rejimi';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji Rejimi';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -2168,100 +2113,100 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Əmr';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'Rəqəm';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'Rəq 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'Rəq 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'Rəq 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'Rəq 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'Rəq 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'Rəq 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'Rəq 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'Rəq 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'Rəq 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'Rəq 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'Rəq +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Rəq ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'Rəq .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Rəq /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Rəqəm Daxiletmə';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Rəq =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Rəq *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Rəq (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Rəq )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Rəq -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'Aşağı Səhifə';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'Yuxarı Səhifə';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Qidalanma';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Söndürmə';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Ekran Çapı';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'Sürüşdürmə';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Seçin';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Boşluq';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -2456,28 +2401,17 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBe({
-    String localeName = 'be',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'be',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Інфармацыя пра праграму "$applicationName"';
@@ -2594,10 +2528,10 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Наступны канал';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Папярэдні канал';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -2609,7 +2543,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Выняць';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -2729,25 +2663,25 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Сілкаванне';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Выключыць';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'Ромадзі';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Выбраць';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Прабел';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -2942,28 +2876,17 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBg({
-    String localeName = 'bg',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'bg',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Всичко за $applicationName';
@@ -3092,7 +3015,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
+  String get keyboardKeyEisu => 'Ейсу';
 
   @override
   String get keyboardKeyEject => 'Eject';
@@ -3107,19 +3030,19 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Режим за хангъл';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Режим за ханджа';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'Ханкаку';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'Хирагана';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Хирагана катакана';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -3128,13 +3051,13 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Режим за кана';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Режим за канджи';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -3224,7 +3147,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'Ромаджи';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
@@ -3236,10 +3159,10 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'Зенкаку';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Зенкаку ханкаку';
 
   @override
   String get lastPageTooltip => 'Последна страница';
@@ -3428,28 +3351,17 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBn({
-    String localeName = 'bn',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'bn',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName সম্পর্কে';
@@ -3566,10 +3478,10 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'আগের চ্যানেলে যান';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'পরের চ্যানেলে যান';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -3581,7 +3493,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'ইজেক্ট করুন';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -3593,19 +3505,19 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => "'হাঙ্গুল' মোড";
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => "'হাঞ্জা' মোড";
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'হানকাকু';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'হিরাগানা';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'হিরাগানা কাতাকানা';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -3614,16 +3526,16 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => "'কানা' মোড";
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => "'কাঞ্জি' মোড";
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'কাতাকানা';
 
   @override
-  String get keyboardKeyMeta => 'Meta';
+  String get keyboardKeyMeta => 'মেটা';
 
   @override
   String get keyboardKeyMetaMacOs => 'Command';
@@ -3710,22 +3622,22 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'রোমাজি';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'বেছে নিন';
 
   @override
   String get keyboardKeySpace => 'Space';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'জেনকাকু';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'জেনকাকু হানকাকু';
 
   @override
   String get lastPageTooltip => 'শেষ পৃষ্ঠা';
@@ -3914,28 +3826,17 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationBs({
-    String localeName = 'bs',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'bs',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -4043,7 +3944,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeyAlt => 'Alt';
 
   @override
-  String get keyboardKeyAltGraph => 'AltGr';
+  String get keyboardKeyAltGraph => 'Alt Gr';
 
   @override
   String get keyboardKeyBackspace => 'Backspace';
@@ -4052,10 +3953,10 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'prethodni kanal';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'sljedeći kanal';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -4079,10 +3980,10 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'način rada Hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'način rada Hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -4091,7 +3992,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeyHiragana => 'Hiragana';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Hiragana katakana';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -4100,10 +4001,10 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'način rada Kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'način rada Kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -4181,19 +4082,19 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'Pg Down';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'Pg Up';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'tipka za uključivanje';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'tipka za isključivanje';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Prt Sc';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
@@ -4205,13 +4106,13 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'tipka za razmak';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Posljednja stranica';
@@ -4400,28 +4301,17 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationCa({
-    String localeName = 'ca',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ca',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Sobre $applicationName';
@@ -4529,34 +4419,34 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get keyboardKeyAlt => 'Alt';
 
   @override
-  String get keyboardKeyAltGraph => 'AltGr';
+  String get keyboardKeyAltGraph => 'Alt Gr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Retrocés';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Bloq Maj';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Canal següent';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Canal anterior';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
 
   @override
-  String get keyboardKeyDelete => 'Del';
+  String get keyboardKeyDelete => 'Supr';
 
   @override
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Expulsa';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Fi';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -4565,10 +4455,10 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Mode hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Mode hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -4580,16 +4470,16 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Inici';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Inser';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Mode kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Mode kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -4598,100 +4488,100 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Ordre';
 
   @override
-  String get keyboardKeyMetaWindows => 'Win';
+  String get keyboardKeyMetaWindows => 'Windows';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'Bloq Núm';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'Núm. 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'Núm. 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'Núm. 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'Núm. 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'Núm. 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'Núm. 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'Núm. 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'Núm. 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'Núm. 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'Núm. 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'Núm. +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Núm. ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'Núm. .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Núm. /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Núm. Retorn';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Núm. =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Núm. *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Núm. (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Núm. )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Núm. -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'Av Pàg';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'Re Pàg';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Engegada';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Apagada';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Impr Pant';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'Bloq Despl';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Selecciona';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Espai';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -4886,28 +4776,17 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationCs({
-    String localeName = 'cs',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'cs',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaci $applicationName';
@@ -5024,10 +4903,10 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'O kanál dolů';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'O kanál nahoru';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -5039,7 +4918,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Odpojit';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -5051,10 +4930,10 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Režim korejského písma';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Režim čínských znaků';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -5063,7 +4942,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get keyboardKeyHiragana => 'Hiragana';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Hiragana katakana';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -5072,10 +4951,10 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Režim kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Režim kandži';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -5159,31 +5038,31 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Vypínač';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Vypnout';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'Rómadži';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Vybrat';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Mezera';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Poslední stránka';
@@ -5372,28 +5251,17 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationDa({
-    String localeName = 'da',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'da',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -5525,7 +5393,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Skub ud';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -5537,10 +5405,10 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul-tilstand';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja-tilstand';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -5558,10 +5426,10 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana-tilstand';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji-tilstand';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -5639,16 +5507,16 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'PgDn';
 
   @override
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Strøm';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Sluk';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -5660,10 +5528,10 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Vælg';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Mellemrumstasten';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -5858,28 +5726,17 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationDe({
-    String localeName = 'de',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'de',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Über $applicationName';
@@ -5990,31 +5847,31 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Rücktaste';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Feststelltaste';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Vorheriger Kanal';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Nächster Kanal';
 
   @override
-  String get keyboardKeyControl => 'Ctrl';
+  String get keyboardKeyControl => 'Strg';
 
   @override
-  String get keyboardKeyDelete => 'Del';
+  String get keyboardKeyDelete => 'Entf';
 
   @override
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Auswerfen';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Ende';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -6023,10 +5880,10 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul-Modus';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja-Modus';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -6038,16 +5895,16 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Pos1';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Einfg';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana-Modus';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji-Modus';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -6056,100 +5913,100 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Befehl';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'Num';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'Num 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'Num 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'Num 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'Num 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'Num 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'Num 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'Num 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'Num 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'Num 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'Num 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'Num +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Num ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'Num .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Num /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Num Eingabetaste';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Num =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Num *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Num (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Num )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'Bild ab';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'Bild auf';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Ein/Aus';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Aus';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Druck';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'Rollen';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Auswählen';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Leertaste';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -6344,28 +6201,17 @@ class MaterialLocalizationDeCh extends MaterialLocalizationDe {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationDeCh({
-    String localeName = 'de_CH',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'de_CH',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get invalidTimeLabel => 'Gib eine gültige Uhrzeit ein';
@@ -6392,28 +6238,17 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEl({
-    String localeName = 'el',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'el',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Σχετικά με την εφαρμογή $applicationName';
@@ -6530,10 +6365,10 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Επόμενο κανάλι';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Προηγούμενο κανάλι';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -6545,7 +6380,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Εξαγωγή';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -6557,10 +6392,10 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Λειτουργία Hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Λειτουργία Hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -6578,10 +6413,10 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Λειτουργία Kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Λειτουργία Kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -6665,10 +6500,10 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Ενεργοποίηση';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Απενεργοποίηση';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -6680,10 +6515,10 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Επιλογή';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Διάστημα';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -6878,28 +6713,17 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEn({
-    String localeName = 'en',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'en',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'About $applicationName';
@@ -7364,28 +7188,53 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnAu({
-    String localeName = 'en_AU',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'en_AU',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps lock';
+
+  @override
+  String get keyboardKeyKanaMode => 'Kana mode';
+
+  @override
+  String get keyboardKeyHangulMode => 'Hangul mode';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Hanja mode';
+
+  @override
+  String get keyboardKeyChannelUp => 'Channel up';
+
+  @override
+  String get keyboardKeyChannelDown => 'Channel down';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Kanji mode';
+
+  @override
+  String get keyboardKeyNumLock => 'Num lock';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll lock';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print screen';
+
+  @override
+  String get keyboardKeyPowerOff => 'Power off';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7433,28 +7282,53 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnCa({
-    String localeName = 'en_CA',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'en_CA',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps lock';
+
+  @override
+  String get keyboardKeyKanaMode => 'Kana mode';
+
+  @override
+  String get keyboardKeyHangulMode => 'Hangul mode';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Hanja mode';
+
+  @override
+  String get keyboardKeyChannelUp => 'Channel up';
+
+  @override
+  String get keyboardKeyChannelDown => 'Channel down';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Kanji mode';
+
+  @override
+  String get keyboardKeyNumLock => 'Num lock';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll lock';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print screen';
+
+  @override
+  String get keyboardKeyPowerOff => 'Power off';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7502,28 +7376,53 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnGb({
-    String localeName = 'en_GB',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'en_GB',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps lock';
+
+  @override
+  String get keyboardKeyKanaMode => 'Kana mode';
+
+  @override
+  String get keyboardKeyHangulMode => 'Hangul mode';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Hanja mode';
+
+  @override
+  String get keyboardKeyChannelUp => 'Channel up';
+
+  @override
+  String get keyboardKeyChannelDown => 'Channel down';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Kanji mode';
+
+  @override
+  String get keyboardKeyNumLock => 'Num lock';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll lock';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print screen';
+
+  @override
+  String get keyboardKeyPowerOff => 'Power off';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7574,28 +7473,53 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnIe({
-    String localeName = 'en_IE',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'en_IE',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps lock';
+
+  @override
+  String get keyboardKeyKanaMode => 'Kana mode';
+
+  @override
+  String get keyboardKeyHangulMode => 'Hangul mode';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Hanja mode';
+
+  @override
+  String get keyboardKeyChannelUp => 'Channel up';
+
+  @override
+  String get keyboardKeyChannelDown => 'Channel down';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Kanji mode';
+
+  @override
+  String get keyboardKeyNumLock => 'Num lock';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll lock';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print screen';
+
+  @override
+  String get keyboardKeyPowerOff => 'Power off';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7646,28 +7570,53 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnIn({
-    String localeName = 'en_IN',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'en_IN',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps lock';
+
+  @override
+  String get keyboardKeyKanaMode => 'Kana mode';
+
+  @override
+  String get keyboardKeyHangulMode => 'Hangul mode';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Hanja mode';
+
+  @override
+  String get keyboardKeyChannelUp => 'Channel up';
+
+  @override
+  String get keyboardKeyChannelDown => 'Channel down';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Kanji mode';
+
+  @override
+  String get keyboardKeyNumLock => 'Num lock';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll lock';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print screen';
+
+  @override
+  String get keyboardKeyPowerOff => 'Power off';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7715,28 +7664,53 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnNz({
-    String localeName = 'en_NZ',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'en_NZ',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Channel down';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Kanji mode';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Hanja mode';
+
+  @override
+  String get keyboardKeyKanaMode => 'Kana mode';
+
+  @override
+  String get keyboardKeyHangulMode => 'Hangul mode';
+
+  @override
+  String get keyboardKeyChannelUp => 'Channel up';
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps lock';
+
+  @override
+  String get keyboardKeyNumLock => 'Num lock';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll lock';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print screen';
+
+  @override
+  String get keyboardKeyPowerOff => 'Power off';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7784,28 +7758,53 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnSg({
-    String localeName = 'en_SG',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'en_SG',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps lock';
+
+  @override
+  String get keyboardKeyKanaMode => 'Kana mode';
+
+  @override
+  String get keyboardKeyHangulMode => 'Hangul mode';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Hanja mode';
+
+  @override
+  String get keyboardKeyChannelUp => 'Channel up';
+
+  @override
+  String get keyboardKeyChannelDown => 'Channel down';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Kanji mode';
+
+  @override
+  String get keyboardKeyNumLock => 'Num lock';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll lock';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print screen';
+
+  @override
+  String get keyboardKeyPowerOff => 'Power off';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7853,28 +7852,53 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEnZa({
-    String localeName = 'en_ZA',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'en_ZA',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps lock';
+
+  @override
+  String get keyboardKeyKanaMode => 'Kana mode';
+
+  @override
+  String get keyboardKeyHangulMode => 'Hangul mode';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Hanja mode';
+
+  @override
+  String get keyboardKeyChannelUp => 'Channel up';
+
+  @override
+  String get keyboardKeyChannelDown => 'Channel down';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Kanji mode';
+
+  @override
+  String get keyboardKeyNumLock => 'Num lock';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll lock';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print screen';
+
+  @override
+  String get keyboardKeyPowerOff => 'Power off';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
   String get dateInputLabel => 'Enter date';
@@ -7925,28 +7949,17 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEs({
-    String localeName = 'es',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Sobre $applicationName';
@@ -8054,34 +8067,34 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get keyboardKeyAlt => 'Alt';
 
   @override
-  String get keyboardKeyAltGraph => 'AltGr';
+  String get keyboardKeyAltGraph => 'Alt Gr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Retroceso';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Bloq Mayús';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Canal siguiente';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Canal anterior';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
 
   @override
-  String get keyboardKeyDelete => 'Del';
+  String get keyboardKeyDelete => 'Supr';
 
   @override
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Expulsar';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Fin';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -8090,10 +8103,10 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Modo Hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Modo Hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -8105,16 +8118,16 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Inicio';
 
   @override
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Modo Kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Modo Kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -8123,13 +8136,13 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Comando';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'Bloq Num';
 
   @override
   String get keyboardKeyNumpad0 => 'Num 0';
@@ -8174,7 +8187,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadDivide => 'Num /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Num Intro';
 
   @override
   String get keyboardKeyNumpadEqual => 'Num =';
@@ -8192,31 +8205,31 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'Av Pág';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'Re Pág';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Encendido';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Apagado';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Impr Pant';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'Bloq Despl';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Selección';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Espacio';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -8411,28 +8424,62 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEs419({
-    String localeName = 'es_419',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_419',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8540,28 +8587,62 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsAr({
-    String localeName = 'es_AR',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_AR',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8669,28 +8750,62 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsBo({
-    String localeName = 'es_BO',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_BO',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8798,28 +8913,62 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsCl({
-    String localeName = 'es_CL',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_CL',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -8927,28 +9076,62 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsCo({
-    String localeName = 'es_CO',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_CO',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9056,28 +9239,62 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsCr({
-    String localeName = 'es_CR',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_CR',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9185,28 +9402,62 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsDo({
-    String localeName = 'es_DO',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_DO',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9314,28 +9565,62 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsEc({
-    String localeName = 'es_EC',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_EC',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9443,28 +9728,62 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsGt({
-    String localeName = 'es_GT',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_GT',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9572,28 +9891,62 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsHn({
-    String localeName = 'es_HN',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_HN',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9701,28 +10054,62 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsMx({
-    String localeName = 'es_MX',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_MX',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9830,28 +10217,62 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsNi({
-    String localeName = 'es_NI',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_NI',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -9959,28 +10380,62 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPa({
-    String localeName = 'es_PA',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_PA',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10088,28 +10543,62 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPe({
-    String localeName = 'es_PE',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_PE',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10217,28 +10706,62 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPr({
-    String localeName = 'es_PR',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_PR',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10346,28 +10869,62 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsPy({
-    String localeName = 'es_PY',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_PY',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10475,28 +11032,62 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsSv({
-    String localeName = 'es_SV',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_SV',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10604,28 +11195,62 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsUs({
-    String localeName = 'es_US',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_US',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10736,28 +11361,62 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsUy({
-    String localeName = 'es_UY',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_UY',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10865,28 +11524,62 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEsVe({
-    String localeName = 'es_VE',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'es_VE',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal siguiente';
+
+  @override
+  String get keyboardKeyCapsLock => 'Bloqueo de mayúscula';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyNumLock => 'Bloqueo numérico';
+
+  @override
+  String get keyboardKeyPageDown => 'AvPág';
+
+  @override
+  String get keyboardKeySpace => 'Barra espaciadora';
+
+  @override
+  String get keyboardKeyScrollLock => 'Bloqueo de desplazamiento';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
+
+  @override
+  String get keyboardKeyPowerOff => 'Apagar';
+
+  @override
+  String get keyboardKeyPower => 'Encender';
+
+  @override
+  String get keyboardKeyPageUp => 'RePág';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
   String? get licensesPackageDetailTextOne => '1 licencia';
@@ -10994,28 +11687,17 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEt({
-    String localeName = 'et',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'et',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Teave rakenduse $applicationName kohta';
@@ -11126,16 +11808,16 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Tagasilüke';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Suurtähelukk';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Kanal madalamale';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Kanal kõrgemale';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -11147,10 +11829,10 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Väljuta';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Lõpp';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -11159,10 +11841,10 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hanguli režiim';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja režiim';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -11171,19 +11853,19 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeyHiragana => 'Hiragana';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Hiragana/Katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Avaleht';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Sisesta';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana režiim';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji režiim';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -11192,13 +11874,13 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Käsk';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'Numbrilukk';
 
   @override
   String get keyboardKeyNumpad0 => 'Num 0';
@@ -11261,37 +11943,37 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'Lehe võrra alla';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'Lehe võrra üles';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Toide';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Väljalülitamine';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Jäädvusta ekraanikuva';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'Kerimislukk';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Vali';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Tühik';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Zenkaku/Hankaku';
 
   @override
   String get lastPageTooltip => 'Viimane leht';
@@ -11480,28 +12162,17 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationEu({
-    String localeName = 'eu',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'eu',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName aplikazioari buruz';
@@ -11609,46 +12280,46 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get keyboardKeyAlt => 'Alt';
 
   @override
-  String get keyboardKeyAltGraph => 'AltGr';
+  String get keyboardKeyAltGraph => 'Alt Gr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Atzera tekla';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Blok Maius';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Jaitsi kanal bat';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Igo kanal bat';
 
   @override
-  String get keyboardKeyControl => 'Ctrl';
+  String get keyboardKeyControl => 'Ktrl';
 
   @override
-  String get keyboardKeyDelete => 'Del';
+  String get keyboardKeyDelete => 'Ezab';
 
   @override
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Kanporatu';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Amaiera';
 
   @override
-  String get keyboardKeyEscape => 'Esc';
+  String get keyboardKeyEscape => 'Ihes';
 
   @override
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul modua';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja modua';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -11657,19 +12328,19 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get keyboardKeyHiragana => 'Hiragana';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Hiragana eta katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Hasi';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Txertatu';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana modua';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji modua';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -11678,106 +12349,106 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Komandoa';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'Blok Zenb';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'Zenbakizko teklatuko 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'Zenbakizko teklatuko 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'Zenbakizko teklatuko 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'Zenbakizko teklatuko 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'Zenbakizko teklatuko 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'Zenbakizko teklatuko 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'Zenbakizko teklatuko 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'Zenbakizko teklatuko 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'Zenbakizko teklatuko 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'Zenbakizko teklatuko 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'Zenbakizko teklatuko +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Zenbakizko teklatuko ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'Zenbakizko teklatuko .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Zenbakizko teklatuko /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Zenbakizko teklatuko Sartu';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Zenbakizko teklatuko =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Zenbakizko teklatuko *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Zenbakizko teklatuko (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Zenbakizko teklatuko )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Zenbakizko teklatuko -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'OrBeh';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'OrGo';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Piztu/Itzali';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Itzali';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Inp pant';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'Rōmaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'Blok Korr';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Hautatu';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Zuriune-barra';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Zenkaku eta hankaku';
 
   @override
   String get lastPageTooltip => 'Azken orria';
@@ -11966,28 +12637,17 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFa({
-    String localeName = 'fa',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'fa',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'درباره $applicationName';
@@ -12092,178 +12752,178 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'زمان معتبری وارد کنید';
 
   @override
-  String get keyboardKeyAlt => 'Alt';
+  String get keyboardKeyAlt => 'دگرساز';
 
   @override
-  String get keyboardKeyAltGraph => 'AltGr';
+  String get keyboardKeyAltGraph => 'دگرساز راست';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'پس‌بَر';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'حالت حروف بزرگ';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'کانال پایین';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'کانال بالا';
 
   @override
-  String get keyboardKeyControl => 'Ctrl';
+  String get keyboardKeyControl => 'مهار';
 
   @override
-  String get keyboardKeyDelete => 'Del';
+  String get keyboardKeyDelete => 'حذف';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
+  String get keyboardKeyEisu => 'اِسو';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'خارج کردن';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'پایان';
 
   @override
-  String get keyboardKeyEscape => 'Esc';
+  String get keyboardKeyEscape => 'گریز';
 
   @override
-  String get keyboardKeyFn => 'Fn';
+  String get keyboardKeyFn => 'عملکرد';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'حالت هانگول';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'حالت هانجا';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'هانکاکو';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'هیراگانا';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'هیراگانا کاتاکانا';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'صفحه اصلی';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'درج';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'حالت کانا';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'حالت کانجی';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'کاتاکانا';
 
   @override
-  String get keyboardKeyMeta => 'Meta';
+  String get keyboardKeyMeta => 'متا';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'فرمان';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'قفل اعداد';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'عدد ۰';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'عدد ۱';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'عدد ۲';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'عدد ۳';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'عدد ۴';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'عدد ۵';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'عدد ۶';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'عدد ۷';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'عدد ۸';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'عدد ۹';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'عدد +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'عدد ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'عدد .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'عدد /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'ورود اعداد';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'عدد =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'عدد *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'عدد (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'عدد )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'عدد -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'صفحه پایین';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'صفحه بالا';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'روشن/ خاموش';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'خاموش کردن';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'چاپ صفحه';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'روماجی';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'قفل پیمایش';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'انتخاب';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'فاصله';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'زنکاکو';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'زنکاکو هانکاکو';
 
   @override
   String get lastPageTooltip => 'صفحه آخر';
@@ -12452,28 +13112,17 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFi({
-    String localeName = 'fi',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'fi',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Tietoja: $applicationName';
@@ -12584,16 +13233,16 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Askelpalautin';
 
   @override
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Edellinen kanava';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Seuraava kanava';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -12605,10 +13254,10 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Poista';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Lopeta';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -12617,10 +13266,10 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul-tila';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja-tila';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -12632,16 +13281,16 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Etusivu';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Lisää';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana-tila';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji-tila';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -12650,7 +13299,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Komento';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
@@ -12725,10 +13374,10 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Virta';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Virta pois';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -12740,10 +13389,10 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Valitse';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Välilyönti';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -12938,28 +13587,17 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFil({
-    String localeName = 'fil',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'fil',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Tungkol sa $applicationName';
@@ -13214,7 +13852,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get keyboardKeyPower => 'Power';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'I-off';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -13226,10 +13864,10 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Piliin';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Puwang';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -13424,28 +14062,17 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFr({
-    String localeName = 'fr',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'fr',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'À propos de $applicationName';
@@ -13553,46 +14180,46 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get keyboardKeyAlt => 'Alt';
 
   @override
-  String get keyboardKeyAltGraph => 'AltGr';
+  String get keyboardKeyAltGraph => 'Alt Gr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Retour arrière';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Verr Maj';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Chaîne suivante';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Chaîne précédente';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
 
   @override
-  String get keyboardKeyDelete => 'Del';
+  String get keyboardKeyDelete => 'Suppr';
 
   @override
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Éjecter';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Fin';
 
   @override
-  String get keyboardKeyEscape => 'Esc';
+  String get keyboardKeyEscape => 'Échap';
 
   @override
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Mode hangûl';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Mode hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -13604,118 +14231,118 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Accueil';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Insérer';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Mode Kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Mode Kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
 
   @override
-  String get keyboardKeyMeta => 'Meta';
+  String get keyboardKeyMeta => 'Méta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Commande';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'Verr Num';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'Num 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'Num 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'Num 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'Num 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'Num 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'Num 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'Num 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'Num 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'Num 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'Num 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'Num +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Num ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'Num .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Num /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Num Entrée';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Num =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Num *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Num (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Num )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'PgSuiv';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'PgPréc';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Puissance';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Éteindre';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Impr. écran';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'Arrêt défil';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Sélectionner';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Espace';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -13910,28 +14537,68 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationFrCa({
-    String localeName = 'fr_CA',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'fr_CA',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Chaîne préc.';
+
+  @override
+  String get keyboardKeyCapsLock => 'Verr. maj.';
+
+  @override
+  String get keyboardKeyNumLock => 'Verr. num.';
+
+  @override
+  String get keyboardKeyPrintScreen => "Impression de l'écran";
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Entrée';
+
+  @override
+  String get keyboardKeyInsert => 'Insér.';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Mode Hanja';
+
+  @override
+  String get keyboardKeyHangulMode => 'Mode Hangul';
+
+  @override
+  String get keyboardKeyEscape => 'Échapp.';
+
+  @override
+  String get keyboardKeyEject => 'Éject.';
+
+  @override
+  String get keyboardKeyChannelUp => 'Chaîne suiv.';
+
+  @override
+  String get keyboardKeyPower => 'Alimentation';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeySelect => 'Sélect.';
+
+  @override
+  String get keyboardKeyScrollLock => 'Arrêt défilement';
+
+  @override
+  String get keyboardKeyPageUp => 'Bas page';
+
+  @override
+  String get keyboardKeyPageDown => 'Haut page';
 
   @override
   String get invalidTimeLabel => 'Entrez une heure valide';
@@ -14012,28 +14679,17 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationGl({
-    String localeName = 'gl',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'gl',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de: $applicationName';
@@ -14141,34 +14797,34 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeyAlt => 'Alt';
 
   @override
-  String get keyboardKeyAltGraph => 'AltGr';
+  String get keyboardKeyAltGraph => 'Alt Gr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Retroceso';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Bloq Maiús';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Canle abaixo';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Canle arriba';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
 
   @override
-  String get keyboardKeyDelete => 'Del';
+  String get keyboardKeyDelete => 'Supr';
 
   @override
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Expulsar';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Fin';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -14177,10 +14833,10 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Modo hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Modo hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -14192,16 +14848,16 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Inicio';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Inserir';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Modo kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Modo kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -14210,13 +14866,13 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Comando';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'Bloq Num';
 
   @override
   String get keyboardKeyNumpad0 => 'Num 0';
@@ -14261,7 +14917,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadDivide => 'Num /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Num Intro';
 
   @override
   String get keyboardKeyNumpadEqual => 'Num =';
@@ -14279,31 +14935,31 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'AvPáx';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'RePáx';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Acender';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Apagar';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Imprimir pantalla';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'Bloq Despr';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Seleccionar';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Espazo';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -14498,28 +15154,17 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationGsw({
-    String localeName = 'gsw',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'gsw',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Über $applicationName';
@@ -14630,31 +15275,31 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Rücktaste';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Feststelltaste';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Vorheriger Kanal';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Nächster Kanal';
 
   @override
-  String get keyboardKeyControl => 'Ctrl';
+  String get keyboardKeyControl => 'Strg';
 
   @override
-  String get keyboardKeyDelete => 'Del';
+  String get keyboardKeyDelete => 'Entf';
 
   @override
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Auswerfen';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Ende';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -14663,10 +15308,10 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul-Modus';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja-Modus';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -14678,16 +15323,16 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Pos1';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Einfg';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana-Modus';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji-Modus';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -14696,100 +15341,100 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Befehl';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'Num';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'Num 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'Num 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'Num 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'Num 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'Num 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'Num 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'Num 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'Num 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'Num 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'Num 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'Num +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Num ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'Num .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Num /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Num Eingabetaste';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Num =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Num *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Num (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Num )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'Bild ab';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'Bild auf';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Ein/Aus';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Aus';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Druck';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'Rollen';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Auswählen';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Leertaste';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -14984,28 +15629,17 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationGu({
-    String localeName = 'gu',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'gu',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName વિશે';
@@ -15470,28 +16104,17 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHe({
-    String localeName = 'he',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'he',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'מידע על $applicationName';
@@ -15707,46 +16330,46 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpad9 => 'Num 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => '+ ‏Num';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => ', ‏Num';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => '. ‏Num';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => '/ ‏Num';
 
   @override
   String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => '= ‏Num';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => '* ‏Num';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => ') ‏Num';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => '( ‏Num';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => '- ‏Num';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'Page Down';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'Page Up';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'הפעלה';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'כיבוי';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -15761,7 +16384,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'רווח';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -15956,28 +16579,17 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHi({
-    String localeName = 'hi',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'hi',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName के बारे में जानकारी';
@@ -16442,28 +17054,17 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHr({
-    String localeName = 'hr',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'hr',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -16580,10 +17181,10 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Kanal prema dolje';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Kanal prema gore';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -16595,10 +17196,10 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Izbaci';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Kraj';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -16607,10 +17208,10 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Način hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Način hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -16625,13 +17226,13 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeyHome => 'Home';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Umetni';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Način kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Način kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -16640,7 +17241,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Naredba';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
@@ -16649,64 +17250,64 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'Broj 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'Broj 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'Broj 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'Broj 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'Broj 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'Broj 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'Broj 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'Broj 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'Broj 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'Broj 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'Broj +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Broj ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'Broj .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Broj /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Broj Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Broj =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Broj *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Broj (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Broj )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Broj -';
 
   @override
   String get keyboardKeyPageDown => 'PgDown';
@@ -16715,10 +17316,10 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Napajanje';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Isključivanje';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -16730,10 +17331,10 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Odaberi';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Razmaknica';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -16928,28 +17529,17 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHu({
-    String localeName = 'hu',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'hu',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'A(z) $applicationName névjegye';
@@ -17066,10 +17656,10 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Csatorna – le';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Csatorna – fel';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -17081,7 +17671,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Kiadás';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -17093,10 +17683,10 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul mód';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Handzsa mód';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -17114,10 +17704,10 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana mód';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kandzsi mód';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -17201,10 +17791,10 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Bekapcsolás';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Kikapcsolás';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -17216,10 +17806,10 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Kiválasztás';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Szóköz';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -17414,28 +18004,17 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationHy({
-    String localeName = 'hy',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'hy',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName հավելվածի մասին';
@@ -17552,10 +18131,10 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Հաջորդ ալիքը';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Նախորդ ալիքը';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -17579,10 +18158,10 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul ռեժիմ';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja ռեժիմ';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -17600,10 +18179,10 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana ռեժիմ';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji ռեժիմ';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -17687,10 +18266,10 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Սնուցում';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Անջատել';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -17702,10 +18281,10 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Ընտրել';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Բացատ';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -17900,28 +18479,17 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationId({
-    String localeName = 'id',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'id',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Tentang $applicationName';
@@ -18386,28 +18954,17 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationIs({
-    String localeName = 'is',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'is',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Um $applicationName';
@@ -18518,16 +19075,16 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Bakklykill';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Hástafalás';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Niður um rás';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Upp um rás';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -18539,7 +19096,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Fjarlægja';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -18551,10 +19108,10 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul-stilling';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja-stilling';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -18572,10 +19129,10 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana-stilling';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji-stilling';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -18659,10 +19216,10 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Aflrofi';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Slökkva';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -18674,10 +19231,10 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Velja';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Bil';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -18872,28 +19429,17 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationIt({
-    String localeName = 'it',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'it',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Informazioni su $applicationName';
@@ -19001,34 +19547,34 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeyAlt => 'Alt';
 
   @override
-  String get keyboardKeyAltGraph => 'AltGr';
+  String get keyboardKeyAltGraph => 'Alt Gr';
 
   @override
   String get keyboardKeyBackspace => 'Backspace';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Bloc Maiusc';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Canale giù';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Canale su';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
 
   @override
-  String get keyboardKeyDelete => 'Del';
+  String get keyboardKeyDelete => 'Canc';
 
   @override
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Espelli';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Fine';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -19037,10 +19583,10 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Modalità hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Modalità hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -19055,13 +19601,13 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeyHome => 'Home';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Ins';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Modalità kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Modalità kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -19070,13 +19616,13 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Comando';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'Bloc Num';
 
   @override
   String get keyboardKeyNumpad0 => 'Num 0';
@@ -19121,7 +19667,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadDivide => 'Num /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Num Invio';
 
   @override
   String get keyboardKeyNumpadEqual => 'Num =';
@@ -19139,31 +19685,31 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'Pag giù';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'Pag su';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Spegni/Accendi';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Spegni';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Stamp';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'Bloc Scorr';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Seleziona';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Barra spaziatrice';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -19358,28 +19904,17 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationJa({
-    String localeName = 'ja',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ja',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName について';
@@ -19493,13 +20028,13 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeyBackspace => 'Backspace';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'CapsLock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => '次のチャンネル';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => '前のチャンネル';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -19508,7 +20043,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
+  String get keyboardKeyEisu => '英数';
 
   @override
   String get keyboardKeyEject => 'Eject';
@@ -19523,19 +20058,19 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'ハングルモード';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => '漢字（ハンジャ）モード';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => '半角';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'ひらがな';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'かな / カナ / ローマ字';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -19544,13 +20079,13 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'かなモード';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => '漢字モード';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'カタカナ';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -19562,73 +20097,73 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'NumLock';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'テンキー 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'テンキー 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'テンキー 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'テンキー 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'テンキー 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'テンキー 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'テンキー 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'テンキー 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'テンキー 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'テンキー 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'テンキー +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'テンキー ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'テンキー .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'テンキー /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'テンキー Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'テンキー =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'テンキー *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'テンキー (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'テンキー )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'テンキー -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'PageDown';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'PageUp';
 
   @override
   String get keyboardKeyPower => 'Power';
@@ -19637,13 +20172,13 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeyPowerOff => 'Power Off';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Printscreen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'ローマ字';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'ScrollLock';
 
   @override
   String get keyboardKeySelect => 'Select';
@@ -19652,10 +20187,10 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => '全角';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => '半 / 全 / 漢字';
 
   @override
   String get lastPageTooltip => '最後のページ';
@@ -19844,28 +20379,17 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKa({
-    String localeName = 'ka',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ka',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName-ის შესახებ';
@@ -20009,19 +20533,19 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'ჰანგილის რეჟიმი';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'ჰანჯის რეჟიმი';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'ჰანკაკუ';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'ჰირაგანა';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'ჰირაგანა კატაკანა';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -20030,13 +20554,13 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'კანას რეჟიმი';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'კანჯის რეჟიმი';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'კატაკანა';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -20117,16 +20641,16 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'ჩართვა';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'გამორთვა';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'რომაჯი';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
@@ -20138,10 +20662,10 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'ზენკაკუ';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'ზენკაკუ ჰანკაკუ';
 
   @override
   String get lastPageTooltip => 'ბოლო გვერდი';
@@ -20330,28 +20854,17 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKk({
-    String localeName = 'kk',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'kk',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName туралы';
@@ -20468,10 +20981,10 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Келесі арна';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Алдыңғы арна';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -20495,19 +21008,19 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Ханғыл режимі';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Ханжа режимі';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'Ханкаку';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'Хирагана';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Хирагана Катакана';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -20516,13 +21029,13 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Кана режимі';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Канжи режимі';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -20603,16 +21116,16 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Қуат';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Қуатты өшіру';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'Ромажи';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
@@ -20621,13 +21134,13 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Бос орын';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'Зенкаку';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Зенкаку Ханкаку';
 
   @override
   String get lastPageTooltip => 'Соңғы бет';
@@ -20816,28 +21329,17 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKm({
-    String localeName = 'km',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'km',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'អំពី $applicationName';
@@ -21302,28 +21804,17 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKn({
-    String localeName = 'kn',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'kn',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => '\u{24}\u{61}\u{70}\u{70}\u{6c}\u{69}\u{63}\u{61}\u{74}\u{69}\u{6f}\u{6e}\u{4e}\u{61}\u{6d}\u{65}\u{20}\u{cac}\u{c97}\u{ccd}\u{c97}\u{cc6}';
@@ -21788,28 +22279,17 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKo({
-    String localeName = 'ko',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ko',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName 정보';
@@ -21920,16 +22400,16 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => '백스페이스';
 
   @override
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => '채널 아래로';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => '채널 위로';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -21941,7 +22421,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => '꺼내기';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -21953,19 +22433,19 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => '한글 모드';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => '한자 모드';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => '반각';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => '히라가나';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => '히라가나 가타카나';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -21974,16 +22454,16 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => '가나 모드';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => '칸지 모드';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => '가타카나';
 
   @override
-  String get keyboardKeyMeta => 'Meta';
+  String get keyboardKeyMeta => '메타';
 
   @override
   String get keyboardKeyMetaMacOs => 'Command';
@@ -22058,34 +22538,34 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get keyboardKeyPageDown => 'PgDown';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'PageUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => '전원';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => '종료';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => '로마자';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => '선택';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => '스페이스';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => '전각';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => '전각 및 반각';
 
   @override
   String get lastPageTooltip => '마지막 페이지';
@@ -22274,28 +22754,17 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKy({
-    String localeName = 'ky',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ky',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName каналы жөнүндө';
@@ -22439,19 +22908,19 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Хангул режими';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Ханжа режими';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'Ханкаку';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'Хирагана';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Хирагана-катакана';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -22460,16 +22929,16 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Кана режими';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Канжи режими';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'Катакана';
 
   @override
-  String get keyboardKeyMeta => 'Meta';
+  String get keyboardKeyMeta => 'Мета';
 
   @override
   String get keyboardKeyMetaMacOs => 'Command';
@@ -22556,22 +23025,22 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'Ромажи';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Тандоо';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Боштук';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'Зенкаку';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Зенкаку-ханкаку';
 
   @override
   String get lastPageTooltip => 'Акыркы бет';
@@ -22760,28 +23229,17 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationLo({
-    String localeName = 'lo',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'lo',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'ກ່ຽວກັບ $applicationName';
@@ -22925,10 +23383,10 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'ໂໝດ Hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'ໂໝດ Hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -22946,10 +23404,10 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'ໂໝດ Kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'ໂໝດ Kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -22967,64 +23425,64 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'ເລກ 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'ເລກ 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'ເລກ 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'ເລກ 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'ເລກ 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'ເລກ 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'ເລກ 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'ເລກ 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'ເລກ 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'ເລກ 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'ປຸ່ມ +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'ປຸ່ມ ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'ປຸ່ມ .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'ປຸ່ມ /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'ປຸ່ມ Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'ປຸ່ມ =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'ປຸ່ມ *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'ປຸ່ມ (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'ປຸ່ມ )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'ປຸ່ມ -';
 
   @override
   String get keyboardKeyPageDown => 'PgDown';
@@ -23033,10 +23491,10 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'ເປີດປິດ';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'ປິດເຄື່ອງ';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -23246,28 +23704,17 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationLt({
-    String localeName = 'lt',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'lt',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Apie „$applicationName“';
@@ -23378,16 +23825,16 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Naikinimo klavišas';
 
   @override
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Ankstesnis kanalas';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Kitas kanalas';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -23399,7 +23846,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Išimti';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -23411,10 +23858,10 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul režimas';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja režimas';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -23432,10 +23879,10 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana režimas';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji režimas';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -23453,64 +23900,64 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'Skaitm 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'Skaitm 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'Skaitm 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'Skaitm 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'Skaitm 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'Skaitm 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'Skaitm 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'Skaitm 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'Skaitm 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'Skaitm 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'Skaitm +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Skaitm ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'Skaitm .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Skaitm /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Skaitm „Enter“';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Skaitm =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Skaitm *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Skaitm (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Skaitm )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Skaitm -';
 
   @override
   String get keyboardKeyPageDown => 'PgDown';
@@ -23519,10 +23966,10 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Maitinimas';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Išjungti';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -23537,7 +23984,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Tarpas';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -23732,28 +24179,17 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationLv({
-    String localeName = 'lv',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'lv',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Par $applicationName';
@@ -23870,10 +24306,10 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Nākamais kanāls';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Iepriekšējais kanāls';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -23885,7 +24321,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Izstumt';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -23897,10 +24333,10 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul režīms';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja režīms';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -23918,10 +24354,10 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana režīms';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji režīms';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -23933,7 +24369,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeyMetaMacOs => 'Command';
 
   @override
-  String get keyboardKeyMetaWindows => 'Win';
+  String get keyboardKeyMetaWindows => 'Windows';
 
   @override
   String get keyboardKeyNumLock => 'Num Lock';
@@ -24005,10 +24441,10 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Ieslēgt';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Izslēgt';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -24020,10 +24456,10 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Atlasīt';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Atstarpes taustiņš';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -24218,28 +24654,17 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMk({
-    String localeName = 'mk',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'mk',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'За $applicationName';
@@ -24704,28 +25129,17 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMl({
-    String localeName = 'ml',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ml',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName എന്നതിനെക്കുറിച്ച്';
@@ -25067,7 +25481,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => 'മുമ്പത്തെ പേജ്';
 
   @override
-  String get refreshIndicatorSemanticLabel => 'പുതുക്കിയെടുക്കുക';
+  String get refreshIndicatorSemanticLabel => 'റീഫ്രഷ് ചെയ്യുക';
 
   @override
   String? get remainingTextFieldCharacterCountFew => null;
@@ -25190,28 +25604,17 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMn({
-    String localeName = 'mn',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'mn',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName-н тухай';
@@ -25355,40 +25758,40 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Солонгос хэлний горим';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja горим';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'Хирагана';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Хирагана Катакана';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Гэр';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Оруулах';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana горим';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji горим';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'Катакана';
 
   @override
-  String get keyboardKeyMeta => 'Meta';
+  String get keyboardKeyMeta => 'Мета';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Тушаал';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
@@ -25463,10 +25866,10 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Асаах/унтраах товч';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Унтраах';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -25478,7 +25881,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Сонгох';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -25676,28 +26079,17 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMr({
-    String localeName = 'mr',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'mr',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName बद्दल';
@@ -25808,16 +26200,16 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'बॅकस्पेस';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'कॅप्स लॉक';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'चॅनल डाउन';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'चॅनल अप';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -25829,10 +26221,10 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'इजेक्ट';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'एंड';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -25841,40 +26233,40 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'हंगुल मोड';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'हांजा मोड';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'हानकाकू';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'हिरागाना';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'हिरागाना काताकाना';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'होम';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'इन्सर्ट';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'काना मोड';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'कांजी मोड';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'काताकाना';
 
   @override
-  String get keyboardKeyMeta => 'Meta';
+  String get keyboardKeyMeta => 'मेटा';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'कमांड';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
@@ -25949,31 +26341,31 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'पॉवर';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'पॉवर ऑफ';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'प्रिंट स्क्रीन';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'रोमाजी';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'स्क्रोल लॉक';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'निवडा';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'स्पेस';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'झेनकाकू';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'झेनकाकू हानकाकू';
 
   @override
   String get lastPageTooltip => 'शेवटचे पेज';
@@ -26162,28 +26554,17 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMs({
-    String localeName = 'ms',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ms',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Perihal $applicationName';
@@ -26300,10 +26681,10 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Saluran Bawah';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Saluran ke Atas';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -26315,7 +26696,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Keluarkan';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -26327,10 +26708,10 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Mod Hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Mod Hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -26348,10 +26729,10 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Mod Kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Mod Kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -26360,7 +26741,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Perintah';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
@@ -26435,10 +26816,10 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Kuasa';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Matikan';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -26450,10 +26831,10 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Pilih';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Ruang';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -26648,28 +27029,17 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationMy({
-    String localeName = 'my',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'my',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName အကြောင်း';
@@ -26780,16 +27150,16 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'နောက်ပြန်ခလုတ်';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'စားလုံးကြီးလော့ခ်';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'ချန်နယ်အောက်';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'ချန်နယ်အပေါ်';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -26801,10 +27171,10 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'ထုတ်ရန်';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'အဆုံး';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -26813,10 +27183,10 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul မုဒ်';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja မုဒ်';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -26828,16 +27198,16 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'ပင်မခလုတ်';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'ထည့်သွင်းခလုတ်';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana မုဒ်';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji မုဒ်';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -26846,73 +27216,73 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'ကွန်မန်း';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'နံပါတ်လော့ခ်';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'နံပါတ် ၀';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'နံပါတ် ၁';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'နံပါတ် ၂';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'နံပါတ် ၃';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'နံပါတ် ၄';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'နံပါတ် ၅';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'နံပါတ် ၆';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'နံပါတ် ၇';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'နံပါတ် ၈';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'နံပါတ် ၉';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'နံပါတ် +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'နံပါတ် ၊';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'နံပါတ် ။';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'နံပါတ် /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'နံပါတ် Enter ခလုတ်';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'နံပါတ် =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'နံပါတ် *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'နံပါတ် (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'နံပါတ် )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'နံပါတ် -';
 
   @override
   String get keyboardKeyPageDown => 'PgDown';
@@ -26921,25 +27291,25 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'ပါဝါခလုတ်';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'စက်ပိတ်ရန်';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'ပရင့်စခရင်';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'လှိမ့်သည့်လော့ခ်';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'ရွေးရန်';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'နေရာခြားခလုတ်';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -27134,28 +27504,17 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNb({
-    String localeName = 'nb',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'nb',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -27263,19 +27622,19 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeyAlt => 'Alt';
 
   @override
-  String get keyboardKeyAltGraph => 'AltGr';
+  String get keyboardKeyAltGraph => 'Alt Gr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Tilbaketast';
 
   @override
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Forrige kanal';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Neste kanal';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -27287,7 +27646,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Løs ut';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -27299,10 +27658,10 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul-modus';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja-modus';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -27311,7 +27670,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeyHiragana => 'Hiragana';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Hiragana katakana';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -27320,10 +27679,10 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana-modus';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji-modus';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -27332,7 +27691,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Kommando';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
@@ -27407,31 +27766,31 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Av/på';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Slå av';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'PrtScn';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'ScrLk';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Velg';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Mellomrom';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Siste side';
@@ -27620,28 +27979,17 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNe({
-    String localeName = 'ne',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ne',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName बारे';
@@ -28106,28 +28454,17 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNl({
-    String localeName = 'nl',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'nl',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Over $applicationName';
@@ -28244,10 +28581,10 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Kanaal omlaag';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Kanaal omhoog';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -28259,7 +28596,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Uitwerpen';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -28271,10 +28608,10 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul-modus';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja-modus';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -28292,10 +28629,10 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana-modus';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji-modus';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -28379,10 +28716,10 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Aan/uit';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Uit';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -28394,10 +28731,10 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Selecteren';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Spatie';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -28592,28 +28929,17 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationNo({
-    String localeName = 'no',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'no',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -28721,19 +29047,19 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeyAlt => 'Alt';
 
   @override
-  String get keyboardKeyAltGraph => 'AltGr';
+  String get keyboardKeyAltGraph => 'Alt Gr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Tilbaketast';
 
   @override
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Forrige kanal';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Neste kanal';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -28745,7 +29071,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Løs ut';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -28757,10 +29083,10 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul-modus';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja-modus';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -28769,7 +29095,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeyHiragana => 'Hiragana';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Hiragana katakana';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -28778,10 +29104,10 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana-modus';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji-modus';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -28790,7 +29116,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Kommando';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
@@ -28865,31 +29191,31 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Av/på';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Slå av';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'PrtScn';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'ScrLk';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Velg';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Mellomrom';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Siste side';
@@ -29078,28 +29404,17 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationOr({
-    String localeName = 'or',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'or',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName ବିଷୟରେ';
@@ -29564,28 +29879,17 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPa({
-    String localeName = 'pa',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'pa',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName ਬਾਰੇ';
@@ -30050,28 +30354,17 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPl({
-    String localeName = 'pl',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'pl',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName – informacje';
@@ -30188,10 +30481,10 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Poprzedni kanał';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Następny kanał';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -30203,7 +30496,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Wysuń';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -30215,10 +30508,10 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Tryb hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Tryb hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -30236,10 +30529,10 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Tryb kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Tryb kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -30257,82 +30550,82 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'Num 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'Num 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'Num 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'Num 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'Num 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'Num 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'Num 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'Num 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'Num 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'Num 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'Num +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Num ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'Num .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Num /';
 
   @override
   String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Num =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Num *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Num (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Num )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'PgDn';
 
   @override
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Zasilanie';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Wyłącz zasilanie';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'Rōmaji';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
@@ -30341,7 +30634,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Spacja';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -30536,28 +30829,17 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPs({
-    String localeName = 'ps',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ps',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'د $applicationName په اړه';
@@ -31022,28 +31304,17 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPt({
-    String localeName = 'pt',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'pt',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Sobre o app $applicationName';
@@ -31160,10 +31431,10 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Canais para baixo';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Canais para cima';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -31175,7 +31446,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Ejetar';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -31187,10 +31458,10 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Modo Hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Modo Hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -31208,10 +31479,10 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Modo Kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Modo Kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -31295,10 +31566,10 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Liga/desliga';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Desligar';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -31310,10 +31581,10 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Selecionar';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Espaço';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -31358,7 +31629,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get okButtonLabel => 'Ok';
+  String get okButtonLabel => 'OK';
 
   @override
   String get openAppDrawerTooltip => 'Abrir menu de navegação';
@@ -31508,28 +31779,50 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationPtPt({
-    String localeName = 'pt_PT',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'pt_PT',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get keyboardKeyChannelDown => 'Canal anterior';
+
+  @override
+  String get keyboardKeyBackspace => 'Retrocesso';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Modo kanji';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Modo hanja';
+
+  @override
+  String get keyboardKeyKanaMode => 'Modo kana';
+
+  @override
+  String get keyboardKeyInsert => 'Inserir';
+
+  @override
+  String get keyboardKeyHome => 'Início';
+
+  @override
+  String get keyboardKeyEnd => 'Fim';
+
+  @override
+  String get keyboardKeyHangulMode => 'Modo hangul';
+
+  @override
+  String get keyboardKeyChannelUp => 'Canal seguinte';
+
+  @override
+  String get keyboardKeyPower => 'Alimentação';
 
   @override
   String get dialModeButtonLabel => 'Mude para o modo de seletor de mostrador';
@@ -31607,9 +31900,6 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get pageRowsInfoTitleApproximateRaw => r'$firstRow a $lastRow de cerca de $rowCount';
 
   @override
-  String get okButtonLabel => 'OK';
-
-  @override
   String get modalBarrierDismissLabel => 'Ignorar';
 
   @override
@@ -31637,28 +31927,17 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationRo({
-    String localeName = 'ro',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ro',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Despre $applicationName';
@@ -31775,10 +32054,10 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Înapoi';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Înainte';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -31802,10 +32081,10 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Modul Hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Modul Hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -31823,10 +32102,10 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Modul Kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Modul Kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -31844,64 +32123,64 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => '0 de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => '1 de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => '2 de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => '3 de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => '4 de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => '5 de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => '6 de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => '7 de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => '8 de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => '9 de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => '+ de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => ', de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => '. de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => '/ de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Enter de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => '= de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => '* de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => '( de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => ') de pe tastatura numerică';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => '- de pe tastatura numerică';
 
   @override
   String get keyboardKeyPageDown => 'PgDown';
@@ -31928,7 +32207,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Spațiu';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -32123,28 +32402,17 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationRu({
-    String localeName = 'ru',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ru',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName: сведения';
@@ -32261,10 +32529,10 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Следующий канал';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Предыдущий канал';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -32273,10 +32541,10 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
+  String get keyboardKeyEisu => 'Эйсу';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Извлечь';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -32288,19 +32556,19 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Хангыль';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Ханча';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'Ханкаку';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'Хирагана';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Хирагана Катакана';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -32309,13 +32577,13 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Кана';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Кандзи';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -32372,7 +32640,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadDivide => 'Num /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Num Ввод';
 
   @override
   String get keyboardKeyNumpadEqual => 'Num =';
@@ -32396,31 +32664,31 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Питание';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Отключить питание';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'Ромадзи';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Выбрать';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Пробел';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'Дзэнкаку';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Дзэнкаку Ханкаку';
 
   @override
   String get lastPageTooltip => 'Последняя страница';
@@ -32609,28 +32877,17 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSi({
-    String localeName = 'si',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'si',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName ගැන';
@@ -33095,28 +33352,17 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSk({
-    String localeName = 'sk',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'sk',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName – informácie';
@@ -33233,10 +33479,10 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'O kanál nižšie';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'O kanál vyššie';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -33248,7 +33494,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Odpojiť';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -33260,10 +33506,10 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Režim Hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Režim Hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -33281,10 +33527,10 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Režim Kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Režim kandži';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -33368,10 +33614,10 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Vypínač';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Vypnúť';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -33386,7 +33632,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Medzerník';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -33581,28 +33827,17 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSl({
-    String localeName = 'sl',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'sl',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -33707,73 +33942,73 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Vnesite veljaven čas';
 
   @override
-  String get keyboardKeyAlt => 'Alt';
+  String get keyboardKeyAlt => 'Alt.';
 
   @override
-  String get keyboardKeyAltGraph => 'AltGr';
+  String get keyboardKeyAltGraph => 'Alt. gr.';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Vračalka';
 
   @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
+  String get keyboardKeyCapsLock => 'Velike črke';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Kanal dol';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Kanal gor';
 
   @override
-  String get keyboardKeyControl => 'Ctrl';
+  String get keyboardKeyControl => 'Ktrl';
 
   @override
-  String get keyboardKeyDelete => 'Del';
+  String get keyboardKeyDelete => 'Odstrani';
 
   @override
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Izvrzi';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Konec';
 
   @override
-  String get keyboardKeyEscape => 'Esc';
+  String get keyboardKeyEscape => 'Izhod';
 
   @override
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Način hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Način handža';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'hankaku';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'hiragana';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'hiragana katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Začetek';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Vstavi';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Način kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Način kanji';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -33785,100 +34020,100 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'Num Lock';
+  String get keyboardKeyNumLock => 'Vklopi štev.';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'Štev. 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'Štev. 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'Štev. 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'Štev. 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'Štev. 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'Štev. 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'Štev. 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'Štev. 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'Štev. 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'Štev. 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'Štev. +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Štev. ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'Štev. .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Štev. /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Štev. Vnos';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Štev. =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Štev. *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Štev. (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Štev. )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Štev. -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'Stran dol';
 
   @override
-  String get keyboardKeyPageUp => 'PgUp';
+  String get keyboardKeyPageUp => 'Stran gor';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Vklop';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Izklop';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Zajem zaslona';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'Romadži';
 
   @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
+  String get keyboardKeyScrollLock => 'Vklopi drsenje';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Izberi';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Preslednica';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'zenkaku';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Zadnja stran';
@@ -34067,28 +34302,17 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSq({
-    String localeName = 'sq',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'sq',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Rreth $applicationName';
@@ -34214,7 +34438,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get keyboardKeyControl => 'Ctrl';
 
   @override
-  String get keyboardKeyDelete => 'Del';
+  String get keyboardKeyDelete => 'Delete';
 
   @override
   String get keyboardKeyEisu => 'Eisū';
@@ -34553,28 +34777,17 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSr({
-    String localeName = 'sr',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'sr',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'О апликацији $applicationName';
@@ -34691,10 +34904,10 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Претходни канал';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Следећи канал';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -34703,7 +34916,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
+  String get keyboardKeyEisu => 'Еису';
 
   @override
   String get keyboardKeyEject => 'Eject';
@@ -34718,19 +34931,19 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Режим хангул';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Режим ханџа';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'Ханкаку';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'Хирагана';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Хирагана катакана';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -34739,13 +34952,13 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Кана режим';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Канџи режим';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -34826,16 +35039,16 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Дугме за укључивање';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Дугме за искључивање';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'Ромађи';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
@@ -34844,13 +35057,13 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Тастер за размак';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'Зенкаку';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Зенкаку ханкаку';
 
   @override
   String get lastPageTooltip => 'Последња страница';
@@ -35039,28 +35252,17 @@ class MaterialLocalizationSrCyrl extends MaterialLocalizationSr {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSrCyrl({
-    String localeName = 'sr_Cyrl',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'sr_Cyrl',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 }
 
 /// The translations for Serbian, using the Latin script (`sr_Latn`).
@@ -35069,28 +35271,17 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSrLatn({
-    String localeName = 'sr_Latn',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'sr_Latn',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'O aplikaciji $applicationName';
@@ -35190,6 +35381,57 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
 
   @override
   String get invalidTimeLabel => 'Unesite važeće vreme';
+
+  @override
+  String get keyboardKeyChannelDown => 'Prethodni kanal';
+
+  @override
+  String get keyboardKeyChannelUp => 'Sledeći kanal';
+
+  @override
+  String get keyboardKeyEisu => 'Eisu';
+
+  @override
+  String get keyboardKeyHangulMode => 'Režim hangul';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Režim handža';
+
+  @override
+  String get keyboardKeyHankaku => 'Hankaku';
+
+  @override
+  String get keyboardKeyHiragana => 'Hiragana';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana katakana';
+
+  @override
+  String get keyboardKeyKanaMode => 'Kana režim';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Kandži režim';
+
+  @override
+  String get keyboardKeyKatakana => 'Katakana';
+
+  @override
+  String get keyboardKeyPower => 'Dugme za uključivanje';
+
+  @override
+  String get keyboardKeyPowerOff => 'Dugme za isključivanje';
+
+  @override
+  String get keyboardKeyRomaji => 'Romađi';
+
+  @override
+  String get keyboardKeySpace => 'Taster za razmak';
+
+  @override
+  String get keyboardKeyZenkaku => 'Zenkaku';
+
+  @override
+  String get keyboardKeyZenkakuHankaku => 'Zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Poslednja stranica';
@@ -35345,28 +35587,17 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSv({
-    String localeName = 'sv',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'sv',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Om $applicationName';
@@ -35477,16 +35708,16 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Backsteg';
 
   @override
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Byt kanal nedåt';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Byt kanal uppåt';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -35498,7 +35729,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Mata ut';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -35510,10 +35741,10 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul-läge';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja-läge';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -35525,16 +35756,16 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
 
   @override
-  String get keyboardKeyHome => 'Home';
+  String get keyboardKeyHome => 'Hem';
 
   @override
-  String get keyboardKeyInsert => 'Insert';
+  String get keyboardKeyInsert => 'Infoga';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana-läge';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji-läge';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -35543,7 +35774,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Kommando';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
@@ -35618,10 +35849,10 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Strömbrytare';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Stäng av';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -35633,10 +35864,10 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Välj';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Blanksteg';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -35831,28 +36062,17 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationSw({
-    String localeName = 'sw',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'sw',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Kuhusu $applicationName';
@@ -35996,10 +36216,10 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hali ya Hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hali ya Hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -36017,10 +36237,10 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Hali ya Kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Hali ya Kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -36098,7 +36318,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'Pg-down';
 
   @override
   String get keyboardKeyPageUp => 'PgUp';
@@ -36317,28 +36537,17 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTa({
-    String localeName = 'ta',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ta',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName பற்றி';
@@ -36803,28 +37012,17 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTe({
-    String localeName = 'te',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'te',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName గురించి';
@@ -37289,28 +37487,17 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTh({
-    String localeName = 'th',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'th',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'เกี่ยวกับ $applicationName';
@@ -37454,19 +37641,19 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'โหมดตัวอักษรฮันกึล';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'โหมดตัวอักษรฮันจา';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'ฮันคาคุ';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'ฮิรางานะ';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'ฮิรางานะ คาตาคานะ';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -37475,13 +37662,13 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'โหมดตัวอักษรคานะ';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'โหมดตัวอักษรคันจิ';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'คาตาคานะ';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -37496,64 +37683,64 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'เลข 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'เลข 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'เลข 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'เลข 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'เลข 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'เลข 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'เลข 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'เลข 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'เลข 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'เลข 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'เลข +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'เลข ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'เลข .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'เลข /';
 
   @override
   String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'เลข =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'เลข *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'เลข (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'เลข )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'เลข -';
 
   @override
   String get keyboardKeyPageDown => 'PgDown';
@@ -37562,16 +37749,16 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'เปิด/ปิด';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'ปิดเครื่อง';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'โรมาจิ';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
@@ -37583,10 +37770,10 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'เซ็นคาคุ';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'เซ็นคาคุ ฮันคาคุ';
 
   @override
   String get lastPageTooltip => 'หน้าสุดท้าย';
@@ -37775,28 +37962,17 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTl({
-    String localeName = 'tl',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'tl',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Tungkol sa $applicationName';
@@ -38051,7 +38227,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get keyboardKeyPower => 'Power';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'I-off';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -38063,10 +38239,10 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Piliin';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Puwang';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -38261,28 +38437,17 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationTr({
-    String localeName = 'tr',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'tr',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName Hakkında';
@@ -38393,16 +38558,16 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => 'Geri Tuşu';
 
   @override
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Kanal Aşağı';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Kanal Yukarı';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -38414,10 +38579,10 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Çıkar';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Son';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -38426,10 +38591,10 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul Modu';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja Modu';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -38447,10 +38612,10 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana Modu';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji Modu';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -38459,7 +38624,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => 'Komut';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
@@ -38534,13 +38699,13 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Güç';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Kapat';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => 'Ekranı Yazdır';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
@@ -38549,10 +38714,10 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Seç';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Boşluk';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -38747,28 +38912,17 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationUk({
-    String localeName = 'uk',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'uk',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Про додаток $applicationName';
@@ -38885,10 +39039,10 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Канал униз';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Канал угору';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -38900,7 +39054,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get keyboardKeyEisu => 'Eisū';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => 'Вийняти';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -38912,19 +39066,19 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Режим хангиль';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Режим ханча';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => 'Ханкаку';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'Хірагана';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'Хірагана/Катакана';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -38933,13 +39087,13 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Режим кана';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Режим канджі';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -39020,16 +39174,16 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Кнопка живлення';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Вимкнути живлення';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'Ромадзі';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
@@ -39038,13 +39192,13 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Пробіл';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => 'Зенкаку';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => 'Зенкаку/Ханкаку';
 
   @override
   String get lastPageTooltip => 'Остання сторінка';
@@ -39233,28 +39387,17 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationUr({
-    String localeName = 'ur',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'ur',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName کے بارے میں';
@@ -39470,34 +39613,34 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpad9 => 'Num 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => '+ Num';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Num ,‎';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => '. Num';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Num /‎';
 
   @override
   String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Num =‎';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Num *‎';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Num (‎';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Num )‎';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Num -‎';
 
   @override
   String get keyboardKeyPageDown => 'PgDown';
@@ -39719,28 +39862,17 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationUz({
-    String localeName = 'uz',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'uz',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'$applicationName haqida';
@@ -39857,10 +39989,10 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Keyingi kanal';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Avvalgi kanal';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -39884,10 +40016,10 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Hangul rejimi';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Hanja rejimi';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -39905,10 +40037,10 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Kana rejimi';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Kanji rejimi';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -40010,7 +40142,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Boʻsh joy';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -40205,28 +40337,17 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationVi({
-    String localeName = 'vi',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'vi',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Giới thiệu về $applicationName';
@@ -40343,10 +40464,10 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'Giảm kênh';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'Tăng kênh';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -40370,10 +40491,10 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => 'Chế độ Hangul';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => 'Chế độ Hanja';
 
   @override
   String get keyboardKeyHankaku => 'Hankaku';
@@ -40391,10 +40512,10 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'Chế độ Kana';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => 'Chế độ Kanji';
 
   @override
   String get keyboardKeyKatakana => 'Katakana';
@@ -40412,64 +40533,64 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => 'Phím số 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => 'Phím số 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => 'Phím số 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => 'Phím số 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => 'Phím số 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => 'Phím số 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => 'Phím số 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => 'Phím số 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => 'Phím số 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => 'Phím số 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => 'Phím +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => 'Phím ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => 'Phím .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => 'Phím /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => 'Phím Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => 'Phím =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => 'Phím *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => 'Phím (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => 'Phím )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => 'Phím -';
 
   @override
   String get keyboardKeyPageDown => 'PgDown';
@@ -40478,10 +40599,10 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Nguồn';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Tắt nguồn';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
@@ -40496,7 +40617,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => 'Phím cách';
 
   @override
   String get keyboardKeyZenkaku => 'Zenkaku';
@@ -40691,28 +40812,17 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZh({
-    String localeName = 'zh',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'zh',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'关于$applicationName';
@@ -40823,7 +40933,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'Backspace';
+  String get keyboardKeyBackspace => '退格键';
 
   @override
   String get keyboardKeyCapsLock => 'Caps Lock';
@@ -40841,10 +40951,10 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
+  String get keyboardKeyEisu => '英数';
 
   @override
-  String get keyboardKeyEject => 'Eject';
+  String get keyboardKeyEject => '弹出';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -40856,19 +40966,19 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
+  String get keyboardKeyHangulMode => '한글';
 
   @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
+  String get keyboardKeyHanjaMode => '한자';
 
   @override
-  String get keyboardKeyHankaku => 'Hankaku';
+  String get keyboardKeyHankaku => '半角';
 
   @override
-  String get keyboardKeyHiragana => 'Hiragana';
+  String get keyboardKeyHiragana => 'ひらがな';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+  String get keyboardKeyHiraganaKatakana => 'ひらがな / カタカナ / ローマ字';
 
   @override
   String get keyboardKeyHome => 'Home';
@@ -40877,19 +40987,19 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
+  String get keyboardKeyKanaMode => 'かな';
 
   @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
+  String get keyboardKeyKanjiMode => '漢字';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'カタカナ';
 
   @override
   String get keyboardKeyMeta => 'Meta';
 
   @override
-  String get keyboardKeyMetaMacOs => 'Command';
+  String get keyboardKeyMetaMacOs => '⌘';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
@@ -40898,97 +41008,97 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'Num 0';
+  String get keyboardKeyNumpad0 => '数字键盘 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'Num 1';
+  String get keyboardKeyNumpad1 => '数字键盘 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'Num 2';
+  String get keyboardKeyNumpad2 => '数字键盘 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'Num 3';
+  String get keyboardKeyNumpad3 => '数字键盘 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'Num 4';
+  String get keyboardKeyNumpad4 => '数字键盘 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'Num 5';
+  String get keyboardKeyNumpad5 => '数字键盘 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'Num 6';
+  String get keyboardKeyNumpad6 => '数字键盘 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'Num 7';
+  String get keyboardKeyNumpad7 => '数字键盘 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'Num 8';
+  String get keyboardKeyNumpad8 => '数字键盘 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'Num 9';
+  String get keyboardKeyNumpad9 => '数字键盘 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'Num +';
+  String get keyboardKeyNumpadAdd => '数字键盘 +';
 
   @override
-  String get keyboardKeyNumpadComma => 'Num ,';
+  String get keyboardKeyNumpadComma => '数字键盘 ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
+  String get keyboardKeyNumpadDecimal => '数字键盘 .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'Num /';
+  String get keyboardKeyNumpadDivide => '数字键盘 /';
 
   @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
+  String get keyboardKeyNumpadEnter => '数字键盘 Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'Num =';
+  String get keyboardKeyNumpadEqual => '数字键盘 =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
+  String get keyboardKeyNumpadMultiply => '数字键盘 *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
+  String get keyboardKeyNumpadParenLeft => '数字键盘 (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
+  String get keyboardKeyNumpadParenRight => '数字键盘 )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
+  String get keyboardKeyNumpadSubtract => '数字键盘 -';
 
   @override
-  String get keyboardKeyPageDown => 'PgDown';
+  String get keyboardKeyPageDown => 'PgDn';
 
   @override
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => '电源';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => '关机';
 
   @override
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
+  String get keyboardKeyRomaji => 'ローマ字';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => '选择';
 
   @override
-  String get keyboardKeySpace => 'Space';
+  String get keyboardKeySpace => '空格键';
 
   @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
+  String get keyboardKeyZenkaku => '全角';
 
   @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
+  String get keyboardKeyZenkakuHankaku => '半角 / 全角 / 漢字';
 
   @override
   String get lastPageTooltip => '最后一页';
@@ -41177,28 +41287,17 @@ class MaterialLocalizationZhHans extends MaterialLocalizationZh {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHans({
-    String localeName = 'zh_Hans',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'zh_Hans',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -41207,28 +41306,17 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHant({
-    String localeName = 'zh_Hant',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'zh_Hant',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'關於$applicationName';
@@ -41319,6 +41407,132 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
 
   @override
   String get invalidTimeLabel => '請輸入有效的時間';
+
+  @override
+  String get keyboardKeyBackspace => 'Backspace';
+
+  @override
+  String get keyboardKeyChannelDown => '下一個頻道';
+
+  @override
+  String get keyboardKeyChannelUp => '上一個頻道';
+
+  @override
+  String get keyboardKeyEisu => 'Eisū';
+
+  @override
+  String get keyboardKeyEject => 'Eject';
+
+  @override
+  String get keyboardKeyHangulMode => 'Hangul 模式';
+
+  @override
+  String get keyboardKeyHanjaMode => 'Hanja 模式';
+
+  @override
+  String get keyboardKeyHankaku => 'Hankaku';
+
+  @override
+  String get keyboardKeyHiragana => 'Hiragana';
+
+  @override
+  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
+
+  @override
+  String get keyboardKeyKanaMode => 'Kana 模式';
+
+  @override
+  String get keyboardKeyKanjiMode => 'Kanji 模式';
+
+  @override
+  String get keyboardKeyKatakana => 'Katakana';
+
+  @override
+  String get keyboardKeyMetaMacOs => 'Command';
+
+  @override
+  String get keyboardKeyNumpad0 => '數字鍵盤 0';
+
+  @override
+  String get keyboardKeyNumpad1 => '數字鍵盤 1';
+
+  @override
+  String get keyboardKeyNumpad2 => '數字鍵盤 2';
+
+  @override
+  String get keyboardKeyNumpad3 => '數字鍵盤 3';
+
+  @override
+  String get keyboardKeyNumpad4 => '數字鍵盤 4';
+
+  @override
+  String get keyboardKeyNumpad5 => '數字鍵盤 5';
+
+  @override
+  String get keyboardKeyNumpad6 => '數字鍵盤 6';
+
+  @override
+  String get keyboardKeyNumpad7 => '數字鍵盤 7';
+
+  @override
+  String get keyboardKeyNumpad8 => '數字鍵盤 8';
+
+  @override
+  String get keyboardKeyNumpad9 => '數字鍵盤 9';
+
+  @override
+  String get keyboardKeyNumpadAdd => '數字鍵盤 +';
+
+  @override
+  String get keyboardKeyNumpadComma => '數字鍵盤 ,';
+
+  @override
+  String get keyboardKeyNumpadDecimal => '數字鍵盤 .';
+
+  @override
+  String get keyboardKeyNumpadDivide => '數字鍵盤 /';
+
+  @override
+  String get keyboardKeyNumpadEnter => '數字鍵盤 Enter';
+
+  @override
+  String get keyboardKeyNumpadEqual => '數字鍵盤 =';
+
+  @override
+  String get keyboardKeyNumpadMultiply => '數字鍵盤 *';
+
+  @override
+  String get keyboardKeyNumpadParenLeft => '數字鍵盤 (';
+
+  @override
+  String get keyboardKeyNumpadParenRight => '數字鍵盤 )';
+
+  @override
+  String get keyboardKeyNumpadSubtract => '數字鍵盤 -';
+
+  @override
+  String get keyboardKeyPageDown => 'PgDown';
+
+  @override
+  String get keyboardKeyPower => '電源';
+
+  @override
+  String get keyboardKeyPowerOff => '關機';
+
+  @override
+  String get keyboardKeyRomaji => 'Romaji';
+
+  @override
+  String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeySpace => '空格';
+
+  @override
+  String get keyboardKeyZenkaku => 'Zenkaku';
+
+  @override
+  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => '最後一頁';
@@ -41456,28 +41670,17 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHantHk({
-    String localeName = 'zh_Hant_HK',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'zh_Hant_HK',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -41486,28 +41689,17 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZhHantTw({
-    String localeName = 'zh_Hant_TW',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'zh_Hant_TW',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get dialModeButtonLabel => '切換至鐘面挑選器模式';
@@ -41591,28 +41783,17 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationZu({
-    String localeName = 'zu',
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
+    super.localeName = 'zu',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
 
   @override
   String get aboutListTileTitleRaw => r'Mayelana no-$applicationName';
@@ -41729,10 +41910,10 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'Channel Down';
+  String get keyboardKeyChannelDown => 'I-Channel Down';
 
   @override
-  String get keyboardKeyChannelUp => 'Channel Up';
+  String get keyboardKeyChannelUp => 'I-Channel Up';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -41783,10 +41964,10 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get keyboardKeyKanjiMode => 'Kanji Mode';
 
   @override
-  String get keyboardKeyKatakana => 'Katakana';
+  String get keyboardKeyKatakana => 'I-Katakana';
 
   @override
-  String get keyboardKeyMeta => 'Meta';
+  String get keyboardKeyMeta => 'I-Meta';
 
   @override
   String get keyboardKeyMetaMacOs => 'Command';
@@ -41864,13 +42045,13 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Power';
+  String get keyboardKeyPower => 'Amandla';
 
   @override
-  String get keyboardKeyPowerOff => 'Power Off';
+  String get keyboardKeyPowerOff => 'Cisha';
 
   @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
+  String get keyboardKeyPrintScreen => '-Print Screen';
 
   @override
   String get keyboardKeyRomaji => 'Romaji';
@@ -41879,7 +42060,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'Select';
+  String get keyboardKeySelect => 'Khetha';
 
   @override
   String get keyboardKeySpace => 'Space';

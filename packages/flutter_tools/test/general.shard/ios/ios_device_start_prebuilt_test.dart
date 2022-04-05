@@ -285,6 +285,7 @@ void main() {
             '--verbose-logging',
             '--cache-sksl',
             '--purge-persistent-cache',
+            '--enable-impeller',
           ].join(' '),
         ], environment: const <String, String>{
         'PATH': '/usr/bin:null',
@@ -332,6 +333,7 @@ void main() {
         purgePersistentCache: true,
         verboseSystemLogs: true,
         nullAssertions: true,
+        enableImpeller: true,
       ),
       platformArgs: <String, dynamic>{},
     );

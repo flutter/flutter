@@ -234,7 +234,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// the number of lines. By default, it is 1, meaning this is a single-line
   /// text field. If it is not null, it must be greater than zero.
   ///
-  /// The [offset] is required and must not be null. You can use [new
+  /// The [offset] is required and must not be null. You can use [
   /// ViewportOffset.zero] if you have no need for scrolling.
   RenderEditable({
     InlineSpan? text,
@@ -1222,7 +1222,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // can be re-used when [assembleSemanticsNode] is called again. This ensures
   // stable ids for the [SemanticsNode]s of [TextSpan]s across
   // [assembleSemanticsNode] invocations.
-  Queue<SemanticsNode>? _cachedChildNodes;
+  LinkedHashMap<Key, SemanticsNode>? _cachedChildNodes;
 
   /// Returns a list of rects that bound the given selection.
   ///
@@ -1326,7 +1326,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     int placeholderIndex = 0;
     int childIndex = 0;
     RenderBox? child = firstChild;
-    final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
+    final LinkedHashMap<Key, SemanticsNode> newChildCache = LinkedHashMap<Key, SemanticsNode>();
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       final TextSelection selection = TextSelection(
@@ -1406,18 +1406,36 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
             assert(false, '${recognizer.runtimeType} is not supported.');
           }
         }
-        final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty ?? false)
-            ? _cachedChildNodes!.removeFirst()
-            : SemanticsNode();
+        if (node.parentPaintClipRect != null) {
+          final Rect paintRect = node.parentPaintClipRect!.intersect(currentRect);
+          configuration.isHidden = paintRect.isEmpty && !currentRect.isEmpty;
+        }
+        late final SemanticsNode newChild;
+        if (_cachedChildNodes?.isNotEmpty ?? false) {
+          newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first)!;
+        } else {
+          final UniqueKey key = UniqueKey();
+          newChild = SemanticsNode(
+            key: key,
+            showOnScreen: _createShowOnScreenFor(key),
+          );
+        }
         newChild
           ..updateWith(config: configuration)
           ..rect = currentRect;
-        newChildCache.addLast(newChild);
+        newChildCache[newChild.key!] = newChild;
         newChildren.add(newChild);
       }
     }
     _cachedChildNodes = newChildCache;
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
+  }
+
+  VoidCallback? _createShowOnScreenFor(Key key) {
+    return () {
+      final SemanticsNode node = _cachedChildNodes![key]!;
+      showOnScreen(descendant: this, rect: node.rect);
+    };
   }
 
   // TODO(ianh): in theory, [selection] could become null between when

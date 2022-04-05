@@ -789,7 +789,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  ///  * [new DecoratedBox]
+  ///  * [DecoratedBox.new]
   const DecoratedBoxTransition({
     Key? key,
     required this.decoration,
@@ -856,7 +856,7 @@ class AlignTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  ///  * [new Align].
+  ///  * [Align.new].
   const AlignTransition({
     Key? key,
     required Animation<AlignmentGeometry> alignment,
