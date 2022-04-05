@@ -1757,21 +1757,24 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   /// Picks between three different colors, depending upon the state of two
   /// different animations.
   Color? _getBackgroundColor(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
-    final ColorTween backgroundTween = ColorTween(
-      begin: widget.disabledColor
-        ?? chipTheme.disabledColor
-        ?? theme.disabledColor,
-      end: widget.backgroundColor
+    final Color? beginBackgroundColor = MaterialStateProperty.resolveAs<Color?>(widget.disabledColor ?? chipTheme.disabledColor ?? theme.disabledColor, materialStates);
+    final Color? endBackgroundColor = MaterialStateProperty.resolveAs<Color?>(widget.backgroundColor
         ?? chipTheme.backgroundColor
         ?? theme.chipTheme.backgroundColor
-        ?? chipDefaults.backgroundColor,
-    );
-    final ColorTween selectTween = ColorTween(
-      begin: backgroundTween.evaluate(enableController),
-      end: widget.selectedColor
+        ?? chipDefaults.backgroundColor, materialStates);
+    final Color? selectedColor = MaterialStateProperty.resolveAs<Color?>(widget.selectedColor
         ?? chipTheme.selectedColor
         ?? theme.chipTheme.selectedColor
         ?? chipDefaults.selectedColor,
+        materialStates);
+
+    final ColorTween backgroundTween = ColorTween(
+      begin: beginBackgroundColor,
+      end: endBackgroundColor,
+    );
+    final ColorTween selectTween = ColorTween(
+      begin: backgroundTween.evaluate(enableController),
+      end: selectedColor,
     );
     return selectTween.evaluate(selectionFade);
   }
