@@ -1,4 +1,4 @@
-Signature: 9b7b6d72cc64334323fae77271291752
+Signature: 25fffcbb03ac9ff5ed88f14ef743d7f1
 
 UNUSED LICENSES:
 
@@ -3680,6 +3680,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/co
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/equalizer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/gain.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/vendor_specific.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/proxy_host_publisher.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/service_instance_publisher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.clientlevel/clientlevel.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.systemmode/systemmode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.config/config.fidl
