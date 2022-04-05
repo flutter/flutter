@@ -264,14 +264,13 @@ size_t Canvas::GetStencilDepth() const {
 
 void Canvas::Save(bool create_subpass) {
   auto entry = CanvasStackEntry{};
+  entry.xformation = xformation_stack_.back().xformation;
+  entry.stencil_depth = xformation_stack_.back().stencil_depth;
   if (create_subpass) {
     entry.is_subpass = true;
     current_pass_ = GetCurrentPass().AddSubpass(std::make_unique<EntityPass>());
     current_pass_->SetTransformation(xformation_stack_.back().xformation);
     current_pass_->SetStencilDepth(xformation_stack_.back().stencil_depth);
-  } else {
-    entry.xformation = xformation_stack_.back().xformation;
-    entry.stencil_depth = xformation_stack_.back().stencil_depth;
   }
   xformation_stack_.emplace_back(std::move(entry));
 }

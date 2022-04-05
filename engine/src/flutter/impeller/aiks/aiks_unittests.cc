@@ -9,6 +9,7 @@
 #include "impeller/aiks/image.h"
 #include "impeller/geometry/geometry_unittests.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/playground/widgets.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "impeller/typographer/backends/skia/text_render_context_skia.h"
 #include "third_party/skia/include/core/SkData.h"
@@ -516,8 +517,38 @@ TEST_F(AiksTest, PathsShouldHaveUniformAlpha) {
     }
     canvas.Translate({-240, 60});
   }
+}
 
-  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+TEST_F(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
+  auto callback = [](AiksContext& renderer, RenderPass& pass) {
+    Canvas canvas;
+    Paint alpha;
+    alpha.color = Color::Red().WithAlpha(0.5);
+
+    auto current = Point{25, 25};
+    const auto offset = Point{25, 25};
+    const auto size = Size(100, 100);
+
+    auto [b0, b1] = IMPELLER_PLAYGROUND_LINE(Point(40, 40), Point(160, 160), 10,
+                                             Color::White(), Color::White());
+    auto bounds = Rect::MakeLTRB(b0.x, b0.y, b1.x, b1.y);
+
+    canvas.DrawRect(bounds, Paint{.color = Color::Yellow(),
+                                  .stroke_width = 5.0f,
+                                  .style = Paint::Style::kStroke});
+
+    canvas.SaveLayer(alpha, bounds);
+
+    canvas.DrawRect({current, size}, Paint{.color = Color::Red()});
+    canvas.DrawRect({current += offset, size}, Paint{.color = Color::Green()});
+    canvas.DrawRect({current += offset, size}, Paint{.color = Color::Blue()});
+
+    canvas.Restore();
+
+    return renderer.Render(canvas.EndRecordingAsPicture(), pass);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing

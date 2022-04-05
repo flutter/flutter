@@ -13,6 +13,13 @@ AiksPlayground::AiksPlayground() = default;
 AiksPlayground::~AiksPlayground() = default;
 
 bool AiksPlayground::OpenPlaygroundHere(const Picture& picture) {
+  return OpenPlaygroundHere(
+      [&picture](AiksContext& renderer, RenderPass& pass) -> bool {
+        return renderer.Render(picture, pass);
+      });
+}
+
+bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
   if (!Playground::is_enabled()) {
     return true;
   }
@@ -24,8 +31,8 @@ bool AiksPlayground::OpenPlaygroundHere(const Picture& picture) {
   }
 
   return Playground::OpenPlaygroundHere(
-      [&renderer, &picture](RenderPass& pass) -> bool {
-        return renderer.Render(picture, pass);
+      [&renderer, &callback](RenderPass& pass) -> bool {
+        return callback(renderer, pass);
       });
 }
 

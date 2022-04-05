@@ -839,9 +839,16 @@ TEST(GeometryTest, RectGetPoints) {
 }
 
 TEST(GeometryTest, RectMakePointBounds) {
-  auto r = Rect::MakePointBounds({Point(1, 5), Point(4, -1), Point(0, 6)});
-  auto expected = Rect(0, -1, 4, 7);
-  ASSERT_RECT_NEAR(r, expected);
+  {
+    Rect r =
+        Rect::MakePointBounds({Point(1, 5), Point(4, -1), Point(0, 6)}).value();
+    auto expected = Rect(0, -1, 4, 7);
+    ASSERT_RECT_NEAR(r, expected);
+  }
+  {
+    std::optional<Rect> r = Rect::MakePointBounds({});
+    ASSERT_FALSE(r.has_value());
+  }
 }
 
 TEST(GeometryTest, CubicPathComponentPolylineDoesNotIncludePointOne) {
