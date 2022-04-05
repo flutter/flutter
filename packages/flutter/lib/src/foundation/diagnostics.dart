@@ -1547,14 +1547,10 @@ abstract class DiagnosticsNode {
   /// Converts the properties ([getProperties]) of this node to a form useful
   /// for [Timeline] event arguments (as in [Timeline.startSync]).
   ///
-  /// The properties specified by [timelineArgumentsIndicatingLandmarkEvent] are
-  /// included in the result.
-  ///
   /// Children ([getChildren]) are omitted.
   ///
   /// This method is only valid in debug builds. In profile builds, this method
-  /// throws an exception. In release builds, it returns a copy of
-  /// [timelineArgumentsIndicatingLandmarkEvent] with no arguments added.
+  /// throws an exception. In release builds it returns null.
   ///
   /// See also:
   ///
