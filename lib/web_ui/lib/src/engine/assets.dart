@@ -25,8 +25,8 @@ class AssetManager {
   String? get _baseUrl {
     return html.window.document
         .querySelectorAll('meta')
-        .whereType<html.MetaElement?>()
-        .firstWhere((dynamic e) => e.name == 'assetBase', orElse: () => null)
+        .whereType<html.MetaElement>()
+        .firstWhereOrNull((html.MetaElement element) => element.name == 'assetBase')
         ?.content;
   }
 

@@ -75,7 +75,7 @@ abstract class HostNode {
   ///
   /// See:
   /// * [Document.querySelectorAll](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll)
-  List<html.Node> querySelectorAll(String selectors);
+  List<html.Element> querySelectorAll(String selectors);
 }
 
 /// A [HostNode] implementation, backed by a [html.ShadowRoot].
@@ -125,7 +125,7 @@ class ShadowDomHostNode implements HostNode {
   }
 
   @override
-  List<html.Node> querySelectorAll(String selectors) {
+  List<html.Element> querySelectorAll(String selectors) {
     return _shadow.querySelectorAll(selectors);
   }
 
@@ -168,7 +168,7 @@ class ElementHostNode implements HostNode {
   }
 
   @override
-  List<html.Node> querySelectorAll(String selectors) {
+  List<html.Element> querySelectorAll(String selectors) {
     return _element.querySelectorAll(selectors);
   }
 
