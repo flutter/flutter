@@ -127,5 +127,51 @@ TEST_F(DisplayListTest, CanDrawArc) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_F(DisplayListTest, StrokedPathsDrawCorrectly) {
+  flutter::DisplayListBuilder builder;
+  builder.setColor(SK_ColorRED);
+  builder.setStyle(SkPaint::Style::kStroke_Style);
+  builder.setStrokeWidth(10);
+
+  // Rectangle
+  builder.translate(100, 100);
+  builder.drawRect(SkRect::MakeSize({100, 100}));
+
+  // Rounded rectangle
+  builder.translate(150, 0);
+  builder.drawRRect(SkRRect::MakeRectXY(SkRect::MakeSize({100, 50}), 10, 10));
+
+  // Double rounded rectangle
+  builder.translate(150, 0);
+  builder.drawDRRect(
+      SkRRect::MakeRectXY(SkRect::MakeSize({100, 50}), 10, 10),
+      SkRRect::MakeRectXY(SkRect::MakeXYWH(10, 10, 80, 30), 10, 10));
+
+  // Contour with duplicate join points
+  {
+    builder.translate(150, 0);
+    SkPath path;
+    path.lineTo({100, 0});
+    path.lineTo({100, 0});
+    path.lineTo({100, 100});
+    builder.drawPath(path);
+  }
+
+  // Contour with duplicate end points
+  {
+    builder.setStrokeCap(SkPaint::Cap::kRound_Cap);
+    builder.translate(150, 0);
+    SkPath path;
+    path.moveTo(0, 0);
+    path.lineTo({0, 0});
+    path.lineTo({50, 50});
+    path.lineTo({100, 0});
+    path.lineTo({100, 0});
+    builder.drawPath(path);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
