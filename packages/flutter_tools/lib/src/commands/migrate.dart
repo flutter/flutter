@@ -4,11 +4,13 @@
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../cache.dart';
 import '../migrate/migrate_utils.dart';
 import '../runner/flutter_command.dart';
 import 'migrate_abandon.dart';
 import 'migrate_apply.dart';
+import 'migrate_resolve_conflicts.dart';
 import 'migrate_start.dart';
 import 'migrate_status.dart';
 
@@ -20,9 +22,11 @@ class MigrateCommand extends FlutterCommand {
     bool verbose = false,
     required this.logger,
     required FileSystem fileSystem,
+    required Terminal terminal,
   }) : _verbose = verbose {
     addSubcommand(MigrateAbandonCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));
     addSubcommand(MigrateApplyCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));
+    addSubcommand(MigrateResolveConflictsCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, terminal: terminal));
     addSubcommand(MigrateStartCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));
     addSubcommand(MigrateStatusCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));
     // TODO(garyq): add command for guided conflict resolution.

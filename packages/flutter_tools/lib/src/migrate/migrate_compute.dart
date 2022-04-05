@@ -18,6 +18,7 @@ import 'migrate_utils.dart';
 enum MergeType {
   threeWay,
   twoWay,
+  custom,
 }
 
 // This defines files and directories that should be skipped regardless
@@ -54,6 +55,10 @@ const List<String> _skippedMergeFileExt = <String>[
   '.jpg',
   '.jpeg',
   '.gif',
+  // Don't merge compiled artifacts and executables
+  '.jar',
+  '.so',
+  '.exe',
 ];
 
 /// True for files that should not be merged. Typically, images and binary files.
@@ -437,7 +442,7 @@ Future<void> createBase(
       status.pause();
       logger.printStatus('Creating base app for $platforms with revision $revision.', indent: 2, color: TerminalColor.grey);
       status.resume();
-      await MigrateUtils.createFromTemplates(
+      String newDirectoryPath = await MigrateUtils.createFromTemplates(
         sdkDir.childDirectory('bin').absolute.path,
         name: name,
         androidLanguage: androidLanguage,
@@ -445,6 +450,9 @@ Future<void> createBase(
         outputDirectory: migrateResult.generatedBaseTemplateDirectory!.absolute.path,
         platforms: platforms,
       );
+      if (newDirectoryPath != migrateResult.generatedBaseTemplateDirectory) {
+        migrateResult.generatedBaseTemplateDirectory = fileSystem.directory(newDirectoryPath);
+      }
       // Determine merge type for each newly generated file.
       final List<FileSystemEntity> generatedBaseFiles = migrateResult.generatedBaseTemplateDirectory!.listSync(recursive: true);
       for (final FileSystemEntity entity in generatedBaseFiles) {
@@ -457,6 +465,10 @@ Future<void> createBase(
           // Use two way merge when the base revision is the same as the target revision.
           migrateResult.mergeTypeMap[localPath] = revision == targetRevision ? MergeType.twoWay : MergeType.threeWay;
         }
+      }
+      if (newDirectoryPath != migrateResult.generatedBaseTemplateDirectory) {
+        migrateResult.generatedBaseTemplateDirectory = fileSystem.directory(newDirectoryPath);
+        break; // The create command is old and does not distinguish between platforms so it only needs to be called once.
       }
     }
   }
@@ -632,15 +644,16 @@ Future<void> computeMerge(
     // File changed by user
     if (migrateResult.diffMap.containsKey(localPath)) {
       MergeResult? result;
+      // Default to two way merge as it does not require the base file to exist.
+      MergeType mergeType = migrateResult.mergeTypeMap[localPath] ?? MergeType.twoWay;
       for (final CustomMerge customMerge in customMerges) {
         if (customMerge.localPath == localPath) {
           result = customMerge.merge(currentFile, baseTemplateFile, targetTemplateFile);
+          mergeType = MergeType.custom;
           break;
         }
       }
       if (result == null) {
-        // Default to two way merge as it does not require the base file to exist.
-        MergeType mergeType = migrateResult.mergeTypeMap[localPath] ?? MergeType.twoWay;
         // Use two way merge if diff between base and target are the same.
         // This prevents the three way merge re-deleting the base->target changes.
         if (preferTwoWayMerge || (
@@ -667,12 +680,17 @@ Future<void> computeMerge(
             );
             break;
           }
+          case MergeType.custom: {
+            break; // handled above
+          }
         }
       }
-      migrateResult.mergeResults.add(result);
+      if (result != null) {
+        migrateResult.mergeResults.add(result!);
+      }
       if (verbose) {
         status.pause();
-        logger.printStatus('$localPath was merged.');
+        logger.printStatus('$localPath was merged with a $mergeType.');
         status.resume();
       }
       continue;

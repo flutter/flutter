@@ -187,6 +187,7 @@ List<FlutterCommand> generateCommands({
     verbose: verbose,
     logger: globals.logger,
     fileSystem: globals.fs,
+    terminal: globals.terminal,
   ),
   MakeHostAppEditableCommand(),
   PackagesCommand(),
