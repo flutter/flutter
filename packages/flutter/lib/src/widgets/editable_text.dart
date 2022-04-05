@@ -2479,6 +2479,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_selectionOverlay == null) {
         _selectionOverlay = TextSelectionOverlay(
           clipboardStatus: clipboardStatus,
+          // TODO(justinmc): Or pass the controller directly?
           context: _contextualMenuContext,
           value: _value,
           debugRequiredFor: widget,
@@ -3279,7 +3280,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
-    Widget child = MouseRegion(
+    final Widget child = MouseRegion(
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
       child: Actions(
         actions: _actions,
@@ -3380,8 +3381,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return child;
     }
     return InheritedContextualMenu(
-      buildMenu: (BuildContext context, Offset primaryAnchor, Offset? secondaryAnchor) {
-        return widget.buildContextualMenu!(context, this, primaryAnchor, secondaryAnchor);
+      buildMenu: (BuildContext context, ContextualMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
+        return widget.buildContextualMenu!(context, controller, this, primaryAnchor, secondaryAnchor);
       },
       child: Builder(
         builder: (BuildContext context) {
@@ -4618,4 +4619,10 @@ _Throttled<T> _throttle<T>({
 ///
 ///  * [ContextualMenuBuilder], which is the generic type for any contextual
 ///    menu builder, not just for the text selection toolbar.
-typedef TextSelectionToolbarBuilder = Widget Function(BuildContext, EditableTextState, Offset, Offset?);
+typedef TextSelectionToolbarBuilder = Widget Function(
+  BuildContext,
+  ContextualMenuController,
+  EditableTextState,
+  Offset,
+  Offset?,
+);

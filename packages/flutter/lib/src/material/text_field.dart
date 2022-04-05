@@ -1281,7 +1281,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          buildContextualMenu: widget.buildContextualMenu ?? (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
+          buildContextualMenu: widget.buildContextualMenu ?? (BuildContext context, ContextualMenuController controller, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
             if (_editableText == null || textSelectionControls == null) {
               return const SizedBox.shrink();
             }

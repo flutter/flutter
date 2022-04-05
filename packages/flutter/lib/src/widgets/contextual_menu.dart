@@ -22,7 +22,12 @@ import 'ticker_provider.dart';
 ///
 ///  * [TextSelectionToolbarBuilder], which is a specific case of this for
 ///    building text selection toolbars.
-typedef ContextualMenuBuilder = Widget Function(BuildContext, Offset, Offset?);
+typedef ContextualMenuBuilder = Widget Function(
+  BuildContext,
+  ContextualMenuController,
+  Offset,
+  Offset?,
+);
 
 // TODO(justinmc): Figure out all the platforms and nested packages.
 // Should a CupertinoTextField on Android show the iOS toolbar?? It seems to now
@@ -56,6 +61,7 @@ class InheritedContextualMenu extends InheritedWidget {
   /// Creates an instance of [InheritedContextualMenu].
   InheritedContextualMenu({
     Key? key,
+    // TODO(justinmc): Make all names the same (buildMenu vs. buildContextualMenu).
     required ContextualMenuBuilder buildMenu,
     required Widget child,
   }) : assert(buildMenu != null),
@@ -109,7 +115,9 @@ class ContextualMenuController {
   /// * [Overlay.of], which uses this parameter.
   final Widget? debugRequiredFor;
 
-  OverlayEntry? _menuOverlayEntry;
+  // The OverlayEntry is static because only one contextual menu can be
+  // displayed at one time.
+  static OverlayEntry? _menuOverlayEntry;
 
   /// True iff the contextual menu is currently being displayed.
   bool get isVisible => _menuOverlayEntry != null;
@@ -140,7 +148,7 @@ class ContextualMenuController {
           child: GestureDetector(
             onTap: () {},
             onSecondaryTap: () {},
-            child: capturedThemes.wrap(buildMenu(context, primaryAnchor, secondaryAnchor)),
+            child: capturedThemes.wrap(buildMenu(context, this, primaryAnchor, secondaryAnchor)),
           ),
         );
       },

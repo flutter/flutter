@@ -1277,7 +1277,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             restorationId: 'editable',
             scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-            buildContextualMenu: widget.buildContextualMenu ?? (BuildContext context, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
+            buildContextualMenu: widget.buildContextualMenu ?? (BuildContext context, ContextualMenuController controller, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
               return DefaultCupertinoTextSelectionToolbar(
                 primaryAnchor: primaryAnchor,
                 secondaryAnchor: secondaryAnchor,
