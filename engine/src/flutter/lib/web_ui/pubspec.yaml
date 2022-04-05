@@ -6,7 +6,7 @@ environment:
   sdk: ">=2.12.0-0 <3.0.0"
 
 dependencies:
-  js: 0.6.3
+  js: 0.6.4
   meta: 1.3.0
 
 dev_dependencies:
