@@ -47,7 +47,7 @@ void main() {
       'Icon(Icons.abc),',
     );
   });
-  
+
   test('usage string is correct with replacement', () {
     expect(
       Icon(const MapEntry<String, String>('123', '')).usage,
