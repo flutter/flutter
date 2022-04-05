@@ -482,5 +482,43 @@ TEST_F(AiksTest, TransformMultipliesCorrectly) {
   // clang-format on
 }
 
+TEST_F(AiksTest, PathsShouldHaveUniformAlpha) {
+  // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
+  Canvas canvas;
+  Paint paint;
+
+  paint.color = Color::White();
+  canvas.DrawPaint(paint);
+
+  paint.color = Color::Black().WithAlpha(0.5);
+  paint.style = Paint::Style::kStroke;
+  paint.stroke_width = 10;
+
+  Path path = PathBuilder{}
+                  .MoveTo({20, 20})
+                  .QuadraticCurveTo({60, 20}, {60, 60})
+                  .Close()
+                  .MoveTo({60, 20})
+                  .QuadraticCurveTo({60, 60}, {20, 60})
+                  .TakePath();
+
+  canvas.Scale({3, 3});
+  for (auto join :
+       {SolidStrokeContents::Join::kBevel, SolidStrokeContents::Join::kRound,
+        SolidStrokeContents::Join::kMiter}) {
+    paint.stroke_join = join;
+    for (auto cap :
+         {SolidStrokeContents::Cap::kButt, SolidStrokeContents::Cap::kSquare,
+          SolidStrokeContents::Cap::kRound}) {
+      paint.stroke_cap = cap;
+      canvas.DrawPath(path, paint);
+      canvas.Translate({80, 0});
+    }
+    canvas.Translate({-240, 60});
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller

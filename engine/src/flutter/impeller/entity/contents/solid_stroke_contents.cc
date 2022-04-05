@@ -79,7 +79,11 @@ static VertexBuffer CreateSolidStrokeVertices(
       vtx.vertex_normal = {};
       vtx.pen_down = 0.0;
       vtx_builder.AppendVertex(vtx);
+
       vtx.vertex_position = polyline.points[contour_start_point_i];
+      // Append two transparent vertices at the beginning of the new contour
+      // because it's a triangle strip.
+      vtx_builder.AppendVertex(vtx);
       vtx_builder.AppendVertex(vtx);
     }
 
@@ -152,9 +156,13 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
   cmd.pipeline =
       renderer.GetSolidStrokePipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
+
+  auto smoothing = SmoothingApproximation(
+      5.0 / (stroke_size_ * entity.GetTransformation().GetMaxBasisLength()),
+      0.0, 0.0);
   cmd.BindVertices(CreateSolidStrokeVertices(
       entity.GetPath(), pass.GetTransientsBuffer(), cap_proc_, join_proc_,
-      miter_limit_, arc_smoothing_approximation_));
+      miter_limit_, smoothing));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
   VS::BindStrokeInfo(cmd,
                      pass.GetTransientsBuffer().EmplaceUniform(stroke_info));
@@ -166,7 +174,6 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
 
 void SolidStrokeContents::SetStrokeSize(Scalar size) {
   stroke_size_ = size;
-  arc_smoothing_approximation_ = SmoothingApproximation(5.0 / size, 0.0, 0.0);
 }
 
 Scalar SolidStrokeContents::GetStrokeSize() const {
