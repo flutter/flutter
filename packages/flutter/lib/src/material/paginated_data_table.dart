@@ -87,7 +87,7 @@ class PaginatedDataTable extends StatefulWidget {
     required this.source,
     this.checkboxHorizontalMargin,
     this.controller,
-    this.primary=false,
+    this.primary,
   }) : assert(actions == null || (actions != null && header != null)),
        assert(columns != null),
        assert(dragStartBehavior != null),
@@ -108,7 +108,7 @@ class PaginatedDataTable extends StatefulWidget {
          return true;
        }()),
        assert(source != null),
-       assert(!(controller != null && primary),
+       assert(!(controller != null && (primary ?? false)),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.',
        );
@@ -247,7 +247,7 @@ class PaginatedDataTable extends StatefulWidget {
   final ScrollController? controller;
 
   /// {@macro flutter.widgets.scroll_view.primary}
-  final bool primary;
+  final bool? primary;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
