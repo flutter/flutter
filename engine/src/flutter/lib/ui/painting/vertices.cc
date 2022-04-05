@@ -67,7 +67,7 @@ bool Vertices::init(Dart_Handle vertices_handle,
     builder.store_colors(reinterpret_cast<const SkColor*>(colors.data()));
   }
 
-  if (indices.data()) {
+  if (indices.data() && indices.num_elements() > 0) {
     builder.store_indices(indices.data());
   }
 
