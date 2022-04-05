@@ -11,47 +11,6 @@ import '../src/common.dart';
 import '../src/fake_vm_services.dart';
 
 void main() {
-  testWithoutContext('Coverage collector Can handle coverage SentinelException', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 50).toJson(),
-        ),
-        FakeVmServiceRequest(
-          method: 'getVM',
-          jsonResponse: (VM.parse(<String, Object>{})
-            ..isolates = <IsolateRef>[
-              IsolateRef.parse(<String, Object>{
-                'id': '1'
-              }),
-            ]
-          ).toJson(),
-        ),
-        const FakeVmServiceRequest(
-          method: 'getScripts',
-          args: <String, Object>{
-            'isolateId': '1',
-          },
-          jsonResponse: <String, Object>{
-            'type': 'Sentinel'
-          }
-        )
-      ],
-    );
-
-    final Map<String, Object> result = await collect(
-      null,
-      (String predicate) => true,
-      connector: (Uri uri) async {
-        return fakeVmServiceHost.vmService;
-      },
-    );
-
-    expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[]});
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  });
-
   testWithoutContext('Coverage collector processes coverage and script data', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
@@ -70,20 +29,10 @@ void main() {
           ).toJson(),
         ),
         FakeVmServiceRequest(
-          method: 'getScripts',
-          args: <String, Object>{
-            'isolateId': '1',
-          },
-          jsonResponse: ScriptList(scripts: <ScriptRef>[
-            ScriptRef(uri: 'foo.dart', id: '1'),
-          ]).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getSourceReport',
           args: <String, Object>{
             'isolateId': '1',
             'reports': <Object>['Coverage'],
-            'scriptId': '1',
             'forceCompile': true,
           },
           jsonResponse: SourceReport(
@@ -98,11 +47,25 @@ void main() {
                   misses: <int>[],
                 ),
               ),
+              SourceReportRange(
+                scriptIndex: 1,
+                startPos: 0,
+                endPos: 0,
+                compiled: true,
+                coverage: SourceReportCoverage(
+                  hits: <int>[],
+                  misses: <int>[],
+                ),
+              ),
             ],
             scripts: <ScriptRef>[
               ScriptRef(
                 uri: 'foo.dart',
                 id: '1',
+              ),
+              ScriptRef(
+                uri: 'bar.dart',
+                id: '2',
               ),
             ],
           ).toJson(),
@@ -117,6 +80,19 @@ void main() {
             uri: 'foo.dart',
             id: '1',
             library: LibraryRef(name: '', id: '1111', uri: 'foo.dart'),
+            tokenPosTable: <List<int>>[],
+          ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getObject',
+          args: <String, Object>{
+            'isolateId': '1',
+            'objectId': '2',
+          },
+          jsonResponse: Script(
+            uri: 'bar.dart',
+            id: '2',
+            library: LibraryRef(name: '', id: '2222', uri: 'bar.dart'),
             tokenPosTable: <List<int>>[],
           ).toJson(),
         ),
@@ -143,6 +119,17 @@ void main() {
         },
         'hits': <Object>[],
       },
+      <String, Object>{
+        'source': 'bar.dart',
+        'script': <String, Object>{
+          'type': '@Script',
+          'fixedId': true,
+          'id': 'libraries/1/scripts/bar.dart',
+          'uri': 'bar.dart',
+          '_kind': 'library',
+        },
+        'hits': <Object>[],
+      },
     ]});
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
@@ -165,20 +152,10 @@ void main() {
           ).toJson(),
         ),
         FakeVmServiceRequest(
-          method: 'getScripts',
-          args: <String, Object>{
-            'isolateId': '1',
-          },
-          jsonResponse: ScriptList(scripts: <ScriptRef>[
-            ScriptRef(uri: 'foo.dart', id: '1'),
-          ]).toJson(),
-        ),
-        FakeVmServiceRequest(
           method: 'getSourceReport',
           args: <String, Object>{
             'isolateId': '1',
             'reports': <Object>['Coverage'],
-            'scriptId': '1',
             'forceCompile': true,
             'reportLines': true,
           },
@@ -194,11 +171,25 @@ void main() {
                   misses: <int>[2],
                 ),
               ),
+              SourceReportRange(
+                scriptIndex: 1,
+                startPos: 0,
+                endPos: 0,
+                compiled: true,
+                coverage: SourceReportCoverage(
+                  hits: <int>[4, 7],
+                  misses: <int>[8],
+                ),
+              ),
             ],
             scripts: <ScriptRef>[
               ScriptRef(
                 uri: 'foo.dart',
                 id: '1',
+              ),
+              ScriptRef(
+                uri: 'bar.dart',
+                id: '2',
               ),
             ],
           ).toJson(),
@@ -225,6 +216,17 @@ void main() {
           '_kind': 'library',
         },
         'hits': <Object>[1, 1, 3, 1, 2, 0],
+      },
+      <String, Object>{
+        'source': 'bar.dart',
+        'script': <String, Object>{
+          'type': '@Script',
+          'fixedId': true,
+          'id': 'libraries/1/scripts/bar.dart',
+          'uri': 'bar.dart',
+          '_kind': 'library',
+        },
+        'hits': <Object>[4, 1, 7, 1, 8, 0],
       },
     ]});
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
