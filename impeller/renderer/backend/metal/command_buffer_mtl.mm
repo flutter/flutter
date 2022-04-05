@@ -8,8 +8,19 @@
 
 namespace impeller {
 
+id<MTLCommandBuffer> CreateCommandBuffer(id<MTLCommandQueue> queue) {
+  if (@available(iOS 14.0, macOS 11.0, *)) {
+    auto desc = [[MTLCommandBufferDescriptor alloc] init];
+    // Degrades CPU performance slightly but is well worth the cost for typical
+    // Impeller workloads.
+    desc.errorOptions = MTLCommandBufferErrorOptionEncoderExecutionStatus;
+    return [queue commandBufferWithDescriptor:desc];
+  }
+  return [queue commandBuffer];
+}
+
 CommandBufferMTL::CommandBufferMTL(id<MTLCommandQueue> queue)
-    : buffer_([queue commandBuffer]) {
+    : buffer_(CreateCommandBuffer(queue)) {
   if (!buffer_) {
     return;
   }
@@ -42,6 +53,109 @@ static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
   return CommandBufferMTL::Status::kError;
 }
 
+API_AVAILABLE(ios(14.0), macos(11.0))
+NSString* MTLCommandEncoderErrorStateToString(
+    MTLCommandEncoderErrorState state) {
+  switch (state) {
+    case MTLCommandEncoderErrorStateUnknown:
+      return @"unknown";
+    case MTLCommandEncoderErrorStateCompleted:
+      return @"completed";
+    case MTLCommandEncoderErrorStateAffected:
+      return @"affected";
+    case MTLCommandEncoderErrorStatePending:
+      return @"pending";
+    case MTLCommandEncoderErrorStateFaulted:
+      return @"faulted";
+  }
+  return @"unknown";
+}
+
+static NSString* MTLCommandBufferErrorToString(MTLCommandBufferError code) {
+  switch (code) {
+    case MTLCommandBufferErrorNone:
+      return @"none";
+    case MTLCommandBufferErrorInternal:
+      return @"internal";
+    case MTLCommandBufferErrorTimeout:
+      return @"timeout";
+    case MTLCommandBufferErrorPageFault:
+      return @"page fault";
+    case MTLCommandBufferErrorAccessRevoked:
+      return @"access revoked / blacklisted";
+    case MTLCommandBufferErrorNotPermitted:
+      return @"not permitted";
+    case MTLCommandBufferErrorOutOfMemory:
+      return @"out of memory";
+    case MTLCommandBufferErrorInvalidResource:
+      return @"invalid resource";
+    case MTLCommandBufferErrorMemoryless:
+      return @"memory-less";
+    case MTLCommandBufferErrorStackOverflow:
+      return @"stack overflow";
+    default:
+      break;
+  }
+
+  return [NSString stringWithFormat:@"<unknown> %zu", code];
+}
+
+static void LogMTLCommandBufferErrorIfPresent(id<MTLCommandBuffer> buffer) {
+  if (!buffer) {
+    return;
+  }
+
+  if (buffer.status == MTLCommandBufferStatusCompleted) {
+    return;
+  }
+
+  std::stringstream stream;
+  stream << ">>>>>>>" << std::endl;
+  stream << "Impeller command buffer could not be committed!" << std::endl;
+
+  if (auto desc = buffer.error.localizedDescription) {
+    stream << desc.UTF8String << std::endl;
+  }
+
+  if (buffer.error) {
+    stream << "Domain: "
+           << (buffer.error.domain.length > 0u ? buffer.error.domain.UTF8String
+                                               : "<unknown>")
+           << " Code: "
+           << MTLCommandBufferErrorToString(
+                  static_cast<MTLCommandBufferError>(buffer.error.code))
+                  .UTF8String
+           << std::endl;
+  }
+
+  if (@available(iOS 14.0, macOS 11.0, *)) {
+    NSArray<id<MTLCommandBufferEncoderInfo>>* infos =
+        buffer.error.userInfo[MTLCommandBufferEncoderInfoErrorKey];
+    for (id<MTLCommandBufferEncoderInfo> info in infos) {
+      stream << (info.label.length > 0u ? info.label.UTF8String
+                                        : "<Unlabelled Render Pass>")
+             << ": "
+             << MTLCommandEncoderErrorStateToString(info.errorState).UTF8String
+             << std::endl;
+
+      auto signposts = [info.debugSignposts componentsJoinedByString:@", "];
+      if (signposts.length > 0u) {
+        stream << signposts.UTF8String << std::endl;
+      }
+    }
+
+    for (id<MTLFunctionLog> log in buffer.logs) {
+      auto desc = log.description;
+      if (desc.length > 0u) {
+        stream << desc.UTF8String << std::endl;
+      }
+    }
+  }
+
+  stream << "<<<<<<<";
+  VALIDATION_LOG << stream.str();
+}
+
 bool CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
   if (!buffer_) {
     // Already committed. This is caller error.
@@ -53,6 +167,7 @@ bool CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
 
   if (callback) {
     [buffer_ addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
+      LogMTLCommandBufferErrorIfPresent(buffer);
       callback(ToCommitResult(buffer.status));
     }];
   }
