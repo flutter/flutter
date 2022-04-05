@@ -1560,8 +1560,7 @@ abstract class DiagnosticsNode {
   ///
   ///  * [toJsonMap], which converts this node to a structured form intended for
   ///    data exchange (e.g. with an IDE).
-  Map<String, String> toTimelineArguments() {
-    final Map<String, String> result = Map<String, String>.of(timelineArgumentsIndicatingLandmarkEvent);
+  Map<String, String>? toTimelineArguments() {
     if (!kReleaseMode) {
       // We don't throw in release builds, to avoid hurting users. We also don't do anything useful.
       if (kProfileMode) {
@@ -1573,13 +1572,15 @@ abstract class DiagnosticsNode {
           'this application is compiled in profile mode and yet still invoked the method.'
         );
       }
+      final Map<String, String> result = <String, String>{};
       for (final DiagnosticsNode property in getProperties()) {
         if (property.name != null) {
           result[property.name!] = property.toDescription(parentConfiguration: singleLineTextConfiguration);
         }
       }
+      return result;
     }
-    return result;
+    return null;
   }
 
   /// Serialize the node to a JSON map according to the configuration provided
