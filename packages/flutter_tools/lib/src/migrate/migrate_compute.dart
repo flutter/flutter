@@ -715,7 +715,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
       file.writeAsBytesSync(result.mergedBytes!, flush: true);
     }
   }
-  // Write all files that are newly added in targetl
+  // Write all files that are newly added in target
   for (final FilePendingMigration addedFile in migrateResult.addedFiles) {
     final File file = workingDir.childFile(addedFile.localPath);
     file.createSync(recursive: true);
