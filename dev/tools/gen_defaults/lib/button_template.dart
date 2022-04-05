@@ -12,132 +12,52 @@ class ButtonTemplate extends TokenTemplate {
 
   final String tokenGroup;
 
-  String get _backgroundColor {
+  String _backgroundColor() {
     if (tokens.containsKey('$tokenGroup.container.color')) {
-      final String enabledColor = color('$tokenGroup.container.color');
-      final String? enabledOpacity = opacity('$tokenGroup.container.opacity');
-      final String disabledColor = color('$tokenGroup.disabled.container.color');
-      final String? disabledOpacity = opacity('$tokenGroup.disabled.container.opacity');
       return '''
-  static MaterialStateProperty<Color?>? backgroundColorFor(Color? enabled, Color? disabled) {
-    return (enabled == null && disabled == null)
-      ? null
-      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled))
-            return disabled${disabledOpacity != null ? '?.withOpacity($disabledOpacity)' : ''};
-          return enabled${enabledOpacity != null ? '?.withOpacity($enabledOpacity)' : ''};
-        });
-  }
 
-  @override
-  MaterialStateProperty<Color?>? get backgroundColor {
-    return backgroundColorFor($enabledColor, $disabledColor);
-  }''';
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled))
+        return ${componentColor('$tokenGroup.disabled.container')};
+      return ${componentColor('$tokenGroup.container')};
+    })''';
     }
     return '''
-  @override
-  MaterialStateProperty<Color?>? get backgroundColor =>
-    ButtonStyleButton.allOrNull<Color>(Colors.transparent);''';
+
+    ButtonStyleButton.allOrNull<Color>(Colors.transparent)''';
   }
 
-  String get _foregroundColor {
-    final String enabledColor = color('$tokenGroup.label-text.color');
-    final String? enabledOpacity = opacity('$tokenGroup.label-text.opacity');
-    final String disabledColor = color('$tokenGroup.disabled.label-text.color');
-    final String? disabledOpacity = opacity('$tokenGroup.disabled.label-text.opacity');
-    return '''
-  static MaterialStateProperty<Color?>? foregroundColorFor(Color? enabled, Color? disabled) {
-    return (enabled == null && disabled == null)
-      ? null
-      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled))
-            return disabled${disabledOpacity != null ? '?.withOpacity($disabledOpacity)' : ''};
-          return enabled${enabledOpacity != null ? '?.withOpacity($enabledOpacity)' : ''};
-        });
-  }
-
-  @override
-  MaterialStateProperty<Color?>? get foregroundColor {
-    return foregroundColorFor($enabledColor, $disabledColor);
-  }''';
-    }
-
-  String get _overlayColor {
-    final String hoverColor = color('$tokenGroup.hover.state-layer.color');
-    final String? hoverOpacity = opacity('$tokenGroup.hover.state-layer.opacity');
-    final String focusColor = color('$tokenGroup.focus.state-layer.color');
-    final String? focusOpacity = opacity('$tokenGroup.focus.state-layer.opacity');
-    final String pressedColor = color('$tokenGroup.pressed.state-layer.color');
-    final String? pressedOpacity = opacity('$tokenGroup.pressed.state-layer.opacity');
-    return '''
-  static MaterialStateProperty<Color?>? overlayColorFor(Color? hover, Color? focus, Color? pressed) {
-    return (hover == null && focus == null)
-      ? null
-      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.hovered))
-            return hover${hoverOpacity != null ? '?.withOpacity($hoverOpacity)' : ''};
-          else if (states.contains(MaterialState.focused))
-            return focus${focusOpacity != null ? '?.withOpacity($focusOpacity)' : ''};
-          else if (states.contains(MaterialState.pressed))
-            return pressed${pressedOpacity != null ? '?.withOpacity($pressedOpacity)' : ''};
-          else
-            return null;
-        });
-  }
-
-  @override
-  MaterialStateProperty<Color?>? get overlayColor {
-    return overlayColorFor($hoverColor, $focusColor, $pressedColor);
-  }''';
-  }
-
-  String get _elevation {
+  String _elevation() {
     if (tokens.containsKey('$tokenGroup.container.elevation')) {
       return '''
-  @override
-  MaterialStateProperty<double>? get elevation {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled))
         return ${elevation("$tokenGroup.disabled.container")};
-      else if (states.contains(MaterialState.hovered))
+      if (states.contains(MaterialState.hovered))
         return ${elevation("$tokenGroup.hover.container")};
-      else if (states.contains(MaterialState.focused))
+      if (states.contains(MaterialState.focused))
         return ${elevation("$tokenGroup.focus.container")};
-      else if (states.contains(MaterialState.pressed))
+      if (states.contains(MaterialState.pressed))
         return ${elevation("$tokenGroup.pressed.container")};
       return ${elevation("$tokenGroup.container")};
-    });
-  }''';
+    })''';
     }
     return '''
-  @override
-  MaterialStateProperty<double>? get elevation =>
-    ButtonStyleButton.allOrNull<double>(0.0);''';
-  }
 
-  String get _side {
-    if (tokens.containsKey('$tokenGroup.outline.color')) {
-      return '''
-  @override
-  MaterialStateProperty<BorderSide>? get side {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return ${border("$tokenGroup.disabled.outline")};
-      }
-      return ${border("$tokenGroup.outline")};
-    });
-  }''';
-    }
-    return '''
-  @override
-  MaterialStateProperty<BorderSide>? get side => null;''';
+    ButtonStyleButton.allOrNull<double>(0.0)''';
   }
 
   @override
   String generate() => '''
 // Generated version ${tokens["version"]}
 class _TokenDefaultsM3 extends ButtonStyle {
-  _TokenDefaultsM3(this.context);
+  _TokenDefaultsM3(this.context)
+   : super(
+       animationDuration: kThemeChangeDuration,
+       enableFeedback: true,
+       alignment: Alignment.center,
+     );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -146,76 +66,90 @@ class _TokenDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<TextStyle?> get textStyle =>
     MaterialStateProperty.all<TextStyle?>(${textStyle("$tokenGroup.label-text")});
 
-$_backgroundColor
+  @override
+  MaterialStateProperty<Color?>? get backgroundColor =>${_backgroundColor()};
 
-$_foregroundColor
+  @override
+  MaterialStateProperty<Color?>? get foregroundColor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled))
+        return ${componentColor('$tokenGroup.disabled.label-text')};
+      return ${componentColor('$tokenGroup.label-text')};
+    });
 
-$_overlayColor
+  @override
+  MaterialStateProperty<Color?>? get overlayColor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered))
+        return ${componentColor('$tokenGroup.hover.state-layer')};
+      if (states.contains(MaterialState.focused))
+        return ${componentColor('$tokenGroup.focus.state-layer')};
+      if (states.contains(MaterialState.pressed))
+        return ${componentColor('$tokenGroup.pressed.state-layer')};
+      return null;
+    });
 
+${tokens.containsKey("$tokenGroup.container.shadow-color") ? '''
   @override
   MaterialStateProperty<Color>? get shadowColor =>
-    ButtonStyleButton.allOrNull<Color>(${color("$tokenGroup.container.shadow-color")});
+    ButtonStyleButton.allOrNull<Color>(${color("$tokenGroup.container.shadow-color")});''' : '''
+  // No default shadow color'''}
 
+${tokens.containsKey("$tokenGroup.container.surface-tint-layer.color") ? '''
   @override
   MaterialStateProperty<Color>? get surfaceTintColor =>
-    ButtonStyleButton.allOrNull<Color>(${color("$tokenGroup.container.surface-tint-layer.color")});
-
-$_elevation
+    ButtonStyleButton.allOrNull<Color>(${color("$tokenGroup.container.surface-tint-layer.color")});''' : '''
+  // No default surface tint color'''}
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding {
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+  MaterialStateProperty<double>? get elevation =>${_elevation()};
+
+  @override
+  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(ButtonStyleButton.scaledPadding(
       const EdgeInsets.symmetric(horizontal: 16),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
-    );
-
-    return ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(scaledPadding);
-  }
+    ));
 
   @override
   MaterialStateProperty<Size>? get minimumSize =>
-    ButtonStyleButton.allOrNull<Size>(const Size(64, ${tokens["$tokenGroup.container.height"]}));
+    ButtonStyleButton.allOrNull<Size>(const Size(64.0, ${tokens["$tokenGroup.container.height"]}));
 
-  @override
-  MaterialStateProperty<Size>? get fixedSize =>
-    ButtonStyleButton.allOrNull<Size>(null);
+  // No default fixedSize
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>
     ButtonStyleButton.allOrNull<Size>(Size.infinite);
 
-$_side
+${tokens.containsKey("$tokenGroup.outline.color") ? '''
+  @override
+  MaterialStateProperty<BorderSide>? get side =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled))
+      return ${border("$tokenGroup.disabled.outline")};
+    return ${border("$tokenGroup.outline")};
+  });''' : '''
+  // No default side'''}
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
     ButtonStyleButton.allOrNull<OutlinedBorder>(${shape("$tokenGroup.container")});
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled))
         return SystemMouseCursors.basic;
-      }
       return SystemMouseCursors.click;
     });
-  }
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
 
   @override
   MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
-
-  @override
-  Duration? get animationDuration => kThemeChangeDuration;
-
-  @override
-  bool? get enableFeedback => true;
-
-  @override
-  AlignmentGeometry? get alignment => Alignment.center;
 
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;

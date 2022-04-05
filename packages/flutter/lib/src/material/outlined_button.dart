@@ -395,7 +395,12 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
 
 // Generated version v0_92
 class _TokenDefaultsM3 extends ButtonStyle {
-  _TokenDefaultsM3(this.context);
+  _TokenDefaultsM3(this.context)
+   : super(
+       animationDuration: kThemeChangeDuration,
+       enableFeedback: true,
+       alignment: Alignment.center,
+     );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -408,115 +413,78 @@ class _TokenDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get backgroundColor =>
     ButtonStyleButton.allOrNull<Color>(Colors.transparent);
 
-  static MaterialStateProperty<Color?>? foregroundColorFor(Color? enabled, Color? disabled) {
-    return (enabled == null && disabled == null)
-      ? null
-      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled))
-            return disabled?.withOpacity(0.38);
-          return enabled;
-        });
-  }
+  @override
+  MaterialStateProperty<Color?>? get foregroundColor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled))
+        return _colors.onSurface.withOpacity(0.38);
+      return _colors.primary;
+    });
 
   @override
-  MaterialStateProperty<Color?>? get foregroundColor {
-    return foregroundColorFor(_colors.primary, _colors.onSurface);
-  }
+  MaterialStateProperty<Color?>? get overlayColor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered))
+        return _colors.primary.withOpacity(0.08);
+      if (states.contains(MaterialState.focused))
+        return _colors.primary.withOpacity(0.12);
+      if (states.contains(MaterialState.pressed))
+        return _colors.primary.withOpacity(0.12);
+      return null;
+    });
 
-  static MaterialStateProperty<Color?>? overlayColorFor(Color? hover, Color? focus, Color? pressed) {
-    return (hover == null && focus == null)
-      ? null
-      : MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.hovered))
-            return hover?.withOpacity(0.08);
-          else if (states.contains(MaterialState.focused))
-            return focus?.withOpacity(0.12);
-          else if (states.contains(MaterialState.pressed))
-            return pressed?.withOpacity(0.12);
-          else
-            return null;
-        });
-  }
+  // No default shadow color
 
-  @override
-  MaterialStateProperty<Color?>? get overlayColor {
-    return overlayColorFor(_colors.primary, _colors.primary, _colors.primary);
-  }
-
-  @override
-  MaterialStateProperty<Color>? get shadowColor =>
-    ButtonStyleButton.allOrNull<Color>(null);
-
-  @override
-  MaterialStateProperty<Color>? get surfaceTintColor =>
-    ButtonStyleButton.allOrNull<Color>(null);
+  // No default surface tint color
 
   @override
   MaterialStateProperty<double>? get elevation =>
     ButtonStyleButton.allOrNull<double>(0.0);
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding {
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(ButtonStyleButton.scaledPadding(
       const EdgeInsets.symmetric(horizontal: 16),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
       MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
-    );
-
-    return ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(scaledPadding);
-  }
+    ));
 
   @override
   MaterialStateProperty<Size>? get minimumSize =>
-    ButtonStyleButton.allOrNull<Size>(const Size(64, 40.0));
+    ButtonStyleButton.allOrNull<Size>(const Size(64.0, 40.0));
 
-  @override
-  MaterialStateProperty<Size>? get fixedSize =>
-    ButtonStyleButton.allOrNull<Size>(null);
+  // No default fixedSize
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>
     ButtonStyleButton.allOrNull<Size>(Size.infinite);
 
   @override
-  MaterialStateProperty<BorderSide>? get side {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return BorderSide(color: _colors.onSurface.withOpacity(0.12));
-      }
-      return BorderSide(color: _colors.outline);
-    });
-  }
+  MaterialStateProperty<BorderSide>? get side =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled))
+      return BorderSide(color: _colors.onSurface.withOpacity(0.12));
+    return BorderSide(color: _colors.outline);
+  });
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
     ButtonStyleButton.allOrNull<OutlinedBorder>(const StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled))
         return SystemMouseCursors.basic;
-      }
       return SystemMouseCursors.click;
     });
-  }
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
 
   @override
   MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
-
-  @override
-  Duration? get animationDuration => kThemeChangeDuration;
-
-  @override
-  bool? get enableFeedback => true;
-
-  @override
-  AlignmentGeometry? get alignment => Alignment.center;
 
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
