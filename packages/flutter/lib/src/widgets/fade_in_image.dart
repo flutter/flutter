@@ -467,6 +467,7 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
        assert(fadeOutCurve != null),
        assert(fadeInDuration != null),
        assert(fadeInCurve != null),
+       assert(!wasSynchronouslyLoaded || isTargetLoaded),
        super(key: key, duration: fadeInDuration + fadeOutDuration);
 
   final Widget target;
