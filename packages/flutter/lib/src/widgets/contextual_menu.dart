@@ -1,4 +1,3 @@
-import 'dart:collection' show LinkedHashMap;
 import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
@@ -18,6 +17,11 @@ import 'text_selection.dart';
 import 'ticker_provider.dart';
 
 /// A function that builds a widget to use as a contextual menu.
+///
+/// See also:
+///
+///  * [TextSelectionToolbarBuilder], which is a specific case of this for
+///    building text selection toolbars.
 typedef ContextualMenuBuilder = Widget Function(BuildContext, Offset, Offset?);
 
 // TODO(justinmc): Figure out all the platforms and nested packages.
@@ -151,6 +155,8 @@ class ContextualMenuController {
   }
 }
 
+// TODO(justinmc): How does the user create a buttondata when they can't create
+// a type?
 /// The buttons that can appear in a contextual menu by default.
 enum DefaultContextualMenuButtonType {
   /// A button that cuts the current text selection.
@@ -166,6 +172,7 @@ enum DefaultContextualMenuButtonType {
   selectAll,
 }
 
+// TODO(justinmc): Make `label` a method that uses the current platform.
 /// The type and callback for the available default contextual menu buttons.
 @immutable
 class ContextualMenuButtonData {
@@ -195,22 +202,30 @@ class ContextualMenuButtonData {
   int get hashCode => Object.hash(onPressed, type);
 }
 
-/// A builder function that builds a toolbar given the default [buttonDatas].
+/// A builder function that builds a contextual menu given a list of
+/// [ContextualMenuButtonData]s representing its children.
 ///
 /// See also:
 ///
-///   * [TextSelectionToolbarButtons], which receives this as a parameter.
+///   * [TextSelectionToolbarButtonDatasBuilder], which receives this as a
+///     parameter.
 typedef ToolbarButtonWidgetBuilder = Widget Function(
   BuildContext context,
-  LinkedHashMap<DefaultContextualMenuButtonType, ContextualMenuButtonData> buttonDatas,
+  List<ContextualMenuButtonData> buttonDatas,
 );
 
-// TODO(justinmc): Move this to its own file once the name is finalized.
-// TODO(justinmc): What about the general contextualmenu case?
-/// The default buttons for [TextSelectionToolbar].
-class TextSelectionToolbarButtons extends StatefulWidget {
-  /// Creates an instance of [TextSelectionToolbarButtons].
-  const TextSelectionToolbarButtons({
+
+/// Calls [builder] with the [ContextualMenuButtonData]s representing the
+/// button in this platform's default text selection menu.
+///
+/// See also:
+///
+/// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
+///   given [ContextualMenuButtonData]s.
+/// * [DefaultTextSelectionToolbar], which builds the toolbar itself.
+class TextSelectionToolbarButtonDatasBuilder extends StatefulWidget {
+  /// Creates an instance of [TextSelectionToolbarButtonDatasBuilder].
+  const TextSelectionToolbarButtonDatasBuilder({
     Key? key,
     required this.builder,
     required this.editableTextState,
@@ -222,10 +237,10 @@ class TextSelectionToolbarButtons extends StatefulWidget {
   final EditableTextState editableTextState;
 
   @override
-  _TextSelectionToolbarButtonsState createState() => _TextSelectionToolbarButtonsState();
+  State<TextSelectionToolbarButtonDatasBuilder> createState() => _TextSelectionToolbarButtonDatasBuilderState();
 }
 
-class _TextSelectionToolbarButtonsState extends State<TextSelectionToolbarButtons> with TickerProviderStateMixin {
+class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionToolbarButtonDatasBuilder> with TickerProviderStateMixin {
   ClipboardStatusNotifier? get _clipboardStatus =>
       widget.editableTextState.clipboardStatus;
 
@@ -307,7 +322,7 @@ class _TextSelectionToolbarButtonsState extends State<TextSelectionToolbarButton
   }
 
   @override
-  void didUpdateWidget(TextSelectionToolbarButtons oldWidget) {
+  void didUpdateWidget(TextSelectionToolbarButtonDatasBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_clipboardStatus != oldWidget.editableTextState.clipboardStatus) {
       _clipboardStatus?.addListener(_onChangedClipboardStatus);
@@ -338,31 +353,29 @@ class _TextSelectionToolbarButtonsState extends State<TextSelectionToolbarButton
     // Determine which buttons will appear so that the order and total number is
     // known. A button's position in the menu can slightly affect its
     // appearance.
-    final LinkedHashMap<DefaultContextualMenuButtonType, ContextualMenuButtonData> buttonDatas =
-        LinkedHashMap<DefaultContextualMenuButtonType, ContextualMenuButtonData>.of(
-            <DefaultContextualMenuButtonType, ContextualMenuButtonData>{
-              if (_cutEnabled)
-                DefaultContextualMenuButtonType.cut: ContextualMenuButtonData(
-                  onPressed: _handleCut,
-                  type: DefaultContextualMenuButtonType.cut,
-                ),
-              if (_copyEnabled)
-                DefaultContextualMenuButtonType.copy: ContextualMenuButtonData(
-                  onPressed: _handleCopy,
-                  type: DefaultContextualMenuButtonType.copy,
-                ),
-              if (_pasteEnabled
-                  && _clipboardStatus?.value == ClipboardStatus.pasteable)
-                DefaultContextualMenuButtonType.paste: ContextualMenuButtonData(
-                  onPressed: _handlePaste,
-                  type: DefaultContextualMenuButtonType.paste,
-                ),
-              if (_selectAllEnabled)
-                DefaultContextualMenuButtonType.selectAll: ContextualMenuButtonData(
-                  onPressed: _handleSelectAll,
-                  type: DefaultContextualMenuButtonType.selectAll,
-                ),
-            });
+    final List<ContextualMenuButtonData> buttonDatas = <ContextualMenuButtonData>[
+      if (_cutEnabled)
+        ContextualMenuButtonData(
+          onPressed: _handleCut,
+          type: DefaultContextualMenuButtonType.cut,
+        ),
+      if (_copyEnabled)
+        ContextualMenuButtonData(
+          onPressed: _handleCopy,
+          type: DefaultContextualMenuButtonType.copy,
+        ),
+      if (_pasteEnabled
+          && _clipboardStatus?.value == ClipboardStatus.pasteable)
+        ContextualMenuButtonData(
+          onPressed: _handlePaste,
+          type: DefaultContextualMenuButtonType.paste,
+        ),
+      if (_selectAllEnabled)
+        ContextualMenuButtonData(
+          onPressed: _handleSelectAll,
+          type: DefaultContextualMenuButtonType.selectAll,
+        ),
+    ];
 
     // If there is no option available, build an empty widget.
     if (buttonDatas.isEmpty) {

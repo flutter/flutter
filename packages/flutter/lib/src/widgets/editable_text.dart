@@ -1403,7 +1403,7 @@ class EditableText extends StatefulWidget {
   ///
   ///  * [_PlatformTextSelectionControlsToolbar], which is built by default.
   /// {@endtemplate}
-  final ContextualMenuBuilder? buildContextualMenu;
+  final TextSelectionToolbarBuilder? buildContextualMenu;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -3380,7 +3380,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return child;
     }
     return InheritedContextualMenu(
-      buildMenu: widget.buildContextualMenu!,
+      buildMenu: (BuildContext context, Offset primaryAnchor, Offset? secondaryAnchor) {
+        return widget.buildContextualMenu!(context, this, primaryAnchor, secondaryAnchor);
+      },
       child: Builder(
         builder: (BuildContext context) {
           _contextualMenuContext = context;
@@ -4609,3 +4611,11 @@ _Throttled<T> _throttle<T>({
     return timer!;
   };
 }
+
+/// A function that builds a widget to use as the text selection toolbar.
+///
+/// See also:
+///
+///  * [ContextualMenuBuilder], which is the generic type for any contextual
+///    menu builder, not just for the text selection toolbar.
+typedef TextSelectionToolbarBuilder = Widget Function(BuildContext, EditableTextState, Offset, Offset?);
