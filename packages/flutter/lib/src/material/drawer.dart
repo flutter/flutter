@@ -9,6 +9,7 @@ import 'colors.dart';
 import 'debug.dart';
 import 'drawer_theme.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
@@ -143,6 +144,7 @@ class Drawer extends StatelessWidget {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.width,
     this.child,
     this.semanticLabel,
   }) : assert(elevation == null || elevation >= 0.0),
@@ -170,6 +172,12 @@ class Drawer extends StatelessWidget {
   /// If this is null, then [DrawerThemeData.shape] is used. If that
   /// is also null, then it falls back to [Material]'s default.
   final ShapeBorder? shape;
+
+  /// The width of the drawer.
+  ///
+  /// If this is null, then [DrawerThemeData.width] is used. If that is also
+  /// null, then it falls back to the Material spec's default (304.0).
+  final double? width;
 
   /// The widget below this widget in the tree.
   ///
@@ -211,7 +219,7 @@ class Drawer extends StatelessWidget {
       explicitChildNodes: true,
       label: label,
       child: ConstrainedBox(
-        constraints: const BoxConstraints.expand(width: _kWidth),
+        constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? _kWidth),
         child: Material(
           color: backgroundColor ?? drawerTheme.backgroundColor,
           elevation: elevation ?? drawerTheme.elevation ?? 16.0,

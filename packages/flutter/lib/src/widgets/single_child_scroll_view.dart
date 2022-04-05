@@ -679,6 +679,12 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   }
 
   @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('offset', _paintOffset));
+  }
+
+  @override
   Rect describeSemanticsClip(RenderObject child) {
     assert(axis != null);
     switch (axis) {

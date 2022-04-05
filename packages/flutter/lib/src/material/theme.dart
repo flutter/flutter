@@ -63,7 +63,7 @@ class Theme extends StatelessWidget {
   /// [MaterialLocalizations], the returned data is localized according to the
   /// nearest available [MaterialLocalizations].
   ///
-  /// Defaults to [new ThemeData.fallback] if there is no [Theme] in the given
+  /// Defaults to [ThemeData.fallback] if there is no [Theme] in the given
   /// build context.
   ///
   /// Typical usage is as follows:

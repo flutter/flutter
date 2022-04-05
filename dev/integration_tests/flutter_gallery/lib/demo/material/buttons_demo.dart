@@ -46,7 +46,7 @@ const String _actionText =
 const String _actionCode = 'buttons_action';
 
 class ButtonsDemo extends StatefulWidget {
-  const ButtonsDemo({Key? key}) : super(key: key);
+  const ButtonsDemo({super.key});
 
   static const String routeName = '/material/buttons';
 

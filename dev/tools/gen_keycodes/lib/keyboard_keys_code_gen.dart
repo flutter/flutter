@@ -49,7 +49,7 @@ class SynonymKeyInfo {
 /// Generates the keyboard_key.dart based on the information in the key data
 /// structure given to it.
 class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
-  KeyboardKeysCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData) : super(keyData, logicalData);
+  KeyboardKeysCodeGenerator(super.keyData, super.logicalData);
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {

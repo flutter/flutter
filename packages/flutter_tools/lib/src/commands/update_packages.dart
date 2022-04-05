@@ -1082,11 +1082,11 @@ class PubspecChecksum extends PubspecLine {
 /// A header, e.g. "dependencies:".
 class PubspecHeader extends PubspecLine {
   PubspecHeader(
-    String line,
+    super.line,
     this.section, {
     this.name,
     this.value,
-  }) : super(line);
+  });
 
   /// The section of the pubspec where the parse [line] appears.
   final Section section;
@@ -1163,15 +1163,14 @@ class PubspecHeader extends PubspecLine {
 /// A dependency, as represented by a line (or two) from a pubspec.yaml file.
 class PubspecDependency extends PubspecLine {
   PubspecDependency(
-    String line,
+    super.line,
     this.name,
     this.suffix, {
     required this.isTransitive,
     required DependencyKind kind,
     required this.version,
     required this.sourcePath,
-  }) : _kind = kind,
-       super(line);
+  }) : _kind = kind;
 
   static PubspecDependency? parse(String line, { required String filename }) {
     // We recognize any line that:

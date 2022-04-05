@@ -26,10 +26,10 @@ class FlutterCache extends Cache {
   /// [artifacts] is configurable for testing.
   FlutterCache({
     required Logger logger,
-    required FileSystem fileSystem,
+    required super.fileSystem,
     required Platform platform,
-    required OperatingSystemUtils osUtils,
-  }) : super(logger: logger, fileSystem: fileSystem, platform: platform, osUtils: osUtils, artifacts: <ArtifactSet>[]) {
+    required super.osUtils,
+  }) : super(logger: logger, platform: platform, artifacts: <ArtifactSet>[]) {
     registerArtifact(MaterialFonts(this));
     registerArtifact(GradleWrapper(this));
     registerArtifact(AndroidGenSnapshotArtifacts(this, platform: platform));
@@ -74,7 +74,7 @@ class PubDependencies extends ArtifactSet {
   }) : _logger = logger,
        _flutterRoot = flutterRoot,
        _pub = pub,
-       super(DevelopmentArtifact.web);
+       super(DevelopmentArtifact.universal);
 
   final String Function() _flutterRoot;
   final Logger _logger;

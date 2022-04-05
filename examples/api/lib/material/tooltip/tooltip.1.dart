@@ -11,7 +11,7 @@ void main() => runApp(const MyApp());
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Tooltip Sample';
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +20,15 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatelessWidget(),
+          child: TooltipSample(),
         ),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class TooltipSample extends StatelessWidget {
+  const TooltipSample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
