@@ -179,8 +179,7 @@ PathBuilder& PathBuilder::AddRect(Rect rect) {
   MoveTo(tl);
   prototype_.AddLinearComponent(tl, tr)
       .AddLinearComponent(tr, br)
-      .AddLinearComponent(br, bl)
-      .AddLinearComponent(bl, tl);
+      .AddLinearComponent(br, bl);
   Close();
 
   return *this;

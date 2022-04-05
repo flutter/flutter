@@ -224,12 +224,27 @@ bool Path::UpdateContourComponentAtIndex(size_t index,
 Path::Polyline Path::CreatePolyline(
     const SmoothingApproximation& approximation) const {
   Polyline polyline;
-  auto collect_points = [&polyline](const std::vector<Point>& collection) {
+
+  std::optional<Point> previous_contour_point;
+  auto collect_points = [&polyline, &previous_contour_point](
+                            const std::vector<Point>& collection) {
+    if (collection.empty()) {
+      return;
+    }
+
     polyline.points.reserve(polyline.points.size() + collection.size());
-    polyline.points.insert(polyline.points.end(), collection.begin(),
-                           collection.end());
+
+    for (const auto& point : collection) {
+      if (previous_contour_point.has_value() &&
+          previous_contour_point.value() == point) {
+        // Slip over duplicate points in the same contour.
+        continue;
+      }
+      previous_contour_point = point;
+      polyline.points.push_back(point);
+    }
   };
-  // for (const auto& component : components_) {
+
   for (size_t component_i = 0; component_i < components_.size();
        component_i++) {
     const auto& component = components_[component_i];
@@ -252,6 +267,7 @@ Path::Polyline Path::CreatePolyline(
         const auto& contour = contours_[component.index];
         polyline.contours.push_back({.start_index = polyline.points.size(),
                                      .is_closed = contour.is_closed});
+        previous_contour_point = std::nullopt;
         collect_points({contour.destination});
         break;
     }
