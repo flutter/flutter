@@ -1113,13 +1113,11 @@ void main() {
       )
     );
 
-    // PaginatedDataTable has two Scrollable Widgets, First one is for DataTable
-    // while second one is meant for Footer.
-
+    // DataTable uses primaryScrollController
     final Scrollable bodyScrollView = tester.widget(find.byType(Scrollable).first);
     expect(bodyScrollView.controller, primaryScrollController);
 
-    // footer scrollview is not attached to controller
+    // Footer does not use primaryScrollController
     final Scrollable footerScrollView = tester.widget(find.byType(Scrollable).last);
     expect(footerScrollView.controller, null);
   });

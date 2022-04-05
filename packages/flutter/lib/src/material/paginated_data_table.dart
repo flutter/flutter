@@ -87,7 +87,7 @@ class PaginatedDataTable extends StatefulWidget {
     required this.source,
     this.checkboxHorizontalMargin,
     this.controller,
-    bool? primary,
+    this.primary=false,
   }) : assert(actions == null || (actions != null && header != null)),
        assert(columns != null),
        assert(dragStartBehavior != null),
@@ -108,11 +108,10 @@ class PaginatedDataTable extends StatefulWidget {
          return true;
        }()),
        assert(source != null),
-       assert(!(controller != null && (primary ?? false)),
+       assert(!(controller != null && primary),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.',
-       ),
-       primary = primary ?? controller == null;
+       );
 
   /// The table card's optional header.
   ///
