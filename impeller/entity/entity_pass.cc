@@ -5,10 +5,12 @@
 #include "impeller/entity/entity_pass.h"
 
 #include "flutter/fml/trace_event.h"
+#include "impeller/base/validation.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/texture.h"
 
 namespace impeller {
 
@@ -78,6 +80,9 @@ std::optional<Rect> EntityPass::GetSubpassCoverage(
   if (!delegate_coverage.has_value()) {
     return entities_coverage;
   }
+  // The delegate coverage hint is in given in local space, so apply the subpass
+  // transformation.
+  delegate_coverage = delegate_coverage->TransformBounds(subpass.xformation_);
 
   // If the delegate tells us the coverage is smaller than it needs to be, then
   // great. OTOH, if the delegate is being wasteful, limit coverage to what is
@@ -103,14 +108,23 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
 }
 
 bool EntityPass::Render(ContentContext& renderer,
-                        RenderPass& parent_pass) const {
+                        RenderPass& parent_pass,
+                        Point position) const {
   TRACE_EVENT0("impeller", "EntityPass::Render");
 
-  for (const auto& entity : entities_) {
+  for (Entity entity : entities_) {
+    if (!position.IsZero()) {
+      // If the pass image is going to be rendered with a non-zero position,
+      // apply the negative translation to entity copies before rendering them
+      // so that they'll end up rendering to the correct on-screen position.
+      entity.SetTransformation(Matrix::MakeTranslation(Vector3(-position)) *
+                               entity.GetTransformation());
+    }
     if (!entity.Render(renderer, parent_pass)) {
       return false;
     }
   }
+
   for (const auto& subpass : subpasses_) {
     if (delegate_->CanElide()) {
       continue;
@@ -118,7 +132,7 @@ bool EntityPass::Render(ContentContext& renderer,
 
     if (delegate_->CanCollapseIntoParentPass()) {
       // Directly render into the parent pass and move on.
-      if (!subpass->Render(renderer, parent_pass)) {
+      if (!subpass->Render(renderer, parent_pass, position)) {
         return false;
       }
       continue;
@@ -178,7 +192,7 @@ bool EntityPass::Render(ContentContext& renderer,
 
     sub_renderpass->SetLabel("OffscreenPass");
 
-    if (!subpass->Render(renderer, *sub_renderpass)) {
+    if (!subpass->Render(renderer, *sub_renderpass, subpass_coverage->origin)) {
       return false;
     }
 
@@ -191,10 +205,17 @@ bool EntityPass::Render(ContentContext& renderer,
     }
 
     Entity entity;
-    entity.SetPath(PathBuilder{}.AddRect(subpass_coverage.value()).TakePath());
+    entity.SetPath(PathBuilder{}
+                       .AddRect(Rect::MakeSize(subpass_coverage->size))
+                       .TakePath());
     entity.SetContents(std::move(offscreen_texture_contents));
     entity.SetStencilDepth(stencil_depth_);
-    entity.SetTransformation(xformation_);
+    // Once we have filters being applied for SaveLayer, some special sauce
+    // may be needed here (or in PaintPassDelegate) to ensure the filter
+    // parameters are transformed by the `xformation_` matrix, while continuing
+    // to apply only the subpass offset to the offscreen texture.
+    entity.SetTransformation(
+        Matrix::MakeTranslation(Vector3(subpass_coverage->origin - position)));
     if (!entity.Render(renderer, parent_pass)) {
       return false;
     }
