@@ -162,8 +162,10 @@ external JsFlutterConfiguration? get _jsConfiguration;
 
 /// The JS bindings for the object that's set as `window.flutterConfiguration`.
 @JS()
-@anonymous
-class JsFlutterConfiguration {
+@staticInterop
+class JsFlutterConfiguration {}
+
+extension JsFlutterConfigurationExtension on JsFlutterConfiguration {
   external String? get canvasKitBaseUrl;
   external bool? get canvasKitForceCpuOnly;
   external bool? get debugShowSemanticsNodes;
