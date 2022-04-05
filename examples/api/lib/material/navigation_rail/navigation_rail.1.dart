@@ -92,7 +92,7 @@ class _NavRailExampleState extends State<NavRailExample> {
                   Text('selectedIndex: $_selectedIndex'),
                   const SizedBox(height: 20),
                   Text('Label type: ${labelType.name}'),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 10),
                   OverflowBar(
                     spacing: 10.0,
                     children: <Widget>[
