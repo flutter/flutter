@@ -779,5 +779,13 @@ TEST_F(EntityTest, SetBlendMode) {
   ASSERT_EQ(entity.GetBlendMode(), Entity::BlendMode::kClear);
 }
 
+TEST_F(EntityTest, ContentsGetBoundsForEmptyPathReturnsZero) {
+  Entity entity;
+  entity.SetContents(std::make_shared<SolidColorContents>());
+  entity.SetPath({});
+  ASSERT_TRUE(entity.GetCoverage()->IsZero());
+  ASSERT_TRUE(entity.GetTransformedPathBounds().IsZero());
+}
+
 }  // namespace testing
 }  // namespace impeller
