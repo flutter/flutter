@@ -232,52 +232,43 @@ Future<Map<String, dynamic>> _getAllCoverage(
     if (isolateRef.isSystemIsolate) {
       continue;
     }
-    vm_service.ScriptList scriptList;
-    try {
-      scriptList = await service.getScripts(isolateRef.id);
-    } on vm_service.SentinelException {
-      continue;
-    }
 
-    final List<Future<void>> futures = <Future<void>>[];
+    // Map from script ID to script objects. We only need the script objects for
+    // the token position to line number mapping, which is only needed in older
+    // versions of the service API, where the report lines flag isn't supported.
+    // When that flag is supported, we use this as a Set, to keep track of which
+    // scripts pass the libraryPredicate (we put null as the values). Once the
+    // minimum supported service API version includes reportLines, switch this
+    // to a set.
     final Map<String, vm_service.Script> scripts = <String, vm_service.Script>{};
-    final Map<String, vm_service.SourceReport> sourceReports = <String, vm_service.SourceReport>{};
-    // For each ScriptRef loaded into the VM, load the corresponding Script and
-    // SourceReport object.
 
-    for (final vm_service.ScriptRef script in scriptList.scripts) {
-      final String libraryUri = script.uri;
-      if (!libraryPredicate(libraryUri)) {
-        continue;
+    vm_service.SourceReport sourceReport = await service.getSourceReport(
+      isolateRef.id,
+      <String>['Coverage'],
+      forceCompile: true,
+      reportLines: reportLines ? true : null,
+    );
+    for (final scriptRef in sourceReport.scripts) {
+      if (libraryPredicate(scriptRef.uri)) {
+        scripts[scriptRef.id] = null;
       }
-      final String scriptId = script.id;
-      final Future<void> getSourceReport = service.getSourceReport(
-        isolateRef.id,
-        <String>['Coverage'],
-        scriptId: scriptId,
-        forceCompile: true,
-        reportLines: reportLines ? true : null,
-      )
-      .then((vm_service.SourceReport report) {
-        sourceReports[scriptId] = report;
-      });
-      if (forceSequential) {
-        await null;
-      }
-      futures.add(getSourceReport);
-      if (reportLines) {
-        continue;
-      }
-      final Future<void> getObject = service
-        .getObject(isolateRef.id, scriptId)
-        .then((vm_service.Obj response) {
-          final vm_service.Script script = response as vm_service.Script;
-          scripts[scriptId] = script;
-        });
-      futures.add(getObject);
     }
-    await Future.wait(futures);
-    _buildCoverageMap(scripts, sourceReports, coverage, reportLines);
+    if (!reportLines) {
+      final List<Future<void>> futures = <Future<void>>[];
+      for (final scriptId in scripts.keys) {
+        if (forceSequential) {
+          await null;
+        }
+        final Future<void> getObject = service
+          .getObject(isolateRef.id, scriptId)
+          .then((vm_service.Obj response) {
+            scripts[scriptId] = response as vm_service.Script;
+          });
+        futures.add(getObject);
+      }
+      await Future.wait(futures);
+    }
+    _buildCoverageMap(scripts, sourceReport, coverage, reportLines);
   }
   return <String, dynamic>{'type': 'CodeCoverage', 'coverage': coverage};
 }
@@ -285,20 +276,19 @@ Future<Map<String, dynamic>> _getAllCoverage(
 // Build a hitmap of Uri -> Line -> Hit Count for each script object.
 void _buildCoverageMap(
   Map<String, vm_service.Script> scripts,
-  Map<String, vm_service.SourceReport> sourceReports,
+  vm_service.SourceReport sourceReport,
   List<Map<String, dynamic>> coverage,
   bool reportLines,
 ) {
   final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
-  for (final String scriptId in sourceReports.keys) {
-    final vm_service.SourceReport sourceReport = sourceReports[scriptId];
-    for (final vm_service.SourceReportRange range in sourceReport.ranges) {
-      final vm_service.SourceReportCoverage coverage = range.coverage;
-      // Coverage reports may sometimes be null for a Script.
-      if (coverage == null) {
-        continue;
-      }
-      final vm_service.ScriptRef scriptRef = sourceReport.scripts[range.scriptIndex];
+  for (final vm_service.SourceReportRange range in sourceReport.ranges) {
+    final vm_service.SourceReportCoverage coverage = range.coverage;
+    // Coverage reports may sometimes be null for a Script.
+    if (coverage == null) {
+      continue;
+    }
+    final vm_service.ScriptRef scriptRef = sourceReport.scripts[range.scriptIndex];
+    if (scripts.containsKey(scriptRef.id)) {
       final String uri = scriptRef.uri;
 
       hitMaps[uri] ??= <int, int>{};
