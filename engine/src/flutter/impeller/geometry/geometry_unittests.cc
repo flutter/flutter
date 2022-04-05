@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 #include "impeller/geometry/geometry_unittests.h"
+
 #include <limits>
+
 #include "flutter/testing/testing.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
@@ -982,11 +984,49 @@ TEST(GeometryTest, PolylineGetContourPointBoundsReturnsCorrectRanges) {
   ASSERT_EQ(b2, 6u);
 }
 
-TEST(GeometryTest, PolylineGetContourOutOfBoundsAborts) {
+TEST(GeometryTest, PathAddRectPolylineHasCorrectContourData) {
+  Path::Polyline polyline = PathBuilder{}
+                                .AddRect(Rect::MakeLTRB(50, 60, 70, 80))
+                                .TakePath()
+                                .CreatePolyline();
+  ASSERT_EQ(polyline.contours.size(), 1u);
+  ASSERT_TRUE(polyline.contours[0].is_closed);
+  ASSERT_EQ(polyline.contours[0].start_index, 0u);
+  ASSERT_EQ(polyline.points.size(), 5u);
+  ASSERT_EQ(polyline.points[0], Point(50, 60));
+  ASSERT_EQ(polyline.points[1], Point(70, 60));
+  ASSERT_EQ(polyline.points[2], Point(70, 80));
+  ASSERT_EQ(polyline.points[3], Point(50, 80));
+  ASSERT_EQ(polyline.points[4], Point(50, 60));
+}
+
+TEST(GeometryTest, PathPolylineDuplicatesAreRemovedForSameContour) {
   Path::Polyline polyline =
-      PathBuilder{}.AddLine({100, 100}, {200, 100}).TakePath().CreatePolyline();
-  ASSERT_EQ(polyline.GetContourPointBounds(0), std::make_tuple(0u, 2u));
-  ASSERT_EQ(polyline.GetContourPointBounds(14), std::make_tuple(2u, 2u));
+      PathBuilder{}
+          .MoveTo({50, 50})
+          .LineTo({50, 50})  // Insert duplicate at beginning of contour.
+          .LineTo({100, 50})
+          .LineTo({100, 50})  // Insert duplicate at contour join.
+          .LineTo({100, 100})
+          .Close()  // Implicitly insert duplicate {50, 50} across contours.
+          .LineTo({0, 50})
+          .LineTo({0, 100})
+          .LineTo({0, 100})  // Insert duplicate at end of contour.
+          .TakePath()
+          .CreatePolyline();
+  ASSERT_EQ(polyline.contours.size(), 2u);
+  ASSERT_EQ(polyline.contours[0].start_index, 0u);
+  ASSERT_TRUE(polyline.contours[0].is_closed);
+  ASSERT_EQ(polyline.contours[1].start_index, 4u);
+  ASSERT_FALSE(polyline.contours[1].is_closed);
+  ASSERT_EQ(polyline.points.size(), 7u);
+  ASSERT_EQ(polyline.points[0], Point(50, 50));
+  ASSERT_EQ(polyline.points[1], Point(100, 50));
+  ASSERT_EQ(polyline.points[2], Point(100, 100));
+  ASSERT_EQ(polyline.points[3], Point(50, 50));
+  ASSERT_EQ(polyline.points[4], Point(50, 50));
+  ASSERT_EQ(polyline.points[5], Point(0, 50));
+  ASSERT_EQ(polyline.points[6], Point(0, 100));
 }
 
 }  // namespace testing
