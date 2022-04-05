@@ -15,9 +15,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: _title,
-      home: NavRailExample(),
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+      home: const NavRailExample(),
     );
   }
 }
@@ -39,50 +40,51 @@ class _NavRailExampleState extends State<NavRailExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
-        children: <Widget>[
-          NavigationRail(
-            selectedIndex: _selectedIndex,
-            groupAlignment: groupAligment,
-            onDestinationSelected: (int index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            labelType: labelType,
-            leading: showLeading ? FloatingActionButton(
-              elevation: 0,
-              onPressed: () {
-                // Add your onPressed code here!
+      body: SafeArea(
+        child: Row(
+          children: <Widget>[
+            NavigationRail(
+              selectedIndex: _selectedIndex,
+              groupAlignment: groupAligment,
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
               },
-              child: const Icon(Icons.add),
+              labelType: labelType,
+              leading: showLeading ? FloatingActionButton(
+                elevation: 0,
+                onPressed: () {
+                  // Add your onPressed code here!
+                },
+                child: const Icon(Icons.add),
               ) : const SizedBox(),
-            trailing: showTrailing ? IconButton(
-              onPressed: () {
-                // Add your onPressed code here!
-              },
-              icon: const Icon(Icons.more_horiz_rounded),
+              trailing: showTrailing ? IconButton(
+                onPressed: () {
+                  // Add your onPressed code here!
+                },
+                icon: const Icon(Icons.more_horiz_rounded),
               ) : const SizedBox(),
-            destinations: const <NavigationRailDestination>[
-              NavigationRailDestination(
-                icon: Icon(Icons.favorite_border),
-                selectedIcon: Icon(Icons.favorite),
-                label: Text('First'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.bookmark_border),
-                selectedIcon: Icon(Icons.book),
-                label: Text('Second'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.star_border),
-                selectedIcon: Icon(Icons.star),
-                label: Text('Third'),
-              ),
-            ],
-          ),
-          const VerticalDivider(thickness: 1, width: 1),
-          // This is the main content.
+              destinations: const <NavigationRailDestination>[
+                NavigationRailDestination(
+                  icon: Icon(Icons.favorite_border),
+                  selectedIcon: Icon(Icons.favorite),
+                  label: Text('First'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.bookmark_border),
+                  selectedIcon: Icon(Icons.book),
+                  label: Text('Second'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.star_border),
+                  selectedIcon: Icon(Icons.star),
+                  label: Text('Third'),
+                ),
+              ],
+            ),
+            const VerticalDivider(thickness: 1, width: 1),
+            // This is the main content.
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -177,7 +179,8 @@ class _NavRailExampleState extends State<NavRailExample> {
                 ],
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
