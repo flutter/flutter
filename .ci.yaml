@@ -254,6 +254,7 @@ targets:
         ["framework","hostonly","shard"]
     runIf:
       - .ci.yaml
+    scheduler: luci
 
   - name: Linux customer_testing
     recipe: flutter/flutter
