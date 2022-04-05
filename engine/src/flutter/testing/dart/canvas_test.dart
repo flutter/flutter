@@ -107,6 +107,10 @@ void testNoCrashes() {
     testCanvas((Canvas canvas) => canvas.skew(double.nan, double.nan));
     testCanvas((Canvas canvas) => canvas.transform(Float64List(16)));
     testCanvas((Canvas canvas) => canvas.translate(double.nan, double.nan));
+    testCanvas((Canvas canvas) => canvas.drawVertices(Vertices(VertexMode.triangles, <Offset>[],
+                                                               textureCoordinates: null,
+                                                               colors: null,
+                                                               indices: <int>[]), BlendMode.screen, paint));
   });
 }
 
