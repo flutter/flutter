@@ -39,8 +39,8 @@ enum class SemanticsAction : int32_t {
   kDidLoseAccessibilityFocus = 1 << 16,
   kCustomAction = 1 << 17,
   kDismiss = 1 << 18,
-  kMoveCursorForwardByWordIndex = 1 << 19,
-  kMoveCursorBackwardByWordIndex = 1 << 20,
+  kMoveCursorForwardByWord = 1 << 19,
+  kMoveCursorBackwardByWord = 1 << 20,
   kSetText = 1 << 21,
 };
 

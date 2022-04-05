@@ -136,15 +136,14 @@ std::string NodeActionsToString(const flutter::SemanticsNode& node) {
           flutter::SemanticsAction::kMoveCursorBackwardByCharacter)) {
     output += "kMoveCursorBackwardByCharacter|";
   }
-  if (node.HasAction(
-          flutter::SemanticsAction::kMoveCursorBackwardByWordIndex)) {
-    output += "kMoveCursorBackwardByWordIndex|";
+  if (node.HasAction(flutter::SemanticsAction::kMoveCursorBackwardByWord)) {
+    output += "kMoveCursorBackwardByWord|";
   }
   if (node.HasAction(flutter::SemanticsAction::kMoveCursorForwardByCharacter)) {
     output += "kMoveCursorForwardByCharacter|";
   }
-  if (node.HasAction(flutter::SemanticsAction::kMoveCursorForwardByWordIndex)) {
-    output += "kMoveCursorForwardByWordIndex|";
+  if (node.HasAction(flutter::SemanticsAction::kMoveCursorForwardByWord)) {
+    output += "kMoveCursorForwardByWord|";
   }
   if (node.HasAction(flutter::SemanticsAction::kPaste)) {
     output += "kPaste|";
