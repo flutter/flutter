@@ -50,6 +50,27 @@ class CupertinoTextSelectionToolbarButtonsBuilder extends StatelessWidget {
   /// children.
   final ContextualMenuFromChildrenBuilder builder;
 
+  /// Returns the default button label String for the button of the given
+  /// [DefaultContextualMenuButtonType].
+  static String _getButtonLabel(ContextualMenuButtonData buttonData, CupertinoLocalizations localizations) {
+    if (buttonData.label != null) {
+      return buttonData.label!;
+    }
+
+    switch (buttonData.type) {
+      case DefaultContextualMenuButtonType.cut:
+        return localizations.cutButtonLabel;
+      case DefaultContextualMenuButtonType.copy:
+        return localizations.copyButtonLabel;
+      case DefaultContextualMenuButtonType.paste:
+        return localizations.pasteButtonLabel;
+      case DefaultContextualMenuButtonType.selectAll:
+        return localizations.selectAllButtonLabel;
+      case DefaultContextualMenuButtonType.custom:
+        return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     switch (defaultTargetPlatform) {
@@ -62,7 +83,7 @@ class CupertinoTextSelectionToolbarButtonsBuilder extends StatelessWidget {
           buttonDatas.map((ContextualMenuButtonData buttonData) {
             return CupertinoTextSelectionToolbarButton.text(
               onPressed: buttonData.onPressed,
-              text: CupertinoTextSelectionToolbarButton.getButtonLabel(buttonData.type, localizations),
+              text: _getButtonLabel(buttonData, localizations),
             );
           }).toList(),
         );
@@ -78,7 +99,7 @@ class CupertinoTextSelectionToolbarButtonsBuilder extends StatelessWidget {
             return CupertinoDesktopTextSelectionToolbarButton.text(
               context: context,
               onPressed: buttonData.onPressed,
-              text: CupertinoTextSelectionToolbarButton.getButtonLabel(buttonData.type, localizations),
+              text: _getButtonLabel(buttonData, localizations),
             );
           }).toList(),
         );

@@ -60,8 +60,11 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
 
   /// Returns the default button label String for the button of the given
   /// [DefaultContextualMenuButtonType].
-  static String getButtonLabel(DefaultContextualMenuButtonType type, CupertinoLocalizations localizations) {
-    switch (type) {
+  static String getButtonLabel(ContextualMenuButtonData buttonData, CupertinoLocalizations localizations) {
+    if (buttonData.label != null) {
+      return buttonData.label!;
+    }
+    switch (buttonData.type) {
       case DefaultContextualMenuButtonType.cut:
         return localizations.cutButtonLabel;
       case DefaultContextualMenuButtonType.copy:
@@ -70,6 +73,8 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
         return localizations.pasteButtonLabel;
       case DefaultContextualMenuButtonType.selectAll:
         return localizations.selectAllButtonLabel;
+      case DefaultContextualMenuButtonType.custom:
+        return '';
     }
   }
 

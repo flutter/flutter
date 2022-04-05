@@ -155,6 +155,7 @@ class ContextualMenuController {
   }
 }
 
+// TODO(justinmc): Now that it contains "custom" and isn't all default, rename?
 // TODO(justinmc): How does the user create a buttondata when they can't create
 // a type?
 /// The buttons that can appear in a contextual menu by default.
@@ -170,7 +171,15 @@ enum DefaultContextualMenuButtonType {
 
   /// A button that selects all the contents of the focused text field.
   selectAll,
+
+  /// Anything other than the default button types.
+  custom,
 }
+
+/// A type that returns the label string for a button.
+///
+/// [BuildContext] is provided to allow the use of localizations.
+typedef LabelGetter = String Function (BuildContext context);
 
 // TODO(justinmc): Make `label` a method that uses the current platform.
 /// The type and callback for the available default contextual menu buttons.
@@ -179,7 +188,8 @@ class ContextualMenuButtonData {
   /// Creates an instance of [ContextualMenuButtonData].
   const ContextualMenuButtonData({
     required this.onPressed,
-    required this.type,
+    this.type = DefaultContextualMenuButtonType.custom,
+    this.label,
   });
 
   /// The callback to be called when the button is pressed.
@@ -188,18 +198,29 @@ class ContextualMenuButtonData {
   /// The type of button this represents.
   final DefaultContextualMenuButtonType type;
 
+  /// The label to display on the button.
+  ///
+  /// If a [type] other than [DefaultContextualMenuButtonType.custom] is given
+  /// and a label is not provided, then the default label for that type for the
+  /// platform will be looked up.
+  final String? label;
+
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
     return other is ContextualMenuButtonData
+        && other.label == label
         && other.onPressed == onPressed
         && other.type == type;
   }
 
   @override
-  int get hashCode => Object.hash(onPressed, type);
+  int get hashCode => Object.hash(label, onPressed, type);
+
+  @override
+  String toString() => 'ContextualMenuButtonData $type, $label';
 }
 
 /// A builder function that builds a contextual menu given a list of
