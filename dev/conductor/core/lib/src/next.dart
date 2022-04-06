@@ -74,12 +74,9 @@ class NextContext extends Context {
   const NextContext({
     required this.autoAccept,
     required this.force,
-    required Checkouts checkouts,
-    required File stateFile,
-  }) : super(
-    checkouts: checkouts,
-    stateFile: stateFile,
-  );
+    required super.checkouts,
+    required super.stateFile,
+  });
 
   final bool autoAccept;
   final bool force;

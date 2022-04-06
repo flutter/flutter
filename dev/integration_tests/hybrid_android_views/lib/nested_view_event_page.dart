@@ -20,7 +20,7 @@ class NestedViewEventPage extends PageWidget {
 }
 
 class NestedViewEventBody extends StatefulWidget {
-  const NestedViewEventBody({Key? key}) : super(key: key);
+  const NestedViewEventBody({super.key});
 
   @override
   State<NestedViewEventBody> createState() => NestedViewEventBodyState();

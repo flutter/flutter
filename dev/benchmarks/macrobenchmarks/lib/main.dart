@@ -35,7 +35,7 @@ const String kMacrobenchmarks = 'Macrobenchmarks';
 void main() => runApp(const MacrobenchmarksApp());
 
 class MacrobenchmarksApp extends StatelessWidget {
-  const MacrobenchmarksApp({Key? key, this.initialRoute = '/'}) : super(key: key);
+  const MacrobenchmarksApp({super.key, this.initialRoute = '/'});
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +77,7 @@ class MacrobenchmarksApp extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
