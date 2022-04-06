@@ -57,7 +57,10 @@ String? platformToSubdirectoryPrefix(SupportedPlatform platform) {
       return 'web';
     }
     case SupportedPlatform.windows: {
-      return 'windowsuwp';
+      return 'windows';
+    }
+    case SupportedPlatform.windowsuwp: {
+      return 'winuwp';
     }
     case SupportedPlatform.fuchsia: {
       return 'fuchsia';

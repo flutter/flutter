@@ -126,7 +126,6 @@ class MigrateStartCommand extends FlutterCommand {
         ));
       }
     }
-    print(platforms!);
 
     final MigrateResult? migrateResult = await computeMigration(
       verbose: _verbose,

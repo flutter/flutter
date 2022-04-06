@@ -155,7 +155,7 @@ class MigrateUtils {
         );
       }
     }
-    checkForErrors(result, commandDescription: '${flutterBinPath}flutter ${cmdArgs.join(' ')}');
+    checkForErrors(result, commandDescription: '${flutterBinPath}flutter ${cmdArgs.join(' ')}', silent: true);
 
     if (legacyNameParameter) {
       return globals.fs.path.join(outputDirectory, name);

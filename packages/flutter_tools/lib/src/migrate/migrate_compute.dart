@@ -177,7 +177,7 @@ Future<MigrateResult?> computeMigration({
     logger: logger,
   );
 
-  Set<String?> blacklistPrefixes = <String?>{};
+  final Set<String?> blacklistPrefixes = <String?>{};
   platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
   SupportedPlatform.values.forEach((v) => blacklistPrefixes.add(platformToSubdirectoryPrefix(v)));
   platforms!.forEach((v) => blacklistPrefixes.remove(platformToSubdirectoryPrefix(v)));
