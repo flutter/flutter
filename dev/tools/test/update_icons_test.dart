@@ -40,4 +40,22 @@ void main() {
   test('no double underscores', () {
     expect(Icon.generateFlutterId('abc__123'), 'abc_123');
   });
+
+  test('usage string is correct', () {
+    expect(
+      Icon(const MapEntry<String, String>('abc', '')).usage,
+      'Icon(Icons.abc),',
+    );
+  });
+
+  test('usage string is correct with replacement', () {
+    expect(
+      Icon(const MapEntry<String, String>('123', '')).usage,
+      'Icon(Icons.onetwothree),',
+    );
+    expect(
+      Icon(const MapEntry<String, String>('123_rounded', '')).usage,
+      'Icon(Icons.onetwothree_rounded),',
+    );
+  });
 }

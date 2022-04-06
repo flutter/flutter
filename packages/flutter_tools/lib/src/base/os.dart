@@ -372,10 +372,16 @@ class _MacOSUtils extends _PosixUtils {
         _processUtils.runSync(<String>['sw_vers', '-productName']),
         _processUtils.runSync(<String>['sw_vers', '-productVersion']),
         _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+        _processUtils.runSync(<String>['uname', '-m']),
       ];
       if (results.every((RunResult result) => result.exitCode == 0)) {
+        String osName = getNameForHostPlatform(hostPlatform);
+        // If the script is running in Rosetta, "uname -m" will return x86_64.
+        if (hostPlatform == HostPlatform.darwin_arm && results[3].stdout.contains('x86_64')) {
+          osName = '$osName (Rosetta)';
+        }
         _name =
-            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} ${getNameForHostPlatform(hostPlatform)}';
+            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} $osName';
       }
       _name ??= super.name;
     }
