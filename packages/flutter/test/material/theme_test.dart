@@ -265,6 +265,65 @@ void main() {
     expect(materials[1].color, green); // dialog scaffold
   });
 
+  testWidgets('Scaffold inherits ColorScheme.background', (WidgetTester tester) async {
+    const Color seedColor = Color(0xFF00FF00);
+    const Color backgroundColor = Color(0xFF0000ff);
+
+    Widget buildApp({Color? seedColor, ColorScheme? colorScheme, Color? background}) {
+      return MaterialApp(
+        theme: ThemeData(colorSchemeSeed: seedColor, colorScheme: colorScheme),
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const Scaffold(
+                          body: SizedBox(
+                            width: 200.0,
+                            height: 200.0,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('SHOW'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(seedColor: seedColor));
+
+    await tester.tap(find.text('SHOW'));
+    await tester.pump(const Duration(seconds: 1));
+
+    List<Material> materials = tester.widgetList<Material>(find.byType(Material)).toList();
+    expect(materials.length, equals(2));
+    expect(materials[0].color, const Color(0xfffcfcf6)); // app scaffold
+    expect(materials[1].color, const Color(0xfffcfcf6)); // dialog scaffold
+
+    await tester.pumpWidget(buildApp(colorScheme: const ColorScheme.light().copyWith(background: backgroundColor)));
+    await tester.pumpAndSettle();
+    materials = tester.widgetList<Material>(find.byType(Material)).toList();
+    expect(materials.length, equals(2));
+    expect(materials[0].color, backgroundColor); // app scaffold
+    expect(materials[1].color, backgroundColor); // dialog scaffold
+
+    await tester.pumpWidget(buildApp(colorScheme: ColorScheme.fromSeed(seedColor: seedColor, background: backgroundColor)));
+    await tester.pumpAndSettle();
+    materials = tester.widgetList<Material>(find.byType(Material)).toList();
+    expect(materials.length, equals(2));
+    expect(materials[0].color, backgroundColor); // app scaffold
+    expect(materials[1].color, backgroundColor); // dialog scaffold
+  });
+
   testWidgets('IconThemes are applied', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

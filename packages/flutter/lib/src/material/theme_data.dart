@@ -460,7 +460,9 @@ class ThemeData with Diagnosticable {
     final bool isDark = effectiveBrightness == Brightness.dark;
     if (colorSchemeSeed != null) {
       colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: effectiveBrightness);
+    }
 
+    if (colorScheme != null) {
       // For surfaces that use primary color in light themes and surface color in dark
       final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
       final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
