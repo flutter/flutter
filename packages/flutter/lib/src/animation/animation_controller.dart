@@ -751,7 +751,8 @@ class AnimationController extends Animation<double>
   }
 
   /// Update the simulation without restarting the animation.
-  /// [simulation] will be replace current simulation.
+  ///
+  /// The current simulation will be replaced with the provided [Simulation].
   void updateSimulation(Simulation simulation){
     assert(isAnimating);
     _simulation = simulation;

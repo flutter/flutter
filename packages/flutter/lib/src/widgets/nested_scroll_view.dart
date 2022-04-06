@@ -686,9 +686,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     );
   }
 
-  /// This method is called by [BallisticScrollActivity.applyNewDimensions].
-  /// It doesn't affect NestedScrollView. So this method uses an empty implementation.
-  /// Maybe call this method in [_NestedOuterBallisticScrollActivity] and [_NestedInnerBallisticScrollActivity]
+  // Unsupported
   // TODO(MxSoul): see https://github.com/flutter/flutter/issues/100748
   @override
   Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {
@@ -1349,9 +1347,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     ));
   }
 
-  /// This method is called by [BallisticScrollActivity.applyNewDimensions].
-  /// It doesn't affect NestedScrollView. So this method uses an empty implementation.
-  /// Maybe call this method in [_NestedOuterBallisticScrollActivity] and [_NestedInnerBallisticScrollActivity]
+  // Unsupported
   // TODO(MxSoul): see https://github.com/flutter/flutter/issues/100748
   @override
   Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {

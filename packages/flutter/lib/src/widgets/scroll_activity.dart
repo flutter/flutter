@@ -50,10 +50,9 @@ abstract class ScrollActivityDelegate {
   /// given velocity.
   void goBallistic(double velocity);
 
-  /// Update the ballistic animation when layout is change.
-  /// Instead of restarting the animation while fling.
-  /// [initVelocity] is the velocity when ballistic animation start
-  /// [initPosition] is the position when ballistic animation start
+  /// Update the ballistic animation instead of restarting  it, for example as the result of a layout change after a flinging gesture.
+  ///
+  /// The [initVelocity] and [initPosition] refer to the starting values of the new ballistic animation.
   Simulation? updateBallisticAnimation(double initVelocity, double initPosition);
 }
 
