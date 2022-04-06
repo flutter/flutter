@@ -6,7 +6,8 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
-#include "impeller/base/base.h"
+#include "impeller/base/strings.h"
+#include "impeller/base/validation.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline_descriptor.h"

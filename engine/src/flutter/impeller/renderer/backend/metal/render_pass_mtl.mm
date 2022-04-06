@@ -7,7 +7,7 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "impeller/base/base.h"
+#include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/metal/device_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/pipeline_mtl.h"

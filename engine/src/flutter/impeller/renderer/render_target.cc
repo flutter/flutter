@@ -4,7 +4,8 @@
 
 #include "impeller/renderer/render_target.h"
 
-#include "impeller/base/base.h"
+#include "impeller/base/strings.h"
+#include "impeller/base/validation.h"
 #include "impeller/renderer/allocator.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/texture.h"
