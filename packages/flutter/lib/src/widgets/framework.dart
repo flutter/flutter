@@ -14,6 +14,7 @@ import 'debug.dart';
 import 'focus_manager.dart';
 import 'inherited_model.dart';
 import 'notification_listener.dart';
+import 'widget_inspector.dart';
 
 export 'package:flutter/foundation.dart' show
   factory,
@@ -53,23 +54,6 @@ class _DebugOnly {
 const _DebugOnly _debugOnly = _DebugOnly();
 
 // KEYS
-
-/// A key that is only equal to itself.
-///
-/// This cannot be created with a const constructor because that implies that
-/// all instantiated keys would be the same instance and therefore not be unique.
-class UniqueKey extends LocalKey {
-  /// Creates a key that is equal only to itself.
-  ///
-  /// The key cannot be created with a const constructor because that implies
-  /// that all instantiated keys would be the same instance and therefore not
-  /// be unique.
-  // ignore: prefer_const_constructors_in_immutables , never use const for this class
-  UniqueKey();
-
-  @override
-  String toString() => '[#${shortHash(this)}]';
-}
 
 /// A key that takes its identity from the object used as its value.
 ///
@@ -2657,10 +2641,13 @@ class BuildOwner {
           }
           return true;
         }());
-        if (!kReleaseMode && debugProfileBuildsEnabled) {
+        final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(element.widget);
+        if (isTimelineTracked) {
           Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
           assert(() {
-            debugTimelineArguments = element.widget.toDiagnosticsNode().toTimelineArguments();
+            if (kDebugMode) {
+              debugTimelineArguments = element.widget.toDiagnosticsNode().toTimelineArguments();
+            }
             return true;
           }());
           Timeline.startSync(
@@ -2685,7 +2672,7 @@ class BuildOwner {
             ],
           );
         }
-        if (!kReleaseMode && debugProfileBuildsEnabled)
+        if (isTimelineTracked)
           Timeline.finishSync();
         index += 1;
         if (dirtyCount < _dirtyElements.length || _dirtyElementsNeedsResorting!) {
@@ -3093,6 +3080,12 @@ class _NotificationNode {
     }
     parent?.dispatchNotification(notification);
   }
+}
+
+bool _isProfileBuildsEnabledFor(Widget widget) {
+  return debugProfileBuildsEnabled ||
+      (debugProfileBuildsEnabledUserWidgets &&
+          debugIsWidgetLocalCreation(widget));
 }
 
 /// An instantiation of a [Widget] at a particular location in the tree.
@@ -3520,10 +3513,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       } else if (hasSameSuperclass && Widget.canUpdate(child.widget, newWidget)) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
-        if (!kReleaseMode && debugProfileBuildsEnabled) {
+        final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(newWidget);
+        if (isTimelineTracked) {
           Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
           assert(() {
-            debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+            if (kDebugMode) {
+              debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+            }
             return true;
           }());
           Timeline.startSync(
@@ -3532,7 +3528,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           );
         }
         child.update(newWidget);
-        if (!kReleaseMode && debugProfileBuildsEnabled)
+        if (isTimelineTracked)
           Timeline.finishSync();
         assert(child.widget == newWidget);
         assert(() {
@@ -3782,10 +3778,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Element inflateWidget(Widget newWidget, Object? newSlot) {
     assert(newWidget != null);
 
-    if (!kReleaseMode && debugProfileBuildsEnabled) {
+    final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(newWidget);
+    if (isTimelineTracked) {
       Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
       assert(() {
-        debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+        if (kDebugMode) {
+          debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+        }
         return true;
       }());
       Timeline.startSync(
@@ -3817,7 +3816,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     newChild.mount(this, newSlot);
     assert(newChild._lifecycleState == _ElementLifecycle.active);
 
-    if (!kReleaseMode && debugProfileBuildsEnabled)
+    if (isTimelineTracked)
       Timeline.finishSync();
 
     return newChild;

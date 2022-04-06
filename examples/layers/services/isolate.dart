@@ -197,7 +197,7 @@ class CalculationManager {
 // This is a StatefulWidget in order to hold the CalculationManager and
 // the AnimationController for the running animation.
 class IsolateExampleWidget extends StatefulWidget {
-  const IsolateExampleWidget({Key? key}) : super(key: key);
+  const IsolateExampleWidget({super.key});
 
   @override
   IsolateExampleState createState() => IsolateExampleState();

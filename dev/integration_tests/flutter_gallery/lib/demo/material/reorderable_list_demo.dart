@@ -18,7 +18,7 @@ enum _ReorderableListType {
 }
 
 class ReorderableListDemo extends StatefulWidget {
-  const ReorderableListDemo({ Key? key }) : super(key: key);
+  const ReorderableListDemo({ super.key });
 
   static const String routeName = '/material/reorderable-list';
 

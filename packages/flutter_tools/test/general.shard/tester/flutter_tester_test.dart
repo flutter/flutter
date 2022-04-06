@@ -147,7 +147,7 @@ void main() {
           '--run-forever',
           '--non-interactive',
           '--enable-dart-profiling',
-          '--packages=.packages',
+          '--packages=.dart_tool/package_config.json',
           '--flutter-assets-dir=/.tmp_rand0/flutter_tester.rand0',
           '/.tmp_rand0/flutter_tester.rand0/flutter-tester-app.dill',
         ],

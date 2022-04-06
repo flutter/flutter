@@ -101,7 +101,7 @@ final Finder backFinder = find.byElementPredicate(
 );
 
 class _LiveWidgetController extends LiveWidgetController {
-  _LiveWidgetController(WidgetsBinding binding) : super(binding);
+  _LiveWidgetController(super.binding);
 
   /// With [frameSync] enabled, Flutter Driver will wait to perform an action
   /// until there are no pending frames in the app under test.

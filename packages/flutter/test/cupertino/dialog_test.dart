@@ -12,6 +12,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -1440,6 +1441,51 @@ void main() {
       expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(390.0, 600.0));
     });
+  });
+
+  testWidgets('Hovering over Cupertino alert dialog action updates cursor to clickable on Web', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: RepaintBoundary(
+              child: CupertinoAlertDialog(
+                title: const Text('Title'),
+                content: const Text('text'),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    onPressed: () {},
+                    child: const Text('NO'),
+                  ),
+                  CupertinoDialogAction(
+                    onPressed: () {},
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    final Offset dialogAction = tester.getCenter(find.text('OK'));
+    await gesture.moveTo(dialogAction);
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 }
 

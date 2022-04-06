@@ -399,7 +399,7 @@ Widget _boilerplate(Widget child) {
 }
 
 class SimpleCustomSemanticsWidget extends LeafRenderObjectWidget {
-  const SimpleCustomSemanticsWidget(this.label, {Key? key}) : super(key: key);
+  const SimpleCustomSemanticsWidget(this.label, {super.key});
 
   final String label;
 
@@ -431,9 +431,8 @@ class SimpleCustomSemanticsRenderObject extends RenderBox {
 }
 
 class SimpleGenericWidget<T> extends StatelessWidget {
-  const SimpleGenericWidget({required Widget child, Key? key})
-      : _child = child,
-        super(key: key);
+  const SimpleGenericWidget({required Widget child, super.key})
+      : _child = child;
 
   final Widget _child;
 

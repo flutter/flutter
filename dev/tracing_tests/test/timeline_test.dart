@@ -22,7 +22,7 @@ final Set<String> interestingLabels = <String>{
 };
 
 class TestRoot extends StatefulWidget {
-  const TestRoot({ Key? key }) : super(key: key);
+  const TestRoot({ super.key });
 
   static late final TestRootState state;
 
@@ -110,6 +110,17 @@ void main() {
     expect(args['color'], 'Color(0xffffffff)');
     debugProfileBuildsEnabled = false;
 
+    debugProfileBuildsEnabledUserWidgets = true;
+    await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey(), color: const Color(0xFFFFFFFF))); });
+    events = await fetchInterestingEvents(interestingLabels);
+    expect(
+      events.map<String>(eventToName),
+      <String>['BUILD', 'Placeholder', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
+    );
+    args = (events.where((TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
+    expect(args['color'], 'Color(0xffffffff)');
+    debugProfileBuildsEnabledUserWidgets = false;
+
     debugProfileLayoutsEnabled = true;
     await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey())); });
     events = await fetchInterestingEvents(interestingLabels);
@@ -120,7 +131,7 @@ void main() {
     args = (events.where((TimelineEvent event) => event.json!['name'] == '$RenderCustomPaint').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['creator'], startsWith('CustomPaint'));
     expect(args['creator'], contains('Placeholder'));
-    expect(args['foregroundPainter'], startsWith('_PlaceholderPainter#'));
+    expect(args['painter'], startsWith('_PlaceholderPainter#'));
     debugProfileLayoutsEnabled = false;
 
     debugProfilePaintsEnabled = true;
@@ -133,7 +144,7 @@ void main() {
     args = (events.where((TimelineEvent event) => event.json!['name'] == '$RenderCustomPaint').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['creator'], startsWith('CustomPaint'));
     expect(args['creator'], contains('Placeholder'));
-    expect(args['foregroundPainter'], startsWith('_PlaceholderPainter#'));
+    expect(args['painter'], startsWith('_PlaceholderPainter#'));
     debugProfilePaintsEnabled = false;
 
   }, skip: isBrowser); // [intended] uses dart:isolate and io.

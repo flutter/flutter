@@ -48,8 +48,7 @@ abstract class BaseCodeGenerator {
 
 /// A code generator which also defines platform-based behavior.
 abstract class PlatformCodeGenerator extends BaseCodeGenerator {
-  PlatformCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
-    : super(keyData, logicalData);
+  PlatformCodeGenerator(super.keyData, super.logicalData);
 
   /// Absolute path to the output file.
   ///

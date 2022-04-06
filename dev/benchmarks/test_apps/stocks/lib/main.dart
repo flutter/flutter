@@ -20,7 +20,7 @@ import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
 class StocksApp extends StatefulWidget {
-  const StocksApp({Key? key}) : super(key: key);
+  const StocksApp({super.key});
 
   @override
   StocksAppState createState() => StocksAppState();

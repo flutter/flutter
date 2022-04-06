@@ -117,6 +117,7 @@ class FlutterOptions {
   static const String kInitializeFromDill = 'initialize-from-dill';
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const String kFatalWarnings = 'fatal-warnings';
+  static const String kUseApplicationBinary = 'use-application-binary';
 }
 
 /// flutter command categories for usage.
@@ -606,6 +607,16 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesApplicationBinaryOption() {
+    argParser.addOption(
+      FlutterOptions.kUseApplicationBinary,
+      help: 'Specify a pre-built application binary to use when running. For Android applications, '
+        'this must be the path to an APK. For iOS applications, the path to an IPA. Other device types '
+        'do not yet support prebuilt application binaries.',
+      valueHelp: 'path/to/app.apk',
+    );
+  }
+
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
@@ -945,6 +956,16 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kCodeSizeDirectory,
       help: 'The location to write code size analysis files. If this is not specified, files '
             'are written to a temporary directory under the build directory.'
+    );
+  }
+
+  void addEnableImpellerFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-impeller',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Whether to enable the experimental Impeller rendering engine. '
+              'Impeller is currently only supported on iOS. This flag will '
+              'be ignored when targeting other platforms.',
     );
   }
 

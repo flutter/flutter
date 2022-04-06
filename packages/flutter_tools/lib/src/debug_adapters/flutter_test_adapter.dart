@@ -29,12 +29,12 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
     bool enableAuthCodes = true,
     Logger? logger,
   }) : super(
-          channel,
-          ipv6: ipv6,
-          enableDds: enableDds,
-          enableAuthCodes: enableAuthCodes,
-          logger: logger,
-        );
+    channel,
+    ipv6: ipv6,
+    enableDds: enableDds,
+    enableAuthCodes: enableAuthCodes,
+    logger: logger,
+  );
 
   FileSystem fileSystem;
   Platform platform;
