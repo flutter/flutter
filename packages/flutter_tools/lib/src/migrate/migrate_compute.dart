@@ -78,7 +78,7 @@ bool _skippedMerge(String localPath) {
   return false;
 }
 
-/// Stores a file that has been marked for migraton and metadata about the file.
+/// Stores a file that has been marked for migration and metadata about the file.
 class FilePendingMigration {
   FilePendingMigration(this.localPath, this.file);
   String localPath;
@@ -142,7 +142,7 @@ class MigrateResult {
 ///  - Call `flutter create` with target revision (target is typically current flutter version)
 ///  - Diff base revision generated app with target revision generated app
 ///  - Compute all newly added files between base and target revisions
-///  - Compute merge of all files that are modifed by user and flutter
+///  - Compute merge of all files that are modified by user and flutter
 ///  - Track temp dirs to be deleted
 Future<MigrateResult?> computeMigration({
     bool verbose = false,
@@ -392,7 +392,10 @@ String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion v
     return metadata.versionRevision!;
   }
   // Earliest version of flutter with .metadata: c17099f474675d8066fec6984c242d8b409ae985 (2017)
+  // Flutter 2.0.0: 60bd88df915880d23877bfc1602e8ddcf4c4dd2a
   // Flutter v1.0.0: 5391447fae6209bb21a89e6a5a6583cac1af9b4b
+  //
+  // We fall back on flutter v1.0.0 if we can't figure out anything else about the project.
   return '5391447fae6209bb21a89e6a5a6583cac1af9b4b';
 }
 
