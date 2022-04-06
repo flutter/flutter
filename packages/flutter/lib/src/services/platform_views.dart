@@ -1052,7 +1052,8 @@ class TextureAndroidViewController extends AndroidViewController {
   @override
   void setInitialSize(Size size) {
     assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
-    _initialSize.complete(size);
+    if (!_initialSize.isCompleted)
+      _initialSize.complete(size);
   }
 
   @override
