@@ -147,6 +147,7 @@ class TextFormField extends FormField<String> {
     String? restorationId,
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
+    TextSelectionToolbarBuilder? buildContextualMenu,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -238,6 +239,7 @@ class TextFormField extends FormField<String> {
                scrollController: scrollController,
                enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
                mouseCursor: mouseCursor,
+               buildContextualMenu: buildContextualMenu,
              ),
            );
          },
