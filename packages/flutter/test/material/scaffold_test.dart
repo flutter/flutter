@@ -2303,7 +2303,7 @@ void main() {
       '     AnimatedPhysicalModel\n'
       '     Material\n'
       '     _ScrollMetricsNotificationObserverScope\n'
-      '     NotificationListener<ScrollNotification>\n'
+      '     NotificationListener<ScrollMetricsNotification>\n'
       '     ScrollMetricsNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold\n'
