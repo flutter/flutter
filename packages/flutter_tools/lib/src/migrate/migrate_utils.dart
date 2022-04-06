@@ -19,17 +19,6 @@ import '../globals.dart' as globals;
 class MigrateUtils {
   MigrateUtils();
 
-  /// Creates a temporary directory.
-  ///
-  /// This directory should be deleted after use.
-  static Future<Directory> createTempDirectory(String name) async {
-    final ProcessResult result = await Process.run('mktemp', <String>['-d', '-t', name]);
-    checkForErrors(result);
-    final Directory dir = globals.fs.directory((result.stdout as String).trim());
-    dir.createSync(recursive: true);
-    return dir;
-  }
-
   /// Calls `git diff` on two files and returns the diff as a DiffResult.
   static Future<DiffResult> diffFiles(File one, File two, {String? outputPath}) async {
     if (one.existsSync() && !two.existsSync()) {
@@ -55,20 +44,9 @@ class MigrateUtils {
     return DiffResult(result, outputPath);
   }
 
-  // Returns the parent commit hash.
-  static Future<String> getParentHash(String hash, String workingDirectory) async {
-    final List<String> cmdArgs = <String>['log', '$hash', '-2', '--pretty=%H'];
-    final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: 'git ${cmdArgs.join(' ')}');
-    return (result.stdout as String).trim().split('\n').last;
-  }
-
   // Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
   static Future<bool> cloneFlutter(String revision, String destination, String flutterDirectory) async {
     // Use https url instead of ssh to avoid need to setup ssh on git.
-    final String parentRevision = await getParentHash(revision, flutterDirectory);
-    print(parentRevision);
-    // List<String> cmdArgs = <String>['clone', '--branch=master', '--single-branch', '--shallow-exclude=$revision', 'https://github.com/flutter/flutter.git', destination];
     List<String> cmdArgs = <String>['clone', '--single-branch', '--filter=blob:none', '--shallow-exclude=v1.0.0', 'https://github.com/flutter/flutter.git', destination];
     ProcessResult result = await Process.run('git', cmdArgs);
     checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
@@ -115,12 +93,12 @@ class MigrateUtils {
       cmdArgs.add(outputDirectory);
     }
     ProcessResult result = await Process.run('$flutterBinPath/flutter', ['create', '-h'], workingDirectory: outputDirectory);
-    // print(result.stdout);
     result = await Process.run('$flutterBinPath/flutter', cmdArgs, workingDirectory: outputDirectory);
-    print(result.stderr);
-    String error = result.stderr;
-    // Old versions of the tool does not include the platforms option. In this case, we will just
-    // just call the general create command.
+    final String error = result.stderr;
+
+    // Catch errors due to parameters not existing.
+
+    // Old versions of the tool does not include the platforms option.
     if (error.contains('Could not find an option named "platforms".')) {
       return createFromTemplates(
         flutterBinPath,
