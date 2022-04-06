@@ -21,10 +21,8 @@ import 'theme_data.dart';
 ///
 /// ### This class is obsolete.
 ///
-/// FlatButton and RaisedButton have been replaced by
-/// TextButton and ElevatedButton respectively.
-/// ButtonTheme has been replaced by TextButtonTheme and
-/// ElevatedButtonTheme. The appearance of the
+/// FlatButton has been replaced by TextButton and ButtonTheme has been replaced
+/// by TextButtonTheme. The appearance of the
 /// new widgets can be customized by specifying a [ButtonStyle]
 /// or by creating a one-off style using a `styleFrom` method like
 /// [TextButton.styleFrom]. The original button classes
@@ -38,9 +36,9 @@ import 'theme_data.dart';
 /// MaterialButtons whose [onPressed] and [onLongPress] callbacks are null will be disabled. To have
 /// an enabled button, make sure to pass a non-null value for [onPressed] or [onLongPress].
 ///
-/// Rather than using this class directly, consider using [FlatButton]
-/// or [RaisedButton], which configure this class with
-/// appropriate defaults that match the material design specification.
+/// Rather than using this class directly, consider using [FlatButton], which
+/// configure this class with appropriate defaults that match the material
+/// design specification.
 ///
 /// To create a button directly, without inheriting theme defaults, use
 /// [RawMaterialButton].
@@ -55,7 +53,7 @@ class MaterialButton extends StatelessWidget {
   /// Creates a material button.
   ///
   /// Rather than creating a material button directly, consider using
-  /// [FlatButton] or [RaisedButton]. To create a custom Material button
+  /// [FlatButton]. To create a custom Material button
   /// consider using [RawMaterialButton].
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
@@ -457,8 +455,7 @@ class MaterialButton extends StatelessWidget {
   }
 }
 
-/// The type of [MaterialButton]s created with RaisedButton.icon] and
-/// FlatButton.icon.
+/// The type of [MaterialButton]s created with FlatButton.icon.
 ///
 /// This mixin only exists to give the "label and icon" button widgets a distinct
 /// type for the sake of [ButtonTheme].
