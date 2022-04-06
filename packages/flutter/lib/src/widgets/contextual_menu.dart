@@ -303,8 +303,8 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-      return widget.editableTextState.textEditingValue.text.isNotEmpty
-          && widget.editableTextState.textEditingValue.selection.isCollapsed;
+        return widget.editableTextState.textEditingValue.text.isNotEmpty
+            && widget.editableTextState.textEditingValue.selection.isCollapsed;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
       case TargetPlatform.fuchsia:
@@ -412,5 +412,99 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
     }
 
     return widget.builder(context, buttonDatas);
+  }
+}
+
+/// Shows and hides the contextual menu based on user gestures.
+///
+/// By default, shows the menu on right clicks, and on mobile, long presses too.
+class ContextualMenuGestureDetector extends StatefulWidget {
+  /// Creates an instance of [ContextualMenuGestureDetector].
+  ContextualMenuGestureDetector({
+    required this.child,
+    bool? longPressEnabled,
+    bool? secondaryTapEnabled,
+    Key? key,
+  }) : longPressEnabled = longPressEnabled ?? _longPressEnabled,
+       secondaryTapEnabled = secondaryTapEnabled ?? true,
+       super(key: key);
+
+  /// The child widget that will be listened to for gestures.
+  final Widget child;
+
+  /// True iff long press gestures show the menu.
+  ///
+  /// By default, true for mobile platforms only.
+  final bool longPressEnabled;
+
+  /// True iff right click gestures show the menu.
+  ///
+  /// True by default.
+  final bool secondaryTapEnabled;
+
+  static bool get _longPressEnabled {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return true;
+      case TargetPlatform.macOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return false;
+    }
+  }
+
+  @override
+  State<ContextualMenuGestureDetector> createState() => _ContextualMenuGestureDetectorState();
+}
+
+class _ContextualMenuGestureDetectorState extends State<ContextualMenuGestureDetector> {
+  ContextualMenuController get _contextualMenuController {
+    final ContextualMenuController? state = InheritedContextualMenu.of(context);
+    assert(state != null, 'No ContextualMenuArea found above in the Widget tree.');
+    return state!;
+  }
+
+  Offset? _longPressOffset;
+
+  void _onSecondaryTapUp(TapUpDetails details) {
+    _contextualMenuController.show(context, details.globalPosition);
+  }
+
+  void _onTap() {
+    if (!_contextualMenuController.isVisible) {
+      return;
+    }
+    _contextualMenuController.hide();
+  }
+
+  void _onLongPressStart(LongPressStartDetails details) {
+    _longPressOffset = details.globalPosition;
+  }
+
+  void _onLongPress() {
+    assert(_longPressOffset != null);
+    _show(_longPressOffset!);
+    _longPressOffset = null;
+  }
+
+  void _show(Offset position) {
+    _contextualMenuController.show(context, position);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      // TODO(justinmc): Secondary tapping when the menu is open should fade out
+      // and then fade in to show again at the new location on Mac. On Linux, it
+      // should hide the menu and not change the selection.
+      onSecondaryTapUp: widget.secondaryTapEnabled ? _onSecondaryTapUp : null,
+      onTap: _onTap,
+      onLongPress: widget.longPressEnabled ? _onLongPress : null,
+      onLongPressStart: widget.longPressEnabled ? _onLongPressStart : null,
+      child: widget.child,
+    );
   }
 }
