@@ -33,45 +33,12 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// handlers must be implemented (and the analyzer will list those that have
 /// been omitted).
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 ///
-/// This [StatefulWidget] implements the parts of the [State] and
-/// [WidgetsBindingObserver] protocols necessary to react to application
-/// lifecycle messages. See [didChangeAppLifecycleState].
-///
-/// ```dart
-/// class AppLifecycleReactor extends StatefulWidget {
-///   const AppLifecycleReactor({ Key? key }) : super(key: key);
-///
-///   @override
-///   State<AppLifecycleReactor> createState() => _AppLifecycleReactorState();
-/// }
-///
-/// class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver {
-///   @override
-///   void initState() {
-///     super.initState();
-///     WidgetsBinding.instance.addObserver(this);
-///   }
-///
-///   @override
-///   void dispose() {
-///     WidgetsBinding.instance.removeObserver(this);
-///     super.dispose();
-///   }
-///
-///   late AppLifecycleState _notification;
-///
-///   @override
-///   void didChangeAppLifecycleState(AppLifecycleState state) {
-///     setState(() { _notification = state; });
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Text('Last notification: $_notification');
-///   }
-/// }
+/// This sample shows how to react and keep track of AppLifecycleState changes.
+/// See also [didChangeAppLifecycleState].
+/// 
+/// ** See code in examples/api/lib/widgets/binding/widget_binding_observer.0.dart **
 /// ```
 /// {@end-tool}
 ///
