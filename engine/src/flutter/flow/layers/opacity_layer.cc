@@ -37,7 +37,7 @@ void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
 
 void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "OpacityLayer::Preroll");
-  FML_DCHECK(!GetChildContainer()->layers().empty());  // We can't be a leaf.
+  FML_DCHECK(!layers().empty());  // We can't be a leaf.
 
   SkMatrix child_matrix = matrix;
   child_matrix.preTranslate(offset_.fX, offset_.fY);
@@ -63,7 +63,8 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
     child_matrix = RasterCache::GetIntegralTransCTM(child_matrix);
 #endif
-    TryToPrepareRasterCache(context, GetCacheableChild(), child_matrix);
+    TryToPrepareRasterCache(context, this, child_matrix,
+                            RasterCacheLayerStrategy::kLayerChildren);
   }
 
   // Restore cull_rect
@@ -96,8 +97,9 @@ void OpacityLayer::Paint(PaintContext& context) const {
   paint.setAlphaf(subtree_opacity);
 
   if (context.raster_cache &&
-      context.raster_cache->Draw(GetCacheableChild(),
-                                 *context.leaf_nodes_canvas, &paint)) {
+      context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
+                                 RasterCacheLayerStrategy::kLayerChildren,
+                                 &paint)) {
     return;
   }
 

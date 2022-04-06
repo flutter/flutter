@@ -63,7 +63,8 @@ void ImageFilterLayer::Preroll(PrerollContext* context,
     // times to consider its properties and children to be stable
     // from frame to frame so we try to cache the layer itself
     // for maximum performance.
-    TryToPrepareRasterCache(context, this, matrix);
+    TryToPrepareRasterCache(context, this, matrix,
+                            RasterCacheLayerStrategy::kLayer);
   } else {
     // This ImageFilterLayer is not yet considered stable so we
     // increment the count to measure how many times it has been
@@ -84,7 +85,8 @@ void ImageFilterLayer::Preroll(PrerollContext* context,
       // stable between frames and also avoiding a rendering surface
       // switch during the Paint phase even if they are not stable.
       // This benefit is seen most during animations.
-      TryToPrepareRasterCache(context, GetCacheableChild(), matrix);
+      TryToPrepareRasterCache(context, this, matrix,
+                              RasterCacheLayerStrategy::kLayerChildren);
     }
   }
 }
@@ -94,15 +96,16 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   if (context.raster_cache) {
-    if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas)) {
+    if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
+                                   RasterCacheLayerStrategy::kLayer)) {
       return;
     }
     if (transformed_filter_) {
       SkPaint paint;
       paint.setImageFilter(transformed_filter_);
-
-      if (context.raster_cache->Draw(GetCacheableChild(),
-                                     *context.leaf_nodes_canvas, &paint)) {
+      if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
+                                     RasterCacheLayerStrategy::kLayerChildren,
+                                     &paint)) {
         return;
       }
     }
@@ -115,8 +118,8 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
   // case the bounds of the child may not be the same as the filtered version
   // so we use the bounds of the child container which do not include any
   // modifications that the filter might apply.
-  Layer::AutoSaveLayer save_layer = Layer::AutoSaveLayer::Create(
-      context, GetChildContainer()->paint_bounds(), &paint);
+  Layer::AutoSaveLayer save_layer =
+      Layer::AutoSaveLayer::Create(context, child_paint_bounds(), &paint);
   PaintChildren(context);
 }
 
