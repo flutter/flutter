@@ -37,8 +37,7 @@ Future<void> runProjectTest(Future<void> Function(FlutterProject project) testFu
   try {
     await testFunction(project);
   } finally {
-    print('tempDir=$tempDir');
-    // rmTree(tempDir);
+    rmTree(tempDir);
   }
 }
 

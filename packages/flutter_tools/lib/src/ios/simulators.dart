@@ -319,13 +319,12 @@ class SimDevice {
 
 class IOSSimulator extends Device {
   IOSSimulator(
-    String id, {
+    super.id, {
       required this.name,
       required this.simulatorCategory,
       required SimControl simControl,
     }) : _simControl = simControl,
          super(
-           id,
            category: Category.mobile,
            platformType: PlatformType.ios,
            ephemeral: true,

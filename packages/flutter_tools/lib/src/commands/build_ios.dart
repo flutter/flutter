@@ -21,7 +21,7 @@ import 'build.dart';
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({ required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
+  BuildIOSCommand({ required super.verboseHelp }) {
     argParser
       ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
@@ -42,7 +42,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final String name = 'ios';
 
   @override
-  final String description = 'Build an iOS application bundle (Mac OS X host only).';
+  final String description = 'Build an iOS application bundle (macOS host only).';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
@@ -65,8 +65,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 ///
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({required bool verboseHelp})
-      : super(verboseHelp: verboseHelp) {
+  BuildIOSArchiveCommand({required super.verboseHelp}) {
     argParser.addOption(
       'export-method',
       defaultsTo: 'app-store',
@@ -95,7 +94,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final List<String> aliases = <String>['xcarchive'];
 
   @override
-  final String description = 'Build an iOS archive bundle and IPA for distribution (Mac OS X host only).';
+  final String description = 'Build an iOS archive bundle and IPA for distribution (macOS host only).';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;
