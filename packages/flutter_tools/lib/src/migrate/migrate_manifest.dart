@@ -100,6 +100,7 @@ class MigrateManifest {
     return output;
   }
 
+  // A list of local paths of files that had conflicts and are now fully resolved.
   List<String> resolvedConflictFiles(Directory workingDir) {
     final List<String> output = <String>[];
     for (final String localPath in conflictFiles) {

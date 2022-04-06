@@ -22,7 +22,8 @@ class MigrateStatusCommand extends FlutterCommand {
     requiresPubspecYaml();
     argParser.addOption(
       'working-directory',
-      help: 'Specifies the custom migration working directory used to stage and edit proposed changes.',
+      help: 'Specifies the custom migration working directory used to stage and edit proposed changes. '
+            'This path can be absolute or relative to the flutter project root.',
       valueHelp: 'path',
     );
     argParser.addFlag(
@@ -61,8 +62,14 @@ class MigrateStatusCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject project = FlutterProject.current();
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-    if (stringArg('working-directory') != null) {
-      workingDirectory = fileSystem.directory(stringArg('working-directory'));
+    final String? customWorkingDirectoryPath = stringArg('working-directory');
+    if (customWorkingDirectoryPath != null) {
+      if (customWorkingDirectoryPath.startsWith(fileSystem.path.separator) || customWorkingDirectoryPath.startsWith('/')) {
+        // Is an absolute path
+        workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
+      } else {
+        workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
+      }
     }
     if (!workingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Start a new migration with:');

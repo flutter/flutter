@@ -5,7 +5,6 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../globals.dart' as globals;
 import '../cache.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
@@ -16,15 +15,15 @@ import 'migrate.dart';
 /// Flutter migrate subcommand to check the migration status of the project.
 class MigrateResolveConflictsCommand extends FlutterCommand {
   MigrateResolveConflictsCommand({
-    bool verbose = false,
     required this.logger,
     required this.fileSystem,
     required this.terminal,
-  }) : _verbose = verbose {
+  }) {
     requiresPubspecYaml();
     argParser.addOption(
       'working-directory',
-      help: 'Specifies the custom migration working directory used to stage and edit proposed changes.',
+      help: 'Specifies the custom migration working directory used to stage and edit proposed changes. '
+            'This path can be absolute or relative to the flutter project root.',
       valueHelp: 'path',
     );
     argParser.addOption(
@@ -33,8 +32,6 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       help: 'The number of lines of context to show around the each conflict. Defaults to 5.',
     );
   }
-
-  final bool _verbose;
 
   final Logger logger;
 
@@ -54,20 +51,22 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
-  /// Manually marks the lines in a diff that should be printed unformatted for visbility.
-  final Set<int> _initialDiffLines = <int>{0, 1};
-
   static const String _conflictStartMarker = '<<<<<<<';
   static const String _conflictDividerMarker = '=======';
   static const String _conflictEndMarker = '>>>>>>>';
-  static const int _contextLineCount = 5;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject project = FlutterProject.current();
     Directory workingDirectory = project.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
-    if (stringArg('working-directory') != null) {
-      workingDirectory = fileSystem.directory(stringArg('working-directory'));
+    final String? customWorkingDirectoryPath = stringArg('working-directory');
+    if (customWorkingDirectoryPath != null) {
+      if (customWorkingDirectoryPath.startsWith(fileSystem.path.separator) || customWorkingDirectoryPath.startsWith('/')) {
+        // Is an absolute path
+        workingDirectory = fileSystem.directory(customWorkingDirectoryPath);
+      } else {
+        workingDirectory = project.directory.childDirectory(customWorkingDirectoryPath);
+      }
     }
     if (!workingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Start a new migration with:');
@@ -88,10 +87,10 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
 
     for (final String localPath in conflictFiles) {
       final File file = workingDirectory.childFile(localPath);
-      List<String> lines = file.readAsStringSync().split('\n');
+      final List<String> lines = file.readAsStringSync().split('\n');
 
       // Find all conflicts
-      List<Conflict> conflicts = <Conflict>[];
+      final List<Conflict> conflicts = <Conflict>[];
       Conflict currentConflict = Conflict.empty();
       for (int lineNumber = 0; lineNumber < lines.length; lineNumber++) {
         final String line = lines[lineNumber];
@@ -211,8 +210,9 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
 }
 
 class Conflict {
-  Conflict.empty();
   Conflict(this.startLine, this.dividerLine, this.endLine);
+
+  Conflict.empty();
 
   int? startLine;
   int? dividerLine;

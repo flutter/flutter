@@ -180,7 +180,7 @@ Future<MigrateResult?> computeMigration({
   final Set<String?> blacklistPrefixes = <String?>{};
   platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
   SupportedPlatform.values.forEach((v) => blacklistPrefixes.add(platformToSubdirectoryPrefix(v)));
-  platforms!.forEach((v) => blacklistPrefixes.remove(platformToSubdirectoryPrefix(v)));
+  platforms.forEach((v) => blacklistPrefixes.remove(platformToSubdirectoryPrefix(v)));
   blacklistPrefixes.remove('root');
   blacklistPrefixes.remove(null);
 
@@ -245,7 +245,7 @@ Future<MigrateResult?> computeMigration({
   if (customBaseAppDir) {
     migrateResult.generatedBaseTemplateDirectory = fileSystem.directory(baseAppPath);
   } else {
-    migrateResult.generatedBaseTemplateDirectory = await MigrateUtils.createTempDirectory('generatedBaseTemplate');
+    migrateResult.generatedBaseTemplateDirectory = fileSystem.systemTempDirectory.createTempSync('generatedBaseTemplate');
     if (verbose) {
       logger.printStatus('Created temporary directory: ${migrateResult.generatedBaseTemplateDirectory}', indent: 2, color: TerminalColor.grey);
     }
@@ -253,7 +253,7 @@ Future<MigrateResult?> computeMigration({
   if (customTargetAppDir) {
     migrateResult.generatedTargetTemplateDirectory = fileSystem.directory(targetAppPath);
   } else {
-    migrateResult.generatedTargetTemplateDirectory = await MigrateUtils.createTempDirectory('generatedTargetTemplate');
+    migrateResult.generatedTargetTemplateDirectory = fileSystem.systemTempDirectory.createTempSync('generatedTargetTemplate');
     if (verbose) {
       logger.printStatus('Created temporary directory: ${migrateResult.generatedBaseTemplateDirectory}', indent: 2, color: TerminalColor.grey);
     }
@@ -450,7 +450,7 @@ Future<void> createBase(
             revisionToFlutterSdkDir[revision] = sdkDir;
             sdkAvailable = true;
           } else {
-            sdkDir = await MigrateUtils.createTempDirectory('flutter_$activeRevision');
+            sdkDir = fileSystem.systemTempDirectory.createTempSync('flutter_$activeRevision');
             migrateResult.sdkDirs[activeRevision] = sdkDir;
             status.pause();
             logger.printStatus('Cloning SDK $activeRevision', indent: 2, color: TerminalColor.grey);
@@ -729,7 +729,7 @@ Future<void> computeMerge(
             continue;
           }
         }
-        migrateResult.mergeResults.add(result!);
+        migrateResult.mergeResults.add(result);
       }
       if (verbose) {
         status.pause();
