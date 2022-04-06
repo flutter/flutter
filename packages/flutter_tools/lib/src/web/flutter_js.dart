@@ -61,6 +61,8 @@ _flutter.loader = null;
         console.warn("Do not call didCreateEngineInitializer by hand. Start with loadEntrypoint instead.");
       }
       this._didCreateEngineInitializerResolve(engineInitializer);
+      // Remove this method after it's done, so Flutter Web can hot restart.
+      delete this.didCreateEngineInitializer;
     }).bind(this);
 
     _loadEntrypoint(entrypointUrl) {
@@ -82,6 +84,10 @@ _flutter.loader = null;
 
     _waitForServiceWorkerActivation(serviceWorker, entrypointUrl) {
       if (!serviceWorker) return;
+      if (serviceWorker.state == "activated") {
+        console.log("Service worker already active.");
+        return this._loadEntrypoint(entrypointUrl);
+      }
       return new Promise((resolve, _) => {
         serviceWorker.addEventListener("statechange", () => {
           if (serviceWorker.state == "activated") {
@@ -103,19 +109,23 @@ _flutter.loader = null;
         timeoutMillis = 4000,
       } = serviceWorkerOptions;
 
-      var serviceWorkerUrl = "flutter_service_worker.js?v=" + serviceWorkerVersion;
+      let serviceWorkerUrl = "flutter_service_worker.js?v=" + serviceWorkerVersion;
       let loader = navigator.serviceWorker.register(serviceWorkerUrl)
           .then((reg) => {
             if (!reg.active && (reg.installing || reg.waiting)) {
               // No active web worker and we have installed or are installing
               // one for the first time. Simply wait for it to activate.
-              return this._waitForServiceWorkerActivation(reg.installing || reg.waiting, entrypointUrl);
+              let sw = reg.installing || reg.waiting;
+              return this._waitForServiceWorkerActivation(sw, entrypointUrl);
             } else if (!reg.active.scriptURL.endsWith(serviceWorkerVersion)) {
               // When the app updates the serviceWorkerVersion changes, so we
               // need to ask the service worker to update.
               console.log("New service worker available.");
-              reg.update();
-              return this._waitForServiceWorkerActivation(reg.installing, entrypointUrl);
+              return reg.update().then((reg) => {
+                console.log("Service worker updated.");
+                let sw = reg.installing || reg.waiting || reg.active;
+                return this._waitForServiceWorkerActivation(sw, entrypointUrl);
+              });
             } else {
               // Existing service worker is still good.
               console.log("Loading app from service worker.");
