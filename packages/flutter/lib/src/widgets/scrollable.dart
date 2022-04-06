@@ -311,9 +311,19 @@ class Scrollable extends StatefulWidget {
 
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
+  ///
+  /// The [padding] is used to add extra space around the [context]'s
+  /// associated widget when revealing it. For example, `EdgeInsets.only(bottom: 16.0)`
+  /// will ensure an additional 16 pixels of space are visible below the widget.
+  ///
+  /// See also:
+  ///
+  ///  * [FocusNode.ensureVisiblePadding] which specifies the [padding] used when
+  ///    a widget is focused via focus traversal.
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
+    EdgeInsets padding = EdgeInsets.zero,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
@@ -332,6 +342,7 @@ class Scrollable extends StatefulWidget {
       futures.add(scrollable.position.ensureVisible(
         context.findRenderObject()!,
         alignment: alignment,
+        padding: padding,
         duration: duration,
         curve: curve,
         alignmentPolicy: alignmentPolicy,
