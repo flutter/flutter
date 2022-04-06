@@ -1242,7 +1242,6 @@ abstract class PlatformViewController {
   ///
   /// The size is inferred from the parent widget.
   ///
-  /// [size] is the view's new size in logical pixel, it must not be null and must
-  /// be bigger than zero.
+  /// [size] is the view's initial size in logical pixel.
   void setInitialSize(Size size);
 }
