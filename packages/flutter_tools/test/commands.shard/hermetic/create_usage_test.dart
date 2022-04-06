@@ -5,17 +5,13 @@
 // @dart = 2.8
 
 import 'package:args/command_runner.dart';
-import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
-import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:test/fake.dart';
 
@@ -28,6 +24,7 @@ class FakePub extends Fake implements Pub {
 
   final FileSystem fs;
   int calledGetOffline = 0;
+  int calledOnline = 0;
 
   @override
   Future<void> get({
@@ -45,6 +42,9 @@ class FakePub extends Fake implements Pub {
     fs.directory(directory).childFile('.packages').createSync();
     if (offline == true){
       calledGetOffline += 1;
+    }
+    else {
+      calledOnline += 1;
     }
   }
 }
@@ -178,10 +178,11 @@ void main() {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['create', 'testy', '--offline']);
-      expect(fakePub.calledGetOffline, 2);
-      //expect((await command.usageValues).commandCreateProjectType, 'plugin');
+      expect(fakePub.calledOnline, 0);
+      expect(fakePub.calledGetOffline, 1);
+      expect(command.argParser.options.containsKey('offline'), true);
+      expect(command.shouldUpdateCache, true);
     }, overrides: <Type, Generator>{
-      //ProcessManager: () => FakeProcessManager.any(),
       Pub: () => fakePub,
     }));
   });
@@ -193,21 +194,4 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   @override
   List<Workflow> get workflows => <Workflow>[];
-}
-
-FakeCommand getFakeCommand({
-  bool verbose = false,
-  int exitCode = 0,
-  void Function() onRun,
-}) {
-  return FakeCommand(
-    command: const <String>[
-      'flutter',
-      'pub',
-      'get',
-      '--offline'
-    ],
-    exitCode: exitCode,
-    onRun: onRun,
-  );
 }
