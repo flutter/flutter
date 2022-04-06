@@ -34,9 +34,9 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// been omitted).
 ///
 /// {@tool dartpad}
-///
-/// This sample shows how to react and keep track of AppLifecycleState changes.
-/// See also [didChangeAppLifecycleState].
+/// This sample shows how to implement parts of the [State] and
+/// [WidgetsBindingObserver] protocols necessary to react to application
+/// lifecycle messages. See [didChangeAppLifecycleState].
 /// 
 /// ** See code in examples/api/lib/widgets/binding/widget_binding_observer.0.dart **
 /// ```
