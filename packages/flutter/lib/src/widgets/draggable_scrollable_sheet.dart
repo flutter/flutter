@@ -165,7 +165,7 @@ class DraggableScrollableController extends ChangeNotifier {
 
   void _assertAttached() {
     assert(
-      _attachedController != null,
+      isAttached,
       'DraggableScrollableController is not attached to a sheet. A DraggableScrollableController '
         'must be used in a DraggableScrollableSheet before any of its methods are called.',
     );
