@@ -118,7 +118,6 @@ export 'src/material/progress_indicator_theme.dart';
 export 'src/material/radio.dart';
 export 'src/material/radio_list_tile.dart';
 export 'src/material/radio_theme.dart';
-export 'src/material/raised_button.dart';
 export 'src/material/range_slider.dart';
 export 'src/material/refresh_indicator.dart';
 export 'src/material/reorderable_list.dart';

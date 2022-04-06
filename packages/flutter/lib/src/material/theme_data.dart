@@ -115,7 +115,6 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 ///   * [TextButton]
 ///   * [ElevatedButton]
 ///   * [FlatButton]
-///   * [RaisedButton]
 ///   * The time picker widget ([showTimePicker])
 ///   * [SnackBar]
 ///   * [Chip]
@@ -524,7 +523,6 @@ class ThemeData with Diagnosticable {
     // [disabledColor], [highlightColor], and [splashColor].
     buttonTheme ??= ButtonThemeData(
       colorScheme: colorScheme,
-      // Defaults to the fill color for RaisedButtons for backwards compatibility.
       buttonColor: buttonColor ?? (isDark ? primarySwatch[600]! : Colors.grey[300]!),
       disabledColor: disabledColor,
       focusColor: focusColor,
@@ -1423,8 +1421,7 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
   final ButtonBarThemeData buttonBarTheme;
 
-  /// Defines the default configuration of button widgets, like [RaisedButton]
-  /// and [FlatButton].
+  /// Defines the default configuration of button widgets, like [FlatButton].
   final ButtonThemeData buttonTheme;
 
   /// The colors and styles used to render [Card].
@@ -1627,7 +1624,7 @@ class ThemeData with Diagnosticable {
   )
   final IconThemeData accentIconTheme;
 
-  /// The default fill color of the [Material] used in [RaisedButton]s.
+  /// The default fill color of the [Material].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
     'This feature was deprecated after v2.3.0-0.2.pre.',
