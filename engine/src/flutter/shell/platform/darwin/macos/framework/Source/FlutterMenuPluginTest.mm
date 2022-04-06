@@ -106,7 +106,7 @@
     ],
   };
 
-  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"Menu.setMenu"
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"Menu.setMenus"
                                                              arguments:testMenus]
                     result:^(id _Nullable result){
                     }];
