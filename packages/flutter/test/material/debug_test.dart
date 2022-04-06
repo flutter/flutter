@@ -265,10 +265,8 @@ void main() {
         ),
       ),
     ));
-    // Tap SnackBarAction to dismiss.
-    // The SnackBarAction should assert we still have an ancestor
-    // ScaffoldMessenger in order to dismiss the SnackBar from the
-    // Scaffold.
+    // The Scaffold should assert we still have an ancestor ScaffoldMessenger in
+    // order to dismiss the SnackBar from the ScaffoldMessenger.
     await tester.tap(find.text('Test'));
     FlutterError.onError = oldHandler;
 
@@ -290,11 +288,10 @@ void main() {
     expect(error.toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   No ScaffoldMessenger widget found.\n'
-      '   SnackBarAction widgets require a ScaffoldMessenger widget\n'
-      '   ancestor.\n'
+      '   Scaffold widgets require a ScaffoldMessenger widget ancestor.\n'
       '   The specific widget that could not find a ScaffoldMessenger\n'
       '   ancestor was:\n'
-      '     SnackBarAction\n'
+      '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00829]\n'
       '   The ancestors of this widget were:\n'
       '     TextButtonTheme\n'
       '     Padding\n'

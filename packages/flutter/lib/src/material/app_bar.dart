@@ -767,34 +767,33 @@ class _AppBarState extends State<AppBar> {
   }
 
   void _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
-      final bool oldScrolledUnder = _scrolledUnder;
-      final ScrollMetrics metrics = notification.metrics;
+    final bool oldScrolledUnder = _scrolledUnder;
+    final ScrollMetrics metrics = notification.metrics;
 
-      if (notification.depth != 0) {
-        _scrolledUnder = false;
-      } else {
-        switch (metrics.axisDirection) {
-          case AxisDirection.up:
-            // Scroll view is reversed
-            _scrolledUnder = metrics.extentAfter > 0;
-            break;
-          case AxisDirection.down:
-            _scrolledUnder = metrics.extentBefore > 0;
-            break;
-          case AxisDirection.right:
-          case AxisDirection.left:
-          // Scrolled under is only supported in the vertical axis.
-            _scrolledUnder = false;
-            break;
-        }
+    if (notification.depth != 0) {
+      _scrolledUnder = false;
+    } else {
+      switch (metrics.axisDirection) {
+        case AxisDirection.up:
+          // Scroll view is reversed
+          _scrolledUnder = metrics.extentAfter > 0;
+          break;
+        case AxisDirection.down:
+          _scrolledUnder = metrics.extentBefore > 0;
+          break;
+        case AxisDirection.right:
+        case AxisDirection.left:
+        // Scrolled under is only supported in the vertical axis.
+          _scrolledUnder = false;
+          break;
       }
+    }
 
-      if (_scrolledUnder != oldScrolledUnder) {
-        setState(() {
-          // React to a change in MaterialState.scrolledUnder
-        });
-      }
-
+    if (_scrolledUnder != oldScrolledUnder) {
+      setState(() {
+        // React to a change in MaterialState.scrolledUnder
+      });
+    }
   }
 
   Color _resolveColor(Set<MaterialState> states, Color? widgetColor, Color? themeColor, Color defaultColor) {
@@ -1194,7 +1193,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
 
     final bool isScrolledUnder = overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent);
-
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
     final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
       ? (visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight)).clamp(0.0, 1.0)
