@@ -11,6 +11,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'inherited_theme.dart';
+import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 import 'text_selection.dart';
@@ -28,32 +29,6 @@ typedef ContextualMenuBuilder = Widget Function(
   Offset,
   Offset?,
 );
-
-// TODO(justinmc): Figure out all the platforms and nested packages.
-// Should a CupertinoTextField on Android show the iOS toolbar?? It seems to now
-// before this PR.
-/*
-class ContextualMenuConfiguration extends InheritedWidget {
-  const ContextualMenuConfiguration({
-    Key? key,
-    required this.buildMenu,
-    required Widget child,
-  }) : super(key: key, child: child);
-
-  final ContextualMenuBuilder buildMenu;
-
-  /// Get the [ContextualMenuConfiguration] that applies to the given
-  /// [BuildContext].
-  static ContextualMenuConfiguration of(BuildContext context) {
-    final ContextualMenuConfiguration? result = context.dependOnInheritedWidgetOfExactType<ContextualMenuConfiguration>();
-    assert(result != null, 'No ContextualMenuConfiguration found in context.');
-    return result!;
-  }
-
-  @override
-  bool updateShouldNotify(ContextualMenuConfiguration old) => buildMenu != old.buildMenu;
-}
-*/
 
 /// Designates a part of the Widget tree to use the contextual menu given by
 /// [buildMenu].
@@ -139,17 +114,13 @@ class ContextualMenuController {
 
     _menuOverlayEntry = OverlayEntry(
       builder: (BuildContext context) {
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: hide,
-          onSecondaryTap: hide,
-          // TODO(justinmc): I'm using this to block taps on the menu from being
-          // received by the above barrier. Is there a less weird way?
-          child: GestureDetector(
-            onTap: () {},
-            onSecondaryTap: () {},
-            child: capturedThemes.wrap(buildMenu(context, this, primaryAnchor, secondaryAnchor)),
-          ),
+        return Stack(
+          children: <Widget>[
+            ModalBarrier(
+              onDismiss: hide,
+            ),
+            capturedThemes.wrap(buildMenu(context, this, primaryAnchor, secondaryAnchor)),
+          ],
         );
       },
     );
