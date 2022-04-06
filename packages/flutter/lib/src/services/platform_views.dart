@@ -1013,11 +1013,19 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   }
 }
 
-/// Controls an Android view that is rendered to a texture.
+/// Controls an Android view that is rendered as a texture.
 ///
-/// This is typically used by [AndroidView] to display an Android View in the Android view hierarchy.
+/// This is typically used by [AndroidView] to display a View in the Android view hierarchy.
 ///
-/// Typically created with [PlatformViewsService.initAndroidView].
+/// The platform view is created by calling [create]. However, the platform view won't be
+/// created until an initial size is given.
+///
+/// To set the initial size of the platform view, use [setInitialSize]. After the platform
+/// view is created, it can be resized by calling [setSize].
+///
+/// Calling [setSize] prior to setting an initial size doesn't set the initial size.
+///
+/// The controller is typically created with [PlatformViewsService.initAndroidView].
 class TextureAndroidViewController extends AndroidViewController {
   TextureAndroidViewController._({
     required int viewId,
@@ -1103,7 +1111,7 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> _sendCreateMessage() async {
-    // The initial size is set in the first call to setSize.
+    // The initial size is set after calling setInitialSize.
     final Size size = await _initialSize.future;
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
