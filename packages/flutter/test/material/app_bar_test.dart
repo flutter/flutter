@@ -2596,7 +2596,9 @@ void main() {
                 SliverAppBar(
                   elevation: 0,
                   backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+                    return states.contains(MaterialState.scrolledUnder)
+                      ? scrolledColor
+                      : defaultColor;
                   }),
                   expandedHeight: expandedHeight,
                   pinned: true,
@@ -2619,7 +2621,7 @@ void main() {
 
       testWidgets('backgroundColor', (WidgetTester tester) async {
         await tester.pumpWidget(
-            _buildSliverApp(contentHeight: 1200.0)
+          _buildSliverApp(contentHeight: 1200.0)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2775,12 +2777,14 @@ void main() {
             appBar: AppBar(
               elevation: 0,
               backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+                return states.contains(MaterialState.scrolledUnder)
+                  ? scrolledColor
+                  : defaultColor;
               }),
               title: const Text('AppBar'),
               flexibleSpace: includeFlexibleSpace
                 ? const FlexibleSpaceBar(title: Text('FlexibleSpace'))
-                  : null,
+                : null,
             ),
             body: ListView(
               reverse: reverse,
@@ -2794,7 +2798,7 @@ void main() {
 
       testWidgets('backgroundColor', (WidgetTester tester) async {
         await tester.pumpWidget(
-            _buildAppBar(contentHeight: 1200.0)
+          _buildAppBar(contentHeight: 1200.0)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2819,7 +2823,7 @@ void main() {
 
       testWidgets('backgroundColor with FlexibleSpace', (WidgetTester tester) async {
         await tester.pumpWidget(
-            _buildAppBar(contentHeight: 1200.0, includeFlexibleSpace: true)
+          _buildAppBar(contentHeight: 1200.0, includeFlexibleSpace: true)
         );
 
         expect(getAppBarBackgroundColor(tester), defaultColor);
@@ -2844,7 +2848,7 @@ void main() {
 
       testWidgets('backgroundColor - reverse', (WidgetTester tester) async {
         await tester.pumpWidget(
-            _buildAppBar(contentHeight: 1200.0, reverse: true)
+          _buildAppBar(contentHeight: 1200.0, reverse: true)
         );
         await tester.pump();
 
@@ -2935,7 +2939,9 @@ void main() {
               appBar: AppBar(
                 elevation: 0,
                 backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                  return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+                  return states.contains(MaterialState.scrolledUnder)
+                    ? scrolledColor
+                    : defaultColor;
                 }),
                 title: const Text('AppBar'),
               ),
