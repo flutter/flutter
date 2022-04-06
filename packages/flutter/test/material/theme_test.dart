@@ -266,8 +266,9 @@ void main() {
   });
 
   testWidgets('Scaffold inherits ColorScheme.background', (WidgetTester tester) async {
-    const Color seedColor = Color(0xFF00FF00);
-    const Color backgroundColor = Color(0xFF0000ff);
+    const Color seedColor = Color(0xff00FF00);
+    const Color redColor = Color(0xffff0000);
+    const Color blueColor = Color(0xff0000ff);
 
     Widget buildApp({Color? seedColor, ColorScheme? colorScheme, Color? background}) {
       return MaterialApp(
@@ -309,19 +310,19 @@ void main() {
     expect(materials[0].color, const Color(0xfffcfcf6)); // app scaffold
     expect(materials[1].color, const Color(0xfffcfcf6)); // dialog scaffold
 
-    await tester.pumpWidget(buildApp(colorScheme: const ColorScheme.light().copyWith(background: backgroundColor)));
+    await tester.pumpWidget(buildApp(colorScheme: const ColorScheme.light().copyWith(background: redColor)));
     await tester.pumpAndSettle();
     materials = tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materials.length, equals(2));
-    expect(materials[0].color, backgroundColor); // app scaffold
-    expect(materials[1].color, backgroundColor); // dialog scaffold
+    expect(materials[0].color, redColor); // app scaffold
+    expect(materials[1].color, redColor); // dialog scaffold
 
-    await tester.pumpWidget(buildApp(colorScheme: ColorScheme.fromSeed(seedColor: seedColor, background: backgroundColor)));
+    await tester.pumpWidget(buildApp(colorScheme: ColorScheme.fromSeed(seedColor: seedColor, background: blueColor)));
     await tester.pumpAndSettle();
     materials = tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materials.length, equals(2));
-    expect(materials[0].color, backgroundColor); // app scaffold
-    expect(materials[1].color, backgroundColor); // dialog scaffold
+    expect(materials[0].color, blueColor); // app scaffold
+    expect(materials[1].color, blueColor); // dialog scaffold
   });
 
   testWidgets('IconThemes are applied', (WidgetTester tester) async {
