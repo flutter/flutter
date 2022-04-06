@@ -892,7 +892,9 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   }
 
   void _onPlatformViewCreated(int id) {
-    setState(() { print('created'); _platformViewCreated = true; });
+    setState(() {
+      _platformViewCreated = true;
+    });
   }
 
   void _handleFrameworkFocusChanged(bool isFocused) {
