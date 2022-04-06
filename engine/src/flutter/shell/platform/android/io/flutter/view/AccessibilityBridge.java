@@ -2063,7 +2063,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private enum AccessibilityFeature {
     ACCESSIBLE_NAVIGATION(1 << 0),
     INVERT_COLORS(1 << 1), // NOT SUPPORTED
-    DISABLE_ANIMATIONS(1 << 2);
+    DISABLE_ANIMATIONS(1 << 2),
+    BOLD_TEXT(1 << 3), // NOT SUPPORTED
+    REDUCE_MOTION(1 << 4), // NOT SUPPORTED
+    HIGH_CONTRAST(1 << 5), // NOT SUPPORTED
+    ON_OFF_SWITCH_LABELS(1 << 6); // NOT SUPPORTED
 
     final int value;
 
