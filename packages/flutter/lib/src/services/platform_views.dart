@@ -1008,13 +1008,6 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   }
 
   @override
-  void setInitialSize(Size size) {
-    // This is not necessary when a PlatformViewLayer is used.
-    // The initial size is derivated from the ExternalViewEmbedder,
-    // and sent to the platform via JNI.
-  }
-
-  @override
   Future<void> setOffset(Offset off) {
     throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
   }
@@ -1051,7 +1044,7 @@ class TextureAndroidViewController extends AndroidViewController {
   int? get textureId => _textureId;
 
   /// The size used to create the platform view.
-  Completer<Size> _initialSize = Completer<Size>();
+  final Completer<Size> _initialSize = Completer<Size>();
 
   /// The current offset of the platform view.
   Offset _off = Offset.zero;
@@ -1243,5 +1236,5 @@ abstract class PlatformViewController {
   /// The size is inferred from the parent widget.
   ///
   /// [size] is the view's initial size in logical pixel.
-  void setInitialSize(Size size);
+  void setInitialSize(Size size) {}
 }

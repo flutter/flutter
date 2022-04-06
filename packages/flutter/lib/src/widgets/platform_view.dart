@@ -424,11 +424,6 @@ class _HtmlElementViewController extends PlatformViewController {
   }
 
   @override
-  void setInitialSize(Size size) {
-    // Investigate if Web can use the size from the parent as well.
-  }
-
-  @override
   Future<void> dispose() async {
     if (_initialized) {
       await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
@@ -1086,7 +1081,7 @@ typedef _OnLayoutCallback = void Function(Size size);
 /// A [RenderBox] that notifies its size to the owner after a layout.
 class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
   _PlatformViewPlaceholderBox({
-    _OnLayoutCallback? this.onLayout,
+    this.onLayout,
   }) : super(additionalConstraints: const BoxConstraints.tightFor(
       width: double.infinity,
       height: double.infinity,
@@ -1107,9 +1102,9 @@ class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
 /// This placeholder is basically a [SizedBox.expand] with a [onLayout] callback to
 /// notify the size of the render object to its parent.
 class _PlatformViewPlaceHolder extends SingleChildRenderObjectWidget {
-  _PlatformViewPlaceHolder({
+  const _PlatformViewPlaceHolder({
     Key? key,
-    _OnLayoutCallback? this.onLayout,
+    this.onLayout,
   }) : super(key: key);
 
   final _OnLayoutCallback? onLayout;

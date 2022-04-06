@@ -94,6 +94,9 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
+  void setInitialSize(Size size) {}
+
+  @override
   Future<void> setOffset(Offset off) async {}
 
   @override
