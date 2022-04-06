@@ -170,6 +170,7 @@ typedef LocateFileCallback = String Function(String file, String unusedBase);
 
 @JS()
 @anonymous
+@staticInterop
 class CanvasKitInitOptions {
   external factory CanvasKitInitOptions({
     required LocateFileCallback locateFile,
@@ -179,7 +180,10 @@ class CanvasKitInitOptions {
 typedef CanvasKitInitCallback = void Function(CanvasKit canvasKit);
 
 @JS()
-class CanvasKitInitPromise {
+@staticInterop
+class CanvasKitInitPromise {}
+
+extension CanvasKitInitPromiseExtension on CanvasKitInitPromise {
   external void then(CanvasKitInitCallback callback);
 }
 
@@ -191,6 +195,7 @@ class ColorSpace {}
 
 @JS()
 @anonymous
+@staticInterop
 class SkWebGLContextOptions {
   external factory SkWebGLContextOptions({
     required int antialias,
@@ -200,7 +205,10 @@ class SkWebGLContextOptions {
 }
 
 @JS('window.flutterCanvasKit.Surface')
-class SkSurface {
+@staticInterop
+class SkSurface {}
+
+extension SkSurfaceExtension on SkSurface {
   external SkCanvas getCanvas();
   external void flush();
   external int width();
@@ -210,8 +218,10 @@ class SkSurface {
 }
 
 @JS()
-@anonymous
-class SkGrContext {
+@staticInterop
+class SkGrContext {}
+
+extension SkGrContextExtension on SkGrContext {
   external void setResourceCacheLimitBytes(int limit);
   external void releaseResourcesAndAbandonContext();
   external void delete();
