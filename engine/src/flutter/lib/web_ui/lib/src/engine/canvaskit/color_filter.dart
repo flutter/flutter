@@ -83,10 +83,14 @@ class CkBlendModeColorFilter extends CkColorFilter {
 
   @override
   SkColorFilter _initRawColorFilter() {
-    return canvasKit.ColorFilter.MakeBlend(
+    final SkColorFilter? filter = canvasKit.ColorFilter.MakeBlend(
       toSharedSkColor1(color),
       toSkBlendMode(blendMode),
     );
+    if (filter == null) {
+      throw ArgumentError('Invalid parameters for blend mode ColorFilter');
+    }
+    return filter;
   }
 
   @override
