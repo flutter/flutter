@@ -37,6 +37,11 @@ template("impeller_component") {
 
       public_configs += [ "//flutter/impeller:impeller_public_config" ]
 
+      if (!defined(invoker.cflags)) {
+        cflags = []
+      }
+      cflags += [ "-Wthread-safety-analysis" ]
+
       if (!defined(invoker.cflags_objc)) {
         cflags_objc = []
       }
