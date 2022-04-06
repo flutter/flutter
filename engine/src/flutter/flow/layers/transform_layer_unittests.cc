@@ -21,6 +21,7 @@ TEST_F(TransformLayerTest, PaintingEmptyLayerDies) {
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
+  EXPECT_EQ(layer->child_paint_bounds(), SkRect::MakeEmpty());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -51,6 +52,7 @@ TEST_F(TransformLayerTest, Identity) {
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
+  EXPECT_EQ(layer->child_paint_bounds(), mock_layer->paint_bounds());
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_matrix(), SkMatrix());  // identity
@@ -81,6 +83,7 @@ TEST_F(TransformLayerTest, Simple) {
   EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer->paint_bounds(),
             layer_transform.mapRect(mock_layer->paint_bounds()));
+  EXPECT_EQ(layer->child_paint_bounds(), mock_layer->paint_bounds());
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_matrix(),
@@ -123,8 +126,10 @@ TEST_F(TransformLayerTest, Nested) {
   EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer2->paint_bounds(),
             layer2_transform.mapRect(mock_layer->paint_bounds()));
+  EXPECT_EQ(layer2->child_paint_bounds(), mock_layer->paint_bounds());
   EXPECT_EQ(layer1->paint_bounds(),
             layer1_transform.mapRect(layer2->paint_bounds()));
+  EXPECT_EQ(layer1->child_paint_bounds(), layer2->paint_bounds());
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer2->needs_painting(paint_context()));
   EXPECT_TRUE(layer1->needs_painting(paint_context()));
@@ -177,14 +182,18 @@ TEST_F(TransformLayerTest, NestedSeparated) {
 
   preroll_context()->cull_rect = cull_rect;
   layer1->Preroll(preroll_context(), initial_transform);
-  SkRect expected_layer1_bounds = layer2->paint_bounds();
-  expected_layer1_bounds.join(mock_layer1->paint_bounds());
+  SkRect layer1_child_bounds = layer2->paint_bounds();
+  layer1_child_bounds.join(mock_layer1->paint_bounds());
+  SkRect expected_layer1_bounds = layer1_child_bounds;
   layer1_transform.mapRect(&expected_layer1_bounds);
+
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer2->paint_bounds(),
             layer2_transform.mapRect(mock_layer2->paint_bounds()));
+  EXPECT_EQ(layer2->child_paint_bounds(), mock_layer2->paint_bounds());
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer1->paint_bounds(), expected_layer1_bounds);
+  EXPECT_EQ(layer1->child_paint_bounds(), layer1_child_bounds);
   EXPECT_TRUE(mock_layer2->needs_painting(paint_context()));
   EXPECT_TRUE(layer2->needs_painting(paint_context()));
   EXPECT_TRUE(mock_layer1->needs_painting(paint_context()));

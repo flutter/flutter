@@ -25,6 +25,7 @@ TEST_F(PhysicalShapeLayerTest, PaintingEmptyLayerDies) {
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
+  EXPECT_EQ(layer->child_paint_bounds(), SkRect::MakeEmpty());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -55,6 +56,7 @@ TEST_F(PhysicalShapeLayerTest, NonEmptyLayer) {
                                            layer_path, Clip::none);
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), layer_path.getBounds());
+  EXPECT_EQ(layer->child_paint_bounds(), SkRect::MakeEmpty());
   EXPECT_TRUE(layer->needs_painting(paint_context()));
 
   SkPaint layer_paint;
@@ -93,6 +95,7 @@ TEST_F(PhysicalShapeLayerTest, ChildrenLargerThanPathClip) {
   child_paint_bounds.join(child2->paint_bounds());
   EXPECT_EQ(layer->paint_bounds(), layer_path.getBounds());
   EXPECT_NE(layer->paint_bounds(), child_paint_bounds);
+  EXPECT_EQ(layer->child_paint_bounds(), child_paint_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
 
   SkPaint layer_paint;
@@ -142,13 +145,14 @@ TEST_F(PhysicalShapeLayerTest, ChildrenLargerThanPathNoClip) {
   layer->Add(child1);
   layer->Add(child2);
 
-  SkRect total_bounds = SkRect::MakeEmpty();
   layer->Preroll(preroll_context(), SkMatrix());
-  total_bounds.join(child1->paint_bounds());
-  total_bounds.join(child2->paint_bounds());
+  SkRect child_bounds = child1->paint_bounds();
+  child_bounds.join(child2->paint_bounds());
+  SkRect total_bounds = child_bounds;
   total_bounds.join(layer_path.getBounds());
   EXPECT_NE(layer->paint_bounds(), layer_path.getBounds());
   EXPECT_EQ(layer->paint_bounds(), total_bounds);
+  EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
 
   SkPaint layer_paint;

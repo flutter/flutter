@@ -555,17 +555,27 @@ TEST(RasterCache, RasterCacheKeyHashFunction) {
   RasterCacheKey layer_key(id, RasterCacheKeyType::kLayer, matrix);
   RasterCacheKey picture_key(id, RasterCacheKeyType::kPicture, matrix);
   RasterCacheKey display_list_key(id, RasterCacheKeyType::kDisplayList, matrix);
+  RasterCacheKey layer_children_key(id, RasterCacheKeyType::kLayerChildren,
+                                    matrix);
 
+  auto raster_cache_key_id = RasterCacheKeyID({id});
   auto layer_hash_code = hash_function(layer_key);
-  ASSERT_EQ(layer_hash_code, fml::HashCombine(id, RasterCacheKeyType::kLayer));
+  ASSERT_EQ(layer_hash_code, fml::HashCombine(raster_cache_key_id.GetHash(),
+                                              RasterCacheKeyType::kLayer));
 
   auto picture_hash_code = hash_function(picture_key);
-  ASSERT_EQ(picture_hash_code,
-            fml::HashCombine(id, RasterCacheKeyType::kPicture));
+  ASSERT_EQ(picture_hash_code, fml::HashCombine(raster_cache_key_id.GetHash(),
+                                                RasterCacheKeyType::kPicture));
 
   auto display_list_hash_code = hash_function(display_list_key);
   ASSERT_EQ(display_list_hash_code,
-            fml::HashCombine(id, RasterCacheKeyType::kDisplayList));
+            fml::HashCombine(raster_cache_key_id.GetHash(),
+                             RasterCacheKeyType::kDisplayList));
+
+  auto layer_children_hash_code = hash_function(layer_children_key);
+  ASSERT_EQ(layer_children_hash_code,
+            fml::HashCombine(raster_cache_key_id.GetHash(),
+                             RasterCacheKeyType::kLayerChildren));
 }
 
 TEST(RasterCache, RasterCacheKeySameID) {
@@ -575,13 +585,17 @@ TEST(RasterCache, RasterCacheKeySameID) {
   RasterCacheKey layer_key(id, RasterCacheKeyType::kLayer, matrix);
   RasterCacheKey picture_key(id, RasterCacheKeyType::kPicture, matrix);
   RasterCacheKey display_list_key(id, RasterCacheKeyType::kDisplayList, matrix);
+  RasterCacheKey layer_children_key(id, RasterCacheKeyType::kLayerChildren,
+                                    matrix);
   map[layer_key] = 100;
   map[picture_key] = 200;
   map[display_list_key] = 300;
+  map[layer_children_key] = 400;
 
   ASSERT_EQ(map[layer_key], 100);
   ASSERT_EQ(map[picture_key], 200);
   ASSERT_EQ(map[display_list_key], 300);
+  ASSERT_EQ(map[layer_children_key], 400);
 }
 
 TEST(RasterCache, RasterCacheKeySameType) {
@@ -620,6 +634,46 @@ TEST(RasterCache, RasterCacheKeySameType) {
   ASSERT_EQ(map[display_list_first_key], 350);
   ASSERT_EQ(map[display_list_second_key], 400);
   ASSERT_EQ(map[display_list_third_key], 450);
+
+  type = RasterCacheKeyType::kLayerChildren;
+  RasterCacheKey layer_children_first_key(RasterCacheKeyID({1, 2, 3}), type,
+                                          matrix);
+  RasterCacheKey layer_children_second_key(RasterCacheKeyID({2, 3, 1}), type,
+                                           matrix);
+  RasterCacheKey layer_children_third_key(RasterCacheKeyID({3, 2, 1}), type,
+                                          matrix);
+  map[layer_children_first_key] = 100;
+  map[layer_children_second_key] = 200;
+  map[layer_children_third_key] = 300;
+  ASSERT_EQ(map[layer_children_first_key], 100);
+  ASSERT_EQ(map[layer_children_second_key], 200);
+  ASSERT_EQ(map[layer_children_third_key], 300);
+}
+
+TEST(RasterCache, RasterCacheKeyID_Equal) {
+  RasterCacheKeyID first = RasterCacheKeyID({1});
+  RasterCacheKeyID second = RasterCacheKeyID({1});
+  RasterCacheKeyID third = RasterCacheKeyID({2});
+  ASSERT_EQ(first, second);
+  ASSERT_NE(first, third);
+
+  RasterCacheKeyID fourth = RasterCacheKeyID({1, 2});
+  RasterCacheKeyID fifth = RasterCacheKeyID({1, 2});
+  RasterCacheKeyID sixth = RasterCacheKeyID({2, 1});
+  ASSERT_EQ(fourth, fifth);
+  ASSERT_NE(fourth, sixth);
+}
+
+TEST(RasterCache, RasterCacheKeyID_HashCode) {
+  uint64_t foo = 1;
+  uint64_t bar = 2;
+  RasterCacheKeyID first = RasterCacheKeyID({foo});
+  RasterCacheKeyID second = RasterCacheKeyID({foo, bar});
+  RasterCacheKeyID third = RasterCacheKeyID({bar, foo});
+
+  ASSERT_EQ(first.GetHash(), fml::HashCombine(foo));
+  ASSERT_EQ(second.GetHash(), fml::HashCombine(foo, bar));
+  ASSERT_EQ(third.GetHash(), fml::HashCombine(bar, foo));
 }
 
 }  // namespace testing

@@ -66,6 +66,7 @@ class MockRasterCache : public RasterCache {
   std::unique_ptr<RasterCacheResult> RasterizeLayer(
       PrerollContext* context,
       Layer* layer,
+      RasterCacheLayerStrategy stategy,
       const SkMatrix& ctm,
       bool checkerboard) const override;
 

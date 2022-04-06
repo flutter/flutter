@@ -21,6 +21,8 @@ class SkColorSpace;
 
 namespace flutter {
 
+enum class RasterCacheLayerStrategy { kLayer, kLayerChildren };
+
 class RasterCacheResult {
  public:
   RasterCacheResult(sk_sp<SkImage> image,
@@ -143,6 +145,7 @@ class RasterCache {
   virtual std::unique_ptr<RasterCacheResult> RasterizeLayer(
       PrerollContext* context,
       Layer* layer,
+      RasterCacheLayerStrategy strategy,
       const SkMatrix& ctm,
       bool checkerboard) const;
 
@@ -202,9 +205,16 @@ class RasterCache {
   // away.
   void Touch(SkPicture* picture, const SkMatrix& transformation_matrix);
   void Touch(DisplayList* display_list, const SkMatrix& transformation_matrix);
-  void Touch(Layer* layer, const SkMatrix& ctm);
+  void Touch(
+      Layer* layer,
+      const SkMatrix& ctm,
+      RasterCacheLayerStrategy strategey = RasterCacheLayerStrategy::kLayer);
 
-  void Prepare(PrerollContext* context, Layer* layer, const SkMatrix& ctm);
+  void Prepare(
+      PrerollContext* context,
+      Layer* layer,
+      const SkMatrix& ctm,
+      RasterCacheLayerStrategy strategey = RasterCacheLayerStrategy::kLayer);
 
   // Find the raster cache for the picture and draw it to the canvas.
   //
@@ -226,9 +236,11 @@ class RasterCache {
   // (e.g., draw the raster cache with some opacity).
   //
   // Return true if the layer raster cache is found and drawn.
-  bool Draw(const Layer* layer,
-            SkCanvas& canvas,
-            const SkPaint* paint = nullptr) const;
+  bool Draw(
+      const Layer* layer,
+      SkCanvas& canvas,
+      RasterCacheLayerStrategy strategey = RasterCacheLayerStrategy::kLayer,
+      const SkPaint* paint = nullptr) const;
 
   void PrepareNewFrame();
   void CleanupAfterFrame();
@@ -309,6 +321,15 @@ class RasterCache {
            picture_cached_this_frame_ + display_list_cached_this_frame_ <
                picture_and_display_list_cache_limit_per_frame_;
   }
+
+  std::optional<RasterCacheKey> TryToMakeRasterCacheKeyForLayer(
+      const Layer* layer,
+      RasterCacheLayerStrategy strategy,
+      const SkMatrix& ctm) const;
+
+  const SkRect& GetPaintBoundsFromLayer(
+      Layer* layer,
+      RasterCacheLayerStrategy strategy) const;
 
   const size_t access_threshold_;
   const size_t picture_and_display_list_cache_limit_per_frame_;
