@@ -2998,6 +2998,46 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(debugIsLocalCreationLocation(paddingElement.widget), isFalse);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
+    testWidgets('debugIsWidgetLocalCreation test', (WidgetTester tester) async {
+      setupDefaultPubRootDirectory(service);
+
+      final GlobalKey key = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Text('target', key: key, textDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      final Element element = key.currentContext! as Element;
+      expect(debugIsWidgetLocalCreation(element.widget), isTrue);
+
+      final Finder paddingFinder = find.byType(Padding);
+      final Element paddingElement = paddingFinder.evaluate().first;
+      expect(debugIsWidgetLocalCreation(paddingElement.widget), isFalse);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+    testWidgets('debugIsWidgetLocalCreation false test', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Text('target', key: key, textDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      final Element element = key.currentContext! as Element;
+      expect(debugIsWidgetLocalCreation(element.widget), isFalse);
+    }, skip: WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --no-track-widget-creation flag.
+
     test('devToolsInspectorUri test', () {
       activeDevToolsServerAddress = 'http://127.0.0.1:9100';
       connectedVmServiceUri = 'http://127.0.0.1:55269/798ay5al_FM=/';
