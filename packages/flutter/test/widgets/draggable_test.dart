@@ -10,6 +10,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -3075,6 +3076,35 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/92083
+  testWidgets('feedback respect the MouseRegion cursor configure', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: const <Widget>[
+            Draggable<int>(
+              ignoringFeedbackPointer: false,
+              feedback: MouseRegion(
+                cursor: SystemMouseCursors.grabbing,
+                child: SizedBox(height: 50.0, child: Text('Draggable')),
+              ),
+              child: SizedBox(height: 50.0, child: Text('Target')),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Offset location = tester.getCenter(find.text('Target'));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: location);
+    addTearDown(gesture.removePointer);
+
+    await gesture.down(location);
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grabbing);
+  });
+
   testWidgets('configurable feedback ignore pointer behavior', (WidgetTester tester) async {
     bool onTap = false;
     await tester.pumpWidget(
