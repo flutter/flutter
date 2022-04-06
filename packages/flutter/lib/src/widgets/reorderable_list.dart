@@ -1294,8 +1294,11 @@ class ReorderableDragStartListener extends StatelessWidget {
 ///  * [ReorderableListView], a Material Design list that allows the user to
 ///    reorder its items.
 class ReorderableDelayedDragStartListener extends ReorderableDragStartListener {
-  /// Creates a listener for an drag following a long press event over the
+  /// Creates a listener for a drag following a long press event over the
   /// given child widget.
+  /// 
+  /// The [delay] specifies the [Duration] it takes for the press gesture to be
+  /// considered a long press. The [delay] defaults to [kLongPressTimeout].
   ///
   /// This is most commonly used to wrap an entire list item in a reorderable
   /// list.
@@ -1304,11 +1307,16 @@ class ReorderableDelayedDragStartListener extends ReorderableDragStartListener {
     required super.child,
     required super.index,
     super.enabled,
+    this.delay = kLongPressTimeout,
   });
+
+  /// The [Duration] it takes for the press gesture to be promoted into a long
+  /// press gesture and enable a drag ability.
+  final Duration delay;
 
   @override
   MultiDragGestureRecognizer createRecognizer() {
-    return DelayedMultiDragGestureRecognizer(debugOwner: this);
+    return DelayedMultiDragGestureRecognizer(debugOwner: this, delay: delay);
   }
 }
 

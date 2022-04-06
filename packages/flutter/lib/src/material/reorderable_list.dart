@@ -82,6 +82,7 @@ class ReorderableListView extends StatefulWidget {
     this.anchor = 0.0,
     this.cacheExtent,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.delayedDragStartDuration = kLongPressTimeout,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
@@ -151,6 +152,7 @@ class ReorderableListView extends StatefulWidget {
     this.anchor = 0.0,
     this.cacheExtent,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.delayedDragStartDuration = kLongPressTimeout,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
@@ -248,6 +250,10 @@ class ReorderableListView extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// The delay after which the user is able to drag the element.
+  /// By default, this is [kLongPressTimeout].
+  final Duration delayedDragStartDuration;
 
   /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
   ///
@@ -397,11 +403,18 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         case TargetPlatform.iOS:
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-          return ReorderableDelayedDragStartListener(
-            key: itemGlobalKey,
-            index: index,
-            child: itemWithSemantics,
-          );
+          return widget.delayedDragStartDuration == Duration.zero
+              ? ReorderableDragStartListener(
+                  key: itemGlobalKey,
+                  index: index,
+                  child: itemWithSemantics,
+                )
+              : ReorderableDelayedDragStartListener(
+                  key: itemGlobalKey,
+                  index: index,
+                  delay: widget.delayedDragStartDuration,
+                  child: itemWithSemantics,
+                );
       }
     }
 
