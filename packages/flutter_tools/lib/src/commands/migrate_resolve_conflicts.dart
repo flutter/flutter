@@ -31,6 +31,12 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       defaultsTo: '5',
       help: 'The number of lines of context to show around the each conflict. Defaults to 5.',
     );
+    argParser.addFlag(
+      'confirm-commit',
+      defaultsTo: true,
+      negatable: true,
+      help: 'Indicates if proposed changes require user verification before writing to disk.',
+    );
   }
 
   final Logger logger;
@@ -85,7 +91,8 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
 
     terminal.usesTerminalUi = true;
 
-    for (final String localPath in conflictFiles) {
+    for (int i = 0; i < conflictFiles.length; i++) {
+      final localPath = conflictFiles[i];
       final File file = workingDirectory.childFile(localPath);
       final List<String> lines = file.readAsStringSync().split('\n');
 
@@ -107,6 +114,9 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       }
 
       // Prompt developer
+      int originalCount = 0;
+      int newCount = 0;
+      int skipCount = 0;
       for (final Conflict conflict in conflicts) {
         assert(conflict.startLine != null && conflict.dividerLine != null && conflict.endLine != null);
         // Print the conflict for reference
@@ -177,16 +187,19 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
           for (int lineNumber = conflict.startLine!; lineNumber <= conflict.endLine!; lineNumber++) {
             result += '${lines[lineNumber]}\n';
           }
+          skipCount++;
         } else if (conflict.keepOriginal!) {
           // Keeping original lines
           for (int lineNumber = conflict.startLine! + 1; lineNumber < conflict.dividerLine!; lineNumber++) {
             result += '${lines[lineNumber]}\n';
           }
+          originalCount++;
         } else {
           // Keeping new lines
           for (int lineNumber = conflict.dividerLine! + 1; lineNumber < conflict.endLine!; lineNumber++) {
             result += '${lines[lineNumber]}\n';
           }
+          newCount++;
         }
         lastPrintedLine = (conflict.endLine! + 1).clamp(0, lines.length);
       }
@@ -194,12 +207,42 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
         result += '${lines[lineNumber]}\n';
       }
 
-      file.writeAsStringSync(result, flush: true);
+      // Display conflict summary for this file and confirm with user if the changes should be commited.
+      if (boolArg('confirm-commit')) {
+        logger.printStatus(terminal.clearScreen(), newline: false);
+        logger.printStatus('Conflicts in $localPath complete.\n');
+        logger.printStatus('You chose to:\n  Skip $skipCount conflicts\n  Keep the original lines for $originalCount conflicts\n  Keep the new lines for $newCount conflicts\n');
+        String selection = 'y';
+        try {
+          selection = await terminal.promptForCharInput(
+            <String>['y', 'n', 'r'],
+            logger: logger,
+            prompt: 'Commit the changes to disk? (y)es, (n)o, (r)etry this file',
+            defaultChoiceIndex: 0,
+          );
+        } on StateError catch(e) {
+          logger.printError(
+            e.message,
+            indent: 0,
+          );
+        }
+        switch(selection) {
+          case 'y': {
+            file.writeAsStringSync(result, flush: true);
+            break;
+          }
+          case 'n': {
+            break;
+          }
+          case 'r': {
+            i--;
+            break;
+          }
+        }
+      } else {
+        file.writeAsStringSync(result, flush: true);
+      }
     }
-
-    // logger.printStatus('Resolve conflicts and accept changes with:');
-    // MigrateUtils.printCommandText('flutter migrate apply', logger);
-
     return const FlutterCommandResult(ExitStatus.success);
   }
 
