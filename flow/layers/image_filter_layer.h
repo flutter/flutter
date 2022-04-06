@@ -10,7 +10,7 @@
 
 namespace flutter {
 
-class ImageFilterLayer : public MergedContainerLayer {
+class ImageFilterLayer : public ContainerLayer {
  public:
   explicit ImageFilterLayer(sk_sp<SkImageFilter> filter);
 

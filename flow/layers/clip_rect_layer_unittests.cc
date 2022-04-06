@@ -28,6 +28,7 @@ TEST_F(ClipRectLayerTest, PaintingEmptyLayerDies) {
   EXPECT_EQ(preroll_context()->cull_rect, kGiantRect);        // Untouched
   EXPECT_TRUE(preroll_context()->mutators_stack.is_empty());  // Untouched
   EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
+  EXPECT_EQ(layer->child_paint_bounds(), kEmptyRect);
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -38,6 +39,7 @@ TEST_F(ClipRectLayerTest, PaintBeforePrerollDies) {
   const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
   auto layer = std::make_shared<ClipRectLayer>(layer_bounds, Clip::hardEdge);
   EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
+  EXPECT_EQ(layer->child_paint_bounds(), kEmptyRect);
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -61,6 +63,7 @@ TEST_F(ClipRectLayerTest, PaintingCulledLayerDies) {
   EXPECT_TRUE(preroll_context()->mutators_stack.is_empty());  // Untouched
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), child_bounds);
+  EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_cull_rect(), kEmptyRect);
@@ -98,6 +101,7 @@ TEST_F(ClipRectLayerTest, ChildOutsideBounds) {
   EXPECT_TRUE(preroll_context()->mutators_stack.is_empty());  // Untouched
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), child_intersect_bounds);
+  EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_cull_rect(), intersect_bounds);
@@ -133,6 +137,7 @@ TEST_F(ClipRectLayerTest, FullyContainedChild) {
   EXPECT_TRUE(preroll_context()->mutators_stack.is_empty());  // Untouched
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
+  EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_cull_rect(), layer_bounds);
@@ -175,6 +180,7 @@ TEST_F(ClipRectLayerTest, PartiallyContainedChild) {
   EXPECT_TRUE(preroll_context()->mutators_stack.is_empty());  // Untouched
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), child_intersect_bounds);
+  EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_cull_rect(), intersect_bounds);
