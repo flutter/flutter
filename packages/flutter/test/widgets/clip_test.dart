@@ -900,7 +900,7 @@ void main() {
       );
     }
 
-    for(final TextDirection textDirection in TextDirection.values) {
+    for (final TextDirection textDirection in TextDirection.values) {
       await tester.pumpWidget(buildClipRRect(textDirection));
       final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
       final bool isRtl = textDirection == TextDirection.rtl;
@@ -955,7 +955,7 @@ void main() {
       );
     }
 
-    for(final TextDirection textDirection in TextDirection.values) {
+    for (final TextDirection textDirection in TextDirection.values) {
       await tester.pumpWidget(buildClipRRect(textDirection));
       final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
       final bool isRtl = textDirection == TextDirection.rtl;
