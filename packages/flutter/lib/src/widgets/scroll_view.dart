@@ -71,7 +71,11 @@ enum ScrollViewKeyboardDismissBehavior {
 abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
   ///
-  /// If the [primary] argument is true, the [controller] must be null.
+  /// The [ScrollView.primary] argument defaults to true for vertical
+  /// scroll views if no [controller] has been provided. The [controller] argument
+  /// must be null if [primary] is explicitly set to true. If [primary] is true,
+  /// the nearest [PrimaryScrollController] surrounding the widget is attached
+  /// to this scroll view.
   ///
   /// If the [shrinkWrap] argument is true, the [center] argument must be null.
   ///

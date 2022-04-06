@@ -16,6 +16,7 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:pub_semver/pub_semver.dart';
 
 import 'allowlist.dart';
 import 'run_command.dart';
@@ -523,7 +524,7 @@ class _TestSkip {
 
 Iterable<_TestSkip> _getTestSkips(File file) {
   final ParseStringResult parseResult = parseFile(
-    featureSet: FeatureSet.latestLanguageVersion(),
+    featureSet: FeatureSet.fromEnableFlags2(sdkLanguageVersion: Version.parse('2.17.0-0'), flags: <String>['super-parameters']),
     path: file.absolute.path,
   );
   final _TestSkipLinesVisitor<CompilationUnit> visitor = _TestSkipLinesVisitor<CompilationUnit>(parseResult);

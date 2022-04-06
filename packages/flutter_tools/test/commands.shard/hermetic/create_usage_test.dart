@@ -24,6 +24,9 @@ import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 class FakePub extends Fake implements Pub {
+  FakePub(this.fs);
+
+  final FileSystem fs;
   int calledGetOffline = 0;
 
   @override
@@ -39,6 +42,7 @@ class FakePub extends Fake implements Pub {
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
   }) async {
+    fs.directory(directory).childFile('.packages').createSync();
     if (offline == true){
       calledGetOffline += 1;
     }
@@ -46,11 +50,9 @@ class FakePub extends Fake implements Pub {
 }
 
 void main() {
-  FileSystem fileSystem;
-  final FakePub fakePub = FakePub();
-
   group('usageValues', () {
     Testbed testbed;
+    FakePub fakePub;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -59,7 +61,7 @@ void main() {
 
     setUp(() {
       testbed = Testbed(setup: () {
-        //fileSystem = MemoryFileSystem.test();
+        fakePub = FakePub(globals.fs);
         Cache.flutterRoot = 'flutter';
         final List<String> filePaths = <String>[
           globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
@@ -180,7 +182,7 @@ void main() {
       //expect((await command.usageValues).commandCreateProjectType, 'plugin');
     }, overrides: <Type, Generator>{
       //ProcessManager: () => FakeProcessManager.any(),
-      Pub: () => fakePub
+      Pub: () => fakePub,
     }));
   });
 }

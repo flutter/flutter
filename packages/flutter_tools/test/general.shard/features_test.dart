@@ -89,14 +89,14 @@ void main() {
 
     testWithoutContext('Flutter macOS desktop help string', () {
       expect(flutterMacOSDesktopFeature.generateHelpMessage(),
-      'Enable or disable beta-quality support for desktop on macOS. '
+      'Enable or disable support for desktop on macOS. '
       'This setting will take effect on the master, beta, and stable channels. '
       'Newer beta versions are available on the beta channel.');
     });
 
     testWithoutContext('Flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
-      'Enable or disable beta-quality support for desktop on Linux. '
+      'Enable or disable support for desktop on Linux. '
       'This setting will take effect on the master, beta, and stable channels. '
       'Newer beta versions are available on the beta channel.');
     });
@@ -380,6 +380,10 @@ void main() {
       testConfig.setValue('enable-windows-uwp-desktop', true);
 
       expect(featureFlags.isWindowsUwpEnabled, true);
+    });
+
+    testWithoutContext('Flutter Windows UWP desktop config includes removal warning', () {
+      expect(windowsUwpEmbedding.extraHelpText, contains('Windows UWP support is obsolete and will be removed'));
     });
 
     testWithoutContext('Flutter Windows UWP desktop off by default on stable', () {

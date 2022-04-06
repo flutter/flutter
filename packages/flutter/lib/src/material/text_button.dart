@@ -294,7 +294,7 @@ class TextButton extends ButtonStyleButton {
       animationDuration: kThemeChangeDuration,
       enableFeedback: true,
       alignment: Alignment.center,
-      splashFactory: InkRipple.splashFactory,
+      splashFactory: theme.useMaterial3 ? theme.splashFactory : InkRipple.splashFactory,
     );
   }
 

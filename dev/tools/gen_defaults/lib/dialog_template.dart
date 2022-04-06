@@ -5,9 +5,8 @@
 import 'template.dart';
 
 class DialogTemplate extends TokenTemplate {
-  const DialogTemplate(String fileName, Map<String, dynamic> tokens)
-    : super(fileName, tokens,
-        colorSchemePrefix: '_colors.',
+  const DialogTemplate(super.fileName, super.tokens)
+    : super(colorSchemePrefix: '_colors.',
         textThemePrefix: '_textTheme.'
       );
 

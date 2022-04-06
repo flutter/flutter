@@ -1196,16 +1196,9 @@ class _TestRepository extends Repository {
 
 class _TestNextContext extends NextContext {
   const _TestNextContext({
-    bool autoAccept = false,
-    bool force = false,
-    required File stateFile,
-    required Checkouts checkouts,
-  }) : super(
-    autoAccept: autoAccept,
-    force: force,
-    checkouts: checkouts,
-    stateFile: stateFile,
-  );
+    required super.stateFile,
+    required super.checkouts,
+  }) : super(autoAccept: false, force: false);
 
   @override
   Future<bool> prompt(String message) {

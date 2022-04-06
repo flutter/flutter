@@ -5,9 +5,8 @@
 import 'template.dart';
 
 class NavigationRailTemplate extends TokenTemplate {
-  const NavigationRailTemplate(String fileName, Map<String, dynamic> tokens)
-    : super(fileName, tokens,
-        colorSchemePrefix: '_colors.',
+  const NavigationRailTemplate(super.fileName, super.tokens)
+    : super(colorSchemePrefix: '_colors.',
         textThemePrefix: '_textTheme.',
       );
 

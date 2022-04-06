@@ -46,6 +46,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
               'FLUTTER_TEST_OUTPUTS_DIR environment variable is set, the file '
               'will be written there instead.',
       )
+      ..addFlag('cache-startup-profile',
+        help: 'Caches the CPU profile collected before the first frame for startup '
+              'analysis.',
+      )
       ..addFlag('verbose-system-logs',
         negatable: false,
         help: 'Include verbose logging from the Flutter engine.',
@@ -163,6 +167,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
+  bool get cacheStartupProfile => boolArg('cache-startup-profile');
   bool get runningWithPrebuiltApplication => argResults['use-application-binary'] != null;
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   bool get enableImpeller => boolArg('enable-impeller');
@@ -202,6 +207,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         buildInfo,
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        cacheStartupProfile: cacheStartupProfile,
         enableDds: enableDds,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         dartFlags: stringArg('dart-flags') ?? '',
