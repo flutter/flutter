@@ -379,7 +379,7 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
     final double maxExtent = this.maxExtent;
-    print('scrolling');
+
     layoutChild(constraints.scrollOffset, maxExtent);
     final double paintExtent = maxExtent - constraints.scrollOffset;
     geometry = SliverGeometry(
@@ -426,10 +426,9 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
-    print('Pinned, constraints: $constraints');
     final double maxExtent = this.maxExtent;
     final bool overlapsContent = constraints.overlap > 0.0;
-    print('pinned');
+
     layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
     final double effectiveRemainingPaintExtent = math.max(0, constraints.remainingPaintExtent - constraints.overlap);
     final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, effectiveRemainingPaintExtent);
@@ -695,7 +694,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       _effectiveScrollOffset = constraints.scrollOffset;
     }
     final bool overlapsContent = _effectiveScrollOffset! < constraints.scrollOffset;
-    print('floating pinned');
+
     layoutChild(
       _effectiveScrollOffset!,
       maxExtent,
