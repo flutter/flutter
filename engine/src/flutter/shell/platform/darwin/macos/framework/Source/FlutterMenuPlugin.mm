@@ -12,10 +12,10 @@
 
 // Channel constants
 static NSString* const kChannelName = @"flutter/menu";
-static NSString* const kMenuSetMethod = @"Menu.setMenu";
-static NSString* const kMenuItemSelectedCallbackMethod = @"Menu.selectedCallback";
-static NSString* const kMenuItemOpenedMethod = @"Menu.opened";
-static NSString* const kMenuItemClosedMethod = @"Menu.closed";
+static NSString* const kMenuSetMenusMethod = @"Menu.setMenus";
+static NSString* const kMenuSelectedCallbackMethod = @"Menu.selectedCallback";
+static NSString* const kMenuOpenedMethod = @"Menu.opened";
+static NSString* const kMenuClosedMethod = @"Menu.closed";
 
 // Serialization keys for menu objects
 static NSString* const kIdKey = @"id";
@@ -23,7 +23,7 @@ static NSString* const kLabelKey = @"label";
 static NSString* const kEnabledKey = @"enabled";
 static NSString* const kChildrenKey = @"children";
 static NSString* const kDividerKey = @"isDivider";
-static NSString* const kShortcutEquivalentKey = @"shortcutEquivalent";
+static NSString* const kShortcutCharacterKey = @"shortcutCharacter";
 static NSString* const kShortcutTriggerKey = @"shortcutTrigger";
 static NSString* const kShortcutModifiersKey = @"shortcutModifiers";
 static NSString* const kPlatformProvidedMenuKey = @"platformProvidedMenu";
@@ -55,7 +55,7 @@ static NSString* const kAppName = @"APP_NAME";
 //    letter and keyEquivalentModifierMask does not include
 //    NSEventModifierFlagShift, AppKit will add ⇧ automatically in the UI.
 
-/*
+/**
  * Maps the string used by NSMenuItem for the given special key equivalent.
  * Keys are the logical key ids of matching trigger keys.
  */
@@ -103,7 +103,7 @@ static NSDictionary<NSNumber*, NSNumber*>* GetMacOsSpecialKeys() {
   };
 }
 
-/*
+/**
  * The mapping from the PlatformProvidedMenu enum to the macOS selectors for the provided
  * menus.
  */
@@ -127,7 +127,7 @@ static const std::map<flutter::PlatformProvidedMenu, SEL> GetMacOSProvidedMenus(
   };
 }
 
-/*
+/**
  * Returns the NSEventModifierFlags of |modifiers|, a value from
  * kShortcutKeyModifiers.
  */
@@ -151,16 +151,16 @@ static NSEventModifierFlags KeyEquivalentModifierMaskForModifiers(NSNumber* modi
   return flags;
 }
 
-/*
+/**
  * An NSMenuDelegate used to listen for changes in the menu when it opens and
  * closes.
  */
 @interface FlutterMenuDelegate : NSObject <NSMenuDelegate>
-/*
+/**
  * When this delegate receives notification that the menu opened or closed, it
  * will send a message on the given channel to that effect for the menu item
  * with the given id (the ID comes from the data supplied by the framework to
- * FlutterMenuPlugin.setMenu).
+ * |FlutterMenuPlugin.setMenus|).
  */
 - (instancetype)initWithIdentifier:(int64_t)identifier channel:(FlutterMethodChannel*)channel;
 @end
@@ -180,11 +180,11 @@ static NSEventModifierFlags KeyEquivalentModifierMaskForModifiers(NSNumber* modi
 }
 
 - (void)menuWillOpen:(NSMenu*)menu {
-  [_channel invokeMethod:kMenuItemOpenedMethod arguments:@(_identifier)];
+  [_channel invokeMethod:kMenuOpenedMethod arguments:@(_identifier)];
 }
 
 - (void)menuDidClose:(NSMenu*)menu {
-  [_channel invokeMethod:kMenuItemClosedMethod arguments:@(_identifier)];
+  [_channel invokeMethod:kMenuClosedMethod arguments:@(_identifier)];
 }
 @end
 
@@ -206,14 +206,14 @@ static NSEventModifierFlags KeyEquivalentModifierMaskForModifiers(NSNumber* modi
 // Create an NSMenuItem from information in the dictionary sent by the framework.
 - (NSMenuItem*)menuItemFromFlutterRepresentation:(NSDictionary*)representation;
 
-// Invokes kMenuItemSelectedCallbackMethod with the senders ID.
+// Invokes kMenuSelectedCallbackMethod with the senders ID.
 //
 // Used as the callback for all Flutter-created menu items that have IDs.
 - (void)flutterMenuItemSelected:(id)sender;
 
 // Replaces the NSApp.mainMenu with menus created from an array of top level
 // menus sent by the framework.
-- (void)setMenu:(nonnull NSDictionary*)representation;
+- (void)setMenus:(nonnull NSDictionary*)representation;
 @end
 
 @implementation FlutterMenuPlugin {
@@ -312,8 +312,8 @@ static NSEventModifierFlags KeyEquivalentModifierMaskForModifiers(NSNumber* modi
     return [self
         createPlatformProvidedMenu:(flutter::PlatformProvidedMenu)platformProvidedMenuId.intValue];
   } else {
-    if (representation[kShortcutEquivalentKey]) {
-      keyEquivalent = representation[kShortcutEquivalentKey];
+    if (representation[kShortcutCharacterKey]) {
+      keyEquivalent = representation[kShortcutCharacterKey];
     } else {
       NSNumber* triggerKeyId = representation[kShortcutTriggerKey];
       const NSDictionary<NSNumber*, NSNumber*>* specialKeys = GetMacOsSpecialKeys();
@@ -373,20 +373,20 @@ static NSEventModifierFlags KeyEquivalentModifierMaskForModifiers(NSNumber* modi
 
 - (void)flutterMenuItemSelected:(id)sender {
   NSMenuItem* item = sender;
-  [_channel invokeMethod:kMenuItemSelectedCallbackMethod arguments:@(item.tag)];
+  [_channel invokeMethod:kMenuSelectedCallbackMethod arguments:@(item.tag)];
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if ([call.method isEqualToString:kMenuSetMethod]) {
+  if ([call.method isEqualToString:kMenuSetMenusMethod]) {
     NSDictionary* menus = call.arguments;
-    [self setMenu:menus];
+    [self setMenus:menus];
     result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }
 }
 
-- (void)setMenu:(NSDictionary*)representation {
+- (void)setMenus:(NSDictionary*)representation {
   [_menuDelegates removeAllObjects];
   NSMenu* newMenu = [[NSMenu alloc] init];
   // There's currently only one window, named "0", but there could be other
