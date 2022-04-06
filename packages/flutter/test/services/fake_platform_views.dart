@@ -16,6 +16,7 @@ class FakePlatformViewController extends PlatformViewController {
 
   bool disposed = false;
   bool focusCleared = false;
+  Size initialSize = Size.zero;
 
   /// Events that are dispatched.
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
@@ -42,6 +43,11 @@ class FakePlatformViewController extends PlatformViewController {
   @override
   Future<void> clearFocus() async {
     focusCleared = true;
+  }
+
+  @override
+  void setInitialSize(Size size) {
+    initialSize = size;
   }
 }
 

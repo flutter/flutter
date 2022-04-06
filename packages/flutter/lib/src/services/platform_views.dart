@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -996,8 +996,7 @@ class ExpensiveAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> _sendDisposeMessage() {
-    return SystemChannels.platform_views
-        .invokeMethod<void>('dispose', <String, dynamic>{
+    return SystemChannels.platform_views.invokeMethod<void>('dispose', <String, dynamic>{
       'id': viewId,
       'hybrid': true,
     });
@@ -1006,6 +1005,13 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   @override
   Future<Size> setSize(Size size) {
     throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
+  }
+
+  @override
+  void setInitialSize(Size size) {
+    // This is not necessary when a PlatformViewLayer is used.
+    // The initial size is derivated from the ExternalViewEmbedder,
+    // and sent to the platform via JNI.
   }
 
   @override
@@ -1045,10 +1051,16 @@ class TextureAndroidViewController extends AndroidViewController {
   int? get textureId => _textureId;
 
   /// The size used to create the platform view.
-  Size? _initialSize;
+  Completer<Size> _initialSize = Completer<Size>();
 
   /// The current offset of the platform view.
   Offset _off = Offset.zero;
+
+  @override
+  void setInitialSize(Size size) {
+    assert(_state == _AndroidViewState.waitingForSize);
+    _initialSize.complete(size);
+  }
 
   @override
   Future<Size> setSize(Size size) async {
@@ -1058,8 +1070,6 @@ class TextureAndroidViewController extends AndroidViewController {
     assert(!size.isEmpty);
 
     if (_state == _AndroidViewState.waitingForSize) {
-      _initialSize = size;
-      await create();
       return size;
     }
 
@@ -1100,27 +1110,17 @@ class TextureAndroidViewController extends AndroidViewController {
     );
   }
 
-  /// Creates the Android View.
-  ///
-  /// This should not be called before [AndroidViewController.setSize].
-  ///
-  /// Throws an [AssertionError] if view was already disposed.
-  @override
-  Future<void> create() async {
-    if (_initialSize != null)
-      return super.create();
-  }
-
   @override
   Future<void> _sendCreateMessage() async {
-    assert(_initialSize != null, 'trying to create $TextureAndroidViewController without setting an initial size.');
-    assert(!_initialSize!.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
+    // The initial size is set in the first call to setSize.
+    final Size size = await _initialSize.future;
+    assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
-      'width': _initialSize!.width,
-      'height': _initialSize!.height,
+      'width': size.width,
+      'height': size.height,
       'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
     };
     if (_creationParams != null) {
@@ -1237,4 +1237,12 @@ abstract class PlatformViewController {
 
   /// Clears the view's focus on the platform side.
   Future<void> clearFocus();
+
+  /// Notifies the initial size of the platform view.
+  ///
+  /// The size is inferred from the parent widget.
+  ///
+  /// [size] is the view's new size in logical pixel, it must not be null and must
+  /// be bigger than zero.
+  void setInitialSize(Size size);
 }
