@@ -37,13 +37,20 @@ const List<String> _skippedDirectories = <String>[
   'assets', // Common directory for user assets.
 ];
 
-bool _skipped(String localPath) {
+bool _skipped(String localPath, {Set<String?>? blacklistPrefixes}) {
   if (_skippedFiles.contains(localPath)) {
     return true;
   }
   for (final String dir in _skippedDirectories) {
     if (localPath.startsWith('$dir/')) {
       return true;
+    }
+  }
+  if (blacklistPrefixes != null) {
+    for (final String? prefix in blacklistPrefixes) {
+      if (localPath.startsWith('${prefix!}/')) {
+        return true;
+      }
     }
   }
   return false;
@@ -169,6 +176,14 @@ Future<MigrateResult?> computeMigration({
     projectDirectory: flutterProject.directory,
     logger: logger,
   );
+
+  Set<String?> blacklistPrefixes = <String?>{};
+  platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
+  SupportedPlatform.values.forEach((v) => blacklistPrefixes.add(platformToSubdirectoryPrefix(v)));
+  platforms!.forEach((v) => blacklistPrefixes.remove(platformToSubdirectoryPrefix(v)));
+  blacklistPrefixes.remove('root');
+  blacklistPrefixes.remove(null);
+
   final FlutterVersion version = FlutterVersion(workingDirectory: flutterProject.directory.absolute.path);
   final String fallbackRevision = getFallbackBaseRevision(metadata, version);
   targetRevision ??= version.frameworkRevision;
@@ -270,6 +285,7 @@ Future<MigrateResult?> computeMigration({
     androidLanguage,
     iosLanguage,
     targetFlutterDirectory,
+    platforms,
     logger,
     fileSystem,
     status
@@ -307,6 +323,7 @@ Future<MigrateResult?> computeMigration({
   await diffBaseAndTarget(
     migrateResult,
     flutterProject,
+    blacklistPrefixes,
     logger,
     verbose,
     fileSystem,
@@ -321,6 +338,7 @@ Future<MigrateResult?> computeMigration({
   await computeNewlyAddedFiles(
     migrateResult,
     flutterProject,
+    blacklistPrefixes,
     logger,
     verbose,
     fileSystem,
@@ -339,6 +357,7 @@ Future<MigrateResult?> computeMigration({
     unmanagedFiles,
     unmanagedDirectories,
     preferTwoWayMerge,
+    blacklistPrefixes,
     logger,
     verbose,
     fileSystem,
@@ -372,8 +391,9 @@ String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion v
   if (metadata.versionRevision != null) {
     return metadata.versionRevision!;
   }
-  // Earliest version of flutter with .metadata: c17099f474675d8066fec6984c242d8b409ae985
-  return 'c17099f474675d8066fec6984c242d8b409ae985';
+  // Earliest version of flutter with .metadata: c17099f474675d8066fec6984c242d8b409ae985 (2017)
+  // Flutter v1.0.0: 5391447fae6209bb21a89e6a5a6583cac1af9b4b
+  return '5391447fae6209bb21a89e6a5a6583cac1af9b4b';
 }
 
 /// Creates the base reference app based off of the migrate config in the .metadata file.
@@ -389,6 +409,7 @@ Future<void> createBase(
   String androidLanguage,
   String iosLanguage,
   Directory targetFlutterDirectory,
+  List<SupportedPlatform>? platformWhitelist,
   Logger logger,
   FileSystem fileSystem,
   Status status,
@@ -429,7 +450,7 @@ Future<void> createBase(
             status.pause();
             logger.printStatus('Cloning SDK $activeRevision', indent: 2, color: TerminalColor.grey);
             status.resume();
-            sdkAvailable = await MigrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path);
+            sdkAvailable = await MigrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path, Cache.flutterRoot!);
             revisionToFlutterSdkDir[revision] = sdkDir;
           }
         } else {
@@ -478,6 +499,7 @@ Future<void> createBase(
 Future<void> diffBaseAndTarget(
   MigrateResult migrateResult,
   FlutterProject flutterProject,
+  Set<String?> blacklistPrefixes,
   Logger logger,
   bool verbose,
   FileSystem fileSystem,
@@ -491,7 +513,7 @@ Future<void> diffBaseAndTarget(
     }
     final File baseTemplateFile = entity.absolute;
     final String localPath = getLocalPath(baseTemplateFile.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path, fileSystem);
-    if (_skipped(localPath)) {
+    if (_skipped(localPath, blacklistPrefixes: blacklistPrefixes)) {
       continue;
     }
     if (await MigrateUtils.isGitIgnored(baseTemplateFile.absolute.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path)) {
@@ -524,6 +546,7 @@ Future<void> diffBaseAndTarget(
 Future<void> computeNewlyAddedFiles(
   MigrateResult migrateResult,
   FlutterProject flutterProject,
+  Set<String?> blacklistPrefixes,
   Logger logger,
   bool verbose,
   FileSystem fileSystem,
@@ -536,7 +559,7 @@ Future<void> computeNewlyAddedFiles(
     }
     final File targetTemplateFile = entity.absolute;
     final String localPath = getLocalPath(targetTemplateFile.path, migrateResult.generatedTargetTemplateDirectory!.absolute.path, fileSystem);
-    if (migrateResult.diffMap.containsKey(localPath) || _skipped(localPath)) {
+    if (migrateResult.diffMap.containsKey(localPath) || _skipped(localPath, blacklistPrefixes: blacklistPrefixes)) {
       continue;
     }
     if (await MigrateUtils.isGitIgnored(targetTemplateFile.absolute.path, migrateResult.generatedTargetTemplateDirectory!.absolute.path)) {
@@ -559,6 +582,7 @@ Future<void> computeMerge(
   List<String> unmanagedFiles,
   List<String> unmanagedDirectories,
   bool preferTwoWayMerge,
+  Set<String?> blacklistPrefixes,
   Logger logger,
   bool verbose,
   FileSystem fileSystem,
@@ -595,7 +619,7 @@ Future<void> computeMerge(
     final String localPath = getLocalPath(currentFile.path, projectRootPath, fileSystem);
     if (migrateResult.diffMap.containsKey(localPath) && migrateResult.diffMap[localPath]!.isIgnored ||
         await MigrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path) ||
-        _skipped(localPath) ||
+        _skipped(localPath, blacklistPrefixes: blacklistPrefixes) ||
         _skippedMerge(localPath)) {
       continue;
     }

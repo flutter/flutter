@@ -55,17 +55,28 @@ class MigrateUtils {
     return DiffResult(result, outputPath);
   }
 
+  // Returns the parent commit hash.
+  static Future<String> getParentHash(String hash, String workingDirectory) async {
+    final List<String> cmdArgs = <String>['log', '$hash', '-2', '--pretty=%H'];
+    final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
+    checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: 'git ${cmdArgs.join(' ')}');
+    return (result.stdout as String).trim().split('\n').last;
+  }
+
   // Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
-  static Future<bool> cloneFlutter(String revision, String destination) async {
+  static Future<bool> cloneFlutter(String revision, String destination, String flutterDirectory) async {
     // Use https url instead of ssh to avoid need to setup ssh on git.
-    List<String> cmdArgs = <String>['clone', 'https://github.com/flutter/flutter.git', destination];
+    final String parentRevision = await getParentHash(revision, flutterDirectory);
+    print(parentRevision);
+    // List<String> cmdArgs = <String>['clone', '--branch=master', '--single-branch', '--shallow-exclude=$revision', 'https://github.com/flutter/flutter.git', destination];
+    List<String> cmdArgs = <String>['clone', '--single-branch', '--filter=blob:none', '--shallow-exclude=v1.0.0', 'https://github.com/flutter/flutter.git', destination];
     ProcessResult result = await Process.run('git', cmdArgs);
-    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}', silent: true);
+    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
 
     cmdArgs.clear();
     cmdArgs = <String>['reset', '--hard', revision];
     result = await Process.run('git', cmdArgs, workingDirectory: destination);
-    if (!checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}', exit: false, silent: true)) {
+    if (!checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}', exit: false)) {
       return false;
     }
     return true;
@@ -148,12 +159,6 @@ class MigrateUtils {
 
     if (legacyNameParameter) {
       return globals.fs.path.join(outputDirectory, name);
-      // print('------------');
-      // print(result.stdout);
-      // result = await Process.run('ls', ['-r', '$outputDirectory/$name'], workingDirectory: outputDirectory);
-      // print(result.stdout);
-      // result = await Process.run('mv', ['-f', '$outputDirectory/$name/pubspec.yaml', '$outputDirectory/pubspec.yaml'], workingDirectory: outputDirectory);
-      // checkForErrors(result, commandDescription: 'mv');
     }
     return outputDirectory;
   }
