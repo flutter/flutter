@@ -737,24 +737,24 @@ class _AppBarState extends State<AppBar> {
   static const double _defaultElevation = 4.0;
   static const Color _defaultShadowColor = Color(0xFF000000);
 
-  ScrollNotificationObserverState? _scrollNotificationObserver;
+  ScrollMetricsNotificationObserverState? _scrollMetricsNotificationObserver;
   bool _scrolledUnder = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_scrollNotificationObserver != null)
-      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
-    _scrollNotificationObserver = ScrollNotificationObserver.of(context);
-    if (_scrollNotificationObserver != null)
-      _scrollNotificationObserver!.addListener(_handleScrollNotification);
+    if (_scrollMetricsNotificationObserver != null)
+      _scrollMetricsNotificationObserver!.removeListener(_handleScrollMetricsNotification);
+    _scrollMetricsNotificationObserver = ScrollMetricsNotificationObserver.of(context);
+    if (_scrollMetricsNotificationObserver != null)
+      _scrollMetricsNotificationObserver!.addListener(_handleScrollMetricsNotification);
   }
 
   @override
   void dispose() {
-    if (_scrollNotificationObserver != null) {
-      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
-      _scrollNotificationObserver = null;
+    if (_scrollMetricsNotificationObserver != null) {
+      _scrollMetricsNotificationObserver!.removeListener(_handleScrollMetricsNotification);
+      _scrollMetricsNotificationObserver = null;
     }
     super.dispose();
   }
@@ -767,18 +767,35 @@ class _AppBarState extends State<AppBar> {
     Scaffold.of(context).openEndDrawer();
   }
 
-  void _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification) {
+  void _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
       final bool oldScrolledUnder = _scrolledUnder;
-      _scrolledUnder = notification.depth == 0
-          && notification.metrics.extentBefore > 0
-          && notification.metrics.axis == Axis.vertical;
+      final ScrollMetrics metrics = notification.metrics;
+
+      if (notification.depth != 0) {
+        _scrolledUnder = false;
+      } else {
+        switch (metrics.axisDirection) {
+          case AxisDirection.up:
+            // Scroll view is reversed
+            _scrolledUnder = metrics.extentAfter > 0;
+            break;
+          case AxisDirection.down:
+            _scrolledUnder = metrics.extentBefore > 0;
+            break;
+          case AxisDirection.right:
+          case AxisDirection.left:
+          // Scrolled under is only supported in the vertical axis.
+            _scrolledUnder = false;
+            break;
+        }
+      }
+
       if (_scrolledUnder != oldScrolledUnder) {
         setState(() {
           // React to a change in MaterialState.scrolledUnder
         });
       }
-    }
+
   }
 
   Color _resolveColor(Set<MaterialState> states, Color? widgetColor, Color? themeColor, Color defaultColor) {
@@ -1178,6 +1195,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
 
     final bool isScrolledUnder = overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent);
+
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
     final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
       ? (visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight)).clamp(0.0, 1.0)
