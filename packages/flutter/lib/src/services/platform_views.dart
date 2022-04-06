@@ -1051,20 +1051,17 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   void setInitialSize(Size size) {
-    assert(_state == _AndroidViewState.waitingForSize);
+    assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
     _initialSize.complete(size);
   }
 
   @override
   Future<Size> setSize(Size size) async {
-    assert(_state != _AndroidViewState.disposed, 'trying to size a disposed Android View. View id: $viewId');
+    assert(_state != _AndroidViewState.disposed, 'Android view is disposed. View id: $viewId');
+    assert(_state != _AndroidViewState.waitingForSize, 'Android view is must have an initial size. View id: $viewId');
 
     assert(size != null);
     assert(!size.isEmpty);
-
-    if (_state == _AndroidViewState.waitingForSize) {
-      return size;
-    }
 
     final Map<Object?, Object?>? meta = await SystemChannels.platform_views.invokeMapMethod<Object?, Object?>(
       'resize',
