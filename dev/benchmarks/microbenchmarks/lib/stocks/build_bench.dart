@@ -52,11 +52,14 @@ Future<void> main() async {
       values.add(watch.elapsedMicroseconds.toDouble());
     }
   });
+  return values;
+}
 
+Future<void> main() async {
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResultStatistics(
     description: 'Stock build',
-    values: values,
+    values: await runBuildBenchmark(),
     unit: 'µs per iteration',
     name: 'stock_build_iteration',
   );
