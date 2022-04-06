@@ -1,4 +1,4 @@
-Signature: 382fa110bca6c517df3cbeabd3c21f32
+Signature: 1703953d11b2c65e41ba2aaa619e4794
 
 UNUSED LICENSES:
 
@@ -816,6 +816,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/cmake_mac/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/cockroachdb/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/gcloud_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/go/asset.json
 FILE: ../../../third_party/skia/infra/bots/assets/go_win/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-11.4/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-13.3/VERSION
@@ -2390,7 +2391,6 @@ FILE: ../../../third_party/skia/src/shaders/gradients/Sk4fLinearGradient.h
 FILE: ../../../third_party/skia/src/sksl/SkSLCompiler.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCompiler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.h
-FILE: ../../../third_party/skia/src/sksl/SkSLMain.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLMemoryLayout.h
 FILE: ../../../third_party/skia/src/sksl/SkSLProgramSettings.h
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.cpp
@@ -6356,6 +6356,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/text/GrGlyphVector.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrGlyphVector.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLFinalizationChecks.cpp
+FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsSameExpressionTree.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLNoOpErrorReporter.h
 FILE: ../../../third_party/skia/src/utils/SkTestCanvas.h
 ----------------------------------------------------------------------------------------------------
@@ -6750,6 +6751,8 @@ FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
 FILE: ../../../third_party/skia/gm/palette.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSBIX.cpp
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_hmtx.h
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.h
 FILE: ../../../third_party/skia/src/utils/SkBlitterTrace.h
 FILE: ../../../third_party/skia/src/utils/SkBlitterTraceCommon.h
 FILE: ../../../third_party/skia/src/utils/SkCycles.h
