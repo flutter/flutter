@@ -849,7 +849,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   Widget build(BuildContext context) {
     if (!_platformViewCreated) {
       // Depending on the platform, the initial size can be used to size the platform view.
-      return _PlatformViewPlaceHolder(onLayout: _controller?.setInitialSize);
+      return _PlatformViewPlaceHolder(onLayout: _controller!.setInitialSize);
     }
     _surface ??= widget._surfaceFactory(context, _controller!);
     return Focus(
@@ -1082,19 +1082,18 @@ typedef _OnLayoutCallback = void Function(Size size);
 /// A [RenderBox] that notifies its size to the owner after a layout.
 class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
   _PlatformViewPlaceholderBox({
-    this.onLayout,
+    required this.onLayout,
   }) : super(additionalConstraints: const BoxConstraints.tightFor(
       width: double.infinity,
       height: double.infinity,
     ));
 
-  _OnLayoutCallback? onLayout;
+  _OnLayoutCallback onLayout;
 
   @override
   void performLayout() {
     super.performLayout();
-    if (onLayout != null)
-      onLayout!(size);
+    onLayout(size);
   }
 }
 
@@ -1105,10 +1104,10 @@ class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
 class _PlatformViewPlaceHolder extends SingleChildRenderObjectWidget {
   const _PlatformViewPlaceHolder({
     Key? key,
-    this.onLayout,
+    required this.onLayout,
   }) : super(key: key);
 
-  final _OnLayoutCallback? onLayout;
+  final _OnLayoutCallback onLayout;
 
   @override
   _PlatformViewPlaceholderBox createRenderObject(BuildContext context) {
