@@ -970,7 +970,7 @@ class SkMaskFilter {
 
 @JS()
 class SkColorFilterNamespace {
-  external SkColorFilter MakeBlend(Float32List color, SkBlendMode blendMode);
+  external SkColorFilter? MakeBlend(Float32List color, SkBlendMode blendMode);
   external SkColorFilter MakeMatrix(
     Float32List matrix, // 20-element matrix
   );
