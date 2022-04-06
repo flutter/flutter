@@ -17,6 +17,10 @@ impeller_component("base") {
     "promise.h",
     "strings.cc",
     "strings.h",
+    "thread.cc",
+    "thread.h",
+    "thread_safety.cc",
+    "thread_safety.h",
     "validation.cc",
     "validation.h",
   ]
@@ -26,7 +30,7 @@ impeller_component("base") {
 
 impeller_component("base_unittests") {
   testonly = true
-  sources = []
+  sources = [ "base_unittests.cc" ]
   deps = [
     ":base",
     "//flutter/testing",
