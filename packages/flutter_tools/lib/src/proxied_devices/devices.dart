@@ -534,7 +534,7 @@ class ProxiedPortForwarder extends DevicePortForwarder {
       unawaited(socket.done.catchError((Object error, StackTrace stackTrace) {
         // Do nothing here. Everything will be handled in the `then` block below.
         return false;
-      }).then((dynamic value) {
+      }).whenComplete(() {
         // Send a proxy disconnect event just in case.
         unawaited(connection.sendRequest('proxy.disconnect', <String, Object>{
           'id': id,
