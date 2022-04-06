@@ -271,13 +271,6 @@ class TextButton extends ButtonStyleButton {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      const EdgeInsets.all(8),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
-    );
-
     return Theme.of(context).useMaterial3
       ? _TokenDefaultsM3(context)
       : styleFrom(
@@ -287,7 +280,7 @@ class TextButton extends ButtonStyleButton {
           shadowColor: theme.shadowColor,
           elevation: 0,
           textStyle: theme.textTheme.button,
-          padding: scaledPadding,
+          padding: _scaledPadding(context),
           minimumSize: const Size(64, 36),
           maximumSize: Size.infinite,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
@@ -308,6 +301,15 @@ class TextButton extends ButtonStyleButton {
   ButtonStyle? themeStyleOf(BuildContext context) {
     return TextButtonTheme.of(context).style;
   }
+}
+
+EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+  return ButtonStyleButton.scaledPadding(
+    const EdgeInsets.all(8),
+    const EdgeInsets.symmetric(horizontal: 8),
+    const EdgeInsets.symmetric(horizontal: 4),
+    MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+  );
 }
 
 @immutable
@@ -485,12 +487,7 @@ class _TokenDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
-    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(ButtonStyleButton.scaledPadding(
-      const EdgeInsets.symmetric(horizontal: 16),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
-    ));
+    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(_scaledPadding(context));
 
   @override
   MaterialStateProperty<Size>? get minimumSize =>
