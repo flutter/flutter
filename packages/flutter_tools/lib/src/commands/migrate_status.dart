@@ -30,6 +30,10 @@ class MigrateStatusCommand extends FlutterCommand {
       defaultsTo: true,
       help: 'Shows the diff output when enabled. Enabled by default.',
     );
+    argParser.addFlag(
+      'show-added-files',
+      help: 'Shows the contents of added files. Disabled by default.',
+    );
   }
 
   final bool _verbose;
@@ -70,7 +74,21 @@ class MigrateStatusCommand extends FlutterCommand {
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
     if (boolArg('diff') || _verbose) {
-      for (final String localPath in manifest.mergedFiles) {
+      if (boolArg('show-added-files') || _verbose) {
+        for (final String localPath in manifest.addedFiles) {
+          logger.printStatus('Newly addded file at $localPath:\n');
+          try {
+            logger.printStatus(workingDirectory.childFile(localPath).readAsStringSync(), color: TerminalColor.green);
+          } on FileSystemException {
+            logger.printStatus('Contents are byte data\n', color: TerminalColor.grey);
+          }
+        }
+      }
+      final List<String> files = <String>[];
+      files.addAll(manifest.mergedFiles);
+      files.addAll(manifest.resolvedConflictFiles(workingDirectory));
+      files.addAll(manifest.remainingConflictFiles(workingDirectory));
+      for (final String localPath in files) {
         final DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
         if (result.diff != '') {
           // Print with different colors for better visibility.
@@ -91,6 +109,8 @@ class MigrateStatusCommand extends FlutterCommand {
             }
             logger.printStatus(line, color: TerminalColor.grey);
           }
+        } else {
+          print('SKIPPED PRINTING EMPTY DIFF for $localPath');
         }
       }
     }

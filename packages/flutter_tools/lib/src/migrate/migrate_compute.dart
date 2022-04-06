@@ -395,7 +395,9 @@ String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion v
   // Flutter 2.0.0: 60bd88df915880d23877bfc1602e8ddcf4c4dd2a
   // Flutter v1.0.0: 5391447fae6209bb21a89e6a5a6583cac1af9b4b
   //
-  // We fall back on flutter v1.0.0 if we can't figure out anything else about the project.
+  // TODO(garyq): Use things like dart sdk version and other hints to better fine-tune this fallback.
+  //
+  // We fall back on flutter v1.0.0 if .metadata doesn't exist.
   return '5391447fae6209bb21a89e6a5a6583cac1af9b4b';
 }
 
@@ -569,6 +571,10 @@ Future<void> computeNewlyAddedFiles(
       migrateResult.diffMap[localPath] = DiffResult.ignored();
     }
     migrateResult.diffMap[localPath] = DiffResult.addition();
+    if (flutterProject.directory.childFile(localPath).existsSync()) {
+      // Don't store as added file if file already exists in the project.
+      continue;
+    }
     migrateResult.addedFiles.add(FilePendingMigration(localPath, targetTemplateFile));
   }
   if (verbose) {
@@ -594,7 +600,7 @@ Future<void> computeMerge(
   final List<CustomMerge> customMerges = <CustomMerge>[
     MetadataCustomMerge(logger: logger),
   ];
-  // For each existing file in the project, we attampt to 3 way merge if it is changed by the user.
+  // For each existing file in the project, we attempt to 3 way merge if it is changed by the user.
   final List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
   final String projectRootPath = flutterProject.directory.absolute.path;
   for (final FileSystemEntity entity in currentFiles) {
@@ -713,6 +719,16 @@ Future<void> computeMerge(
         }
       }
       if (result != null) {
+        // Don't include if result is identical to the current file.
+        if (result.mergedString != null) {
+          if (result.mergedString == currentFile.readAsStringSync()) {
+            continue;
+          }
+        } else {
+          if (result.mergedBytes == currentFile.readAsBytesSync()) {
+            continue;
+          }
+        }
         migrateResult.mergeResults.add(result!);
       }
       if (verbose) {
@@ -760,9 +776,9 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
   );
   manifest.writeFile();
 
-  logger.printBox('Working directory created at `${workingDir.path}`');
-  logger.printStatus(''); // newline
-
   // output the manifest contents.
   checkAndPrintMigrateStatus(manifest, workingDir, logger: logger);
+
+  logger.printStatus(''); // newline
+  logger.printBox('Working directory created at `${workingDir.path}`');
 }
