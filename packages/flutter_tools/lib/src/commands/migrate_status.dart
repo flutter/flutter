@@ -99,6 +99,8 @@ class MigrateStatusCommand extends FlutterCommand {
 
     checkAndPrintMigrateStatus(manifest, workingDirectory, logger: logger);
 
+    logger.printStatus('Guided conflict resolution wizard:');
+    MigrateUtils.printCommandText('flutter migrate resolve-conflicts', logger);
     logger.printStatus('Resolve conflicts and accept changes with:');
     MigrateUtils.printCommandText('flutter migrate apply', logger);
 

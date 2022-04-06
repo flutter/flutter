@@ -40,6 +40,36 @@ enum SupportedPlatform {
   root, // Special platform to represent the root project directory
 }
 
+String? platformToSubdirectoryPrefix(SupportedPlatform platform) {
+  switch(platform) {
+    case SupportedPlatform.android: {
+      return 'android';
+    }
+    case SupportedPlatform.ios: {
+      return 'ios';
+    }
+    case SupportedPlatform.linux: {
+      return 'linux';
+    }
+    case SupportedPlatform.macos: {
+      return 'macos';
+    }
+    case SupportedPlatform.web: {
+      return 'web';
+    }
+    case SupportedPlatform.windows: {
+      return 'windowsuwp';
+    }
+    case SupportedPlatform.fuchsia: {
+      return 'fuchsia';
+    }
+    case SupportedPlatform.root: {
+      return 'root';
+    }
+  }
+  return null;
+}
+
 class FlutterProjectFactory {
   FlutterProjectFactory({
     required Logger logger,
