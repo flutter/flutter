@@ -42,7 +42,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final String name = 'ios';
 
   @override
-  final String description = 'Build an iOS application bundle (Mac OS X host only).';
+  final String description = 'Build an iOS application bundle (macOS host only).';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
@@ -94,7 +94,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final List<String> aliases = <String>['xcarchive'];
 
   @override
-  final String description = 'Build an iOS archive bundle and IPA for distribution (Mac OS X host only).';
+  final String description = 'Build an iOS archive bundle and IPA for distribution (macOS host only).';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;

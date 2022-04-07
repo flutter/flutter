@@ -346,6 +346,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   Future<void> ensureVisible(
     RenderObject object, {
     double alignment = 0.0,
+    EdgeInsets padding = EdgeInsets.zero,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,

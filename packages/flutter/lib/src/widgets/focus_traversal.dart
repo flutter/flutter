@@ -36,7 +36,7 @@ void _focusAndEnsureVisible(
   ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
 }) {
   node.requestFocus();
-  Scrollable.ensureVisible(node.context!, alignment: 1.0, alignmentPolicy: alignmentPolicy);
+  Scrollable.ensureVisible(node.context!, alignment: 1.0, padding: node.ensureVisiblePadding, alignmentPolicy: alignmentPolicy);
 }
 
 // A class to temporarily hold information about FocusTraversalGroups when
