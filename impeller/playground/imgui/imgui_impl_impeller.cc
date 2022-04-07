@@ -89,6 +89,13 @@ bool ImGui_ImplImpeller_Init(std::shared_ptr<impeller::Context> context) {
                                           impeller::ImguiRasterFragmentShader>::
         MakeDefaultPipelineDescriptor(*context);
     desc->SetSampleCount(impeller::SampleCount::kCount4);
+    auto stencil = desc->GetFrontStencilAttachmentDescriptor();
+    if (stencil.has_value()) {
+      stencil->stencil_compare = impeller::CompareFunction::kAlways;
+      stencil->depth_stencil_pass = impeller::StencilOperation::kKeep;
+      desc->SetStencilAttachmentDescriptors(stencil.value());
+    }
+
     bd->pipeline =
         context->GetPipelineLibrary()->GetRenderPipeline(std::move(desc)).get();
     IM_ASSERT(bd->pipeline != nullptr && "Could not create ImGui pipeline.");
