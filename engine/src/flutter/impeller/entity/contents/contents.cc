@@ -29,24 +29,27 @@ Contents::Contents() = default;
 
 Contents::~Contents() = default;
 
-Rect Contents::GetBounds(const Entity& entity) const {
-  return entity.GetTransformedPathBounds();
+std::optional<Rect> Contents::GetCoverage(const Entity& entity) const {
+  return entity.GetPathCoverage();
 }
 
 std::optional<Snapshot> Contents::RenderToTexture(
     const ContentContext& renderer,
     const Entity& entity) const {
-  auto bounds = GetBounds(entity);
+  auto bounds = GetCoverage(entity);
+  if (!bounds.has_value()) {
+    return std::nullopt;
+  }
 
   auto texture = renderer.MakeSubpass(
-      ISize::Ceil(bounds.size),
+      ISize::Ceil(bounds->size),
       [&contents = *this, &entity, &bounds](const ContentContext& renderer,
                                             RenderPass& pass) -> bool {
         Entity sub_entity;
         sub_entity.SetPath(entity.GetPath());
         sub_entity.SetBlendMode(Entity::BlendMode::kSource);
         sub_entity.SetTransformation(
-            Matrix::MakeTranslation(Vector3(-bounds.origin)) *
+            Matrix::MakeTranslation(Vector3(-bounds->origin)) *
             entity.GetTransformation());
         return contents.Render(renderer, sub_entity, pass);
       });
@@ -55,7 +58,7 @@ std::optional<Snapshot> Contents::RenderToTexture(
     return std::nullopt;
   }
 
-  return Snapshot{.texture = texture, .position = bounds.origin};
+  return Snapshot{.texture = texture, .position = bounds->origin};
 }
 
 }  // namespace impeller

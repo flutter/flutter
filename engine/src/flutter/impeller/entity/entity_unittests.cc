@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "flutter/testing/testing.h"
+#include "impeller/entity/contents/filters/blend_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/filter_input.h"
 #include "impeller/entity/contents/solid_color_contents.h"
@@ -760,7 +761,9 @@ TEST_F(EntityTest, GaussianBlurFilter) {
     // Renders a green bounding rect of the target filter.
     Entity bounds_entity;
     bounds_entity.SetPath(
-        PathBuilder{}.AddRect(target_contents->GetBounds(entity)).TakePath());
+        PathBuilder{}
+            .AddRect(target_contents->GetCoverage(entity).value())
+            .TakePath());
     bounds_entity.SetContents(
         SolidColorContents::Make(bounds_color.Premultiply()));
     bounds_entity.SetTransformation(Matrix());
@@ -779,12 +782,12 @@ TEST_F(EntityTest, SetBlendMode) {
   ASSERT_EQ(entity.GetBlendMode(), Entity::BlendMode::kClear);
 }
 
-TEST_F(EntityTest, ContentsGetBoundsForEmptyPathReturnsZero) {
+TEST_F(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
   Entity entity;
   entity.SetContents(std::make_shared<SolidColorContents>());
   entity.SetPath({});
-  ASSERT_TRUE(entity.GetCoverage()->IsZero());
-  ASSERT_TRUE(entity.GetTransformedPathBounds().IsZero());
+  ASSERT_FALSE(entity.GetCoverage().has_value());
+  ASSERT_FALSE(entity.GetPathCoverage().has_value());
 }
 
 }  // namespace testing

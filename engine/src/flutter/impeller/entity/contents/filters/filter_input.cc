@@ -30,17 +30,17 @@ FilterInput::Variant FilterInput::GetInput() const {
   return input_;
 }
 
-Rect FilterInput::GetBounds(const Entity& entity) const {
+std::optional<Rect> FilterInput::GetCoverage(const Entity& entity) const {
   if (snapshot_) {
     return Rect(snapshot_->position, Size(snapshot_->texture->GetSize()));
   }
 
   if (auto contents = std::get_if<std::shared_ptr<Contents>>(&input_)) {
-    return contents->get()->GetBounds(entity);
+    return contents->get()->GetCoverage(entity);
   }
 
   if (auto texture = std::get_if<std::shared_ptr<Texture>>(&input_)) {
-    return entity.GetTransformedPathBounds();
+    return entity.GetPathCoverage();
   }
 
   FML_UNREACHABLE();

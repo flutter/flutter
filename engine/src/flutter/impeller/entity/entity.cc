@@ -4,6 +4,8 @@
 
 #include "impeller/entity/entity.h"
 
+#include <optional>
+
 #include "impeller/base/validation.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/render_pass.h"
@@ -30,10 +32,10 @@ void Entity::SetPath(Path path) {
   path_ = std::move(path);
 }
 
-Rect Entity::GetTransformedPathBounds() const {
+std::optional<Rect> Entity::GetPathCoverage() const {
   auto bounds = GetPath().GetBoundingBox();
   if (!bounds.has_value()) {
-    return Rect();
+    return std::nullopt;
   }
   return bounds->TransformBounds(GetTransformation());
 }
@@ -51,7 +53,7 @@ std::optional<Rect> Entity::GetCoverage() const {
     return std::nullopt;
   }
 
-  return contents_->GetBounds(*this);
+  return contents_->GetCoverage(*this);
 }
 
 void Entity::SetContents(std::shared_ptr<Contents> contents) {

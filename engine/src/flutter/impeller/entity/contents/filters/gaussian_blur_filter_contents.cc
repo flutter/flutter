@@ -78,38 +78,55 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
   auto& host_buffer = pass.GetTransientsBuffer();
 
   auto input = inputs[0]->GetSnapshot(renderer, entity);
-  auto input_bounds = inputs[0]->GetBounds(entity);
-  auto filter_bounds = GetBounds(entity);
+  if (!input.has_value()) {
+    return true;
+  }
+
+  auto input_bounds = inputs[0]->GetCoverage(entity);
+  if (!input_bounds.has_value() || input_bounds->IsEmpty()) {
+    return true;
+  }
+  auto filter_bounds = GetCoverage(entity);
+  if (!filter_bounds.has_value() || filter_bounds->IsEmpty()) {
+    FML_LOG(ERROR) << "The gaussian blur filter coverage is missing or empty "
+                      "even though the filter's input has coverage.";
+    return false;
+  }
 
   auto transformed_blur =
       entity.GetTransformation().TransformDirection(blur_vector_);
 
   // LTRB
   Scalar uv[4] = {
-      (filter_bounds.GetLeft() - input_bounds.GetLeft()) /
-          input_bounds.size.width,
-      (filter_bounds.GetTop() - input_bounds.GetTop()) /
-          input_bounds.size.height,
-      1 + (filter_bounds.GetRight() - input_bounds.GetRight()) /
-              input_bounds.size.width,
-      1 + (filter_bounds.GetBottom() - input_bounds.GetBottom()) /
-              input_bounds.size.height,
+      (filter_bounds->GetLeft() - input_bounds->GetLeft()) /
+          input_bounds->size.width,
+      (filter_bounds->GetTop() - input_bounds->GetTop()) /
+          input_bounds->size.height,
+      1 + (filter_bounds->GetRight() - input_bounds->GetRight()) /
+              input_bounds->size.width,
+      1 + (filter_bounds->GetBottom() - input_bounds->GetBottom()) /
+              input_bounds->size.height,
   };
 
   auto source = source_override_ ? source_override_ : inputs[0];
   auto source_texture = source->GetSnapshot(renderer, entity);
-  auto source_bounds = source->GetBounds(entity);
+  auto source_bounds = source->GetCoverage(entity);
+  if (!source_texture.has_value() || !source_bounds.has_value() ||
+      source_bounds->IsEmpty()) {
+    VALIDATION_LOG << "The gaussian blur source override has no coverage.";
+    return false;
+  }
 
   // LTRB
   Scalar uv_src[4] = {
-      (filter_bounds.GetLeft() - source_bounds.GetLeft()) /
-          source_bounds.size.width,
-      (filter_bounds.GetTop() - source_bounds.GetTop()) /
-          source_bounds.size.height,
-      1 + (filter_bounds.GetRight() - source_bounds.GetRight()) /
-              source_bounds.size.width,
-      1 + (filter_bounds.GetBottom() - source_bounds.GetBottom()) /
-              source_bounds.size.height,
+      (filter_bounds->GetLeft() - source_bounds->GetLeft()) /
+          source_bounds->size.width,
+      (filter_bounds->GetTop() - source_bounds->GetTop()) /
+          source_bounds->size.height,
+      1 + (filter_bounds->GetRight() - source_bounds->GetRight()) /
+              source_bounds->size.width,
+      1 + (filter_bounds->GetBottom() - source_bounds->GetBottom()) /
+              source_bounds->size.height,
   };
 
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
@@ -124,7 +141,7 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
   auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
   VS::FrameInfo frame_info;
-  frame_info.texture_size = Point(input_bounds.size);
+  frame_info.texture_size = Point(input_bounds->size);
   frame_info.blur_radius = transformed_blur.GetLength();
   frame_info.blur_direction = transformed_blur.Normalize();
   frame_info.src_factor = src_color_factor_;
@@ -150,13 +167,17 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
   return pass.AddCommand(cmd);
 }
 
-Rect DirectionalGaussianBlurFilterContents::GetBounds(
+std::optional<Rect> DirectionalGaussianBlurFilterContents::GetCoverage(
     const Entity& entity) const {
-  auto bounds = FilterContents::GetBounds(entity);
+  auto bounds = FilterContents::GetCoverage(entity);
+  if (!bounds.has_value()) {
+    return std::nullopt;
+  }
+
   auto transformed_blur =
       entity.GetTransformation().TransformDirection(blur_vector_).Abs();
-  auto extent = bounds.size + transformed_blur * 2;
-  return Rect(bounds.origin - transformed_blur, Size(extent.x, extent.y));
+  auto extent = bounds->size + transformed_blur * 2;
+  return Rect(bounds->origin - transformed_blur, Size(extent.x, extent.y));
 }
 
 }  // namespace impeller

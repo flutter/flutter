@@ -65,7 +65,7 @@ class Entity {
 
   void SetPath(Path path);
 
-  Rect GetTransformedPathBounds() const;
+  std::optional<Rect> GetPathCoverage() const;
 
   void SetAddsToCoverage(bool adds);
 

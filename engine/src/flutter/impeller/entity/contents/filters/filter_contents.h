@@ -61,7 +61,7 @@ class FilterContents : public Contents {
               RenderPass& pass) const override;
 
   // |Contents|
-  Rect GetBounds(const Entity& entity) const override;
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
   virtual std::optional<Snapshot> RenderToTexture(

@@ -42,7 +42,7 @@ class FilterInput final {
 
   Variant GetInput() const;
 
-  Rect GetBounds(const Entity& entity) const;
+  std::optional<Rect> GetCoverage(const Entity& entity) const;
 
   std::optional<Snapshot> GetSnapshot(const ContentContext& renderer,
                                       const Entity& entity) const;

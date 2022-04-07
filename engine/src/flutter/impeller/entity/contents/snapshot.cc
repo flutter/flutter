@@ -4,6 +4,8 @@
 
 #include "impeller/entity/contents/snapshot.h"
 
+#include <optional>
+
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/texture_contents.h"
 
@@ -13,12 +15,15 @@ std::optional<Snapshot> Snapshot::FromTransformedTexture(
     const ContentContext& renderer,
     const Entity& entity,
     std::shared_ptr<Texture> texture) {
-  Rect bounds = entity.GetTransformedPathBounds();
+  auto bounds = entity.GetPathCoverage();
+  if (!bounds.has_value()) {
+    return std::nullopt;
+  }
 
   auto result = renderer.MakeSubpass(
-      ISize(bounds.size),
-      [&texture, &entity, bounds](const ContentContext& renderer,
-                                  RenderPass& pass) -> bool {
+      ISize(bounds->size),
+      [&texture, &entity, &bounds](const ContentContext& renderer,
+                                   RenderPass& pass) -> bool {
         TextureContents contents;
         contents.SetTexture(texture);
         contents.SetSourceRect(Rect::MakeSize(Size(texture->GetSize())));
@@ -26,7 +31,7 @@ std::optional<Snapshot> Snapshot::FromTransformedTexture(
         sub_entity.SetPath(entity.GetPath());
         sub_entity.SetBlendMode(Entity::BlendMode::kSource);
         sub_entity.SetTransformation(
-            Matrix::MakeTranslation(Vector3(-bounds.origin)) *
+            Matrix::MakeTranslation(Vector3(-bounds->origin)) *
             entity.GetTransformation());
         return contents.Render(renderer, sub_entity, pass);
       });
@@ -34,7 +39,7 @@ std::optional<Snapshot> Snapshot::FromTransformedTexture(
     return std::nullopt;
   }
 
-  return Snapshot{.texture = result, .position = bounds.origin};
+  return Snapshot{.texture = result, .position = bounds->origin};
 }
 
 }  // namespace impeller
