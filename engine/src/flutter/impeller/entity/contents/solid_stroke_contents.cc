@@ -4,6 +4,7 @@
 
 #include "solid_stroke_contents.h"
 
+#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
@@ -78,12 +79,19 @@ static VertexBuffer CreateSolidStrokeVertices(
       vtx.vertex_position = polyline.points[contour_start_point_i - 1];
       vtx.vertex_normal = {};
       vtx.pen_down = 0.0;
+      // Append two transparent vertices when "picking up" the pen so that the
+      // triangle drawn when moving to the beginning of the new contour will
+      // have zero volume. This is necessary because strokes with a transparent
+      // color affect the stencil buffer to prevent overdraw.
+      vtx_builder.AppendVertex(vtx);
       vtx_builder.AppendVertex(vtx);
 
       vtx.vertex_position = polyline.points[contour_start_point_i];
-      // Append two transparent vertices at the beginning of the new contour
-      // because it's a triangle strip.
+      // Append two vertices at the beginning of the new contour
+      // so that the next appended vertex will create a triangle with zero
+      // volume.
       vtx_builder.AppendVertex(vtx);
+      vtx.pen_down = 1.0;
       vtx_builder.AppendVertex(vtx);
     }
 
@@ -147,14 +155,18 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
                    entity.GetTransformation();
 
   VS::StrokeInfo stroke_info;
-  stroke_info.color = color_;
+  stroke_info.color = color_.Premultiply();
   stroke_info.size = stroke_size_;
 
   Command cmd;
   cmd.primitive_type = PrimitiveType::kTriangleStrip;
-  cmd.label = "SolidStroke";
-  cmd.pipeline =
-      renderer.GetSolidStrokePipeline(OptionsFromPassAndEntity(pass, entity));
+  cmd.label = "Solid Stroke";
+  auto options = OptionsFromPassAndEntity(pass, entity);
+  if (!color_.IsOpaque()) {
+    options.stencil_compare = CompareFunction::kEqual;
+    options.stencil_operation = StencilOperation::kIncrementClamp;
+  }
+  cmd.pipeline = renderer.GetSolidStrokePipeline(options);
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto smoothing = SmoothingApproximation(
@@ -167,7 +179,11 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
   VS::BindStrokeInfo(cmd,
                      pass.GetTransientsBuffer().EmplaceUniform(stroke_info));
 
-  pass.AddCommand(std::move(cmd));
+  pass.AddCommand(cmd);
+
+  if (!color_.IsOpaque()) {
+    return ClipRestoreContents().Render(renderer, entity, pass);
+  }
 
   return true;
 }

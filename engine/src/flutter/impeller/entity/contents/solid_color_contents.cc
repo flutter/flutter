@@ -53,7 +53,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   using VS = SolidFillPipeline::VertexShader;
 
   Command cmd;
-  cmd.label = "SolidFill";
+  cmd.label = "Solid Fill";
   cmd.pipeline =
       renderer.GetSolidFillPipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
@@ -63,7 +63,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation();
-  frame_info.color = color_;
+  frame_info.color = color_.Premultiply();
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   cmd.primitive_type = PrimitiveType::kTriangle;

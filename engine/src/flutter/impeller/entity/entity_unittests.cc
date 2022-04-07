@@ -752,8 +752,7 @@ TEST_F(EntityTest, GaussianBlurFilter) {
     // unfiltered input.
     Entity cover_entity;
     cover_entity.SetPath(PathBuilder{}.AddRect(rect).TakePath());
-    cover_entity.SetContents(
-        SolidColorContents::Make(cover_color.Premultiply()));
+    cover_entity.SetContents(SolidColorContents::Make(cover_color));
     cover_entity.SetTransformation(ctm);
 
     cover_entity.Render(context, pass);
@@ -764,8 +763,7 @@ TEST_F(EntityTest, GaussianBlurFilter) {
         PathBuilder{}
             .AddRect(target_contents->GetCoverage(entity).value())
             .TakePath());
-    bounds_entity.SetContents(
-        SolidColorContents::Make(bounds_color.Premultiply()));
+    bounds_entity.SetContents(SolidColorContents::Make(bounds_color));
     bounds_entity.SetTransformation(Matrix());
 
     bounds_entity.Render(context, pass);
