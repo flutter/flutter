@@ -26,11 +26,8 @@ import 'theme_data.dart';
 /// [ButtonStyle] of a [TextButton], [ElevatedButton] or an
 /// [OutlinedButton].
 ///
-/// FlatButton and RaisedButton have been replaced by
-/// TextButton and ElevatedButton respectively.
-/// ButtonTheme has been replaced by TextButtonTheme and
-/// ElevatedButtonTheme. The original classes
-/// have been deprecated, please migrate code that uses them.
+/// FlatButton has been replaced by TextButton and ButtonTheme has been
+/// replaced by TextButtonTheme. Please migrate code that uses them.
 /// There's a detailed migration guide for the new button and button
 /// theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
