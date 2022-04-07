@@ -3077,6 +3077,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
+  // TODO(justinmc): Do canCopy et. al. without TextSelectionControls, since
+  // those are deprecated.
   VoidCallback? _semanticsOnCopy(TextSelectionControls? controls) {
     return widget.selectionEnabled
         && copyEnabled
