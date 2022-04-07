@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <array>
+
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/aiks_playground.h"
 #include "impeller/aiks/canvas.h"
@@ -483,40 +484,77 @@ TEST_F(AiksTest, TransformMultipliesCorrectly) {
   // clang-format on
 }
 
-TEST_F(AiksTest, PathsShouldHaveUniformAlpha) {
+TEST_F(AiksTest, SolidStrokesRenderCorrectly) {
   // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
-  Canvas canvas;
-  Paint paint;
-
-  paint.color = Color::White();
-  canvas.DrawPaint(paint);
-
-  paint.color = Color::Black().WithAlpha(0.5);
-  paint.style = Paint::Style::kStroke;
-  paint.stroke_width = 10;
-
-  Path path = PathBuilder{}
-                  .MoveTo({20, 20})
-                  .QuadraticCurveTo({60, 20}, {60, 60})
-                  .Close()
-                  .MoveTo({60, 20})
-                  .QuadraticCurveTo({60, 60}, {20, 60})
-                  .TakePath();
-
-  canvas.Scale({3, 3});
-  for (auto join :
-       {SolidStrokeContents::Join::kBevel, SolidStrokeContents::Join::kRound,
-        SolidStrokeContents::Join::kMiter}) {
-    paint.stroke_join = join;
-    for (auto cap :
-         {SolidStrokeContents::Cap::kButt, SolidStrokeContents::Cap::kSquare,
-          SolidStrokeContents::Cap::kRound}) {
-      paint.stroke_cap = cap;
-      canvas.DrawPath(path, paint);
-      canvas.Translate({80, 0});
+  bool first_frame = true;
+  auto callback = [&](AiksContext& renderer, RenderPass& pass) {
+    if (first_frame) {
+      first_frame = false;
+      ImGui::SetNextWindowSize({480, 100});
+      ImGui::SetNextWindowPos({100, 550});
     }
-    canvas.Translate({-240, 60});
-  }
+
+    static Color color = Color::Black().WithAlpha(0.5);
+    static float scale = 3;
+    static bool add_circle_clip = true;
+
+    ImGui::Begin("Controls");
+    ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&color));
+    ImGui::SliderFloat("Scale", &scale, 0, 6);
+    ImGui::Checkbox("Circle clip", &add_circle_clip);
+    ImGui::End();
+
+    Canvas canvas;
+    Paint paint;
+
+    paint.color = Color::White();
+    canvas.DrawPaint(paint);
+
+    paint.color = color;
+    paint.style = Paint::Style::kStroke;
+    paint.stroke_width = 10;
+
+    Path path = PathBuilder{}
+                    .MoveTo({20, 20})
+                    .QuadraticCurveTo({60, 20}, {60, 60})
+                    .Close()
+                    .MoveTo({60, 20})
+                    .QuadraticCurveTo({60, 60}, {20, 60})
+                    .TakePath();
+
+    canvas.Scale(Vector2(scale, scale));
+
+    if (add_circle_clip) {
+      auto [handle_a, handle_b] = IMPELLER_PLAYGROUND_LINE(
+          Point(60, 300), Point(600, 300), 20, Color::Red(), Color::Red());
+
+      auto screen_to_canvas = canvas.GetCurrentTransformation().Invert();
+      Point point_a = screen_to_canvas * handle_a;
+      Point point_b = screen_to_canvas * handle_b;
+
+      Point middle = (point_a + point_b) / 2;
+      auto radius = point_a.GetDistance(middle);
+      canvas.ClipPath(PathBuilder{}.AddCircle(middle, radius).TakePath());
+    }
+
+    for (auto join :
+         {SolidStrokeContents::Join::kBevel, SolidStrokeContents::Join::kRound,
+          SolidStrokeContents::Join::kMiter}) {
+      paint.stroke_join = join;
+      for (auto cap :
+           {SolidStrokeContents::Cap::kButt, SolidStrokeContents::Cap::kSquare,
+            SolidStrokeContents::Cap::kRound}) {
+        paint.stroke_cap = cap;
+        canvas.DrawPath(path, paint);
+        canvas.Translate({80, 0});
+      }
+      canvas.Translate({-240, 60});
+    }
+
+    return renderer.Render(canvas.EndRecordingAsPicture(), pass);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_F(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
