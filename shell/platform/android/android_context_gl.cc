@@ -85,7 +85,7 @@ static EGLResult<EGLConfig> ChooseEGLConfiguration(EGLDisplay display,
       EGL_BLUE_SIZE,       8,
       EGL_ALPHA_SIZE,      8,
       EGL_DEPTH_SIZE,      0,
-      EGL_STENCIL_SIZE,    8,
+      EGL_STENCIL_SIZE,    0,
       EGL_SAMPLES,         static_cast<EGLint>(msaa_samples),
       EGL_SAMPLE_BUFFERS,  sample_buffers,
       EGL_NONE,            // termination sentinel
