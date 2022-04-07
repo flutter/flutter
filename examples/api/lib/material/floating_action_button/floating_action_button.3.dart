@@ -11,28 +11,23 @@ void main() => runApp(const MyApp());
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  static const String _title = 'FloatingActionButton Samples';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
-      home: const FABExample(title: _title),
+      home: const FabExample(),
     );
   }
 }
 
-class FABExample extends StatelessWidget {
-  const FABExample({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+class FabExample extends StatelessWidget {
+  const FabExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: const Text('FloatingActionButton Sample'),
       ),
       body: Center(
         child: Column(
