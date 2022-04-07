@@ -184,6 +184,20 @@ class ContextualMenuButtonData {
   /// platform will be looked up.
   final String? label;
 
+  /// Creates a new [ContextualMenuButtonData] with the provided parameters
+  /// overridden.
+  ContextualMenuButtonData copyWith({
+    VoidCallback? onPressed,
+    DefaultContextualMenuButtonType? type,
+    String? label,
+  }) {
+    return ContextualMenuButtonData(
+      onPressed: onPressed ?? this.onPressed,
+      type: type ?? this.type,
+      label: label ?? this.label,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
