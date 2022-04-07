@@ -5,7 +5,10 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'rendering_tester.dart';
+
 class RenderTestBox extends RenderBox {
+  late Size boxSize;
   double value = 0.0;
   double next() {
     value += 1.0;
@@ -19,9 +22,22 @@ class RenderTestBox extends RenderBox {
   double computeMinIntrinsicHeight(double width) => next();
   @override
   double computeMaxIntrinsicHeight(double width) => next();
+
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+    boxSize = size;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    return boxSize.height / 2.0;
+  }
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('Intrinsics cache', () {
     final RenderBox test = RenderTestBox();
 
@@ -67,5 +83,35 @@ void main() {
     expect(test.getMinIntrinsicWidth(100.0), equals(2.0));
     expect(test.getMinIntrinsicWidth(0.0), equals(1.0));
 
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/101179
+  test('Cached baselines should be clear if its parent re-layout', () {
+    double viewHeight =  200.0;
+    final RenderBox test = RenderTestBox();
+    final RenderBox baseline = RenderBaseline(
+      baseline: 0.0,
+      baselineType: TextBaseline.alphabetic,
+      child: test,
+    );
+    final RenderConstrainedBox root = RenderConstrainedBox(
+      additionalConstraints: BoxConstraints.tightFor(width: 200.0, height: viewHeight),
+      child: baseline,
+    );
+
+    layout(RenderPositionedBox(
+      child: root,
+    ));
+
+    BoxParentData? parentData = test.parentData as BoxParentData?;
+    expect(parentData!.offset.dy, -(viewHeight / 2.0));
+
+    // Trigger the root render re-layout.
+    viewHeight = 300.0;
+    root.additionalConstraints = BoxConstraints.tightFor(width: 200.0, height: viewHeight);
+    pumpFrame();
+
+    parentData = test.parentData as BoxParentData?;
+    expect(parentData!.offset.dy, -(viewHeight / 2.0));
   });
 }
