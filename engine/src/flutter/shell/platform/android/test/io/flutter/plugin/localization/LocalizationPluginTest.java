@@ -140,8 +140,8 @@ public class LocalizationPluginTest {
 
   // This test should be synced with the version for API 26.
   @Test
-  @Config(sdk = Build.VERSION_CODES.N)
-  public void computePlatformResolvedLocaleAPI24() {
+  @Config(minSdk = Build.VERSION_CODES.N)
+  public void computePlatformResolvedLocale_fromAndroidN() {
     // --- Test Setup ---
     FlutterJNI flutterJNI = new FlutterJNI();
 
@@ -235,8 +235,8 @@ public class LocalizationPluginTest {
 
   // Tests the legacy pre API 24 algorithm.
   @Test
-  @Config(sdk = Build.VERSION_CODES.JELLY_BEAN)
-  public void computePlatformResolvedLocaleAPI16() {
+  @Config(minSdk = Build.VERSION_CODES.JELLY_BEAN, maxSdk = Build.VERSION_CODES.M)
+  public void computePlatformResolvedLocale_beforeAndroidN() {
     // --- Test Setup ---
     FlutterJNI flutterJNI = new FlutterJNI();
 
