@@ -544,6 +544,22 @@ def RunClangTidyTests(build_dir):
       cwd=test_dir)
 
 
+def RunApiConsistencyTests(build_dir):
+  test_dir = os.path.join(buildroot_dir, 'flutter', 'tools', 'api_check')
+  dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
+  for dart_test_file in dart_tests:
+    opts = [
+      '--disable-dart-dev',
+      dart_test_file,
+      os.path.join(buildroot_dir, 'flutter')]
+    RunEngineExecutable(
+      build_dir,
+      os.path.join('dart-sdk', 'bin', 'dart'),
+      None,
+      flags=opts,
+      cwd=test_dir)
+
+
 def main():
   parser = argparse.ArgumentParser()
   all_types = ['engine', 'dart', 'benchmarks', 'java', 'android', 'objc', 'font-subset']
@@ -611,6 +627,7 @@ def main():
     RunLitetestTests(build_dir)
     RunGithooksTests(build_dir)
     RunClangTidyTests(build_dir)
+    RunApiConsistencyTests(build_dir)
     RunDartTests(build_dir, dart_filter, args.verbose_dart_snapshot)
     RunConstFinderTests(build_dir)
     RunFrontEndServerTests(build_dir)
