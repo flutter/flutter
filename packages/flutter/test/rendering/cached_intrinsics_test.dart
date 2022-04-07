@@ -86,7 +86,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101179
-  test('Cached baselines should be clear if its parent re-layout', () {
+  test('Cached baselines should be cleared if its parent re-layout', () {
     double viewHeight =  200.0;
     final RenderBox test = RenderTestBox();
     final RenderBox baseline = RenderBaseline(
