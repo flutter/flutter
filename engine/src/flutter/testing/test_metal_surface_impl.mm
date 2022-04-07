@@ -10,6 +10,10 @@
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/testing/test_metal_context.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
+#include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
+#include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
