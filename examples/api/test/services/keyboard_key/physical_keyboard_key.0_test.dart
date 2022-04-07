@@ -15,13 +15,11 @@ void main() {
     await tester.tap(find.text('Click to focus'));
     await tester.pumpAndSettle();
     expect(find.text('Press a key'), findsOneWidget);
-    // Yes, this is a physical keyboard key test, but we don't have a way to
-    // send a physical keyboard key in the test framework.
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyQ, physicalKey: PhysicalKeyboardKey.keyA);
     await tester.pumpAndSettle();
     expect(find.text('Pressed the key next to CAPS LOCK!'), findsOneWidget);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyB);
     await tester.pumpAndSettle();
     expect(find.text('Not the key next to CAPS LOCK: Pressed Key B'), findsOneWidget);
   });
