@@ -9,7 +9,6 @@ impeller_component("base") {
     "allocation.cc",
     "allocation.h",
     "backend_cast.h",
-    "base.h",
     "comparable.cc",
     "comparable.h",
     "config.h",
