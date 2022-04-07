@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -50,7 +50,8 @@ def _get_adb_command(args, flutter_root):
 
 def _find_package_pid(adb_command, package):
     """Find the pid of the Flutter application process."""
-    ps_output = subprocess.check_output(adb_command + ['shell', 'ps'])
+    ps_output = subprocess.check_output(adb_command + ['shell', 'ps'],
+                                        encoding='utf-8')
     ps_match = re.search('^\S+\s+(\d+).*\s%s' % package, ps_output, re.MULTILINE)
     if not ps_match:
         print('Unable to find pid for package %s on device' % package)
@@ -60,7 +61,8 @@ def _find_package_pid(adb_command, package):
 
 def _get_device_abi(adb_command):
     abi_output = subprocess.check_output(
-        adb_command + ['shell', 'getprop', 'ro.product.cpu.abi']).strip()
+        adb_command + ['shell', 'getprop', 'ro.product.cpu.abi'],
+        encoding='utf-8').strip()
     if abi_output.startswith('arm64'):
         return 'arm64'
     if abi_output.startswith('arm'):
@@ -111,7 +113,8 @@ class GdbClient(object):
 
         # Find library files that are mapped into the process.
         proc_maps = subprocess.check_output(
-            adb_command + ['shell', 'run-as', package, 'cat', '/proc/%d/maps' % package_pid])
+            adb_command + ['shell', 'run-as', package, 'cat', '/proc/%d/maps' % package_pid],
+            encoding='utf-8')
         proc_libs = re.findall('(/system/.*\.(?:so|oat))\s*$', proc_maps, re.MULTILINE)
 
         if old_sysroot:
