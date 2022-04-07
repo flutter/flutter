@@ -18,7 +18,7 @@ void main() {
     });
 
     test('create Android view of unregistered type', () async {
-      await expectLater(() => 
+      await expectLater(() =>
         PlatformViewsService.initAndroidView(
           id: 0,
           viewType: 'web',
