@@ -398,7 +398,7 @@ class SystemChannels {
   /// The following outgoing method is defined for this channel (invoked using
   /// [OptionalMethodChannel.invokeMethod]):
   ///
-  ///  * `Menu.setMenu`: sends the configuration of the platform menu, including
+  ///  * `Menu.setMenus`: sends the configuration of the platform menu, including
   ///    labels, enable/disable information, and unique integer identifiers for
   ///    each menu item. The configuration is sent as a `Map<String, Object?>`
   ///    encoding the list of top level menu items in window "0", which each
