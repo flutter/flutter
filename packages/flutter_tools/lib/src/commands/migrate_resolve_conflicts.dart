@@ -12,7 +12,8 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'migrate.dart';
 
-/// Flutter migrate subcommand to check the migration status of the project.
+/// Flutter migrate subcommand that guides the developer through conflicts,
+/// allowing them to accept the original, the new lines, or skip and resolve manually.
 class MigrateResolveConflictsCommand extends FlutterCommand {
   MigrateResolveConflictsCommand({
     required this.logger,
@@ -83,7 +84,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
-    final int contextLineCount = stringArg('context-lines') == null ? 5 : int.parse(stringArg('context-lines')!);
+    final int contextLineCount = int.parse(stringArg('context-lines')!);
 
     checkAndPrintMigrateStatus(manifest, workingDirectory, logger: logger);
 
@@ -150,7 +151,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
           selection = await terminal.promptForCharInput(
             <String>['o', 'n', 's'],
             logger: logger,
-            prompt: 'Keep the (o)riginal lines, (n)ew lines, or (S)kip resolving this conflict?',
+            prompt: 'Accept the (o)riginal lines, (n)ew lines, or (S)kip and resolve the conflict manually?',
             defaultChoiceIndex: 2,
           );
         } on StateError catch(e) {
@@ -178,7 +179,11 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
 
       int lastPrintedLine = 0;
       String result = '';
+      bool hasChanges = false;
       for (final Conflict conflict in conflicts) {
+        if (conflict.keepOriginal != null) {
+          hasChanges = true; // don't unecessarily write file if no changes were made.
+        }
         for (int lineNumber = lastPrintedLine; lineNumber < conflict.startLine!; lineNumber++) {
           result += '${lines[lineNumber]}\n';
         }
@@ -206,12 +211,19 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       for (int lineNumber = lastPrintedLine; lineNumber < lines.length; lineNumber++) {
         result += '${lines[lineNumber]}\n';
       }
+      // Ensure we don't add extra newlines at the end of files
+      if (result.endsWith('\n\n\n')) {
+        result.replaceRange(result.length - 3, null, '\n');
+      }
+      if (result.endsWith('\n\n')) {
+        result.replaceRange(result.length - 2, null, '\n');
+      }
 
       // Display conflict summary for this file and confirm with user if the changes should be commited.
       if (boolArg('confirm-commit')) {
         logger.printStatus(terminal.clearScreen(), newline: false);
         logger.printStatus('Conflicts in $localPath complete.\n');
-        logger.printStatus('You chose to:\n  Skip $skipCount conflicts\n  Keep the original lines for $originalCount conflicts\n  Keep the new lines for $newCount conflicts\n');
+        logger.printStatus('You chose to:\n  Skip $skipCount conflicts\n  Acccept the original lines for $originalCount conflicts\n  Accept the new lines for $newCount conflicts\n');
         String selection = 'y';
         try {
           selection = await terminal.promptForCharInput(
@@ -228,7 +240,9 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
         }
         switch(selection) {
           case 'y': {
-            file.writeAsStringSync(result, flush: true);
+            if (hasChanges) {
+              file.writeAsStringSync(result, flush: true);
+            }
             break;
           }
           case 'n': {
@@ -247,7 +261,8 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
   }
 
   void printConflictLine(String text, int lineNumber, {TerminalColor? color}) {
-    logger.printStatus('$lineNumber  ', color: TerminalColor.grey, newline: false, indent: 2);
+    final String padding = ' ' * (5 - lineNumber.toString().length); // This pads line numbers up to 99,999
+    logger.printStatus('$lineNumber$padding', color: TerminalColor.grey, newline: false, indent: 2);
     logger.printStatus(text, color: color);
   }
 }
