@@ -19,6 +19,12 @@ GrContextOptions MakeDefaultContextOptions(ContextType type,
   options.fPersistentCache = PersistentCache::GetCacheForProcess();
 
   if (api.has_value() && api.value() == GrBackendApi::kOpenGL) {
+    // Using stencil buffers has caused memory and performance regressions.
+    // See b/226484927 for internal customer regressions doc.
+    // Before enabling, we need to show a motivating case for where it will
+    // improve performance on OpenGL backend.
+    options.fAvoidStencilBuffers = true;
+
     // To get video playback on the widest range of devices, we limit Skia to
     // ES2 shading language when the ES3 external image extension is missing.
     options.fPreferExternalImagesOverES3 = true;

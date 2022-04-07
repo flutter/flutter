@@ -139,7 +139,7 @@ static sk_sp<SkSurface> WrapOnscreenSurface(GrDirectContext* context,
   GrBackendRenderTarget render_target(size.width(),     // width
                                       size.height(),    // height
                                       0,                // sample count
-                                      8,                // stencil bits
+                                      0,                // stencil bits
                                       framebuffer_info  // framebuffer info
   );
 
