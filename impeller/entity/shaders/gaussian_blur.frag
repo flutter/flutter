@@ -16,6 +16,7 @@ in vec2 v_texture_coords;
 in vec2 v_src_texture_coords;
 in vec2 v_texture_size;
 in vec2 v_blur_direction;
+in float v_blur_sigma;
 in float v_blur_radius;
 in float v_src_factor;
 in float v_inner_blur_factor;
@@ -23,12 +24,11 @@ in float v_outer_blur_factor;
 
 out vec4 frag_color;
 
-const float kTwoPi = 6.283185307179586;
+const float kSqrtTwoPi = 2.50662827463;
 
 float Gaussian(float x) {
-  float stddev = v_blur_radius * 0.5;
-  float xnorm = x / stddev;
-  return exp(-0.5 * xnorm * xnorm) / (kTwoPi * stddev * stddev);
+  float variance = v_blur_sigma * v_blur_sigma;
+  return exp(-0.5 * x * x / variance) / (kSqrtTwoPi * v_blur_sigma);
 }
 
 // Emulate SamplerAddressMode::ClampToBorder.
@@ -38,17 +38,19 @@ vec4 SampleWithBorder(sampler2D tex, vec2 uv) {
 }
 
 void main() {
-  vec4 total = vec4(0);
-  float total_gaussian = 0;
+  vec4 total_color = vec4(0);
+  float gaussian_integral = 0;
   vec2 blur_uv_offset = v_blur_direction / v_texture_size;
+
   for (float i = -v_blur_radius; i <= v_blur_radius; i++) {
     float gaussian = Gaussian(i);
-    total_gaussian += gaussian;
-    total += gaussian * SampleWithBorder(texture_sampler,
-                                         v_texture_coords + blur_uv_offset * i);
+    gaussian_integral += gaussian;
+    total_color +=
+        gaussian * SampleWithBorder(texture_sampler,
+                                    v_texture_coords + blur_uv_offset * i);
   }
 
-  vec4 blur_color = total / total_gaussian;
+  vec4 blur_color = total_color / gaussian_integral;
 
   vec4 src_color = SampleWithBorder(alpha_mask_sampler, v_src_texture_coords);
   float blur_factor = v_inner_blur_factor * float(src_color.a > 0) +
