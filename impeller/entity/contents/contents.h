@@ -36,13 +36,13 @@ class Contents {
                       const Entity& entity,
                       RenderPass& pass) const = 0;
 
-  /// @brief Get the bounding rectangle that this contents modifies in screen
-  ///        space.
-  virtual Rect GetBounds(const Entity& entity) const;
+  /// @brief Get the screen space bounding rectangle that this contents affects.
+  virtual std::optional<Rect> GetCoverage(const Entity& entity) const;
 
   /// @brief Render this contents to a texture, respecting the entity's
   ///        transform, path, stencil depth, blend mode, etc.
-  ///        The result texture size is always the size of `GetBounds(entity)`.
+  ///        The result texture size is always the size of
+  ///        `GetCoverage(entity)`.
   virtual std::optional<Snapshot> RenderToTexture(
       const ContentContext& renderer,
       const Entity& entity) const;

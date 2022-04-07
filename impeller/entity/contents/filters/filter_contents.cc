@@ -95,6 +95,11 @@ void FilterContents::SetInputs(FilterInput::Vector inputs) {
 bool FilterContents::Render(const ContentContext& renderer,
                             const Entity& entity,
                             RenderPass& pass) const {
+  auto filter_coverage = GetCoverage(entity);
+  if (!filter_coverage.has_value()) {
+    return true;
+  }
+
   // Run the filter.
 
   auto maybe_snapshot = RenderToTexture(renderer, entity);
@@ -110,49 +115,56 @@ bool FilterContents::Render(const ContentContext& renderer,
   contents->SetSourceRect(Rect::MakeSize(Size(snapshot.texture->GetSize())));
 
   Entity e;
-  e.SetPath(PathBuilder{}.AddRect(GetBounds(entity)).GetCurrentPath());
+  e.SetPath(PathBuilder{}.AddRect(filter_coverage.value()).GetCurrentPath());
   e.SetBlendMode(entity.GetBlendMode());
   e.SetStencilDepth(entity.GetStencilDepth());
   return contents->Render(renderer, e, pass);
 }
 
-Rect FilterContents::GetBounds(const Entity& entity) const {
-  // The default bounds of FilterContents is just the union of its inputs.
-  // FilterContents implementations may choose to increase the bounds in any
-  // direction, but it should never
+std::optional<Rect> FilterContents::GetCoverage(const Entity& entity) const {
+  // The default coverage of FilterContents is just the union of its inputs'
+  // coverage. FilterContents implementations may choose to adjust this
+  // coverage depending on the use case.
 
   if (inputs_.empty()) {
-    return Rect();
+    return std::nullopt;
   }
 
-  Rect result = inputs_.front()->GetBounds(entity);
-  for (auto input_i = inputs_.begin() + 1; input_i < inputs_.end(); input_i++) {
-    result.Union(input_i->get()->GetBounds(entity));
+  std::optional<Rect> result;
+  for (const auto& input : inputs_) {
+    auto coverage = input->GetCoverage(entity);
+    if (!coverage.has_value()) {
+      continue;
+    }
+    if (!result.has_value()) {
+      result = coverage;
+      continue;
+    }
+    result = result->Union(result.value());
   }
-
   return result;
 }
 
 std::optional<Snapshot> FilterContents::RenderToTexture(
     const ContentContext& renderer,
     const Entity& entity) const {
-  auto bounds = GetBounds(entity);
-  if (bounds.IsZero()) {
+  auto bounds = GetCoverage(entity);
+  if (!bounds.has_value() || bounds->IsEmpty()) {
     return std::nullopt;
   }
 
   // Render the filter into a new texture.
   auto texture = renderer.MakeSubpass(
-      ISize(GetBounds(entity).size),
+      ISize(bounds->size),
       [=](const ContentContext& renderer, RenderPass& pass) -> bool {
-        return RenderFilter(inputs_, renderer, entity, pass, bounds);
+        return RenderFilter(inputs_, renderer, entity, pass, bounds.value());
       });
 
   if (!texture) {
     return std::nullopt;
   }
 
-  return Snapshot{.texture = texture, .position = bounds.origin};
+  return Snapshot{.texture = texture, .position = bounds->origin};
 }
 
 }  // namespace impeller
