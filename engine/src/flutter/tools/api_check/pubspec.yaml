@@ -1,0 +1,84 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: apicheck
+publish_to: none
+
+# Do not add any dependencies that require more than what is provided in
+# //third_party/dart/pkg or //third_party/dart/third_party/pkg.
+# In particular, package:test is not usable here.
+
+# If you do add packages here, make sure you can run `pub get --offline`, and
+# check the .packages and .package_config to make sure all the paths are
+# relative to this directory into //third_party/dart
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+# Do not add any dependencies that require more than what is provided in
+# //third_party/pkg, //third_party/dart/pkg, or
+# //third_party/dart/third_party/pkg. In particular, package:test is not usable
+# here.
+
+# If you do add packages here, make sure you can run `pub get --offline`, and
+# check the .packages and .package_config to make sure all the paths are
+# relative to this directory into //third_party/dart
+
+dependencies:
+  analyzer: any
+  _fe_analyzer_shared: any
+
+dev_dependencies:
+  async_helper: any
+  expect: any
+  litetest: any
+  smith: any
+
+dependency_overrides:
+  _fe_analyzer_shared:
+    path: ../../../third_party/dart/pkg/_fe_analyzer_shared
+  analyzer:
+    path: ../../../third_party/dart/pkg/analyzer
+  async:
+    path: ../../../third_party/dart/third_party/pkg/async
+  async_helper:
+    path: ../../../third_party/dart/pkg/async_helper
+  charcode:
+    path: ../../../third_party/dart/third_party/pkg/charcode
+  collection:
+    path: ../../../third_party/dart/third_party/pkg/collection
+  convert:
+    path: ../../../third_party/dart/third_party/pkg/convert
+  crypto:
+    path: ../../../third_party/dart/third_party/pkg/crypto
+  expect:
+    path: ../../../third_party/dart/pkg/expect
+  file:
+    path: ../../../third_party/pkg/file/packages/file
+  glob:
+    path: ../../../third_party/dart/third_party/pkg/glob
+  litetest:
+    path: ../../testing/litetest
+  meta:
+    path: ../../../third_party/dart/pkg/meta
+  package_config:
+    path: ../../../third_party/dart/third_party/pkg_tested/package_config
+  path:
+    path: ../../../third_party/dart/third_party/pkg/path
+  pub_semver:
+    path: ../../../third_party/dart/third_party/pkg/pub_semver
+  source_span:
+    path: ../../../third_party/dart/third_party/pkg/source_span
+  string_scanner:
+    path: ../../../third_party/dart/third_party/pkg/string_scanner
+  term_glyph:
+    path: ../../../third_party/dart/third_party/pkg/term_glyph
+  typed_data:
+    path: ../../../third_party/dart/third_party/pkg/typed_data
+  watcher:
+    path: ../../../third_party/dart/third_party/pkg/watcher
+  yaml:
+    path: ../../../third_party/dart/third_party/pkg/yaml
+  smith:
+    path: ../../../third_party/dart/pkg/smith
