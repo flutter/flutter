@@ -750,16 +750,17 @@ abstract class AndroidViewController extends PlatformViewController {
     return ((pointerId << 8) & 0xff00) | (action & 0xff);
   }
 
+  /// Sends the message to dispose the platform view.
   Future<void> _sendDisposeMessage();
-  Future<void> _sendCreateMessage();
 
-  /// Creates the Android View.
-  ///
-  /// Throws an [AssertionError] if view was already disposed.
-  Future<void> create() async {
+  /// Sends the message to create the platform view with an initial [size].
+  Future<void> _sendCreateMessage({Size? size});
+
+  @override
+  Future<void> create({Size? size}) async {
     assert(_state != _AndroidViewState.disposed, 'trying to create a disposed Android view');
 
-    await _sendCreateMessage();
+    await _sendCreateMessage(size: size);
 
     _state = _AndroidViewState.created;
     for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
@@ -970,7 +971,7 @@ class ExpensiveAndroidViewController extends AndroidViewController {
         );
 
   @override
-  Future<void> _sendCreateMessage() {
+  Future<void> _sendCreateMessage({Size? size}) {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
@@ -1020,10 +1021,7 @@ class ExpensiveAndroidViewController extends AndroidViewController {
 /// The platform view is created by calling [create]. However, the platform view won't be
 /// created until an initial size is given.
 ///
-/// To set the initial size of the platform view, use [setInitialSize]. After the platform
-/// view is created, it can be resized by calling [setSize].
-///
-/// Calling [setSize] prior to setting an initial size doesn't set the initial size.
+/// Calling [setSize] prior to creating the view doesn't resize the view.
 ///
 /// The controller is typically created with [PlatformViewsService.initAndroidView].
 class TextureAndroidViewController extends AndroidViewController {
@@ -1051,21 +1049,8 @@ class TextureAndroidViewController extends AndroidViewController {
   @override
   int? get textureId => _textureId;
 
-  /// The size used to create the platform view.
-  final Completer<Size> _initialSize = Completer<Size>();
-
   /// The current offset of the platform view.
   Offset _off = Offset.zero;
-
-  @override
-  void setInitialSize(Size size) {
-    assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
-    assert(size != null);
-    assert(!size.isEmpty);
-
-    if (!_initialSize.isCompleted)
-      _initialSize.complete(size);
-  }
 
   @override
   Future<Size> setSize(Size size) async {
@@ -1086,6 +1071,15 @@ class TextureAndroidViewController extends AndroidViewController {
     assert(meta!.containsKey('width'));
     assert(meta!.containsKey('height'));
     return Size(meta!['width']! as double, meta['height']! as double);
+  }
+
+  @override
+  Future<void> create({Size? size}) async {
+    if (size == null)
+      return;
+    assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
+    assert(!size.isEmpty);
+    return super.create(size: size);
   }
 
   @override
@@ -1112,9 +1106,10 @@ class TextureAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<void> _sendCreateMessage() async {
-    // The initial size is set after calling setInitialSize.
-    final Size size = await _initialSize.future;
+  Future<void> _sendCreateMessage({Size? size}) async {
+    if (size == null)
+      return;
+
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final Map<String, dynamic> args = <String, dynamic>{
@@ -1231,6 +1226,13 @@ abstract class PlatformViewController {
   /// Dispatches the `event` to the platform view.
   Future<void> dispatchPointerEvent(PointerEvent event);
 
+  /// Creates the platform view with the initial [size].
+  ///
+  /// [size] is the view's initial size in logical pixel.
+  /// [size] can be omitted if the concrete implementation doesn't require an initial size
+  /// to create the platform view.
+  Future<void> create({Size? size}) async {}
+
   /// Disposes the platform view.
   ///
   /// The [PlatformViewController] is unusable after calling dispose.
@@ -1238,11 +1240,4 @@ abstract class PlatformViewController {
 
   /// Clears the view's focus on the platform side.
   Future<void> clearFocus();
-
-  /// Notifies the initial size of the platform view.
-  ///
-  /// The size is inferred from the parent widget.
-  ///
-  /// [size] is the view's initial size in logical pixel.
-  void setInitialSize(Size size) {}
 }

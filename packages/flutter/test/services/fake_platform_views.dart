@@ -44,11 +44,6 @@ class FakePlatformViewController extends PlatformViewController {
   Future<void> clearFocus() async {
     focusCleared = true;
   }
-
-  @override
-  void setInitialSize(Size size) {
-    initialSize = size;
-  }
 }
 
 class FakeAndroidViewController implements AndroidViewController {
@@ -94,9 +89,6 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  void setInitialSize(Size size) {}
-
-  @override
   Future<void> setOffset(Offset off) async {}
 
   @override
@@ -126,7 +118,7 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> create() async {}
+  Future<void> create({Size? size}) async {}
 
   @override
   List<PlatformViewCreatedCallback> get createdCallbacks => <PlatformViewCreatedCallback>[];

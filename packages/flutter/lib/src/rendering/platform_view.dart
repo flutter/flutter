@@ -179,8 +179,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
       if (_viewController.isCreated) {
         _currentTextureSize = await _viewController.setSize(targetSize);
       } else {
-        _viewController.setInitialSize(targetSize);
-        await _viewController.create();
+        await _viewController.create(size: targetSize);
         _currentTextureSize = targetSize;
       }
       // We've resized the platform view to targetSize, but it is possible that

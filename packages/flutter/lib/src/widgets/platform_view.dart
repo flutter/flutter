@@ -849,7 +849,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   Widget build(BuildContext context) {
     if (!_platformViewCreated) {
       // Depending on the platform, the initial size can be used to size the platform view.
-      return _PlatformViewPlaceHolder(onLayout: _controller!.setInitialSize);
+      return _PlatformViewPlaceHolder(onLayout: (Size size) => _controller!.create(size: size));
     }
     _surface ??= widget._surfaceFactory(context, _controller!);
     return Focus(

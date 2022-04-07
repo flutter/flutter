@@ -18,32 +18,32 @@ void main() {
     });
 
     test('create Android view of unregistered type', () async {
-      await expectLater(() => (
+      await expectLater(() => 
         PlatformViewsService.initAndroidView(
           id: 0,
           viewType: 'web',
           layoutDirection: TextDirection.ltr,
-        )..setInitialSize(const Size(100.0, 100.0))).create(),
+        ).create(size: const Size(100.0, 100.0)),
         throwsA(isA<PlatformException>()),
       );
       viewsController.registerViewType('web');
 
       try {
-        await (PlatformViewsService.initSurfaceAndroidView(
+        await PlatformViewsService.initSurfaceAndroidView(
           id: 0,
           viewType: 'web',
           layoutDirection: TextDirection.ltr,
-        )..setInitialSize(const Size(1.0, 1.0))).create();
+        ).create(size: const Size(1.0, 1.0));
       } catch (e) {
         expect(false, isTrue, reason: 'did not expected any exception, but instead got `$e`');
       }
 
       try {
-        await (PlatformViewsService.initAndroidView(
+        await PlatformViewsService.initAndroidView(
           id: 1,
           viewType: 'web',
           layoutDirection: TextDirection.ltr,
-        )..setInitialSize(const Size(1.0, 1.0))).create();
+        ).create(size: const Size(1.0, 1.0));
       } catch (e) {
         expect(false, isTrue, reason: 'did not expected any exception, but instead got `$e`');
       }
@@ -51,10 +51,10 @@ void main() {
 
     test('create Android views', () async {
       viewsController.registerViewType('webview');
-      await (PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr)
-          ..setInitialSize(const Size(100.0, 100.0))).create();
-      await (PlatformViewsService.initAndroidView( id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl)
-          ..setInitialSize(const Size(200.0, 300.0))).create();
+      await PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr)
+          .create(size: const Size(100.0, 100.0));
+      await PlatformViewsService.initAndroidView( id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl)
+          .create(size: const Size(200.0, 300.0));
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
@@ -71,16 +71,15 @@ void main() {
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
       );
-      controller.setInitialSize(const Size(100.0, 100.0));
-      await controller.create();
+      await controller.create(size: const Size(100.0, 100.0));
       expectLater(
         () {
           final AndroidViewController controller = PlatformViewsService.initAndroidView(
             id: 0,
             viewType: 'web',
             layoutDirection: TextDirection.ltr,
-          )..setInitialSize(const Size(100.0, 100.0));
-          return controller.create();
+          );
+          return controller.create(size: const Size(100.0, 100.0));
         },
         throwsA(isA<PlatformException>()),
       );
@@ -88,26 +87,26 @@ void main() {
 
     test('dispose Android view', () async {
       viewsController.registerViewType('webview');
-      await (PlatformViewsService.initAndroidView(
+      await PlatformViewsService.initAndroidView(
         id: 0,
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
-      )..setInitialSize(const Size(100.0, 100.0))).create();
+      ).create(size: const Size(100.0, 100.0));
 
       final AndroidViewController viewController = PlatformViewsService.initAndroidView(
         id: 1,
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
-      )..setInitialSize(const Size(200.0, 300.0));
-      await viewController.create();
+      );
+      await viewController.create(size: const Size(200.0, 300.0));
       await viewController.dispose();
 
       final AndroidViewController surfaceViewController = PlatformViewsService.initSurfaceAndroidView(
         id: 1,
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
-      )..setInitialSize(const Size(200.0, 300.0));
-      await surfaceViewController.create();
+      );
+      await surfaceViewController.create(size: const Size(200.0, 300.0));
       await surfaceViewController.dispose();
 
       expect(
@@ -124,8 +123,8 @@ void main() {
         id: 1,
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
-      )..setInitialSize(const Size(200.0, 300.0));
-      await viewController.create();
+      );
+      await viewController.create(size: const Size(200.0, 300.0));
       await viewController.dispose();
       await viewController.dispose();
     });
@@ -138,8 +137,8 @@ void main() {
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
         onFocus: () { didFocus = true; },
-      )..setInitialSize(const Size(100.0, 100.0));
-      await viewController.create();
+      );
+      await viewController.create(size: const Size(100.0, 100.0));
       await viewController.dispose();
       final ByteData message =
           SystemChannels.platform_views.codec.encodeMethodCall(const MethodCall('viewFocused', 0));
@@ -149,18 +148,18 @@ void main() {
 
     test('resize Android view', () async {
       viewsController.registerViewType('webview');
-      await (PlatformViewsService.initAndroidView(
+      await PlatformViewsService.initAndroidView(
         id: 0,
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
-      )..setInitialSize(const Size(100.0, 100.0))).create();
+      ).create(size: const Size(100.0, 100.0));
 
       final AndroidViewController androidView = PlatformViewsService.initAndroidView(
         id: 1,
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
-      )..setInitialSize(const Size(200.0, 300.0));
-      await androidView.create();
+      );
+      await androidView.create(size: const Size(200.0, 300.0));
       await androidView.setSize(const Size(500.0, 500.0));
 
       expect(
@@ -184,8 +183,7 @@ void main() {
       )..addOnPlatformViewCreatedListener(callback);
       expect(createdViews, isEmpty);
 
-      controller1.setInitialSize(const Size(100.0, 100.0));
-      await controller1.create();
+      await controller1.create(size: const Size(100.0, 100.0));
       expect(createdViews, orderedEquals(<int>[0]));
 
       final AndroidViewController controller2 = PlatformViewsService.initAndroidView(
@@ -195,8 +193,7 @@ void main() {
       )..addOnPlatformViewCreatedListener(callback);
       expect(createdViews, orderedEquals(<int>[0]));
 
-      controller2.setInitialSize(const Size(100.0, 200.0));
-      await controller2.create();
+      await controller2.create(size: const Size(100.0, 200.0));
       expect(createdViews, orderedEquals(<int>[0, 5]));
 
     });
@@ -207,9 +204,9 @@ void main() {
         id: 0,
         viewType: 'webview',
         layoutDirection: TextDirection.rtl,
-      )..setInitialSize(const Size(100.0, 100.0));
+      );
       await viewController.setLayoutDirection(TextDirection.ltr);
-      await viewController.create();
+      await viewController.create(size: const Size(100.0, 100.0));
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
@@ -224,9 +221,9 @@ void main() {
         id: 0,
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
-      )..setInitialSize(const Size(100.0, 100.0));
+      );
       await viewController.setLayoutDirection(TextDirection.rtl);
-      await viewController.create();
+      await viewController.create(size: const Size(100.0, 100.0));
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
@@ -241,8 +238,8 @@ void main() {
         id: 7,
         viewType: 'webview',
         layoutDirection: TextDirection.ltr,
-      )..setInitialSize(const Size(100.0, 100.0));
-      await viewController.create();
+      );
+      await viewController.create(size: const Size(100.0, 100.0));
       await viewController.setOffset(const Offset(10, 20));
       expect(
         viewsController.offsets,
