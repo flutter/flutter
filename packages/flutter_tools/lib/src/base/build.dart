@@ -139,9 +139,15 @@ class AOTSnapshotter {
       '--deterministic',
     ];
 
-    // We strip snapshot by default, but allow to suppress this behavior
-    // by supplying --no-strip in extraGenSnapshotOptions.
-    bool shouldStrip = true;
+    final bool targetingApplePlatform =
+        platform == TargetPlatform.ios || platform == TargetPlatform.darwin;
+    _logger.printTrace('targetingApplePlatform = $targetingApplePlatform');
+    final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
+
+    // We strip snapshot by default unless we need to split a dSYM out, but
+    // we allow to suppress stripping by supplying --no-strip in
+    // extraGenSnapshotOptions.
+    bool shouldStrip = !(targetingApplePlatform && shouldSplitDebugInfo);
 
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
@@ -186,7 +192,6 @@ class AOTSnapshotter {
     // multiple debug files.
     final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
     final String debugFilename = 'app.$archName.symbols';
-    final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
     if (shouldSplitDebugInfo) {
       _fileSystem.directory(splitDebugInfo)
         .createSync(recursive: true);
@@ -197,7 +202,10 @@ class AOTSnapshotter {
       // Faster async/await
       if (shouldSplitDebugInfo) ...<String>[
         '--dwarf-stack-traces',
-        '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}',
+        // --save-debugging-info produces non-native symbol format which breaks
+        // `flutter symbolize` for Apple so we're using dsymutil instead.
+        if (!targetingApplePlatform)
+          '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}',
       ],
       if (dartObfuscation)
         '--obfuscate',
@@ -218,7 +226,7 @@ class AOTSnapshotter {
 
     // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
-    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin) {
+    if (targetingApplePlatform) {
       final RunResult result = await _buildFramework(
         appleArch: darwinArch!,
         isIOS: platform == TargetPlatform.ios,
@@ -227,6 +235,7 @@ class AOTSnapshotter {
         outputPath: outputDir.path,
         bitcode: bitcode,
         quiet: quiet,
+        splitDebugInfo: shouldSplitDebugInfo ? splitDebugInfo : null,
       );
       if (result.exitCode != 0) {
         return result.exitCode;
@@ -244,7 +253,8 @@ class AOTSnapshotter {
     required String assemblyPath,
     required String outputPath,
     required bool bitcode,
-    required bool quiet
+    required bool quiet,
+    required String? splitDebugInfo,
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
     if (!quiet) {
@@ -294,11 +304,17 @@ class AOTSnapshotter {
       '-o', appLib,
       assemblyO,
     ];
-    final RunResult linkResult = await _xcode.clang(linkArgs);
-    if (linkResult.exitCode != 0) {
+    RunResult result = await _xcode.clang(linkArgs);
+    if (result.exitCode != 0) {
       _logger.printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
+    } else if (splitDebugInfo != null) {
+      final String dSYMPath = _fileSystem.path.join(splitDebugInfo, targetArch, 'App.dSYM');
+      result = await _xcode.dsymutil(<String>['-o', dSYMPath, appLib]);
+      if (result.exitCode != 0) {
+        _logger.printError('Failed to generate dSYM. dsymutil terminated with exit code ${compileResult.exitCode}');
+      }
     }
-    return linkResult;
+    return result;
   }
 
   bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
