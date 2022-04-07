@@ -230,6 +230,8 @@ class ElevatedButton extends ButtonStyleButton {
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
   ///
+  /// ## Material 2 defaults
+  ///
   /// * `textStyle` - Theme.textTheme.button
   /// * `backgroundColor`
   ///   * disabled - Theme.colorScheme.onSurface(0.12)
@@ -247,7 +249,7 @@ class ElevatedButton extends ButtonStyleButton {
   ///   * hovered or focused - 4
   ///   * pressed - 8
   /// * `padding`
-  ///   * textScaleFactor <= 1 - horizontal(16)
+  ///   * `textScaleFactor <= 1` - horizontal(16)
   ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(16), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
@@ -278,6 +280,48 @@ class ElevatedButton extends ButtonStyleButton {
   /// outline, is null. That means that the outline is defined by the button
   /// shape's [OutlinedBorder.side]. Typically the default value of an
   /// [OutlinedBorder]'s side is [BorderSide.none], so an outline is not drawn.
+  ///
+  /// ## Material 3 defaults
+  ///
+  /// If [ThemeData.useMaterial3] is set to true the following defaults will
+  /// be used:
+  ///
+  /// * `textStyle` - Theme.textTheme.labelLarge
+  /// * `backgroundColor`
+  ///   * disabled - Theme.colorScheme.onSurface(0.12)
+  ///   * others - Theme.colorScheme.surface
+  /// * `foregroundColor`
+  ///   * disabled - Theme.colorScheme.onSurface(0.38)
+  ///   * others - Theme.colorScheme.primary
+  /// * `overlayColor`
+  ///   * hovered - Theme.colorScheme.primary(0.08)
+  ///   * focused or pressed - Theme.colorScheme.primary(0.12)
+  /// * `shadowColor` - Theme.colorScheme.shadow
+  /// * `surfaceTintColor` - Theme.colorScheme.surfaceTint
+  /// * `elevation`
+  ///   * disabled - 0
+  ///   * default - 1
+  ///   * hovered - 3
+  ///   * focused or pressed - 1
+  /// * `padding`
+  ///   * `textScaleFactor <= 1` - horizontal(16)
+  ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(16), horizontal(8))
+  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
+  ///   * `3 < textScaleFactor` - horizontal(4)
+  /// * `minimumSize` - Size(64, 40)
+  /// * `fixedSize` - null
+  /// * `maximumSize` - Size.infinite
+  /// * `side` - null
+  /// * `shape` - StadiumBorder()
+  /// * `mouseCursor`
+  ///   * disabled - SystemMouseCursors.basic
+  ///   * others - SystemMouseCursors.click
+  /// * `visualDensity` - Theme.visualDensity
+  /// * `tapTargetSize` - Theme.materialTapTargetSize
+  /// * `animationDuration` - kThemeChangeDuration
+  /// * `enableFeedback` - true
+  /// * `alignment` - Alignment.center
+  /// * `splashFactory` - Theme.splashFactory
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);

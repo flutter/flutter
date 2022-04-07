@@ -91,6 +91,27 @@ import 'theme_data.dart';
 ///   home: MyAppHome(),
 /// )
 /// ```
+///
+/// ## Material 3 button types
+///
+/// Material Design 3 specifies five types of common buttons. Flutter provides
+/// support for these using the following button classes:
+/// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
+///
+/// | Type         | Flutter implementation  |
+/// | :----------- | :---------------------- |
+/// | Elevated     | [ElevatedButton]        |
+/// | Filled       | Styled [ElevatedButton] |
+/// | Filled Tonal | Styled [ElevatedButton] |
+/// | Outlined     | [OutlinedButton]        |
+/// | Text         | [TextButton]            |
+///
+/// {@tool dartpad}
+/// This sample shows how to create each of the Material 3 button types with Flutter.
+///
+/// ** See code in examples/api/lib/material/button_style/button_style.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextButtonTheme], the theme for [TextButton]s.
