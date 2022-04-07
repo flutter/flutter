@@ -23,9 +23,12 @@ static constexpr char kChannelName[] = "flutter/platform";
 static constexpr char kGetClipboardDataMethod[] = "Clipboard.getData";
 static constexpr char kHasStringsClipboardMethod[] = "Clipboard.hasStrings";
 static constexpr char kSetClipboardDataMethod[] = "Clipboard.setData";
+static constexpr char kPlaySoundMethod[] = "SystemSound.play";
 
 static constexpr char kTextPlainFormat[] = "text/plain";
 static constexpr char kFakeContentType[] = "text/madeupcontenttype";
+
+static constexpr char kSoundTypeAlert[] = "SystemSoundType.alert";
 
 // Test implementation of PlatformHandler to allow testing the PlatformHandler
 // logic.
@@ -43,6 +46,9 @@ class TestPlatformHandler : public PlatformHandler {
   MOCK_METHOD1(GetHasStrings,
                void(std::unique_ptr<MethodResult<rapidjson::Document>>));
   MOCK_METHOD2(SetPlainText,
+               void(const std::string&,
+                    std::unique_ptr<MethodResult<rapidjson::Document>>));
+  MOCK_METHOD2(SystemSoundPlay,
                void(const std::string&,
                     std::unique_ptr<MethodResult<rapidjson::Document>>));
 };
@@ -199,6 +205,32 @@ TEST(PlatformHandler, RejectsSettingUnknownTypes) {
         JsonMethodCodec::GetInstance().DecodeAndProcessResponseEnvelope(
             reply, reply_size, &result);
       }));
+}
+
+TEST(PlatformHandler, PlayingSystemSoundCallsThrough) {
+  TestBinaryMessenger messenger;
+  TestPlatformHandler platform_handler(&messenger);
+
+  auto args = std::make_unique<rapidjson::Document>(rapidjson::kStringType);
+  auto& allocator = args->GetAllocator();
+  args->SetString(kSoundTypeAlert);
+  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
+      MethodCall<rapidjson::Document>(kPlaySoundMethod, std::move(args)));
+
+  // Set up a handler to call a response on |result| so that it doesn't log
+  // on destruction about leaking.
+  ON_CALL(platform_handler, SystemSoundPlay)
+      .WillByDefault(
+          [](auto sound_type,
+             std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+            result->NotImplemented();
+          });
+
+  EXPECT_CALL(platform_handler,
+              SystemSoundPlay(::testing::StrEq(kSoundTypeAlert), _));
+  EXPECT_TRUE(messenger.SimulateEngineMessage(
+      kChannelName, encoded->data(), encoded->size(),
+      [](const uint8_t* reply, size_t reply_size) {}));
 }
 
 }  // namespace testing

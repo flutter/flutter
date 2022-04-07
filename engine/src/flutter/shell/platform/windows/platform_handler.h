@@ -42,8 +42,14 @@ class PlatformHandler {
       const std::string& text,
       std::unique_ptr<MethodResult<rapidjson::Document>> result) = 0;
 
+  virtual void SystemSoundPlay(
+      const std::string& sound_type,
+      std::unique_ptr<MethodResult<rapidjson::Document>> result) = 0;
+
   // A error type to use for error responses.
   static constexpr char kClipboardError[] = "Clipboard error";
+
+  static constexpr char kSoundTypeAlert[] = "SystemSoundType.alert";
 
  private:
   // Called when a method is called on |channel_|;

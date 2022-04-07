@@ -11,6 +11,7 @@ static constexpr char kChannelName[] = "flutter/platform";
 static constexpr char kGetClipboardDataMethod[] = "Clipboard.getData";
 static constexpr char kHasStringsClipboardMethod[] = "Clipboard.hasStrings";
 static constexpr char kSetClipboardDataMethod[] = "Clipboard.setData";
+static constexpr char kPlaySoundMethod[] = "SystemSound.play";
 
 static constexpr char kTextPlainFormat[] = "text/plain";
 static constexpr char kTextKey[] = "text";
@@ -64,6 +65,11 @@ void PlatformHandler::HandleMethodCall(
       return;
     }
     SetPlainText(itr->value.GetString(), std::move(result));
+  } else if (method.compare(kPlaySoundMethod) == 0) {
+    // Only one string argument is expected.
+    const rapidjson::Value& sound_type = method_call.arguments()[0];
+
+    SystemSoundPlay(sound_type.GetString(), std::move(result));
   } else {
     result->NotImplemented();
   }

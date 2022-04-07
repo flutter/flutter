@@ -37,6 +37,11 @@ class PlatformHandlerWinUwp : public PlatformHandler {
       const std::string& text,
       std::unique_ptr<MethodResult<rapidjson::Document>> result) override;
 
+  // |PlatformHandler|
+  void SystemSoundPlay(
+      const std::string& sound_type,
+      std::unique_ptr<MethodResult<rapidjson::Document>> result) override;
+
  private:
   // A reference to the Flutter view.
   FlutterWindowsView* view_;
