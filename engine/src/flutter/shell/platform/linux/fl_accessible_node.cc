@@ -187,9 +187,15 @@ static AtkRole fl_accessible_node_get_role(AtkObject* accessible) {
   if ((self->flags & kFlutterSemanticsFlagIsButton) != 0) {
     return ATK_ROLE_PUSH_BUTTON;
   }
-  if ((self->flags & (kFlutterSemanticsFlagHasCheckedState |
-                      kFlutterSemanticsFlagHasToggledState)) != 0) {
+  if ((self->flags & kFlutterSemanticsFlagIsInMutuallyExclusiveGroup) != 0 &&
+      (self->flags & kFlutterSemanticsFlagHasCheckedState) != 0) {
+    return ATK_ROLE_RADIO_BUTTON;
+  }
+  if ((self->flags & kFlutterSemanticsFlagHasCheckedState) != 0) {
     return ATK_ROLE_CHECK_BOX;
+  }
+  if ((self->flags & kFlutterSemanticsFlagHasToggledState) != 0) {
+    return ATK_ROLE_TOGGLE_BUTTON;
   }
   if ((self->flags & kFlutterSemanticsFlagIsSlider) != 0) {
     return ATK_ROLE_SLIDER;

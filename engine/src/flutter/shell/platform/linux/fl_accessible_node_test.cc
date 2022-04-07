@@ -79,6 +79,31 @@ TEST(FlAccessibleNodeTest, SetFlags) {
   g_object_unref(state);
 }
 
+// Checks Flutter flags are mapped to appropriate ATK roles.
+TEST(FlAccessibleNodeTest, GetRole) {
+  g_autoptr(FlEngine) engine = make_mock_engine();
+
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
+
+  fl_accessible_node_set_flags(
+      node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsButton));
+  EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_PUSH_BUTTON);
+
+  fl_accessible_node_set_flags(node, static_cast<FlutterSemanticsFlag>(
+                                         kFlutterSemanticsFlagHasCheckedState));
+  EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_CHECK_BOX);
+
+  fl_accessible_node_set_flags(
+      node, static_cast<FlutterSemanticsFlag>(
+                kFlutterSemanticsFlagHasCheckedState |
+                kFlutterSemanticsFlagIsInMutuallyExclusiveGroup));
+  EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_RADIO_BUTTON);
+
+  fl_accessible_node_set_flags(node, static_cast<FlutterSemanticsFlag>(
+                                         kFlutterSemanticsFlagHasToggledState));
+  EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_TOGGLE_BUTTON);
+}
+
 // Checks Flutter actions are mapped to the appropriate ATK actions.
 TEST(FlAccessibleNodeTest, SetActions) {
   g_autoptr(FlEngine) engine = make_mock_engine();
