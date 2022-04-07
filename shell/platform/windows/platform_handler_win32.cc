@@ -269,4 +269,15 @@ void PlatformHandlerWin32::SetPlainText(
   result->Success();
 }
 
+void PlatformHandlerWin32::SystemSoundPlay(
+    const std::string& sound_type,
+    std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+  if (sound_type.compare(kSoundTypeAlert) == 0) {
+    MessageBeep(MB_OK);
+    result->Success();
+  } else {
+    result->NotImplemented();
+  }
+}
+
 }  // namespace flutter
