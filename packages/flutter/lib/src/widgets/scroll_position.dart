@@ -676,6 +676,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Animates the position such that the given object is as visible as possible
   /// by just scrolling this position.
   ///
+  /// The [padding] is used to add extra space around the [object] when revealing it.
+  /// For example, `EdgeInsets.only(bottom: 16.0)` will ensure an additional 16 pixels
+  /// of space are visible below the [object].
+  ///
   /// The optional `targetRenderObject` parameter is used to determine which area
   /// of that object should be as visible as possible. If `targetRenderObject`
   /// is null, the entire [RenderObject] (as defined by its
@@ -686,9 +690,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   ///  * [ScrollPositionAlignmentPolicy] for the way in which `alignment` is
   ///    applied, and the way the given `object` is aligned.
+  ///  * [FocusNode.ensureVisiblePadding] which specifies the [padding] used when
+  ///    a widget is focused via focus traversal.
   Future<void> ensureVisible(
     RenderObject object, {
     double alignment = 0.0,
+    EdgeInsets padding = EdgeInsets.zero,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
@@ -699,13 +706,17 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(object)!;
     assert(viewport != null);
 
-    Rect? targetRect;
+    Rect targetRect;
     if (targetRenderObject != null && targetRenderObject != object) {
       targetRect = MatrixUtils.transformRect(
         targetRenderObject.getTransformTo(object),
         object.paintBounds.intersect(targetRenderObject.paintBounds),
       );
+    } else {
+      targetRect = object.paintBounds;
     }
+
+    targetRect = padding.inflateRect(targetRect);
 
     double target;
     switch (alignmentPolicy) {

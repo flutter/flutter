@@ -117,6 +117,7 @@ class FlutterOptions {
   static const String kInitializeFromDill = 'initialize-from-dill';
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const String kFatalWarnings = 'fatal-warnings';
+  static const String kUseApplicationBinary = 'use-application-binary';
 }
 
 /// flutter command categories for usage.
@@ -603,6 +604,16 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kDeviceTimeout,
       help: 'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
       valueHelp: '10'
+    );
+  }
+
+  void usesApplicationBinaryOption() {
+    argParser.addOption(
+      FlutterOptions.kUseApplicationBinary,
+      help: 'Specify a pre-built application binary to use when running. For Android applications, '
+        'this must be the path to an APK. For iOS applications, the path to an IPA. Other device types '
+        'do not yet support prebuilt application binaries.',
+      valueHelp: 'path/to/app.apk',
     );
   }
 

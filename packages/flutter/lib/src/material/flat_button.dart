@@ -14,11 +14,8 @@ import 'theme_data.dart';
 ///
 /// ### This class is deprecated, please use [TextButton] instead.
 ///
-/// FlatButton and RaisedButton have been replaced by
-/// [TextButton] and [ElevatedButton] respectively.
-/// ButtonTheme has been replaced by [TextButtonTheme] and
-/// [ElevatedButtonTheme]. The original classes
-/// will eventually be removed, please migrate code that uses them.
+/// FlatButton have been replaced by [TextButton] and ButtonTheme has been
+/// replaced by [TextButtonTheme]. Please migrate code that uses them.
 /// There's a detailed migration guide for the new button and button
 /// theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
