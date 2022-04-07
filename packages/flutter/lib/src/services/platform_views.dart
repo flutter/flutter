@@ -1015,13 +1015,9 @@ class ExpensiveAndroidViewController extends AndroidViewController {
 }
 
 /// Controls an Android view that is rendered as a texture.
-///
 /// This is typically used by [AndroidView] to display a View in the Android view hierarchy.
 ///
-/// The platform view is created by calling [create]. However, the platform view won't be
-/// created until an initial size is given.
-///
-/// Calling [setSize] prior to creating the view doesn't resize the view.
+/// The platform view is created by calling [create] with an initial size.
 ///
 /// The controller is typically created with [PlatformViewsService.initAndroidView].
 class TextureAndroidViewController extends AndroidViewController {
