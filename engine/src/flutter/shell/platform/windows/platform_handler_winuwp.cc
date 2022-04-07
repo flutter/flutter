@@ -108,4 +108,10 @@ void PlatformHandlerWinUwp::SetPlainText(
   result->Success();
 }
 
+void PlatformHandlerWinUwp::SystemSoundPlay(
+    const std::string& sound_type,
+    std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+  result->NotImplemented();
+}
+
 }  // namespace flutter
