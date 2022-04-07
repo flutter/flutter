@@ -1,4 +1,4 @@
-Signature: 6664b99acf2e0e03f55fc1dcc8ba5f4e
+Signature: b5bed999aaf0dedc313459e67618b9cd
 
 UNUSED LICENSES:
 
@@ -6344,8 +6344,7 @@ FILE: ../../../third_party/skia/src/core/SkPipelineData.h
 FILE: ../../../third_party/skia/src/core/SkSLTypeShared.h
 FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.cpp
 FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.h
-FILE: ../../../third_party/skia/src/core/SkUniformData.cpp
-FILE: ../../../third_party/skia/src/core/SkUniformData.h
+FILE: ../../../third_party/skia/src/gpu/GrImageInfo.cpp
 FILE: ../../../third_party/skia/src/gpu/RefCntedCallback.h
 FILE: ../../../third_party/skia/src/gpu/ops/PathTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/PathTessellator.h
