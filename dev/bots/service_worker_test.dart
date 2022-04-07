@@ -156,6 +156,16 @@ Future<void> runWebServiceWorkerTest({
     );
   }
 
+  // Preserve old index.html as index_og.html so we can restore it later for other tests
+  await runCommand(
+    'mv',
+    <String>[
+      'index.html',
+      'index_og.html',
+    ],
+    workingDirectory: _testAppWebDirectory,
+  );
+
   final bool shouldExpectFlutterJs = testType != ServiceWorkerTestType.withoutFlutterJs;
 
   print('BEGIN runWebServiceWorkerTest(headless: $headless, testType: $testType)\n');
@@ -362,7 +372,14 @@ Future<void> runWebServiceWorkerTest({
     expect(reportedVersion, '4');
     reportedVersion = null;
   } finally {
-    File(path.join(_testAppWebDirectory, 'index.html')).deleteSync();
+    await runCommand(
+      'mv',
+      <String>[
+        'index_og.html',
+        'index.html',
+      ],
+      workingDirectory: _testAppWebDirectory,
+    );
     await _setAppVersion(1);
     await server?.stop();
   }
