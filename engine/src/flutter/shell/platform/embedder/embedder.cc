@@ -621,7 +621,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
       config.size.width,   // width
       config.size.height,  // height
       1,                   // sample count
-      8,                   // stencil bits
+      0,                   // stencil bits
       framebuffer_info     // framebuffer info
   );
 

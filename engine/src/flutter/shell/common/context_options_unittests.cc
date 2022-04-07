@@ -9,10 +9,10 @@
 namespace flutter {
 namespace testing {
 
-TEST(ContextOptionsTest, OpenGLAllowsStencilBuffers) {
+TEST(ContextOptionsTest, OpenGLDisablesStencilBuffers) {
   auto options = MakeDefaultContextOptions(flutter::ContextType::kRender,
                                            GrBackendApi::kOpenGL);
-  EXPECT_FALSE(options.fAvoidStencilBuffers);
+  EXPECT_TRUE(options.fAvoidStencilBuffers);
 }
 
 }  // namespace testing
