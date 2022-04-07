@@ -68,10 +68,14 @@ const List<String> _skippedMergeFileExt = <String>[
   '.exe',
 ];
 
+const List<String> _alwaysMigrateFiles = <String>[
+  'android/gradle/wrapper/gradle-wrapper.jar',
+];
+
 /// True for files that should not be merged. Typically, images and binary files.
 bool _skippedMerge(String localPath) {
   for (final String ext in _skippedMergeFileExt) {
-    if (localPath.endsWith(ext)) {
+    if (localPath.endsWith(ext) && !_alwaysMigrateFiles.contains(localPath)) {
       return true;
     }
   }
@@ -621,9 +625,6 @@ Future<void> computeMerge(
     }
 
     final File currentFile = entity.absolute;
-    if (!currentFile.path.startsWith(projectRootPath)) {
-      continue; // Not a project file.
-    }
     // Diff the current file against the old generated template
     final String localPath = getLocalPath(currentFile.path, projectRootPath, fileSystem);
     if (migrateResult.diffMap.containsKey(localPath) && migrateResult.diffMap[localPath]!.isIgnored ||
@@ -641,15 +642,19 @@ Future<void> computeMerge(
       continue;
     }
 
+    final bool alwaysMigrate = _alwaysMigrateFiles.contains(localPath);
+    print('$localPath $alwaysMigrate');
+
     // Current file unchanged by user, thus we consider it owned by the tool.
-    if (userDiff.exitCode == 0) {
-      if (migrateResult.diffMap.containsKey(localPath)) {
+    if (userDiff.exitCode == 0 || alwaysMigrate) {
+      if (migrateResult.diffMap.containsKey(localPath) || alwaysMigrate) {
         // File changed between base and target
         if (migrateResult.diffMap[localPath]!.isDeletion) {
           // File is deleted in new template
           migrateResult.deletedFiles.add(FilePendingMigration(localPath, currentFile));
+          continue;
         }
-        if (migrateResult.diffMap[localPath]!.exitCode != 0) {
+        if (migrateResult.diffMap[localPath]!.exitCode != 0 || alwaysMigrate) {
           // Accept the target version wholesale
           MergeResult result;
           try {
