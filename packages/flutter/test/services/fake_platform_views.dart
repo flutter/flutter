@@ -16,7 +16,6 @@ class FakePlatformViewController extends PlatformViewController {
 
   bool disposed = false;
   bool focusCleared = false;
-  Size initialSize = Size.zero;
 
   /// Events that are dispatched.
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];

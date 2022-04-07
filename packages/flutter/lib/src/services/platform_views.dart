@@ -1051,7 +1051,7 @@ class TextureAndroidViewController extends AndroidViewController {
   @override
   Future<Size> setSize(Size size) async {
     assert(_state != _AndroidViewState.disposed, 'Android view is disposed. View id: $viewId');
-    assert(_state != _AndroidViewState.waitingForSize, 'Android view is must have an initial size. View id: $viewId');
+    assert(_state != _AndroidViewState.waitingForSize, 'Android view must have an initial size. View id: $viewId');
     assert(size != null);
     assert(!size.isEmpty);
 
