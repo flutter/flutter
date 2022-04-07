@@ -60,6 +60,7 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final bool dismissible;
 
+  /// {@template flutter.widgets.ModalBarrier.onDismiss}
   /// Called when the barrier is being dismissed.
   ///
   /// If non-null [onDismiss] will be called in place of popping the current
@@ -68,6 +69,7 @@ class ModalBarrier extends StatelessWidget {
   /// If null, the ambient [Navigator]'s current route will be popped.
   ///
   /// This field is ignored if [dismissible] is false.
+  /// {@endtemplate}
   final VoidCallback? onDismiss;
 
   /// Whether the modal barrier semantics are included in the semantics tree.
@@ -172,6 +174,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
     this.dismissible = true,
     this.semanticsLabel,
     this.barrierSemanticsDismissible,
+    this.onDismiss,
   }) : super(key: key, listenable: color);
 
   /// If non-null, fill the barrier with this color.
@@ -208,6 +211,9 @@ class AnimatedModalBarrier extends AnimatedWidget {
   ///    the [ModalBarrier] built by [ModalRoute] pages.
   final bool? barrierSemanticsDismissible;
 
+  /// {@macro flutter.widgets.ModalBarrier.onDismiss}
+  final VoidCallback? onDismiss;
+
   @override
   Widget build(BuildContext context) {
     return ModalBarrier(
@@ -215,6 +221,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
       dismissible: dismissible,
       semanticsLabel: semanticsLabel,
       barrierSemanticsDismissible: barrierSemanticsDismissible,
+      onDismiss: onDismiss,
     );
   }
 }
