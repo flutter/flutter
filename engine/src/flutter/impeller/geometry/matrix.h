@@ -80,6 +80,10 @@ struct Matrix {
     // clang-format on
   }
 
+  static constexpr Matrix MakeScale(const Vector2& s) {
+    return MakeScale(Vector3(s.x, s.y, 1.0));
+  }
+
   static constexpr Matrix MakeSkew(Scalar sx, Scalar sy) {
     // clang-format off
     return Matrix(1.0, sy , 0.0, 0.0,

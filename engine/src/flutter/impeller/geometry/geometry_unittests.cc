@@ -37,13 +37,24 @@ TEST(GeometryTest, RotationMatrix) {
 }
 
 TEST(GeometryTest, InvertMultMatrix) {
-  auto rotation = Matrix::MakeRotationZ(Radians{M_PI_4});
-  auto invert = rotation.Invert();
-  auto expect = Matrix{0.707, -0.707, 0, 0,  //
-                       0.707, 0.707,  0, 0,  //
-                       0,     0,      1, 0,  //
-                       0,     0,      0, 1};
-  ASSERT_MATRIX_NEAR(invert, expect);
+  {
+    auto rotation = Matrix::MakeRotationZ(Radians{M_PI_4});
+    auto invert = rotation.Invert();
+    auto expect = Matrix{0.707, -0.707, 0, 0,  //
+                         0.707, 0.707,  0, 0,  //
+                         0,     0,      1, 0,  //
+                         0,     0,      0, 1};
+    ASSERT_MATRIX_NEAR(invert, expect);
+  }
+  {
+    auto scale = Matrix::MakeScale(Vector2{2, 4});
+    auto invert = scale.Invert();
+    auto expect = Matrix{0.5, 0,    0, 0,  //
+                         0,   0.25, 0, 0,  //
+                         0,   0,    1, 0,  //
+                         0,   0,    0, 1};
+    ASSERT_MATRIX_NEAR(invert, expect);
+  }
 }
 
 TEST(GeometryTest, MutliplicationMatrix) {

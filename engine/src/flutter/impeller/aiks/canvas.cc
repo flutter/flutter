@@ -80,6 +80,10 @@ void Canvas::Translate(const Vector3& offset) {
   Concat(Matrix::MakeTranslation(offset));
 }
 
+void Canvas::Scale(const Vector2& scale) {
+  Concat(Matrix::MakeScale(scale));
+}
+
 void Canvas::Scale(const Vector3& scale) {
   Concat(Matrix::MakeScale(scale));
 }
@@ -283,7 +287,7 @@ void Canvas::DrawTextFrame(TextFrame text_frame, Point position, Paint paint) {
   auto text_contents = std::make_shared<TextContents>();
   text_contents->SetTextFrame(std::move(text_frame));
   text_contents->SetGlyphAtlas(std::move(lazy_glyph_atlas));
-  text_contents->SetColor(paint.color.Premultiply());
+  text_contents->SetColor(paint.color);
 
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation() *

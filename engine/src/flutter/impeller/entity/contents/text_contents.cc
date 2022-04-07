@@ -80,7 +80,7 @@ bool TextContents::Render(const ContentContext& renderer,
   frame_info.atlas_size =
       Point{static_cast<Scalar>(atlas->GetTexture()->GetSize().width),
             static_cast<Scalar>(atlas->GetTexture()->GetSize().height)};
-  frame_info.text_color = ToVector(color_);
+  frame_info.text_color = ToVector(color_.Premultiply());
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   // Common fragment uniforms for all glyphs.

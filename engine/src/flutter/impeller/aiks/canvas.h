@@ -52,6 +52,8 @@ class Canvas {
 
   void Translate(const Vector3& offset);
 
+  void Scale(const Vector2& scale);
+
   void Scale(const Vector3& scale);
 
   void Skew(Scalar sx, Scalar sy);
