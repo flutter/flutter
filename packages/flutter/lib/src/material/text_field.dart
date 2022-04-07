@@ -1321,38 +1321,66 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
+    late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
+      ExtendSelectionToLastTapDownPositionIntent : TextEditingCallbackAction<ExtendSelectionToLastTapDownPositionIntent>(
+          (ExtendSelectionToLastTapDownPositionIntent intent) {
+            _editableText!.extendSelection(intent);
+          },
+          enabledPredicate: (ExtendSelectionToLastTapDownPositionIntent intent) {
+            return widget.selectionEnabled && _effectiveController.value.selection.isValid;
+          }
+
+      )
+    };
+
     return FocusTrapArea(
       focusNode: focusNode,
       child: MouseRegion(
         cursor: effectiveMouseCursor,
         onEnter: (PointerEnterEvent event) => _handleHover(true),
         onExit: (PointerExitEvent event) => _handleHover(false),
-        child: IgnorePointer(
-          ignoring: !_isEnabled,
-          child: AnimatedBuilder(
-            animation: controller, // changes the _currentLength
-            builder: (BuildContext context, Widget? child) {
-              return Semantics(
-                maxValueLength: semanticsMaxValueLength,
-                currentValueLength: _currentLength,
-                onTap: widget.readOnly ? null : () {
-                  if (!_effectiveController.selection.isValid) {
-                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-                  }
-                  _requestKeyboard();
-                },
-                onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-                child: child,
-              );
-            },
-            child: child,
-            // child: _selectionGestureDetectorBuilder.buildGestureDetector(
-            //   behavior: HitTestBehavior.translucent,
-            //   child: child,
-            // ),
+        child: Actions(
+          actions: _actions,
+          child: IgnorePointer(
+            ignoring: !_isEnabled,
+            child: AnimatedBuilder(
+              animation: controller, // changes the _currentLength
+              builder: (BuildContext context, Widget? child) {
+                return Semantics(
+                  maxValueLength: semanticsMaxValueLength,
+                  currentValueLength: _currentLength,
+                  onTap: widget.readOnly ? null : () {
+                    if (!_effectiveController.selection.isValid) {
+                      _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                    }
+                    _requestKeyboard();
+                  },
+                  onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+                  child: child,
+                );
+              },
+              child: child,
+              // child: _selectionGestureDetectorBuilder.buildGestureDetector(
+              //   behavior: HitTestBehavior.translucent,
+              //   child: child,
+              // ),
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+class TextEditingCallbackAction<T extends Intent> extends Action<T> {
+  TextEditingCallbackAction(this._onInvoke, { this.enabledPredicate });
+
+  final void Function(T intent) _onInvoke;
+  final bool Function(T)? enabledPredicate;
+
+  @override
+  void invoke(T intent) => _onInvoke(intent);
+
+  @override
+  bool isEnabled(T intent) => enabledPredicate?.call(intent) ?? true;
 }

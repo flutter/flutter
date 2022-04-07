@@ -13,6 +13,7 @@ import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'default_text_editing_shortcuts.dart';
+import 'text_selection_gestures.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -1735,13 +1736,15 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
           // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
           // fall through to the defaultShortcuts.
-          child: DefaultTextEditingShortcuts(
-            child: Actions(
-              actions: widget.actions ?? WidgetsApp.defaultActions,
-              child: FocusTraversalGroup(
-                policy: ReadingOrderTraversalPolicy(),
-                child: ShortcutRegistrar(
-                  child: child,
+          child: TextSelectionGestures.platformDefaults(
+            child: DefaultTextEditingShortcuts(
+              child: Actions(
+                actions: widget.actions ?? WidgetsApp.defaultActions,
+                child: FocusTraversalGroup(
+                  policy: ReadingOrderTraversalPolicy(),
+                  ShortcutRegistrar(
+                      child: child,
+                  ),
                 ),
               ),
             ),

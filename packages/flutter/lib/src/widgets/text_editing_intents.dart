@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -336,3 +338,40 @@ class TransposeCharactersIntent extends Intent {
   /// Creates a [TransposeCharactersIntent].
   const TransposeCharactersIntent();
 }
+
+// ---------- Gesture Intents ----------
+class SelectLastTapDownPositionIntent extends Intent {
+
+}
+
+class SelectWordsInRangeAndEnableToolbarIntent extends Intent {
+
+}
+
+class SelectWordsInRangeAndShowToolbarIntent extends Intent {
+
+}
+
+class ShowToolbarIntent extends Intent {
+
+}
+
+class SelectWordAtLastTapDownPositionAndShowToolbarIntent extends Intent {
+
+}
+
+class SetLastAndSecondaryTapDownPositionAndEnableToolbarIntent extends Intent {
+
+}
+
+class CleanUpShiftTappingStatesIntent extends Intent {
+
+}
+
+class ExtendSelectionToLastTapDownPositionIntent extends Intent {
+  const ExtendSelectionToLastTapDownPositionIntent({required this.lastTapDownPosition, required this.cause});
+
+  final Offset lastTapDownPosition;
+  final SelectionChangedCause cause;
+}
+

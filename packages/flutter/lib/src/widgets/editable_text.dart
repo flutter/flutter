@@ -3167,6 +3167,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // --------------------------- Text Editing Actions ---------------------------
 
+  void extendSelection(ExtendSelectionToLastTapDownPositionIntent intent) {
+    print('hello world');
+    final TextPosition tappedPosition = renderEditable.getPositionForPoint(intent.lastTapDownPosition);
+    final TextSelection selection = renderEditable.selection!;
+    final TextSelection nextSelection = selection.copyWith(
+      extentOffset: tappedPosition.offset,
+    );
+
+    userUpdateTextEditingValue(
+      textEditingValue.copyWith(
+        selection: nextSelection,
+      ),
+      intent.cause,
+    );
+  }
+
   _TextBoundary _characterBoundary(DirectionalTextEditingIntent intent) {
     final _TextBoundary atomicTextBoundary = widget.obscureText ? _CodeUnitBoundary(_value) : _CharacterBoundary(_value);
     return _CollapsedSelectionBoundary(atomicTextBoundary, intent.forward);
