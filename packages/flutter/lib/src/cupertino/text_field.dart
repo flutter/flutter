@@ -1,3 +1,5 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
@@ -9,11 +11,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'default_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
 import 'text_selection.dart';
-import 'text_selection_toolbar.dart';
-import 'text_selection_toolbar_buttons.dart';
 import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
@@ -1314,193 +1315,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           ),
         ),
       ),
-    );
-  }
-}
-
-// TODO(justinmc): A user building a contextual menu not related to text
-// selection might want something like this, too.
-// TODO(justinmc): Move this to its own file, or text_selection.dart.
-/// The default contextual menu for text selection for the current platform.
-///
-/// See also:
-///
-/// * [TextSelectionToolbarButtonDatasBuilder], which builds the
-///   [ContextualMenuButtonData]s.
-/// * [TextSelectionToolbarButtonsBuilder], which builds the button Widgets
-///   given [ContextualMenuButtonData]s.
-class DefaultCupertinoTextSelectionToolbar extends StatelessWidget {
-  /// Create an instance of [DefaultCupertinoTextSelectionToolbar].
-  const DefaultCupertinoTextSelectionToolbar({
-    required this.primaryAnchor,
-    this.secondaryAnchor,
-    this.buttonDatas,
-    this.children,
-    this.editableTextState,
-    Key? key,
-  }) : assert(
-         buttonDatas == null || children == null,
-         'No need for both buttonDatas and children.',
-       ),
-       assert(
-         !(buttonDatas == null && children == null && editableTextState == null),
-         'If not providing buttonDatas or children, provide editableTextState to generate them.',
-       ),
-       super(key: key);
-
-  /// The main location on which to anchor the menu.
-  ///
-  /// Optionally, [secondaryAnchor] can be provided as an alternative anchor
-  /// location if the menu doesn't fit here.
-  final Offset primaryAnchor;
-
-  /// The optional secondary location on which to anchor the menu, if it doesn't
-  /// fit at [primaryAnchor].
-  final Offset? secondaryAnchor;
-
-  /// The information needed to create each child button of the menu.
-  ///
-  /// If provided, [children] cannot also be provided.
-  final List<ContextualMenuButtonData>? buttonDatas;
-
-  /// Used to generate the default buttons for the platform in the case that
-  /// [children] and [buttonDatas] are not provided.
-  final EditableTextState? editableTextState;
-
-  // TODO(justinmc): Does it make sesne to have this parameter? Even though
-  // there is a switch on the platform in here. Try out some examples.
-  /// The children of the toolbar.
-  ///
-  /// If provided, buttonDatas cannot also be provided.
-  final List<Widget>? children;
-
-  @override
-  Widget build(BuildContext context) {
-    // If there aren't any buttons to build, build an empty toolbar.
-    if ((children?.isEmpty ?? false) || (buttonDatas?.isEmpty ?? false)) { 
-      return const SizedBox(width: 0.0, height: 0.0);
-    }
-
-    if (children?.isNotEmpty ?? false) {
-      return _DefaultTextSelectionToolbarFromChildren(
-        primaryAnchor: primaryAnchor,
-        secondaryAnchor: secondaryAnchor,
-        children: children!,
-      );
-    }
-
-    if (buttonDatas?.isNotEmpty ?? false) {
-      return _DefaultTextSelectionToolbarFromButtonDatas(
-        primaryAnchor: primaryAnchor,
-        secondaryAnchor: secondaryAnchor,
-        buttonDatas: buttonDatas!,
-      );
-    }
-
-    return TextSelectionToolbarButtonDatasBuilder(
-      editableTextState: editableTextState!,
-      builder: (BuildContext context, List<ContextualMenuButtonData> buttonDatas) {
-        return _DefaultTextSelectionToolbarFromButtonDatas(
-          primaryAnchor: primaryAnchor,
-          secondaryAnchor: secondaryAnchor,
-          buttonDatas: buttonDatas,
-        );
-      },
-    );
-  }
-}
-
-/// The default text selection toolbar by platform given the [children] for the
-/// platform, for Cupertino.
-class _DefaultTextSelectionToolbarFromChildren extends StatelessWidget {
-  const _DefaultTextSelectionToolbarFromChildren({
-    required this.primaryAnchor,
-    this.secondaryAnchor,
-    required this.children,
-    Key? key,
-  }) : assert(children != null),
-       super(key: key);
-
-  /// The main location on which to anchor the menu.
-  ///
-  /// Optionally, [secondaryAnchor] can be provided as an alternative anchor
-  /// location if the menu doesn't fit here.
-  final Offset primaryAnchor;
-
-  /// The optional secondary location on which to anchor the menu, if it doesn't
-  /// fit at [primaryAnchor].
-  final Offset? secondaryAnchor;
-
-  /// The children of the toolbar, typically buttons.
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    // If there aren't any buttons to build, build an empty toolbar.
-    if (children.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
-    }
-
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return CupertinoTextSelectionToolbar(
-          anchorAbove: primaryAnchor,
-          anchorBelow: secondaryAnchor!,
-          children: children,
-        );
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.macOS:
-        return CupertinoDesktopTextSelectionToolbar(
-          anchor: primaryAnchor,
-          children: children,
-        );
-    }
-  }
-}
-
-/// The default text selection toolbar by platform given [buttonDatas]
-/// representing the children for the platform.
-class _DefaultTextSelectionToolbarFromButtonDatas extends StatelessWidget {
-  const _DefaultTextSelectionToolbarFromButtonDatas({
-    required this.primaryAnchor,
-    this.secondaryAnchor,
-    required this.buttonDatas,
-    Key? key,
-  }) : assert(buttonDatas != null),
-       super(key: key);
-
-  /// The main location on which to anchor the menu.
-  ///
-  /// Optionally, [secondaryAnchor] can be provided as an alternative anchor
-  /// location if the menu doesn't fit here.
-  final Offset primaryAnchor;
-
-  /// The optional secondary location on which to anchor the menu, if it doesn't
-  /// fit at [primaryAnchor].
-  final Offset? secondaryAnchor;
-
-  /// The information needed to create each child button of the menu.
-  final List<ContextualMenuButtonData> buttonDatas;
-
-  @override
-  Widget build(BuildContext context) {
-    // If there aren't any buttons to build, build an empty toolbar.
-    if (buttonDatas.isEmpty) {
-      return const SizedBox(width: 0.0, height: 0.0);
-    }
-
-    return CupertinoTextSelectionToolbarButtonsBuilder(
-      buttonDatas: buttonDatas,
-      builder: (BuildContext context, List<Widget> children) {
-        return _DefaultTextSelectionToolbarFromChildren(
-          primaryAnchor: primaryAnchor,
-          secondaryAnchor: secondaryAnchor,
-          children: children,
-        );
-      },
     );
   }
 }

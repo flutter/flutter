@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
+import 'default_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'text_selection.dart';
@@ -204,6 +205,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
+    this.buildContextualMenu,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -262,6 +264,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
+    this.buildContextualMenu,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -424,6 +427,9 @@ class SelectableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.onSelectionChanged}
   final SelectionChangedCallback? onSelectionChanged;
+
+  /// {@macro flutter.widgets.EditableText.buildContextualMenu}
+  final TextSelectionToolbarBuilder? buildContextualMenu;
 
   @override
   State<SelectableText> createState() => _SelectableTextState();
@@ -699,6 +705,13 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
         autofillHints: null,
+        buildContextualMenu: widget.buildContextualMenu ?? (BuildContext context, ContextualMenuController controller, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
+          return DefaultTextSelectionToolbar(
+            primaryAnchor: primaryAnchor,
+            secondaryAnchor: secondaryAnchor,
+            editableTextState: editableTextState,
+          );
+        },
       ),
     );
 
