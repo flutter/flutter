@@ -18,7 +18,9 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
 
   ~DirectionalGaussianBlurFilterContents() override;
 
-  void SetBlurVector(Vector2 blur_vector);
+  void SetSigma(Sigma sigma);
+
+  void SetDirection(Vector2 direction);
 
   void SetBlurStyle(BlurStyle blur_style);
 
@@ -34,8 +36,8 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
                     const Entity& entity,
                     RenderPass& pass,
                     const Rect& bounds) const override;
-
-  Vector2 blur_vector_;
+  Sigma blur_sigma_;
+  Vector2 blur_direction_;
   BlurStyle blur_style_ = BlurStyle::kNormal;
   bool src_color_factor_ = false;
   bool inner_blur_factor_ = true;

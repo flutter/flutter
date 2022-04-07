@@ -22,12 +22,23 @@ DirectionalGaussianBlurFilterContents::DirectionalGaussianBlurFilterContents() =
 DirectionalGaussianBlurFilterContents::
     ~DirectionalGaussianBlurFilterContents() = default;
 
-void DirectionalGaussianBlurFilterContents::SetBlurVector(Vector2 blur_vector) {
-  if (blur_vector.GetLengthSquared() < kEhCloseEnough) {
-    blur_vector_ = Vector2(0, kEhCloseEnough);
+void DirectionalGaussianBlurFilterContents::SetSigma(Sigma sigma) {
+  if (sigma.sigma < kEhCloseEnough) {
+    // This cutoff is an implementation detail of the blur that's tied to the
+    // fragment shader. When the blur is set to 0, having a value slightly above
+    // zero makes the shader do 1 finite sample to pass the image through with
+    // no blur (while retaining correct alpha mask behavior).
+    blur_sigma_ = Sigma{kEhCloseEnough};
     return;
   }
-  blur_vector_ = blur_vector;
+  blur_sigma_ = sigma;
+}
+
+void DirectionalGaussianBlurFilterContents::SetDirection(Vector2 direction) {
+  blur_direction_ = direction.Normalize();
+  if (blur_direction_.IsZero()) {
+    blur_direction_ = Vector2(0, 1);
+  }
 }
 
 void DirectionalGaussianBlurFilterContents::SetBlurStyle(BlurStyle blur_style) {
@@ -93,8 +104,8 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
     return false;
   }
 
-  auto transformed_blur =
-      entity.GetTransformation().TransformDirection(blur_vector_);
+  auto transformed_blur = entity.GetTransformation().TransformDirection(
+      blur_direction_ * blur_sigma_.sigma);
 
   // LTRB
   Scalar uv[4] = {
@@ -142,7 +153,8 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
 
   VS::FrameInfo frame_info;
   frame_info.texture_size = Point(input_bounds->size);
-  frame_info.blur_radius = transformed_blur.GetLength();
+  frame_info.blur_sigma = transformed_blur.GetLength();
+  frame_info.blur_radius = Radius{Sigma{frame_info.blur_sigma}}.radius;
   frame_info.blur_direction = transformed_blur.Normalize();
   frame_info.src_factor = src_color_factor_;
   frame_info.inner_blur_factor = inner_blur_factor_;
@@ -174,10 +186,14 @@ std::optional<Rect> DirectionalGaussianBlurFilterContents::GetCoverage(
     return std::nullopt;
   }
 
-  auto transformed_blur =
-      entity.GetTransformation().TransformDirection(blur_vector_).Abs();
-  auto extent = bounds->size + transformed_blur * 2;
-  return Rect(bounds->origin - transformed_blur, Size(extent.x, extent.y));
+  auto transformed_blur_vector =
+      entity.GetTransformation()
+          .TransformDirection(blur_direction_ *
+                              ceil(Radius{blur_sigma_}.radius))
+          .Abs();
+  auto extent = bounds->size + transformed_blur_vector * 2;
+  return Rect(bounds->origin - transformed_blur_vector,
+              Size(extent.x, extent.y));
 }
 
 }  // namespace impeller

@@ -729,7 +729,8 @@ TEST_F(EntityTest, GaussianBlurFilter) {
         Entity::BlendMode::kPlus, FilterInput::Make({boston, bridge, bridge}));
 
     auto blur = FilterContents::MakeGaussianBlur(
-        FilterInput::Make(blend), blur_amount[0], blur_amount[1],
+        FilterInput::Make(blend), FilterContents::Sigma{blur_amount[0]},
+        FilterContents::Sigma{blur_amount[1]},
         blur_styles[selected_blur_style]);
 
     ISize input_size = boston->GetSize();
