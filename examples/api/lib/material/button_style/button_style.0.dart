@@ -6,7 +6,9 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const ButtonApp());
+void main() {
+  runApp(const ButtonApp());
+}
 
 class ButtonApp extends StatelessWidget {
   const ButtonApp({Key? key}) : super(key: key);
