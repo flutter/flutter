@@ -13,8 +13,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: DialogExample(),
+    return MaterialApp(
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+      home: const DialogExample(),
     );
   }
 }
