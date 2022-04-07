@@ -85,14 +85,14 @@ _flutter.loader = null;
         if (!serviceWorker) {
           console.warn("Cannot activate a null service worker. Falling back to plain <script> tag.");
         } else {
-          console.info("Service worker already active.");
+          console.debug("Service worker already active.");
         }
         return this._loadEntrypoint(entrypointUrl);
       }
       return new Promise((resolve, _) => {
         serviceWorker.addEventListener("statechange", () => {
           if (serviceWorker.state == "activated") {
-            console.info("Installed new service worker.");
+            console.debug("Installed new service worker.");
             resolve(this._loadEntrypoint(entrypointUrl));
           }
         });
@@ -121,15 +121,15 @@ _flutter.loader = null;
             } else if (!reg.active.scriptURL.endsWith(serviceWorkerVersion)) {
               // When the app updates the serviceWorkerVersion changes, so we
               // need to ask the service worker to update.
-              console.info("New service worker available.");
+              console.debug("New service worker available.");
               return reg.update().then((reg) => {
-                console.info("Service worker updated.");
+                console.debug("Service worker updated.");
                 let sw = reg.installing || reg.waiting || reg.active;
                 return this._waitForServiceWorkerActivation(sw, entrypointUrl);
               });
             } else {
               // Existing service worker is still good.
-              console.info("Loading app from service worker.");
+              console.debug("Loading app from service worker.");
               return this._loadEntrypoint(entrypointUrl);
             }
           });
