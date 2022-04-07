@@ -435,10 +435,8 @@ class IOSDeployDebugger {
 
   Future<void> stopAndDumpBacktrace() async {
     if (!debuggerAttached) {
-      throw 'whoops'; // TODO
       return;
     }
-
     try {
       // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
       _iosDeployProcess?.stdin.writeln(_signalStop);

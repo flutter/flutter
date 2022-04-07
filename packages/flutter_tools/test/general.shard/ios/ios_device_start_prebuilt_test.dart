@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -65,7 +66,10 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
 });
 
 // The command used to actually launch the app and attach the debugger with args in debug.
-FakeCommand attachDebuggerCommand({IOSink stdin}) {
+FakeCommand attachDebuggerCommand({
+  IOSink stdin,
+  Completer<void>/*?*/ completer,
+}) {
   return FakeCommand(
     command: const <String>[
       'script',
@@ -82,6 +86,7 @@ FakeCommand attachDebuggerCommand({IOSink stdin}) {
       '--args',
       '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points',
     ],
+    completer: completer,
     environment: const <String, String>{
       'PATH': '/usr/bin:null',
       'DYLD_LIBRARY_PATH': '/path/to/libraries',
@@ -190,8 +195,9 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final CompleterIOSink stdin = CompleterIOSink();
+    final Completer<void> completer = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      attachDebuggerCommand(stdin: stdin),
+      attachDebuggerCommand(stdin: stdin, completer: completer),
     ]);
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
@@ -224,7 +230,8 @@ void main() {
     expect(launchResult.hasObservatory, true);
     expect(await device.stopApp(iosApp), false);
     expect(logger.errorText, contains('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...'));
-    expect(stdin.writes, contains('foo bar'));
+    expect(utf8.decoder.convert(stdin.writes.first), contains('process signal SIGSTOP'));
+    completer.complete();
     expect(processManager, hasNoRemainingExpectations);
   });
 
