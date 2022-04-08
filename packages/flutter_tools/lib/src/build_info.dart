@@ -164,7 +164,7 @@ class BuildInfo {
   /// and skips the check and potential invalidation of files.
   final bool assumeInitializeFromDillUpToDate;
 
-  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
   static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
   static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);

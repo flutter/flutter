@@ -956,7 +956,7 @@ Build settings for action build and target plugin2:
     });
 
     testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo.debug;
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
@@ -977,7 +977,7 @@ Build settings for action build and target plugin2:
     });
 
     testUsingOsxContext('does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false', () async {
-      const BuildInfo buildInfo = BuildInfo.debug;
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
