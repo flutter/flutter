@@ -3068,12 +3068,6 @@ targets:
     bringup: true
     timeout: 60
     properties:
-      caches: >-
-        [
-          {"name":"gradle","path":"gradle"}
-        ]
-      dependencies: >-
-        []
       tags: >
         ["devicelab","android","mac"]
       task_name: entrypoint_dart_registrant
