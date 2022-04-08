@@ -72,6 +72,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.sortAscending = true,
     this.onSelectAll,
     this.dataRowHeight = kMinInteractiveDimension,
+    this.headingRowColor = Theme.of(context).primaryColor,
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
@@ -93,6 +94,7 @@ class PaginatedDataTable extends StatefulWidget {
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
        assert(dataRowHeight != null),
+       assert(headingRowColor != null),
        assert(headingRowHeight != null),
        assert(horizontalMargin != null),
        assert(columnSpacing != null),
@@ -158,6 +160,11 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// This value is optional and defaults to 56.0 if not specified.
   final double headingRowHeight;
+  
+  /// The color of the heading row.
+  ///
+  /// This value is optional and defaults to theme primary color if not specified.
+  final double headingRowColor;
 
   /// The horizontal margin between the edges of the table and the content
   /// in the first and last cells of each row.
@@ -516,6 +523,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     decoration: const BoxDecoration(),
                     dataRowHeight: widget.dataRowHeight,
                     headingRowHeight: widget.headingRowHeight,
+                    headingRowColor: widget.headingRowColor,
                     horizontalMargin: widget.horizontalMargin,
                     checkboxHorizontalMargin: widget.checkboxHorizontalMargin,
                     columnSpacing: widget.columnSpacing,
