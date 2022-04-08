@@ -2574,7 +2574,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       tags: >
-        ["devicelab","hostonly"]
+        ["devicelab","android","mac"]
       task_name: entrypoint_dart_registrant
     scheduler: luci
     runIf:
