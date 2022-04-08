@@ -296,6 +296,9 @@ class IOSDeployDebugger {
   // (lldb) Process 6152 detached
   static final RegExp _lldbProcessDetached = RegExp(r'Process \d* detached');
 
+  // (lldb) Process 6152 resuming
+  static final RegExp _lldbProcessResuming = RegExp(r'Process \d+ resuming');
+
   // Send signal to stop (pause) the app. Used before a backtrace dump.
   static const String _signalStop = 'process signal SIGSTOP';
 
@@ -385,6 +388,13 @@ class IOSDeployDebugger {
           // The debugger has detached from the app, and there will be no more debugging messages.
           // Kill the ios-deploy process.
           exit();
+          return;
+        }
+
+        if (_lldbProcessResuming.hasMatch(line)) {
+          _logger.printTrace(line);
+          // we marked this detached when we received [_backTraceAll]
+          _debuggerState = _IOSDeployDebuggerState.attached;
           return;
         }
 
