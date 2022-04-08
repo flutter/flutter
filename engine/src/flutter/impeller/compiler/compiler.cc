@@ -458,7 +458,7 @@ std::unique_ptr<fml::Mapping> Compiler::CreateDepfileContents(
   const auto dependencies = GetDependencyNames(" ");
 
   std::stringstream stream;
-  stream << targets << ":\n\t" << dependencies << "\n";
+  stream << targets << ": " << dependencies << "\n";
 
   auto contents = std::make_shared<std::string>(stream.str());
   return std::make_unique<fml::NonOwnedMapping>(
