@@ -354,23 +354,26 @@ class IOSDeployDebugger {
           // Even though we're not "detached", just stopped, mark as detached so the backtrace
           // is only show in verbose.
           _debuggerState = _IOSDeployDebuggerState.detached;
+
+          // If we paused the app and are waiting to resume it, complete the completer
+          final Completer<void>? processResumeCompleter = _processResumeCompleter;
+          if (processResumeCompleter != null) {
+            _processResumeCompleter = null;
+            processResumeCompleter.complete();
+          }
           return;
         }
 
         if (line.contains('PROCESS_STOPPED') || _lldbProcessStopped.hasMatch(line)) {
-          _logger.printError('App is stopped, about to dump backtrace...');
           // The app has been stopped. Dump the backtrace, and detach.
           _logger.printTrace(line);
           _iosDeployProcess?.stdin.writeln(_backTraceAll);
           if (_processResumeCompleter == null) {
-            _logger.printError('Detaching...'); // TODO
             detach();
-          } else {
-            _processResumeCompleter!.complete();
-            _processResumeCompleter = null;
           }
           return;
         }
+
         if (line.contains('PROCESS_EXITED') || _lldbProcessExit.hasMatch(line)) {
           // The app exited or crashed, so exit. Continue passing debugging
           // messages to the log reader until it exits to capture crash dumps.
@@ -459,9 +462,7 @@ class IOSDeployDebugger {
     }
     // wait for backtrace to be dumped
     await completer.future;
-    _logger.printError('about to resume');
     _iosDeployProcess?.stdin.writeln(_processResume);
-    return logLines.drain();
   }
 
   Future<void> stopAndDumpBacktrace() async {
