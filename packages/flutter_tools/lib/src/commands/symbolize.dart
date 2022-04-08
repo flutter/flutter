@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:native_stack_traces/native_stack_traces.dart';
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -68,8 +69,11 @@ class SymbolizeCommand extends FlutterCommand {
     if (argResults?.wasParsed('debug-info') != true) {
       throwToolExit('"--debug-info" is required to symbolize stack traces.');
     }
-    if (!_fileSystem.isFileSync(stringArgDeprecated('debug-info')!)) {
-      throwToolExit('${stringArgDeprecated('debug-info')} does not exist.');
+    final String debugInfoPath = stringArgDeprecated('debug-info')!;
+    if (debugInfoPath.endsWith('.dSYM')
+        ? !_fileSystem.isDirectorySync(debugInfoPath)
+        : !_fileSystem.isFileSync(debugInfoPath)) {
+      throwToolExit('$debugInfoPath does not exist.');
     }
     if ((argResults?.wasParsed('input') ?? false) && !_fileSystem.isFileSync(stringArgDeprecated('input')!)) {
       throwToolExit('${stringArgDeprecated('input')} does not exist.');
