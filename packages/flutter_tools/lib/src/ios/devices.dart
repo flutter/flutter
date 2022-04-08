@@ -436,9 +436,8 @@ class IOSDevice extends Device {
       //final Timer timer = Timer(discoveryTimeout ?? const Duration(seconds: 30), () {
         _logger.printError('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...');
         await iosDeployDebugger?.pauseDumpBacktraceResume();
-        _logger.printError('log drain finished'); // TODO
       });
-      _logger.printError('Awaiting observatory URI...');
+      _logger.printError('Awaiting observatory URI $observatoryDiscovery...');
       final Uri? localUri = await observatoryDiscovery?.uri;
       _logger.printError('Got observatory URI!');
       timer.cancel();
