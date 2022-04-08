@@ -46,7 +46,10 @@ class DialogExample extends StatelessWidget {
         return AlertDialog(
           title: const Text('Basic dialog title'),
           content: const Text(
-              'A dialog is a type of modal window that\nappears in front of app content to\nprovide critical information, or prompt\nfor a decision to be made.'),
+              'A dialog is a type of modal window that\n'
+              'appears in front of app content to\n'
+              'provide critical information, or prompt\n'
+              'for a decision to be made.'),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(
