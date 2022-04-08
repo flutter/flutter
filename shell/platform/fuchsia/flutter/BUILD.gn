@@ -132,6 +132,7 @@ template("runner_sources") {
       "//flutter/assets",
       "//flutter/common",
       "//flutter/fml",
+      "//flutter/shell/platform/common/client_wrapper:client_wrapper_library_stubs",
       "//flutter/vulkan",
     ]
 
@@ -507,6 +508,7 @@ if (enable_unittests) {
              ":flutter_runner_sources",
              "//build/fuchsia/pkg:async-testing",
              "//build/fuchsia/pkg:sys_cpp_testing",
+             "//flutter/shell/platform/common/client_wrapper:client_wrapper_library_stubs",
              "//flutter/testing",
            ] + flutter_deps
   }
@@ -525,6 +527,7 @@ if (enable_unittests) {
     # embedder API.
     flutter_deps = [
       "//flutter/lib/ui",
+      "//flutter/shell/platform/common/client_wrapper:client_wrapper_library_stubs",
       "//third_party/dart/runtime:libdart_jit",
       "//third_party/dart/runtime/platform:libdart_platform_jit",
     ]
