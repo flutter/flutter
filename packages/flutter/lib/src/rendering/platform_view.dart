@@ -176,7 +176,12 @@ class RenderAndroidView extends PlatformViewRenderBox {
     Size targetSize;
     do {
       targetSize = size;
-      _currentTextureSize = await _viewController.setSize(targetSize);
+      if (_viewController.isCreated) {
+        _currentTextureSize = await _viewController.setSize(targetSize);
+      } else {
+        await _viewController.create(size: targetSize);
+        _currentTextureSize = targetSize;
+      }
       // We've resized the platform view to targetSize, but it is possible that
       // while we were resizing the render object's size was changed again.
       // In that case we will resize the platform view again.
