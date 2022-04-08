@@ -1,8 +1,5 @@
 # Specify analysis options.
 #
-# Until there are meta linter rules, each desired lint must be explicitly enabled.
-# See: https://github.com/dart-lang/linter/issues/288
-#
 # For a list of lints, see: http://dart-lang.github.io/linter/lints/
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/main/pkg/analyzer#configuring-the-analyzer
@@ -15,11 +12,12 @@
 #   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
 #   - https://github.com/flutter/packages/blob/master/analysis_options.yaml
 #
-# This file contains the analysis options used by Flutter tools, such as IntelliJ,
-# Android Studio, and the `flutter analyze` command.
+# This file contains the analysis options used for code in the flutter/flutter
+# repository.
 
 analyzer:
   language:
+    strict-casts: true
     strict-raw-types: true
   errors:
     # treat missing required parameters as a warning (not a hint)
@@ -43,8 +41,7 @@ analyzer:
 
 linter:
   rules:
-    # these rules are documented on and in the same order as
-    # the Dart Lint rules page to make maintenance easier
+    # This list is derived from the list of all available lints located at
     # https://github.com/dart-lang/linter/blob/master/example/all.yaml
     - always_declare_return_types
     - always_put_control_body_on_new_line
