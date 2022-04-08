@@ -6,6 +6,7 @@ assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
+import("//flutter/testing/testing.gni")
 
 config("utils_config") {
   include_dirs = [ "../../.." ]
@@ -80,6 +81,10 @@ make_utils("utils") {
   deps = [ "//third_party/dart/runtime/bin:elf_loader" ]
 }
 
+test_fixtures("utils_fixtures") {
+  fixtures = []
+}
+
 executable("dart_utils_unittests") {
   testonly = true
 
@@ -87,13 +92,18 @@ executable("dart_utils_unittests") {
 
   sources = [ "build_info_unittests.cc" ]
 
-  # This is needed for //third_party/googletest for linking zircon symbols.
-  libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+  libs = [
+    # This is needed for //third_party/googletest for linking zircon symbols.
+    "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so",
+  ]
 
   deps = [
     ":utils",
+    ":utils_fixtures",
     "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
     "//flutter/testing",
+    "//third_party/dart/runtime:libdart_jit",
+    "//third_party/dart/runtime/bin:dart_io_api",
   ]
 }
 

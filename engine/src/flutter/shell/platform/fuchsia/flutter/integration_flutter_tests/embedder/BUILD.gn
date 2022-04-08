@@ -49,6 +49,7 @@ executable("flutter-embedder-test2-bin") {
     "$fuchsia_sdk_root/pkg:zx",
     "//flutter/shell/platform/fuchsia/flutter/integration_flutter_tests/fuchsia_testing/src/lib/ui/base_view",
     "//flutter/shell/platform/fuchsia/flutter/integration_flutter_tests/fuchsia_testing/src/ui/testing/views",
+    "//third_party/dart/runtime:libdart_jit",
     "//third_party/googletest:gtest_main",
   ]
 }
