@@ -11,7 +11,6 @@ import 'constants.dart';
 import 'flat_button.dart';
 import 'material_button.dart';
 import 'material_state.dart';
-import 'raised_button.dart';
 import 'theme.dart';
 import 'theme_data.dart' show MaterialTapTargetSize;
 
@@ -21,8 +20,7 @@ import 'theme_data.dart' show MaterialTapTargetSize;
 ///
 /// See also:
 ///
-///  * [RaisedButton] and [FlatButton] which are configured
-///    based on the ambient [ButtonTheme].
+///  * [FlatButton] which is configured based on the ambient [ButtonTheme].
 enum ButtonTextTheme {
   /// Button text is black or white depending on [ThemeData.brightness].
   normal,
@@ -68,8 +66,7 @@ enum ButtonBarLayoutBehavior {
 ///
 /// See also:
 ///
-///  * [FlatButton] and [RaisedButton] which are styled
-///    based on the ambient button theme.
+///  * [FlatButton] which is styled based on the ambient button theme.
 ///  * [RawMaterialButton], which can be used to configure a button that doesn't
 ///    depend on any inherited themes.
 class ButtonTheme extends InheritedTheme {
@@ -174,11 +171,9 @@ class ButtonTheme extends InheritedTheme {
 ///  * [ElevatedButton], [ElevatedButtonTheme], [ElevatedButtonThemeData],
 ///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData]
 ///
-/// FlatButton and RaisedButton have been replaced by
-/// TextButton and ElevatedButton respectively.
-/// ButtonTheme has been replaced by TextButtonTheme and
-/// ElevatedButtonTheme. The original classes
-/// have been deprecated, please migrate code that uses them.
+/// FlatButton has been replaced by TextButton and ButtonTheme has been replaced
+/// by TextButtonTheme. Please migrate code that uses them.
+///
 /// There's a detailed migration guide for the new button and button
 /// theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
@@ -196,8 +191,8 @@ class ButtonThemeData with Diagnosticable {
   /// [height] parameters must greater than or equal to zero.
   ///
   /// The ButtonTheme's methods that have a [MaterialButton] parameter and
-  /// have a name with a `get` prefix are used by [RaisedButton]
-  /// and [FlatButton] to configure a [RawMaterialButton].
+  /// have a name with a `get` prefix are used by [FlatButton] to configure a
+  /// [RawMaterialButton].
   const ButtonThemeData({
     this.textTheme = ButtonTextTheme.normal,
     this.minWidth = 88.0,
@@ -278,7 +273,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getPadding], which is used by [RaisedButton] and [FlatButton].
+  ///  * [getPadding], which is used by [FlatButton].
   EdgeInsetsGeometry get padding {
     if (_padding != null)
       return _padding!;
@@ -304,7 +299,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getShape], which is used by [RaisedButton] and [FlatButton].
+  ///  * [getShape], which is used by [FlatButton].
   ShapeBorder get shape {
     if (_shape != null)
       return _shape!;
@@ -333,7 +328,7 @@ class ButtonThemeData with Diagnosticable {
   /// This property only affects [DropdownButton] and its menu.
   final bool alignedDropdown;
 
-  /// The background fill color for [RaisedButton]s.
+  /// The background fill color.
   ///
   /// This property is null by default.
   ///
@@ -343,18 +338,17 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getFillColor], which is used by [RaisedButton] to compute its
-  ///    background fill color.
+  ///  * [getFillColor], which is used to compute the background fill color.
   final Color? _buttonColor;
 
-  /// The background fill color for disabled [RaisedButton]s.
+  /// The background fill color when disabled.
   ///
   /// This property is null by default.
   ///
   /// See also:
   ///
-  ///  * [getDisabledFillColor], which is used by [RaisedButton] to compute its
-  ///    background fill color.
+  ///  * [getDisabledFillColor], which is to compute background fill color for
+  ///    disabled state.
   final Color? _disabledColor;
 
   /// The fill color of the button when it has the input focus.
@@ -366,7 +360,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getFocusColor], which is used by [RaisedButton] and [FlatButton].
+  ///  * [getFocusColor], which is used by [FlatButton].
   final Color? _focusColor;
 
   /// The fill color of the button when a pointer is hovering over it.
@@ -378,7 +372,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getHoverColor], which is used by [RaisedButton] and [FlatButton].
+  ///  * [getHoverColor], which is used by [FlatButton].
   final Color? _hoverColor;
 
   /// The color of the overlay that appears when a button is pressed.
@@ -387,7 +381,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getHighlightColor], which is used by [RaisedButton] and [FlatButton].
+  ///  * [getHighlightColor], which is used by [FlatButton].
   final Color? _highlightColor;
 
   /// The color of the ink "splash" overlay that appears when a button is tapped.
@@ -396,7 +390,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getSplashColor], which is used by [RaisedButton] and [FlatButton].
+  ///  * [getSplashColor], which is used by [FlatButton].
   final Color? _splashColor;
 
   /// A set of thirteen colors that can be used to derive the button theme's
@@ -417,7 +411,7 @@ class ButtonThemeData with Diagnosticable {
   //
   // See also:
   //
-  //  * [getMaterialTargetTapSize], which is used by [RaisedButton] and [FlatButton].
+  //  * [getMaterialTargetTapSize], which is used by [FlatButton].
   final MaterialTapTargetSize? _materialTapTargetSize;
 
   /// The [button]'s overall brightness.
@@ -484,9 +478,6 @@ class ButtonThemeData with Diagnosticable {
   /// Otherwise, if button is a [FlatButton] then null is
   /// returned.
   ///
-  /// Otherwise, if button is a [RaisedButton], returns the `buttonColor`
-  /// constructor parameter if it was non-null and the button is enabled.
-  ///
   /// Otherwise the fill color depends on the value of [getTextTheme].
   ///
   ///  * [ButtonTextTheme.normal] or [ButtonTextTheme.accent], the
@@ -505,7 +496,7 @@ class ButtonThemeData with Diagnosticable {
     if (button is FlatButton || button.runtimeType == MaterialButton)
       return null;
 
-    if (button.enabled && button is RaisedButton && _buttonColor != null)
+    if (button.enabled && _buttonColor != null)
       return _buttonColor;
 
     switch (getTextTheme(button)) {
@@ -569,7 +560,7 @@ class ButtonThemeData with Diagnosticable {
   /// Returns the button's [MaterialButton.splashColor] if it is non-null.
   ///
   /// Otherwise, returns the value of the `splashColor` constructor parameter
-  /// it is non-null and [button] is a [RaisedButton].
+  /// it is non-null.
   ///
   /// Otherwise, returns the value of the `splashColor` constructor parameter
   /// if it is non-null and [button] is a [FlatButton] and
@@ -580,7 +571,7 @@ class ButtonThemeData with Diagnosticable {
     if (button.splashColor != null)
       return button.splashColor!;
 
-    if (_splashColor != null && button is RaisedButton)
+    if (_splashColor != null)
       return _splashColor!;
 
     if (_splashColor != null && button is FlatButton) {
@@ -715,8 +706,8 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// Returns the button's [MaterialButton.padding] if it is non-null.
   ///
-  /// If this is a button constructed with [RaisedButton.icon] or
-  /// [FlatButton.icon] then the padding is:
+  /// If this is a button constructed with [FlatButton.icon] then the padding
+  /// is:
   /// `EdgeInsetsDirectional.only(start: 12.0, end: 16.0)`.
   ///
   /// Otherwise, returns [padding] if it is non-null.

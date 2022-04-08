@@ -759,6 +759,16 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return null;
   }
 
+  /// Returns the amount of additional space to reveal around the attached widget
+  /// when focused inside a scrolling container via [Scrollable.ensureVisible].
+  ///
+  /// For example, a value of `EdgeInsets.all(16.0)` ensures 16 pixels of
+  /// the adjacent widget are visible when this node receives focus.
+  ///
+  /// By default, this returns [FocusManager.defaultEnsureVisiblePadding] from the
+  /// associated [FocusManager], or [EdgeInsets.zero].
+  EdgeInsets get ensureVisiblePadding => _manager?.defaultEnsureVisiblePadding ?? EdgeInsets.zero;
+
   /// Returns the size of the attached widget's [RenderObject], in logical
   /// units.
   ///
@@ -1709,6 +1719,20 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
     return handled;
   }
+
+  /// The default amount of additonal space to reveal when a widget is focused
+  /// inside a scrolling container via [Scrollable.ensureVisible].
+  ///
+  /// Defaults to [EdgeInsets.zero], which does not add any additional space
+  /// when widgets are revealed.
+  ///
+  /// For example, a value of `EdgeInsets.all(16.0)` ensures 16 pixels of
+  /// the adjacent widget are visible when focusing a widget inside of a
+  /// scrolling container.
+  ///
+  /// Individual [FocusNode]s may increase or decrease this padding, use
+  /// [FocusNode.ensureVisiblePadding] to obtain a node's desired padding.
+  EdgeInsets defaultEnsureVisiblePadding = EdgeInsets.zero;
 
   /// The node that currently has the primary focus.
   FocusNode? get primaryFocus => _primaryFocus;

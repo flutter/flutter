@@ -16,6 +16,7 @@ import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
+import 'platform_menu_bar.dart';
 import 'router.dart';
 import 'widget_inspector.dart';
 
@@ -294,6 +295,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
     }());
+    platformMenuDelegate = DefaultPlatformMenuDelegate();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -522,6 +524,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// See [FocusManager] for more details.
   FocusManager get focusManager => _buildOwner!.focusManager;
+
+  /// A delegate that communicates with a platform plugin for serializing and
+  /// managing platform-rendered menu bars created by [PlatformMenuBar].
+  ///
+  /// This is set by default to a [DefaultPlatformMenuDelegate] instance in
+  /// [initInstances].
+  late PlatformMenuDelegate platformMenuDelegate;
 
   final List<WidgetsBindingObserver> _observers = <WidgetsBindingObserver>[];
 

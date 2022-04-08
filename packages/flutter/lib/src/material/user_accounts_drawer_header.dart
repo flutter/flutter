@@ -369,9 +369,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
       container: true,
       label: MaterialLocalizations.of(context).signedInLabel,
       child: DrawerHeader(
-        decoration: widget.decoration ?? BoxDecoration(
-          color: Theme.of(context).primaryColor,
-        ),
+        decoration: widget.decoration ?? BoxDecoration(color: Theme.of(context).colorScheme.primary),
         margin: widget.margin,
         padding: const EdgeInsetsDirectional.only(top: 16.0, start: 16.0),
         child: SafeArea(

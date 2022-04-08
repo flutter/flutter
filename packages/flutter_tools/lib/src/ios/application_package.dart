@@ -157,9 +157,9 @@ class PrebuiltIOSApp extends IOSApp implements PrebuiltApplicationPackage {
   PrebuiltIOSApp({
     required this.uncompressedBundle,
     this.bundleName,
-    required String projectBundleId,
+    required super.projectBundleId,
     required this.applicationPackage,
-  }) : super(projectBundleId: projectBundleId);
+  });
 
   /// The uncompressed bundle of the application.
   ///

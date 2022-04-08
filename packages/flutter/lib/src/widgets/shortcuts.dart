@@ -12,6 +12,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
+import 'platform_menu_bar.dart';
 
 /// A set of [KeyboardKey]s that can be used as the keys in a [Map].
 ///
@@ -397,7 +398,7 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 ///
 ///  * [CharacterActivator], an activator that represents key combinations
 ///    that result in the specified character, such as question mark.
-class SingleActivator with Diagnosticable implements ShortcutActivator {
+class SingleActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
   /// Triggered when the [trigger] key is pressed while the modifiers are held.
   ///
   /// The `trigger` should be the non-modifier key that is pressed after all the
@@ -517,6 +518,17 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
       && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
   }
 
+  @override
+  ShortcutSerialization serializeForMenu() {
+    return ShortcutSerialization.modifier(
+      trigger,
+      shift: shift,
+      alt: alt,
+      meta: meta,
+      control: control,
+    );
+  }
+
   /// Returns a short and readable description of the key combination.
   ///
   /// Intended to be used in debug mode for logging purposes. In release mode,
@@ -572,7 +584,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 ///
 ///  * [SingleActivator], an activator that represents a single key combined
 ///    with modifiers, such as `Ctrl+C`.
-class CharacterActivator with Diagnosticable implements ShortcutActivator {
+class CharacterActivator with Diagnosticable, MenuSerializableShortcut implements ShortcutActivator {
   /// Create a [CharacterActivator] from the triggering character.
   const CharacterActivator(this.character);
 
@@ -606,6 +618,11 @@ class CharacterActivator with Diagnosticable implements ShortcutActivator {
       return true;
     }());
     return result;
+  }
+
+  @override
+  ShortcutSerialization serializeForMenu() {
+    return ShortcutSerialization.character(character);
   }
 
   @override
