@@ -23,7 +23,6 @@ _script_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 _src_root_dir = os.path.join(_script_dir, '..', '..', '..')
 _out_dir = os.path.join(_src_root_dir, 'out')
 _bucket_directory = os.path.join(_out_dir, 'fuchsia_bucket')
-_fuchsia_base = 'flutter/shell/platform/fuchsia'
 
 
 def IsLinux():
@@ -32,6 +31,7 @@ def IsLinux():
 
 def IsMac():
   return platform.system() == 'Darwin'
+
 
 def GetFuchsiaSDKPath():
   # host_os references the gn host_os
@@ -174,16 +174,20 @@ def CopyVulkanDepsToBucket(src, dst, arch):
     FindFileAndCopyTo('VkLayer_khronos_validation.json', '%s/pkg' % (sdk_path), deps_bucket_path)
     FindFileAndCopyTo('VkLayer_khronos_validation.so', '%s/arch/%s' % (sdk_path, arch), deps_bucket_path)
 
+
 def CopyIcuDepsToBucket(src, dst):
   source_root = os.path.join(_out_dir, src)
   deps_bucket_path = os.path.join(_bucket_directory, dst)
   FindFileAndCopyTo('icudtl.dat', source_root, deps_bucket_path)
 
-def BuildBucket(runtime_mode, arch, optimized, product):
+
+def CopyBuildToBucket(runtime_mode, arch, optimized, product):
   unopt = "_unopt" if not optimized else ""
+
   out_dir = 'fuchsia_%s%s_%s/' % (runtime_mode, unopt, arch)
   bucket_dir = 'flutter/%s/%s%s/' % (arch, runtime_mode, unopt)
   deps_dir = 'flutter/%s/deps/' % (arch)
+
   CopyToBucket(out_dir, bucket_dir, product)
   CopyVulkanDepsToBucket(out_dir, deps_dir, arch)
   CopyIcuDepsToBucket(out_dir, deps_dir)
@@ -209,6 +213,7 @@ def BuildBucket(runtime_mode, arch, optimized, product):
     dst_path = os.path.join(bucket_root, license)
     CopyPath(src_path, dst_path)
 
+
 def CheckCIPDPackageExists(package_name, tag):
   '''Check to see if the current package/tag combo has been published'''
   command = [
@@ -225,6 +230,7 @@ def CheckCIPDPackageExists(package_name, tag):
   else:
     return True
 
+
 def RunCIPDCommandWithRetries(command):
   # Retry up to three times.  We've seen CIPD fail on verification in some
   # instances. Normally verification takes slightly more than 1 minute when
@@ -238,6 +244,7 @@ def RunCIPDCommandWithRetries(command):
       print('Failed %s times' % tries + 1)
       if tries == num_tries - 1:
         raise
+
 
 def ProcessCIPDPackage(upload, engine_version):
   if not upload or not IsLinux():
@@ -267,6 +274,7 @@ def ProcessCIPDPackage(upload, engine_version):
       tag,
   ])
 
+
 def BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy,
                 asan, dart_version_git_info, prebuilt_dart_sdk, additional_targets=[]):
   unopt = "_unopt" if not optimized else ""
@@ -281,7 +289,6 @@ def BuildTarget(runtime_mode, arch, optimized, enable_lto, enable_legacy,
 
   if not optimized:
     flags.append('--unoptimized')
-
   if not enable_lto:
     flags.append('--no-lto')
   if not enable_legacy:
@@ -368,13 +375,21 @@ def main():
       '--no-dart-version-git-info',
       action='store_true',
       default=False,
-      help='If set, skips building and just creates packages.')
+      help='If set, turns off the Dart SDK git hash check.')
 
   parser.add_argument(
       '--no-prebuilt-dart-sdk',
       action='store_true',
       default=False,
       help='If set, builds the Dart SDK locally instead of using the prebuilt Dart SDK.')
+
+  parser.add_argument(
+    '--copy-unoptimized-debug-artifacts',
+    action='store_true',
+    default=False,
+    help='If set, unoptimized debug artifacts will be copied into CIPD along '
+         'with optimized builds. This is a hack to allow infra to make '
+         'and copy two debug builds, one with ASAN and one without.')
 
   args = parser.parse_args()
   RemoveDirectoryIfExists(_bucket_directory)
@@ -390,7 +405,7 @@ def main():
 
   # Build buckets
   for arch in archs:
-    for i in range(3):
+    for i in range(len(runtime_modes)):
       runtime_mode = runtime_modes[i]
       product = product_modes[i]
       if build_mode == 'all' or runtime_mode == build_mode:
@@ -399,7 +414,18 @@ def main():
                       args.asan, not args.no_dart_version_git_info,
                       not args.no_prebuilt_dart_sdk,
                       args.targets.split(",") if args.targets else [])
-        BuildBucket(runtime_mode, arch, optimized, product)
+        CopyBuildToBucket(runtime_mode, arch, optimized, product)
+
+        # This is a hack. The recipe for building and uploading Fuchsia to CIPD
+        # builds both a debug build (debug without ASAN) and unoptimized debug
+        # build (debug with ASAN). To copy both builds into CIPD, the recipe
+        # runs build_fuchsia_artifacts.py in optimized mode and tells
+        # build_fuchsia_artifacts.py to also copy_unoptimized_debug_artifacts.
+        #
+        # TODO(akbiggs): Consolidate Fuchsia's building and copying logic to
+        # avoid ugly hacks like this.
+        if args.copy_unoptimized_debug_artifacts and runtime_mode == 'debug' and optimized:
+          CopyBuildToBucket(runtime_mode, arch, not optimized, product)
 
   # Create and optionally upload CIPD package
   if args.cipd_dry_run or args.upload:
