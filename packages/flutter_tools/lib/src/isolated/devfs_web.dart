@@ -60,6 +60,9 @@ typedef DwdsLauncher = Future<Dwds> Function({
   bool spawnDds,
   bool enableDevtoolsLaunch,
   DevtoolsLauncher devtoolsLauncher,
+  bool launchDevToolsInNewWindow,
+  SdkConfigurationProvider sdkConfigurationProvider,
+  bool emitDebugEvents,
 });
 
 // A minimal index for projects that do not yet support web.
