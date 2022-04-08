@@ -722,7 +722,7 @@ void printHowToConsumeAar({
 
   for (final String buildMode in buildModes) {
     logger.printStatus("""
-      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber'""");
+      ${buildMode}Implementation '$androidPackage:flutter:$buildNumber:$buildMode'""");
   }
 
   logger.printStatus('''
