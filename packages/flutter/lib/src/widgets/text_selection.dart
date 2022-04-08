@@ -1636,6 +1636,9 @@ class TextSelectionGestureDetectorBuilder {
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+        if (!renderEditable.hasFocus) {
+          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+        }
         editableText.toggleToolbar();
         break;
     }
