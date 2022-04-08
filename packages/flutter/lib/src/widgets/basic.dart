@@ -252,7 +252,6 @@ class Opacity extends StatelessWidget {
     required this.opacity,
     this.alwaysIncludeSemantics = false,
     this.child,
-    this.includeRepaintBoundary = true,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        assert(alwaysIncludeSemantics != null),
        super(key: key);
@@ -279,15 +278,6 @@ class Opacity extends StatelessWidget {
   /// would otherwise contribute relevant semantics.
   final bool alwaysIncludeSemantics;
 
-  /// Whether to wrap the provided child widget in a [RepaintBoundary].
-  ///
-  /// This value defaults to true. The repaint boundary allows the engine
-  /// to reuse textures on subsequent frames if the opacity is changing but
-  /// the child layer is not. If the child layers are usually changing along
-  /// with the opacity, setting this value to `false` will reduce the size of the
-  /// layer tree.
-  final bool includeRepaintBoundary;
-
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -298,9 +288,7 @@ class Opacity extends StatelessWidget {
     return _Opacity(
       opacity: opacity,
       alwaysIncludeSemantics: alwaysIncludeSemantics,
-      child: includeRepaintBoundary
-        ? RepaintBoundary(child: child)
-        : child,
+      child: RepaintBoundary(child: child),
     );
   }
 

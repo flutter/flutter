@@ -877,7 +877,6 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
             padding: const EdgeInsets.all(12.0),
             child: Opacity(
               opacity: opacity,
-              includeRepaintBoundary: false, // Rotation defeats raster caching
               child: Transform.rotate(
                 angle: rotation,
                 child: CustomPaint(
