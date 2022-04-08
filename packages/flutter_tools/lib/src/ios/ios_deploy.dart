@@ -308,6 +308,9 @@ class IOSDeployDebugger {
   // Print backtrace for all threads while app is stopped.
   static const String _backTraceAll = 'thread backtrace all';
 
+  /// If this is non-null, then the app process is paused and awaiting backtrace logging.
+  ///
+  /// The future should be completed once the backtraces are logged.
   Completer<void>? _processResumeCompleter;
 
   /// Launch the app on the device, and attach the debugger.
