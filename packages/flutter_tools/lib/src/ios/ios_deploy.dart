@@ -299,8 +299,13 @@ class IOSDeployDebugger {
   // Send signal to stop (pause) the app. Used before a backtrace dump.
   static const String _signalStop = 'process signal SIGSTOP';
 
+  static const String _processResume = 'process continue';
+  static const String _processInterrupt = 'process interrupt';
+
   // Print backtrace for all threads while app is stopped.
   static const String _backTraceAll = 'thread backtrace all';
+
+  Completer<void>? _processResumeCompleter;
 
   /// Launch the app on the device, and attach the debugger.
   ///
@@ -319,7 +324,6 @@ class IOSDeployDebugger {
           .transform<String>(const LineSplitter())
           .listen((String line) {
         _monitorIOSDeployFailure(line, _logger);
-
         // (lldb)     run
         // success
         // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: The Dart VM service is listening on http://127.0.0.1:57782/
@@ -354,10 +358,17 @@ class IOSDeployDebugger {
         }
 
         if (line.contains('PROCESS_STOPPED') || _lldbProcessStopped.hasMatch(line)) {
+          _logger.printError('App is stopped, about to dump backtrace...');
           // The app has been stopped. Dump the backtrace, and detach.
           _logger.printTrace(line);
           _iosDeployProcess?.stdin.writeln(_backTraceAll);
-          detach();
+          if (_processResumeCompleter == null) {
+            _logger.printError('Detaching...'); // TODO
+            detach();
+          } else {
+            _processResumeCompleter!.complete();
+            _processResumeCompleter = null;
+          }
           return;
         }
         if (line.contains('PROCESS_EXITED') || _lldbProcessExit.hasMatch(line)) {
@@ -433,17 +444,38 @@ class IOSDeployDebugger {
     return success;
   }
 
+  Future<void> pauseDumpBacktraceResume() async {
+    if (!debuggerAttached) {
+      return;
+    }
+    final Completer<void> completer = Completer<void>();
+    _processResumeCompleter = completer;
+    try {
+      // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
+      _iosDeployProcess?.stdin.writeln(_processInterrupt);
+    } on SocketException catch (error) {
+      // Best effort, try to detach, but maybe the app already exited or already detached.
+      _logger.printTrace('Could not stop app from debugger: $error');
+    }
+    // wait for backtrace to be dumped
+    await completer.future;
+    _logger.printError('about to resume');
+    _iosDeployProcess?.stdin.writeln(_processResume);
+    return logLines.drain();
+  }
+
   Future<void> stopAndDumpBacktrace() async {
     if (!debuggerAttached) {
       return;
     }
     try {
       // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
-      _iosDeployProcess?.stdin.writeln(_signalStop);
+      _iosDeployProcess?.stdin.writeln(_processInterrupt);
     } on SocketException catch (error) {
       // Best effort, try to detach, but maybe the app already exited or already detached.
       _logger.printTrace('Could not stop app from debugger: $error');
     }
+
     // Wait for logging to finish on process exit.
     return logLines.drain();
   }
