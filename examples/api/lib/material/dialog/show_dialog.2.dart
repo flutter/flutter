@@ -55,7 +55,7 @@ class DialogExample extends StatelessWidget {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('Disabled'),
+              child: const Text('Disable'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -64,7 +64,7 @@ class DialogExample extends StatelessWidget {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('Enabled'),
+              child: const Text('Enable'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
