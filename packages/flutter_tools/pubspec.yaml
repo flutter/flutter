@@ -11,7 +11,7 @@ dependencies:
   args: 2.3.0
   browser_launcher: 1.1.0
   dds: 2.2.0
-  dwds: 12.1.0
+  dwds: 12.1.1
   completion: 1.0.0
   coverage: 1.2.0
   crypto: 3.0.1
@@ -105,4 +105,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: ba1b
+# PUBSPEC CHECKSUM: 0a1c
