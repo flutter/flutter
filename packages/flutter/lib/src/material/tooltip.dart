@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -98,8 +99,10 @@ class Tooltip extends StatefulWidget {
     this.height,
     this.padding,
     this.margin,
-    this.verticalOffset,
-    this.preferBelow,
+    double? offset,
+    Alignment? preferredDirection,
+    double? verticalOffset,
+    bool? preferBelow,
     this.excludeFromSemantics,
     this.decoration,
     this.textStyle,
@@ -115,6 +118,16 @@ class Tooltip extends StatefulWidget {
           'If you wish to provide a `textStyle` for a rich tooltip, add the '
           '`textStyle` directly to the `richMessage` InlineSpan.',
         ),
+        assert(
+          offset == null || verticalOffset == null,
+          'If `offset` is specified, `verticalOffset` will have no effect.'
+        ),
+        assert(
+          preferredDirection == null || preferBelow == null,
+          'If `preferredDirection` is specified, `preferBelow` will have no effect.'
+        ),
+        preferredDirection = (preferBelow != null && !preferBelow) ? Alignment.topCenter : preferredDirection,
+        offset = verticalOffset ?? offset,
         super(key: key);
 
   /// The text to display in the tooltip.
@@ -150,21 +163,24 @@ class Tooltip extends StatefulWidget {
   /// 0.0 logical pixels on all sides.
   final EdgeInsetsGeometry? margin;
 
-  /// The vertical gap between the widget and the displayed tooltip.
+  /// The distance between the widget and the displayed tooltip.
   ///
-  /// When [preferBelow] is set to true and tooltips have sufficient space to
-  /// display themselves, this property defines how much vertical space
-  /// tooltips will position themselves under their corresponding widgets.
-  /// Otherwise, tooltips will position themselves above their corresponding
-  /// widgets with the given offset.
-  final double? verticalOffset;
+  /// The tooltip will appear [offset] pixels away in the [preferredDirection]
+  /// from the widget.
+  final double? offset;
 
-  /// Whether the tooltip defaults to being displayed below the widget.
+  /// The direction that the tooltip should appear around the widget.
   ///
-  /// Defaults to true. If there is insufficient space to display the tooltip in
-  /// the preferred direction, the tooltip will be displayed in the opposite
-  /// direction.
-  final bool? preferBelow;
+  /// If there is enough room to put the tooltip [offset] pixels away from the
+  /// widget in [preferredDirection], then the tooltip will be placed there.
+  ///
+  /// If the widget is near an edge of the window, and there is not enough space
+  /// to put the tooltip in [preferredDirection], then [preferredDirection] will
+  /// be flipped vertically, horizontally, or both so that the tooltip can fit
+  /// on the screen.
+  ///
+  /// By default, preferredDirection is [Alignment.bottomCenter].
+  final Alignment? preferredDirection;
 
   /// Whether the tooltip's [message] or [richMessage] should be excluded from
   /// the semantics tree.
@@ -292,8 +308,8 @@ class Tooltip extends StatefulWidget {
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
-    properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
-    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
+    properties.add(DoubleProperty('offset', offset, defaultValue: null));
+    properties.add(DiagnosticsProperty<Alignment>('preferredDirection', preferredDirection, defaultValue: null));
     properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
@@ -307,8 +323,8 @@ class Tooltip extends StatefulWidget {
 /// This class can be used to programmatically show the Tooltip, see the
 /// [ensureTooltipVisible] method.
 class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
-  static const double _defaultVerticalOffset = 24.0;
-  static const bool _defaultPreferBelow = true;
+  static const double _defaultOffset = 24.0;
+  static const Alignment _defaultPreferredDirection = Alignment.bottomCenter;
   static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.zero;
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
@@ -324,8 +340,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late EdgeInsetsGeometry _margin;
   late Decoration _decoration;
   late TextStyle _textStyle;
-  late double _verticalOffset;
-  late bool _preferBelow;
+  late double _offset;
+  late Alignment _preferredDirection;
   late bool _excludeFromSemantics;
   late AnimationController _controller;
   OverlayEntry? _entry;
@@ -576,8 +592,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
           curve: Curves.fastOutSlowIn,
         ),
         target: target,
-        verticalOffset: _verticalOffset,
-        preferBelow: _preferBelow,
+        offset: _offset,
+        preferredDirection: _preferredDirection,
       ),
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
@@ -687,8 +703,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _height = widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight();
     _padding = widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding();
     _margin = widget.margin ?? tooltipTheme.margin ?? _defaultMargin;
-    _verticalOffset = widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset;
-    _preferBelow = widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow;
+    _offset = widget.offset ?? tooltipTheme.offset ?? _defaultOffset;
+    _preferredDirection = widget.preferredDirection ?? tooltipTheme.preferredDirection ?? _defaultPreferredDirection;
     _excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
     _decoration = widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration;
     _textStyle = widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle;
@@ -737,46 +753,75 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// The arguments must not be null.
   _TooltipPositionDelegate({
     required this.target,
-    required this.verticalOffset,
-    required this.preferBelow,
-  }) : assert(target != null),
-       assert(verticalOffset != null),
-       assert(preferBelow != null);
+    required this.offset,
+    required this.preferredDirection,
+  });
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.
   final Offset target;
 
-  /// The amount of vertical distance between the target and the displayed
+  /// The amount of distance between the target and the displayed
   /// tooltip.
-  final double verticalOffset;
+  final double offset;
 
-  /// Whether the tooltip is displayed below its widget by default.
+  /// What direction the tooltip is displayed in relative to the widget by default.
   ///
   /// If there is insufficient space to display the tooltip in the preferred
   /// direction, the tooltip will be displayed in the opposite direction.
-  final bool preferBelow;
+  final Alignment preferredDirection;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
 
+  static Alignment _flip(Alignment alignment, Axis axis) {
+    return axis == Axis.horizontal
+         ? Alignment(alignment.x, -alignment.y)
+         : Alignment(-alignment.x, alignment.y);
+  }
+  static Alignment _flipHorizontally(Alignment alignment) => _flip(alignment, Axis.horizontal);
+  static Alignment _flipVertically(Alignment alignment) => _flip(alignment, Axis.vertical);
+  static Alignment _flipVerticallyAndHorizontally(Alignment alignment) {
+    return _flipVertically(_flipHorizontally(alignment));
+  }
+
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    return positionDependentBox(
-      size: size,
-      childSize: childSize,
-      target: target,
-      verticalOffset: verticalOffset,
-      preferBelow: preferBelow,
-    );
+    final Offset childCenter = Offset(childSize.width / 2, childSize.height / 2);
+
+    Offset _childCenterInDirection(Alignment direction) {
+      final double directionInRadians = Offset(direction.x, direction.y).direction;
+      return target + Offset.fromDirection(directionInRadians, offset) - childCenter;
+    }
+
+    bool _childIsInWindow(Offset offset) {
+      final Rect windowRect = Offset.zero & size;
+      final Rect childRect = offset & childSize;
+      return windowRect.contains(childRect.topLeft)
+          && windowRect.contains(childRect.topRight)
+          && windowRect.contains(childRect.bottomLeft)
+          && windowRect.contains(childRect.bottomRight);
+    }
+
+    // Figure out where to put tooltip based on the [preferredDirection] and
+    // where it will fit on screen.
+    final List<Alignment> possibleDirections = <Alignment>[
+      preferredDirection,
+      _flipHorizontally(preferredDirection),
+      _flipVertically(preferredDirection),
+      _flipVerticallyAndHorizontally(preferredDirection),
+    ];
+    final Iterable<Offset> proposedOffsets = possibleDirections.map(_childCenterInDirection);
+    return proposedOffsets.firstWhere(_childIsInWindow, orElse: () => proposedOffsets.first);
   }
 
   @override
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
     return target != oldDelegate.target
-        || verticalOffset != oldDelegate.verticalOffset
-        || preferBelow != oldDelegate.preferBelow;
+        || offset != oldDelegate.offset
+        || preferredDirection != oldDelegate.preferredDirection;
   }
+
 }
 
 class _TooltipOverlay extends StatelessWidget {
@@ -790,8 +835,8 @@ class _TooltipOverlay extends StatelessWidget {
     this.textStyle,
     required this.animation,
     required this.target,
-    required this.verticalOffset,
-    required this.preferBelow,
+    required this.offset,
+    required this.preferredDirection,
     this.onEnter,
     this.onExit,
   }) : super(key: key);
@@ -804,8 +849,8 @@ class _TooltipOverlay extends StatelessWidget {
   final TextStyle? textStyle;
   final Animation<double> animation;
   final Offset target;
-  final double verticalOffset;
-  final bool preferBelow;
+  final double offset;
+  final Alignment preferredDirection;
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
 
@@ -846,8 +891,8 @@ class _TooltipOverlay extends StatelessWidget {
       child: CustomSingleChildLayout(
         delegate: _TooltipPositionDelegate(
           target: target,
-          verticalOffset: verticalOffset,
-          preferBelow: preferBelow,
+          offset: offset,
+          preferredDirection: preferredDirection,
         ),
         child: result,
       ),

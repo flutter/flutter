@@ -30,6 +30,8 @@ class TooltipThemeData with Diagnosticable {
     this.height,
     this.padding,
     this.margin,
+    this.offset,
+    this.preferredDirection,
     this.verticalOffset,
     this.preferBelow,
     this.excludeFromSemantics,
@@ -49,6 +51,10 @@ class TooltipThemeData with Diagnosticable {
 
   /// If provided, the amount of empty space to surround the [Tooltip].
   final EdgeInsetsGeometry? margin;
+
+  final double? offset;
+
+  final Alignment? preferredDirection;
 
   /// The vertical gap between the widget and the displayed tooltip.
   ///

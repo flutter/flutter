@@ -33,8 +33,6 @@ import 'basic_types.dart';
 /// the container given the margin, then the child will be centered in the
 /// container.
 ///
-/// Used by [Tooltip] to position a tooltip relative to its parent.
-///
 /// The arguments must not be null.
 Offset positionDependentBox({
   required Size size,
