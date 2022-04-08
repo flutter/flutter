@@ -38,6 +38,29 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.0.dart **
 /// {@end-tool}
 ///
+/// ## Troubleshooting
+///
+/// ### Why do I need to provide unique PageStorageKey(s) to scrollable(s) inside [ExpansionTile]
+/// when providing a PageStorageKey [ExpansionTile]?
+///
+/// When providing a unique PageStorageKey [ExpansionTile] to save and restore its expanded state,
+/// If you have a scrollable such as [ListView] or [GridView] inside an [ExpansionTile],
+/// you need to provide a unique [PageStorageKey] to descendant scrollable to restore its
+/// scroll offset.
+///
+/// The key provided to the scrollable must be unique for each scrollable.
+///
+/// If PageStorageKey is only provided to [ExpanionTile], it will be used
+/// to restore position of the desendents scrollables of the [ExpansionTile]. While
+/// the [ExpansionTile] uses `bool` value to save and restore the expanded state,
+/// the [Scrollable]s inside [ExpansionTile] use `double` value to save and restore
+/// the scroll offset.
+///
+/// {@tool dartpad}
+///
+/// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ListTile], useful for creating expansion tile [children] when the

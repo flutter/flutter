@@ -6,33 +6,30 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ExpansionTileApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class ExpansionTileApp extends StatelessWidget {
+  const ExpansionTileApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('ExpansionTile Sample')),
+        body: const ExpansionTileExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class ExpansionTileExample extends StatefulWidget {
+  const ExpansionTileExample({Key? key}) : super(key: key);
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ExpansionTileExample> createState() => _ExpansionTileExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ExpansionTileExampleState extends State<ExpansionTileExample> {
   bool _customTileExpanded = false;
 
   @override
