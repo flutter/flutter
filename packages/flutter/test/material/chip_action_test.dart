@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Adds the basic requirements for a Chip.
-Widget _wrapForChip({
+Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
@@ -22,6 +22,15 @@ Widget _wrapForChip({
       ),
     ),
   );
+}
+
+void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
+  final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
+  // There should be two Material widgets, first Material is from the "_wrapForChip" and
+  // last Material is from the "RawChip".
+  expect(materials.length, 2);
+  // The last Material from `RawChip` should have the clip behavior.
+  expect(materials.last.clipBehavior, clipBehavior);
 }
 
 void main() {
@@ -41,18 +50,12 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
-    final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
-    expect(materials.length, 2);
-    expect(materials.last.clipBehavior, clipBehavior);
-  }
-
   testWidgets('ActionChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
-    await tester.pumpWidget(_wrapForChip(child: ActionChip(label: label, onPressed: () { })));
+    await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, onPressed: () { })));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(_wrapForChip(child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: () { })));
+    await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: () { })));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 }

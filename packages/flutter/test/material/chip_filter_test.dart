@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 /// Adds the basic requirements for a Chip.
-Widget _wrapForChip({
+Widget wrapForChip({
   required Widget child,
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
@@ -26,14 +26,14 @@ Widget _wrapForChip({
   );
 }
 
-Future<void> _pumpCheckmarkChip(
+Future<void> pumpCheckmarkChip(
   WidgetTester tester, {
   required Widget chip,
   Color? themeColor,
   Brightness brightness = Brightness.light,
 }) async {
   await tester.pumpWidget(
-    _wrapForChip(
+    wrapForChip(
       brightness: brightness,
       child: Builder(
         builder: (BuildContext context) {
@@ -50,7 +50,7 @@ Future<void> _pumpCheckmarkChip(
   );
 }
 
-Widget _selectedFilterChip({ Color? checkmarkColor }) {
+Widget selectedFilterChip({ Color? checkmarkColor }) {
   return FilterChip(
     label: const Text('InputChip'),
     selected: true,
@@ -60,7 +60,7 @@ Widget _selectedFilterChip({ Color? checkmarkColor }) {
   );
 }
 
-void _expectCheckmarkColor(Finder finder, Color color) {
+void expectCheckmarkColor(Finder finder, Color color) {
   expect(
     finder,
     paints
@@ -71,6 +71,15 @@ void _expectCheckmarkColor(Finder finder, Color color) {
       // The second path that is painted is the check mark.
       ..path(color: color),
   );
+}
+
+void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
+  final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
+  // There should be two Material widgets, first Material is from the "_wrapForChip" and
+  // last Material is from the "RawChip".
+  expect(materials.length, 2);
+  // The last Material from `RawChip` should have the clip behavior.
+  expect(materials.last.clipBehavior, clipBehavior);
 }
 
 void main() {
@@ -91,80 +100,74 @@ void main() {
   });
 
   testWidgets('Filter chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
-    await _pumpCheckmarkChip(
+    await pumpCheckmarkChip(
       tester,
-      chip: _selectedFilterChip(),
+      chip: selectedFilterChip(),
     );
 
-    _expectCheckmarkColor(
+    expectCheckmarkColor(
       find.byType(FilterChip),
       Colors.black.withAlpha(0xde),
     );
   });
 
   testWidgets('Filter chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
-    await _pumpCheckmarkChip(
+    await pumpCheckmarkChip(
       tester,
-      chip: _selectedFilterChip(),
+      chip: selectedFilterChip(),
       brightness: Brightness.dark,
     );
 
-    _expectCheckmarkColor(
+    expectCheckmarkColor(
       find.byType(FilterChip),
       Colors.white.withAlpha(0xde),
     );
   });
 
   testWidgets('Filter chip check mark color can be set by the chip theme', (WidgetTester tester) async {
-    await _pumpCheckmarkChip(
+    await pumpCheckmarkChip(
       tester,
-      chip: _selectedFilterChip(),
+      chip: selectedFilterChip(),
       themeColor: const Color(0xff00ff00),
     );
 
-    _expectCheckmarkColor(
+    expectCheckmarkColor(
       find.byType(FilterChip),
       const Color(0xff00ff00),
     );
   });
 
   testWidgets('Filter chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
-    await _pumpCheckmarkChip(
+    await pumpCheckmarkChip(
       tester,
-      chip: _selectedFilterChip(checkmarkColor: const Color(0xff00ff00)),
+      chip: selectedFilterChip(checkmarkColor: const Color(0xff00ff00)),
     );
 
-    _expectCheckmarkColor(
+    expectCheckmarkColor(
       find.byType(FilterChip),
       const Color(0xff00ff00),
     );
   });
 
   testWidgets('Filter chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
-    await _pumpCheckmarkChip(
+    await pumpCheckmarkChip(
       tester,
-      chip: _selectedFilterChip(checkmarkColor: const Color(0xffff0000)),
+      chip: selectedFilterChip(checkmarkColor: const Color(0xffff0000)),
       themeColor: const Color(0xff00ff00),
     );
 
-    _expectCheckmarkColor(
+    expectCheckmarkColor(
       find.byType(FilterChip),
       const Color(0xffff0000),
     );
   });
 
-  void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
-    final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
-    expect(materials.length, 2);
-    expect(materials.last.clipBehavior, clipBehavior);
-  }
-
   testWidgets('FilterChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
-    await tester.pumpWidget(_wrapForChip(child: FilterChip(label: label, onSelected: (bool b) { })));
+    await tester.pumpWidget(wrapForChip(child: FilterChip(label: label, onSelected: (bool b) { })));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(_wrapForChip(child: FilterChip(label: label, onSelected: (bool b) { }, clipBehavior: Clip.antiAlias)));
+    await tester.pumpWidget(wrapForChip(child: FilterChip(label: label, onSelected: (bool b) { }, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 }
