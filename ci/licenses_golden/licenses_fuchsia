@@ -1,4 +1,4 @@
-Signature: 2652cdf3ee37ee3f9ad56576f80214a5
+Signature: e8252dfb4a0a6ff67d122359fe3b484a
 
 UNUSED LICENSES:
 
@@ -2333,7 +2333,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/client_state.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/allocator.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/flatland.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/screenshot.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/flatland_tokens.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/wlan_common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/constants.fidl
@@ -3758,6 +3757,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/screen_capture.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/overview.fidl
