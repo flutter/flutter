@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:flutter_devicelab/framework/ab.dart';
-import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
