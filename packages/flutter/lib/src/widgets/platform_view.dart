@@ -805,7 +805,6 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 /// The `surfaceFactory` and the `onCreatePlatformView` are only called when the
 /// state of this widget is initialized, or when the `viewType` changes.
 class PlatformViewLink extends StatefulWidget {
-
   /// Construct a [PlatformViewLink] widget.
   ///
   /// The `surfaceFactory` and the `onCreatePlatformView` must not be null.
@@ -842,11 +841,19 @@ class PlatformViewLink extends StatefulWidget {
 class _PlatformViewLinkState extends State<PlatformViewLink> {
   int? _id;
   PlatformViewController? _controller;
+  bool _platformViewCreated = false;
   Widget? _surface;
   FocusNode? _focusNode;
 
   @override
   Widget build(BuildContext context) {
+    if (_controller == null) {
+      return const SizedBox.expand();
+    }
+    if (!_platformViewCreated) {
+      // Depending on the platform, the initial size can be used to size the platform view.
+      return _PlatformViewPlaceHolder(onLayout: (Size size) => _controller!.create(size: size));
+    }
     _surface ??= widget._surfaceFactory(context, _controller!);
     return Focus(
       focusNode: _focusNode,
@@ -881,10 +888,16 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       PlatformViewCreationParams._(
         id: _id!,
         viewType: widget.viewType,
-        onPlatformViewCreated: (_) {},
+        onPlatformViewCreated: _onPlatformViewCreated,
         onFocusChanged: _handlePlatformFocusChanged,
       ),
     );
+  }
+
+  void _onPlatformViewCreated(int id) {
+    setState(() {
+      _platformViewCreated = true;
+    });
   }
 
   void _handleFrameworkFocusChanged(bool isFocused) {
@@ -1062,5 +1075,50 @@ class AndroidViewSurface extends PlatformViewSurface {
     viewController.pointTransformer =
         (Offset position) => renderBox.globalToLocal(position);
     return renderBox;
+  }
+}
+
+/// A callback used to notify the size of the platform view placeholder.
+/// This size is the initial size of the platform view.
+typedef _OnLayoutCallback = void Function(Size size);
+
+/// A [RenderBox] that notifies its size to the owner after a layout.
+class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
+  _PlatformViewPlaceholderBox({
+    required this.onLayout,
+  }) : super(additionalConstraints: const BoxConstraints.tightFor(
+      width: double.infinity,
+      height: double.infinity,
+    ));
+
+  _OnLayoutCallback onLayout;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    onLayout(size);
+  }
+}
+
+/// When a platform view is in the widget hierarchy, this widget is used to capture
+/// the size of the platform view after the first layout.
+/// This placeholder is basically a [SizedBox.expand] with a [onLayout] callback to
+/// notify the size of the render object to its parent.
+class _PlatformViewPlaceHolder extends SingleChildRenderObjectWidget {
+  const _PlatformViewPlaceHolder({
+    Key? key,
+    required this.onLayout,
+  }) : super(key: key);
+
+  final _OnLayoutCallback onLayout;
+
+  @override
+  _PlatformViewPlaceholderBox createRenderObject(BuildContext context) {
+    return _PlatformViewPlaceholderBox(onLayout: onLayout);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _PlatformViewPlaceholderBox renderObject) {
+    renderObject.onLayout = onLayout;
   }
 }
