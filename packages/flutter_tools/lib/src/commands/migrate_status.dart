@@ -116,8 +116,6 @@ class MigrateStatusCommand extends FlutterCommand {
             }
             logger.printStatus(line, color: TerminalColor.grey);
           }
-        } else {
-          print('SKIPPED PRINTING EMPTY DIFF for $localPath');
         }
       }
     }
@@ -126,9 +124,15 @@ class MigrateStatusCommand extends FlutterCommand {
 
     checkAndPrintMigrateStatus(manifest, workingDirectory, logger: logger);
 
-    logger.printStatus('Guided conflict resolution wizard:');
-    MigrateUtils.printCommandText('flutter migrate resolve-conflicts', logger);
-    logger.printStatus('Resolve conflicts and accept changes with:');
+    final bool readyToApply = manifest.remainingConflictFiles(workingDirectory).isEmpty;
+
+    if (!readyToApply) {
+      logger.printStatus('Guided conflict resolution wizard:');
+      MigrateUtils.printCommandText('flutter migrate resolve-conflicts', logger);
+      logger.printStatus('Resolve conflicts and accept changes with:');
+    } else {
+      logger.printStatus('All conflicts resolved. Review changes above and apply the migration with:', color: TerminalColor.green);
+    }
     MigrateUtils.printCommandText('flutter migrate apply', logger);
 
     return const FlutterCommandResult(ExitStatus.success);

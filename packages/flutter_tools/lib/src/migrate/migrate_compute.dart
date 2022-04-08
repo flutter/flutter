@@ -68,9 +68,13 @@ const List<String> _skippedMergeFileExt = <String>[
   '.exe',
 ];
 
-const List<String> _alwaysMigrateFiles = <String>[
+const Set<String> _alwaysMigrateFiles = <String>{
   'android/gradle/wrapper/gradle-wrapper.jar',
-];
+  // Always add .gitignore back in even if user-deleted as it makes it
+  // difficult to migrate in the future and the migrate tool enforces git
+  // usage.
+  '.gitignore',
+};
 
 /// True for files that should not be merged. Typically, images and binary files.
 bool _skippedMerge(String localPath) {
@@ -607,6 +611,7 @@ Future<void> computeMerge(
   // For each existing file in the project, we attempt to 3 way merge if it is changed by the user.
   final List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
   final String projectRootPath = flutterProject.directory.absolute.path;
+  final Set<String> missingAlwaysMigrateFiles = Set<String>.of(_alwaysMigrateFiles);
   for (final FileSystemEntity entity in currentFiles) {
     if (entity is! File) {
       continue;
@@ -627,6 +632,7 @@ Future<void> computeMerge(
     final File currentFile = entity.absolute;
     // Diff the current file against the old generated template
     final String localPath = getLocalPath(currentFile.path, projectRootPath, fileSystem);
+    missingAlwaysMigrateFiles.remove(localPath);
     if (migrateResult.diffMap.containsKey(localPath) && migrateResult.diffMap[localPath]!.isIgnored ||
         await MigrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path) ||
         _skipped(localPath, blacklistPrefixes: blacklistPrefixes) ||
@@ -744,6 +750,14 @@ Future<void> computeMerge(
       continue;
     }
   }
+
+  // Add files that are in the target, marked as always migrate, and missing in the current project.
+  for (final String localPath in missingAlwaysMigrateFiles) {
+    final File targetTemplateFile = migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
+    if (targetTemplateFile.existsSync()) {
+      migrateResult.addedFiles.add(FilePendingMigration(localPath, targetTemplateFile));
+    }
+  }
 }
 
 /// Writes the files into the working directory for the developer to review and resolve any conflicts.
@@ -784,6 +798,5 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
   // output the manifest contents.
   checkAndPrintMigrateStatus(manifest, workingDir, logger: logger);
 
-  logger.printStatus(''); // newline
   logger.printBox('Working directory created at `${workingDir.path}`');
 }
