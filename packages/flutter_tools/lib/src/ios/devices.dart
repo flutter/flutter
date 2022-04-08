@@ -436,9 +436,7 @@ class IOSDevice extends Device {
         _logger.printError('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...');
         iosDeployDebugger?.pauseDumpBacktraceResume();
       });
-      _logger.printError('Awaiting observatory URI $observatoryDiscovery...');
       final Uri? localUri = await observatoryDiscovery?.uri;
-      _logger.printError('Got observatory URI!');
       timer.cancel();
       if (localUri == null) {
         await iosDeployDebugger?.stopAndDumpBacktrace();

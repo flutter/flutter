@@ -457,6 +457,7 @@ class IOSDeployDebugger {
     return success;
   }
 
+  /// Pause app, dump backtrace for debugging, and resume.
   Future<void> pauseDumpBacktraceResume() async {
     if (!debuggerAttached) {
       return;
@@ -467,7 +468,6 @@ class IOSDeployDebugger {
       // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
       _iosDeployProcess?.stdin.writeln(_processInterrupt);
     } on SocketException catch (error) {
-      // Best effort, try to detach, but maybe the app already exited or already detached.
       _logger.printTrace('Could not stop app from debugger: $error');
     }
     // wait for backtrace to be dumped
@@ -481,12 +481,11 @@ class IOSDeployDebugger {
     }
     try {
       // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
-      _iosDeployProcess?.stdin.writeln(_processInterrupt);
+      _iosDeployProcess?.stdin.writeln(_signalStop);
     } on SocketException catch (error) {
       // Best effort, try to detach, but maybe the app already exited or already detached.
       _logger.printTrace('Could not stop app from debugger: $error');
     }
-
     // Wait for logging to finish on process exit.
     return logLines.drain();
   }
