@@ -406,7 +406,7 @@ void main() {
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
   });
 
-  test('selection is paint above the text', () {
+  test('selection is painted above the text', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
@@ -437,7 +437,6 @@ void main() {
       paints
         ..paragraph()
         // Check that it's the black selection box, not the red cursor.
-        // cause of the `
         ..rect(color: Colors.black),
     );
 
@@ -478,8 +477,8 @@ void main() {
       paints
         ..paragraph()
         // Red collapsed cursor is painted, not a selection box.
-        // cursor can painted above the selection
-        ..rect(color: Colors.red[500])
+        // The cursor is painted above the selection.
+        ..rect(color: Colors.red[500]),
     );
 
     // There is exactly one rect paint (0 selection, 1 cursor).
