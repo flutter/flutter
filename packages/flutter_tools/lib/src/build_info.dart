@@ -565,7 +565,6 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
     ];
   }
   return <DarwinArch>[
-    DarwinArch.armv7,
     DarwinArch.arm64,
   ];
 }

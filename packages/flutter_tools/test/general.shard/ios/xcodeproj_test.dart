@@ -874,7 +874,9 @@ Build settings for action build and target plugin2:
         updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
-        ), throwsToolExit(message: '32-bit iOS local engine binaries are not supported.'));
+        ),
+        throwsToolExit(message: '32-bit iOS local engine binaries are not supported.'),
+      );
     });
 
     testUsingContext('sets ARCHS=arm64 when arm64 local host engine is set', () async {
