@@ -38,10 +38,10 @@ void configureProject(Project project, String outputDir) {
         }
     }
 
-    // Some extra work to keep the publications in the same format as the previous plugin. Instead of
-    // using classifiers for the variants, append `_{variant}` to the artifactId
+    // Some extra work to have alternative publications with the same format as the old maven plugin.
+    // Instead of using classifiers for the variants, the old maven plugin appended `_{variant}` to the artifactId
 
-    // First, create a default MavenPublication for each variant (except "all" since we don't need that here)
+    // First, create a default MavenPublication for each variant (except "all" since that is used to publish artifacts in the new way)
     project.components.forEach { component ->
         if (component.name != "all") {
             project.publishing.publications.create(component.name, MavenPublication) {
@@ -50,12 +50,29 @@ void configureProject(Project project, String outputDir) {
         }
     }
 
-    // then, rename the artifactId to include the variant and make sure to remove any classifier data tha gradle has set
+    // then, rename the artifactId to include the variant and make sure to remove any classifier
+    // data tha gradle has set, as well as adding a <relocation> tag pointing to the new coordinates
     project.publishing.publications.forEach { pub ->
-        pub.artifactId = "${pub.artifactId}_${pub.name}"
-        pub.publishableArtifacts.forEach { artifact ->
-            artifact.classifier = null
+        def relocationArtifactId = pub.artifactId
+        pub.artifactId = "${relocationArtifactId}_${pub.name}"
+        pub.alias = true
+
+        pub.pom.distributionManagement {
+            relocation {
+                // New artifact coordinates
+                groupId = "${pub.groupId}"
+                artifactId = "${relocationArtifactId}"
+                version = "${pub.version}"
+                message = "Use classifiers rather than _variant for new publish plugin"
+            }
         }
+
+    }
+
+    // also publish the artifacts in the new way, using one set of coordinates with classifiers
+    project.publishing.publications.create("all", MavenPublication) {
+        from project.components.all
+        alias false
     }
 
     if (!project.property("is-plugin").toBoolean()) {
@@ -105,30 +122,9 @@ void addAarTask(Project project, variant) {
         if (!project.gradle.startParameter.taskNames.contains(taskName)) {
             return
         }
-        overrideDefaultPublishConfig(project, variant)
         // Generate the Maven artifacts.
         finalizedBy "publish"
     }
-}
-
-// This method mimics the logic in AGP when `android.defaultPublishConfig` is set in `build.gradle`:
-// https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/variant/VariantHelper.java
-//
-// Unfortunately, `android.defaultPublishConfig` cannot be overridden at this point since
-// AGP already run this code.
-void overrideDefaultPublishConfig(Project project, variant) {
-    String variantName = variant.name.capitalize()
-    Task bundle = project.tasks.findByName("bundle${variantName}Aar") // gradle:3.2.0
-    if (bundle == null) {
-        bundle = project.tasks.findByName("bundle${variantName}") // gradle:3.1.0
-    }
-    if (bundle == null) {
-        throw new GradleException("Can't generate AAR for variant ${variantName}.");
-    }
-    // Clear the current archive artifacts since the artifacts are based on `android.defaultPublishConfig`.
-    project.configurations["archives"].artifacts.clear()
-    // Add the artifact that will be published.
-    project.artifacts.add("archives", bundle)
 }
 
 // maven-publish has to be applied _before_ the project gets evaluated, but some of the code in
