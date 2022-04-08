@@ -159,12 +159,6 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     'app.ios-arm64.symbols',
   ));
 
-  checkFileExists(path.join(
-    projectDir.path,
-    'symbols',
-    'app.ios-armv7.symbols',
-  ));
-
   section('Check debug build has no Dart AOT');
 
   final String aotSymbols = await _dylibSymbols(debugAppFrameworkPath);
