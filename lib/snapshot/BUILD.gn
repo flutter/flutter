@@ -143,9 +143,7 @@ template("bin_to_coff") {
       args += [ "--executable" ]
     }
 
-    if (current_cpu == "x64") {
-      args += [ "--64-bit" ]
-    }
+    args += [ "--arch=$current_cpu" ]
     inputs = [ invoker.input ]
     outputs = [ output ]
   }
