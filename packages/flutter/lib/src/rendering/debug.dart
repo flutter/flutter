@@ -145,20 +145,22 @@ bool debugProfileLayoutsEnabled = false;
 ///    areas are being excessively repainted.
 bool debugProfilePaintsEnabled = false;
 
-/// Adds debugging information to the args of [Timeline] events related to
-/// [RenderObject] layouts.
+/// Adds debugging information to [Timeline] events related to [RenderObject]
+/// layouts.
 ///
-/// This flag will only add [Timeline] arguments for debug builds and may
-/// require other conditions to be met. Such conditions will be defined at each
-/// usage of this flag.
+/// This flag will only add [Timeline] event arguments for debug builds.
+/// Additional arguments will be added for the "LAYOUT" timeline event and for
+/// all [RenderObject] layout [Timeline] events, which are the events that are
+/// added when [debugProfileLayoutsEnabled] is true.
 bool debugEnhanceLayoutTimelineArguments = false;
 
-/// Adds debugging information to the args of [Timeline] events related to
-/// [RenderObject] paints.
+/// Adds debugging information to [Timeline] events related to [RenderObject]
+/// paints.
 ///
-/// This flag will only add [Timeline] arguments for debug builds and may
-/// require other conditions to be met. Such conditions will be defined at each
-/// usage of this flag.
+/// This flag will only add [Timeline] event arguments for debug builds.
+/// Additional arguments will be added for the "PAINT" timeline event and for
+/// all [RenderObject] paint [Timeline] events, which are the [Timeline] events
+/// that are added when [debugProfilePaintsEnabled] is true.
 bool debugEnhancePaintTimelineArguments = false;
 
 /// Signature for [debugOnProfilePaint] implementations.
