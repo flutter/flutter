@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';
@@ -46,6 +48,10 @@ class Velocity {
   /// Velocity with the same direction and with magnitude [minValue]. Similarly,
   /// if the magnitude of this Velocity is greater than maxValue then return a
   /// new Velocity with the same direction and magnitude [maxValue].
+  /// if the magnitude of this Velocity is infinite because only one of its component is infinite
+  /// then return a new Velocity in that direction with [maxValue] magnitude.
+  /// if the magnitude of this Velocity is infinite with both components infinite
+  /// then return a new Velocity with [maxValue] magnitude.
   ///
   /// If the magnitude of this Velocity is within the specified bounds then
   /// just return this.
@@ -53,8 +59,18 @@ class Velocity {
     assert(minValue != null && minValue >= 0.0);
     assert(maxValue != null && maxValue >= 0.0 && maxValue >= minValue);
     final double valueSquared = pixelsPerSecond.distanceSquared;
-    if (valueSquared > maxValue * maxValue)
+    if (valueSquared > maxValue * maxValue) {
+      if (valueSquared.isInfinite) {
+        if (pixelsPerSecond.dx.isInfinite && pixelsPerSecond.dy.isInfinite) {
+          return Velocity(pixelsPerSecond: Offset.fromDirection(pi/4, maxValue));
+        } else if (pixelsPerSecond.dx.isInfinite) {
+          return Velocity(pixelsPerSecond: Offset(maxValue, 0.0));
+        } else if (pixelsPerSecond.dy.isInfinite) {
+          return Velocity(pixelsPerSecond: Offset(0.0, maxValue));
+        }
+      }
       return Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * maxValue);
+    }
     if (valueSquared < minValue * minValue)
       return Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * minValue);
     return this;
@@ -232,11 +248,21 @@ class VelocityTracker {
 
     // We're unable to make a velocity estimate but we did have at least one
     // valid pointer position.
+    final Offset offset = newestSample.point - oldestSample.point;
+    final Duration duration = newestSample.time - oldestSample.time;
+
     return VelocityEstimate(
-      pixelsPerSecond: Offset.zero,
+      // If the offset is > 0 in one direction and the duration is zero,
+      // then the velocity is infinite in that direction.
+      pixelsPerSecond: (duration == Duration.zero)
+          ? Offset(
+              offset.dx.abs() > 0 ? double.infinity : 0.0,
+              offset.dy.abs() > 0 ? double.infinity : 0.0,
+            )
+          : Offset.zero,
       confidence: 1.0,
-      duration: newestSample.time - oldestSample.time,
-      offset: newestSample.point - oldestSample.point,
+      duration: duration,
+      offset: offset,
     );
   }
 
