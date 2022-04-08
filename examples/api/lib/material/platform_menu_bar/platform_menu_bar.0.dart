@@ -4,6 +4,10 @@
 
 // Flutter code sample for PlatformMenuBar
 
+////////////////////////////////////
+// THIS SAMPLE ONLY WORKS ON MACOS.
+////////////////////////////////////
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
