@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 // Flutter code sample for FontFeature.FontFeature.localeAware
-import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 
