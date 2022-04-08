@@ -132,6 +132,17 @@ bool debugProfileBuildsEnabled = false;
 ///    for every widget and has a higher overhead cost.
 bool debugProfileBuildsEnabledUserWidgets = false;
 
+/// Adds debugging information to the args of [Timeline] events related to
+/// [Widget] builds.
+///
+/// This flag will only add [Timeline] arguments for debug builds and may
+/// require other conditions to be met. Such conditions will be defined at each
+/// usage of this flag. For example, some usages of
+/// [debugEnhanceBuildTimelineArguments] will require that one of
+/// [debugProfileBuildsEnabled] and [debugProfileBuildsEnabledUserWidgets] are
+/// also enabled.
+bool debugEnhanceBuildTimelineArguments = false;
+
 /// Show banners for deprecated widgets.
 bool debugHighlightDeprecatedWidgets = false;
 

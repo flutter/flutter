@@ -145,6 +145,22 @@ bool debugProfileLayoutsEnabled = false;
 ///    areas are being excessively repainted.
 bool debugProfilePaintsEnabled = false;
 
+/// Adds debugging information to the args of [Timeline] events related to
+/// [RenderObject] layouts.
+///
+/// This flag will only add [Timeline] arguments for debug builds and may
+/// require other conditions to be met. Such conditions will be defined at each
+/// usage of this flag.
+bool debugEnhanceLayoutTimelineArguments = false;
+
+/// Adds debugging information to the args of [Timeline] events related to
+/// [RenderObject] paints.
+///
+/// This flag will only add [Timeline] arguments for debug builds and may
+/// require other conditions to be met. Such conditions will be defined at each
+/// usage of this flag.
+bool debugEnhancePaintTimelineArguments = false;
+
 /// Signature for [debugOnProfilePaint] implementations.
 typedef ProfilePaintCallback = void Function(RenderObject renderObject);
 
