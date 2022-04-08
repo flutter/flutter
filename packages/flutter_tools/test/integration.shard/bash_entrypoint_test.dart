@@ -60,10 +60,11 @@ Future<void> main() async {
       logger: BufferLogger.test(),
     );
     expect(dartArch, os.hostPlatform);
-  });
+  }, skip: !platform.isMacOS); // [intended] Calls macOS-specific commands
 }
 
 // Call `file` on the path and parse the output.
+// This is macOS-specific.
 HostPlatform _identifyBinaryArch(String path) {
   // Expect STDOUT like:
   //   bin/cache/dart-sdk/bin/dart: Mach-O 64-bit executable x86_64
