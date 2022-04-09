@@ -408,7 +408,7 @@ std::vector<Point> CubicPathComponent::Extrema() const {
   CubicPathBoundingPopulateValues(values, p1.x, cp1.x, cp2.x, p2.x);
   CubicPathBoundingPopulateValues(values, p1.y, cp1.y, cp2.y, p2.y);
 
-  std::vector<Point> points;
+  std::vector<Point> points = {p1, p2};
 
   for (const auto& value : values) {
     points.emplace_back(Solve(value));
