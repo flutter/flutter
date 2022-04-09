@@ -9,6 +9,7 @@ import 'rendering_tester.dart';
 
 class RenderTestBox extends RenderBox {
   late Size boxSize;
+  int calls = 0;
   double value = 0.0;
   double next() {
     value += 1.0;
@@ -31,6 +32,7 @@ class RenderTestBox extends RenderBox {
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    calls += 1;
     return boxSize.height / 2.0;
   }
 }
@@ -88,7 +90,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/101179
   test('Cached baselines should be cleared if its parent re-layout', () {
     double viewHeight =  200.0;
-    final RenderBox test = RenderTestBox();
+    final RenderTestBox test = RenderTestBox();
     final RenderBox baseline = RenderBaseline(
       baseline: 0.0,
       baselineType: TextBaseline.alphabetic,
@@ -105,6 +107,7 @@ void main() {
 
     BoxParentData? parentData = test.parentData as BoxParentData?;
     expect(parentData!.offset.dy, -(viewHeight / 2.0));
+    expect(test.calls, 1);
 
     // Trigger the root render re-layout.
     viewHeight = 300.0;
@@ -113,5 +116,22 @@ void main() {
 
     parentData = test.parentData as BoxParentData?;
     expect(parentData!.offset.dy, -(viewHeight / 2.0));
+    expect(test.calls, 2); // The layout constraints change will clear the cached data.
+
+    final RenderObject parent = test.parent! as RenderObject;
+    expect(parent.debugNeedsLayout, false);
+
+    // Do not forget notify parent dirty after the cached data be cleared by `layout()`
+    test.markNeedsLayout();
+    expect(parent.debugNeedsLayout, true);
+
+    pumpFrame();
+    expect(parent.debugNeedsLayout, false);
+    expect(test.calls, 3); // Self dirty will clear the cached data.
+
+    parent.markNeedsLayout();
+    pumpFrame();
+
+    expect(test.calls, 3); // Use the cached data if the layout constraints do not change.
   });
 }
