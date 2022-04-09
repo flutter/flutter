@@ -397,15 +397,15 @@ inline Dart_Handle LookupNonNullableType(const std::string& library_name,
                                          const std::string& type_name) {
   auto library =
       Dart_LookupLibrary(DartConverter<std::string>::ToDart(library_name));
-  if (LogIfError(library)) {
+  if (CheckAndHandleError(library)) {
     return library;
   }
   auto type_string = DartConverter<std::string>::ToDart(type_name);
-  if (LogIfError(type_string)) {
+  if (CheckAndHandleError(type_string)) {
     return type_string;
   }
   auto type = Dart_GetNonNullableType(library, type_string, 0, nullptr);
-  if (LogIfError(type)) {
+  if (CheckAndHandleError(type)) {
     return type;
   }
   return type;
@@ -439,7 +439,7 @@ Dart_Handle CreateZeroInitializedDartObject(
     return ::Dart_NewDouble(0.0);
   } else {
     auto object = ::Dart_New(type_handle_or_null, ::Dart_Null(), 0, nullptr);
-    LogIfError(object);
+    CheckAndHandleError(object);
     return object;
   }
   return ::Dart_Null();
@@ -450,20 +450,20 @@ struct DartListFactory {
   static Dart_Handle NewList(Dart_Handle type_handle, intptr_t length) {
     bool is_nullable = false;
     auto is_nullable_handle = ::Dart_IsNullableType(type_handle, &is_nullable);
-    if (LogIfError(is_nullable_handle)) {
+    if (CheckAndHandleError(is_nullable_handle)) {
       return is_nullable_handle;
     }
     if (is_nullable) {
       auto list = ::Dart_NewListOfType(type_handle, length);
-      LogIfError(list);
+      CheckAndHandleError(list);
       return list;
     } else {
       auto sentinel = CreateZeroInitializedDartObject<T>(type_handle);
-      if (LogIfError(sentinel)) {
+      if (CheckAndHandleError(sentinel)) {
         return sentinel;
       }
       auto list = ::Dart_NewListOfTypeFilled(type_handle, sentinel, length);
-      LogIfError(list);
+      CheckAndHandleError(list);
       return list;
     }
     return ::Dart_Null();

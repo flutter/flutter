@@ -56,7 +56,7 @@ TEST_F(TypeConversionsTest, CanConvertEmptyList) {
   AddNativeCallback(
       "NotifySuccess", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
         auto bool_handle = Dart_GetNativeArgument(args, 0);
-        ASSERT_FALSE(tonic::LogIfError(bool_handle));
+        ASSERT_FALSE(tonic::CheckAndHandleError(bool_handle));
         ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(bool_handle));
         event.Signal();
       }));
@@ -64,7 +64,7 @@ TEST_F(TypeConversionsTest, CanConvertEmptyList) {
       "NotifyNative", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments) {
         std::vector<int64_t> items;
         auto items_handle = tonic::ToDart(items);
-        ASSERT_FALSE(tonic::LogIfError(items_handle));
+        ASSERT_FALSE(tonic::CheckAndHandleError(items_handle));
         tonic::DartInvokeField(::Dart_RootLibrary(), "testCanConvertEmptyList",
                                {items_handle});
       }));
@@ -77,7 +77,7 @@ TEST_F(TypeConversionsTest, CanConvertListOfStrings) {
   AddNativeCallback(
       "NotifySuccess", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
         auto bool_handle = Dart_GetNativeArgument(args, 0);
-        ASSERT_FALSE(tonic::LogIfError(bool_handle));
+        ASSERT_FALSE(tonic::CheckAndHandleError(bool_handle));
         ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(bool_handle));
         event.Signal();
       }));
@@ -89,7 +89,7 @@ TEST_F(TypeConversionsTest, CanConvertListOfStrings) {
         items.push_back("soldier");
         items.push_back("sailor");
         auto items_handle = tonic::ToDart(items);
-        ASSERT_FALSE(tonic::LogIfError(items_handle));
+        ASSERT_FALSE(tonic::CheckAndHandleError(items_handle));
         tonic::DartInvokeField(::Dart_RootLibrary(),
                                "testCanConvertListOfStrings", {items_handle});
       }));
@@ -102,7 +102,7 @@ TEST_F(TypeConversionsTest, CanConvertListOfDoubles) {
   AddNativeCallback(
       "NotifySuccess", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
         auto bool_handle = Dart_GetNativeArgument(args, 0);
-        ASSERT_FALSE(tonic::LogIfError(bool_handle));
+        ASSERT_FALSE(tonic::CheckAndHandleError(bool_handle));
         ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(bool_handle));
         event.Signal();
       }));
@@ -114,7 +114,7 @@ TEST_F(TypeConversionsTest, CanConvertListOfDoubles) {
         items.push_back(3.0);
         items.push_back(4.0);
         auto items_handle = tonic::ToDart(items);
-        ASSERT_FALSE(tonic::LogIfError(items_handle));
+        ASSERT_FALSE(tonic::CheckAndHandleError(items_handle));
         tonic::DartInvokeField(::Dart_RootLibrary(),
                                "testCanConvertListOfDoubles", {items_handle});
       }));
@@ -127,7 +127,7 @@ TEST_F(TypeConversionsTest, CanConvertListOfInts) {
   AddNativeCallback(
       "NotifySuccess", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
         auto bool_handle = Dart_GetNativeArgument(args, 0);
-        ASSERT_FALSE(tonic::LogIfError(bool_handle));
+        ASSERT_FALSE(tonic::CheckAndHandleError(bool_handle));
         ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(bool_handle));
         event.Signal();
       }));
@@ -139,7 +139,7 @@ TEST_F(TypeConversionsTest, CanConvertListOfInts) {
         items.push_back(3);
         items.push_back(4);
         auto items_handle = tonic::ToDart(items);
-        ASSERT_FALSE(tonic::LogIfError(items_handle));
+        ASSERT_FALSE(tonic::CheckAndHandleError(items_handle));
         tonic::DartInvokeField(::Dart_RootLibrary(), "testCanConvertListOfInts",
                                {items_handle});
       }));
@@ -152,7 +152,7 @@ TEST_F(TypeConversionsTest, CanConvertListOfFloatsToListOfDartDoubles) {
   AddNativeCallback(
       "NotifySuccess", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
         auto bool_handle = Dart_GetNativeArgument(args, 0);
-        ASSERT_FALSE(tonic::LogIfError(bool_handle));
+        ASSERT_FALSE(tonic::CheckAndHandleError(bool_handle));
         ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(bool_handle));
         event.Signal();
       }));
@@ -164,7 +164,7 @@ TEST_F(TypeConversionsTest, CanConvertListOfFloatsToListOfDartDoubles) {
         items.push_back(3.0f);
         items.push_back(4.0f);
         auto items_handle = tonic::ToDart(items);
-        ASSERT_FALSE(tonic::LogIfError(items_handle));
+        ASSERT_FALSE(tonic::CheckAndHandleError(items_handle));
         // This will fail on type mismatch.
         tonic::DartInvokeField(::Dart_RootLibrary(),
                                "testCanConvertListOfDoubles", {items_handle});

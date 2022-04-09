@@ -53,6 +53,16 @@ typedef _SetNeedsReportTimingsFunc = void Function(bool value);
 /// Signature for [PlatformDispatcher.onConfigurationChanged].
 typedef PlatformConfigurationChangedCallback = void Function(PlatformConfiguration configuration);
 
+/// Signature for [PlatformDispatcher.onError].
+///
+/// If this method returns false, the engine may use some fallback method to
+/// provide information about the error.
+///
+/// After calling this method, the process or the VM may terminate. Some severe
+/// unhandled errors may not be able to call this method either, such as Dart
+/// compilation errors or process terminating errors.
+typedef ErrorCallback = bool Function(Object exception, StackTrace stackTrace);
+
 // A gesture setting value that indicates it has not been set by the engine.
 const double _kUnsetGestureSetting = -1.0;
 
@@ -1010,6 +1020,50 @@ class PlatformDispatcher {
       SemanticsAction.values[action]!,
       args,
     );
+  }
+
+  ErrorCallback? _onError;
+  Zone? _onErrorZone;
+
+  /// A callback that is invoked when an unhandled error occurs in the root
+  /// isolate.
+  ///
+  /// This callback must return `true` if it has handled the error. Otherwise,
+  /// it must return `false` and a fallback mechanism such as printing to stderr
+  /// will be used, as configured by the specific platform embedding via
+  /// `Settings::unhandled_exception_callback`.
+  ///
+  /// The VM or the process may exit or become unresponsive after calling this
+  /// callback. The callback will not be called for exceptions that cause the VM
+  /// or process to terminate or become unresponsive before the callback can be
+  /// invoked.
+  ///
+  /// This callback is not directly invoked by errors in child isolates of the
+  /// root isolate. Programs that create new isolates must listen for errors on
+  /// those isolates and forward the errors to the root isolate. An example of
+  /// this can be found in the Flutter framework's `compute` function.
+  ErrorCallback? get onError => _onError;
+  set onError(ErrorCallback? callback) {
+    _onError = callback;
+    _onErrorZone = Zone.current;
+  }
+
+  bool _dispatchError(Object error, StackTrace stackTrace) {
+    if (_onError == null) {
+      return false;
+    }
+    assert(_onErrorZone != null);
+
+    if (identical(_onErrorZone, Zone.current)) {
+      return _onError!(error, stackTrace);
+    } else {
+      try {
+        return _onErrorZone!.runBinary<bool, Object, StackTrace>(_onError!, error, stackTrace);
+      } catch (e, s) {
+        _onErrorZone!.handleUncaughtError(e, s);
+        return false;
+      }
+    }
   }
 
   /// The route or path that the embedder requested when the application was

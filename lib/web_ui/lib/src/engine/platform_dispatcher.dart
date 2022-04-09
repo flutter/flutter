@@ -1024,6 +1024,19 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         _onSemanticsAction, _onSemanticsActionZone, id, action, args);
   }
 
+  // TODO(dnfield): make this work on web.
+  // https://github.com/flutter/flutter/issues/100277
+  ui.ErrorCallback? _onError;
+  // ignore: unused_field
+  Zone? _onErrorZone;
+  @override
+  ui.ErrorCallback? get onError => _onError;
+  @override
+  set onError(ui.ErrorCallback? callback) {
+    _onError = callback;
+    _onErrorZone = Zone.current;
+  }
+
   /// The route or path that the embedder requested when the application was
   /// launched.
   ///

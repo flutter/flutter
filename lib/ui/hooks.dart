@@ -115,27 +115,26 @@ void _drawFrame() {
   PlatformDispatcher.instance._drawFrame();
 }
 
+@pragma('vm:entry-point')
+bool _onError(Object error, StackTrace? stackTrace) {
+  return PlatformDispatcher.instance._dispatchError(error, stackTrace ?? StackTrace.empty);
+}
+
 // ignore: always_declare_return_types, prefer_generic_function_type_aliases
 typedef _ListStringArgFunction(List<String> args);
 
 @pragma('vm:entry-point')
-void _runMainZoned(Function startMainIsolateFunction,
-                   Function userMainFunction,
-                   List<String> args) {
+void _runMain(Function startMainIsolateFunction,
+              Function userMainFunction,
+              List<String> args) {
   startMainIsolateFunction(() {
-    runZonedGuarded<void>(() {
-      if (userMainFunction is _ListStringArgFunction) {
-        userMainFunction(args);
-      } else {
-        userMainFunction();
-      }
-    }, (Object error, StackTrace stackTrace) {
-      _reportUnhandledException(error.toString(), stackTrace.toString());
-    });
+    if (userMainFunction is _ListStringArgFunction) {
+      userMainFunction(args);
+    } else {
+      userMainFunction();
+    }
   }, null);
 }
-
-void _reportUnhandledException(String error, String stackTrace) native 'PlatformConfiguration_reportUnhandledException';
 
 /// Invokes [callback] inside the given [zone].
 void _invoke(void Function()? callback, Zone zone) {

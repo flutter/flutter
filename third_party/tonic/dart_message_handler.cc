@@ -91,7 +91,7 @@ void DartMessageHandler::OnHandleMessage(DartState* dart_state) {
       Dart_SetPausedOnStart(false);
       // We've resumed, handle normal messages that are in the queue.
       result = Dart_HandleMessage();
-      error = LogIfError(result);
+      error = CheckAndHandleError(result);
       dart_state->MessageEpilogue(result);
       if (!Dart_CurrentIsolate()) {
         isolate_exited_ = true;
@@ -118,7 +118,7 @@ void DartMessageHandler::OnHandleMessage(DartState* dart_state) {
         Dart_IsFatalError(result)) {
       error = true;
     } else {
-      error = LogIfError(result);
+      error = CheckAndHandleError(result);
     }
     dart_state->MessageEpilogue(result);
     if (!Dart_CurrentIsolate()) {

@@ -29,7 +29,6 @@
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
 
 using tonic::DartConverter;
-using tonic::LogIfError;
 using tonic::ToDart;
 
 namespace flutter {

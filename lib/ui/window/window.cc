@@ -32,7 +32,7 @@ void Window::DispatchPointerDataPacket(const PointerDataPacket& packet) {
   if (Dart_IsError(data_handle)) {
     return;
   }
-  tonic::LogIfError(tonic::DartInvokeField(
+  tonic::CheckAndHandleError(tonic::DartInvokeField(
       library_.value(), "_dispatchPointerDataPacket", {data_handle}));
 }
 
@@ -44,7 +44,7 @@ void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
     return;
   }
   tonic::DartState::Scope scope(dart_state);
-  tonic::LogIfError(tonic::DartInvokeField(
+  tonic::CheckAndHandleError(tonic::DartInvokeField(
       library_.value(), "_updateWindowMetrics",
       {
           tonic::ToDart(window_id_),

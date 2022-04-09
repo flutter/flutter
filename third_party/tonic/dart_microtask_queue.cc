@@ -80,7 +80,7 @@ void DartMicrotaskQueue::RunMicrotasks() {
         // log message.
         if (!dart_state->has_set_return_code() || !Dart_IsError(result) ||
             !Dart_IsFatalError(result)) {
-          LogIfError(result);
+          CheckAndHandleError(result);
         }
         DartErrorHandleType error = GetErrorHandleType(result);
         if (error != kNoError) {

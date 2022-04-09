@@ -61,7 +61,7 @@ DartByteData::DartByteData(Dart_Handle list)
 
   Dart_TypedData_Type type;
   Dart_TypedDataAcquireData(list, &type, &data_, &length_in_bytes_);
-  TONIC_DCHECK(!LogIfError(list));
+  TONIC_DCHECK(!CheckAndHandleError(list));
   if (type != Dart_TypedData_kByteData)
     Dart_ThrowException(ToDart("Non-genuine ByteData passed to engine."));
 }
@@ -95,7 +95,7 @@ DartByteData DartConverter<DartByteData>::FromArguments(
     int index,
     Dart_Handle& exception) {
   Dart_Handle data = Dart_GetNativeArgument(args, index);
-  TONIC_DCHECK(!LogIfError(data));
+  TONIC_DCHECK(!CheckAndHandleError(data));
   return DartByteData(data);
 }
 

@@ -23,7 +23,7 @@ TypedList<kTypeName, ElemType>::TypedList(Dart_Handle list)
   Dart_TypedData_Type type;
   Dart_TypedDataAcquireData(list, &type, reinterpret_cast<void**>(&data_),
                             &num_elements_);
-  TONIC_DCHECK(!LogIfError(list));
+  TONIC_DCHECK(!CheckAndHandleError(list));
   if (type != kTypeName)
     Dart_ThrowException(ToDart("Non-genuine TypedData passed to engine."));
 }
@@ -61,7 +61,7 @@ DartConverter<TypedList<kTypeName, ElemType>>::FromArguments(
     int index,
     Dart_Handle& exception) {
   Dart_Handle list = Dart_GetNativeArgument(args, index);
-  TONIC_DCHECK(!LogIfError(list));
+  TONIC_DCHECK(!CheckAndHandleError(list));
   return TypedList<kTypeName, ElemType>(list);
 }
 
@@ -80,7 +80,7 @@ Dart_Handle DartConverter<TypedList<kTypeName, ElemType>>::ToDart(
     unsigned int length) {
   const intptr_t buffer_length = static_cast<intptr_t>(length);
   Dart_Handle array = Dart_NewTypedData(kTypeName, buffer_length);
-  TONIC_DCHECK(!LogIfError(array));
+  TONIC_DCHECK(!CheckAndHandleError(array));
   {
     Dart_TypedData_Type type;
     void* data = nullptr;
