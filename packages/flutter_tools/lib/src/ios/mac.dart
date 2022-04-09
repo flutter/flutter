@@ -574,37 +574,14 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
     ).send();
   }
 
-  // Building for iOS Simulator, but the linked and embedded framework 'App.framework' was built for iOS.
-  // or
-  // Building for iOS, but the linked and embedded framework 'App.framework' was built for iOS Simulator.
-  if ((result.stdout?.contains('Building for iOS') ?? false)
-      && (result.stdout?.contains('but the linked and embedded framework') ?? false)
-      && (result.stdout?.contains('was built for iOS') ?? false)) {
-    logger.printError('');
-    logger.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
-    logger.printError('');
-    logger.printError('You can temporarily work around this issue by running:');
-    logger.printError('  flutter clean');
-    return;
+  // Handle errors.
+  final bool issueDetected = _handleIssues(result.xcResult, logger, xcodeBuildExecution);
+
+  if (!issueDetected && xcodeBuildExecution != null) {
+    // Fallback to use stdout to detect and print issues.
+    _parseIssueInStdout(xcodeBuildExecution, logger, result);
   }
-  if (xcodeBuildExecution != null
-      && xcodeBuildExecution.environmentType == EnvironmentType.physical
-      && (result.stdout?.contains('BCEROR') ?? false)
-      // May need updating if Xcode changes its outputs.
-      && (result.stdout?.contains("Xcode couldn't find a provisioning profile matching") ?? false)) {
-    logger.printError(noProvisioningProfileInstruction, emphasis: true);
-    return;
-  }
-  // Make sure the user has specified one of:
-  // * DEVELOPMENT_TEAM (automatic signing)
-  // * PROVISIONING_PROFILE (manual signing)
-  if (xcodeBuildExecution != null &&
-      xcodeBuildExecution.environmentType == EnvironmentType.physical &&
-      !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
-        xcodeBuildExecution.buildSettings.containsKey)) {
-    logger.printError(noDevelopmentTeamInstruction, emphasis: true);
-    return;
-  }
+
   if (xcodeBuildExecution != null
       && xcodeBuildExecution.environmentType == EnvironmentType.physical
       && (xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') ?? false)) {
@@ -613,19 +590,6 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
     logger.printError("Try replacing 'com.example' with your signing id in Xcode:");
     logger.printError('  open ios/Runner.xcworkspace');
     return;
-  }
-
-  // Handle xcresult errors.
-  final XCResult? xcResult = result.xcResult;
-  if (xcResult == null) {
-    return;
-  }
-  if (!xcResult.parseSuccess) {
-    globals.printTrace('XCResult parsing error: ${xcResult.parsingErrorMessage}');
-    return;
-  }
-  for (final XCResultIssue issue in xcResult.issues) {
-    _handleXCResultIssue(issue: issue, logger: logger);
   }
 }
 
@@ -724,7 +688,7 @@ bool upgradePbxProjWithFlutterAssets(IosProject project, Logger logger) {
   return true;
 }
 
-void _handleXCResultIssue({required XCResultIssue issue, required Logger logger}) {
+_XCResultIssueHandlingResult _handleXCResultIssue({required XCResultIssue issue, required Logger logger}) {
   // Issue summary from xcresult.
   final StringBuffer issueSummaryBuffer = StringBuffer();
   issueSummaryBuffer.write(issue.subType ?? 'Unknown');
@@ -744,16 +708,89 @@ void _handleXCResultIssue({required XCResultIssue issue, required Logger logger}
       break;
   }
 
-  // Add more custom output for flutter users.
-  if (issue.message != null && issue.message!.toLowerCase().contains('provisioning profile')) {
+  final String? message = issue.message;
+  if (message == null) {
+    return _XCResultIssueHandlingResult(requiresProvisioningProfile: false, hasProvisioningProfileIssue: false);
+  }
+
+  // Add more error messages for flutter users for some special errors.
+  if (message.toLowerCase().contains('requires a provisioning profile.')) {
+    return _XCResultIssueHandlingResult(requiresProvisioningProfile: true, hasProvisioningProfileIssue: true);
+  } else if (message.toLowerCase().contains('provisioning profile')) {
+    return _XCResultIssueHandlingResult(requiresProvisioningProfile: false, hasProvisioningProfileIssue: true);
+  }
+  return _XCResultIssueHandlingResult(requiresProvisioningProfile: false, hasProvisioningProfileIssue: false);
+}
+
+// Returns `true` if at least one issue is detected.
+bool _handleIssues(XCResult? xcResult, Logger logger, XcodeBuildExecution? xcodeBuildExecution) {
+  bool requiresProvisioningProfile = false;
+  bool hasProvisioningProfileIssue = false;
+  bool issueDetected = false;
+
+  if (xcResult != null && xcResult.parseSuccess) {
+    for (final XCResultIssue issue in xcResult.issues) {
+      final _XCResultIssueHandlingResult handlingResult = _handleXCResultIssue(issue: issue, logger: logger);
+      if (handlingResult.hasProvisioningProfileIssue) {
+        hasProvisioningProfileIssue = true;
+      }
+      if (handlingResult.requiresProvisioningProfile) {
+        requiresProvisioningProfile = true;
+      }
+      issueDetected = true;
+    }
+  } else if (xcResult != null) {
+    globals.printTrace('XCResult parsing error: ${xcResult.parsingErrorMessage}');
+  }
+
+  if (requiresProvisioningProfile) {
+    logger.printError(noProvisioningProfileInstruction, emphasis: true);
+  } else if (_missingDevelopmentTeam(xcodeBuildExecution)) {
+    issueDetected = true;
+    logger.printError(noDevelopmentTeamInstruction, emphasis: true);
+  } else if (hasProvisioningProfileIssue) {
     logger.printError('');
     logger.printError('It appears that there was a problem signing your application prior to installation on the device.');
     logger.printError('');
     logger.printError('Verify that the Bundle Identifier in your project is your signing id in Xcode');
     logger.printError('  open ios/Runner.xcworkspace');
     logger.printError('');
-    logger.printError("Also try selecting 'Product > Build' to fix the problem:");
+    logger.printError("Also try selecting 'Product > Build' to fix the problem.");
   }
+  return issueDetected;
+}
+
+// Return 'true' a missing development team issue is detected.
+bool _missingDevelopmentTeam(XcodeBuildExecution? xcodeBuildExecution) {
+  // Make sure the user has specified one of:
+  // * DEVELOPMENT_TEAM (automatic signing)
+  // * PROVISIONING_PROFILE (manual signing)
+  return xcodeBuildExecution != null && xcodeBuildExecution.environmentType == EnvironmentType.physical &&
+      !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
+        xcodeBuildExecution.buildSettings.containsKey);
+}
+// Detects and handles errors from stdout.
+//
+// As detecting issues in stdout is not usually accurate, this should be used as a fallback when other issue detecting methods failed.
+void _parseIssueInStdout(XcodeBuildExecution xcodeBuildExecution, Logger logger, XcodeBuildResult result) {
+  if (xcodeBuildExecution.environmentType == EnvironmentType.physical
+      // May need updating if Xcode changes its outputs.
+      && (result.stdout?.contains('requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor') ?? false)) {
+    logger.printError(noProvisioningProfileInstruction, emphasis: true);
+    return;
+  }
+}
+
+// The result of [_handleXCResultIssue].
+class _XCResultIssueHandlingResult {
+
+  _XCResultIssueHandlingResult({required this.requiresProvisioningProfile, required this.hasProvisioningProfileIssue});
+
+  // An issue indicates that user didn't provide the provisioning profile.
+  final bool requiresProvisioningProfile;
+
+  // An issue indicates that there is a provisioning profile issue.
+  final bool hasProvisioningProfileIssue;
 }
 
 const String _kResultBundlePath = 'temporary_xcresult_bundle';
