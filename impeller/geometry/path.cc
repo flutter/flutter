@@ -322,6 +322,10 @@ std::optional<std::pair<Point, Point>> Path::GetMinMaxCoveragePoints() const {
     clamp(cubic.Extrema());
   }
 
+  if (!min.has_value() || !max.has_value()) {
+    return std::nullopt;
+  }
+
   return std::make_pair(min.value(), max.value());
 }
 

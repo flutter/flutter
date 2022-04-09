@@ -315,6 +315,17 @@ TEST(GeometryTest, BoundingBoxOfCompositePathIsCorrect) {
   ASSERT_RECT_NEAR(actual.value(), expected);
 }
 
+TEST(GeometryTest, PathGetBoundingBoxForCubicWithNoDerivativeRootsIsCorrect) {
+  PathBuilder builder;
+  // Straight diagonal line.
+  builder.AddCubicCurve({0, 1}, {2, 3}, {4, 5}, {6, 7});
+  auto path = builder.TakePath();
+  auto actual = path.GetBoundingBox();
+  auto expected = Rect::MakeLTRB(0, 1, 6, 7);
+  ASSERT_TRUE(actual.has_value());
+  ASSERT_RECT_NEAR(actual.value(), expected);
+}
+
 TEST(GeometryTest, CanGenerateMipCounts) {
   ASSERT_EQ((Size{128, 128}.MipCount()), 7u);
   ASSERT_EQ((Size{128, 256}.MipCount()), 8u);
