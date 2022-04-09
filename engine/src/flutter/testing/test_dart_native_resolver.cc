@@ -101,11 +101,11 @@ void TestDartNativeResolver::SetNativeResolverForIsolate() {
   auto result = Dart_SetNativeResolver(Dart_RootLibrary(),
                                        DartNativeEntryResolverCallback,
                                        DartNativeEntrySymbolCallback);
-  FML_CHECK(!tonic::LogIfError(result))
+  FML_CHECK(!tonic::CheckAndHandleError(result))
       << "Could not set native resolver in test.";
 
   result = Dart_SetFfiNativeResolver(Dart_RootLibrary(), &FfiNativeResolver);
-  FML_CHECK(!tonic::LogIfError(result))
+  FML_CHECK(!tonic::CheckAndHandleError(result))
       << "Could not set FFI native resolver in test.";
 
   std::scoped_lock lock(gIsolateResolversMutex);

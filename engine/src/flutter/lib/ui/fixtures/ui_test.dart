@@ -13,6 +13,33 @@ void main() {}
 void _finish() native 'Finish';
 
 @pragma('vm:entry-point')
+void customOnErrorTrue() {
+  PlatformDispatcher.instance.onError = (Object error, StackTrace? stack) {
+    _finish();
+    return true;
+  };
+  throw Exception('true');
+}
+
+@pragma('vm:entry-point')
+void customOnErrorFalse() {
+  PlatformDispatcher.instance.onError = (Object error, StackTrace? stack) {
+    _finish();
+    return false;
+  };
+  throw Exception('false');
+}
+
+@pragma('vm:entry-point')
+void customOnErrorThrow() {
+  PlatformDispatcher.instance.onError = (Object error, StackTrace? stack) {
+    _finish();
+    throw Exception('throw2');
+  };
+  throw Exception('throw1');
+}
+
+@pragma('vm:entry-point')
 void validateSceneBuilderAndScene() {
   final SceneBuilder builder = SceneBuilder();
   builder.pushOffset(10, 10);
@@ -311,9 +338,9 @@ void hooksTests() {
     }
   }
 
-  void expectIdentical(Zone originalZone, Zone callbackZone) {
-    if (!identical(callbackZone, originalZone)) {
-      throw 'Callback called in wrong zone.';
+  void expectIdentical(Object a, Object b) {
+    if (!identical(a, b)) {
+      throw 'Expected $a to be identical to $b.';
     }
   }
 
@@ -366,6 +393,26 @@ void hooksTests() {
     if (devicePixelRatio != 0.1234) {
       throw 'Expected devicePixelRatio to be 0.1234 but got $devicePixelRatio.';
     }
+  });
+
+  test('onError preserves the callback zone', () {
+    late Zone originalZone;
+    late Zone callbackZone;
+    final Object error = Exception('foo');
+    StackTrace? stackTrace;
+
+    runZoned(() {
+      originalZone = Zone.current;
+      PlatformDispatcher.instance.onError = (Object exception, StackTrace? stackTrace) {
+        callbackZone = Zone.current;
+        expectIdentical(exception, error);
+        expectNotEquals(stackTrace, null);
+        return true;
+      };
+    });
+
+    _callHook('_onError', 2, error, StackTrace.current);
+    expectIdentical(originalZone, callbackZone);
   });
 
   test('updateUserSettings can handle an empty object', () {

@@ -46,7 +46,7 @@ class ByteDataScope {
 
   explicit ByteDataScope(size_t size) {
     dart_handle_ = Dart_NewTypedData(Dart_TypedData_kByteData, size);
-    FML_DCHECK(!tonic::LogIfError(dart_handle_));
+    FML_DCHECK(!tonic::CheckAndHandleError(dart_handle_));
     Acquire();
     FML_DCHECK(size == size_);
   }
@@ -65,7 +65,7 @@ class ByteDataScope {
   void Release() {
     FML_DCHECK(is_valid_);
     Dart_Handle result = Dart_TypedDataReleaseData(dart_handle_);
-    tonic::LogIfError(result);
+    tonic::CheckAndHandleError(result);
     is_valid_ = false;
     data_ = nullptr;
     size_ = 0;
@@ -81,8 +81,8 @@ class ByteDataScope {
     intptr_t size;
     Dart_Handle result =
         Dart_TypedDataAcquireData(dart_handle_, &type, &data_, &size);
-    is_valid_ =
-        !tonic::LogIfError(result) && type == Dart_TypedData_kByteData && data_;
+    is_valid_ = !tonic::CheckAndHandleError(result) &&
+                type == Dart_TypedData_kByteData && data_;
     if (is_valid_) {
       size_ = size;
     } else {
@@ -119,7 +119,7 @@ Dart_Handle ConstructDartObject(const char* class_name, Args&&... args) {
       tonic::DartState::Current()->class_library();
   Dart_Handle type =
       Dart_HandleFromPersistent(class_library.GetClass("zircon", class_name));
-  FML_DCHECK(!tonic::LogIfError(type));
+  FML_DCHECK(!tonic::CheckAndHandleError(type));
 
   const char* cstr;
   Dart_StringToCString(Dart_ToString(type), &cstr);
@@ -128,7 +128,7 @@ Dart_Handle ConstructDartObject(const char* class_name, Args&&... args) {
       {std::forward<Args>(args)...}};
   Dart_Handle object =
       Dart_New(type, Dart_EmptyString(), sizeof...(Args), args_array.data());
-  FML_DCHECK(!tonic::LogIfError(object));
+  FML_DCHECK(!tonic::CheckAndHandleError(object));
   return object;
 }
 
@@ -158,16 +158,16 @@ Dart_Handle MakeHandleInfoList(
 fdio_ns_t* GetNamespace() {
   // Grab the fdio_ns_t* out of the isolate.
   Dart_Handle zircon_lib = Dart_LookupLibrary(ToDart("dart:zircon"));
-  FML_DCHECK(!tonic::LogIfError(zircon_lib));
+  FML_DCHECK(!tonic::CheckAndHandleError(zircon_lib));
   Dart_Handle namespace_type =
       Dart_GetNonNullableType(zircon_lib, ToDart("_Namespace"), 0, nullptr);
-  FML_DCHECK(!tonic::LogIfError(namespace_type));
+  FML_DCHECK(!tonic::CheckAndHandleError(namespace_type));
   Dart_Handle namespace_field =
       Dart_GetField(namespace_type, ToDart("_namespace"));
-  FML_DCHECK(!tonic::LogIfError(namespace_field));
+  FML_DCHECK(!tonic::CheckAndHandleError(namespace_field));
   uint64_t fdio_ns_ptr;
   Dart_Handle result = Dart_IntegerToUint64(namespace_field, &fdio_ns_ptr);
-  FML_DCHECK(!tonic::LogIfError(result));
+  FML_DCHECK(!tonic::CheckAndHandleError(result));
 
   return reinterpret_cast<fdio_ns_t*>(fdio_ns_ptr);
 }
@@ -551,7 +551,7 @@ Dart_Handle System::VmoMap(fml::RefPtr<Handle> vmo) {
   void* data = reinterpret_cast<void*>(mapped_addr);
   Dart_Handle object = Dart_NewExternalTypedData(Dart_TypedData_kUint8, data,
                                                  static_cast<intptr_t>(size));
-  FML_DCHECK(!tonic::LogIfError(object));
+  FML_DCHECK(!tonic::CheckAndHandleError(object));
 
   SizedRegion* r = new SizedRegion(data, size);
   Dart_NewFinalizableHandle(object, reinterpret_cast<void*>(r),

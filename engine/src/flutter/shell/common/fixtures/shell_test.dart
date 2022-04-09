@@ -13,6 +13,28 @@ void nativeReportTimingsCallback(List<int> timings) native 'NativeReportTimingsC
 void nativeOnBeginFrame(int microseconds) native 'NativeOnBeginFrame';
 void nativeOnPointerDataPacket(List<int> sequences) native 'NativeOnPointerDataPacket';
 
+@pragma('vm:entry-point')
+void onErrorA() {
+  PlatformDispatcher.instance.onError = (Object error, StackTrace? stack) {
+    notifyErrorA(error.toString());
+    return true;
+  };
+  Future<void>.delayed(const Duration(seconds: 2)).then((_) {
+    throw Exception('I should be coming from A');
+  });
+}
+
+@pragma('vm:entry-point')
+void onErrorB() {
+  PlatformDispatcher.instance.onError = (Object error, StackTrace? stack) {
+    notifyErrorB(error.toString());
+    return true;
+  };
+  throw Exception('I should be coming from B');
+}
+
+void notifyErrorA(String message) native 'NotifyErrorA';
+void notifyErrorB(String message) native 'NotifyErrorB';
 
 @pragma('vm:entry-point')
 void drawFrames() {

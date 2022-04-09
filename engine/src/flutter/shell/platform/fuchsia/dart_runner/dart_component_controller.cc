@@ -415,7 +415,7 @@ bool DartComponentController::Main() {
     return false;
   }
   for (size_t i = 0; i < arguments.size(); i++) {
-    tonic::LogIfError(
+    tonic::CheckAndHandleError(
         Dart_ListSetAt(dart_arguments, i, ToDart(arguments.at(i))));
   }
 

@@ -22,13 +22,13 @@ Dart_Handle DartInvoke(Dart_Handle closure,
   int argc = args.size();
   Dart_Handle* argv = const_cast<Dart_Handle*>(args.begin());
   Dart_Handle handle = Dart_InvokeClosure(closure, argc, argv);
-  LogIfError(handle);
+  CheckAndHandleError(handle);
   return handle;
 }
 
 Dart_Handle DartInvokeVoid(Dart_Handle closure) {
   Dart_Handle handle = Dart_InvokeClosure(closure, 0, nullptr);
-  LogIfError(handle);
+  CheckAndHandleError(handle);
   return handle;
 }
 

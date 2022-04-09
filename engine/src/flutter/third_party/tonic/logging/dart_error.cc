@@ -4,6 +4,8 @@
 
 #include "tonic/logging/dart_error.h"
 
+#include <atomic>
+
 #include "tonic/common/macros.h"
 #include "tonic/converter/dart_converter.h"
 
@@ -12,16 +14,30 @@ namespace DartError {
 const char kInvalidArgument[] = "Invalid argument.";
 }  // namespace DartError
 
-bool LogIfError(Dart_Handle handle) {
+namespace {
+void DefaultLogUnhandledException(Dart_Handle, Dart_Handle) {}
+std::atomic<DartError::UnhandledExceptionReporter> log_unhandled_exception =
+    DefaultLogUnhandledException;
+
+void ReportUnhandledException(Dart_Handle exception_handle,
+                              Dart_Handle stack_trace_handle) {
+  log_unhandled_exception.load()(exception_handle, stack_trace_handle);
+}
+}  // namespace
+
+void SetUnhandledExceptionReporter(
+    DartError::UnhandledExceptionReporter reporter) {
+  log_unhandled_exception.store(reporter);
+}
+
+bool CheckAndHandleError(Dart_Handle handle) {
+  // Specifically handle UnhandledExceptionErrors first. These exclude fatal
+  // errors that are shutting down the vm and compilation errors in source code.
   if (Dart_IsUnhandledExceptionError(handle)) {
     Dart_Handle exception_handle = Dart_ErrorGetException(handle);
-    const std::string exception =
-        tonic::StdStringFromDart(Dart_ToString(exception_handle));
     Dart_Handle stack_trace_handle = Dart_ErrorGetStackTrace(handle);
-    const std::string stack_trace =
-        tonic::StdStringFromDart(Dart_ToString(stack_trace_handle));
-    tonic::Log("Dart Unhandled Exception: %s, stack trace: %s",
-               exception.c_str(), stack_trace.c_str());
+
+    ReportUnhandledException(exception_handle, stack_trace_handle);
     return true;
   } else if (Dart_IsError(handle)) {
     tonic::Log("Dart Error: %s", Dart_GetError(handle));

@@ -3721,6 +3721,74 @@ TEST_F(ShellTest, UsesPlatformMessageHandler) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, SpawnWorksWithOnError) {
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(settings);
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+  configuration.SetEntrypoint("onErrorA");
+
+  auto second_configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(second_configuration.IsValid());
+  second_configuration.SetEntrypoint("onErrorB");
+
+  fml::CountDownLatch latch(2);
+
+  AddNativeCallback(
+      "NotifyErrorA", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        auto string_handle = Dart_GetNativeArgument(args, 0);
+        const char* c_str;
+        Dart_StringToCString(string_handle, &c_str);
+        EXPECT_STREQ(c_str, "Exception: I should be coming from A");
+        latch.CountDown();
+      }));
+
+  AddNativeCallback(
+      "NotifyErrorB", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        auto string_handle = Dart_GetNativeArgument(args, 0);
+        const char* c_str;
+        Dart_StringToCString(string_handle, &c_str);
+        EXPECT_STREQ(c_str, "Exception: I should be coming from B");
+        latch.CountDown();
+      }));
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+
+  PostSync(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [this, &spawner = shell, &second_configuration, &latch]() {
+        ::testing::NiceMock<MockPlatformViewDelegate> platform_view_delegate;
+        auto spawn = spawner->Spawn(
+            std::move(second_configuration), "",
+            [&platform_view_delegate](Shell& shell) {
+              auto result =
+                  std::make_unique<::testing::NiceMock<MockPlatformView>>(
+                      platform_view_delegate, shell.GetTaskRunners());
+              ON_CALL(*result, CreateRenderingSurface())
+                  .WillByDefault(::testing::Invoke([] {
+                    return std::make_unique<::testing::NiceMock<MockSurface>>();
+                  }));
+              return result;
+            },
+            [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
+        ASSERT_NE(nullptr, spawn.get());
+        ASSERT_TRUE(ValidateShell(spawn.get()));
+
+        // Before destroying the shell, wait for expectations of the spawned
+        // isolate to be met.
+        latch.Wait();
+
+        DestroyShell(std::move(spawn));
+      });
+
+  DestroyShell(std::move(shell));
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
 }  // namespace testing
 }  // namespace flutter
 
