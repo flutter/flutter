@@ -4,6 +4,8 @@
 
 #include "solid_stroke_contents.h"
 
+#include <optional>
+
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
@@ -25,6 +27,28 @@ void SolidStrokeContents::SetColor(Color color) {
 
 const Color& SolidStrokeContents::GetColor() const {
   return color_;
+}
+
+std::optional<Rect> SolidStrokeContents::GetCoverage(
+    const Entity& entity) const {
+  auto path_coverage = entity.GetPathCoverage();
+  if (!path_coverage.has_value()) {
+    return std::nullopt;
+  }
+
+  Scalar max_radius = 0.5;
+  if (cap_ == Cap::kSquare) {
+    max_radius = max_radius * kSqrt2;
+  }
+  if (join_ == Join::kMiter) {
+    max_radius = std::max(max_radius, miter_limit_ * 0.5f);
+  }
+  Vector2 max_radius_xy = entity.GetTransformation().TransformDirection(
+      Vector2(max_radius, max_radius) * stroke_size_);
+
+  return Rect(path_coverage->origin - max_radius_xy,
+              Size(path_coverage->size.width + max_radius_xy.x * 2,
+                   path_coverage->size.height + max_radius_xy.y * 2));
 }
 
 static VertexBuffer CreateSolidStrokeVertices(
