@@ -40,7 +40,7 @@ String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolute
 gradle.getGradle().projectsLoaded { g ->
     g.rootProject.beforeEvaluate { p ->
         p.subprojects { sp ->
-            //only flutter 'add-to-app' project.
+            //only flutter submodules.
             if (androidPlugins != null) {
                 String sanitizedPluginName = sp.name.replace(":", "");
                 //matching submodule, which one's name on the `pluginsFile`.
