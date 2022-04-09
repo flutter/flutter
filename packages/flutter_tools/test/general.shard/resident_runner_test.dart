@@ -1573,7 +1573,7 @@ flutter:
       debuggingOptions: DebuggingOptions.enabled(
         const BuildInfo(
           BuildMode.debug,
-          '',
+          null,
           treeShakeIcons: false,
         )
       ),
