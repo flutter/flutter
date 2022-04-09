@@ -323,10 +323,10 @@ flutter::Paint DartConverter<flutter::Paint>::FromArguments(
     int index,
     Dart_Handle& exception) {
   Dart_Handle paint_objects = Dart_GetNativeArgument(args, index);
-  FML_DCHECK(!LogIfError(paint_objects));
+  FML_DCHECK(!CheckAndHandleError(paint_objects));
 
   Dart_Handle paint_data = Dart_GetNativeArgument(args, index + 1);
-  FML_DCHECK(!LogIfError(paint_data));
+  FML_DCHECK(!CheckAndHandleError(paint_data));
 
   return flutter::Paint(paint_objects, paint_data);
 }

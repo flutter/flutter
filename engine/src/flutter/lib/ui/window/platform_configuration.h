@@ -420,8 +420,11 @@ class PlatformConfiguration final {
   ///
   void CompletePlatformMessageEmptyResponse(int response_id);
 
+  Dart_Handle on_error() { return on_error_.Get(); }
+
  private:
   PlatformConfigurationClient* client_;
+  tonic::DartPersistentValue on_error_;
   tonic::DartPersistentValue update_locales_;
   tonic::DartPersistentValue update_user_settings_data_;
   tonic::DartPersistentValue update_lifecycle_state_;

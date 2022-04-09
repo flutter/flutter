@@ -170,8 +170,8 @@ TEST_F(DartIsolateTest, CanRunDartCodeCodeSynchronously) {
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
   ASSERT_TRUE(isolate->RunInIsolateScope([]() -> bool {
-    if (tonic::LogIfError(::Dart_Invoke(Dart_RootLibrary(),
-                                        tonic::ToDart("sayHi"), 0, nullptr))) {
+    if (tonic::CheckAndHandleError(::Dart_Invoke(
+            Dart_RootLibrary(), tonic::ToDart("sayHi"), 0, nullptr))) {
       return false;
     }
     return true;
@@ -503,7 +503,7 @@ TEST_F(DartIsolateTest, DISABLED_ValidLoadingUnitSucceeds) {
   AddNativeCallback(
       "NotifySuccess", CREATE_NATIVE_ENTRY([this](Dart_NativeArguments args) {
         auto bool_handle = Dart_GetNativeArgument(args, 0);
-        ASSERT_FALSE(tonic::LogIfError(bool_handle));
+        ASSERT_FALSE(tonic::CheckAndHandleError(bool_handle));
         ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(bool_handle));
         Signal();
       }));

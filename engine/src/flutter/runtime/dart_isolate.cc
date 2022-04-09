@@ -332,12 +332,13 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate) {
 
   SetMessageHandlingTaskRunner(GetTaskRunners().GetUITaskRunner());
 
-  if (tonic::LogIfError(
+  if (tonic::CheckAndHandleError(
           Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag))) {
     return false;
   }
 
-  if (tonic::LogIfError(Dart_SetDeferredLoadHandler(OnDartLoadLibrary))) {
+  if (tonic::CheckAndHandleError(
+          Dart_SetDeferredLoadHandler(OnDartLoadLibrary))) {
     return false;
   }
 
@@ -366,7 +367,7 @@ bool DartIsolate::LoadLoadingUnit(
   Dart_Handle result = Dart_DeferredLoadComplete(
       loading_unit_id, dart_snapshot->GetDataMapping(),
       dart_snapshot->GetInstructionsMapping());
-  if (tonic::LogIfError(result)) {
+  if (tonic::CheckAndHandleError(result)) {
     LoadLoadingUnitError(loading_unit_id, Dart_GetError(result),
                          /*transient*/ true);
     return false;
@@ -381,7 +382,7 @@ void DartIsolate::LoadLoadingUnitError(intptr_t loading_unit_id,
   tonic::DartState::Scope scope(this);
   Dart_Handle result = Dart_DeferredLoadCompleteError(
       loading_unit_id, error_message.c_str(), transient);
-  tonic::LogIfError(result);
+  tonic::CheckAndHandleError(result);
 }
 
 void DartIsolate::SetMessageHandlingTaskRunner(
@@ -520,7 +521,7 @@ bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
 
   Dart_Handle library =
       Dart_LoadLibraryFromKernel(mapping->GetMapping(), mapping->GetSize());
-  if (tonic::LogIfError(library)) {
+  if (tonic::CheckAndHandleError(library)) {
     return false;
   }
 
@@ -530,7 +531,7 @@ bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
   }
 
   Dart_SetRootLibrary(library);
-  if (tonic::LogIfError(Dart_FinalizeLoading(false))) {
+  if (tonic::CheckAndHandleError(Dart_FinalizeLoading(false))) {
     return false;
   }
   return true;
@@ -664,7 +665,7 @@ bool DartIsolate::MarkIsolateRunnable() {
 [[nodiscard]] static bool InvokeMainEntrypoint(
     Dart_Handle user_entrypoint_function,
     Dart_Handle args) {
-  if (tonic::LogIfError(user_entrypoint_function)) {
+  if (tonic::CheckAndHandleError(user_entrypoint_function)) {
     FML_LOG(ERROR) << "Could not resolve main entrypoint function.";
     return false;
   }
@@ -673,13 +674,13 @@ bool DartIsolate::MarkIsolateRunnable() {
       tonic::DartInvokeField(Dart_LookupLibrary(tonic::ToDart("dart:isolate")),
                              "_getStartMainIsolateFunction", {});
 
-  if (tonic::LogIfError(start_main_isolate_function)) {
+  if (tonic::CheckAndHandleError(start_main_isolate_function)) {
     FML_LOG(ERROR) << "Could not resolve main entrypoint trampoline.";
     return false;
   }
 
-  if (tonic::LogIfError(tonic::DartInvokeField(
-          Dart_LookupLibrary(tonic::ToDart("dart:ui")), "_runMainZoned",
+  if (tonic::CheckAndHandleError(tonic::DartInvokeField(
+          Dart_LookupLibrary(tonic::ToDart("dart:ui")), "_runMain",
           {start_main_isolate_function, user_entrypoint_function, args}))) {
     FML_LOG(ERROR) << "Could not invoke the main entrypoint.";
     return false;

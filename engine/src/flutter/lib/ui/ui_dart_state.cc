@@ -134,7 +134,7 @@ std::shared_ptr<VolatilePathTracker> UIDartState::GetVolatilePathTracker()
 }
 
 void UIDartState::ScheduleMicrotask(Dart_Handle closure) {
-  if (tonic::LogIfError(closure) || !Dart_IsClosure(closure)) {
+  if (tonic::CheckAndHandleError(closure) || !Dart_IsClosure(closure)) {
     return;
   }
 
@@ -184,19 +184,6 @@ tonic::DartErrorHandleType UIDartState::GetLastError() {
     error = microtask_queue_.GetLastError();
   }
   return error;
-}
-
-void UIDartState::ReportUnhandledException(const std::string& error,
-                                           const std::string& stack_trace) {
-  if (unhandled_exception_callback_ &&
-      unhandled_exception_callback_(error, stack_trace)) {
-    return;
-  }
-
-  // Either the exception handler was not set or it could not handle the error,
-  // just log the exception.
-  FML_LOG(ERROR) << "Unhandled Exception: " << error << std::endl
-                 << stack_trace;
 }
 
 void UIDartState::LogMessage(const std::string& tag,

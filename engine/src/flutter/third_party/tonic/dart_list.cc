@@ -12,7 +12,7 @@ DartList::DartList(Dart_Handle dart_handle) : dart_handle_(dart_handle) {
   TONIC_DCHECK(Dart_IsList(dart_handle_));
 
   intptr_t length;
-  is_valid_ = !LogIfError(Dart_ListLength(dart_handle_, &length));
+  is_valid_ = !CheckAndHandleError(Dart_ListLength(dart_handle_, &length));
   size_ = length;
 }
 
@@ -32,14 +32,14 @@ DartList::DartList(DartList&& other)
 }
 
 void DartList::Set(size_t index, Dart_Handle value) {
-  LogIfError(Dart_ListSetAt(dart_handle_, index, value));
+  CheckAndHandleError(Dart_ListSetAt(dart_handle_, index, value));
 }
 
 DartList DartConverter<DartList>::FromArguments(Dart_NativeArguments args,
                                                 int index,
                                                 Dart_Handle& exception) {
   Dart_Handle list = Dart_GetNativeArgument(args, index);
-  if (LogIfError(list) || !Dart_IsList(list)) {
+  if (CheckAndHandleError(list) || !Dart_IsList(list)) {
     exception = Dart_NewApiError("Invalid Argument");
     return DartList();
   }

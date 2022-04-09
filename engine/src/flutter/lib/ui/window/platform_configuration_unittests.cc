@@ -115,5 +115,161 @@ TEST_F(ShellTest, PlatformConfigurationWindowMetricsUpdate) {
   DestroyShell(std::move(shell), std::move(task_runners));
 }
 
+TEST_F(ShellTest, PlatformConfigurationOnErrorHandlesError) {
+  auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
+  bool did_throw = false;
+
+  auto finish = [message_latch](Dart_NativeArguments args) {
+    message_latch->Signal();
+  };
+  AddNativeCallback("Finish", CREATE_NATIVE_ENTRY(finish));
+
+  Settings settings = CreateSettingsForFixture();
+  settings.unhandled_exception_callback =
+      [&did_throw](const std::string& exception,
+                   const std::string& stack_trace) -> bool {
+    did_throw = true;
+    return false;
+  };
+
+  TaskRunners task_runners("test",                  // label
+                           GetCurrentTaskRunner(),  // platform
+                           CreateNewThread(),       // raster
+                           CreateNewThread(),       // ui
+                           CreateNewThread()        // io
+  );
+
+  std::unique_ptr<Shell> shell =
+      CreateShell(std::move(settings), std::move(task_runners));
+
+  ASSERT_TRUE(shell->IsSetup());
+  auto run_configuration = RunConfiguration::InferFromSettings(settings);
+  run_configuration.SetEntrypoint("customOnErrorTrue");
+
+  shell->RunEngine(std::move(run_configuration), [&](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
+
+  message_latch->Wait();
+
+  // Flush the UI task runner to make sure errors that were triggered had a turn
+  // to propagate.
+  task_runners.GetUITaskRunner()->PostTask(
+      [&message_latch]() { message_latch->Signal(); });
+  message_latch->Wait();
+
+  ASSERT_FALSE(did_throw);
+  DestroyShell(std::move(shell), std::move(task_runners));
+}
+
+TEST_F(ShellTest, PlatformConfigurationOnErrorDoesNotHandleError) {
+  auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
+  std::string ex;
+  std::string st;
+  size_t throw_count = 0;
+
+  auto finish = [message_latch](Dart_NativeArguments args) {
+    message_latch->Signal();
+  };
+  AddNativeCallback("Finish", CREATE_NATIVE_ENTRY(finish));
+
+  Settings settings = CreateSettingsForFixture();
+  settings.unhandled_exception_callback =
+      [&ex, &st, &throw_count](const std::string& exception,
+                               const std::string& stack_trace) -> bool {
+    throw_count += 1;
+    ex = std::move(exception);
+    st = std::move(stack_trace);
+    return true;
+  };
+
+  TaskRunners task_runners("test",                  // label
+                           GetCurrentTaskRunner(),  // platform
+                           CreateNewThread(),       // raster
+                           CreateNewThread(),       // ui
+                           CreateNewThread()        // io
+  );
+
+  std::unique_ptr<Shell> shell =
+      CreateShell(std::move(settings), std::move(task_runners));
+
+  ASSERT_TRUE(shell->IsSetup());
+  auto run_configuration = RunConfiguration::InferFromSettings(settings);
+  run_configuration.SetEntrypoint("customOnErrorFalse");
+
+  shell->RunEngine(std::move(run_configuration), [&](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
+
+  message_latch->Wait();
+
+  // Flush the UI task runner to make sure errors that were triggered had a turn
+  // to propagate.
+  task_runners.GetUITaskRunner()->PostTask(
+      [&message_latch]() { message_latch->Signal(); });
+  message_latch->Wait();
+
+  ASSERT_EQ(throw_count, 1ul);
+  ASSERT_EQ(ex, "Exception: false") << ex;
+  ASSERT_EQ(st.rfind("#0      customOnErrorFalse", 0), 0ul) << st;
+  DestroyShell(std::move(shell), std::move(task_runners));
+}
+
+TEST_F(ShellTest, PlatformConfigurationOnErrorThrows) {
+  auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
+  std::vector<std::string> errors;
+  size_t throw_count = 0;
+
+  auto finish = [message_latch](Dart_NativeArguments args) {
+    message_latch->Signal();
+  };
+  AddNativeCallback("Finish", CREATE_NATIVE_ENTRY(finish));
+
+  Settings settings = CreateSettingsForFixture();
+  settings.unhandled_exception_callback =
+      [&errors, &throw_count](const std::string& exception,
+                              const std::string& stack_trace) -> bool {
+    throw_count += 1;
+    errors.push_back(std::move(exception));
+    errors.push_back(std::move(stack_trace));
+    return true;
+  };
+
+  TaskRunners task_runners("test",                  // label
+                           GetCurrentTaskRunner(),  // platform
+                           CreateNewThread(),       // raster
+                           CreateNewThread(),       // ui
+                           CreateNewThread()        // io
+  );
+
+  std::unique_ptr<Shell> shell =
+      CreateShell(std::move(settings), std::move(task_runners));
+
+  ASSERT_TRUE(shell->IsSetup());
+  auto run_configuration = RunConfiguration::InferFromSettings(settings);
+  run_configuration.SetEntrypoint("customOnErrorThrow");
+
+  shell->RunEngine(std::move(run_configuration), [&](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
+
+  message_latch->Wait();
+
+  // Flush the UI task runner to make sure errors that were triggered had a turn
+  // to propagate.
+  task_runners.GetUITaskRunner()->PostTask(
+      [&message_latch]() { message_latch->Signal(); });
+  message_latch->Wait();
+
+  ASSERT_EQ(throw_count, 2ul);
+  ASSERT_EQ(errors.size(), 4ul);
+  ASSERT_EQ(errors[0], "Exception: throw2") << errors[0];
+  ASSERT_EQ(errors[1].rfind("#0      customOnErrorThrow"), 0ul) << errors[1];
+  ASSERT_EQ(errors[2], "Exception: throw1") << errors[2];
+  ASSERT_EQ(errors[3].rfind("#0      customOnErrorThrow"), 0ul) << errors[3];
+
+  DestroyShell(std::move(shell), std::move(task_runners));
+}
+
 }  // namespace testing
 }  // namespace flutter

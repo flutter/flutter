@@ -40,7 +40,7 @@ RRect DartConverter<flutter::RRect>::FromArguments(Dart_NativeArguments args,
                                                    int index,
                                                    Dart_Handle& exception) {
   Dart_Handle value = Dart_GetNativeArgument(args, index);
-  FML_DCHECK(!LogIfError(value));
+  FML_DCHECK(!CheckAndHandleError(value));
   return FromDart(value);
 }
 

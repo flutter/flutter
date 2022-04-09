@@ -40,6 +40,9 @@ void DartPersistentValue::Clear() {
 
   auto dart_state = dart_state_.lock();
   if (!dart_state) {
+    // The Dart isolate was collected and the persistent value has been
+    // collected with it. value_ is a dangling reference.
+    value_ = nullptr;
     return;
   }
 

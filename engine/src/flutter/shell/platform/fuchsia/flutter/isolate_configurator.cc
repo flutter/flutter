@@ -51,44 +51,44 @@ void IsolateConfigurator::BindFuchsia() {
 void IsolateConfigurator::BindZircon() {
   // Tell dart:zircon about the FDIO namespace configured for this instance.
   Dart_Handle zircon_lib = Dart_LookupLibrary(tonic::ToDart("dart:zircon"));
-  FML_CHECK(!tonic::LogIfError(zircon_lib));
+  FML_CHECK(!tonic::CheckAndHandleError(zircon_lib));
 
   Dart_Handle namespace_type = Dart_GetNonNullableType(
       zircon_lib, tonic::ToDart("_Namespace"), 0, nullptr);
-  FML_CHECK(!tonic::LogIfError(namespace_type));
+  FML_CHECK(!tonic::CheckAndHandleError(namespace_type));
 
   Dart_Handle result =
       Dart_SetField(namespace_type,               //
                     tonic::ToDart("_namespace"),  //
                     tonic::ToDart(reinterpret_cast<intptr_t>(fdio_ns_.get())));
-  FML_CHECK(!tonic::LogIfError(result));
+  FML_CHECK(!tonic::CheckAndHandleError(result));
 }
 
 void IsolateConfigurator::BindDartIO() {
   // Grab the dart:io lib.
   Dart_Handle io_lib = Dart_LookupLibrary(tonic::ToDart("dart:io"));
-  FML_CHECK(!tonic::LogIfError(io_lib));
+  FML_CHECK(!tonic::CheckAndHandleError(io_lib));
 
   // Disable dart:io exit()
   Dart_Handle embedder_config_type = Dart_GetNonNullableType(
       io_lib, tonic::ToDart("_EmbedderConfig"), 0, nullptr);
-  FML_CHECK(!tonic::LogIfError(embedder_config_type));
+  FML_CHECK(!tonic::CheckAndHandleError(embedder_config_type));
 
   Dart_Handle result = Dart_SetField(embedder_config_type,
                                      tonic::ToDart("_mayExit"), Dart_False());
-  FML_CHECK(!tonic::LogIfError(result));
+  FML_CHECK(!tonic::CheckAndHandleError(result));
 
   // Tell dart:io about the FDIO namespace configured for this instance.
   Dart_Handle namespace_type =
       Dart_GetNonNullableType(io_lib, tonic::ToDart("_Namespace"), 0, nullptr);
-  FML_CHECK(!tonic::LogIfError(namespace_type));
+  FML_CHECK(!tonic::CheckAndHandleError(namespace_type));
 
   Dart_Handle namespace_args[] = {
       Dart_NewInteger(reinterpret_cast<intptr_t>(fdio_ns_.get())),  //
   };
   result = Dart_Invoke(namespace_type, tonic::ToDart("_setupNamespace"), 1,
                        namespace_args);
-  FML_CHECK(!tonic::LogIfError(result));
+  FML_CHECK(!tonic::CheckAndHandleError(result));
 }
 
 }  // namespace flutter_runner
