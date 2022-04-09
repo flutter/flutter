@@ -69,6 +69,9 @@ class SolidStrokeContents final : public Contents {
   Join GetStrokeJoin();
 
   // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
+
+  // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
