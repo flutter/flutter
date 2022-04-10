@@ -8,6 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
+import 'details_with_position.dart';
 import 'events.dart';
 import 'gesture_settings.dart';
 import 'pointer_router.dart';
@@ -607,7 +608,7 @@ typedef GestureSerialTapDownCallback = void Function(SerialTapDownDetails detail
 ///
 ///  * [SerialTapGestureRecognizer], which passes this information to its
 ///    [SerialTapGestureRecognizer.onSerialTapDown] callback.
-class SerialTapDownDetails {
+class SerialTapDownDetails implements GestureDetailsWithPosition {
   /// Creates details for a [GestureSerialTapDownCallback].
   ///
   /// The `count` argument must be greater than zero.
@@ -621,9 +622,11 @@ class SerialTapDownDetails {
        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
+  @override
   final Offset globalPosition;
 
   /// The local position at which the pointer contacted the screen.
+  @override
   final Offset localPosition;
 
   /// The kind of the device that initiated the event.
@@ -690,7 +693,7 @@ typedef GestureSerialTapUpCallback = void Function(SerialTapUpDetails details);
 ///
 ///  * [SerialTapGestureRecognizer], which passes this information to its
 ///    [SerialTapGestureRecognizer.onSerialTapUp] callback.
-class SerialTapUpDetails {
+class SerialTapUpDetails implements GestureDetailsWithPosition {
   /// Creates details for a [GestureSerialTapUpCallback].
   ///
   /// The `count` argument must be greater than zero.
@@ -703,9 +706,11 @@ class SerialTapUpDetails {
        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
+  @override
   final Offset globalPosition;
 
   /// The local position at which the pointer contacted the screen.
+  @override
   final Offset localPosition;
 
   /// The kind of the device that initiated the event.

@@ -5,6 +5,7 @@
 
 import 'arena.dart';
 import 'constants.dart';
+import 'details_with_position.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
@@ -100,7 +101,7 @@ typedef GestureLongPressEndCallback = void Function(LongPressEndDetails details)
 ///    passes these details.
 ///  * [LongPressGestureRecognizer.onTertiaryLongPressDown], whose callback
 ///    passes these details.
-class LongPressDownDetails {
+class LongPressDownDetails implements GestureDetailsWithPosition {
   /// Creates the details for a [GestureLongPressDownCallback].
   ///
   /// The `globalPosition` argument must not be null.
@@ -115,12 +116,14 @@ class LongPressDownDetails {
        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
+  @override
   final Offset globalPosition;
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
 
   /// The local position at which the pointer contacted the screen.
+  @override
   final Offset localPosition;
 }
 
@@ -131,7 +134,7 @@ class LongPressDownDetails {
 ///  * [LongPressGestureRecognizer.onLongPressStart], which uses [GestureLongPressStartCallback].
 ///  * [LongPressMoveUpdateDetails], the details for [GestureLongPressMoveUpdateCallback]
 ///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback].
-class LongPressStartDetails {
+class LongPressStartDetails implements GestureDetailsWithPosition {
   /// Creates the details for a [GestureLongPressStartCallback].
   ///
   /// The [globalPosition] argument must not be null.
@@ -142,9 +145,11 @@ class LongPressStartDetails {
        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer initially contacted the screen.
+  @override
   final Offset globalPosition;
 
   /// The local position at which the pointer initially contacted the screen.
+  @override
   final Offset localPosition;
 }
 
@@ -155,7 +160,7 @@ class LongPressStartDetails {
 ///  * [LongPressGestureRecognizer.onLongPressMoveUpdate], which uses [GestureLongPressMoveUpdateCallback].
 ///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback]
 ///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
-class LongPressMoveUpdateDetails {
+class LongPressMoveUpdateDetails implements GestureDetailsWithPosition {
   /// Creates the details for a [GestureLongPressMoveUpdateCallback].
   ///
   /// The [globalPosition] and [offsetFromOrigin] arguments must not be null.
@@ -170,9 +175,11 @@ class LongPressMoveUpdateDetails {
        localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
 
   /// The global position of the pointer when it triggered this update.
+  @override
   final Offset globalPosition;
 
   /// The local position of the pointer when it triggered this update.
+  @override
   final Offset localPosition;
 
   /// A delta offset from the point where the long press drag initially contacted
@@ -193,7 +200,7 @@ class LongPressMoveUpdateDetails {
 ///  * [LongPressGestureRecognizer.onLongPressEnd], which uses [GestureLongPressEndCallback].
 ///  * [LongPressMoveUpdateDetails], the details for [GestureLongPressMoveUpdateCallback].
 ///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
-class LongPressEndDetails {
+class LongPressEndDetails implements GestureDetailsWithPosition {
   /// Creates the details for a [GestureLongPressEndCallback].
   ///
   /// The [globalPosition] argument must not be null.
@@ -205,9 +212,11 @@ class LongPressEndDetails {
        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer lifted from the screen.
+  @override
   final Offset globalPosition;
 
   /// The local position at which the pointer contacted the screen.
+  @override
   final Offset localPosition;
 
   /// The pointer's velocity when it stopped contacting the screen.

@@ -7,6 +7,7 @@ import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 
+import 'details_with_position.dart';
 import 'velocity_tracker.dart';
 
 /// Details object for callbacks that use [GestureDragDownCallback].
@@ -17,7 +18,7 @@ import 'velocity_tracker.dart';
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragDownDetails {
+class DragDownDetails implements GestureDetailsWithPosition {
   /// Creates details for a [GestureDragDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
@@ -35,12 +36,14 @@ class DragDownDetails {
   ///
   ///  * [localPosition], which is the [globalPosition] transformed to the
   ///    coordinate space of the event receiver.
+  @override
   final Offset globalPosition;
 
   /// The local position in the coordinate system of the event receiver at
   /// which the pointer contacted the screen.
   ///
   /// Defaults to [globalPosition] if not specified in the constructor.
+  @override
   final Offset localPosition;
 
   @override
@@ -63,7 +66,7 @@ typedef GestureDragDownCallback = void Function(DragDownDetails details);
 ///  * [DragDownDetails], the details for [GestureDragDownCallback].
 ///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragStartDetails {
+class DragStartDetails implements GestureDetailsWithPosition {
   /// Creates details for a [GestureDragStartCallback].
   ///
   /// The [globalPosition] argument must not be null.
@@ -89,12 +92,14 @@ class DragStartDetails {
   ///
   ///  * [localPosition], which is the [globalPosition] transformed to the
   ///    coordinate space of the event receiver.
+  @override
   final Offset globalPosition;
 
   /// The local position in the coordinate system of the event receiver at
   /// which the pointer contacted the screen.
   ///
   /// Defaults to [globalPosition] if not specified in the constructor.
+  @override
   final Offset localPosition;
 
   /// The kind of the device that initiated the event.
@@ -124,7 +129,7 @@ typedef GestureDragStartCallback = void Function(DragStartDetails details);
 ///  * [DragDownDetails], the details for [GestureDragDownCallback].
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragUpdateDetails {
+class DragUpdateDetails implements GestureDetailsWithPosition {
   /// Creates details for a [DragUpdateDetails].
   ///
   /// The [delta] argument must not be null.
@@ -182,12 +187,14 @@ class DragUpdateDetails {
   ///
   ///  * [localPosition], which is the [globalPosition] transformed to the
   ///    coordinate space of the event receiver.
+  @override
   final Offset globalPosition;
 
   /// The local position in the coordinate system of the event receiver at
   /// which the pointer contacted the screen.
   ///
   /// Defaults to [globalPosition] if not specified in the constructor.
+  @override
   final Offset localPosition;
 
   @override

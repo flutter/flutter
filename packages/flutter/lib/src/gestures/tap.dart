@@ -8,6 +8,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'arena.dart';
 import 'constants.dart';
+import 'details_with_position.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
@@ -17,7 +18,7 @@ import 'recognizer.dart';
 ///
 ///  * [GestureDetector.onTapDown], which receives this information.
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
-class TapDownDetails {
+class TapDownDetails implements GestureDetailsWithPosition{
   /// Creates details for a [GestureTapDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
@@ -29,12 +30,14 @@ class TapDownDetails {
        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
+  @override
   final Offset globalPosition;
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
 
   /// The local position at which the pointer contacted the screen.
+  @override
   final Offset localPosition;
 }
 
@@ -56,7 +59,7 @@ typedef GestureTapDownCallback = void Function(TapDownDetails details);
 ///
 ///  * [GestureDetector.onTapUp], which receives this information.
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
-class TapUpDetails {
+class TapUpDetails implements GestureDetailsWithPosition {
   /// The [globalPosition] argument must not be null.
   TapUpDetails({
     required this.kind,
@@ -66,9 +69,11 @@ class TapUpDetails {
        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
+  @override
   final Offset globalPosition;
 
   /// The local position at which the pointer contacted the screen.
+  @override
   final Offset localPosition;
 
   /// The kind of the device that initiated the event.

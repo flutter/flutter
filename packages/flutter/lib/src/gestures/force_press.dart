@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'arena.dart';
+import 'details_with_position.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
@@ -38,7 +39,7 @@ enum _ForceState {
 ///  * [ForcePressGestureRecognizer.onStart], [ForcePressGestureRecognizer.onPeak],
 ///    [ForcePressGestureRecognizer.onEnd], and [ForcePressGestureRecognizer.onUpdate]
 ///    which use [ForcePressDetails].
-class ForcePressDetails {
+class ForcePressDetails implements GestureDetailsWithPosition {
   /// Creates details for a [GestureForcePressStartCallback],
   /// [GestureForcePressPeakCallback] or [GestureForcePressEndCallback].
   ///
@@ -52,9 +53,11 @@ class ForcePressDetails {
        localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the function was called.
+  @override
   final Offset globalPosition;
 
   /// The local position at which the function was called.
+  @override
   final Offset localPosition;
 
   /// The pressure of the pointer on the screen.
