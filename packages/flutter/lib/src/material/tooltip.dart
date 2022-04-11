@@ -792,6 +792,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     // How much buffer to add around the edges of the window. The tooltip will
     // not be laid out in these margins if it can avoid it.
     const double windowMargins = 10.0;
+    final Rect windowWithMargins = (Offset.zero & windowSize).deflate(windowMargins);
 
     Offset _tooltipOffsetInDirection(Alignment direction) {
       // When vertical direction is 0, tooltip should be horizontally centered.
@@ -804,9 +805,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     }
 
     double _tooltipOnScreenArea(Offset offset) {
-      final Rect windowRect = (Offset.zero & windowSize).deflate(windowMargins);
       final Rect tooltipRect = offset & tooltipSize;
-      final Rect intersect = windowRect.intersect(tooltipRect);
+      final Rect intersect = windowWithMargins.intersect(tooltipRect);
       final double onScreenArea = intersect.width * intersect.height;
       return onScreenArea;
     }
