@@ -40,10 +40,9 @@ class FakePub extends Fake implements Pub {
     bool printProgress = true,
   }) async {
     fs.directory(directory).childFile('.packages').createSync();
-    if (offline == true){
+    if (offline == true) {
       calledGetOffline += 1;
-    }
-    else {
+    } else {
       calledOnline += 1;
     }
   }

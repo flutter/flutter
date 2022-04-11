@@ -743,7 +743,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// exceed width/height.
   ///
   /// This value is ignored if [clipper] is non-null.
-  final BorderRadius? borderRadius;
+  final BorderRadiusGeometry? borderRadius;
 
   /// If non-null, determines which clip to use.
   final CustomClipper<RRect>? clipper;
@@ -759,6 +759,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
       borderRadius: borderRadius!,
       clipper: clipper,
       clipBehavior: clipBehavior,
+      textDirection: Directionality.maybeOf(context),
     );
   }
 
@@ -767,13 +768,14 @@ class ClipRRect extends SingleChildRenderObjectWidget {
     renderObject
       ..borderRadius = borderRadius!
       ..clipBehavior = clipBehavior
-      ..clipper = clipper;
+      ..clipper = clipper
+      ..textDirection = Directionality.maybeOf(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, showName: false, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, showName: false, defaultValue: null));
     properties.add(DiagnosticsProperty<CustomClipper<RRect>>('clipper', clipper, defaultValue: null));
   }
 }
