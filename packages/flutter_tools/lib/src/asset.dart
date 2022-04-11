@@ -517,7 +517,7 @@ class ManifestAssetBundle implements AssetBundle {
     // Add Material shader assets.
     final Uri entryUri = _fileSystem.path.toUri('ink_sparkle.spv');
     result.add(_Asset(
-      baseDir: _fileSystem.path.join(Cache.flutterRoot!, 'bin', 'cache', 'artifacts', 'material_shaders'),
+      baseDir: _fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter', 'lib', 'src', 'material', 'shaders'),
       relativeUri: Uri(path: entryUri.pathSegments.last),
       entryUri: entryUri,
       package: null,
