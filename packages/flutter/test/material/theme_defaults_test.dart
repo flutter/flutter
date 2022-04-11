@@ -17,7 +17,7 @@ void main() {
         MaterialApp(
           theme: ThemeData.light(),
           home: Center(
-            child: FlatButton(
+            child: TextButton(
               onPressed: () { }, // button.enabled == true
               child: const Text('button'),
             ),
@@ -45,7 +45,7 @@ void main() {
         MaterialApp(
           theme: ThemeData.light(),
           home: const Center(
-            child: FlatButton(
+            child: TextButton(
               onPressed: null, // button.enabled == false
               child: Text('button'),
             ),

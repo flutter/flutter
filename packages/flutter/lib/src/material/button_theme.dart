@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
-import 'flat_button.dart';
 import 'material_button.dart';
 import 'material_state.dart';
 import 'theme.dart';
@@ -427,9 +426,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// Despite the name, this property is not the [TextTheme] whose
   /// [TextTheme.button] is used as the button text's [TextStyle].
-  ButtonTextTheme getTextTheme(MaterialButton button) {
-    return button.textTheme ?? textTheme;
-  }
+  ButtonTextTheme getTextTheme(MaterialButton button) => button.textTheme ?? textTheme;
 
   /// The foreground color of the [button]'s text and icon when
   /// [MaterialButton.onPressed] is null (when MaterialButton.enabled is false).
@@ -441,11 +438,7 @@ class ButtonThemeData with Diagnosticable {
   /// If [MaterialButton.textColor] is a [MaterialStateProperty<Color>], it will be
   /// used as the `disabledTextColor`. It will be resolved in the [MaterialState.disabled] state.
   Color getDisabledTextColor(MaterialButton button) {
-    if (button.textColor is MaterialStateProperty<Color?>)
-      return button.textColor!;
-    if (button.disabledTextColor != null)
-      return button.disabledTextColor!;
-    return colorScheme!.onSurface.withOpacity(0.38);
+    return button.textColor ?? button.disabledTextColor ?? colorScheme!.onSurface.withOpacity(0.38);
   }
 
   /// The [button]'s background color when [MaterialButton.onPressed] is null
@@ -459,11 +452,7 @@ class ButtonThemeData with Diagnosticable {
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
   /// with its opacity set to 0.38.
   Color getDisabledFillColor(MaterialButton button) {
-    if (button.disabledColor != null)
-      return button.disabledColor!;
-    if (_disabledColor != null)
-      return _disabledColor!;
-    return colorScheme!.onSurface.withOpacity(0.38);
+    return button.disabledColor ?? _disabledColor ?? colorScheme!.onSurface.withOpacity(0.38);
   }
 
   /// The button's background fill color or null for buttons that don't have
@@ -493,7 +482,7 @@ class ButtonThemeData with Diagnosticable {
     if (fillColor != null)
       return fillColor;
 
-    if (button is FlatButton || button.runtimeType == MaterialButton)
+    if (button.runtimeType == MaterialButton)
       return null;
 
     if (button.enabled && _buttonColor != null)
@@ -546,11 +535,7 @@ class ButtonThemeData with Diagnosticable {
         final bool fillIsDark = fillColor != null
           ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
           : getBrightness(button) == Brightness.dark;
-        if (fillIsDark)
-          return Colors.white;
-        if (button is FlatButton)
-          return colorScheme!.primary;
-        return Colors.black;
+        return fillIsDark ? Colors.white : Colors.black;
     }
   }
 
@@ -574,7 +559,7 @@ class ButtonThemeData with Diagnosticable {
     if (_splashColor != null)
       return _splashColor!;
 
-    if (_splashColor != null && button is FlatButton) {
+    if (_splashColor != null) {
       switch (getTextTheme(button)) {
         case ButtonTextTheme.normal:
         case ButtonTextTheme.accent:
@@ -640,13 +625,7 @@ class ButtonThemeData with Diagnosticable {
   /// Returns the button's [MaterialButton.elevation] if it is non-null.
   ///
   /// If button is a [FlatButton] then elevation is 0.0, otherwise it is 2.0.
-  double getElevation(MaterialButton button) {
-    if (button.elevation != null)
-      return button.elevation!;
-    if (button is FlatButton)
-      return 0.0;
-    return 2.0;
-  }
+  double getElevation(MaterialButton button) => button.elevation ?? 2.0;
 
   /// The [button]'s elevation when it is enabled and has focus.
   ///
@@ -654,13 +633,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If button is a [FlatButton] then the focus
   /// elevation is 0.0, otherwise the highlight elevation is 4.0.
-  double getFocusElevation(MaterialButton button) {
-    if (button.focusElevation != null)
-      return button.focusElevation!;
-    if (button is FlatButton)
-      return 0.0;
-    return 4.0;
-  }
+  double getFocusElevation(MaterialButton button) => button.focusElevation ?? 4.0;
 
   /// The [button]'s elevation when it is enabled and has focus.
   ///
@@ -668,13 +641,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If button is a [FlatButton] then the hover
   /// elevation is 0.0, otherwise the highlight elevation is 4.0.
-  double getHoverElevation(MaterialButton button) {
-    if (button.hoverElevation != null)
-      return button.hoverElevation!;
-    if (button is FlatButton)
-      return 0.0;
-    return 4.0;
-  }
+  double getHoverElevation(MaterialButton button) => button.hoverElevation ?? 4.0;
 
   /// The [button]'s elevation when it is enabled and has been pressed.
   ///
@@ -682,13 +649,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If button is a [FlatButton] then the highlight
   /// elevation is 0.0, otherwise the highlight elevation is 8.0.
-  double getHighlightElevation(MaterialButton button) {
-    if (button.highlightElevation != null)
-      return button.highlightElevation!;
-    if (button is FlatButton)
-      return 0.0;
-    return 8.0;
-  }
+  double getHighlightElevation(MaterialButton button) => button.highlightElevation ?? 8.0;
 
   /// The [button]'s elevation when [MaterialButton.onPressed] is null (when
   /// MaterialButton.enabled is false).
@@ -696,11 +657,7 @@ class ButtonThemeData with Diagnosticable {
   /// Returns the button's [MaterialButton.elevation] if it is non-null.
   ///
   /// Otherwise the disabled elevation is 0.0.
-  double getDisabledElevation(MaterialButton button) {
-    if (button.disabledElevation != null)
-      return button.disabledElevation!;
-    return 0.0;
-  }
+  double getDisabledElevation(MaterialButton button) => button.disabledElevation ?? 0.0;
 
   /// Padding for the [button]'s child (typically the button's label).
   ///
@@ -738,9 +695,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// Returns the button's [MaterialButton.shape] if it is non-null, otherwise
   /// [shape] is returned.
-  ShapeBorder getShape(MaterialButton button) {
-    return button.shape ?? shape;
-  }
+  ShapeBorder getShape(MaterialButton button) => button.shape ?? shape;
 
   /// The duration of the [button]'s highlight animation.
   ///

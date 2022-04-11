@@ -61,7 +61,7 @@ void main() {
               alignment: Alignment.topLeft,
               child: Directionality(
                 textDirection: TextDirection.ltr,
-                child: FlatButton(
+                child: TextButton(
                   onPressed: () { },
                   child: const Text('b'), // intrinsic width < minimum width
                 ),
@@ -254,7 +254,7 @@ void main() {
                 primary: MaterialStateColor.resolveWith(getTextColor),
               ),
               textTheme: ButtonTextTheme.primary,
-              child: FlatButton(
+              child: TextButton(
                 onPressed: () {},
                 focusNode: focusNode,
                 child: const Text('FlatButton'),
@@ -278,7 +278,7 @@ void main() {
     expect(textColor(), focusedColor);
 
     // Hovered.
-    final Offset center = tester.getCenter(find.byType(FlatButton));
+    final Offset center = tester.getCenter(find.byType(TextButton));
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
