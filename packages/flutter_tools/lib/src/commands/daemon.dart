@@ -157,12 +157,12 @@ class Daemon {
     this.logToStdout = false,
   }) {
     // Set up domains.
-    _registerDomain(daemonDomain = DaemonDomain(this));
-    _registerDomain(appDomain = AppDomain(this));
-    _registerDomain(deviceDomain = DeviceDomain(this));
-    _registerDomain(emulatorDomain = EmulatorDomain(this));
-    _registerDomain(devToolsDomain = DevToolsDomain(this));
-    _registerDomain(proxyDomain = ProxyDomain(this));
+    registerDomain(daemonDomain = DaemonDomain(this));
+    registerDomain(appDomain ?? AppDomain(this));
+    registerDomain(deviceDomain = DeviceDomain(this));
+    registerDomain(emulatorDomain = EmulatorDomain(this));
+    registerDomain(devToolsDomain = DevToolsDomain(this));
+    registerDomain(proxyDomain = ProxyDomain(this));
 
     // Start listening.
     _commandSubscription = connection.incomingCommands.listen(
@@ -192,7 +192,8 @@ class Daemon {
   final Completer<int> _onExitCompleter = Completer<int>();
   final Map<String, Domain> _domainMap = <String, Domain>{};
 
-  void _registerDomain(Domain domain) {
+  @visibleForTesting
+  void registerDomain(Domain domain) {
     _domainMap[domain.name] = domain;
   }
 
