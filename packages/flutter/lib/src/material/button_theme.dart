@@ -16,10 +16,6 @@ import 'theme_data.dart' show MaterialTapTargetSize;
 /// Used with [ButtonTheme] and [ButtonThemeData] to define a button's base
 /// colors, and the defaults for the button's minimum size, internal padding,
 /// and shape.
-///
-/// See also:
-///
-///  * [FlatButton] which is configured based on the ambient [ButtonTheme].
 enum ButtonTextTheme {
   /// Button text is black or white depending on [ThemeData.brightness].
   normal,
@@ -46,15 +42,12 @@ enum ButtonBarLayoutBehavior {
 
 /// Used with [ButtonThemeData] to configure the color and geometry of buttons.
 ///
-/// ### This class is obsolete.
+/// This class is planned to be deprecated in a future release.
+/// Please use one or more of these buttons and associated themes instead:
 ///
-/// Please use one or more of the new buttons and their themes
-/// instead: [TextButton] and [TextButtonTheme], [ElevatedButton] and
-/// [ElevatedButtonTheme], [OutlinedButton] and
-/// [OutlinedButtonTheme]. The original classes have been deprecated,
-/// please migrate code that uses them.  There's a detailed
-/// migration guide for the new button and button theme classes in
-/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
+///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
+///  * [ElevatedButton], [ElevatedButtonTheme], [ElevatedButtonThemeData],
+///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData]
 ///
 /// A button theme can be specified as part of the overall Material theme
 /// using [ThemeData.buttonTheme]. The Material theme's button theme data
@@ -65,7 +58,6 @@ enum ButtonBarLayoutBehavior {
 ///
 /// See also:
 ///
-///  * [FlatButton] which is styled based on the ambient button theme.
 ///  * [RawMaterialButton], which can be used to configure a button that doesn't
 ///    depend on any inherited themes.
 class ButtonTheme extends InheritedTheme {
@@ -162,20 +154,12 @@ class ButtonTheme extends InheritedTheme {
 
 /// Used with [ButtonTheme] to configure the color and geometry of buttons.
 ///
-/// ### This class is obsolete.
-///
-/// Please use one or more of the new buttons and their themes instead:
+/// This class is planned to be deprecated in a future release.
+/// Please use one or more of these buttons and associated themes instead:
 ///
 ///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
 ///  * [ElevatedButton], [ElevatedButtonTheme], [ElevatedButtonThemeData],
 ///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData]
-///
-/// FlatButton has been replaced by TextButton and ButtonTheme has been replaced
-/// by TextButtonTheme. Please migrate code that uses them.
-///
-/// There's a detailed migration guide for the new button and button
-/// theme classes in
-/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
 ///
 /// A button theme can be specified as part of the overall Material theme
 /// using [ThemeData.buttonTheme]. The Material theme's button theme data
@@ -188,10 +172,6 @@ class ButtonThemeData with Diagnosticable {
   /// The [textTheme], [minWidth], [height], [alignedDropdown], and
   /// [layoutBehavior] parameters must not be null. The [minWidth] and
   /// [height] parameters must greater than or equal to zero.
-  ///
-  /// The ButtonTheme's methods that have a [MaterialButton] parameter and
-  /// have a name with a `get` prefix are used by [FlatButton] to configure a
-  /// [RawMaterialButton].
   const ButtonThemeData({
     this.textTheme = ButtonTextTheme.normal,
     this.minWidth = 88.0,
@@ -269,10 +249,6 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// Defaults to 24.0 on the left and right if [textTheme] is
   /// [ButtonTextTheme.primary], 16.0 on the left and right otherwise.
-  ///
-  /// See also:
-  ///
-  ///  * [getPadding], which is used by [FlatButton].
   EdgeInsetsGeometry get padding {
     if (_padding != null)
       return _padding!;
@@ -295,10 +271,6 @@ class ButtonThemeData with Diagnosticable {
   /// Defaults to a rounded rectangle with circular corner radii of 4.0 if
   /// [textTheme] is [ButtonTextTheme.primary], a rounded rectangle with
   /// circular corner radii of 2.0 otherwise.
-  ///
-  /// See also:
-  ///
-  ///  * [getShape], which is used by [FlatButton].
   ShapeBorder get shape {
     if (_shape != null)
       return _shape!;
@@ -356,10 +328,6 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If the button is in the hovering or highlighted state, then the [hoverColor]
   /// or [highlightColor] will take precedence over the [focusColor].
-  ///
-  /// See also:
-  ///
-  ///  * [getFocusColor], which is used by [FlatButton].
   final Color? _focusColor;
 
   /// The fill color of the button when a pointer is hovering over it.
@@ -368,28 +336,16 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If the button is in the highlighted state, then the [highlightColor] will
   /// take precedence over the [hoverColor].
-  ///
-  /// See also:
-  ///
-  ///  * [getHoverColor], which is used by [FlatButton].
   final Color? _hoverColor;
 
   /// The color of the overlay that appears when a button is pressed.
   ///
   /// This property is null by default.
-  ///
-  /// See also:
-  ///
-  ///  * [getHighlightColor], which is used by [FlatButton].
   final Color? _highlightColor;
 
   /// The color of the ink "splash" overlay that appears when a button is tapped.
   ///
   /// This property is null by default.
-  ///
-  /// See also:
-  ///
-  ///  * [getSplashColor], which is used by [FlatButton].
   final Color? _splashColor;
 
   /// A set of thirteen colors that can be used to derive the button theme's
@@ -407,10 +363,6 @@ class ButtonThemeData with Diagnosticable {
   // The minimum size of a button's tap target.
   //
   // This property is null by default.
-  //
-  // See also:
-  //
-  //  * [getMaterialTargetTapSize], which is used by [FlatButton].
   final MaterialTapTargetSize? _materialTapTargetSize;
 
   /// The [button]'s overall brightness.
@@ -464,9 +416,6 @@ class ButtonThemeData with Diagnosticable {
   /// Otherwise, returns [MaterialButton.disabledColor] if it is non-null and
   /// the button is disabled.
   ///
-  /// Otherwise, if button is a [FlatButton] then null is
-  /// returned.
-  ///
   /// Otherwise the fill color depends on the value of [getTextTheme].
   ///
   ///  * [ButtonTextTheme.normal] or [ButtonTextTheme.accent], the
@@ -514,8 +463,7 @@ class ButtonThemeData with Diagnosticable {
   ///    [getBrightness] resolves to [Brightness.light].
   ///  * [ButtonTextTheme.accent]: [ColorScheme.secondary] of [colorScheme].
   ///  * [ButtonTextTheme.primary]: If [getFillColor] is dark then [Colors.white],
-  ///    otherwise if [button] is a [FlatButton] then
-  ///    [ColorScheme.primary] of [colorScheme], otherwise [Colors.black].
+  ///    otherwise [Colors.black].
   Color getTextColor(MaterialButton button) {
     if (!button.enabled)
       return getDisabledTextColor(button);
@@ -548,16 +496,12 @@ class ButtonThemeData with Diagnosticable {
   /// it is non-null.
   ///
   /// Otherwise, returns the value of the `splashColor` constructor parameter
-  /// if it is non-null and [button] is a [FlatButton] and
-  /// [getTextTheme] is not [ButtonTextTheme.primary]
+  /// if it is non-null and [getTextTheme] is not [ButtonTextTheme.primary]
   ///
   /// Otherwise, returns [getTextColor] with an opacity of 0.12.
   Color getSplashColor(MaterialButton button) {
     if (button.splashColor != null)
       return button.splashColor!;
-
-    if (_splashColor != null)
-      return _splashColor!;
 
     if (_splashColor != null) {
       switch (getTextTheme(button)) {
@@ -622,33 +566,26 @@ class ButtonThemeData with Diagnosticable {
 
   /// The [button]'s elevation when it is enabled and has not been pressed.
   ///
-  /// Returns the button's [MaterialButton.elevation] if it is non-null.
-  ///
-  /// If button is a [FlatButton] then elevation is 0.0, otherwise it is 2.0.
+  /// Returns the button's [MaterialButton.elevation] if it is non-null,
+  /// otherwise it is 2.0.
   double getElevation(MaterialButton button) => button.elevation ?? 2.0;
 
   /// The [button]'s elevation when it is enabled and has focus.
   ///
-  /// Returns the button's [MaterialButton.focusElevation] if it is non-null.
-  ///
-  /// If button is a [FlatButton] then the focus
-  /// elevation is 0.0, otherwise the highlight elevation is 4.0.
+  /// Returns the button's [MaterialButton.focusElevation] if it is non-null,
+  /// otherwise the highlight elevation is 4.0.
   double getFocusElevation(MaterialButton button) => button.focusElevation ?? 4.0;
 
   /// The [button]'s elevation when it is enabled and has focus.
   ///
-  /// Returns the button's [MaterialButton.hoverElevation] if it is non-null.
-  ///
-  /// If button is a [FlatButton] then the hover
-  /// elevation is 0.0, otherwise the highlight elevation is 4.0.
+  /// Returns the button's [MaterialButton.hoverElevation] if it is non-null,
+  /// otherwise the highlight elevation is 4.0.
   double getHoverElevation(MaterialButton button) => button.hoverElevation ?? 4.0;
 
   /// The [button]'s elevation when it is enabled and has been pressed.
   ///
-  /// Returns the button's [MaterialButton.highlightElevation] if it is non-null.
-  ///
-  /// If button is a [FlatButton] then the highlight
-  /// elevation is 0.0, otherwise the highlight elevation is 8.0.
+  /// Returns the button's [MaterialButton.highlightElevation] if it is non-null,
+  /// otherwise the highlight elevation is 8.0.
   double getHighlightElevation(MaterialButton button) => button.highlightElevation ?? 8.0;
 
   /// The [button]'s elevation when [MaterialButton.onPressed] is null (when
@@ -661,13 +598,9 @@ class ButtonThemeData with Diagnosticable {
 
   /// Padding for the [button]'s child (typically the button's label).
   ///
-  /// Returns the button's [MaterialButton.padding] if it is non-null.
-  ///
-  /// If this is a button constructed with [FlatButton.icon] then the padding
-  /// is:
-  /// `EdgeInsetsDirectional.only(start: 12.0, end: 16.0)`.
-  ///
-  /// Otherwise, returns [padding] if it is non-null.
+  /// Returns the button's [MaterialButton.padding] if it is non-null,
+  /// otherwise, returns the `padding` of the constructor parameter if it is
+  /// non-null.
   ///
   /// Otherwise, returns horizontal padding of 24.0 on the left and right if
   /// [getTextTheme] is [ButtonTextTheme.primary], 16.0 on the left and right
