@@ -4,6 +4,8 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui';
+import 'package:collection/collection.dart' show maxBy;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -786,33 +788,54 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   }
 
   @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    final Offset childCenter = Offset(childSize.width / 2, childSize.height / 2);
+  Offset getPositionForChild(Size windowSize, Size tooltipSize) {
+    // How much buffer to add around the edges of the window. The tooltip will
+    // not be laid out in these margins if it can avoid it.
+    const double windowMargins = 10.0;
 
-    Offset _childCenterInDirection(Alignment direction) {
+    Offset _tooltipOffsetInDirection(Alignment direction) {
+      // When vertical direction is 0, tooltip should be horizontally centered.
+      final double tooltipSizeOffsetX = (tooltipSize.width / 2) * (direction.x - 1);
+      // When horizontal direction is 0, tooltip should be vertically centered.
+      final double tooltipSizeOffsetY = (tooltipSize.height / 2) * (direction.y - 1);
+      final Offset tooltipSizeOffset = Offset(tooltipSizeOffsetX, tooltipSizeOffsetY);
       final double directionInRadians = Offset(direction.x, direction.y).direction;
-      return target + Offset.fromDirection(directionInRadians, offset) - childCenter;
+      return target + Offset.fromDirection(directionInRadians, offset) + tooltipSizeOffset;
     }
 
-    bool _childIsInWindow(Offset offset) {
-      final Rect windowRect = Offset.zero & size;
-      final Rect childRect = offset & childSize;
-      return windowRect.contains(childRect.topLeft)
-          && windowRect.contains(childRect.topRight)
-          && windowRect.contains(childRect.bottomLeft)
-          && windowRect.contains(childRect.bottomRight);
+    double _tooltipOnScreenArea(Offset offset) {
+      final Rect windowRect = (Offset.zero & windowSize).deflate(windowMargins);
+      final Rect tooltipRect = offset & tooltipSize;
+      final Rect intersect = windowRect.intersect(tooltipRect);
+      final double onScreenArea = intersect.width * intersect.height;
+      return onScreenArea;
+    }
+
+    bool _tooltipIsInWindow(Offset offset) {
+      final double tooltipArea = tooltipSize.width * tooltipSize.height;
+      return _tooltipOnScreenArea(offset) == tooltipArea;
     }
 
     // Figure out where to put tooltip based on the [preferredDirection] and
-    // where it will fit on screen.
+    // whether it will fit in the window.
     final List<Alignment> possibleDirections = <Alignment>[
+      // Variations of preferred direction.
       preferredDirection,
       _flipHorizontally(preferredDirection),
       _flipVertically(preferredDirection),
       _flipVerticallyAndHorizontally(preferredDirection),
+
+      // Defaults.
+      Alignment.bottomCenter,
+      Alignment.topCenter,
+      Alignment.centerRight,
+      Alignment.centerLeft,
     ];
-    final Iterable<Offset> proposedOffsets = possibleDirections.map(_childCenterInDirection);
-    return proposedOffsets.firstWhere(_childIsInWindow, orElse: () => proposedOffsets.first);
+    final Iterable<Offset> proposedOffsets = possibleDirections.map(_tooltipOffsetInDirection);
+    return proposedOffsets.firstWhere(
+        _tooltipIsInWindow,
+        orElse: () => maxBy(proposedOffsets, _tooltipOnScreenArea)!,
+    );
   }
 
   @override
