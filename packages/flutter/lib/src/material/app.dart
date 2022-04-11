@@ -82,6 +82,13 @@ enum ThemeMode {
 /// This widget also configures the observer of the top-level [Navigator] (if
 /// any) to perform [Hero] animations.
 ///
+/// {@template flutter.material.MaterialApp.defaultSelectionStyle}
+/// The [MaterialApp] automatically creates this widget with
+/// [ThemeData.textSelectionTheme]. If it is null, it then sets the selection
+/// color to [ColorScheme.primary] with 0.4 opacity and cursorColor
+/// to [ColorScheme.primary].
+/// {@endtemplate}
+///
 /// If [home], [routes], [onGenerateRoute], and [onUnknownRoute] are all null,
 /// and [builder] is not null, then no [Navigator] is created.
 ///

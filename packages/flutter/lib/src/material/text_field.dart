@@ -1134,7 +1134,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final bool paintCursorAboveText;
     final bool cursorOpacityAnimates;
     Offset? cursorOffset;
-    Color? cursorColor = widget.cursorColor;
+    final Color cursorColor;
     final Color selectionColor;
     Color? autocorrectionTextRectColor;
     Radius? cursorRadius = widget.cursorRadius;
@@ -1147,7 +1147,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         textSelectionControls ??= cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
+        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
@@ -1160,7 +1160,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
+        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
@@ -1178,7 +1178,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         textSelectionControls ??= materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor ??= selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
 
@@ -1187,7 +1187,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         textSelectionControls ??= desktopTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor ??= selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
 
@@ -1196,7 +1196,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         textSelectionControls ??= desktopTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor ??= selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.

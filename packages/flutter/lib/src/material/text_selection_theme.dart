@@ -120,12 +120,12 @@ class TextSelectionThemeData with Diagnosticable {
 /// color with light blue selection handles to the child text field.
 ///
 /// ```dart
-/// TextSelectionTheme(
-///   data: const TextSelectionThemeData(
+/// const TextSelectionTheme(
+///   data: TextSelectionThemeData(
 ///     cursorColor: Colors.blue,
 ///     selectionHandleColor: Colors.lightBlue,
 ///   ),
-///   child: const TextField(),
+///   child: TextField(),
 /// )
 /// ```
 /// {@end-tool}
@@ -137,23 +137,32 @@ class TextSelectionTheme extends InheritedTheme {
   /// selection properties for all widgets below it in the widget tree.
   ///
   /// The data argument must not be null.
-  TextSelectionTheme({
+  const TextSelectionTheme({
     Key? key,
     required this.data,
     required Widget child,
   }) : assert(data != null),
-      super(key: key, child: _wrapsWithDefaultSelectionStyle(data, child));
-
-  static Widget _wrapsWithDefaultSelectionStyle(TextSelectionThemeData data, Widget child) {
-    return DefaultSelectionStyle(
-      selectionColor: data.selectionColor,
-      cursorColor: data.cursorColor,
-      child: child,
-    );
-  }
+       _child = child,
+       super(key: key, child: const _NullWidget());
 
   /// The properties for descendant [TextField] and [SelectableText] widgets.
   final TextSelectionThemeData data;
+
+  // Overriding the getter to insert `DefaultSelectionStyle` into the subtree
+  // without a breaking change. This should be avoid in general since this
+  // relies on the implementation detail of ProxyWidget.
+  //
+  // The `TextSelectionTheme` should be non-const if it were to start
+  // from scratch.
+  @override
+  Widget get child {
+    return DefaultSelectionStyle(
+      selectionColor: data.selectionColor,
+      cursorColor: data.cursorColor,
+      child: _child,
+    );
+  }
+  final Widget _child;
 
   /// Returns the [data] from the closest [TextSelectionTheme] ancestor. If
   /// there is no ancestor, it returns [ThemeData.textSelectionTheme].
@@ -176,4 +185,11 @@ class TextSelectionTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(TextSelectionTheme oldWidget) => data != oldWidget.data;
+}
+
+class _NullWidget extends Widget {
+  const _NullWidget();
+
+  @override
+  Element createElement() => throw UnimplementedError();
 }

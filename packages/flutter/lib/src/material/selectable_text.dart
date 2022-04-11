@@ -360,7 +360,7 @@ class SelectableText extends StatefulWidget {
 
   /// The color of the cursor.
   ///
-  /// The cursor indicates the current location of text insertion point in
+  /// The cursor indicates the current location of the text insertion point in
   /// the field.
   ///
   /// If this is null it will default to the ambient
@@ -610,7 +610,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     final bool paintCursorAboveText;
     final bool cursorOpacityAnimates;
     Offset? cursorOffset;
-    Color? cursorColor = widget.cursorColor;
+    final Color cursorColor;
     final Color selectionColor;
     Radius? cursorRadius = widget.cursorRadius;
 
@@ -621,7 +621,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
+        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
@@ -633,7 +633,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
+        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
@@ -645,7 +645,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor ??= selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
 
@@ -655,7 +655,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= desktopTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor ??= selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
     }

@@ -30,7 +30,7 @@ import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
-import 'selection.dart';
+import 'default_selection_style.dart';
 import 'shortcuts.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';

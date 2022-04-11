@@ -13,14 +13,9 @@ import 'inherited_theme.dart';
 /// The selection style to apply to descendant [EditableText] widgets which
 /// don't have an explicit style.
 ///
-/// The [CupertinoApp] automatically creates this widget with selectionColor
-/// sets to [CupertinoThemeData.primaryColor] with 0.2 opacity and cursorColor
-/// sets to [CupertinoThemeData.primaryColor].
+/// {@macro flutter.cupertino.CupertinoApp.defaultSelectionStyle}
 ///
-/// The [MaterialApp] automatically creates this widget with
-/// [ThemeData.textSelectionTheme]. If it is null, it then sets the selection
-/// color to [ColorScheme.primary] with 0.4 opacity and cursorColor
-/// to [ColorScheme.primary].
+/// {@macro flutter.material.MaterialApp.defaultSelectionStyle}
 ///
 /// See also:
 ///  * [TextSelectionTheme]: which also creates a [DefaultSelectionStyle] for
@@ -48,9 +43,9 @@ class DefaultSelectionStyle extends InheritedTheme {
       selectionColor = null,
       super(key: key, child: const _NullWidget());
 
-  /// The color of the cursor in the text field.
+  /// The color of the text field's cursor.
   ///
-  /// The cursor indicates the current location of text insertion point in
+  /// The cursor indicates the current location of the text insertion point in
   /// the field.
   final Color? cursorColor;
 

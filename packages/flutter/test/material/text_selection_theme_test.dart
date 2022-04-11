@@ -175,10 +175,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Material(
+        home: const Material(
           child: TextSelectionTheme(
             data: widgetTextSelectionTheme,
-            child: const TextField(autofocus: true),
+            child: TextField(autofocus: true),
           ),
         ),
       ),
@@ -232,10 +232,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Material(
+        home: const Material(
           child: TextSelectionTheme(
             data: widgetTextSelectionTheme,
-            child: const TextField(cursorColor: cursorColor),
+            child: TextField(cursorColor: cursorColor),
           ),
         ),
       ),
@@ -249,10 +249,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Material(
+        home: const Material(
           child: TextSelectionTheme(
             data: widgetTextSelectionTheme,
-            child: const SelectableText('foobar', cursorColor: cursorColor),
+            child: SelectableText('foobar', cursorColor: cursorColor),
           ),
         ),
       ),
@@ -261,5 +261,44 @@ void main() {
     final EditableTextState selectableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderSelectable = selectableTextState.renderEditable;
     expect(renderSelectable.cursorColor, cursorColor.withAlpha(0));
+  });
+
+  testWidgets('TextSelectionThem overrides DefaultSelectionStyle', (WidgetTester tester) async {
+    const Color themeSelectionColor = Color(0xffaabbcc);
+    const Color themeCursorColor = Color(0x00ccbbaa);
+    const Color defaultSelectionColor = Color(0xffaa1111);
+    const Color defaultCursorColor = Color(0x00cc2222);
+    final Key defaultSelectionStyle = UniqueKey();
+    final Key themeStyle = UniqueKey();
+    // Test TextField's cursor color.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultSelectionStyle(
+          selectionColor: defaultSelectionColor,
+          cursorColor: defaultCursorColor,
+          child: Container(
+            key: defaultSelectionStyle,
+            child: TextSelectionTheme(
+              data: const TextSelectionThemeData(
+                selectionColor: themeSelectionColor,
+                cursorColor: themeCursorColor,
+              ),
+              child: Placeholder(
+                key: themeStyle,
+              ),
+            ),
+          )
+        ),
+      ),
+    );
+    final BuildContext defaultSelectionStyleContext = tester.element(find.byKey(defaultSelectionStyle));
+    DefaultSelectionStyle style = DefaultSelectionStyle.of(defaultSelectionStyleContext);
+    expect(style.selectionColor, defaultSelectionColor);
+    expect(style.cursorColor, defaultCursorColor);
+
+    final BuildContext themeStyleContext = tester.element(find.byKey(themeStyle));
+    style = DefaultSelectionStyle.of(themeStyleContext);
+    expect(style.selectionColor, themeSelectionColor);
+    expect(style.cursorColor, themeCursorColor);
   });
 }
