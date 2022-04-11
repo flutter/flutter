@@ -188,7 +188,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -2436,7 +2436,7 @@ targets:
       caches: >-
         [
           {"name":"gradle", "path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -3698,7 +3698,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
