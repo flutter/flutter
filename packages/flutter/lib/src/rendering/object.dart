@@ -860,7 +860,7 @@ class PipelineOwner {
     if (!kReleaseMode) {
       Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
       assert(() {
-        if (debugProfileLayoutsEnabled) {
+        if (debugEnhanceLayoutTimelineArguments) {
           debugTimelineArguments = <String, String>{
             ...debugTimelineArguments,
             'dirty count': '${_nodesNeedingLayout.length}',
@@ -966,7 +966,7 @@ class PipelineOwner {
     if (!kReleaseMode) {
       Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
       assert(() {
-        if (debugProfilePaintsEnabled) {
+        if (debugEnhancePaintTimelineArguments) {
           debugTimelineArguments = <String, String>{
             ...debugTimelineArguments,
             'dirty count': '${_nodesNeedingPaint.length}',
@@ -1798,7 +1798,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
       Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
       assert(() {
-        debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        if (debugEnhanceLayoutTimelineArguments) {
+          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        }
         return true;
       }());
       Timeline.startSync(
@@ -2402,7 +2404,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (!kReleaseMode && debugProfilePaintsEnabled) {
       Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
       assert(() {
-        debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        if (debugEnhancePaintTimelineArguments) {
+          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        }
         return true;
       }());
       Timeline.startSync(
