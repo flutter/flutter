@@ -158,7 +158,7 @@ class Daemon {
   }) {
     // Set up domains.
     registerDomain(daemonDomain = DaemonDomain(this));
-    registerDomain(appDomain ?? AppDomain(this));
+    registerDomain(appDomain = AppDomain(this));
     registerDomain(deviceDomain = DeviceDomain(this));
     registerDomain(emulatorDomain = EmulatorDomain(this));
     registerDomain(devToolsDomain = DevToolsDomain(this));
