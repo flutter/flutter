@@ -284,10 +284,15 @@ class ScaleTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// The ImageFilter layer created by setting filterQuality will introduce
+    /// a saveLayer call. This is usually worthwhile when animating the layer,
+    /// but leaving it in the layer tree before the animation has started or after
+    /// it has finished significantly hurts performance.
+    final bool skipfilterQuality = scale.isCompleted || scale.isDismissed;
     return Transform.scale(
       scale: scale.value,
       alignment: alignment,
-      filterQuality: filterQuality,
+      filterQuality: skipfilterQuality ? null : filterQuality,
       child: child,
     );
   }
@@ -350,10 +355,15 @@ class RotationTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// The ImageFilter layer created by setting filterQuality will introduce
+    /// a saveLayer call. This is usually worthwhile when animating the layer,
+    /// but leaving it in the layer tree before the animation has started or after
+    /// it has finished significantly hurts performance.
+    final bool skipfilterQuality = turns.isCompleted || turns.isDismissed;
     return Transform.rotate(
       angle: turns.value * math.pi * 2.0,
       alignment: alignment,
-      filterQuality: filterQuality,
+      filterQuality: skipfilterQuality ? null : filterQuality,
       child: child,
     );
   }
