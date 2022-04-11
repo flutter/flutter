@@ -111,14 +111,28 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
   final String outputPath = path.join(projectDir.path, outputDirectoryName);
 
-  checkFileExists(path.join(
+  // TODO(jmagman): Remove ios-arm64_armv7 checks when armv7 engine artifacts are removed.
+  final String arm64FlutterFramework = path.join(
+    outputPath,
+    'Debug',
+    'Flutter.xcframework',
+    'ios-arm64',
+    'Flutter.framework',
+  );
+
+  final String armv7FlutterFramework = path.join(
     outputPath,
     'Debug',
     'Flutter.xcframework',
     'ios-arm64_armv7',
     'Flutter.framework',
-    'Flutter',
-  ));
+  );
+
+  final bool arm64FlutterBinaryExists = exists(File(path.join(arm64FlutterFramework, 'Flutter')));
+  final bool armv7FlutterBinaryExists = exists(File(path.join(armv7FlutterFramework, 'Flutter')));
+  if (!arm64FlutterBinaryExists && !armv7FlutterBinaryExists) {
+    throw TaskResult.failure('Expected debug Flutter engine artifact binary to exist');
+  }
 
   final String debugAppFrameworkPath = path.join(
     outputPath,
@@ -226,7 +240,17 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   section("Check all modes' engine dylib");
 
   for (final String mode in <String>['Debug', 'Profile', 'Release']) {
-    final String engineFrameworkPath = path.join(
+    // TODO(jmagman): Remove ios-arm64_armv7 checks when armv7 engine artifacts are removed.
+    final String arm64EngineBinary = path.join(
+      outputPath,
+      mode,
+      'Flutter.xcframework',
+      'ios-arm64',
+      'Flutter.framework',
+      'Flutter',
+    );
+
+    final String arm64Armv7EngineBinary = path.join(
       outputPath,
       mode,
       'Flutter.xcframework',
@@ -235,7 +259,13 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'Flutter',
     );
 
-    await _checkBitcode(engineFrameworkPath, mode);
+    if (exists(File(arm64EngineBinary))) {
+      await _checkBitcode(arm64EngineBinary, mode);
+    } else if (exists(File(arm64Armv7EngineBinary))) {
+      await _checkBitcode(arm64Armv7EngineBinary, mode);
+    } else {
+      throw TaskResult.failure('Expected Flutter $mode engine artifact binary to exist');
+    }
 
     checkFileExists(path.join(
       outputPath,
