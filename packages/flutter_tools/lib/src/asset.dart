@@ -492,6 +492,8 @@ class ManifestAssetBundle implements AssetBundle {
 
   List<_Asset> _getMaterialAssets() {
     final List<_Asset> result = <_Asset>[];
+
+    // Add Material font assets.
     for (final Map<String, Object> family in kMaterialFonts) {
       final Object? fonts = family['fonts'];
       if (fonts == null) {
@@ -511,6 +513,15 @@ class ManifestAssetBundle implements AssetBundle {
         ));
       }
     }
+
+    // Add Material shader assets.
+    final Uri entryUri = _fileSystem.path.toUri('ink_sparkle.spv');
+    result.add(_Asset(
+      baseDir: _fileSystem.path.join(Cache.flutterRoot!, 'bin', 'cache', 'artifacts', 'material_shaders'),
+      relativeUri: Uri(path: entryUri.pathSegments.last),
+      entryUri: entryUri,
+      package: null,
+    ));
 
     return result;
   }
