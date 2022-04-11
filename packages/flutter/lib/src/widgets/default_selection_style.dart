@@ -4,8 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
-
 import 'framework.dart';
 import 'inherited_theme.dart';
 
