@@ -11,71 +11,111 @@ import 'package:platform/platform.dart';
 import './common.dart';
 
 void main() {
-  group('codesign command', () {
-    const String flutterRoot = '/flutter';
-    const String checkoutsParentDirectory = '$flutterRoot/dev/conductor/';
-    const String flutterCache =
-        '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/cache';
-    const String flutterBin =
-        '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/flutter';
-    const String revision = 'abcd1234';
-    late CommandRunner<void> runner;
-    late Checkouts checkouts;
-    late MemoryFileSystem fileSystem;
-    late FakePlatform platform;
-    late TestStdio stdio;
-    late FakeProcessManager processManager;
-    const List<String> binariesWithEntitlements = <String>[
-      '$flutterCache/dart-sdk/bin/dart',
-      '$flutterCache/dart-sdk/bin/dartaotruntime',
-    ];
-    const List<String> binariesWithoutEntitlements = <String>[
-      '$flutterCache/engine/darwin-x64/font-subset',
-    ];
-    const List<String> allBinaries = <String>[
-      ...binariesWithEntitlements,
-      ...binariesWithoutEntitlements,
-    ];
+  const String flutterRoot = '/flutter';
+  const String checkoutsParentDirectory = '$flutterRoot/dev/conductor/';
+  const String flutterCache =
+      '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/cache';
+  const String flutterBin =
+      '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/flutter';
+  const String revision = 'abcd1234';
+  late CommandRunner<void> runner;
+  late Checkouts checkouts;
+  late MemoryFileSystem fileSystem;
+  late FakePlatform platform;
+  late TestStdio stdio;
+  late FakeProcessManager processManager;
+  const List<String> binariesWithEntitlements = <String>[
+    '$flutterCache/dart-sdk/bin/dart',
+    '$flutterCache/dart-sdk/bin/dartaotruntime',
+  ];
+  const List<String> binariesWithoutEntitlements = <String>[
+    '$flutterCache/engine/darwin-x64/font-subset',
+  ];
+  const List<String> allBinaries = <String>[
+    ...binariesWithEntitlements,
+    ...binariesWithoutEntitlements,
+  ];
+  const String certName = 'flutter';
+  const String engineRevision = 'deadbeef';
 
-    void createRunner({
-      String operatingSystem = 'macos',
-      List<FakeCommand>? commands,
-    }) {
-      stdio = TestStdio();
-      fileSystem = MemoryFileSystem.test();
-      platform = FakePlatform(operatingSystem: operatingSystem);
-      processManager = FakeProcessManager.list(commands ?? <FakeCommand>[]);
-      checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(checkoutsParentDirectory),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-      final FakeCodesignCommand command = FakeCodesignCommand(
-        checkouts: checkouts,
-        binariesWithEntitlements: Future<List<String>>.value(binariesWithEntitlements),
-        binariesWithoutEntitlements: Future<List<String>>.value(binariesWithoutEntitlements),
-        flutterRoot: fileSystem.directory(flutterRoot),
-      );
-      runner = CommandRunner<void>('codesign-test', '')
-        ..addCommand(command);
-    }
+  void createRunner({
+    String operatingSystem = 'macos',
+    List<FakeCommand>? commands,
+  }) {
+    stdio = TestStdio();
+    fileSystem = MemoryFileSystem.test();
+    // create engine version hash
+    fileSystem.file('flutter/bin/internal/engine.version')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(engineRevision);
+    platform = FakePlatform(
+      operatingSystem: operatingSystem,
+      environment: <String, String>{},
+    );
+    processManager = FakeProcessManager.list(commands ?? <FakeCommand>[]);
+    checkouts = Checkouts(
+      fileSystem: fileSystem,
+      parentDirectory: fileSystem.directory(checkoutsParentDirectory),
+      platform: platform,
+      processManager: processManager,
+      stdio: stdio,
+    );
+    final FakeCodesignCommand command = FakeCodesignCommand(
+      checkouts: checkouts,
+      binariesWithEntitlementsOverride: binariesWithEntitlements,
+      binariesWithoutEntitlementsOverride: binariesWithoutEntitlements,
+      flutterRoot: fileSystem.directory(flutterRoot),
+    );
+    runner = CommandRunner<void>('codesign-test', '')
+      ..addCommand(command);
+  }
 
+
+  group('codesign', () {
+    test('foo', () async {
+      createRunner();
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          'file://$flutterRoot/',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
+        ]),
+        FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
+        FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
+      ]);
+      await runner.run(<String>[
+        'codesign',
+        '--$kCodesignCertName',
+        certName,
+      ]);
+
+      expect(processManager, hasNoRemainingExpectations);
+    });
+  });
+
+  group('codesign --verify', () {
     test('throws exception if not run from macos', () async {
       createRunner(operatingSystem: 'linux');
       expect(
         () async => runner.run(<String>['codesign']),
         throwsExceptionWith('Error! Expected operating system "macos"'),
-      );
-    });
-
-    test('throws exception if verify flag is not provided', () async {
-      createRunner();
-      expect(
-        () async => runner.run(<String>['codesign']),
-        throwsExceptionWith(
-            'Sorry, but codesigning is not implemented yet. Please pass the --$kVerify flag to verify signatures'),
       );
     });
 
@@ -293,8 +333,13 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          FrameworkRepository.defaultBranch,
+          revision,
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
@@ -338,7 +383,7 @@ void main() {
       ]);
       await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]);
       expect(processManager.hasRemainingExpectations, false);
-      expect(stdio.stdout, contains('Verified that binaries for commit $revision are codesigned and have expected entitlements'));
+      expect(stdio.stdout, contains('Verified that binaries are codesigned and have expected entitlements'));
     });
 
     test('fails if a single binary is not codesigned', () async {
@@ -386,8 +431,13 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          FrameworkRepository.defaultBranch,
+          revision,
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
@@ -478,8 +528,13 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          FrameworkRepository.defaultBranch,
+          revision,
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
@@ -542,8 +597,13 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          FrameworkRepository.defaultBranch,
+          revision,
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
@@ -602,14 +662,17 @@ void main() {
 class FakeCodesignCommand extends CodesignCommand {
   FakeCodesignCommand({
     required super.checkouts,
-    required this.binariesWithEntitlements,
-    required this.binariesWithoutEntitlements,
+    required this.binariesWithEntitlementsOverride,
+    required this.binariesWithoutEntitlementsOverride,
     required super.flutterRoot,
   });
 
-  @override
-  final Future<List<String>> binariesWithEntitlements;
+  final List<String> binariesWithEntitlementsOverride;
+  final List<String> binariesWithoutEntitlementsOverride;
 
   @override
-  final Future<List<String>> binariesWithoutEntitlements;
+  List<String> binariesWithEntitlements(String cacheDirectoryPath) => binariesWithEntitlementsOverride;
+
+  @override
+  List<String> binariesWithoutEntitlements(String cacheDirectoryPath) => binariesWithoutEntitlementsOverride;
 }

@@ -2,11 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io' as io;
+import 'dart:typed_data';
 
+import 'package:archive/archive_io.dart' as package_arch;
 import 'package:args/command_runner.dart';
+import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart' show visibleForTesting;
+import 'package:http/io_client.dart';
+import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -27,29 +32,32 @@ const String kVerify = 'verify';
 const String kSignatures = 'signatures';
 const String kRevision = 'revision';
 const String kUpstream = 'upstream';
+const String kCodesignCertName = 'codesign-cert-name';
+const String kCodesignPrimaryBundleId = 'codesign-primary-bundle-id';
+const String kCodesignUserName = 'codesign-user-name';
+const String kAppSpecificPassword = 'app-specific-password';
 
 /// Command to codesign and verify the signatures of cached binaries.
 class CodesignCommand extends Command<void> {
   CodesignCommand({
     required this.checkouts,
     required this.flutterRoot,
-    FrameworkRepository? framework,
+    this.overrideFramework,
   })  : fileSystem = checkouts.fileSystem,
         platform = checkouts.platform,
         stdio = checkouts.stdio,
         processManager = checkouts.processManager {
-    if (framework != null) {
-      _framework = framework;
-    }
     argParser.addFlag(
       kVerify,
-      help: 'Only verify expected binaries exist and are codesigned with entitlements.',
+      help:
+          'Only verify expected binaries exist and are codesigned with entitlements.',
     );
     argParser.addFlag(
       kSignatures,
       defaultsTo: true,
-      help: 'When off, this command will only verify the existence of binaries, and not their\n'
-            'signatures or entitlements. Must be used with --verify flag.',
+      help:
+          'When off, this command will only verify the existence of binaries, and not their\n'
+          'signatures or entitlements. Must be used with --verify flag.',
     );
     argParser.addOption(
       kUpstream,
@@ -60,6 +68,24 @@ class CodesignCommand extends Command<void> {
       kRevision,
       help: 'The Flutter framework revision to use.',
     );
+    argParser.addOption(
+      kCodesignCertName,
+      help: 'The name of the codesign certificate to be used when codesigning.',
+    );
+    argParser.addOption(
+      kCodesignPrimaryBundleId,
+      help: 'Identifier for the application you are codesigning. This is only used '
+        'for disambiguating codesign jobs in the notary service logging.',
+      defaultsTo: 'dev.flutter.sdk'
+    );
+    argParser.addOption(
+      kCodesignUserName,
+      help: 'Apple developer account email used for authentication with notary service.',
+    );
+    argParser.addOption(
+      kAppSpecificPassword,
+      help: 'Unique password specifically for codesigning the given application.',
+    );
   }
 
   final Checkouts checkouts;
@@ -68,19 +94,11 @@ class CodesignCommand extends Command<void> {
   final ProcessManager processManager;
   final Stdio stdio;
 
-  /// Root directory of the Flutter repository.
+  /// Root directory of the Flutter repository used by the conductor tool.
   final Directory flutterRoot;
 
-  FrameworkRepository? _framework;
-  FrameworkRepository get framework {
-    return _framework ??= FrameworkRepository(
-      checkouts,
-      upstreamRemote: Remote(
-        name: RemoteName.upstream,
-        url: argResults![kUpstream] as String,
-      ),
-    );
-  }
+  @visibleForTesting
+  final FrameworkRepository? overrideFramework;
 
   @override
   String get name => 'codesign';
@@ -98,46 +116,55 @@ class CodesignCommand extends Command<void> {
       );
     }
 
-    if (argResults!['verify'] as bool != true) {
-      throw ConductorException(
-        'Sorry, but codesigning is not implemented yet. Please pass the '
-        '--$kVerify flag to verify signatures.',
-      );
-    }
-
-    String revision;
-    if (argResults!.wasParsed(kRevision)) {
-      stdio.printWarning(
-        'Warning! When providing an arbitrary revision, the contents of the cache may not '
-        'match the expected binaries in the conductor tool. It is preferred to check out '
-        'the desired revision and run that version of the conductor.\n',
-      );
-      revision = argResults![kRevision] as String;
+    final FrameworkRepository framework;
+    if (overrideFramework != null) {
+      framework = overrideFramework!;
+    } else if (argResults!.wasParsed(kRevision)) {
+      framework = FrameworkRepository.localRepoAsUpstream(
+          checkouts,
+          upstreamPath: flutterRoot.path,
+          initialRef: argResults![kRevision] as String,
+        );
     } else {
-      revision = ((await processManager.run(
-        <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: flutterRoot.path,
-      )).stdout as String).trim();
-      assert(revision.isNotEmpty);
+      framework = FrameworkRepository.localRepoAsUpstream(
+          checkouts,
+          upstreamPath: flutterRoot.path,
+        );
     }
 
-    await framework.checkout(revision);
-
-    // Ensure artifacts present
-    await framework.runFlutter(<String>['precache', '--android', '--ios', '--macos']);
-
-    await verifyExist();
-    if (argResults![kSignatures] as bool) {
-      await verifySignatures();
+    if (argResults!['verify'] as bool == true) {
+      return CodesignVerifyContext(
+        framework: framework,
+        checkouts: checkouts,
+        shouldVerifySignatures: argResults![kSignatures] as bool,
+        binariesWithEntitlements: binariesWithEntitlements(await framework.cacheDirectory),
+        binariesWithoutEntitlements: binariesWithoutEntitlements(await framework.cacheDirectory),
+      ).run();
     }
+
+    final String codesignCertName = getValueFromEnvOrArgs(kCodesignCertName, argResults!, platform.environment)!;
+    final String codesignPrimaryBundleId = getValueFromEnvOrArgs(kCodesignPrimaryBundleId, argResults!, platform.environment)!;
+    final String codesignUserName = getValueFromEnvOrArgs(kCodesignUserName, argResults!, platform.environment)!;
+    final String appSpecificPassword = getValueFromEnvOrArgs(kAppSpecificPassword, argResults!, platform.environment)!;
+
+    return CodesignContext(
+      framework: framework,
+      checkouts: checkouts,
+      localFlutterRoot: flutterRoot,
+      binariesWithEntitlements: binariesWithEntitlements(await framework.cacheDirectory),
+      binariesWithoutEntitlements: binariesWithoutEntitlements(await framework.cacheDirectory),
+      codesignCertName: codesignCertName,
+      codesignPrimaryBundleId: codesignPrimaryBundleId,
+      codesignUserName: codesignUserName,
+      appSpecificPassword: appSpecificPassword,
+    ).run();
   }
 
   /// Binaries that are expected to be codesigned and have entitlements.
   ///
   /// This list should be kept in sync with the actual contents of Flutter's
   /// cache.
-  Future<List<String>> get binariesWithEntitlements async {
-    final String frameworkCacheDirectory = await framework.cacheDirectory;
+  List<String> binariesWithEntitlements(String cacheDirectoryPath) {
     return <String>[
       'artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
       'artifacts/engine/android-arm-release/darwin-x64/gen_snapshot',
@@ -174,7 +201,7 @@ class CodesignCommand extends Command<void> {
       'dart-sdk/bin/utils/gen_snapshot',
     ]
         .map((String relativePath) =>
-            fileSystem.path.join(frameworkCacheDirectory, relativePath))
+            fileSystem.path.join(cacheDirectoryPath, relativePath))
         .toList();
   }
 
@@ -182,8 +209,7 @@ class CodesignCommand extends Command<void> {
   ///
   /// This list should be kept in sync with the actual contents of Flutter's
   /// cache.
-  Future<List<String>> get binariesWithoutEntitlements async {
-    final String frameworkCacheDirectory = await framework.cacheDirectory;
+  List<String> binariesWithoutEntitlements(String cacheDirectoryPath) {
     return <String>[
       'artifacts/engine/darwin-x64-profile/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
@@ -198,51 +224,93 @@ class CodesignCommand extends Command<void> {
       'artifacts/ios-deploy/ios-deploy',
     ]
         .map((String relativePath) =>
-            fileSystem.path.join(frameworkCacheDirectory, relativePath))
+            fileSystem.path.join(cacheDirectoryPath, relativePath))
         .toList();
   }
+}
 
-  /// Verify the existence of all expected binaries in cache.
-  ///
-  /// This function ignores code signatures and entitlements, and is intended to
-  /// be run on every commit. It should throw if either new binaries are added
-  /// to the cache or expected binaries removed. In either case, this class'
-  /// [binariesWithEntitlements] or [binariesWithoutEntitlements] lists should
-  /// be updated accordingly.
-  @visibleForTesting
-  Future<void> verifyExist() async {
-    final Set<String> foundFiles = <String>{};
-    for (final String binaryPath
-        in await findBinaryPaths(await framework.cacheDirectory)) {
-      if ((await binariesWithEntitlements).contains(binaryPath)) {
-        foundFiles.add(binaryPath);
-      } else if ((await binariesWithoutEntitlements).contains(binaryPath)) {
-        foundFiles.add(binaryPath);
-      } else {
-        throw ConductorException(
-            'Found unexpected binary in cache: $binaryPath');
+/// Logic shared between codesigning and verifying code signatures.
+abstract class _Context {
+  _Context({
+    required this.framework,
+    required this.checkouts,
+    required this.binariesWithEntitlements,
+    required this.binariesWithoutEntitlements,
+    this.initialRevision,
+  });
+
+  final FrameworkRepository framework;
+  final Checkouts checkouts;
+  final String? initialRevision;
+  final List<String> binariesWithEntitlements;
+  final List<String> binariesWithoutEntitlements;
+
+  FileSystem get fileSystem => checkouts.fileSystem;
+  Platform get platform => checkouts.platform;
+  ProcessManager get processManager => checkouts.processManager;
+  Stdio get stdio => checkouts.stdio;
+
+  /// Check if the binary has the expected entitlements.
+  Future<bool> hasExpectedEntitlements(String binaryPath) async {
+    final io.ProcessResult entitlementResult = await processManager.run(
+      <String>[
+        'codesign',
+        '--display',
+        '--entitlements',
+        ':-',
+        binaryPath,
+      ],
+    );
+
+    if (entitlementResult.exitCode != 0) {
+      stdio.printError(
+        'The `codesign --entitlements` command failed with exit code ${entitlementResult.exitCode}:\n'
+        '${entitlementResult.stderr}\n',
+      );
+      return false;
+    }
+
+    bool passes = true;
+    final String output = entitlementResult.stdout as String;
+    for (final String entitlement in expectedEntitlements) {
+      final bool entitlementExpected =
+          binariesWithEntitlements.contains(binaryPath);
+      if (output.contains(entitlement) != entitlementExpected) {
+        stdio.printError(
+          'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} '
+          'entitlement $entitlement.',
+        );
+        passes = false;
+      }
+    }
+    return passes;
+  }
+
+  /// Every binary file in framework's cache.
+  late final Future<List<String>> _allBinaryPaths = (() async {
+    final List<String> allBinaryPaths = <String>[];
+    final io.ProcessResult result = processManager.runSync(
+      <String>[
+        'find',
+        await framework.cacheDirectory,
+        '-type',
+        'f',
+      ],
+    );
+
+    final List<String> allFiles = (result.stdout as String)
+        .split('\n')
+        .where((String s) => s.isNotEmpty)
+        .toList();
+
+    for (final String filePath in allFiles) {
+      if (isBinary(filePath, processManager)) {
+        allBinaryPaths.add(filePath);
       }
     }
 
-    final List<String> allExpectedFiles =
-        (await binariesWithEntitlements) + (await binariesWithoutEntitlements);
-    if (foundFiles.length < allExpectedFiles.length) {
-      final List<String> unfoundFiles = allExpectedFiles
-          .where(
-            (String file) => !foundFiles.contains(file),
-          )
-          .toList();
-      stdio.printError(
-        'Expected binaries not found in cache:\n\n${unfoundFiles.join('\n')}\n\n'
-        'If this commit is removing binaries from the cache, this test should be fixed by\n'
-        'removing the relevant entry from either the "binariesWithEntitlements" or\n'
-        '"binariesWithoutEntitlements" getters in dev/tools/lib/codesign.dart.',
-      );
-      throw ConductorException('Did not find all expected binaries!');
-    }
-
-    stdio.printStatus('All expected binaries present.');
-  }
+    return allBinaryPaths;
+  })();
 
   /// Verify code signatures and entitlements of all binaries in the cache.
   @visibleForTesting
@@ -250,15 +318,14 @@ class CodesignCommand extends Command<void> {
     final List<String> unsignedBinaries = <String>[];
     final List<String> wrongEntitlementBinaries = <String>[];
     final List<String> unexpectedBinaries = <String>[];
-    for (final String binaryPath
-        in await findBinaryPaths(await framework.cacheDirectory)) {
+    for (final String binaryPath in await _allBinaryPaths) {
       bool verifySignature = false;
       bool verifyEntitlements = false;
-      if ((await binariesWithEntitlements).contains(binaryPath)) {
+      if (binariesWithEntitlements.contains(binaryPath)) {
         verifySignature = true;
         verifyEntitlements = true;
       }
-      if ((await binariesWithoutEntitlements).contains(binaryPath)) {
+      if (binariesWithoutEntitlements.contains(binaryPath)) {
         verifySignature = true;
       }
       if (!verifySignature && !verifyEntitlements) {
@@ -298,18 +365,21 @@ class CodesignCommand extends Command<void> {
     }
 
     if (wrongEntitlementBinaries.isNotEmpty) {
-      stdio.printError('Found ${wrongEntitlementBinaries.length} binaries with unexpected entitlements:');
+      stdio.printError(
+          'Found ${wrongEntitlementBinaries.length} binaries with unexpected entitlements:');
       wrongEntitlementBinaries.forEach(stdio.printError);
     }
 
     if (unexpectedBinaries.isNotEmpty) {
-      stdio.printError('Found ${unexpectedBinaries.length} unexpected binaries in the cache:');
+      stdio.printError(
+          'Found ${unexpectedBinaries.length} unexpected binaries in the cache:');
       unexpectedBinaries.forEach(print);
     }
 
     // Finally, exit on any invalid state
     if (unsignedBinaries.isNotEmpty) {
-      throw ConductorException('Test failed because unsigned binaries detected.');
+      throw ConductorException(
+          'Test failed because unsigned binaries detected.');
     }
 
     if (wrongEntitlementBinaries.isNotEmpty) {
@@ -320,96 +390,803 @@ class CodesignCommand extends Command<void> {
     }
 
     if (unexpectedBinaries.isNotEmpty) {
-      throw ConductorException('Test failed because unexpected binaries found in the cache.');
+      throw ConductorException(
+          'Test failed because unexpected binaries found in the cache.');
     }
 
-    final String? desiredRevision = argResults![kRevision] as String?;
-    if (desiredRevision == null) {
-      stdio.printStatus('Verified that binaries are codesigned and have expected entitlements.');
+    if (initialRevision == null) {
+      stdio.printStatus(
+          'Verified that binaries are codesigned and have expected entitlements.');
     } else {
       stdio.printStatus(
-        'Verified that binaries for commit $desiredRevision are codesigned and have '
+        'Verified that binaries for commit $initialRevision are codesigned and have '
         'expected entitlements.',
       );
     }
   }
 
-  List<String>? _allBinaryPaths;
-
-  /// Find every binary file in the given [rootDirectory].
-  Future<List<String>> findBinaryPaths(String rootDirectory) async {
-    if (_allBinaryPaths != null) {
-      return _allBinaryPaths!;
-    }
-    final List<String> allBinaryPaths = <String>[];
-    final io.ProcessResult result = await processManager.run(
-      <String>[
-        'find',
-        rootDirectory,
-        '-type',
-        'f',
-      ],
-    );
-    final List<String> allFiles = (result.stdout as String)
-        .split('\n')
-        .where((String s) => s.isNotEmpty)
-        .toList();
-
-    await Future.forEach(allFiles, (String filePath) async {
-      if (await isBinary(filePath)) {
-        allBinaryPaths.add(filePath);
+  /// Verify the existence of all expected binaries in cache.
+  ///
+  /// This function ignores code signatures and entitlements, and is intended to
+  /// be run on every commit. It should throw if either new binaries are added
+  /// to the cache or expected binaries removed. In either case, this class'
+  /// [binariesWithEntitlements] or [binariesWithoutEntitlements] lists should
+  /// be updated accordingly.
+  @visibleForTesting
+  Future<void> verifyExist() async {
+    final Set<String> foundFiles = <String>{};
+    for (final String binaryPath in await _allBinaryPaths) {
+      if (binariesWithEntitlements.contains(binaryPath)) {
+        foundFiles.add(binaryPath);
+      } else if (binariesWithoutEntitlements.contains(binaryPath)) {
+        foundFiles.add(binaryPath);
+      } else {
+        throw ConductorException(
+            'Found unexpected binary in cache: $binaryPath');
       }
-    });
-    _allBinaryPaths = allBinaryPaths;
-    return _allBinaryPaths!;
-  }
+    }
 
-  /// Check mime-type of file at [filePath] to determine if it is binary.
-  Future<bool> isBinary(String filePath) async {
-    final io.ProcessResult result = await processManager.run(
-      <String>[
-        'file',
-        '--mime-type',
-        '-b', // is binary
-        filePath,
-      ],
-    );
-    return (result.stdout as String).contains('application/x-mach-binary');
-  }
-
-  /// Check if the binary has the expected entitlements.
-  Future<bool> hasExpectedEntitlements(String binaryPath) async {
-    final io.ProcessResult entitlementResult = await processManager.run(
-      <String>[
-        'codesign',
-        '--display',
-        '--entitlements',
-        ':-',
-        binaryPath,
-      ],
-    );
-
-    if (entitlementResult.exitCode != 0) {
+    final List<String> allExpectedFiles = binariesWithEntitlements + binariesWithoutEntitlements;
+    if (foundFiles.length < allExpectedFiles.length) {
+      final List<String> unfoundFiles = allExpectedFiles
+          .where(
+            (String file) => !foundFiles.contains(file),
+          )
+          .toList();
       stdio.printError(
-        'The `codesign --entitlements` command failed with exit code ${entitlementResult.exitCode}:\n'
-        '${entitlementResult.stderr}\n',
+        'Expected binaries not found in cache:\n\n${unfoundFiles.join('\n')}\n\n'
+        'If this commit is removing binaries from the cache, this test should be fixed by\n'
+        'removing the relevant entry from either the "binariesWithEntitlements" or\n'
+        '"binariesWithoutEntitlements" getters in dev/tools/lib/codesign.dart.',
       );
+      throw ConductorException('Did not find all expected binaries!');
+    }
+
+    stdio.printStatus('All expected binaries present.');
+  }
+}
+
+/// A zip file that contains files that must be codesigned.
+abstract class ZipArchive extends ArchiveFile {
+  const ZipArchive({
+    required this.files,
+    required String path,
+  }) : super(path: path);
+
+  final List<ArchiveFile> files;
+}
+
+/// A zip file that must be downloaded then extracted.
+class RemoteZip extends ZipArchive {
+  const RemoteZip({
+    required List<ArchiveFile> files,
+    required String path,
+  }) : super(path: path, files: files);
+
+  @override
+  Future<void> visit(FileVisitor visitor, Directory parent) {
+    return visitor.visitRemoteZip(this, parent);
+  }
+
+  /// The [List] of all archives on cloud storage that contain binaries that
+  /// must be codesigned.
+  static List<RemoteZip> archives = <RemoteZip>[
+    // Android artifacts
+    for (final String arch in <String>['arm', 'arm64', 'x64'])
+      for (final String buildMode in <String>['release', 'profile'])
+        RemoteZip(
+          path: 'android-$arch-$buildMode/darwin-x64.zip',
+          files: const <BinaryFile>[
+            BinaryFile(path: 'gen_snapshot', entitlements: true),
+          ],
+        ),
+    // macOS Dart SDK
+    for (final String arch in <String>['arm64', 'x64'])
+      RemoteZip(
+        path: 'dart-sdk-darwin-$arch.zip',
+        files: const <BinaryFile>[
+          BinaryFile(path: 'dart-sdk/bin/dart', entitlements: true),
+          BinaryFile(path: 'dart-sdk/bin/dartaotruntime', entitlements: true),
+          BinaryFile(path: 'dart-sdk/bin/utils/gen_snapshot', entitlements: true),
+        ],
+      ),
+    // macOS host debug artifacts
+    const RemoteZip(
+      path: 'darwin-x64/artifacts.zip',
+      files: <BinaryFile>[
+        BinaryFile(path: 'flutter_tester', entitlements: true),
+        BinaryFile(path: 'gen_snapshot', entitlements: true),
+      ],
+    ),
+    // macOS host profile and release artifacts
+    for (final String buildMode in <String>['profile', 'release'])
+      RemoteZip(
+        path: 'darwin-x64-$buildMode/artifacts.zip',
+        files: const <BinaryFile>[
+          BinaryFile(path: 'gen_snapshot', entitlements: true),
+        ],
+      ),
+    const RemoteZip(
+      path: 'darwin-x64/font-subset.zip',
+      files: <BinaryFile>[BinaryFile(path: 'font-subset')],
+    ),
+
+    // macOS desktop Framework
+    for (final String buildModeSuffix in <String>['', '-profile', '-release'])
+      RemoteZip(
+        path: 'darwin-x64$buildModeSuffix/FlutterMacOS.framework.zip',
+        files: const <ArchiveFile>[
+          EmbeddedZip(
+            path: 'FlutterMacOS.framework.zip',
+            files: <BinaryFile>[BinaryFile(path: 'Versions/A/FlutterMacOS')]
+          ),
+        ],
+      ),
+
+    // ios artifacts
+    for (final String buildModeSuffix in <String>['', '-profile', '-release'])
+      RemoteZip(
+        path: 'ios$buildModeSuffix/artifacts.zip',
+        files: const <ArchiveFile>[
+          BinaryFile(path: 'gen_snapshot_arm64', entitlements: true),
+          BinaryFile(path: 'gen_snapshot_armv7', entitlements: true),
+          BinaryFile(path: 'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter'),
+          BinaryFile(path: 'Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter'),
+        ],
+      ),
+  ];
+}
+
+/// Interface for classes that interact with files nested inside of [RemoteZip]s.
+abstract class FileVisitor {
+  const FileVisitor();
+
+  Future<void> visitEmbeddedZip(EmbeddedZip file, Directory parent);
+  Future<void> visitRemoteZip(RemoteZip file, Directory parent);
+  Future<void> visitBinaryFile(BinaryFile file, Directory parent);
+}
+
+enum NotaryStatus {
+  pending,
+  failed,
+  succeeded,
+}
+
+/// Codesign and notarize all files within a [RemoteArchive].
+class FileCodesignVisitor extends FileVisitor {
+  FileCodesignVisitor({
+    required this.tempDir,
+    required this.engineHash,
+    required this.processManager,
+    required this.codesignCertName,
+    required this.codesignPrimaryBundleId,
+    required this.codesignUserName,
+    required this.appSpecificPassword,
+    required this.stdio,
+  });
+
+  /// Temp [Directory] to download/extract files to.
+  ///
+  /// This file will be deleted if [validateAll] completes successfully.
+  final Directory tempDir;
+
+  final String engineHash;
+  final ProcessManager processManager;
+  final String codesignCertName;
+  final String codesignPrimaryBundleId;
+  final String codesignUserName;
+  final String appSpecificPassword;
+  final Stdio stdio;
+
+  final IOClient httpClient = IOClient();
+
+  late final File entitlementsFile = tempDir.childFile('Entitlements.plist')
+      ..writeAsStringSync(_entitlementsFileContents);
+
+  late final Directory remoteDownloadsDir = tempDir.childDirectory('downloads')..createSync();
+  late final Directory codesignedZipsDir = tempDir.childDirectory('codesigned_zips')..createSync();
+
+  int _remoteDownloadIndex = 0;
+  int get remoteDownloadIndex => _remoteDownloadIndex++;
+
+  static const String _entitlementsFileContents = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>com.apple.security.cs.allow-jit</key>
+        <true/>
+        <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+        <true/>
+        <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+        <true/>
+        <key>com.apple.security.network.client</key>
+        <true/>
+        <key>com.apple.security.network.server</key>
+        <true/>
+        <key>com.apple.security.cs.disable-library-validation</key>
+        <true/>
+    </dict>
+</plist>
+''';
+
+  /// A [Map] from SHA1 hash of file contents to file pathname from expected
+  /// files to codesign.
+  ///
+  /// These will be cross-referenced with all binary files unzipped.
+  final Map<String, String> expectedFileHashes = <String, String>{};
+
+  /// A [Map] from SHA1 hash of file contents to file pathname of codesigned
+  /// binary files.
+  ///
+  /// This will be used to cross reference the remote files listed in
+  /// [RemoteZip.archives] with the results of calling `flutter precache`.
+  final Map<String, String> codesignedFileHashes = <String, String>{};
+
+  /// A [Map] from SHA1 hash of file contents to file pathname of actual
+  /// downloaded binary files.
+  final Map<String, String> actualFileHashes = <String, String>{};
+
+  final List<String> validationFailures = <String>[]; // TODO use
+
+  int _nextId = 0;
+  int get nextId {
+    final int currentKey = _nextId;
+    _nextId += 1;
+    return currentKey;
+  }
+
+  Future<void> validateAll(Iterable<RemoteZip> archives) async {
+    final Iterable<Future<void>> futures = archives.map<Future<void>>((RemoteZip archive) {
+      final Directory outDir = tempDir.childDirectory('remote_zip_$nextId');
+      return archive.visit(this, outDir);
+    });
+    await Future.wait(
+      futures,
+      eagerError: true,
+    );
+    //_validateFileHashes(); // TODO maybe we don't need this anymore?
+    if (validationFailures.isNotEmpty) {
+      throw Exception('Codesigning failed!\n${validationFailures.join('\n\n')}');
+    }
+  }
+
+  /// Unzip an [EmbeddedZip] and visit its children.
+  ///
+  /// The [parent] directory is scoped to the parent zip file.
+  @override
+  Future<void> visitEmbeddedZip(EmbeddedZip file, Directory parent) async {
+    final File localFile = await _validateFileExists(file, parent);
+    final Directory newDir = tempDir.childDirectory('embedded_zip_$nextId');
+    final package_arch.Archive? archive = await _unzip(localFile, newDir);
+    if (archive != null) {
+      await _hashActualFiles(archive, newDir);
+    }
+    final Iterable<Future<void>> childFutures = file.files.map<Future<void>>((ArchiveFile childFile) {
+      return childFile.visit(this, newDir);
+    });
+    await Future.wait(childFutures);
+    await localFile.delete();
+    final package_arch.Archive? codesignedArchive = await _zip(newDir, localFile);
+    if (codesignedArchive != null && archive != null) {
+      _ensureArchivesAreEquivalent(
+        archive.files,
+        codesignedArchive.files,
+      );
+    }
+
+    //newDir.deleteSync(recursive: true); // TODO do we need to delete this?
+  }
+
+  /// Download and unzip a [RemoteZip] file, and visit its children.
+  ///
+  /// The [parent] directory is scoped to this particular [RemoteZip].
+  @override
+  Future<void> visitRemoteZip(RemoteZip file, Directory parent) async {
+    final FileSystem fs = tempDir.fileSystem;
+
+    // namespace by index otherwise there will be collisions
+    final String localFilePath = '${remoteDownloadIndex}_${fs.path.basename(file.path)}';
+    // download the zip file
+    final File originalFile = await download(
+      file.path,
+      remoteDownloadsDir.childFile(localFilePath).path,
+    );
+
+    final package_arch.Archive? archive = await _unzip(originalFile, parent);
+
+    final Iterable<Future<void>> childFutures = file.files.map<Future<void>>((ArchiveFile childFile) {
+      return childFile.visit(this, parent);
+    });
+    await Future.wait(childFutures);
+
+    if (archive != null) {
+      await _hashActualFiles(archive, parent);
+    }
+
+    final File codesignedFile = codesignedZipsDir.childFile(localFilePath);
+
+    final package_arch.Archive? codesignedArchive = await _zip(parent, codesignedFile);
+    if (archive != null && codesignedArchive != null) {
+      _ensureArchivesAreEquivalent(
+        archive.files,
+        codesignedArchive.files,
+      );
+    }
+
+    // notarize
+    await notarize(codesignedFile);
+
+    await upload(
+      codesignedFile.path,
+      file.path,
+    );
+  }
+
+  /// Codesign a binary file.
+  ///
+  /// The [parent] directory is scoped to the parent zip file.
+  @override
+  Future<void> visitBinaryFile(BinaryFile file, Directory parent) async {
+    final File localFile = await _validateFileExists(file, parent);
+
+    final String preSignDigest = sha1.convert(await localFile.readAsBytes()).toString(); // TODO delete
+    expectedFileHashes[preSignDigest] = file.path;
+    await codesign(localFile, file);
+
+    final String hexDigest = sha1.convert(await localFile.readAsBytes()).toString();
+    codesignedFileHashes[hexDigest] = file.path;
+  }
+
+  @visibleForTesting
+  Future<void> codesign(File file, BinaryFile binaryFile) async {
+    final List<String> args = <String>[
+        'codesign',
+        '-f', // force
+        '-s', // use the cert provided by next argument
+        codesignCertName,
+        file.absolute.path,
+        '--timestamp', // add a secure timestamp
+        '--options=runtime', // hardened runtime
+        if (binaryFile.entitlements)
+          ...<String>['--entitlements', entitlementsFile.absolute.path],
+    ];
+    final io.ProcessResult result = await processManager.run(args);
+    if (result.exitCode != 0) {
+      throw Exception(
+        'Failed to codesign ${file.absolute.path} with args: ${args.join(' ')}\n'
+        'stdout:\n${(result.stdout as String).trim()}\n'
+        'stderr:\n${(result.stderr as String).trim()}',
+      );
+    }
+  }
+
+  void _ensureArchivesAreEquivalent(List<package_arch.ArchiveFile> first, List<package_arch.ArchiveFile> second) {
+    final Set<String> firstStrings = first.map<String>((package_arch.ArchiveFile file) {
+      return file.name;
+    }).toSet();
+    final Set<String> secondStrings = first.map<String>((package_arch.ArchiveFile file) {
+      return file.name;
+    }).toSet();
+
+    for (final String archiveName in firstStrings) {
+      if (!secondStrings.contains(archiveName)) {
+        throw Exception('first has $archiveName but second does not');
+      }
+    }
+    for (final String archiveName in secondStrings) {
+      if (!firstStrings.contains(archiveName)) {
+        throw Exception('second has $archiveName but first does not');
+      }
+    }
+  }
+
+  static const Duration _notarizationTimerDuration = Duration(seconds: 45);
+
+  /// Upload a zip archive to the notary service and verify the build succeeded.
+  ///
+  /// Only [RemoteArchive] zip files need to be uploaded to the notary service,
+  /// as the service will unzip it, validate all binaries are codesigning, and
+  /// notarize the entire archive.
+  ///
+  /// 
+  Future<void> notarize(File file) async {
+    final Completer<void> completer = Completer<void>();
+    final String uuid = _uploadZipToNotary(file);
+
+    Future<void> callback(Timer timer) async {
+      final bool notaryFinished = checkNotaryJobFinished(uuid);
+      if (notaryFinished) {
+        timer.cancel();
+        stdio.printStatus('successfully notarized ${file.path}');
+        completer.complete();
+      }
+    }
+
+    // check on results
+    Timer.periodic(
+      _notarizationTimerDuration,
+      callback,
+    );
+    await completer.future;
+  }
+
+  static final RegExp _statusCheckPattern = RegExp(r'[ ]*Status: ([a-z ]+)');
+
+  /// Make a request to the notary service to see if the notary job is finished.
+  ///
+  /// A return value of true means that notarization finished successfully,
+  /// false means that the job is still pending. If the notarization fails, this
+  /// function will throw a [ConductorException].
+  @visibleForTesting
+  bool checkNotaryJobFinished(String uuid) {
+    final List<String> args = <String>[
+      'xcrun',
+      'altool',
+      '--notarization-info',
+      uuid,
+      '-u',
+      codesignUserName,
+      '--password',
+      appSpecificPassword,
+    ];
+    stdio.printStatus('checking notary status with ${args.join(' ')}');
+    final io.ProcessResult result = processManager.runSync(args);
+    // Note that this tool outputs to STDOUT on Xcode 11, STDERR on earlier
+    final String combinedOutput = (result.stdout as String) + (result.stderr as String);
+
+    final RegExpMatch? match = _statusCheckPattern.firstMatch(combinedOutput);
+
+    if (match == null) {
+      throw ConductorException(
+        'Malformed output from "${args.join(' ')}"\n${combinedOutput.trim()}',
+      );
+    }
+
+    final String status = match.group(1)!;
+    if (status == 'success') {
+      return true;
+    }
+    if (status == 'in progress') {
+      stdio.printStatus('job $uuid still pending');
       return false;
     }
 
-    bool passes = true;
-    final String output = entitlementResult.stdout as String;
-    for (final String entitlement in expectedEntitlements) {
-      final bool entitlementExpected =
-          (await binariesWithEntitlements).contains(binaryPath);
-      if (output.contains(entitlement) != entitlementExpected) {
-        stdio.printError(
-          'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} '
-          'entitlement $entitlement.',
-        );
-        passes = false;
+    throw ConductorException('Notarization failed with: $status\n$combinedOutput');
+  }
+
+  static final RegExp _notaryRequestPattern = RegExp(r'RequestUUID = ([a-z0-9-]+)');
+
+  String _uploadZipToNotary(File localFile, [int retryCount = 3]) {
+    while (retryCount > 0) {
+      final List<String> args = <String>[
+        'xcrun',
+        'altool',
+        '--notarize-app',
+        '--primary-bundle-id',
+        codesignPrimaryBundleId,
+        '--username',
+        codesignUserName,
+        '--password',
+        appSpecificPassword,
+        '--file',
+        localFile.absolute.path,
+      ];
+
+      stdio.printStatus('uploading ${args.join(' ')}');
+      // altool utilizes file locks, so run this synchronously
+      final io.ProcessResult result = processManager.runSync(args);
+
+      // Note that this tool outputs to STDOUT on Xcode 11, STDERR on earlier
+      final String combinedOutput = (result.stdout as String) + (result.stderr as String);
+      final RegExpMatch? match = _notaryRequestPattern.firstMatch(combinedOutput);
+      if (match == null) {
+        throw ConductorException('Exception uploading ${localFile.path}\n${combinedOutput.trim()}');
+        print('Failed to upload to the notary service with args: ${args.join(' ')}\n\n${combinedOutput.trim()}\n');
+        retryCount -= 1;
+        print('Trying again $retryCount more time${retryCount > 1 ? 's' : ''}...');
+        // TODO delay?
+        continue;
+      }
+
+      final String requestUuid = match.group(1)!;
+      print('RequestUUID for ${localFile.path} is: $requestUuid');
+
+      return requestUuid;
+    }
+    throw ConductorException('Failed to upload ${localFile.path} to the notary service');
+  }
+
+  Future<void> _hashActualFiles(package_arch.Archive archive, Directory parent) async {
+    final FileSystem fs = tempDir.fileSystem;
+    for (final package_arch.ArchiveFile file in archive.files) {
+      final String fileOrDirPath = fs.path.join(
+        parent.path,
+        file.name,
+      );
+      if (isBinary(fileOrDirPath, processManager)) {
+        final String hexDigest = sha1.convert(await fs.file(fileOrDirPath).readAsBytes()).toString();
+        actualFileHashes[hexDigest] = fileOrDirPath;
       }
     }
-    return passes;
   }
+
+  static const String gsCloudBaseUrl = r'gs://flutter_infra_release';
+
+  @visibleForOverriding
+  Future<File> download(String remotePath, String localPath) async {
+    final String source = '$gsCloudBaseUrl/flutter/$engineHash/$remotePath';
+    final io.ProcessResult result = await processManager.run(
+      <String>['gsutil', 'cp', source, localPath],
+    );
+    if (result.exitCode != 0) {
+      throw Exception('Failed to download $source');
+    }
+    return tempDir.fileSystem.file(localPath);
+  }
+
+  @visibleForOverriding
+  Future<void> upload(String localPath, String remotePath) async {
+    final String fullRemotePath = '$gsCloudBaseUrl/flutter/$engineHash/$remotePath';
+    // TODO
+    print('STUB: upload from $localPath to $fullRemotePath');
+    //final io.ProcessResult result = await processManager.run(
+    //  <String>['gsutil', 'cp', localPath, fullRemotePath],
+    //);
+    //if (result.exitCode != 0) {
+    //  throw Exception('Failed to upload $localPath to $fullRemotePath');
+    //}
+  }
+
+  Future<package_arch.Archive?> _unzip(File inputZip, Directory outDir) async {
+    // unzip is faster
+    if (processManager.canRun('unzip')) {
+      await processManager.run(
+        <String>[
+          'unzip',
+          inputZip.absolute.path,
+          '-d',
+          outDir.absolute.path,
+        ],
+      );
+      return null;
+    } else {
+      stdio.printError('unzip binary not found on path, falling back to package:archive implementation');
+      final Uint8List bytes = await inputZip.readAsBytes();
+      final package_arch.Archive archive = package_arch.ZipDecoder().decodeBytes(bytes);
+      // TODO ensure the archive.files at the end are the same
+      package_arch.extractArchiveToDisk(archive, outDir.path);
+      return archive;
+    }
+  }
+
+  // TODO should this just return void?
+  Future<package_arch.Archive?> _zip(Directory inDir, File outputZip) async {
+    // zip is faster
+    if (processManager.canRun('zip')) {
+      await processManager.run(
+        <String>[
+          'zip',
+          '--symlinks',
+          '--recurse-paths',
+          outputZip.absolute.path,
+          // use '.' so that the full absolute path is not encoded into the zip file
+          '.',
+          '--include',
+          '*',
+        ],
+        workingDirectory: inDir.absolute.path,
+      );
+      return null;
+    } else {
+      stdio.printError('zip binary not found on path, falling back to package:archive implementation');
+      final package_arch.Archive archive = package_arch.createArchiveFromDirectory(inDir); // TODO do we need to include dir name?
+      package_arch.ZipFileEncoder().zipDirectory(
+          inDir,
+          filename: outputZip.absolute.path,
+      );
+      return archive;
+    }
+  }
+
+  /// Ensure that the expected binaries equal exactly the number of binary files
+  /// that were downloaded and extracted.
+  void _validateFileHashes() {
+    int diffs = 0;
+    for (final MapEntry<String, String> entry in expectedFileHashes.entries) {
+      if (!actualFileHashes.keys.contains(entry.key)) {
+        diffs += 1;
+        stdio.printError('The value ${entry.value} was expected but not actually found.');
+      }
+    }
+    for (final MapEntry<String, String> entry in actualFileHashes.entries) {
+      if (!expectedFileHashes.keys.contains(entry.key)) {
+        diffs += 1;
+        stdio.printError('The value ${entry.value} was found but not expected.');
+      }
+    }
+    if (diffs > 0) {
+      throw '$diffs diffs found!\nExpected length: ${expectedFileHashes.length}\nActual length: ${actualFileHashes.length}';
+    }
+    stdio.printStatus('congratulations, 0 diffs found!');
+  }
+
+  Future<File> _validateFileExists(ArchiveFile archiveFile, Directory parent) async {
+    final FileSystem fileSystem = parent.fileSystem;
+    final String filePath = fileSystem.path.join(
+        parent.absolute.path,
+        archiveFile.path,
+    );
+    final File file = fileSystem.file(filePath);
+    if (!(await file.exists())) {
+      throw Exception('${file.absolute.path} was expected to exist but does not!');
+    }
+    return file;
+  }
+}
+
+class EmbeddedZip extends ZipArchive {
+  const EmbeddedZip({
+    required List<ArchiveFile> files,
+    required String path,
+  }) : super(path: path, files: files);
+
+  @override
+  Future<void> visit(FileVisitor visitor, Directory parent) {
+    return visitor.visitEmbeddedZip(this, parent);
+  }
+}
+
+abstract class ArchiveFile {
+  const ArchiveFile({
+    required this.path,
+  });
+
+  final String path;
+
+  Future<void> visit(FileVisitor visitor, Directory parent);
+}
+
+class BinaryFile extends ArchiveFile {
+  const BinaryFile({
+    this.entitlements = false,
+    required String path,
+  }) : super(path: path);
+
+  final bool entitlements;
+
+  @override
+  Future<void> visit(FileVisitor visitor, Directory parent) {
+    return visitor.visitBinaryFile(this, parent);
+  }
+}
+
+class CodesignContext extends _Context {
+  CodesignContext({
+    required FrameworkRepository framework,
+    required Checkouts checkouts,
+    required List<String> binariesWithEntitlements,
+    required List<String> binariesWithoutEntitlements,
+    required this.localFlutterRoot,
+    required this.codesignCertName,
+    required this.codesignPrimaryBundleId,
+    required this.codesignUserName,
+    required this.appSpecificPassword,
+  }) : super(
+          framework: framework,
+          checkouts: checkouts,
+          binariesWithEntitlements: binariesWithEntitlements,
+          binariesWithoutEntitlements: binariesWithoutEntitlements,
+        );
+
+  final Directory localFlutterRoot;
+  final String codesignCertName;
+  final String codesignPrimaryBundleId;
+  final String codesignUserName;
+  final String appSpecificPassword;
+
+
+  Future<void> run() async {
+    if (initialRevision != null) {
+      throw 'unimplemented'; // TODO
+    }
+
+    final String revision = ((await processManager.run(
+      <String>['git', 'rev-parse', 'HEAD'],
+      workingDirectory: localFlutterRoot.path,
+    ))
+        .stdout as String)
+        .trim();
+
+    final String engineHash = (await localFlutterRoot
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('engine.version')
+        .readAsString())
+        .trim();
+
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('conductor_codesign');
+    final FileCodesignVisitor codesignVisitor = FileCodesignVisitor(
+      tempDir: tempDir,
+      engineHash: engineHash,
+      processManager: processManager,
+      codesignCertName: codesignCertName,
+      codesignPrimaryBundleId: codesignPrimaryBundleId,
+      codesignUserName: codesignUserName,
+      appSpecificPassword: appSpecificPassword,
+      stdio: stdio,
+    );
+
+    await codesignVisitor.validateAll(RemoteZip.archives);
+
+    stdio.printStatus('Codesigned all binaries in ${tempDir.path}');
+  }
+}
+
+class CodesignVerifyContext extends _Context {
+  CodesignVerifyContext({
+    required FrameworkRepository framework,
+    required Checkouts checkouts,
+    required this.shouldVerifySignatures,
+    required List<String> binariesWithEntitlements,
+    required List<String> binariesWithoutEntitlements,
+    String? initialRevision,
+  }) : super(
+    framework: framework,
+    checkouts: checkouts,
+    initialRevision: initialRevision,
+    binariesWithEntitlements: binariesWithEntitlements,
+    binariesWithoutEntitlements: binariesWithoutEntitlements,
+  );
+
+  final bool shouldVerifySignatures;
+
+  Future<void> run() async {
+    final String revision;
+    if (initialRevision != null) {
+      stdio.printWarning(
+        'Warning! When providing an arbitrary revision, the contents of the cache may not '
+        'match the expected binaries in the conductor tool. It is preferred to check out '
+        'the desired revision and run that version of the conductor.\n',
+      );
+      revision = initialRevision!;
+    } else {
+      revision = ((await processManager.run(
+        <String>['git', 'rev-parse', 'HEAD'],
+        workingDirectory: (await framework.checkoutDirectory).path,
+      ))
+              .stdout as String)
+          .trim();
+      assert(revision.isNotEmpty);
+    }
+
+    await framework.checkout(revision);
+
+    // Ensure artifacts present
+    await _precacheArtifacts(framework);
+
+    await verifyExist();
+    if (shouldVerifySignatures) {
+      await verifySignatures();
+    }
+  }
+}
+
+/// Check mime-type of file at [filePath] to determine if it is binary.
+@visibleForTesting
+bool isBinary(String filePath, ProcessManager processManager) {
+  final io.ProcessResult result = processManager.runSync(
+    <String>[
+      'file',
+      '--mime-type',
+      '-b', // is binary
+      filePath,
+    ],
+  );
+  return (result.stdout as String).contains('application/x-mach-binary');
+}
+
+Future<io.ProcessResult> _precacheArtifacts(FrameworkRepository framework) {
+  return framework
+      .runFlutter(<String>['precache', '--android', '--ios', '--macos']);
 }

@@ -6,12 +6,17 @@
 // times out with the default 5 minutes: https://github.com/flutter/flutter/issues/100937
 @Timeout(Duration(minutes: 10))
 
+import 'dart:io' as io;
+
 import 'package:args/command_runner.dart';
-import 'package:conductor_core/src/codesign.dart' show CodesignCommand;
+import 'package:conductor_core/src/codesign.dart';
 import 'package:conductor_core/src/globals.dart';
-import 'package:conductor_core/src/repository.dart' show Checkouts, FrameworkRepository;
+import 'package:conductor_core/src/repository.dart'
+    show Checkouts, FrameworkRepository;
+import 'package:conductor_core/src/stdio.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:http/http.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -19,13 +24,69 @@ import './common.dart';
 
 /// Verify all binaries in the Flutter cache are expected by Conductor.
 void main() {
+  const FileSystem fileSystem = LocalFileSystem();
+  const Platform platform = LocalPlatform();
+  const ProcessManager processManager = LocalProcessManager();
+
+  final Directory flutterRoot = _flutterRootFromDartBinary(
+    fileSystem.file(platform.executable),
+  );
+
+  final String engineHash = flutterRoot
+      .childDirectory('bin')
+      .childDirectory('internal')
+      .childFile('engine.version')
+      .readAsStringSync()
+      .trim();
+
+  group('codesigning', () {
+    late Directory tempDir;
+
+    setUp(() {
+      tempDir = fileSystem.directory('/Users/fujino/git/tmp/workspace'); // TODO
+      tempDir.deleteSync(recursive: true);
+      tempDir.createSync(recursive: true);
+      //tempDir = fileSystem.systemTempDirectory
+      //    .createTempSync('codesign_integration_test')
+      //    .absolute;
+    });
+
+    tearDown(() {
+      // TODO catch failure?
+      //tempDir.deleteSync();
+    });
+
+    test('validate remote artifacts all exist', () async {
+      final _FileValidationVisitor validator = _FileValidationVisitor(
+        engineHash: engineHash,
+        processManager: processManager,
+        tempDir: tempDir,
+      );
+
+      await validator.validateAll(RemoteZip.archives);
+    });
+
+    test('notarize these bad boys', () async { // TODO remove
+      final FileCodesignVisitor validator = TODOFileCodesignVisitor(
+        engineHash: engineHash,
+        processManager: processManager,
+        tempDir: tempDir,
+        codesignCertName: 'flutter',
+        stdio: VerboseStdio.local(),
+      );
+
+      await validator.validateAll(RemoteZip.archives);
+    });
+  }, onPlatform: <String, dynamic>{
+    'windows': const Skip('codesign command is only supported on macos'),
+    'linux': const Skip('codesign command is only supported on macos'),
+  });
+
   test(
-      'validate the expected binaries from the conductor codesign command are present in the cache',
+      'validate the expected binaries from the conductor codesign --verify command are present in the cache',
       () async {
-    const Platform platform = LocalPlatform();
-    const FileSystem fileSystem = LocalFileSystem();
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_conductor_integration_test.');
-    const ProcessManager processManager = LocalProcessManager();
+    final Directory tempDir = fileSystem.systemTempDirectory
+        .createTempSync('flutter_conductor_integration_test.');
     final TestStdio stdio = TestStdio(verbose: true);
     final Checkouts checkouts = Checkouts(
       fileSystem: fileSystem,
@@ -35,16 +96,14 @@ void main() {
       stdio: stdio,
     );
 
-    final Directory flutterRoot = _flutterRootFromDartBinary(
-      fileSystem.file(platform.executable),
-    );
-
     final String currentHead = (processManager.runSync(
       <String>['git', 'rev-parse', 'HEAD'],
       workingDirectory: flutterRoot.path,
-    ).stdout as String).trim();
+    ).stdout as String)
+        .trim();
 
-    final FrameworkRepository framework = FrameworkRepository.localRepoAsUpstream(
+    final FrameworkRepository framework =
+        FrameworkRepository.localRepoAsUpstream(
       checkouts,
       upstreamPath: flutterRoot.path,
       initialRef: currentHead,
@@ -53,7 +112,7 @@ void main() {
     runner.addCommand(
       CodesignCommand(
         checkouts: checkouts,
-        framework: framework,
+        overrideFramework: framework,
         flutterRoot: flutterRoot,
       ),
     );
@@ -78,6 +137,132 @@ void main() {
     'windows': const Skip('codesign command is only supported on macos'),
     'linux': const Skip('codesign command is only supported on macos'),
   });
+}
+
+class TODOFileCodesignVisitor extends FileCodesignVisitor {
+  TODOFileCodesignVisitor({
+    required Directory tempDir,
+    required String engineHash,
+    required ProcessManager processManager,
+    required String codesignCertName,
+    required Stdio stdio,
+  }) : super(
+    tempDir: tempDir,
+    engineHash: engineHash,
+    processManager: processManager,
+    codesignCertName: codesignCertName,
+    appSpecificPassword: appSpecificPasswordEnv,
+    codesignUserName: codesignUserNameEnv,
+    codesignPrimaryBundleId: 'dev.flutter.sdk',
+    stdio: stdio,
+  );
+
+  static final String appSpecificPasswordEnv = io.Platform.environment['APP_SPECIFIC_PASSWORD']!;
+  static final String codesignUserNameEnv = io.Platform.environment['CODESIGN_USERNAME']!;
+
+  late final Directory todoUploadDir = tempDir.childDirectory('uploads')..createSync(); // TODO delete
+  late final File todoUploadManifest = todoUploadDir.childFile('manifest.txt')..createSync();
+  int _todoUploadManifestIndex = 0;
+  int get todoUploadManifestIndex => _todoUploadManifestIndex++; // TODO delete
+
+  @override
+  Future<void> upload(String localPath, String remotePath) async {
+    print('uploading $localPath to $remotePath');
+    final File localFile = tempDir.fileSystem.file(localPath);
+    final String remoteFileBase = remotePath.split(r'/').last;
+    final int index = todoUploadManifestIndex;
+    await todoUploadManifest.writeAsString(
+      '$index\t$remotePath\n',
+      mode: FileMode.append,
+    );
+    await localFile.copy(todoUploadDir.childFile('${index}_$remoteFileBase').absolute.path);
+  }
+}
+
+class _FileValidationVisitor extends FileCodesignVisitor {
+  _FileValidationVisitor({
+    required Directory tempDir,
+    required String engineHash,
+    required ProcessManager processManager,
+  }) : super(
+    tempDir: tempDir,
+    engineHash: engineHash,
+    processManager: processManager,
+    codesignCertName: 'FLUTTER',
+    appSpecificPassword: 'unused',
+    codesignUserName: 'unused',
+    codesignPrimaryBundleId: 'unused',
+    stdio: TestStdio(),
+  );
+
+  @override
+  Future<void> codesign(File file, BinaryFile binaryFile) async {
+    // no-op
+  }
+
+  @override
+  Future<void> notarize(File file) async {
+    // no-op
+  }
+
+  // An implementation that does not depend on the gcloud tool or write access
+  // to cloud storage bucket.
+  @override
+  Future<File> download(String remotePath, String localPath) async {
+    const String cloudHttpBaseUrl = r'https://storage.googleapis.com/flutter_infra_release';
+
+    final String source = '$cloudHttpBaseUrl/flutter/$engineHash/$remotePath';
+
+    // curl is faster
+    if (processManager.canRun('curl')) {
+      final io.ProcessResult response = await processManager.run(<String>[
+        'curl',
+        // follow redirects
+        '--location',
+        // specify output filepath
+        '--output',
+        localPath,
+        source,
+      ]);
+      final File localFile = tempDir.fileSystem.file(localPath);
+      if (response.exitCode != 0) {
+        throw Exception('Failed to download $remotePath!');
+      }
+      if (!(await localFile.exists())) {
+        throw Exception('Download of $remotePath succeeded but file $localPath not present on disk!');
+      }
+      return localFile;
+    } else {
+      print('curl binary not found on path, falling back to package:http implementation');
+      final Response response = await httpClient.get(Uri.parse(source));
+      if (response.statusCode != 200) {
+        throw ClientException('Got ${response.statusCode} from $source');
+      }
+      final File localFile = await tempDir.fileSystem.file(localPath).create(recursive: true);
+      return localFile.writeAsBytes(response.bodyBytes);
+    }
+  }
+
+  late final Directory todoUploadDir = tempDir.childDirectory('uploads')..createSync(); // TODO delete
+  late final File todoUploadManifest = todoUploadDir.childFile('manifest.txt')..createSync();
+  int _todoUploadManifestIndex = 0;
+  int get todoUploadManifestIndex => _todoUploadManifestIndex++; // TODO delete
+
+  @override
+  Future<void> upload(String localPath, String remotePath) async {
+    // no-op
+    //return 'no-op';
+
+    // TODO delete
+    final File localFile = tempDir.fileSystem.file(localPath);
+    final String remoteFileBase = remotePath.split(r'/').last;
+    final int index = todoUploadManifestIndex;
+    await todoUploadManifest.writeAsString(
+      '$index\t$remotePath\n',
+      mode: FileMode.append,
+    );
+    await localFile.copy(todoUploadDir.childFile('${index}_$remoteFileBase').absolute.path);
+  }
 }
 
 Directory _flutterRootFromDartBinary(File dartBinary) {
