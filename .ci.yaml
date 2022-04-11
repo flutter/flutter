@@ -2304,21 +2304,6 @@ targets:
     scheduler: luci
     timeout: 60
 
-  - name: Linux deferred components
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/96403
-    recipe: flutter/deferred_components
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "android_virtual_device", "version": "31"},
-          {"dependency": "curl"}
-        ]
-      tags: >
-        ["framework","hostonly"]
-    scheduler: luci
-    timeout: 60
-
   - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2387,6 +2372,39 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android gradient_dynamic_perf__e2e_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: gradient_dynamic_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android gradient_consistent_perf__e2e_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: gradient_consistent_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android gradient_static_perf__e2e_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: gradient_static_perf__e2e_summary
     scheduler: luci
 
   - name: Linux_android android_choreographer_do_frame_test
