@@ -50,7 +50,7 @@ const Duration _kExpand = Duration(milliseconds: 200);
 ///
 /// The key provided to the scrollable must be unique for each scrollable.
 ///
-/// If PageStorageKey is only provided to [ExpanionTile], it will be used
+/// If PageStorageKey is only provided to [ExpansionTile], it will be used
 /// to restore position of the desendents scrollables of the [ExpansionTile]. While
 /// the [ExpansionTile] uses `bool` value to save and restore the expanded state,
 /// the [Scrollable]s inside [ExpansionTile] use `double` value to save and restore
