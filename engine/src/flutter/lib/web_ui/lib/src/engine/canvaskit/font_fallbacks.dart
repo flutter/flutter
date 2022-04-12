@@ -291,7 +291,7 @@ Future<void> findFontsForMissingCodeunits(List<int> codeUnits) async {
   // we try looking them up in the symbols and emojis fonts.
   if (missingCodeUnits.isNotEmpty || unmatchedCodeUnits.isNotEmpty) {
     if (!data.registeredSymbolsAndEmoji) {
-      _registerSymbolsAndEmoji();
+      await _registerSymbolsAndEmoji();
     } else {
       if (!notoDownloadQueue.isPending) {
         printWarning(

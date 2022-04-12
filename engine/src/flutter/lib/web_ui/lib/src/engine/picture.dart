@@ -65,7 +65,12 @@ class EnginePicture implements ui.Picture {
     // The image loads asynchronously. We need to wait before returning,
     // otherwise the returned HtmlImage will be temporarily unusable.
     final Completer<ui.Image> onImageLoaded = Completer<ui.Image>.sync();
+
+    // Ignoring the returned futures from onError and onLoad because we're
+    // communicating through the `onImageLoaded` completer.
+    // ignore: unawaited_futures
     imageElement.onError.first.then(onImageLoaded.completeError);
+    // ignore: unawaited_futures
     imageElement.onLoad.first.then((_) {
       onImageLoaded.complete(HtmlImage(
         imageElement,

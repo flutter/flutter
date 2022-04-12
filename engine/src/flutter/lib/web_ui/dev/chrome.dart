@@ -191,6 +191,12 @@ Future<Process> _spawnChromiumProcess(String executable, List<String> args, { St
     // A precaution that avoids accumulating browser processes, in case the
     // glibc bug doesn't cause the browser to quit and we keep looping and
     // launching more processes.
+
+    // It's OK to not await the future here, as this is a best-effort process
+    // clean-up only. If we're executing this line, this means things are off
+    // the rails already due to the glibc bug, and we're just scrambling to keep
+    // the system stable.
+    // ignore: unawaited_futures
     process.exitCode.timeout(const Duration(seconds: 1), onTimeout: () {
       process.kill();
       return -1;

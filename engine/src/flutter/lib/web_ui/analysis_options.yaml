@@ -9,3 +9,4 @@ include: ../../analysis_options.yaml
 linter:
   rules:
     public_member_api_docs: false
+    unawaited_futures: true

@@ -143,7 +143,7 @@ void testMain() {
     ), useSingle: false);
     expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
     final List<String> executionOrder = <String>[];
-    window.handleNavigationMessage(
+    await window.handleNavigationMessage(
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'selectSingleEntryHistory',
         null,
@@ -151,7 +151,7 @@ void testMain() {
     ).then<void>((bool data) {
       executionOrder.add('1');
     });
-    window.handleNavigationMessage(
+    await window.handleNavigationMessage(
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'selectMultiEntryHistory',
         null,
@@ -159,7 +159,7 @@ void testMain() {
     ).then<void>((bool data) {
       executionOrder.add('2');
     });
-    window.handleNavigationMessage(
+    await window.handleNavigationMessage(
         const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'selectSingleEntryHistory',
         null,

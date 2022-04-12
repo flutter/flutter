@@ -20,8 +20,8 @@ void main() {
 }
 
 void testMain() {
-  setUpAll(() {
-    ui.webOnlyInitializePlatform();
+  setUpAll(() async {
+    await ui.webOnlyInitializePlatform();
   });
 
   group('SceneBuilder', () {

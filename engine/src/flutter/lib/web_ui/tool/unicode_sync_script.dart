@@ -124,7 +124,7 @@ Future<void> main(List<String> arguments) async {
     result['dry'] as bool,
   );
 
-  syncer.perform();
+  await syncer.perform();
 }
 
 PropertiesSyncer getSyncer(

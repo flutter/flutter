@@ -132,7 +132,7 @@ void testMain() {
 
   test('futurize converts error string to exception', () async {
     try {
-      futurize((Callback<String> callback) {
+      await futurize((Callback<String> callback) {
         return 'this is an error';
       });
       fail('Expected it to throw');
@@ -159,7 +159,7 @@ void testMain() {
 
   test('futurize converts sync null into a sync operation failure', () async {
     try {
-      futurize((Callback<String?> callback) {
+      await futurize((Callback<String?> callback) {
         callback(null);
         return null;
       });
