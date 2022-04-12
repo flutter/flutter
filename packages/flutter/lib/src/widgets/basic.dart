@@ -288,7 +288,9 @@ class Opacity extends StatelessWidget {
     return _Opacity(
       opacity: opacity,
       alwaysIncludeSemantics: alwaysIncludeSemantics,
-      child: RepaintBoundary(child: child),
+      child: RepaintBoundary(
+        child: child,
+      ),
     );
   }
 
@@ -310,7 +312,6 @@ class _Opacity extends SingleChildRenderObjectWidget {
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        assert(alwaysIncludeSemantics != null),
        super(key: key, child: child);
-
 
   final double opacity;
   final bool alwaysIncludeSemantics;

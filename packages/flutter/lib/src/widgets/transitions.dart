@@ -523,7 +523,9 @@ class FadeTransition extends StatelessWidget {
     return _FadeTransition(
       opacity: opacity,
       alwaysIncludeSemantics: alwaysIncludeSemantics,
-      child: RepaintBoundary(child: child),
+      child: RepaintBoundary(
+        child: child,
+      ),
     );
   }
 
