@@ -5,10 +5,12 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -64,26 +66,35 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
 });
 
 // The command used to actually launch the app and attach the debugger with args in debug.
-const FakeCommand kAttachDebuggerCommand = FakeCommand(command: <String>[
-  'script',
-  '-t',
-  '0',
-  '/dev/null',
-  'HostArtifact.iosDeploy',
-  '--id',
-  '123',
-  '--bundle',
-  '/',
-  '--debug',
-  '--no-wifi',
-  '--args',
-  '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points'
-], environment: <String, String>{
-  'PATH': '/usr/bin:null',
-  'DYLD_LIBRARY_PATH': '/path/to/libraries',
-},
-stdout: '(lldb)     run\nsuccess',
-);
+FakeCommand attachDebuggerCommand({
+  IOSink stdin,
+  Completer<void>/*?*/ completer,
+}) {
+  return FakeCommand(
+    command: const <String>[
+      'script',
+      '-t',
+      '0',
+      '/dev/null',
+      'HostArtifact.iosDeploy',
+      '--id',
+      '123',
+      '--bundle',
+      '/',
+      '--debug',
+      '--no-wifi',
+      '--args',
+      '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points',
+    ],
+    completer: completer,
+    environment: const <String, String>{
+      'PATH': '/usr/bin:null',
+      'DYLD_LIBRARY_PATH': '/path/to/libraries',
+    },
+    stdout: '(lldb)     run\nsuccess',
+    stdin: stdin,
+  );
+}
 
 void main() {
   testWithoutContext('disposing device disposes the portForwarder and logReader', () async {
@@ -108,7 +119,7 @@ void main() {
   testWithoutContext('IOSDevice.startApp attaches in debug mode via log reading on iOS 13+', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kAttachDebuggerCommand,
+      attachDebuggerCommand(),
     ]);
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
@@ -183,8 +194,10 @@ void main() {
   testWithoutContext('IOSDevice.startApp prints warning message if discovery takes longer than configured timeout', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
+    final CompleterIOSink stdin = CompleterIOSink();
+    final Completer<void> completer = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kAttachDebuggerCommand,
+      attachDebuggerCommand(stdin: stdin, completer: completer),
     ]);
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
@@ -203,11 +216,8 @@ void main() {
     device.setLogReader(iosApp, deviceLogReader);
 
     // Start writing messages to the log reader.
-    Timer.run(() async {
-      await Future<void>.delayed(const Duration(milliseconds: 1));
-      deviceLogReader.addLine('Foo');
-      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
-    });
+    deviceLogReader.addLine('Foo');
+    deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
 
     final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
@@ -220,6 +230,9 @@ void main() {
     expect(launchResult.hasObservatory, true);
     expect(await device.stopApp(iosApp), false);
     expect(logger.errorText, contains('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...'));
+    expect(utf8.decoder.convert(stdin.writes.first), contains('process interrupt'));
+    completer.complete();
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
