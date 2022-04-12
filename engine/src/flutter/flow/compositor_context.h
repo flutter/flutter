@@ -12,6 +12,7 @@
 #include "flutter/flow/diff_context.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/instrumentation.h"
+#include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/raster_thread_merger.h"
@@ -180,11 +181,14 @@ class CompositorContext {
 
   Stopwatch& ui_time() { return ui_time_; }
 
+  LayerSnapshotStore& snapshot_store() { return layer_snapshot_store_; }
+
  private:
   RasterCache raster_cache_;
   TextureRegistry texture_registry_;
   Stopwatch raster_time_;
   Stopwatch ui_time_;
+  LayerSnapshotStore layer_snapshot_store_;
 
   /// Only used by default constructor of `CompositorContext`.
   FixedRefreshRateUpdater fixed_refresh_rate_updater_;

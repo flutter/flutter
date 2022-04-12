@@ -5,6 +5,7 @@
 #include "flutter/flow/layers/display_list_layer.h"
 
 #include "flutter/display_list/display_list_builder.h"
+#include "flutter/flow/layers/offscreen_surface.h"
 
 namespace flutter {
 
@@ -130,6 +131,29 @@ void DisplayListLayer::Paint(PaintContext& context) const {
       TRACE_EVENT_INSTANT0("flutter", "raster cache hit");
       return;
     }
+  }
+
+  if (context.enable_leaf_layer_tracing) {
+    const auto canvas_size = context.leaf_nodes_canvas->getBaseLayerSize();
+    auto offscreen_surface =
+        std::make_unique<OffscreenSurface>(context.gr_context, canvas_size);
+
+    const auto start_time = fml::TimePoint::Now();
+    {
+      // render display list to offscreen surface.
+      auto* canvas = offscreen_surface->GetCanvas();
+      SkAutoCanvasRestore save(canvas, true);
+      canvas->clear(SK_ColorTRANSPARENT);
+      canvas->setMatrix(context.leaf_nodes_canvas->getTotalMatrix());
+      display_list()->RenderTo(canvas, context.inherited_opacity);
+      canvas->flush();
+    }
+    const fml::TimeDelta offscreen_render_time =
+        fml::TimePoint::Now() - start_time;
+
+    sk_sp<SkData> raster_data = offscreen_surface->GetRasterData(true);
+    context.layer_snapshot_store->Add(unique_id(), offscreen_render_time,
+                                      raster_data);
   }
 
   if (context.leaf_nodes_builder) {
