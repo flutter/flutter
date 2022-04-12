@@ -274,6 +274,9 @@ class ScaleTransition extends AnimatedWidget {
 
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
+  /// When the animation is stopped (either in [AnimationStatus.dismissed] or
+  /// [AnimationStatus.completed]), the filter quality argument will be ignored.
+  ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
 
@@ -284,10 +287,25 @@ class ScaleTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The ImageFilter layer created by setting filterQuality will introduce
+    // a saveLayer call. This is usually worthwhile when animating the layer,
+    // but leaving it in the layer tree before the animation has started or after
+    // it has finished significantly hurts performance.
+    final bool useFilterQuality;
+    switch (scale.status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        useFilterQuality = false;
+        break;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        useFilterQuality = true;
+        break;
+    }
     return Transform.scale(
       scale: scale.value,
       alignment: alignment,
-      filterQuality: filterQuality,
+      filterQuality: useFilterQuality ? filterQuality : null,
       child: child,
     );
   }
@@ -340,6 +358,9 @@ class RotationTransition extends AnimatedWidget {
 
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
+  /// When the animation is stopped (either in [AnimationStatus.dismissed] or
+  /// [AnimationStatus.completed]), the filter quality argument will be ignored.
+  ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
 
@@ -350,10 +371,25 @@ class RotationTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The ImageFilter layer created by setting filterQuality will introduce
+    // a saveLayer call. This is usually worthwhile when animating the layer,
+    // but leaving it in the layer tree before the animation has started or after
+    // it has finished significantly hurts performance.
+    final bool useFilterQuality;
+    switch (turns.status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        useFilterQuality = false;
+        break;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        useFilterQuality = true;
+        break;
+    }
     return Transform.rotate(
       angle: turns.value * math.pi * 2.0,
       alignment: alignment,
-      filterQuality: filterQuality,
+      filterQuality: useFilterQuality ? filterQuality : null,
       child: child,
     );
   }
