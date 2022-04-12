@@ -30,41 +30,78 @@ typedef ContextualMenuBuilder = Widget Function(
   Offset?,
 );
 
-/// Designates a part of the Widget tree to use the contextual menu given by
-/// [buildMenu].
-class InheritedContextualMenu extends InheritedWidget {
-  /// Creates an instance of [InheritedContextualMenu].
-  InheritedContextualMenu({
-    Key? key,
-    // TODO(justinmc): Make all names the same (buildMenu vs. buildContextualMenu).
-    required ContextualMenuBuilder buildMenu,
-    required Widget child,
-  }) : assert(buildMenu != null),
-       assert(child != null),
-       _contextualMenuController = ContextualMenuController(
-         buildMenu: buildMenu,
-       ),
-       super(key: key, child: child);
+typedef ContextMenuBuilder = Widget Function(
+  BuildContext,
+  ContextMenuController,
+  Offset,
+  Offset?,
+);
 
-  final ContextualMenuController _contextualMenuController;
-
-  /// Returns the nearest [ContextualMenuController] for the given
-  /// [BuildContext], if any.
-  static ContextualMenuController? of(BuildContext context) {
-    final InheritedContextualMenu? inheritedContextualMenu =
-        context.dependOnInheritedWidgetOfExactType<InheritedContextualMenu>();
-    return inheritedContextualMenu?._contextualMenuController;
+// TODO(justinmc): Is the ephemeral approach with just dipose right? Consumers
+// that get passed a controller call dispose on it, then it's done for.
+class ContextMenuController {
+  // TODO(justinmc): Update method for efficiency of moving the menu?
+  /// Creates an instance of [ContextMenuController].
+  ContextMenuController({
+    // TODO(justinmc): Accept these or just BuildContext?
+    required ContextMenuBuilder buildContextMenu,
+    required BuildContext context,
+    required Offset primaryAnchor,
+    Offset? secondaryAnchor,
+    Widget? debugRequiredFor,
+  }) {
+    _insert(
+      context: context,
+      buildMenu: buildContextMenu,
+      primaryAnchor: primaryAnchor,
+      secondaryAnchor: secondaryAnchor,
+      debugRequiredFor: debugRequiredFor,
+    );
   }
 
-  @override
-  bool updateShouldNotify(InheritedContextualMenu oldWidget) {
-    return _contextualMenuController != oldWidget._contextualMenuController;
+  // The OverlayEntry is static because only one contextual menu can be
+  // displayed at one time.
+  static OverlayEntry? _menuOverlayEntry;
+
+  void _insert({
+    required ContextMenuBuilder buildMenu,
+    required BuildContext context,
+    required Offset primaryAnchor,
+    Offset? secondaryAnchor,
+    Widget? debugRequiredFor,
+  }) {
+    final OverlayState? overlayState = Overlay.of(
+      context,
+      rootOverlay: true,
+      debugRequiredFor: debugRequiredFor,
+    );
+    final CapturedThemes capturedThemes = InheritedTheme.capture(
+      from: context,
+      to: Navigator.of(context).context,
+    );
+
+    _menuOverlayEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Stack(
+          children: <Widget>[
+            ModalBarrier(
+              onDismiss: dispose,
+            ),
+            capturedThemes.wrap(buildMenu(context, this, primaryAnchor, secondaryAnchor)),
+          ],
+        );
+      },
+    );
+    overlayState!.insert(_menuOverlayEntry!);
   }
 
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ContextualMenuBuilder>('buildMenu', _contextualMenuController.buildMenu));
+  /// True iff the menu is currently being displayed.
+  bool get isVisible => _menuOverlayEntry != null;
+
+  /// Remove the menu.
+  void dispose() {
+    _menuOverlayEntry?.remove();
+    _menuOverlayEntry = null;
   }
 }
 
@@ -400,19 +437,23 @@ class _TextSelectionToolbarButtonDatasBuilderState extends State<TextSelectionTo
   }
 }
 
+// TODO(justinmc): Update docs.
 /// Shows and hides the contextual menu based on user gestures.
 ///
 /// By default, shows the menu on right clicks, and on mobile, long presses too.
-class ContextualMenuGestureDetector extends StatefulWidget {
-  /// Creates an instance of [ContextualMenuGestureDetector].
-  ContextualMenuGestureDetector({
+class ContextMenu extends StatefulWidget {
+  /// Creates an instance of [ContextMenu].
+  ContextMenu({
     required this.child,
+    required this.buildContextMenu,
     bool? longPressEnabled,
     bool? secondaryTapEnabled,
     Key? key,
   }) : longPressEnabled = longPressEnabled ?? _longPressEnabled,
        secondaryTapEnabled = secondaryTapEnabled ?? true,
        super(key: key);
+
+  final ContextMenuBuilder buildContextMenu;
 
   /// The child widget that will be listened to for gestures.
   final Widget child;
@@ -441,27 +482,23 @@ class ContextualMenuGestureDetector extends StatefulWidget {
   }
 
   @override
-  State<ContextualMenuGestureDetector> createState() => _ContextualMenuGestureDetectorState();
+  State<ContextMenu> createState() => _ContextMenuState();
 }
 
-class _ContextualMenuGestureDetectorState extends State<ContextualMenuGestureDetector> {
-  ContextualMenuController get _contextualMenuController {
-    final ContextualMenuController? state = InheritedContextualMenu.of(context);
-    assert(state != null, 'No ContextualMenuArea found above in the Widget tree.');
-    return state!;
-  }
-
+class _ContextMenuState extends State<ContextMenu> {
   Offset? _longPressOffset;
 
+  ContextMenuController? _contextMenuController;
+
   void _onSecondaryTapUp(TapUpDetails details) {
-    _contextualMenuController.show(context, details.globalPosition);
+    _show(details.globalPosition);
   }
 
   void _onTap() {
-    if (!_contextualMenuController.isVisible) {
+    if (!(_contextMenuController?.isVisible ?? false)) {
       return;
     }
-    _contextualMenuController.hide();
+    _hide();
   }
 
   void _onLongPressStart(LongPressStartDetails details) {
@@ -475,7 +512,15 @@ class _ContextualMenuGestureDetectorState extends State<ContextualMenuGestureDet
   }
 
   void _show(Offset position) {
-    _contextualMenuController.show(context, position);
+    _contextMenuController = ContextMenuController(
+      context: context,
+      primaryAnchor: position,
+      buildContextMenu: widget.buildContextMenu,
+    );
+  }
+
+  void _hide() {
+    _contextMenuController?.dispose();
   }
 
   @override

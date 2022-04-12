@@ -304,6 +304,7 @@ class TextSelectionOverlay {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
+    required this.buildContextMenu,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
@@ -368,6 +369,8 @@ class TextSelectionOverlay {
 
   late final SelectionOverlay _selectionOverlay;
 
+  final ContextMenuBuilder buildContextMenu;
+
   /// Retrieve current value.
   @visibleForTesting
   TextEditingValue get value => _value;
@@ -385,11 +388,7 @@ class TextSelectionOverlay {
     _effectiveToolbarVisibility.value = renderObject.selectionStartInViewport.value || renderObject.selectionEndInViewport.value;
   }
 
-  ContextualMenuController get _contextualMenuController {
-    final ContextualMenuController? contextualMenuController = InheritedContextualMenu.of(context);
-    assert(contextualMenuController != null, 'TextSelectionOverlay must be given a BuildContext that has an InheritedContextualMenu above it in the Widget tree.');
-    return contextualMenuController!;
-  }
+  ContextMenuController? _contextMenuController;
 
   /// Whether selection handles are visible.
   ///
@@ -425,9 +424,15 @@ class TextSelectionOverlay {
     _selectionOverlay.showToolbar();
     */
 
+    _contextMenuController?.dispose();
+
     // If right clicking, use the right click position as the only anchor.
     if (renderObject.lastSecondaryTapDownPosition != null) {
-      _contextualMenuController.show(context, renderObject.lastSecondaryTapDownPosition!);
+      _contextMenuController = ContextMenuController(
+        context: context,
+        primaryAnchor: renderObject.lastSecondaryTapDownPosition!,
+        buildContextMenu: buildContextMenu,
+      );
       return;
     }
 
@@ -469,7 +474,12 @@ class TextSelectionOverlay {
       editingRegion.top + endTextSelectionPoint.point.dy,
     );
 
-    _contextualMenuController.show(context, anchorAbove, anchorBelow);
+    _contextMenuController = ContextMenuController(
+      context: context,
+      primaryAnchor: anchorAbove,
+      secondaryAnchor: anchorBelow,
+      buildContextMenu: buildContextMenu,
+    );
   }
 
   /// Updates the overlay after the selection has changed.
@@ -519,8 +529,7 @@ class TextSelectionOverlay {
 
   /// Whether the toolbar is currently visible.
   //bool get toolbarIsVisible => _selectionOverlay._toolbar != null;
-  //bool get toolbarIsVisible => _contextualMenuController?.isVisible ?? false;
-  bool get toolbarIsVisible => _contextualMenuController.isVisible;
+  bool get toolbarIsVisible => _contextMenuController != null;
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
   //void hide() => _selectionOverlay.hide();
@@ -537,7 +546,8 @@ class TextSelectionOverlay {
     _contextualMenuController!.dispose();
     _contextualMenuController = null;
     */
-    _contextualMenuController.hide();
+    _contextMenuController?.dispose();
+    _contextMenuController = null;
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}

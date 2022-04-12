@@ -270,7 +270,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.buildContextualMenu,
+    this.buildContextMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -432,7 +432,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.buildContextualMenu,
+    this.buildContextMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -779,8 +779,8 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.EditableText.buildContextualMenu}
-  final TextSelectionToolbarBuilder? buildContextualMenu;
+  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  final TextSelectionToolbarBuilder? buildContextMenu;
 
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
@@ -1278,7 +1278,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             restorationId: 'editable',
             scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-            buildContextualMenu: widget.buildContextualMenu ?? (BuildContext context, ContextualMenuController controller, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
+            buildContextMenu: widget.buildContextMenu ?? (BuildContext context, ContextMenuController controller, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
               return DefaultCupertinoTextSelectionToolbar(
                 primaryAnchor: primaryAnchor,
                 secondaryAnchor: secondaryAnchor,

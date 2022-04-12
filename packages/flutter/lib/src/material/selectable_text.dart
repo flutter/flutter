@@ -205,7 +205,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.buildContextualMenu,
+    this.buildContextMenu,
   }) :  assert(showCursor != null),
         assert(autofocus != null),
         assert(dragStartBehavior != null),
@@ -264,7 +264,7 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-    this.buildContextualMenu,
+    this.buildContextMenu,
   }) :  assert(showCursor != null),
     assert(autofocus != null),
     assert(dragStartBehavior != null),
@@ -428,8 +428,8 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onSelectionChanged}
   final SelectionChangedCallback? onSelectionChanged;
 
-  /// {@macro flutter.widgets.EditableText.buildContextualMenu}
-  final TextSelectionToolbarBuilder? buildContextualMenu;
+  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  final TextSelectionToolbarBuilder? buildContextMenu;
 
   @override
   State<SelectableText> createState() => _SelectableTextState();
@@ -705,7 +705,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
         autofillHints: null,
-        buildContextualMenu: widget.buildContextualMenu ?? (BuildContext context, ContextualMenuController controller, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
+        buildContextMenu: widget.buildContextMenu ?? (BuildContext context, ContextMenuController controller, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
           return DefaultTextSelectionToolbar(
             primaryAnchor: primaryAnchor,
             secondaryAnchor: secondaryAnchor,

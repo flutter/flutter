@@ -521,7 +521,7 @@ class EditableText extends StatefulWidget {
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
     @Deprecated(
-      'Use `buildContextualMenu` instead. '
+      'Use `buildContextMenu` instead. '
       'This feature was deprecated after v2.12.0-4.1.pre.',
     )
     ToolbarOptions? toolbarOptions,
@@ -532,7 +532,7 @@ class EditableText extends StatefulWidget {
     this.scrollBehavior,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.buildContextualMenu,
+    this.buildContextMenu,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -1394,7 +1394,7 @@ class EditableText extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
 
   // TODO(justinmc): Update the "see also" to the final classes when done.
-  /// {@template flutter.widgets.EditableText.buildContextualMenu}
+  /// {@template flutter.widgets.EditableText.buildContextMenu}
   /// Builds the text selection toolbar when requested by the user.
   ///
   /// If not provided, will build a default menu based on the platform.
@@ -1403,7 +1403,7 @@ class EditableText extends StatefulWidget {
   ///
   ///  * [_PlatformTextSelectionControlsToolbar], which is built by default.
   /// {@endtemplate}
-  final TextSelectionToolbarBuilder? buildContextualMenu;
+  final TextSelectionToolbarBuilder? buildContextMenu;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -1607,12 +1607,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final LayerLink _endHandleLayerLink = LayerLink();
 
   bool _didAutoFocus = false;
-
-  // The BuildContext that contains the InheritedContextualMenu built by this widget,
-  // if one exists.
-  //
-  // This is used by TextSelectionOverlay to lookup the InheritedContextualMenu.
-  late BuildContext _contextualMenuContext;
 
   AutofillGroupState? _currentAutofillScope;
   @override
@@ -2472,15 +2466,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
         break;
     }
-    if (widget.selectionControls == null) {
+    if (widget.selectionControls == null || widget.buildContextMenu == null) {
       _selectionOverlay?.dispose();
       _selectionOverlay = null;
     } else {
       if (_selectionOverlay == null) {
         _selectionOverlay = TextSelectionOverlay(
           clipboardStatus: clipboardStatus,
-          // TODO(justinmc): Or pass the controller directly?
-          context: _contextualMenuContext,
+          context: context,
           value: _value,
           debugRequiredFor: widget,
           toolbarLayerLink: _toolbarLayerLink,
@@ -2491,6 +2484,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           selectionDelegate: this,
           dragStartBehavior: widget.dragStartBehavior,
           onSelectionHandleTapped: widget.onSelectionHandleTapped,
+          buildContextMenu: (
+            BuildContext context,
+            ContextMenuController controller,
+            Offset primaryAnchor,
+            Offset? secondaryAnchor,
+          ) {
+            return widget.buildContextMenu!(
+              context,
+              controller,
+              this,
+              primaryAnchor,
+              secondaryAnchor,
+            );
+          },
         );
       } else {
         _selectionOverlay!.update(_value);
@@ -3378,21 +3385,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ),
     );
 
-    if (widget.buildContextualMenu == null) {
-      _contextualMenuContext = context;
-      return child;
-    }
-    return InheritedContextualMenu(
-      buildMenu: (BuildContext context, ContextualMenuController controller, Offset primaryAnchor, Offset? secondaryAnchor) {
-        return widget.buildContextualMenu!(context, controller, this, primaryAnchor, secondaryAnchor);
-      },
-      child: Builder(
-        builder: (BuildContext context) {
-          _contextualMenuContext = context;
-          return child;
-        }
-      ),
-    );
+    return child;
   }
 
   /// Builds [TextSpan] from current editing value.
@@ -4623,7 +4616,7 @@ _Throttled<T> _throttle<T>({
 ///    menu builder, not just for the text selection toolbar.
 typedef TextSelectionToolbarBuilder = Widget Function(
   BuildContext,
-  ContextualMenuController,
+  ContextMenuController,
   EditableTextState,
   Offset,
   Offset?,

@@ -290,7 +290,7 @@ class TextField extends StatefulWidget {
     this.textDirection,
     this.readOnly = false,
     @Deprecated(
-      'Use `buildContextualMenu` instead. '
+      'Use `buildContextMenu` instead. '
       'This feature was deprecated after v2.12.0-4.1.pre.',
     )
     ToolbarOptions? toolbarOptions,
@@ -334,7 +334,7 @@ class TextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.buildContextualMenu,
+    this.buildContextMenu,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -773,8 +773,8 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.EditableText.buildContextualMenu}
-  final TextSelectionToolbarBuilder? buildContextualMenu;
+  /// {@macro flutter.widgets.EditableText.buildContextMenu}
+  final TextSelectionToolbarBuilder? buildContextMenu;
 
   @override
   State<TextField> createState() => _TextFieldState();
@@ -1280,7 +1280,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-          buildContextualMenu: widget.buildContextualMenu ?? (BuildContext context, ContextualMenuController controller, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
+          buildContextMenu: widget.buildContextMenu ?? (BuildContext context, ContextMenuController controller, EditableTextState editableTextState, Offset primaryAnchor, Offset? secondaryAnchor) {
             return DefaultTextSelectionToolbar(
               primaryAnchor: primaryAnchor,
               secondaryAnchor: secondaryAnchor,
