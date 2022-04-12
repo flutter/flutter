@@ -1,4 +1,4 @@
-Signature: 742f353b5575f1ab63616aa5a7ad0463
+Signature: 70e83b140c4729330568fc42e8b34ab5
 
 UNUSED LICENSES:
 
@@ -25380,7 +25380,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: zlib
 ORIGIN: ../../../third_party/zlib/LICENSE
 TYPE: LicenseType.zlib
-FILE: ../../../third_party/zlib/DEPS
+FILE: ../../../third_party/zlib/DIR_METADATA
 FILE: ../../../third_party/zlib/contrib/minizip/ChangeLogUnzip
 FILE: ../../../third_party/zlib/contrib/minizip/crypt.h
 FILE: ../../../third_party/zlib/contrib/minizip/ioapi.c
@@ -25404,6 +25404,8 @@ FILE: ../../../third_party/zlib/patches/0004-fix-uwp.patch
 FILE: ../../../third_party/zlib/patches/0005-infcover-gtest.patch
 FILE: ../../../third_party/zlib/patches/0006-fix-check_match.patch
 FILE: ../../../third_party/zlib/patches/0007-zero-init-deflate-window.patch
+FILE: ../../../third_party/zlib/patches/0008-minizip-zip-unzip-tools.patch
+FILE: ../../../third_party/zlib/patches/0009-infcover-oob.patch
 FILE: ../../../third_party/zlib/trees.h
 ----------------------------------------------------------------------------------------------------
 version 1.2.11, January 15th, 2017
@@ -25704,6 +25706,41 @@ freely, subject to the following restrictions:
 
 ====================================================================================================
 LIBRARY: zlib
+ORIGIN: ../../../third_party/zlib/google/redact.h + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/zlib/google/redact.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2022 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: zlib
 ORIGIN: ../../../third_party/zlib/google/zip.cc + ../../../LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/zlib/google/zip.cc
@@ -25880,4 +25917,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 407
+Total license count: 408
