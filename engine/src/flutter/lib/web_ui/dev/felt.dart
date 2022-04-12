@@ -71,7 +71,7 @@ Future<void> main(List<String> rawArgs) async {
   io.exit(io.exitCode);
 }
 
-Future<void> _listenToShutdownSignals() async {
+void _listenToShutdownSignals() {
   io.ProcessSignal.sigint.watch().listen((_) async {
     print('Received SIGINT. Shutting down.');
     await cleanup();
