@@ -291,21 +291,21 @@ class ScaleTransition extends AnimatedWidget {
     // a saveLayer call. This is usually worthwhile when animating the layer,
     // but leaving it in the layer tree before the animation has started or after
     // it has finished significantly hurts performance.
-    final bool skipfilterQuality;
+    final bool useFilterQuality;
     switch (scale.status) {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
-        skipfilterQuality = true;
+        useFilterQuality = false;
         break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
-        skipfilterQuality = false;
+        useFilterQuality = true;
         break;
     }
     return Transform.scale(
       scale: scale.value,
       alignment: alignment,
-      filterQuality: skipfilterQuality ? null : filterQuality,
+      filterQuality: useFilterQuality ? filterQuality : null,
       child: child,
     );
   }
@@ -375,21 +375,21 @@ class RotationTransition extends AnimatedWidget {
     // a saveLayer call. This is usually worthwhile when animating the layer,
     // but leaving it in the layer tree before the animation has started or after
     // it has finished significantly hurts performance.
-    final bool skipfilterQuality;
+    final bool useFilterQuality;
     switch (turns.status) {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
-        skipfilterQuality = true;
+        useFilterQuality = false;
         break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
-        skipfilterQuality = false;
+        useFilterQuality = true;
         break;
     }
     return Transform.rotate(
       angle: turns.value * math.pi * 2.0,
       alignment: alignment,
-      filterQuality: skipfilterQuality ? null : filterQuality,
+      filterQuality: useFilterQuality ? filterQuality : null,
       child: child,
     );
   }
