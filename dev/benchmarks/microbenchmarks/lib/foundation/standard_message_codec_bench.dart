@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../common.dart';
 
-const int _kNumIterations = 10000;
+const int _kNumIterations = 100000;
 
 void main() {
   assert(false,
