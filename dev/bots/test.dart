@@ -200,7 +200,7 @@ Future<void> main(List<String> args) async {
       // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
-      'tool_mac_arm_tests': _runToolMacArmTests,
+      'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
       'web_tests': _runWebHtmlUnitTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=canvaskit`
@@ -363,12 +363,12 @@ Future<void> _runWebToolTests() async {
   );
 }
 
-Future<void> _runToolMacArmTests() {
+Future<void> _runToolHostCrossArchTests() {
   return _dartRunTest(
     _toolsPath,
     // These are integration tests
     forceSingleCore: true,
-    testPaths: <String>[path.join('test', 'mac_arm.shard')],
+    testPaths: <String>[path.join('test', 'host_cross_arch.shard')],
   );
 }
 

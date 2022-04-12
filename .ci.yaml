@@ -2913,7 +2913,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac tool_mac_arm_tests
+  - name: Mac tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
@@ -2927,7 +2927,7 @@ targets:
           {"dependency": "xcode"},
           {"dependency": "gems"}
         ]
-      shard: tool_mac_arm_tests
+      shard: tool_host_cross_arch_tests
       tags: >
         ["framework","hostonly","shard"]
       test_timeout_secs: "2700"
