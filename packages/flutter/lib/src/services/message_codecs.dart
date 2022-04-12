@@ -310,7 +310,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   ByteData? encodeMessage(Object? message) {
     if (message == null)
       return null;
-    final WriteBuffer buffer = WriteBuffer();
+    final WriteBuffer buffer = WriteBuffer(startCapacity: 64);
     writeValue(buffer, message);
     return buffer.done();
   }
