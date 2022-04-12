@@ -188,6 +188,7 @@ void main() {
         isBuildingBundle: false,
         localGradleErrors: <GradleHandledError>[],
       );
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('Can retry build on recognized exit code/stderr', () async {
