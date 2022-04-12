@@ -131,13 +131,18 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterCommandResult xcarchiveResult = await super.runCommand();
-    final BuildInfo buildInfo = await getBuildInfo();
+    final BuildInfo buildInfo = await cachedBuildInfo;
     displayNullSafetyMode(buildInfo);
+    final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
-      globals.printStatus('Skipping IPA');
+      globals.printStatus('Skipping IPA.');
+      return xcarchiveResult;
+    }
+
+    if (!shouldCodesign) {
+      globals.printStatus('Codesigning disabled with --no-codesign, skipping IPA.');
       return xcarchiveResult;
     }
 

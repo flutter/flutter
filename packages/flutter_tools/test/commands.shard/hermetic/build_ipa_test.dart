@@ -501,7 +501,7 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build --no-codesign skips codesigning', () async {
+  testUsingContext('ipa build --no-codesign skips codesigning and IPA creation', () async {
     final BuildCommand command = BuildCommand();
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
@@ -519,25 +519,14 @@ void main() {
           'CODE_SIGNING_ALLOWED=NO',
           'CODE_SIGNING_REQUIRED=NO',
           'CODE_SIGNING_IDENTITY=""',
-          '-resultBundlePath', '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle',
+          '-resultBundlePath',
+          '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle',
           '-resultBundleVersion', '3',
           'FLUTTER_SUPPRESS_ANALYTICS=true',
           'COMPILER_INDEX_STORE_ENABLE=NO',
-          '-archivePath', '/build/ios/archive/Runner',
-          'archive',
-        ],
-      ),
-      const FakeCommand(
-        command: <String>[
-          'xcrun',
-          'xcodebuild',
-          '-exportArchive',
           '-archivePath',
-          '/build/ios/archive/Runner.xcarchive',
-          '-exportPath',
-          '/build/ios/ipa',
-          '-exportOptionsPlist',
-          _exportOptionsPlist,
+          '/build/ios/archive/Runner',
+          'archive',
         ],
       ),
     ]);
@@ -547,6 +536,7 @@ void main() {
       const <String>['build', 'ipa', '--no-pub', '--no-codesign']
     );
     expect(fakeProcessManager, hasNoRemainingExpectations);
+    expect(testLogger.statusText, contains('Codesigning disabled with --no-codesign, skipping IPA'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
