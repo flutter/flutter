@@ -2925,7 +2925,7 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "11"},
           {"dependency": "xcode"},
-          {"dependency": "gems"},
+          {"dependency": "gems"}
         ]
       shard: tool_mac_arm_tests
       tags: >
