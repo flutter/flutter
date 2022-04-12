@@ -5,6 +5,7 @@
 #include "flutter/flow/layers/layer_tree.h"
 
 #include "flutter/flow/frame_timings.h"
+#include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/fml/trace_event.h"
@@ -74,6 +75,13 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
     }
   }
 
+  // clear the previous snapshots.
+  LayerSnapshotStore* snapshot_store = nullptr;
+  if (enable_leaf_layer_tracing_) {
+    frame.context().snapshot_store().Clear();
+    snapshot_store = &frame.context().snapshot_store();
+  }
+
   Layer::PaintContext context = {
       static_cast<SkCanvas*>(&internal_nodes_canvas),
       frame.canvas(),
@@ -85,6 +93,8 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
       ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
       checkerboard_offscreen_layers_,
       device_pixel_ratio_,
+      enable_leaf_layer_tracing_,
+      snapshot_store,
       SK_Scalar1,
       frame.display_list_builder(),
   };
@@ -140,7 +150,9 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
       unused_texture_registry,  // texture registry (not supported)
       nullptr,                  // raster cache
       false,                    // checkerboard offscreen layers
-      device_pixel_ratio_       // ratio between logical and physical
+      device_pixel_ratio_,      // ratio between logical and physical
+      false,                    // enable_leaf_layer_tracing
+      nullptr                   // layer_snapshot_store
   };
 
   // Even if we don't have a root layer, we still need to create an empty
