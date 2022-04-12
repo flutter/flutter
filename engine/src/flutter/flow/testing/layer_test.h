@@ -5,6 +5,7 @@
 #ifndef FLOW_TESTING_LAYER_TEST_H_
 #define FLOW_TESTING_LAYER_TEST_H_
 
+#include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/layers/layer.h"
 
 #include <optional>
@@ -128,6 +129,17 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   PrerollContext* preroll_context() { return &preroll_context_; }
   Layer::PaintContext& paint_context() { return paint_context_; }
   Layer::PaintContext& check_board_context() { return check_board_context_; }
+  LayerSnapshotStore& layer_snapshot_store() { return snapshot_store_; }
+
+  void enable_leaf_layer_tracing() {
+    paint_context_.enable_leaf_layer_tracing = true;
+    paint_context_.layer_snapshot_store = &snapshot_store_;
+  }
+
+  void disable_leaf_layer_tracing() {
+    paint_context_.enable_leaf_layer_tracing = false;
+    paint_context_.layer_snapshot_store = nullptr;
+  }
 
  private:
   void set_raster_cache_(std::unique_ptr<RasterCache> raster_cache) {
@@ -145,6 +157,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   PrerollContext preroll_context_;
   Layer::PaintContext paint_context_;
   Layer::PaintContext check_board_context_;
+  LayerSnapshotStore snapshot_store_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(LayerTestBase);
 };

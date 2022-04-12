@@ -18,6 +18,8 @@ source_set("flow") {
     "frame_timings.h",
     "instrumentation.cc",
     "instrumentation.h",
+    "layer_snapshot_store.cc",
+    "layer_snapshot_store.h",
     "layers/backdrop_filter_layer.cc",
     "layers/backdrop_filter_layer.h",
     "layers/clip_path_layer.cc",

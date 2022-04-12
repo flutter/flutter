@@ -68,6 +68,18 @@ class LayerTree {
     checkerboard_offscreen_layers_ = checkerboard;
   }
 
+  /// When `Paint` is called, if leaf layer tracing is enabled, additional
+  /// metadata around raterization of leaf layers is collected.
+  ///
+  /// See: `LayerSnapshotStore`
+  void enable_leaf_layer_tracing(bool enable) {
+    enable_leaf_layer_tracing_ = enable;
+  }
+
+  bool is_leaf_layer_tracing_enabled() const {
+    return enable_leaf_layer_tracing_;
+  }
+
  private:
   std::shared_ptr<Layer> root_layer_;
   SkISize frame_size_ = SkISize::MakeEmpty();  // Physical pixels.
@@ -75,6 +87,7 @@ class LayerTree {
   uint32_t rasterizer_tracing_threshold_;
   bool checkerboard_raster_cache_images_;
   bool checkerboard_offscreen_layers_;
+  bool enable_leaf_layer_tracing_ = false;
 
   PaintRegionMap paint_region_map_;
 
