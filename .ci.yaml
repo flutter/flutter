@@ -254,6 +254,7 @@ targets:
         ["framework","hostonly","shard"]
     runIf:
       - .ci.yaml
+    scheduler: luci
 
   - name: Linux customer_testing
     recipe: flutter/flutter
@@ -904,6 +905,7 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: web_benchmarks_canvaskit
+    scheduler: luci
 
   - name: Linux web_benchmarks_html
     recipe: devicelab/devicelab_drone
@@ -1421,6 +1423,7 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: android_semantics_integration_test
+    scheduler: luci
 
   - name: Linux_android android_stack_size_test
     recipe: devicelab/devicelab_drone
@@ -1472,16 +1475,6 @@ targets:
       task_name: backdrop_filter_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android backdrop_filter_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: backdrop_filter_perf__timeline_summary
-    scheduler: luci
-
   - name: Linux_samsung_s10 backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1522,18 +1515,7 @@ targets:
       task_name: color_filter_and_fade_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android color_filter_and_fade_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: color_filter_and_fade_perf__timeline_summary
-    scheduler: luci
-
   - name: Linux_android color_filter_cache_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1544,7 +1526,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android shader_mask_cache_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1681,7 +1662,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android complex_layout__start_up
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/98999
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1697,6 +1677,7 @@ targets:
         [
           {"name": "openjdk", "path": "java11"}
         ]
+    scheduler: luci
 
   - name: Linux_android cubic_bezier_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -1718,26 +1699,6 @@ targets:
       task_name: cubic_bezier_perf_sksl_warmup__e2e_summary
     scheduler: luci
 
-  - name: Linux_android cubic_bezier_perf_sksl_warmup__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: cubic_bezier_perf_sksl_warmup__timeline_summary
-    scheduler: luci
-
-  - name: Linux_android cubic_bezier_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: cubic_bezier_perf__timeline_summary
-    scheduler: luci
-
   - name: Linux_samsung_s10 cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1756,16 +1717,6 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: cull_opacity_perf__e2e_summary
-    scheduler: luci
-
-  - name: Linux_android cull_opacity_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: cull_opacity_perf__timeline_summary
     scheduler: luci
 
   - name: Linux_samsung_s10 cull_opacity_perf__timeline_summary
@@ -1998,16 +1949,6 @@ targets:
       task_name: fullscreen_textfield_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android fullscreen_textfield_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: fullscreen_textfield_perf__timeline_summary
-    scheduler: luci
-
   - name: Linux_android hello_world__memory
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2042,7 +1983,6 @@ targets:
   - name: Linux_android hybrid_android_views_integration_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/100991
     timeout: 60
     properties:
       tags: >
@@ -2200,16 +2140,6 @@ targets:
       task_name: picture_cache_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android picture_cache_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: picture_cache_perf__timeline_summary
-    scheduler: luci
-
   - name: Linux_samsung_s10 picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2320,16 +2250,6 @@ targets:
       task_name: textfield_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android textfield_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","linux"]
-      task_name: textfield_perf__timeline_summary
-    scheduler: luci
-
   - name: Linux_samsung_s10 textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2379,20 +2299,7 @@ targets:
         ]
       tags: >
         ["framework","hostonly"]
-    timeout: 60
-
-  - name: Linux deferred components
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/96403
-    recipe: flutter/deferred_components
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "android_virtual_device", "version": "31"},
-          {"dependency": "curl"}
-        ]
-      tags: >
-        ["framework","hostonly"]
+    scheduler: luci
     timeout: 60
 
   - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
@@ -2465,8 +2372,40 @@ targets:
       task_name: opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android android_choreographer_do_frame_test
+  - name: Linux_android gradient_dynamic_perf__e2e_summary
     bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: gradient_dynamic_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android gradient_consistent_perf__e2e_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: gradient_consistent_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android gradient_static_perf__e2e_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: gradient_static_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android android_choreographer_do_frame_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2644,27 +2583,6 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: dart_plugin_registry_test
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Mac entrypoint_dart_registrant
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    timeout: 60
-    properties:
-      caches: >-
-        [
-          {"name":"gradle","path":"gradle"}
-        ]
-      dependencies: >-
-        []
-      tags: >
-        ["devicelab","hostonly"]
-      task_name: entrypoint_dart_registrant
     scheduler: luci
     runIf:
       - dev/**
@@ -3176,6 +3094,21 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac_android entrypoint_dart_registrant
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","mac"]
+      task_name: entrypoint_dart_registrant
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Mac_android hello_world_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3588,7 +3521,6 @@ targets:
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -3699,6 +3631,7 @@ targets:
     scheduler: luci
 
   - name: Mac_ios native_ui_tests_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/101426
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3729,7 +3662,6 @@ targets:
 
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3745,6 +3677,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+    scheduler: luci
 
   - name: Windows build_aar_module_test
     recipe: devicelab/devicelab_drone
@@ -3945,6 +3878,7 @@ targets:
       - .ci.yaml
 
   - name: Windows gradle_plugin_fat_apk_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/101428
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4048,6 +3982,7 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test
+    scheduler: luci
     runIf:
       - dev/**
       - packages/flutter_tools/**

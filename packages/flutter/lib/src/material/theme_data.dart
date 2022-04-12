@@ -114,8 +114,6 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 ///   * [OutlinedButton]
 ///   * [TextButton]
 ///   * [ElevatedButton]
-///   * [FlatButton]
-///   * [RaisedButton]
 ///   * The time picker widget ([showTimePicker])
 ///   * [SnackBar]
 ///   * [Chip]
@@ -357,26 +355,6 @@ class ThemeData with Diagnosticable {
     ExpansionTileThemeData? expansionTileTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v1.23.0-4.0.pre.',
-    )
-    bool? useTextSelectionTheme,
-    @Deprecated(
-      'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.',
-    )
-    Color? textSelectionColor,
-    @Deprecated(
-      'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.',
-    )
-    Color? cursorColor,
-    @Deprecated(
-      'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.',
-    )
-    Color? textSelectionHandleColor,
-    @Deprecated(
       'Use colorScheme.secondary instead. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
@@ -524,7 +502,6 @@ class ThemeData with Diagnosticable {
     // [disabledColor], [highlightColor], and [splashColor].
     buttonTheme ??= ButtonThemeData(
       colorScheme: colorScheme,
-      // Defaults to the fill color for RaisedButtons for backwards compatibility.
       buttonColor: buttonColor ?? (isDark ? primarySwatch[600]! : Colors.grey[300]!),
       disabledColor: disabledColor,
       focusColor: focusColor,
@@ -587,10 +564,6 @@ class ThemeData with Diagnosticable {
     expansionTileTheme ??= const ExpansionTileThemeData();
 
      // DEPRECATED (newest deprecations at the bottom)
-    useTextSelectionTheme ??= true;
-    textSelectionColor ??= isDark ? accentColor : primarySwatch[200]!;
-    cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
-    textSelectionHandleColor ??= isDark ? Colors.tealAccent[400]! : primarySwatch[300]!;
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
@@ -676,10 +649,6 @@ class ThemeData with Diagnosticable {
       tooltipTheme: tooltipTheme,
       expansionTileTheme: expansionTileTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      useTextSelectionTheme: useTextSelectionTheme,
-      textSelectionColor: textSelectionColor,
-      cursorColor: cursorColor,
-      textSelectionHandleColor: textSelectionHandleColor,
       accentColor: accentColor,
       accentColorBrightness: accentColorBrightness,
       accentTextTheme: accentTextTheme,
@@ -783,26 +752,6 @@ class ThemeData with Diagnosticable {
     required this.tooltipTheme,
     required this.expansionTileTheme,
     // DEPRECATED (newest deprecations at the bottom)
-    @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v1.23.0-4.0.pre.',
-    )
-    required this.useTextSelectionTheme,
-    @Deprecated(
-      'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.',
-    )
-    required this.textSelectionColor,
-    @Deprecated(
-      'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.',
-    )
-    required this.cursorColor,
-    @Deprecated(
-      'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.',
-    )
-    required this.textSelectionHandleColor,
     @Deprecated(
       'Use colorScheme.secondary instead. '
       'For more information, consult the migration guide at '
@@ -928,10 +877,6 @@ class ThemeData with Diagnosticable {
        assert(tooltipTheme != null),
        assert(expansionTileTheme != null),
         // DEPRECATED (newest deprecations at the bottom)
-       assert(useTextSelectionTheme != null),
-       assert(textSelectionColor != null),
-       assert(cursorColor != null),
-       assert(textSelectionHandleColor != null),
        assert(accentColor != null),
        assert(accentColorBrightness != null),
        assert(accentTextTheme != null),
@@ -1224,21 +1169,25 @@ class ThemeData with Diagnosticable {
   /// {@endtemplate}
   final VisualDensity visualDensity;
 
-  /// A temporary flag used to opt-in to new Material 3 features.
+  /// A temporary flag used to opt-in to Material 3 features.
   ///
   /// If true, then components that have been migrated to Material 3 will
-  /// start using new colors, typography and other features of Material 3.
+  /// use new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
   /// If a [ThemeData] is constructed with [useMaterial3] set to true, then
   /// some properties will get special defaults. However, just copying a [ThemeData]
   /// with [useMaterial3] set to true will not change any of these properties in the
   /// resulting [ThemeData]. These properties are:
-  /// | Property | [useMaterial3] default | fallback default |
-  /// |:---|:---|:---|
-  /// | [typography] | [Typography.material2021] | [Typography.material2014] |
-  /// | [splashFactory] | [InkSparkle]* | [InkSplash] |
-  /// *if and only if the target platform is Android and the app is not running on the web.
+  /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
+  ///
+  /// | Property        | Material 3 default           | Fallback default          |
+  /// | :-------------- | :--------------------------- | :------------------------ |
+  /// | [typography]    | [Typography.material2021]    | [Typography.material2014] |
+  /// | [splashFactory] | [InkSparkle]* or [InkRipple] | [InkSplash]               |
+  ///
+  /// \* if and only if the target platform is Android and the app is not
+  /// running on the web, otherwise it will fallback to [InkRipple].
   ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
@@ -1255,12 +1204,15 @@ class ThemeData with Diagnosticable {
   ///   * [AlertDialog]
   ///   * [Card]
   ///   * [Dialog]
+  ///   * [ElevatedButton]
   ///   * [FloatingActionButton]
   ///   * [Material]
   ///   * [NavigationBar]
   ///   * [NavigationRail]
+  ///   * [OutlinedButton]
   ///   * [StretchingOverscrollIndicator], replacing the
   ///     [GlowingOverscrollIndicator]
+  ///   * [TextButton]
   ///
   /// See also:
   ///
@@ -1423,8 +1375,8 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
   final ButtonBarThemeData buttonBarTheme;
 
-  /// Defines the default configuration of button widgets, like [RaisedButton]
-  /// and [FlatButton].
+  /// Defines the default configuration of button widgets, like [DropdownButton]
+  /// and [ButtonBar].
   final ButtonThemeData buttonTheme;
 
   /// The colors and styles used to render [Card].
@@ -1524,37 +1476,6 @@ class ThemeData with Diagnosticable {
 
   // DEPRECATED (newest deprecations at the bottom)
 
-  /// A temporary flag that was used to opt-in to the new [TextSelectionTheme]
-  /// during the migration to this new theme. That migration is now complete
-  /// and this flag is not longer used by the framework. Please remove any
-  /// reference to this property, as it will be removed in future releases.
-  @Deprecated(
-    'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v1.23.0-4.0.pre.',
-  )
-  final bool useTextSelectionTheme;
-
-  /// The color of text selections in text fields, such as [TextField].
-  @Deprecated(
-    'Use TextSelectionThemeData.selectionColor instead. '
-    'This feature was deprecated after v1.26.0-18.0.pre.',
-  )
-  final Color textSelectionColor;
-
-  /// The color of cursors in Material-style text fields, such as [TextField].
-  @Deprecated(
-    'Use TextSelectionThemeData.cursorColor instead. '
-    'This feature was deprecated after v1.26.0-18.0.pre.',
-  )
-  final Color cursorColor;
-
-  /// The color of the handles used to adjust what part of the text is currently selected.
-  @Deprecated(
-    'Use TextSelectionThemeData.selectionHandleColor instead. '
-    'This feature was deprecated after v1.26.0-18.0.pre.',
-  )
-  final Color textSelectionHandleColor;
-
   /// Obsolete property that was originally used as the foreground
   /// color for widgets (knobs, text, overscroll edge effect, etc).
   ///
@@ -1627,7 +1548,7 @@ class ThemeData with Diagnosticable {
   )
   final IconThemeData accentIconTheme;
 
-  /// The default fill color of the [Material] used in [RaisedButton]s.
+  /// The default fill color of the [Material].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
     'This feature was deprecated after v2.3.0-0.2.pre.',
@@ -1749,26 +1670,6 @@ class ThemeData with Diagnosticable {
     TooltipThemeData? tooltipTheme,
     ExpansionTileThemeData? expansionTileTheme,
     // DEPRECATED (newest deprecations at the bottom)
-    @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v1.23.0-4.0.pre.',
-    )
-    bool? useTextSelectionTheme,
-    @Deprecated(
-      'Use TextSelectionThemeData.selectionColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.',
-    )
-    Color? textSelectionColor,
-    @Deprecated(
-      'Use TextSelectionThemeData.cursorColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.',
-    )
-    Color? cursorColor,
-    @Deprecated(
-      'Use TextSelectionThemeData.selectionHandleColor instead. '
-      'This feature was deprecated after v1.26.0-18.0.pre.',
-    )
-    Color? textSelectionHandleColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
@@ -1898,10 +1799,6 @@ class ThemeData with Diagnosticable {
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
       expansionTileTheme: expansionTileTheme ?? this.expansionTileTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
-      textSelectionColor: textSelectionColor ?? this.textSelectionColor,
-      cursorColor: cursorColor ?? this.cursorColor,
-      textSelectionHandleColor: textSelectionHandleColor ?? this.textSelectionHandleColor,
       accentColor: accentColor ?? this.accentColor,
       accentColorBrightness: accentColorBrightness ?? this.accentColorBrightness,
       accentTextTheme: accentTextTheme ?? this.accentTextTheme,
@@ -2097,10 +1994,6 @@ class ThemeData with Diagnosticable {
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
       expansionTileTheme: ExpansionTileThemeData.lerp(a.expansionTileTheme, b.expansionTileTheme, t)!,
       // DEPRECATED (newest deprecations at the bottom)
-      useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
-      textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t)!,
-      cursorColor: Color.lerp(a.cursorColor, b.cursorColor, t)!,
-      textSelectionHandleColor: Color.lerp(a.textSelectionHandleColor, b.textSelectionHandleColor, t)!,
       accentColor: Color.lerp(a.accentColor, b.accentColor, t)!,
       accentColorBrightness: t < 0.5 ? a.accentColorBrightness : b.accentColorBrightness,
       accentTextTheme: TextTheme.lerp(a.accentTextTheme, b.accentTextTheme, t),
@@ -2198,10 +2091,6 @@ class ThemeData with Diagnosticable {
         other.tooltipTheme == tooltipTheme &&
         other.expansionTileTheme == expansionTileTheme &&
         // DEPRECATED (newest deprecations at the bottom)
-        other.useTextSelectionTheme == useTextSelectionTheme &&
-        other.textSelectionColor == textSelectionColor &&
-        other.cursorColor == cursorColor &&
-        other.textSelectionHandleColor == textSelectionHandleColor &&
         other.accentColor == accentColor &&
         other.accentColorBrightness == accentColorBrightness &&
         other.accentTextTheme == accentTextTheme &&
@@ -2297,10 +2186,6 @@ class ThemeData with Diagnosticable {
       tooltipTheme,
       expansionTileTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      useTextSelectionTheme,
-      textSelectionColor,
-      cursorColor,
-      textSelectionHandleColor,
       accentColor,
       accentColorBrightness,
       accentTextTheme,
@@ -2395,10 +2280,6 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ExpansionTileThemeData>('expansionTileTheme', expansionTileTheme, level: DiagnosticLevel.debug));
     // DEPRECATED (newest deprecations at the bottom)
-    properties.add(DiagnosticsProperty<bool>('useTextSelectionTheme', useTextSelectionTheme, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('textSelectionColor', textSelectionColor, defaultValue: defaultData.textSelectionColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: defaultData.cursorColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('textSelectionHandleColor', textSelectionHandleColor, defaultValue: defaultData.textSelectionHandleColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('accentColor', accentColor, defaultValue: defaultData.accentColor, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme, level: DiagnosticLevel.debug));
@@ -2605,7 +2486,6 @@ class _FifoCache<K, V> {
 ///  * [Checkbox]
 ///  * [Chip]
 ///  * [ElevatedButton]
-///  * [FlatButton]
 ///  * [IconButton]
 ///  * [InputDecorator] (which gives density support to [TextField], etc.)
 ///  * [ListTile]

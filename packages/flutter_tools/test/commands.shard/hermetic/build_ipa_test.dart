@@ -721,7 +721,7 @@ void main() {
     expect(testLogger.errorText, contains('It appears that there was a problem signing your application prior to installation on the device.'));
     expect(testLogger.errorText, contains('Verify that the Bundle Identifier in your project is your signing id in Xcode'));
     expect(testLogger.errorText, contains('open ios/Runner.xcworkspace'));
-    expect(testLogger.errorText, contains("Also try selecting 'Product > Build' to fix the problem:"));
+    expect(testLogger.errorText, contains("Also try selecting 'Product > Build' to fix the problem."));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

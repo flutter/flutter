@@ -21,14 +21,20 @@ import 'mixins.dart';
 class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
     with PidTracker {
   FlutterDebugAdapter(
-    super.channel, {
+    ByteStreamServerChannel channel, {
     required this.fileSystem,
     required this.platform,
-    super.ipv6,
-    super.enableDds,
-    super.enableAuthCodes,
-    super.logger,
-  });
+    bool ipv6 = false,
+    bool enableDds = true,
+    bool enableAuthCodes = true,
+    Logger? logger,
+  }) : super(
+    channel,
+    ipv6: ipv6,
+    enableDds: enableDds,
+    enableAuthCodes: enableAuthCodes,
+    logger: logger,
+  );
 
   FileSystem fileSystem;
   Platform platform;
@@ -199,6 +205,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   /// quickly and therefore may leave orphaned processes.
   @override
   Future<void> disconnectImpl() async {
+    if (isAttach) {
+      await preventBreakingAndResume();
+    }
     terminatePids(ProcessSignal.sigkill);
   }
 
@@ -373,6 +382,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   /// Called by [terminateRequest] to request that we gracefully shut down the app being run (or in the case of an attach, disconnect).
   @override
   Future<void> terminateImpl() async {
+    if (isAttach) {
+      await preventBreakingAndResume();
+    }
     terminatePids(ProcessSignal.sigterm);
     await _process?.exitCode;
   }
