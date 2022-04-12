@@ -2041,6 +2041,8 @@ FILE: ../../../flutter/shell/platform/linux/fl_key_responder.h
 FILE: ../../../flutter/shell/platform/linux/fl_keyboard_manager.cc
 FILE: ../../../flutter/shell/platform/linux/fl_keyboard_manager.h
 FILE: ../../../flutter/shell/platform/linux/fl_keyboard_manager_test.cc
+FILE: ../../../flutter/shell/platform/linux/fl_keyboard_view_delegate.cc
+FILE: ../../../flutter/shell/platform/linux/fl_keyboard_view_delegate.h
 FILE: ../../../flutter/shell/platform/linux/fl_message_codec.cc
 FILE: ../../../flutter/shell/platform/linux/fl_message_codec_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_method_call.cc

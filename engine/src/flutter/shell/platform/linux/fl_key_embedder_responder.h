@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_KEY_EMBEDDER_RESPONDER_H_
 
 #include <gdk/gdk.h>
+#include <functional>
 
 #include "flutter/shell/platform/linux/fl_key_responder.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
@@ -13,6 +14,11 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
 
 constexpr int kMaxConvertedKeyData = 3;
+
+typedef std::function<void(const FlutterKeyEvent* event,
+                           FlutterKeyEventCallback callback,
+                           void* user_data)>
+    EmbedderSendKeyEvent;
 
 G_BEGIN_DECLS
 
@@ -41,7 +47,8 @@ G_DECLARE_FINAL_TYPE(FlKeyEmbedderResponder,
  *
  * Returns: a new #FlKeyEmbedderResponder.
  */
-FlKeyEmbedderResponder* fl_key_embedder_responder_new(FlEngine* engine);
+FlKeyEmbedderResponder* fl_key_embedder_responder_new(
+    EmbedderSendKeyEvent send_key_event);
 
 G_END_DECLS
 

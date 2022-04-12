@@ -5,6 +5,10 @@
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 
 #include <cinttypes>
+#include <memory>
+
+#include "flutter/shell/platform/linux/fl_key_channel_responder.h"
+#include "flutter/shell/platform/linux/fl_key_embedder_responder.h"
 
 /* Declare and define FlKeyboardPendingEvent */
 
@@ -27,7 +31,7 @@ struct _FlKeyboardPendingEvent {
 
   // The target event.
   //
-  // This is freed by #FlKeyboardPendingEvent.
+  // This is freed by #FlKeyboardPendingEvent if not null.
   std::unique_ptr<FlKeyEvent> event;
 
   // Self-incrementing ID attached to an event sent to the framework.
@@ -101,8 +105,8 @@ FlKeyboardPendingEvent* fl_keyboard_pending_event_new(
 /* Declare and define FlKeyboardManagerUserData */
 
 /**
- * FlKeyEmbedderUserData:
- * The user_data used when #FlKeyboardManagerUserData sends event to
+ * FlKeyboardManagerUserData:
+ * The user_data used when #FlKeyboardManager sends event to
  * responders.
  */
 #define FL_TYPE_KEYBOARD_MANAGER_USER_DATA \
@@ -174,13 +178,7 @@ FlKeyboardManagerUserData* fl_keyboard_manager_user_data_new(
 struct _FlKeyboardManager {
   GObject parent_instance;
 
-  // The callback that unhandled events should be redispatched through.
-  FlKeyboardManagerRedispatcher redispatch_callback;
-
-  // A text plugin.
-  //
-  // Released by the manager on dispose.
-  FlTextInputPlugin* text_input_plugin;
+  FlKeyboardViewDelegate* view_delegate;
 
   // An array of #FlKeyResponder. Elements are added with
   // #fl_keyboard_manager_add_responder immediately after initialization and are
@@ -216,9 +214,6 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {}
 static void fl_keyboard_manager_dispose(GObject* object) {
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(object);
 
-  if (self->text_input_plugin != nullptr) {
-    g_clear_object(&self->text_input_plugin);
-  }
   g_ptr_array_free(self->responder_list, TRUE);
   g_ptr_array_set_free_func(self->pending_responds, g_object_unref);
   g_ptr_array_free(self->pending_responds, TRUE);
@@ -315,14 +310,13 @@ static void responder_handle_event_callback(bool handled,
     gpointer removed =
         g_ptr_array_remove_index_fast(self->pending_responds, result_index);
     g_return_if_fail(removed == pending);
-    bool should_redispatch =
-        !pending->any_handled &&
-        (self->text_input_plugin == nullptr ||
-         !fl_text_input_plugin_filter_keypress(self->text_input_plugin,
-                                               pending->event.get()));
+    bool should_redispatch = !pending->any_handled &&
+                             !fl_keyboard_view_delegate_text_filter_key_press(
+                                 self->view_delegate, pending->event.get());
     if (should_redispatch) {
       g_ptr_array_add(self->pending_redispatches, pending);
-      self->redispatch_callback(std::move(pending->event));
+      fl_keyboard_view_delegate_redispatch_event(self->view_delegate,
+                                                 std::move(pending->event));
     } else {
       g_object_unref(pending);
     }
@@ -330,18 +324,13 @@ static void responder_handle_event_callback(bool handled,
 }
 
 FlKeyboardManager* fl_keyboard_manager_new(
-    FlTextInputPlugin* text_input_plugin,
-    FlKeyboardManagerRedispatcher redispatch_callback) {
-  g_return_val_if_fail(text_input_plugin == nullptr ||
-                           FL_IS_TEXT_INPUT_PLUGIN(text_input_plugin),
-                       nullptr);
-  g_return_val_if_fail(redispatch_callback != nullptr, nullptr);
+    FlKeyboardViewDelegate* view_delegate) {
+  g_return_val_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(view_delegate), nullptr);
 
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(
       g_object_new(fl_keyboard_manager_get_type(), nullptr));
 
-  self->text_input_plugin = text_input_plugin;
-  self->redispatch_callback = std::move(redispatch_callback);
+  self->view_delegate = view_delegate;
   self->responder_list = g_ptr_array_new_with_free_func(g_object_unref);
 
   self->pending_responds = g_ptr_array_new();
@@ -349,15 +338,20 @@ FlKeyboardManager* fl_keyboard_manager_new(
 
   self->last_sequence_id = 1;
 
+  // The embedder responder must be added before the channel responder.
+  g_ptr_array_add(
+      self->responder_list,
+      FL_KEY_RESPONDER(fl_key_embedder_responder_new(
+          [self](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
+                 void* user_data) {
+            fl_keyboard_view_delegate_send_key_event(self->view_delegate, event,
+                                                     callback, user_data);
+          })));
+  g_ptr_array_add(self->responder_list,
+                  FL_KEY_RESPONDER(fl_key_channel_responder_new(
+                      fl_keyboard_view_delegate_get_messenger(view_delegate))));
+
   return self;
-}
-
-void fl_keyboard_manager_add_responder(FlKeyboardManager* self,
-                                       FlKeyResponder* responder) {
-  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
-  g_return_if_fail(responder != nullptr);
-
-  g_ptr_array_add(self->responder_list, responder);
 }
 
 // The loop body to dispatch an event to a responder.

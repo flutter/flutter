@@ -148,20 +148,14 @@ namespace {
 GPtrArray* g_call_records;
 }
 
-static FlEngine* make_mock_engine_with_records() {
-  FlEngine* engine = make_mock_engine();
-  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
-  embedder_api->SendKeyEvent = [](auto engine, const FlutterKeyEvent* event,
-                                  FlutterKeyEventCallback callback,
-                                  void* user_data) {
-    if (g_call_records != nullptr) {
-      g_ptr_array_add(g_call_records, fl_key_embedder_call_record_new(
-                                          event, callback, user_data));
+static EmbedderSendKeyEvent record_calls_in(GPtrArray* records_array) {
+  return [records_array](const FlutterKeyEvent* event,
+                         FlutterKeyEventCallback callback, void* user_data) {
+    if (records_array != nullptr) {
+      g_ptr_array_add(records_array, fl_key_embedder_call_record_new(
+                                         event, callback, user_data));
     }
-    return kSuccess;
   };
-
-  return engine;
 }
 
 static void clear_g_call_records() {
@@ -173,9 +167,8 @@ static void clear_g_call_records() {
 TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -265,13 +258,6 @@ TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  // TODO(dkwingsmt): Convert `engine` and `responder` to `g_autofree`.
-  // The current implementation is because `responder` must be unreferenced
-  // after `engine`, otherwise crash will *consistantly* occur on CI even if
-  // everything passes locally.  This is a strange bug I've tried to track for
-  // dozens of hours in vain.  It shouldn't affect real application anyway,
-  // since it seems to appear only during the "reboot" of the engine.
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -279,9 +265,8 @@ TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
 TEST(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -359,7 +344,6 @@ TEST(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -374,9 +358,8 @@ TEST(FlKeyEmbedderResponderTest, PressShiftDuringLetterKeyTap) {
 TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -526,7 +509,6 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -537,9 +519,8 @@ TEST(FlKeyEmbedderResponderTest, TapNumPadKeysBetweenNumLockEvents) {
 TEST(FlKeyEmbedderResponderTest, ReleaseShiftKeyBetweenDigitKeyEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -623,7 +604,6 @@ TEST(FlKeyEmbedderResponderTest, ReleaseShiftKeyBetweenDigitKeyEvents) {
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -634,9 +614,8 @@ TEST(FlKeyEmbedderResponderTest, ReleaseShiftKeyBetweenDigitKeyEvents) {
 TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -786,7 +765,6 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -797,9 +775,8 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEvents) {
 TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -949,16 +926,14 @@ TEST(FlKeyEmbedderResponderTest, TapLetterKeysBetweenCapsLockEventsReversed) {
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
 TEST(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1010,7 +985,6 @@ TEST(FlKeyEmbedderResponderTest, TurnDuplicateDownEventsToRepeats) {
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -1019,9 +993,8 @@ TEST(FlKeyEmbedderResponderTest, IgnoreAbruptUpEvent) {
 
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   // Release KeyA before it was even pressed.
@@ -1042,7 +1015,6 @@ TEST(FlKeyEmbedderResponderTest, IgnoreAbruptUpEvent) {
   EXPECT_EQ(record->callback, nullptr);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -1051,9 +1023,8 @@ TEST(FlKeyEmbedderResponderTest, IgnoreAbruptUpEvent) {
 TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncPressingStateOnSelfEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1174,7 +1145,6 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncPressingStateOnSelfEvents) {
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -1184,9 +1154,8 @@ TEST(FlKeyEmbedderResponderTest,
      SynthesizeForDesyncPressingStateOnNonSelfEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1307,7 +1276,6 @@ TEST(FlKeyEmbedderResponderTest,
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -1317,9 +1285,8 @@ TEST(FlKeyEmbedderResponderTest,
      SynthesizeForDesyncPressingStateOnRemappedEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1378,7 +1345,6 @@ TEST(FlKeyEmbedderResponderTest,
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -1387,9 +1353,8 @@ TEST(FlKeyEmbedderResponderTest,
 TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnNonSelfEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1488,7 +1453,6 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnNonSelfEvents) {
   EXPECT_EQ(record->callback, nullptr);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -1497,9 +1461,8 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnNonSelfEvents) {
 TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnSelfEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1589,7 +1552,6 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnSelfEvents) {
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -1598,9 +1560,8 @@ TEST(FlKeyEmbedderResponderTest, SynthesizeForDesyncLockModeOnSelfEvents) {
 TEST(FlKeyEmbedderResponderTest, SynthesizationOccursOnIgnoredEvents) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
   int user_data = 123;  // Arbitrary user data
 
   FlKeyEmbedderCallRecord* record;
@@ -1636,7 +1597,6 @@ TEST(FlKeyEmbedderResponderTest, SynthesizationOccursOnIgnoredEvents) {
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
 
@@ -1653,9 +1613,8 @@ TEST(FlKeyEmbedderResponderTest, SynthesizationOccursOnIgnoredEvents) {
 TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
   EXPECT_EQ(g_call_records, nullptr);
   g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
-  FlEngine* engine = make_mock_engine_with_records();
-  FlKeyResponder* responder =
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(engine));
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
 
   g_expected_handled = true;
   guint32 now_time = 1;
@@ -1740,6 +1699,5 @@ TEST(FlKeyEmbedderResponderTest, HandlesShiftAltVersusGroupNext) {
   EXPECT_EQ(record->event->synthesized, false);
 
   clear_g_call_records();
-  g_object_unref(engine);
   g_object_unref(responder);
 }
