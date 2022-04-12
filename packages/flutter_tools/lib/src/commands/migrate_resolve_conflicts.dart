@@ -211,13 +211,14 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       for (int lineNumber = lastPrintedLine; lineNumber < lines.length; lineNumber++) {
         result += '${lines[lineNumber]}\n';
       }
-      // Ensure we don't add extra newlines at the end of files
-      if (result.endsWith('\n\n\n')) {
-        result.replaceRange(result.length - 3, null, '\n');
-      }
-      if (result.endsWith('\n\n')) {
-        result.replaceRange(result.length - 2, null, '\n');
-      }
+      result.trim();
+      // // Ensure we don't add extra newlines at the end of files
+      // if (result.endsWith('\n\n\n')) {
+      //   result.replaceRange(result.length - 3, null, '\n');
+      // }
+      // if (result.endsWith('\n\n')) {
+      //   result.replaceRange(result.length - 2, null, '\n');
+      // }
 
       // Display conflict summary for this file and confirm with user if the changes should be commited.
       if (boolArg('confirm-commit')) {
