@@ -96,6 +96,10 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       final localPath = conflictFiles[i];
       final File file = workingDirectory.childFile(localPath);
       final List<String> lines = file.readAsStringSync().split('\n');
+      // We write a newline in the output, this counteracts it.
+      if (lines.last == '') {
+        lines.removeLast();
+      }
 
       // Find all conflicts
       final List<Conflict> conflicts = <Conflict>[];
@@ -180,6 +184,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       int lastPrintedLine = 0;
       String result = '';
       bool hasChanges = false;
+      print(lines);
       for (final Conflict conflict in conflicts) {
         if (conflict.keepOriginal != null) {
           hasChanges = true; // don't unecessarily write file if no changes were made.
@@ -212,13 +217,6 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
         result += '${lines[lineNumber]}\n';
       }
       result.trim();
-      // // Ensure we don't add extra newlines at the end of files
-      // if (result.endsWith('\n\n\n')) {
-      //   result.replaceRange(result.length - 3, null, '\n');
-      // }
-      // if (result.endsWith('\n\n')) {
-      //   result.replaceRange(result.length - 2, null, '\n');
-      // }
 
       // Display conflict summary for this file and confirm with user if the changes should be commited.
       if (boolArg('confirm-commit')) {
@@ -231,7 +229,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
             <String>['y', 'n', 'r'],
             logger: logger,
             prompt: 'Commit the changes to disk? (y)es, (n)o, (r)etry this file',
-            defaultChoiceIndex: 0,
+            defaultChoiceIndex: 1,
           );
         } on StateError catch(e) {
           logger.printError(
