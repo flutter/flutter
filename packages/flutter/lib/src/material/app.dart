@@ -83,10 +83,11 @@ enum ThemeMode {
 /// any) to perform [Hero] animations.
 ///
 /// {@template flutter.material.MaterialApp.defaultSelectionStyle}
-/// The [MaterialApp] automatically creates this widget with
-/// [ThemeData.textSelectionTheme]. If it is null, it then sets the selection
-/// color to [ColorScheme.primary] with 0.4 opacity and cursorColor
-/// to [ColorScheme.primary].
+/// The [MaterialApp] automatically creates a [DefaultSelectionStyle]. It uses
+/// the colors in the [theme]'s [TextSelectionThemeData] if they are not null;
+/// otherwise, the [MaterialApp] sets [DefaultSelectionStyle.selectionColor] to
+/// [ColorScheme.primary] with 0.4 opacity and
+/// [DefaultSelectionStyle.cursorColor] to [ColorScheme.primary].
 /// {@endtemplate}
 ///
 /// If [home], [routes], [onGenerateRoute], and [onUnknownRoute] are all null,
