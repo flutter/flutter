@@ -1,4 +1,4 @@
-Signature: 8c05752b3bdc4fc67faae00c7fcbac5f
+Signature: a76c665a527a298ba502e221ff131b30
 
 UNUSED LICENSES:
 
@@ -6105,6 +6105,7 @@ ORIGIN: ../../../third_party/skia/example/VulkanBasic.cpp + ../../../third_party
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/example/VulkanBasic.cpp
 FILE: ../../../third_party/skia/gm/bug12866.cpp
+FILE: ../../../third_party/skia/gm/crbug_1313579.cpp
 FILE: ../../../third_party/skia/include/core/SkAlphaType.h
 FILE: ../../../third_party/skia/include/core/SkColorType.h
 FILE: ../../../third_party/skia/include/gpu/GpuTypes.h
