@@ -10,14 +10,14 @@
 
 #include "flutter/shell/platform/linux/fl_accessibility_plugin.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
-#include "flutter/shell/platform/linux/fl_key_channel_responder.h"
-#include "flutter/shell/platform/linux/fl_key_embedder_responder.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
+#include "flutter/shell/platform/linux/fl_keyboard_view_delegate.h"
 #include "flutter/shell/platform/linux/fl_mouse_cursor_plugin.h"
 #include "flutter/shell/platform/linux/fl_platform_plugin.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_renderer_gl.h"
+#include "flutter/shell/platform/linux/fl_text_input_plugin.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
@@ -42,6 +42,7 @@ struct _FlView {
   // Flutter system channel handlers.
   FlAccessibilityPlugin* accessibility_plugin;
   FlKeyboardManager* keyboard_manager;
+  FlTextInputPlugin* text_input_plugin;
   FlMouseCursorPlugin* mouse_cursor_plugin;
   FlPlatformPlugin* platform_plugin;
 
@@ -67,12 +68,17 @@ enum { PROP_FLUTTER_PROJECT = 1, PROP_LAST };
 static void fl_view_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
 
+static void fl_view_keyboard_delegate_iface_init(
+    FlKeyboardViewDelegateInterface* iface);
+
 G_DEFINE_TYPE_WITH_CODE(
     FlView,
     fl_view,
     GTK_TYPE_CONTAINER,
     G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
-                          fl_view_plugin_registry_iface_init))
+                          fl_view_plugin_registry_iface_init)
+        G_IMPLEMENT_INTERFACE(fl_keyboard_view_delegate_get_type(),
+                              fl_view_keyboard_delegate_iface_init))
 
 static gboolean text_input_im_filter_by_gtk(GtkIMContext* im_context,
                                             gpointer gdk_event) {
@@ -82,27 +88,13 @@ static gboolean text_input_im_filter_by_gtk(GtkIMContext* im_context,
   return gtk_im_context_filter_keypress(im_context, event);
 }
 
-static void redispatch_key_event_by_gtk(std::unique_ptr<FlKeyEvent> in_event) {
-  g_autofree FlKeyEvent* event = in_event.release();
-  GdkEvent* gdk_event = reinterpret_cast<GdkEvent*>(event->origin);
-  GdkEventType type = gdk_event->type;
-  g_return_if_fail(type == GDK_KEY_PRESS || type == GDK_KEY_RELEASE);
-  gdk_event_put(gdk_event);
-}
-
 // Initialize keyboard manager.
 static void init_keyboard(FlView* self) {
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
-  self->keyboard_manager = fl_keyboard_manager_new(
-      fl_text_input_plugin_new(messenger, self, text_input_im_filter_by_gtk),
-      redispatch_key_event_by_gtk);
-  // The embedder responder must be added before the channel responder.
-  fl_keyboard_manager_add_responder(
-      self->keyboard_manager,
-      FL_KEY_RESPONDER(fl_key_embedder_responder_new(self->engine)));
-  fl_keyboard_manager_add_responder(
-      self->keyboard_manager,
-      FL_KEY_RESPONDER(fl_key_channel_responder_new(messenger)));
+  self->text_input_plugin =
+      fl_text_input_plugin_new(messenger, self, text_input_im_filter_by_gtk);
+  self->keyboard_manager =
+      fl_keyboard_manager_new(FL_KEYBOARD_VIEW_DELEGATE(self));
 }
 
 // Converts a GDK button event into a Flutter event and sends it to the engine.
@@ -246,6 +238,36 @@ static FlPluginRegistrar* fl_view_get_registrar_for_plugin(
 static void fl_view_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface) {
   iface->get_registrar_for_plugin = fl_view_get_registrar_for_plugin;
+}
+
+static void fl_view_keyboard_delegate_iface_init(
+    FlKeyboardViewDelegateInterface* iface) {
+  iface->send_key_event =
+      [](FlKeyboardViewDelegate* view_delegate, const FlutterKeyEvent* event,
+         FlutterKeyEventCallback callback, void* user_data) {
+        FlView* self = FL_VIEW(view_delegate);
+        if (self->engine != nullptr) {
+          fl_engine_send_key_event(self->engine, event, callback, user_data);
+        };
+      };
+  iface->text_filter_key_press = [](FlKeyboardViewDelegate* view_delegate,
+                                    FlKeyEvent* event) {
+    FlView* self = FL_VIEW(view_delegate);
+    return fl_text_input_plugin_filter_keypress(self->text_input_plugin, event);
+  };
+  iface->get_messenger = [](FlKeyboardViewDelegate* view_delegate) {
+    FlView* self = FL_VIEW(view_delegate);
+    return fl_engine_get_binary_messenger(self->engine);
+  };
+  iface->redispatch_event = [](FlKeyboardViewDelegate* view_delegate,
+                               std::unique_ptr<FlKeyEvent> in_event) {
+    FlKeyEvent* event = in_event.release();
+    GdkEvent* gdk_event = reinterpret_cast<GdkEvent*>(event->origin);
+    GdkEventType type = gdk_event->type;
+    g_return_if_fail(type == GDK_KEY_PRESS || type == GDK_KEY_RELEASE);
+    gdk_event_put(gdk_event);
+    fl_key_event_dispose(event);
+  };
 }
 
 // Signal handler for GtkWidget::button-press-event
