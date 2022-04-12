@@ -31,10 +31,6 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device. This changes '
           'the default build mode to debug if otherwise unspecified.',
-      )
-      ..addFlag('codesign',
-        defaultsTo: true,
-        help: 'Codesign the application bundle (only available on device builds).',
       );
   }
 
@@ -52,9 +48,6 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 
   @override
   bool get configOnly => boolArg('config-only');
-
-  @override
-  bool get shouldCodesign => boolArg('codesign');
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
@@ -104,9 +97,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   @override
   final bool configOnly = false;
-
-  @override
-  final bool shouldCodesign = true;
 
   String? get exportOptionsPlist => stringArg('export-options-plist');
 
@@ -291,6 +281,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     addBundleSkSLPathOption(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
+    argParser.addFlag('codesign',
+      defaultsTo: true,
+      help: 'Codesign the application bundle (only available on device builds).',
+    );
   }
 
   @override
@@ -305,7 +299,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   XcodeBuildResult? xcodeBuildResult;
   EnvironmentType get environmentType;
   bool get configOnly;
-  bool get shouldCodesign;
+
+  bool get shouldCodesign => boolArg('codesign');
 
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 
