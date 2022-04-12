@@ -67,7 +67,7 @@ class SafariMacOs extends Browser {
       // Clean up trampoline files/directories before exiting felt.
       cleanupCallbacks.add(() async {
         if (trampolineDirectory.existsSync()) {
-          trampolineDirectory.delete(recursive: true);
+          await trampolineDirectory.delete(recursive: true);
         }
       });
 

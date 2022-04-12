@@ -47,6 +47,10 @@ class HtmlCodec implements ui.Codec {
       final html.ImageElement imgElement = html.ImageElement();
       imgElement.src = src;
       setJsProperty<String>(imgElement, 'decoding', 'async');
+
+      // Ignoring the returned future on purpose because we're communicating
+      // through the `completer`.
+      // ignore: unawaited_futures
       imgElement.decode().then((dynamic _) {
         chunkCallback?.call(100, 100);
         int naturalWidth = imgElement.naturalWidth;

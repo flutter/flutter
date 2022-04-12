@@ -60,6 +60,10 @@ void testMain() {
     final Completer<void> completer = Completer<void>();
     scheduleMicrotask(() { log.add('before drain, microtask'); });
     log.add('before drain');
+
+    // Ignoring the returned future because the completion of the drain is
+    // communicated using the `completer`.
+    // ignore: unawaited_futures
     buffers.drain(channel, (ByteData? drainedData, ui.PlatformMessageResponseCallback drainedCallback) async {
       log.add('callback');
       completer.complete();
