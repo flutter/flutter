@@ -193,7 +193,7 @@ Future<MigrateResult?> computeMigration({
   blacklistPrefixes.remove(null);
 
   final FlutterVersion version = FlutterVersion(workingDirectory: flutterProject.directory.absolute.path);
-  final String fallbackRevision = getFallbackBaseRevision(metadata, version);
+  final String fallbackRevision = getFallbackBaseRevision(metadata, verbose, logger, status);
   targetRevision ??= version.frameworkRevision;
   String rootBaseRevision = '';
   final Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigratePlatformConfig>>{};
@@ -408,7 +408,7 @@ String getFallbackBaseRevision(FlutterProjectMetadata metadata, bool verbose, Lo
   // We fall back on flutter v1.0.0 if .metadata doesn't exist.
   if (verbose) {
     status.pause();
-    logger.printStatus('Could not determine base revision, falling back on `v1.0.0`, revision 5391447fae6209bb21a89e6a5a6583cac1af9b4b', color: TerminalColor.gray, indent: 4);
+    logger.printStatus('Could not determine base revision, falling back on `v1.0.0`, revision 5391447fae6209bb21a89e6a5a6583cac1af9b4b', color: TerminalColor.grey, indent: 4);
     status.resume();
   }
   return '5391447fae6209bb21a89e6a5a6583cac1af9b4b';
@@ -759,7 +759,7 @@ Future<void> computeMerge(
   // Add files that are in the target, marked as always migrate, and missing in the current project.
   for (final String localPath in missingAlwaysMigrateFiles) {
     final File targetTemplateFile = migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
-    if (targetTemplateFile.existsSync()) {
+    if (targetTemplateFile.existsSync() && !_skipped(localPath, blacklistPrefixes: blacklistPrefixes)) {
       migrateResult.addedFiles.add(FilePendingMigration(localPath, targetTemplateFile));
     }
   }
