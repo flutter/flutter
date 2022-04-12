@@ -501,6 +501,49 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
+  testUsingContext('ipa build --no-codesign skips codesigning and IPA creation', () async {
+    final BuildCommand command = BuildCommand();
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-configuration', 'Release',
+          '-quiet',
+          '-workspace', 'Runner.xcworkspace',
+          '-scheme', 'Runner',
+          '-sdk', 'iphoneos',
+          '-destination',
+          'generic/platform=iOS',
+          'CODE_SIGNING_ALLOWED=NO',
+          'CODE_SIGNING_REQUIRED=NO',
+          'CODE_SIGNING_IDENTITY=""',
+          '-resultBundlePath',
+          '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle',
+          '-resultBundleVersion', '3',
+          'FLUTTER_SUPPRESS_ANALYTICS=true',
+          'COMPILER_INDEX_STORE_ENABLE=NO',
+          '-archivePath',
+          '/build/ios/archive/Runner',
+          'archive',
+        ],
+      ),
+    ]);
+    _createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub', '--no-codesign']
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+    expect(testLogger.statusText, contains('Codesigning disabled with --no-codesign, skipping IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
   testUsingContext('code size analysis fails when app not found', () async {
     final BuildCommand command = BuildCommand();
     _createMinimalMockProjectFiles();
