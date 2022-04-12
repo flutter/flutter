@@ -3122,10 +3122,44 @@ class RenderMouseRegion extends RenderProxyBoxWithHitTestBehavior implements Mou
 /// [debugAsymmetricPaintCount] and [debugSymmetricPaintCount] respectively.
 class RenderRepaintBoundary extends RenderProxyBox {
   /// Creates a repaint boundary around [child].
-  RenderRepaintBoundary({ RenderBox? child }) : super(child);
+  RenderRepaintBoundary({ RenderBox? child, bool rasterCache = false }) : _rasterCache = rasterCache, super(child);
 
   @override
   bool get isRepaintBoundary => true;
+
+  final LayerHandle<_RasterCacheOffsetLayer> _rasterCachelayerHandle = LayerHandle<_RasterCacheOffsetLayer>();
+
+  /// Whether to hint that this layer's content should be cached by raster cache.
+  ///
+  /// The compositor contains a raster cache that holds bitmaps of layers in
+  /// order to avoid the cost of repeatedly rendering those layers on each
+  /// frame. If this flag is set, then this layer's content will be cached
+  /// if it is stable.
+  bool get rasterCache => _rasterCache;
+  bool _rasterCache;
+  set rasterCache(bool value) {
+    if (_rasterCache == value)
+      return;
+    _rasterCache = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      if (rasterCache) {
+        assert(needsCompositing);
+        _rasterCachelayerHandle.layer ??= _RasterCacheOffsetLayer();
+        _rasterCachelayerHandle.layer!.offset = offset;
+        context.pushLayer(_rasterCachelayerHandle.layer!, super.paint, Offset.zero);
+      } else {
+        context.paintChild(child!, offset);
+        _rasterCachelayerHandle.layer = null;
+      }
+    } else {
+      _rasterCachelayerHandle.layer = null;
+    }
+  }
 
   /// Capture an image of the current state of this render object and its
   /// children.
@@ -3279,6 +3313,13 @@ class RenderRepaintBoundary extends RenderProxyBox {
     if (inReleaseMode)
       properties.add(DiagnosticsNode.message('(run in debug mode to collect repaint boundary statistics)'));
   }
+}
+
+class _RasterCacheOffsetLayer extends OffsetLayer {
+  _RasterCacheOffsetLayer({ Offset offset = Offset.zero }) : super(offset: offset);
+
+  @override
+  bool get rasterCache => true;
 }
 
 /// A render object that is invisible during hit testing.

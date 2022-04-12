@@ -1213,6 +1213,14 @@ class OffsetLayer extends ContainerLayer {
     _offset = value;
   }
 
+  /// Whether to hint that this layer's content should be cached by raster cache.
+  ///
+  /// The compositor contains a raster cache that holds bitmaps of layers in
+  /// order to avoid the cost of repeatedly rendering those layers on each
+  /// frame. If this flag is set, then this layer's content will be cached
+  /// if it is stable.
+  bool get rasterCache => false;
+
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return super.findAnnotations<S>(result, localPosition - offset, onlyFirst: onlyFirst);
@@ -1236,6 +1244,7 @@ class OffsetLayer extends ContainerLayer {
       offset.dx,
       offset.dy,
       oldLayer: _engineLayer as ui.OffsetEngineLayer?,
+      rasterCache: rasterCache,
     );
     addChildrenToScene(builder);
     builder.pop();

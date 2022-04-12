@@ -6428,16 +6428,25 @@ class MouseRegion extends SingleChildRenderObjectWidget {
 ///    repaints in the observatory's timeline view.
 class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// Creates a widget that isolates repaints.
-  const RepaintBoundary({ Key? key, Widget? child }) : super(key: key, child: child);
+  const RepaintBoundary({ Key? key, Widget? child, this.rasterCache = false }) : super(key: key, child: child);
+
+
+  /// Whether to hint that this layer's content should be cached by raster cache.
+  ///
+  /// The compositor contains a raster cache that holds bitmaps of layers in
+  /// order to avoid the cost of repeatedly rendering those layers on each
+  /// frame. If this flag is set, then this layer's content will be cached
+  /// if it is stable.
+  final bool rasterCache;
 
   /// Wraps the given child in a [RepaintBoundary].
   ///
   /// The key for the [RepaintBoundary] is derived either from the child's key
   /// (if the child has a non-null key) or from the given `childIndex`.
-  factory RepaintBoundary.wrap(Widget child, int childIndex) {
+  factory RepaintBoundary.wrap(Widget child, int childIndex, { bool rasterCache = false }) {
     assert(child != null);
     final Key key = child.key != null ? ValueKey<Key>(child.key!) : ValueKey<int>(childIndex);
-    return RepaintBoundary(key: key, child: child);
+    return RepaintBoundary(key: key, child: child, rasterCache: rasterCache);
   }
 
   /// Wraps each of the given children in [RepaintBoundary]s.
@@ -6445,12 +6454,17 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// The key for each [RepaintBoundary] is derived either from the wrapped
   /// child's key (if the wrapped child has a non-null key) or from the wrapped
   /// child's index in the list.
-  static List<RepaintBoundary> wrapAll(List<Widget> widgets) => <RepaintBoundary>[
-    for (int i = 0; i < widgets.length; ++i) RepaintBoundary.wrap(widgets[i], i),
+  static List<RepaintBoundary> wrapAll(List<Widget> widgets, { bool rasterCache = false }) => <RepaintBoundary>[
+    for (int i = 0; i < widgets.length; ++i) RepaintBoundary.wrap(widgets[i], i, rasterCache: rasterCache),
   ];
 
   @override
-  RenderRepaintBoundary createRenderObject(BuildContext context) => RenderRepaintBoundary();
+  RenderRepaintBoundary createRenderObject(BuildContext context) => RenderRepaintBoundary(rasterCache : rasterCache);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderRepaintBoundary renderObject) {
+    renderObject.rasterCache = rasterCache;
+  }
 }
 
 /// A widget that is invisible during hit testing.
