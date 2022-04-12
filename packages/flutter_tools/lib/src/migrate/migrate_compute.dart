@@ -395,7 +395,7 @@ String getLocalPath(String path, String basePath, FileSystem fileSystem) {
 }
 
 /// Returns a base revision to fallback to in case a true base revision is unknown.
-String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion version) {
+String getFallbackBaseRevision(FlutterProjectMetadata metadata, bool verbose, Logger logger, Status status) {
   if (metadata.versionRevision != null) {
     return metadata.versionRevision!;
   }
@@ -406,6 +406,11 @@ String getFallbackBaseRevision(FlutterProjectMetadata metadata, FlutterVersion v
   // TODO(garyq): Use things like dart sdk version and other hints to better fine-tune this fallback.
   //
   // We fall back on flutter v1.0.0 if .metadata doesn't exist.
+  if (verbose) {
+    status.pause();
+    logger.printStatus('Could not determine base revision, falling back on `v1.0.0`, revision 5391447fae6209bb21a89e6a5a6583cac1af9b4b', color: TerminalColor.gray, indent: 4);
+    status.resume();
+  }
   return '5391447fae6209bb21a89e6a5a6583cac1af9b4b';
 }
 

@@ -203,6 +203,18 @@ class MigrateUtils {
     }
   }
 
+  static Future<void> flutterPubUpgrade(String workingDirectory) async {
+    final List<String> cmdArgs = <String>['pub', 'upgrade', '--major-versions'];
+    final ProcessResult result = await Process.run('flutter', cmdArgs, workingDirectory: workingDirectory);
+    checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: 'flutter ${cmdArgs.join(' ')}');
+  }
+
+  static Future<void> gradlewTasks(String workingDirectory) async {
+    final List<String> cmdArgs = <String>['tasks'];
+    final ProcessResult result = await Process.run('./gradlew', cmdArgs, workingDirectory: workingDirectory);
+    checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: './gradlew ${cmdArgs.join(' ')}');
+  }
+
   static bool checkForErrors(ProcessResult result, {List<int> allowedExitCodes = const <int>[], String? commandDescription, bool exit = true, bool silent = false}) {
     // -1 in allowed exit codes means all exit codes are valid.
     if ((result.exitCode != 0 && !allowedExitCodes.contains(result.exitCode)) && !allowedExitCodes.contains(-1)) {
