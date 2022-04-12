@@ -654,7 +654,6 @@ Future<void> computeMerge(
     }
 
     final bool alwaysMigrate = _alwaysMigrateFiles.contains(localPath);
-    print('$localPath $alwaysMigrate');
 
     // Current file unchanged by user, thus we consider it owned by the tool.
     if (userDiff.exitCode == 0 || alwaysMigrate) {

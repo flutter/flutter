@@ -200,7 +200,11 @@ class MigrateApplyCommand extends FlutterCommand {
   }
 
   Future<void> updateGradleDependencyLocking(FlutterProject flutterProject) async {
-    final List<FileSystemEntity> androidFiles = flutterProject.directory.childDirectory('android').listSync(recursive: false);
+    final Directory androidDir = flutterProject.directory.childDirectory('android');
+    if (!androidDir.existsSync()) {
+      return;
+    }
+    final List<FileSystemEntity> androidFiles = androidDir.listSync(recursive: false);
     final List<File> lockfiles = <File>[];
     final List<String> backedUpFilePaths = <String>[];
     for (final FileSystemEntity entity in androidFiles) {
@@ -224,7 +228,7 @@ class MigrateApplyCommand extends FlutterCommand {
       }
     }
     if (lockfiles.isNotEmpty) {
-      logger.printStats('\nGradle dependency locking detected.');
+      logger.printStatus('\nGradle dependency locking detected.');
       logger.printStatus('Flutter can backup the lockfiles and regenerate updated lockfiles.');
       String selection = 'y';
       try {

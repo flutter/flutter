@@ -20,28 +20,19 @@ class MigrateUtils {
   MigrateUtils();
 
   /// Calls `git diff` on two files and returns the diff as a DiffResult.
-  static Future<DiffResult> diffFiles(File one, File two, {String? outputPath}) async {
+  static Future<DiffResult> diffFiles(File one, File two) async {
     if (one.existsSync() && !two.existsSync()) {
       return DiffResult.deletion();
     }
     if (!one.existsSync() && two.existsSync()) {
       return DiffResult.addition();
     }
-    String gitCmd = '';
-    if (outputPath != null) {
-      final String parentDirPath = outputPath.substring(0, outputPath.lastIndexOf('/'));
-      gitCmd += 'mkdir -p "$parentDirPath" && touch "$outputPath"; ';
-    }
-    gitCmd += 'git diff --no-index "${one.absolute.path}" "${two.absolute.path}"';
-    if (outputPath != null) {
-      gitCmd += ' > "$outputPath"';
-    }
-    final List<String> cmdArgs = <String>['-c', gitCmd];
-    final ProcessResult result = await Process.run('bash', cmdArgs);
+    final List<String> cmdArgs = <String>['diff', '--no-index', '${one.absolute.path}', '${two.absolute.path}'];
+    final ProcessResult result = await Process.run('git', cmdArgs);
 
     // diff exits with 1 if diffs are found.
     checkForErrors(result, allowedExitCodes: <int>[1], commandDescription: 'git ${cmdArgs.join(' ')}');
-    return DiffResult(result, outputPath);
+    return DiffResult(result);
   }
 
   // Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
@@ -210,9 +201,10 @@ class MigrateUtils {
   }
 
   static Future<void> gradlewTasks(String workingDirectory) async {
+    final baseCommand = Platform.isWindows ? 'gradlew.bat' : './gradlew';
     final List<String> cmdArgs = <String>['tasks'];
-    final ProcessResult result = await Process.run('./gradlew', cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: './gradlew ${cmdArgs.join(' ')}');
+    final ProcessResult result = await Process.run(baseCommand, cmdArgs, workingDirectory: workingDirectory);
+    checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: '$baseCommand ${cmdArgs.join(' ')}');
   }
 
   static bool checkForErrors(ProcessResult result, {List<int> allowedExitCodes = const <int>[], String? commandDescription, bool exit = true, bool silent = false}) {
@@ -259,7 +251,7 @@ class MigrateUtils {
 /// Tracks the output of a git diff command or any special cases such as addition of a new
 /// file or deletion of an existing file.
 class DiffResult {
-  DiffResult(ProcessResult result, this.outputPath) :
+  DiffResult(ProcessResult result) :
     diff = result.stdout as String,
     isDeletion = false,
     isAddition = false,
@@ -271,7 +263,6 @@ class DiffResult {
     isDeletion = false,
     isAddition = true,
     isIgnored = false,
-    outputPath = null,
     exitCode = 0;
 
   DiffResult.deletion() :
@@ -279,7 +270,6 @@ class DiffResult {
     isDeletion = true, 
     isAddition = false,
     isIgnored = false,
-    outputPath = null,
     exitCode = 0;
 
   DiffResult.ignored() :
@@ -287,14 +277,12 @@ class DiffResult {
     isDeletion = false, 
     isAddition = false,
     isIgnored = true,
-    outputPath = null,
     exitCode = 0;
 
   final String diff;
   final bool isDeletion;
   final bool isAddition;
   final bool isIgnored;
-  final String? outputPath;
   final int exitCode;
 }
 
