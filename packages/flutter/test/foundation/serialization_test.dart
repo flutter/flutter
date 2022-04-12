@@ -124,5 +124,8 @@ void main() {
       write.done();
       expect(() => write.done(), throwsStateError);
     });
+    test('empty WriteBuffer', () {
+      expect(() => WriteBuffer(startCapacity: 0), throwsAssertionError);
+    });
   });
 }

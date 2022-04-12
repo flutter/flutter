@@ -16,6 +16,7 @@ class WriteBuffer {
   /// [startCapacity] determines the start size of the [WriteBuffer].  The closer
   /// that value is to the real size used, the better the performance.
   factory WriteBuffer({int startCapacity = 8}) {
+    assert(startCapacity > 0);
     final ByteData eightBytes = ByteData(8);
     final Uint8List eightBytesAsList = eightBytes.buffer.asUint8List();
     return WriteBuffer._(Uint8List(startCapacity), eightBytes, eightBytesAsList);
