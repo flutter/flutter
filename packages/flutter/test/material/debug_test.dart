@@ -303,6 +303,8 @@ void main() {
       '     MediaQuery\n'
       '     Padding\n'
       '     SafeArea\n'
+      '     RepaintBoundary\n'
+      '     _FadeTransition\n'
       '     FadeTransition\n'
       '     IconTheme\n'
       '     IconTheme\n'
