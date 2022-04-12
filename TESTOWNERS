@@ -241,6 +241,7 @@
 # flutter_plugins @stuartmorgan @flutter/plugin
 # framework_tests @HansMuller @flutter/framework
 # tool_integration_tests @zanderso @flutter/tool
+# tool_host_cross_arch_tests @zanderso @flutter/tool
 # tool_tests @zanderso @flutter/tool
 # web_integration_tests @yjbanov @flutter/web
 # web_long_running_tests @yjbanov @flutter/web
