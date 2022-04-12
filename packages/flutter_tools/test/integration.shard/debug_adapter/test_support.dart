@@ -63,6 +63,11 @@ class SimpleFlutterRunner {
     unawaited(process.exitCode.then(_handleExitCode));
   }
 
+  final StreamController<String> _output = StreamController<String>.broadcast();
+
+  /// A broadcast stream of any non-JSON output from the process.
+  Stream<String> get output => _output.stream;
+
   void _handleExitCode(int code) {
       if (!_vmServiceUriCompleter.isCompleted) {
         _vmServiceUriCompleter.completeError('Flutter process ended without producing a VM Service URI');
@@ -91,8 +96,9 @@ class SimpleFlutterRunner {
         }
       }
     } on FormatException {
-      // `flutter run` writes a lot of text to stdout so just ignore anything
-      // that's not valid JSON.
+      // `flutter run` writes a lot of text to stdout that isn't daemon messages
+      //  (not valid JSON), so just pass that one for tests that may want it.
+      _output.add(outputLine);
     }
   }
 

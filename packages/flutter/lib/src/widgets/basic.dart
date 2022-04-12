@@ -242,7 +242,7 @@ class Directionality extends InheritedWidget {
 ///    opacity.
 ///  * [Image], which can directly provide a partially transparent image with
 ///    much less performance hit.
-class Opacity extends SingleChildRenderObjectWidget {
+class Opacity extends StatelessWidget {
   /// Creates a widget that makes its child partially transparent.
   ///
   /// The [opacity] argument must not be null and must be between 0.0 and 1.0
@@ -251,10 +251,10 @@ class Opacity extends SingleChildRenderObjectWidget {
     Key? key,
     required this.opacity,
     this.alwaysIncludeSemantics = false,
-    Widget? child,
+    this.child,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        assert(alwaysIncludeSemantics != null),
-       super(key: key, child: child);
+       super(key: key);
 
   /// The fraction to scale the child's alpha value.
   ///
@@ -278,6 +278,44 @@ class Opacity extends SingleChildRenderObjectWidget {
   /// would otherwise contribute relevant semantics.
   final bool alwaysIncludeSemantics;
 
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Opacity(
+      opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
+      child: RepaintBoundary(
+        child: child,
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('opacity', opacity));
+    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+  }
+}
+
+/// The backing implementation of [Opacity].
+class _Opacity extends SingleChildRenderObjectWidget {
+  const _Opacity({
+    Key? key,
+    required this.opacity,
+    this.alwaysIncludeSemantics = false,
+    Widget? child,
+  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+       assert(alwaysIncludeSemantics != null),
+       super(key: key, child: child);
+
+  final double opacity;
+  final bool alwaysIncludeSemantics;
+
   @override
   RenderOpacity createRenderObject(BuildContext context) {
     return RenderOpacity(
@@ -291,13 +329,6 @@ class Opacity extends SingleChildRenderObjectWidget {
     renderObject
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DoubleProperty('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 

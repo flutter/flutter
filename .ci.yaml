@@ -1516,7 +1516,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android color_filter_cache_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1984,7 +1983,6 @@ targets:
   - name: Linux_android hybrid_android_views_integration_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/100991
     timeout: 60
     properties:
       tags: >
@@ -2592,30 +2590,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac entrypoint_dart_registrant
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    timeout: 60
-    properties:
-      caches: >-
-        [
-          {"name":"gradle","path":"gradle"}
-        ]
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "11"},
-          {"dependency": "android_sdk", "version": "version:31v8"}
-        ]
-      tags: >
-        ["devicelab","hostonly"]
-      task_name: entrypoint_dart_registrant
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
   - name: Mac framework_tests_libraries
     recipe: flutter/flutter_drone
     timeout: 60
@@ -3113,6 +3087,21 @@ targets:
       subshard: web
       tags: >
         ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac_android entrypoint_dart_registrant
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","mac"]
+      task_name: entrypoint_dart_registrant
     scheduler: luci
     runIf:
       - dev/**

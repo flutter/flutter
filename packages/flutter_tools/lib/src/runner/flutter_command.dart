@@ -1301,11 +1301,10 @@ abstract class FlutterCommand extends Command<void> {
     if (shouldUpdateCache) {
       // First always update universal artifacts, as some of these (e.g.
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
-      bool offline;
+      final bool offline;
       if (argParser.options.containsKey('offline')) {
         offline = boolArg('offline');
-      }
-      else {
+      } else {
         offline = false;
       }
       await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal}, offline: offline);

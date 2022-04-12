@@ -1371,7 +1371,7 @@ abstract class RenderBox extends RenderObject {
     if (shouldCache) {
       Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
       assert(() {
-        if (debugProfileLayoutsEnabled) {
+        if (debugEnhanceLayoutTimelineArguments) {
           debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
         } else {
           debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
@@ -1835,7 +1835,7 @@ abstract class RenderBox extends RenderObject {
     if (shouldCache) {
       Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
       assert(() {
-        if (debugProfileLayoutsEnabled) {
+        if (debugEnhanceLayoutTimelineArguments) {
           debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
         } else {
           debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
