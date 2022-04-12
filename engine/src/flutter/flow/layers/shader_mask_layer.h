@@ -27,6 +27,9 @@ class ShaderMaskLayer : public ContainerLayer {
   SkRect mask_rect_;
   SkBlendMode blend_mode_;
 
+  static constexpr int kMinimumRendersBeforeCachingFilterLayer = 3;
+  int render_count_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderMaskLayer);
 };
 
