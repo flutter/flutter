@@ -887,6 +887,13 @@ config("optimize_max") {
   }
 }
 
+# These are two named configs that zlib's BUILD.gn expects to exist.
+config("default_optimization") {
+}
+
+config("optimize_speed") {
+}
+
 # Symbols ----------------------------------------------------------------------
 
 config("symbols") {

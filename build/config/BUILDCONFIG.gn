@@ -375,6 +375,9 @@ if (is_debug) {
 }
 _native_compiler_configs += [ _default_optimization_config ]
 
+# zlib's BUILD.gn expects to have this config among default configs.
+_native_compiler_configs += [ "//build/config/compiler:default_optimization" ]
+
 # If it wasn't manually set, set to an appropriate default.
 if (symbol_level == -1) {
   # Linux is slowed by having symbols as part of the target binary, whereas
