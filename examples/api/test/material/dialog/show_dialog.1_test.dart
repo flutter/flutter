@@ -23,7 +23,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(dialogTitle), findsOneWidget);
 
-    await tester.tap(find.text('Enabled'));
+    await tester.tap(find.text('Enable'));
     await tester.pumpAndSettle();
     expect(find.text(dialogTitle), findsNothing);
   });
