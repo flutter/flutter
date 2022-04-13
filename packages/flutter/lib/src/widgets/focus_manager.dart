@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -1757,7 +1758,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _haveScheduledUpdate = true;
-    SchedulerBinding.instance.scheduleTask(_applyFocusChange, Priority.touch);
+    scheduleMicrotask(_applyFocusChange);
   }
 
   void _applyFocusChange() {
