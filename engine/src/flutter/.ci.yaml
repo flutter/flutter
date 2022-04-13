@@ -315,21 +315,16 @@ targets:
       caches: >-
         [
           {"name":"flutter_cocoapods","path":"cocoapods"},
-          {"name":"osx_sdk_13a233_13_15","path":"osx_sdk"},
+          {"name":"old_osx_sdk","path":"osx_sdk"},
           {"name":"builder_mac_engine","path":"builder"},
-          {"name":"openjdk","path":"java"},
-          {"name":"xcode_runtime_ios_13_0","path":"xcode_runtime_ios_13_0"},
-          {"name":"xcode_runtime_ios_15_0","path":"xcode_runtime_ios_15_0"}
+          {"name":"openjdk","path":"java"}
         ]
       dependencies: >-
         [
           {"dependency": "goldctl"}
         ]
-      runtime_versions: >-
-        [
-          "ios-13-0",
-          "ios-15-0"
-        ]
+      os: Mac-10.15
+      xcode: 12c33 # xcode 12.3
     timeout: 60
     runIf:
       - DEPS
