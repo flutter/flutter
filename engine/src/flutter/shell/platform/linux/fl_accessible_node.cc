@@ -71,6 +71,7 @@ struct _FlAccessibleNode {
 
   int32_t id;
   gchar* name;
+  gint index;
   gint x, y, width, height;
   GPtrArray* actions;
   gsize actions_length;
@@ -162,6 +163,12 @@ static const gchar* fl_accessible_node_get_name(AtkObject* accessible) {
 static AtkObject* fl_accessible_node_get_parent(AtkObject* accessible) {
   FlAccessibleNode* self = FL_ACCESSIBLE_NODE(accessible);
   return self->parent;
+}
+
+// Implements AtkObject::get_index_in_parent.
+static gint fl_accessible_node_get_index_in_parent(AtkObject* accessible) {
+  FlAccessibleNode* self = FL_ACCESSIBLE_NODE(accessible);
+  return self->index;
 }
 
 // Implements AtkObject::get_n_children.
@@ -309,6 +316,8 @@ static void fl_accessible_node_class_init(FlAccessibleNodeClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_accessible_node_dispose;
   ATK_OBJECT_CLASS(klass)->get_name = fl_accessible_node_get_name;
   ATK_OBJECT_CLASS(klass)->get_parent = fl_accessible_node_get_parent;
+  ATK_OBJECT_CLASS(klass)->get_index_in_parent =
+      fl_accessible_node_get_index_in_parent;
   ATK_OBJECT_CLASS(klass)->get_n_children = fl_accessible_node_get_n_children;
   ATK_OBJECT_CLASS(klass)->ref_child = fl_accessible_node_ref_child;
   ATK_OBJECT_CLASS(klass)->get_role = fl_accessible_node_get_role;
@@ -346,9 +355,12 @@ FlAccessibleNode* fl_accessible_node_new(FlEngine* engine, int32_t id) {
   return self;
 }
 
-void fl_accessible_node_set_parent(FlAccessibleNode* self, AtkObject* parent) {
+void fl_accessible_node_set_parent(FlAccessibleNode* self,
+                                   AtkObject* parent,
+                                   gint index) {
   g_return_if_fail(FL_IS_ACCESSIBLE_NODE(self));
   self->parent = parent;
+  self->index = index;
   g_object_add_weak_pointer(G_OBJECT(self),
                             reinterpret_cast<gpointer*>(&(self->parent)));
 }
