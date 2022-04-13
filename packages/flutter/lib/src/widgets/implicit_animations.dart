@@ -1759,9 +1759,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
     return FadeTransition(
       opacity: _opacityAnimation,
       alwaysIncludeSemantics: widget.alwaysIncludeSemantics,
-      child: RepaintBoundary(
-        child: widget.child,
-      ),
+      child: widget.child,
     );
   }
 }
