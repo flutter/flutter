@@ -143,17 +143,16 @@ class TextSelectionTheme extends InheritedTheme {
     required Widget child,
   }) : assert(data != null),
        _child = child,
+       // See `get child` override below.
        super(key: key, child: const _NullWidget());
 
   /// The properties for descendant [TextField] and [SelectableText] widgets.
   final TextSelectionThemeData data;
 
   // Overriding the getter to insert `DefaultSelectionStyle` into the subtree
-  // without a breaking change. This should be avoid in general since this
-  // relies on the implementation detail of ProxyWidget.
-  //
-  // The `TextSelectionTheme` should be non-const if it were to start
-  // from scratch.
+  // without breaking API. In general, this approach should be avoided
+  // because it relies on an implementation detail of ProxyWidget. This
+  // workaround is necessary because TextSelectionTheme is const.
   @override
   Widget get child {
     return DefaultSelectionStyle(

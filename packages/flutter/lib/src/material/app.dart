@@ -84,7 +84,7 @@ enum ThemeMode {
 ///
 /// {@template flutter.material.MaterialApp.defaultSelectionStyle}
 /// The [MaterialApp] automatically creates a [DefaultSelectionStyle]. It uses
-/// the colors in the [theme]'s [TextSelectionThemeData] if they are not null;
+/// the colors in the [ThemeData.textSelectionTheme] if they are not null;
 /// otherwise, the [MaterialApp] sets [DefaultSelectionStyle.selectionColor] to
 /// [ColorScheme.primary] with 0.4 opacity and
 /// [DefaultSelectionStyle.cursorColor] to [ColorScheme.primary].

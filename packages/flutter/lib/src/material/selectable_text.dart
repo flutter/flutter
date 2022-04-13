@@ -360,14 +360,12 @@ class SelectableText extends StatefulWidget {
 
   /// The color of the cursor.
   ///
-  /// The cursor indicates the current location of the text insertion point in
-  /// the field.
+  /// The cursor indicates the current text insertion point.
   ///
-  /// If this is null it will default to the ambient
-  /// [DefaultSelectionStyle.cursorColor]. If that is null, and the
-  /// [ThemeData.platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS]
-  /// it will use [CupertinoThemeData.primaryColor]. Otherwise it will use
-  /// the value of [ColorScheme.primary] of [ThemeData.colorScheme].
+  /// If null then [DefaultSelectionStyle.cursorColor] is used. If that is also
+  /// null and [ThemeData.platform] is [TargetPlatform.iOS] or
+  /// [TargetPlatform.macOS], then [CupertinoThemeData.primaryColor] is used.
+  /// Otherwise [ColorScheme.primary] of [ThemeData.colorScheme] is used.
   final Color? cursorColor;
 
   /// Controls how tall the selection highlight boxes are computed to be.
