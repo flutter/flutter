@@ -22,6 +22,7 @@ enum Status {
   error,
   warning,
   success,
+  notReady,
 }
 
 class ProjectValidatorResult {
@@ -29,9 +30,13 @@ class ProjectValidatorResult {
   final String name;
 
   String _error = '';
-  Status? _status;
+  Status _status = Status.notReady;
   String _value = '';
   String _warning = '';
+
+  Status currentStatus(){
+    return _status;
+  }
 
   void setSuccess(String value, {String? warning}) {
     _status = Status.success;
@@ -49,17 +54,17 @@ class ProjectValidatorResult {
   @override
   String toString() {
     // ensure toString is not called before a value or error is set
-    if (_status == null) {
-      throwToolExit('ProjectValidatorResult status not set');
+    if (_status == Status.notReady) {
+      throwToolExit('ProjectValidatorResult status not ready');
     }
 
     String s;
     if (_status == Status.error) {
-      s = _error;
+      s = 'Error: $_error';
     } else {
       s = '$name: $_value';
       if (_warning.isNotEmpty) {
-        s = '$s. $_warning';
+        s = '$s. Warning: $_warning';
       }
     }
 
