@@ -390,7 +390,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
       Uint8List? utf8Bytes;
       int utf8Offset = 0;
       // Only do utf8 encoding if we encounter non-ascii characters.
-      for(int i = 0; i < value.length; i += 1) {
+      for (int i = 0; i < value.length; i += 1) {
         final int char = value.codeUnitAt(i);
         if (char <= 0x7f) {
           asciiBytes[i] = char;
