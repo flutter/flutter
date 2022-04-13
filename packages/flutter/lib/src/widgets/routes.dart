@@ -2152,6 +2152,7 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
   Expando<BoxHitTestResult> cachedResults = Expando<BoxHitTestResult>();
 
   FocusScopeNode _focusScopeNode;
+  FocusNode? _previousFocus;
   FocusScopeNode get focusScopeNode => _focusScopeNode;
   set focusScopeNode(FocusScopeNode value) {
     if (focusScopeNode == value)
@@ -2188,6 +2189,18 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
     }
   }
 
+  void _checkForUnfocus() {
+    if (_previousFocus == null) {
+      return;
+    }
+    // Only continue to unfocus if the previous focus matches the current focus.
+    // If the focus has changed in the meantime, it was probably intentional.
+    if (FocusManager.instance.primaryFocus == _previousFocus) {
+      _previousFocus!.unfocus();
+    }
+    _previousFocus = null;
+  }
+
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
@@ -2220,6 +2233,11 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
       }
     }
     if (!hitCurrentFocus)
-      focusNode.unfocus();
+      _previousFocus = focusNode;
+      // Check post-frame to see that the focus hasn't changed before
+      // unfocusing. This also allows a button tap to capture the previously
+      // active focus before FocusTrap tries to unfocus it, and avoids a bounce
+      // through the scope's focus node in between.
+      SchedulerBinding.instance.scheduleTask<void>(_checkForUnfocus, Priority.idle);
   }
 }
