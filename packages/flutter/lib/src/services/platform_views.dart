@@ -634,6 +634,7 @@ class _AndroidMotionEventConverter {
     int toolType = AndroidPointerProperties.kToolTypeUnknown;
     switch (event.kind) {
       case PointerDeviceKind.touch:
+      case PointerDeviceKind.trackpad:
         toolType = AndroidPointerProperties.kToolTypeFinger;
         break;
       case PointerDeviceKind.mouse:
@@ -646,8 +647,6 @@ class _AndroidMotionEventConverter {
         toolType = AndroidPointerProperties.kToolTypeEraser;
         break;
       case PointerDeviceKind.unknown:
-      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         toolType = AndroidPointerProperties.kToolTypeUnknown;
         break;
     }

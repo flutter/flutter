@@ -2858,6 +2858,21 @@ typedef PointerUpEventListener = void Function(PointerUpEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
 
+/// Signature for listening to [PointerPanZoomStartEvent] events.
+///
+/// Used by [Listener] and [RenderPointerListener].
+typedef PointerPanZoomStartEventListener = void Function(PointerPanZoomStartEvent event);
+
+/// Signature for listening to [PointerPanZoomUpdateEvent] events.
+///
+/// Used by [Listener] and [RenderPointerListener].
+typedef PointerPanZoomUpdateEventListener = void Function(PointerPanZoomUpdateEvent event);
+
+/// Signature for listening to [PointerPanZoomEndEvent] events.
+///
+/// Used by [Listener] and [RenderPointerListener].
+typedef PointerPanZoomEndEventListener = void Function(PointerPanZoomEndEvent event);
+
 /// Signature for listening to [PointerSignalEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
@@ -2885,6 +2900,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     this.onPointerUp,
     this.onPointerHover,
     this.onPointerCancel,
+    this.onPointerPanZoomStart,
+    this.onPointerPanZoomUpdate,
+    this.onPointerPanZoomEnd,
     this.onPointerSignal,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
     RenderBox? child,
@@ -2909,6 +2927,15 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// no longer directed towards this receiver.
   PointerCancelEventListener? onPointerCancel;
 
+  /// Called when a pan/zoom begins such as from a trackpad gesture.
+  PointerPanZoomStartEventListener? onPointerPanZoomStart;
+
+  /// Called when a pan/zoom is updated.
+  PointerPanZoomUpdateEventListener? onPointerPanZoomUpdate;
+
+  /// Called when a pan/zoom finishes.
+  PointerPanZoomEndEventListener? onPointerPanZoomEnd;
+
   /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener? onPointerSignal;
 
@@ -2930,6 +2957,12 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       return onPointerHover?.call(event);
     if (event is PointerCancelEvent)
       return onPointerCancel?.call(event);
+    if (event is PointerPanZoomStartEvent)
+      return onPointerPanZoomStart?.call(event);
+    if (event is PointerPanZoomUpdateEvent)
+      return onPointerPanZoomUpdate?.call(event);
+    if (event is PointerPanZoomEndEvent)
+      return onPointerPanZoomEnd?.call(event);
     if (event is PointerSignalEvent)
       return onPointerSignal?.call(event);
   }
@@ -2945,6 +2978,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
         'up': onPointerUp,
         'hover': onPointerHover,
         'cancel': onPointerCancel,
+        'panZoomStart': onPointerPanZoomStart,
+        'panZoomUpdate': onPointerPanZoomUpdate,
+        'panZoomEnd': onPointerPanZoomEnd,
         'signal': onPointerSignal,
       },
       ifEmpty: '<none>',

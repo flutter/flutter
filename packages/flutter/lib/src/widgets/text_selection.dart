@@ -1525,6 +1525,7 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.macOS:
           switch (details.kind) {
             case PointerDeviceKind.mouse:
+            case PointerDeviceKind.trackpad:
             case PointerDeviceKind.stylus:
             case PointerDeviceKind.invertedStylus:
               // Precise devices should place the cursor at a precise position.
@@ -1532,8 +1533,6 @@ class TextSelectionGestureDetectorBuilder {
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-            default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-                     // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
               // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
               // of the word.
               renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
