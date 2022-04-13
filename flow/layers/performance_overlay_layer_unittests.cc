@@ -60,8 +60,19 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
 
   flutter::TextureRegistry unused_texture_registry;
   flutter::Layer::PaintContext paintContext = {
-      nullptr,        surface->getCanvas(),    nullptr, nullptr, mock_stopwatch,
-      mock_stopwatch, unused_texture_registry, nullptr, false};
+      // clang-format off
+      .internal_nodes_canvas         = nullptr,
+      .leaf_nodes_canvas             = surface->getCanvas(),
+      .gr_context                    = nullptr,
+      .view_embedder                 = nullptr,
+      .raster_time                   = mock_stopwatch,
+      .ui_time                       = mock_stopwatch,
+      .texture_registry              = unused_texture_registry,
+      .raster_cache                  = nullptr,
+      .checkerboard_offscreen_layers = false,
+      .frame_device_pixel_ratio      = 1.0f,
+      // clang-format on
+  };
 
   // Specify font file to ensure the same font across different operation
   // systems.

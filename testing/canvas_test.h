@@ -19,6 +19,8 @@ class CanvasTestBase : public BaseT {
   CanvasTestBase() = default;
 
   MockCanvas& mock_canvas() { return canvas_; }
+  SkColorSpace* mock_color_space() { return canvas_.imageInfo().colorSpace(); }
+  SkNWayCanvas* mock_internal_canvas() { return canvas_.internal_canvas(); }
 
  private:
   MockCanvas canvas_;
