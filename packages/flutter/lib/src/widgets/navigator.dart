@@ -486,7 +486,6 @@ abstract class Route<T> {
   }
 
   /// Whether there is at least one active route underneath this route.
-  @protected
   bool get hasActiveRouteBelow {
     if (_navigator == null)
       return false;
