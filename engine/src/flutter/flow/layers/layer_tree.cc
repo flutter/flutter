@@ -38,19 +38,24 @@ bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
   frame.context().raster_cache().SetCheckboardCacheImages(
       checkerboard_raster_cache_images_);
   MutatorsStack stack;
+  RasterCache* cache =
+      ignore_raster_cache ? nullptr : &frame.context().raster_cache();
   PrerollContext context = {
-      ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
-      frame.gr_context(),
-      frame.view_embedder(),
-      stack,
-      color_space,
-      cull_rect,
-      false,
-      frame.context().raster_time(),
-      frame.context().ui_time(),
-      frame.context().texture_registry(),
-      checkerboard_offscreen_layers_,
-      device_pixel_ratio_};
+      // clang-format off
+      .raster_cache                  = cache,
+      .gr_context                    = frame.gr_context(),
+      .view_embedder                 = frame.view_embedder(),
+      .mutators_stack                = stack,
+      .dst_color_space               = color_space,
+      .cull_rect                     = cull_rect,
+      .surface_needs_readback        = false,
+      .raster_time                   = frame.context().raster_time(),
+      .ui_time                       = frame.context().ui_time(),
+      .texture_registry              = frame.context().texture_registry(),
+      .checkerboard_offscreen_layers = checkerboard_offscreen_layers_,
+      .frame_device_pixel_ratio      = device_pixel_ratio_,
+      // clang-format on
+  };
 
   root_layer_->Preroll(&context, frame.root_surface_transformation());
   return context.surface_needs_readback;
@@ -82,21 +87,25 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
     snapshot_store = &frame.context().snapshot_store();
   }
 
+  RasterCache* cache =
+      ignore_raster_cache ? nullptr : &frame.context().raster_cache();
   Layer::PaintContext context = {
-      static_cast<SkCanvas*>(&internal_nodes_canvas),
-      frame.canvas(),
-      frame.gr_context(),
-      frame.view_embedder(),
-      frame.context().raster_time(),
-      frame.context().ui_time(),
-      frame.context().texture_registry(),
-      ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
-      checkerboard_offscreen_layers_,
-      device_pixel_ratio_,
-      enable_leaf_layer_tracing_,
-      snapshot_store,
-      SK_Scalar1,
-      frame.display_list_builder(),
+      // clang-format off
+      .internal_nodes_canvas         = &internal_nodes_canvas,
+      .leaf_nodes_canvas             = frame.canvas(),
+      .gr_context                    = frame.gr_context(),
+      .view_embedder                 = frame.view_embedder(),
+      .raster_time                   = frame.context().raster_time(),
+      .ui_time                       = frame.context().ui_time(),
+      .texture_registry              = frame.context().texture_registry(),
+      .raster_cache                  = cache,
+      .checkerboard_offscreen_layers = checkerboard_offscreen_layers_,
+      .frame_device_pixel_ratio      = device_pixel_ratio_,
+      .layer_snapshot_store          = snapshot_store,
+      .enable_leaf_layer_tracing     = enable_leaf_layer_tracing_,
+      .inherited_opacity             = SK_Scalar1,
+      .leaf_nodes_builder            = frame.display_list_builder(),
+      // clang-format on
   };
 
   if (root_layer_->needs_painting(context)) {
@@ -122,18 +131,20 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
   root_surface_transformation.reset();
 
   PrerollContext preroll_context{
-      nullptr,                  // raster_cache (don't consult the cache)
-      nullptr,                  // gr_context  (used for the raster cache)
-      nullptr,                  // external view embedder
-      unused_stack,             // mutator stack
-      nullptr,                  // SkColorSpace* dst_color_space
-      kGiantRect,               // SkRect cull_rect
-      false,                    // layer reads from surface
-      unused_stopwatch,         // frame time (dont care)
-      unused_stopwatch,         // engine time (dont care)
-      unused_texture_registry,  // texture registry (not supported)
-      false,                    // checkerboard_offscreen_layers
-      device_pixel_ratio_       // ratio between logical and physical
+      // clang-format off
+      .raster_cache                  = nullptr,
+      .gr_context                    = nullptr,
+      .view_embedder                 = nullptr,
+      .mutators_stack                = unused_stack,
+      .dst_color_space               = nullptr,
+      .cull_rect                     = kGiantRect,
+      .surface_needs_readback        = false,
+      .raster_time                   = unused_stopwatch,
+      .ui_time                       = unused_stopwatch,
+      .texture_registry              = unused_texture_registry,
+      .checkerboard_offscreen_layers = false,
+      .frame_device_pixel_ratio      = device_pixel_ratio_
+      // clang-format on
   };
 
   SkISize canvas_size = canvas->getBaseLayerSize();
@@ -141,18 +152,20 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
   internal_nodes_canvas.addCanvas(canvas);
 
   Layer::PaintContext paint_context = {
-      static_cast<SkCanvas*>(&internal_nodes_canvas),
-      canvas,  // canvas
-      nullptr,
-      nullptr,
-      unused_stopwatch,         // frame time (dont care)
-      unused_stopwatch,         // engine time (dont care)
-      unused_texture_registry,  // texture registry (not supported)
-      nullptr,                  // raster cache
-      false,                    // checkerboard offscreen layers
-      device_pixel_ratio_,      // ratio between logical and physical
-      false,                    // enable_leaf_layer_tracing
-      nullptr                   // layer_snapshot_store
+      // clang-format off
+      .internal_nodes_canvas         = &internal_nodes_canvas,
+      .leaf_nodes_canvas             = canvas,
+      .gr_context                    = nullptr,
+      .view_embedder                 = nullptr,
+      .raster_time                   = unused_stopwatch,
+      .ui_time                       = unused_stopwatch,
+      .texture_registry              = unused_texture_registry,
+      .raster_cache                  = nullptr,
+      .checkerboard_offscreen_layers = false,
+      .frame_device_pixel_ratio      = device_pixel_ratio_,
+      .layer_snapshot_store          = nullptr,
+      .enable_leaf_layer_tracing     = false,
+      // clang-format on
   };
 
   // Even if we don't have a root layer, we still need to create an empty

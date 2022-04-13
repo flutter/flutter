@@ -54,7 +54,7 @@ struct PrerollContext {
   const Stopwatch& ui_time;
   TextureRegistry& texture_registry;
   const bool checkerboard_offscreen_layers;
-  const float frame_device_pixel_ratio;
+  const float frame_device_pixel_ratio = 1.0f;
 
   // These allow us to track properties like elevation, opacity, and the
   // prescence of a platform view during Preroll.
@@ -167,12 +167,12 @@ class Layer {
     TextureRegistry& texture_registry;
     const RasterCache* raster_cache;
     const bool checkerboard_offscreen_layers;
-    const float frame_device_pixel_ratio;
+    const float frame_device_pixel_ratio = 1.0f;
 
     // Snapshot store to collect leaf layer snapshots. The store is non-null
     // only when leaf layer tracing is enabled.
-    bool enable_leaf_layer_tracing = false;
     LayerSnapshotStore* layer_snapshot_store = nullptr;
+    bool enable_leaf_layer_tracing = false;
 
     // The following value should be used to modulate the opacity of the
     // layer during |Paint|. If the layer does not set the corresponding

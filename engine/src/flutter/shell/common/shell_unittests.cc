@@ -2474,16 +2474,21 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
         MutatorsStack mutators_stack;
         TextureRegistry texture_registry;
         PrerollContext preroll_context = {
-            nullptr,                 /* raster_cache */
-            nullptr,                 /* gr_context */
-            nullptr,                 /* external_view_embedder */
-            mutators_stack, nullptr, /* color_space */
-            kGiantRect,              /* cull_rect */
-            false,                   /* layer reads from surface */
-            raster_time,    ui_time, texture_registry,
-            false, /* checkerboard_offscreen_layers */
-            1.0f,  /* frame_device_pixel_ratio */
-            false, /* has_platform_view */
+            // clang-format off
+            .raster_cache                  = nullptr,
+            .gr_context                    = nullptr,
+            .view_embedder                 = nullptr,
+            .mutators_stack                = mutators_stack,
+            .dst_color_space               = nullptr,
+            .cull_rect                     = kGiantRect,
+            .surface_needs_readback        = false,
+            .raster_time                   = raster_time,
+            .ui_time                       = ui_time,
+            .texture_registry              = texture_registry,
+            .checkerboard_offscreen_layers = false,
+            .frame_device_pixel_ratio      = 1.0f,
+            .has_platform_view             = false,
+            // clang-format on
         };
 
         // 2.1. Rasterize the picture. Call Draw multiple times to pass the
