@@ -449,6 +449,11 @@ Shell::Shell(DartVMRef vm,
           task_runners_.GetRasterTaskRunner(),
           std::bind(&Shell::OnServiceProtocolEstimateRasterCacheMemory, this,
                     std::placeholders::_1, std::placeholders::_2)};
+  service_protocol_handlers_
+      [ServiceProtocol::kRenderFrameWithRasterStatsExtensionName] = {
+          task_runners_.GetRasterTaskRunner(),
+          std::bind(&Shell::OnServiceProtocolRenderFrameWithRasterStats, this,
+                    std::placeholders::_1, std::placeholders::_2)};
 }
 
 Shell::~Shell() {
@@ -1810,6 +1815,75 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
 
   FML_DCHECK(false);
   return false;
+}
+
+static rapidjson::Value SerializeLayerSnapshot(
+    const LayerSnapshotData& snapshot,
+    rapidjson::Document* response) {
+  auto& allocator = response->GetAllocator();
+  rapidjson::Value result;
+  result.SetObject();
+  result.AddMember("layer_unique_id", snapshot.GetLayerUniqueId(), allocator);
+  result.AddMember("duration_micros", snapshot.GetDuration().ToMicroseconds(),
+                   allocator);
+  sk_sp<SkData> snapshot_bytes = snapshot.GetSnapshot();
+  if (snapshot_bytes) {
+    rapidjson::Value image;
+    image.SetArray();
+    const uint8_t* data =
+        reinterpret_cast<const uint8_t*>(snapshot_bytes->data());
+    for (size_t i = 0; i < snapshot_bytes->size(); i++) {
+      image.PushBack(data[i], allocator);
+    }
+    result.AddMember("snapshot", image, allocator);
+  }
+  return result;
+}
+
+bool Shell::OnServiceProtocolRenderFrameWithRasterStats(
+    const ServiceProtocol::Handler::ServiceProtocolMap& params,
+    rapidjson::Document* response) {
+  FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
+
+  if (auto last_layer_tree = rasterizer_->GetLastLayerTree()) {
+    auto& allocator = response->GetAllocator();
+    response->SetObject();
+    response->AddMember("type", "RenderFrameWithRasterStats", allocator);
+
+    // When rendering the last layer tree, we do not need to build a frame,
+    // invariants in FrameTimingRecorder enforce that raster timings can not be
+    // set before build-end.
+    auto frame_timings_recorder = std::make_unique<FrameTimingsRecorder>();
+    const auto now = fml::TimePoint::Now();
+    frame_timings_recorder->RecordVsync(now, now);
+    frame_timings_recorder->RecordBuildStart(now);
+    frame_timings_recorder->RecordBuildEnd(now);
+
+    last_layer_tree->enable_leaf_layer_tracing(true);
+    rasterizer_->DrawLastLayerTree(std::move(frame_timings_recorder));
+    last_layer_tree->enable_leaf_layer_tracing(false);
+
+    rapidjson::Value snapshots;
+    snapshots.SetArray();
+
+    LayerSnapshotStore& store =
+        rasterizer_->compositor_context()->snapshot_store();
+    for (const LayerSnapshotData& data : store) {
+      snapshots.PushBack(SerializeLayerSnapshot(data, response), allocator);
+    }
+
+    response->AddMember("snapshots", snapshots, allocator);
+    return true;
+  } else {
+    const char* error =
+        "Failed to render the last frame with raster stats."
+        " Rasterizer does not hold a valid last layer tree."
+        " This could happen if this method was invoked before a frame was "
+        "rendered";
+    FML_DLOG(ERROR) << error;
+    ServiceProtocolFailureError(response, error);
+    return false;
+  }
 }
 
 Rasterizer::Screenshot Shell::Screenshot(
