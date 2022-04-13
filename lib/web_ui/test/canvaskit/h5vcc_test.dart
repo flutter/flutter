@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
-import 'dart:js' as js;
 
+import 'package:js/js.dart';
+import 'package:js/js_util.dart' as js_util;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -23,18 +24,18 @@ void testMain() {
     setUpAll(() async {
       // Set `window.h5vcc` to PatchedH5vcc which uses a downloaded CanvasKit.
       final CanvasKit downloadedCanvasKit = await downloadCanvasKit();
-      debugH5vccSetter = PatchedH5vcc(downloadedCanvasKit);
+      debugH5vccSetter = PatchedH5vcc(canvasKit: downloadedCanvasKit);
 
       // Monkey-patch the getH5vccSkSurface function of
       // `window.h5vcc.canvasKit`.
-      js.context['h5vcc']['canvasKit']['getH5vccSkSurface'] = () {
+      js_util.setProperty(h5vcc!.canvasKit!, 'getH5vccSkSurface', allowInterop(() {
         getH5vccSkSurfaceCalledCount++;
 
         // Returns a fake [SkSurface] object with a minimal implementation.
-        return js.JsObject.jsify(<String, dynamic>{
-          'dispose': () {}
+        return js_util.jsify(<String, dynamic>{
+          'dispose': allowInterop(() {})
         });
-      };
+      }));
     });
 
     setUpCanvasKitTest();
@@ -65,9 +66,9 @@ void testMain() {
   }, testOn: 'chrome');
 }
 
+@JS()
+@anonymous
+@staticInterop
 class PatchedH5vcc implements H5vcc {
-  @override
-  final CanvasKit canvasKit;
-
-  PatchedH5vcc(this.canvasKit);
+  external factory PatchedH5vcc({CanvasKit canvasKit});
 }
