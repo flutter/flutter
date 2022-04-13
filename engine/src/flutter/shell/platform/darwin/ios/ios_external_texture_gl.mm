@@ -9,6 +9,7 @@
 #import <OpenGLES/ES2/glext.h>
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkYUVAInfo.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
