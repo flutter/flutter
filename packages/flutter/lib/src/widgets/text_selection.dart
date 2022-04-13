@@ -20,6 +20,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
+import 'text_selection_gestures.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -2174,6 +2175,64 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       gestures: gestures,
       excludeFromSemantics: true,
       behavior: widget.behavior,
+      child: widget.child,
+    );
+  }
+}
+
+class TextSelectionGesturesDetector extends StatefulWidget {
+  const TextSelectionGesturesDetector({Key? key, required this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  State<TextSelectionGesturesDetector> createState() => _TextSelectionGesturesDetectorState();
+}
+
+class _TextSelectionGesturesDetectorState extends State<TextSelectionGesturesDetector> {
+  late TextSelectionGesturesManager manager;
+
+  Map<Type, GestureRecognizer>? _recognizers = const <Type, GestureRecognizer>{};
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    manager = TextSelectionGestures.of(context);
+    syncAllGestures(context, manager.gestures);
+  }
+
+  @override
+  void dispose() {
+    for (final GestureRecognizer recognizer in _recognizers!.values) {
+      recognizer.dispose();
+    }
+    _recognizers = null;
+    super.dispose();
+  }
+
+  void syncAllGestures(BuildContext context, Map<Type, ContextGestureRecognizerFactory> gestures) {
+    final Map<Type, GestureRecognizer> oldRecognizers = _recognizers!;
+    _recognizers = <Type, GestureRecognizer>{};
+    for (final Type type in gestures.keys) {
+      _recognizers![type] = oldRecognizers[type] ?? gestures[type]!.constructor(context);
+      gestures[type]!.initializer(_recognizers![type]!, context);
+    }
+    for (final Type type in oldRecognizers.keys) {
+      if (!_recognizers!.containsKey(type)) {
+        oldRecognizers[type]!.dispose();
+      }
+    }
+  }
+
+  void _handlePointerDown(BuildContext context, PointerDownEvent event) {
+    manager.handlePointerDown(context, event, _recognizers!);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: (PointerDownEvent event) => _handlePointerDown(context, event),
+      behavior: HitTestBehavior.translucent,
       child: widget.child,
     );
   }

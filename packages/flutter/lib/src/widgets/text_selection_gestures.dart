@@ -1,67 +1,63 @@
-import 'dart:async';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/src/services/text_input.dart';
-
-import 'actions.dart';
-import 'basic.dart';
-import 'focus_manager.dart';
-import 'framework.dart';
-import 'gesture_detector.dart';
-import 'text_editing_intents.dart';
-
-/// A duration that controls how often the drag selection update callback is
-/// called.
-const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
+import 'package:flutter/material.dart';
 
 class TextSelectionGestures extends StatefulWidget {
   const TextSelectionGestures({
     Key? key,
     this.manager,
-    required this.gestures,
-    this.behavior,
     required this.child,
-  }) : assert(child != null),
-        super(key: key);
+    required this.gestures,
+    this.behavior
+  }) : super(key: key);
 
-  const TextSelectionGestures.platformDefaults({
+  TextSelectionGestures.platformDefaults({
     Key? key,
+    TextSelectionGesturesManager? manager,
     required Widget child,
-  }) : this(key: key, gestures: _defaultTextSelectionGestures, child: child);
+  }) : this(
+    key: key,
+    manager: manager,
+    gestures: _defaultGestures,
+    child: child,
+  );
 
   final TextSelectionGesturesManager? manager;
 
-  final Map<GestureTrigger, Intent> gestures;
+  final Map<Type, ContextGestureRecognizerFactory> gestures;
 
-  /// How this gesture detector should behave during hit testing.
-  ///
-  /// This defaults to [HitTestBehavior.deferToChild].
-  final HitTestBehavior? behavior;
-
-  /// Child below this widget.
   final Widget child;
 
-  static const Map<GestureTrigger, Intent> _defaultTextSelectionGestures = <GestureTrigger, Intent>{
-    GestureTrigger(gesture: 'onTapDown') : ExtendSelectionToLastTapDownPositionIntent(lastTapDownPosition: Offset(4,4), cause: SelectionChangedCause.tap),
-    // GestureTrigger(gesture: 'onForcePressStart') : SelectWordsInRangeAndEnableToolbarIntent,
-    // GestureTrigger(gesture: 'onForcePressEnd') : SelectWordsInRangeAndShowToolbarIntent,
-    // GestureTrigger(gesture: 'onSingleTapUp') : SelectLastTapDownPositionIntent,
-    // GestureTrigger(gesture: 'onSingleTapCancel') : DoNothingIntent,
-    // GestureTrigger(gesture: 'onSingleLongTapStart') : SelectLastTapDownPositionIntent,
-    // GestureTrigger(gesture: 'onSingleLongTapMoveUpdate') : DoNothingIntent, //needs an intent
-    // GestureTrigger(gesture: 'onSingleLongTapEnd') : ShowToolbarIntent,
-    // GestureTrigger(gesture: 'onSecondaryTap') : SelectWordAtLastTapDownPositionAndShowToolbarIntent,
-    // GestureTrigger(gesture: 'onSecondaryTapDown') : SetLastAndSecondaryTapDownPositionAndEnableToolbarIntent,
-    // GestureTrigger(gesture: 'onDoubleTapDown') : SelectWordAtLastTapDownPositionAndShowToolbarIntent,
-    // GestureTrigger(gesture: 'onDragSelectionStart') : ExtendSelectionToLastTapDownPositionIntent,
-    // GestureTrigger(gesture: 'onDragSelectionUpdate') : DoNothingIntent, //needs an intent
-    // GestureTrigger(gesture: 'onDragSelectionEnd') : CleanUpShiftTappingStatesIntent,
+  final HitTestBehavior? behavior;
+
+  static TextSelectionGesturesManager of(BuildContext context) {
+    assert(context != null);
+    final _TextSelectionGesturesMarker? inherited = context.dependOnInheritedWidgetOfExactType<_TextSelectionGesturesMarker>();
+    assert(() {
+      if (inherited == null) {
+        throw FlutterError(
+            'Unable to find a TextSelectionGestures widget in the context.\n'
+        );
+      }
+      return true;
+    }());
+    return inherited!.manager;
+  }
+
+  static final Map<Type, ContextGestureRecognizerFactory> _defaultGestures = {
+    TapGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+            (BuildContext context) => TapGestureRecognizer(debugOwner: context),
+            (TapGestureRecognizer instance, BuildContext context) {
+          instance
+            ..onTapDown = (TapDownDetails details) {
+              print('default');
+              Actions.invoke(context, ExtendSelectionToLastTapDownPositionIntent(lastTapDownPosition: details.globalPosition, cause: SelectionChangedCause.tap));
+            };
+        }
+    )
   };
 
   @override
-  State<StatefulWidget> createState() => _TextSelectionGesturesState();
+  State<TextSelectionGestures> createState() => _TextSelectionGesturesState();
 }
 
 class _TextSelectionGesturesState extends State<TextSelectionGestures> {
@@ -85,160 +81,94 @@ class _TextSelectionGesturesState extends State<TextSelectionGestures> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-
-    gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-          () => TapGestureRecognizer(debugOwner: this),
-          (TapGestureRecognizer instance) {
-        instance
-          ..onSecondaryTap = () { manager.handleGestureTrigger(context, 'onSecondaryTap'); }
-          ..onSecondaryTapDown = (TapDownDetails details) { manager.handleGestureTrigger(context, 'onSecondaryTapDown'); }
-          ..onTapDown = (TapDownDetails details) { manager.handleGestureTrigger(context, 'onTapDown'); } // with handleGestureTrigger pass the intent. handleGestureTrigger(context, 'onTapDown', ExtendSelectionToLastTapDownPositionIntent(details))???
-          ..onTapUp = (TapUpDetails details) { manager.handleGestureTrigger(context, 'onTapUp'); }
-          ..onTapCancel = () { manager.handleGestureTrigger(context, 'onTapCancel'); };
-      },
-    );
-
-    if (manager.gestures['onLongPressStart'] != null ||
-        manager.gestures['onLongPressMoveUpdate'] != null ||
-        manager.gestures['onLongPressEnd'] != null) {
-      gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-            () => LongPressGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch}),
-            (LongPressGestureRecognizer instance) {
-          instance
-            ..onLongPressStart = (LongPressStartDetails details) { manager.handleGestureTrigger(context, 'onLongPressStart'); }
-            ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) { manager.handleGestureTrigger(context, 'onLongPressMoveUpdate'); }
-            ..onLongPressEnd = (LongPressEndDetails details) { manager.handleGestureTrigger(context, 'onLongPressEnd'); };
-        },
-      );
-    }
-
-    if (manager.gestures['onDragStart'] != null ||
-        manager.gestures['onDragUpdate'] != null ||
-        manager.gestures['onDragEnd'] != null) {
-      gestures[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-            () => PanGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
-            (PanGestureRecognizer instance) {
-          instance
-          // Text selection should start from the position of the first pointer
-          // down event.
-            ..dragStartBehavior = DragStartBehavior.down
-            ..onStart = (DragStartDetails details) { manager.handleGestureTrigger(context, 'onDragStart'); }
-            ..onUpdate = (DragUpdateDetails details) { manager.handleGestureTrigger(context, 'onDragUpdate'); }
-            ..onEnd = (DragEndDetails details) { manager.handleGestureTrigger(context, 'onDragEnd'); };
-        },
-      );
-    }
-
-    if (manager.gestures['onForcePressStart'] != null || manager.gestures['onForcePressEnd'] != null) {
-      gestures[ForcePressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
-            () => ForcePressGestureRecognizer(debugOwner: this),
-            (ForcePressGestureRecognizer instance) {
-          instance
-            ..onStart = manager.gestures['onForcePressStart'] != null ? (ForcePressDetails details) { manager.handleGestureTrigger(context, 'onForcePressStart'); }: null
-            ..onEnd = manager.gestures['onForcePressEnd'] != null ? (ForcePressDetails details) { manager.handleGestureTrigger(context, 'onForcePressEnd'); } : null;
-        },
-      );
-    }
-
-    return RawGestureDetector(
-      gestures: gestures,
-      excludeFromSemantics: true,
-      behavior: widget.behavior,
+    return _TextSelectionGesturesMarker(
+      manager: manager,
       child: widget.child,
     );
   }
 }
 
-class TextSelectionGesturesManager extends ChangeNotifier with Diagnosticable {
+class TextSelectionGesturesManager extends ChangeNotifier {
   TextSelectionGesturesManager({
-    Map<GestureTrigger, Intent> gestures = const <GestureTrigger, Intent>{},
-    this.modal = false,
+    Map<Type, ContextGestureRecognizerFactory> gestures = const <Type, ContextGestureRecognizerFactory>{},
   })  : assert(gestures != null),
         _gestures = gestures;
-
-  final bool modal;
-
-  Map<GestureTrigger, Intent> get gestures => _gestures;
-  Map<GestureTrigger, Intent> _gestures = <GestureTrigger, Intent>{};
-  set gestures(Map<GestureTrigger, Intent> value) {
-    assert(value != null);
-    if (!mapEquals<GestureTrigger, Intent>(_gestures, value)) {
-      _gestures = value;
-      _indexedGesturesCache = null;
-      notifyListeners();
-    }
-  }
-
-  static Map<String?, List<_TriggerIntentPair>> _indexGestures(Map<GestureTrigger, Intent> source) {
-    final Map<String?, List<_TriggerIntentPair>> result = <String?, List<_TriggerIntentPair>>{};
-    source.forEach((GestureTrigger trigger, Intent intent) {
-      // This intermediate variable is necessary to comply with Dart analyzer.
-      final String gesture = trigger.gesture;
-      result.putIfAbsent(gesture, () => <_TriggerIntentPair>[])
-          .add(_TriggerIntentPair(trigger, intent));
-    });
-    return result;
-  }
-  Map<String?, List<_TriggerIntentPair>> get _indexedGestures {
-    return _indexedGesturesCache ??= _indexGestures(_gestures);
-  }
-  Map<String?, List<_TriggerIntentPair>>? _indexedGesturesCache;
-
-  Intent? _find(String gestureTrigger) {
-    final List<_TriggerIntentPair>? candidatesByKey = _indexedGestures[gestureTrigger];
-    final List<_TriggerIntentPair>? candidatesByNull = _indexedGestures[null];
-    final List<_TriggerIntentPair> candidates = <_TriggerIntentPair>[
-      if (candidatesByKey != null) ...candidatesByKey,
-      if (candidatesByNull != null) ...candidatesByNull,
-    ];
-    for (final _TriggerIntentPair triggerIntent in candidates) {
-      return triggerIntent.intent;
-    }
-    return null;
+  
+  Map<Type, ContextGestureRecognizerFactory> _gestures = <Type, ContextGestureRecognizerFactory>{};
+  Map<Type, ContextGestureRecognizerFactory> get gestures => _gestures;
+  set gestures(Map<Type, ContextGestureRecognizerFactory> gestures) {
+    _gestures = gestures;
   }
 
   @protected
-  void handleGestureTrigger(BuildContext context, String gestureTrigger) {
-    assert(context != null);
-    final Intent? matchedIntent = _find(gestureTrigger);
-    if (matchedIntent != null) {
-      final BuildContext? primaryContext = primaryFocus?.context;
-      if (primaryContext != null) {
-        final Action<Intent>? action = Actions.maybeFind<Intent>(
-          primaryContext,
-          intent: matchedIntent,
-        );
-        if (action != null && action.isEnabled(matchedIntent)) {
-          Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
-        }
-      }
+  void handlePointerDown(BuildContext context, PointerDownEvent event, Map<Type, GestureRecognizer> recognizers) {
+    for (final GestureRecognizer recognizer in recognizers.values) {
+      recognizer.addPointer(event);
     }
   }
+}
 
+class LoggingTextSelectionGesturesManager extends TextSelectionGesturesManager {
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Map<GestureTrigger, Intent>>('gestures', _gestures));
-    properties.add(FlagProperty('modal', value: modal, ifTrue: 'modal', defaultValue: false));
+  void handlePointerDown(BuildContext context, PointerDownEvent event, Map<Type, GestureRecognizer> recognizers) {
+    for(GestureRecognizer recognizer in recognizers.values) {
+      if (recognizer.isPointerAllowed(event)) {
+        print('Handled text selection gesture $recognizer $event in $context');
+      }
+    }
+    super.handlePointerDown(context, event, recognizers);
   }
 }
 
-class GestureTrigger {
-  const GestureTrigger({required this.gesture});
+class _TextSelectionGesturesMarker extends InheritedNotifier<TextSelectionGesturesManager> {
+  const _TextSelectionGesturesMarker({
+    required TextSelectionGesturesManager manager,
+    required Widget child
+  }) : super(notifier: manager, child: child);
 
-  final String gesture;
+  TextSelectionGesturesManager get manager => super.notifier!;
 }
 
-class _TriggerIntentPair with Diagnosticable {
-  const _TriggerIntentPair(this.trigger, this.intent);
-  final GestureTrigger trigger;
-  final Intent intent;
+typedef ContextGestureRecognizerFactoryConstructor<T extends GestureRecognizer> = T Function(BuildContext context);
+
+typedef ContextGestureRecognizerFactoryInitializer<T extends GestureRecognizer> = void Function(T instance, BuildContext context);
+
+class ContextGestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends ContextGestureRecognizerFactory<T> {
+  /// Creates a gesture recognizer factory with the given callbacks.
+  ///
+  /// The arguments must not be null.
+  const ContextGestureRecognizerFactoryWithHandlers(this._constructor, this._initializer)
+      : assert(_constructor != null),
+        assert(_initializer != null);
+
+  final ContextGestureRecognizerFactoryConstructor<T> _constructor;
+
+  final ContextGestureRecognizerFactoryInitializer<T> _initializer;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('trigger', trigger.gesture));
-    properties.add(DiagnosticsProperty<Intent>('intent', intent));
+  T constructor(BuildContext context) => _constructor(context);
+
+  @override
+  void initializer(T instance, BuildContext context) => _initializer(instance, context);
+}
+
+@optionalTypeArgs
+abstract class ContextGestureRecognizerFactory<T extends GestureRecognizer> {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const ContextGestureRecognizerFactory();
+
+  /// Must return an instance of T.
+  T constructor(BuildContext context);
+
+  /// Must configure the given instance (which will have been created by
+  /// `constructor`).
+  ///
+  /// This normally means setting the callbacks.
+  void initializer(T instance, BuildContext context);
+
+  bool _debugAssertTypeMatches(Type type) {
+    assert(type == T, 'ContextGestureRecognizerFactory of type $T was used where type $type was specified.');
+    return true;
   }
 }
