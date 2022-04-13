@@ -674,7 +674,7 @@ class FragmentShaderManager {
   /// In general, this is not needed, but may be useful for debugging or edge cases.
   ui.FragmentProgram get program => _program;
 
-  /// Direct access to the the SPIR-V bytecode that was used to generate this class.
+  /// Direct access to the SPIR-V bytecode that was used to generate this class.
   ///
   /// In general, this is not needed, but may be useful for debugging or edge cases.
   ///
