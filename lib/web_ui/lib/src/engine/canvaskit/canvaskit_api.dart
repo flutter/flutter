@@ -61,7 +61,10 @@ abstract class H5vcc {
 
 @JS()
 @anonymous
-class CanvasKit {
+@staticInterop
+class CanvasKit {}
+
+extension CanvasKitExtension on CanvasKit {
   external SkBlendModeEnum get BlendMode;
   external SkPaintStyleEnum get PaintStyle;
   external SkStrokeCapEnum get StrokeCap;
@@ -191,6 +194,7 @@ extension CanvasKitInitPromiseExtension on CanvasKitInitPromise {
 external ColorSpace get SkColorSpaceSRGB;
 
 @JS()
+@staticInterop
 class ColorSpace {}
 
 @JS()
@@ -229,13 +233,19 @@ extension SkGrContextExtension on SkGrContext {
 
 @JS()
 @anonymous
-class SkFontSlantEnum {
+@staticInterop
+class SkFontSlantEnum {}
+
+extension SkFontSlantEnumExtension on SkFontSlantEnum {
   external SkFontSlant get Upright;
   external SkFontSlant get Italic;
 }
 
 @JS('window.flutterCanvasKit.FontSlant')
-class SkFontSlant {
+@staticInterop
+class SkFontSlant {}
+
+extension SkFontSlantExtension on SkFontSlant {
   external int get value;
 }
 
@@ -250,7 +260,10 @@ SkFontSlant toSkFontSlant(ui.FontStyle style) {
 
 @JS()
 @anonymous
-class SkFontWeightEnum {
+@staticInterop
+class SkFontWeightEnum {}
+
+extension SkFontWeightEnumExtension on SkFontWeightEnum {
   external SkFontWeight get Thin;
   external SkFontWeight get ExtraLight;
   external SkFontWeight get Light;
@@ -263,7 +276,10 @@ class SkFontWeightEnum {
 }
 
 @JS()
-class SkFontWeight {
+@staticInterop
+class SkFontWeight {}
+
+extension SkFontWeightExtension on SkFontWeight {
   external int get value;
 }
 
@@ -284,13 +300,19 @@ SkFontWeight toSkFontWeight(ui.FontWeight weight) {
 }
 
 @JS()
-class SkAffinityEnum {
+@staticInterop
+class SkAffinityEnum {}
+
+extension SkAffinityEnumExtension on SkAffinityEnum {
   external SkAffinity get Upstream;
   external SkAffinity get Downstream;
 }
 
 @JS()
-class SkAffinity {
+@staticInterop
+class SkAffinity {}
+
+extension SkAffinityExtension on SkAffinity {
   external int get value;
 }
 
@@ -304,13 +326,19 @@ SkAffinity toSkAffinity(ui.TextAffinity affinity) {
 }
 
 @JS()
-class SkTextDirectionEnum {
+@staticInterop
+class SkTextDirectionEnum {}
+
+extension SkTextDirectionEnumExtension on SkTextDirectionEnum {
   external SkTextDirection get RTL;
   external SkTextDirection get LTR;
 }
 
 @JS()
-class SkTextDirection {
+@staticInterop
+class SkTextDirection {}
+
+extension SkTextDirectionExtension on SkTextDirection {
   external int get value;
 }
 
@@ -326,7 +354,10 @@ SkTextDirection toSkTextDirection(ui.TextDirection direction) {
 }
 
 @JS()
-class SkTextAlignEnum {
+@staticInterop
+class SkTextAlignEnum {}
+
+extension SkTextAlignEnumExtension on SkTextAlignEnum {
   external SkTextAlign get Left;
   external SkTextAlign get Right;
   external SkTextAlign get Center;
@@ -336,7 +367,10 @@ class SkTextAlignEnum {
 }
 
 @JS()
-class SkTextAlign {
+@staticInterop
+class SkTextAlign {}
+
+extension SkTextAlignExtension on SkTextAlign {
   external int get value;
 }
 
