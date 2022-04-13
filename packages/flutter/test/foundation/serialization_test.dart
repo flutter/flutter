@@ -127,5 +127,8 @@ void main() {
     test('empty WriteBuffer', () {
       expect(() => WriteBuffer(startCapacity: 0), throwsAssertionError);
     });
+    test('size 1', () {
+      expect(() => WriteBuffer(startCapacity: 1), returnsNormally);
+    });
   });
 }
