@@ -299,3 +299,25 @@ void frameCallback(_Image, int) {
   // 'ItDoesNotCrashThatSkiaUnrefQueueDrainAfterIOManagerReset'.
   // The test is a regression test and doesn't care about images, so it is empty.
 }
+
+Picture CreateRedBox(Size size) {
+  Paint paint = Paint()
+    ..color = Color.fromARGB(255, 255, 0, 0)
+    ..style = PaintingStyle.fill;
+  PictureRecorder baseRecorder = PictureRecorder();
+  Canvas canvas = Canvas(baseRecorder);
+  canvas.drawRect(Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
+  return baseRecorder.endRecording();
+}
+
+@pragma('vm:entry-point')
+void scene_with_red_box() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0.0, 0.0);
+    builder.addPicture(Offset(0.0, 0.0), CreateRedBox(Size(2.0, 2.0)));
+    builder.pop();
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}

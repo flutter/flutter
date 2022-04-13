@@ -29,6 +29,7 @@ class ServiceProtocol {
   static const std::string_view kGetDisplayRefreshRateExtensionName;
   static const std::string_view kGetSkSLsExtensionName;
   static const std::string_view kEstimateRasterCacheMemoryExtensionName;
+  static const std::string_view kRenderFrameWithRasterStatsExtensionName;
 
   class Handler {
    public:
