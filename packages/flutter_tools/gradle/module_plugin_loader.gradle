@@ -40,17 +40,13 @@ String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolute
 gradle.getGradle().projectsLoaded { g ->
     g.rootProject.beforeEvaluate { p ->
         p.subprojects { sp ->
-            //only flutter submodules.
             if (androidPlugins != null) {
                 String sanitizedPluginName = sp.name.replace(":", "");
-                //matching submodule, which one's name on the `pluginsFile`.
                 if (androidPlugins.name.contains(sanitizedPluginName)){
                     File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator + File.separator + "plugins_build_output" + File.separator + sanitizedPluginName);
                     if (!androidPluginBuildOutputDir.exists()){
-                        //make dir if not exist.
                         androidPluginBuildOutputDir.mkdirs()
                     }
-                    //let the plugin's output generated in flutter/.android/plugins_build_output/${androidPlugin.name}.
                     sp.buildDir = androidPluginBuildOutputDir
                 }
             }
