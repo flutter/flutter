@@ -67,45 +67,21 @@ Future<void> main() async {
           ]);
         });
 
-        final String outputAarDirectoryOld = path.join(
+        final String outputAarDirectory = path.join(
           flutterProject.rootPath,
           'build/host/outputs/repo/com/example/${flutterProject.name}/flutter_release/1.0/flutter_release-1.0.aar',
         );
-        final Iterable<String> oldAarFiles = await getFilesInAar(outputAarDirectoryOld);
+        final Iterable<String> aarFiles = await getFilesInAar(outputAarDirectory);
 
         checkCollectionContains<String>(<String>[
           ...flutterAssets,
           'jni/armeabi-v7a/libapp.so',
-        ], oldAarFiles);
-
-        final String outputAarDirectoryNew = path.join(
-          flutterProject.rootPath,
-          'build/host/outputs/repo/com/example/${flutterProject.name}/flutter/1.0/flutter-1.0-release.aar',
-        );
-        final Iterable<String> newAarFiles = await getFilesInAar(outputAarDirectoryNew);
-
-        checkCollectionContains<String>(<String>[
-          ...flutterAssets,
-          'jni/armeabi-v7a/libapp.so',
-        ], newAarFiles);
+        ], aarFiles);
 
         // Verify that an identifier from the Dart project code is not present
         // in the compiled binary.
         await inDirectory(flutterProject.rootPath, () async {
-          await exec('unzip', <String>[outputAarDirectoryOld]);
-          checkFileExists(path.join(flutterProject.rootPath, 'jni/armeabi-v7a/libapp.so'));
-          final String response = await eval(
-            'grep',
-            <String>[flutterProject.name, 'jni/armeabi-v7a/libapp.so'],
-            canFail: true,
-          );
-          if (response.trim().contains('matches')) {
-            foundAarProjectName = true;
-          }
-        });
-
-        await inDirectory(flutterProject.rootPath, () async {
-          await exec('unzip', <String>[outputAarDirectoryNew]);
+          await exec('unzip', <String>[outputAarDirectory]);
           checkFileExists(path.join(flutterProject.rootPath, 'jni/armeabi-v7a/libapp.so'));
           final String response = await eval(
             'grep',
