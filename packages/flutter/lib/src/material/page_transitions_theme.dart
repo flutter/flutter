@@ -325,11 +325,7 @@ class _ZoomEnterTransition extends StatelessWidget {
       },
       child: FadeTransition(
         opacity: fadeTransition,
-        child: ScaleTransition(
-          scale: scaleTransition,
-          filterQuality: FilterQuality.none,
-          child: child,
-        ),
+        child: ScaleTransition(scale: scaleTransition, child: child),
       ),
     );
   }
@@ -376,11 +372,7 @@ class _ZoomExitTransition extends StatelessWidget {
 
     return FadeTransition(
       opacity: fadeTransition,
-      child: ScaleTransition(
-        scale: scaleTransition,
-        filterQuality: FilterQuality.none,
-        child: child,
-      ),
+      child: ScaleTransition(scale: scaleTransition, child: child),
     );
   }
 }
