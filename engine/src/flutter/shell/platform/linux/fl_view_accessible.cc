@@ -29,7 +29,7 @@ static FlAccessibleNode* get_node(FlViewAccessible* self, int32_t id) {
   FlView* view = FL_VIEW(gtk_accessible_get_widget(GTK_ACCESSIBLE(self)));
   node = fl_accessible_node_new(fl_view_get_engine(view), id);
   if (id == 0) {
-    fl_accessible_node_set_parent(node, ATK_OBJECT(self));
+    fl_accessible_node_set_parent(node, ATK_OBJECT(self), 0);
   }
   g_hash_table_insert(self->semantics_nodes_by_id, GINT_TO_POINTER(id),
                       reinterpret_cast<gpointer>(node));
@@ -91,7 +91,7 @@ void fl_view_accessible_handle_update_semantics_node(
   for (size_t i = 0; i < node->child_count; i++) {
     FlAccessibleNode* child =
         get_node(self, node->children_in_traversal_order[i]);
-    fl_accessible_node_set_parent(child, ATK_OBJECT(atk_node));
+    fl_accessible_node_set_parent(child, ATK_OBJECT(atk_node), i);
     g_ptr_array_add(children, child);
   }
   fl_accessible_node_set_children(atk_node, children);
