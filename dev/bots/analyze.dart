@@ -88,79 +88,78 @@ Future<void> run(List<String> arguments) async {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  //print('$clock All tool test files end in _test.dart...');
-  //await verifyToolTestsEndInTestDart(flutterRoot);
+  print('$clock All tool test files end in _test.dart...');
+  await verifyToolTestsEndInTestDart(flutterRoot);
 
-  //print('$clock No sync*/async*');
-  //await verifyNoSyncAsyncStar(flutterPackages);
-  //await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
+  print('$clock No sync*/async*');
+  await verifyNoSyncAsyncStar(flutterPackages);
+  await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
 
-  //print('$clock No runtimeType in toString...');
-  //await verifyNoRuntimeTypeInToString(flutterRoot);
+  print('$clock No runtimeType in toString...');
+  await verifyNoRuntimeTypeInToString(flutterRoot);
 
-  //print('$clock Debug mode instead of checked mode...');
-  //await verifyNoCheckedMode(flutterRoot);
+  print('$clock Debug mode instead of checked mode...');
+  await verifyNoCheckedMode(flutterRoot);
 
-  //print('$clock Links for creating GitHub issues');
-  //await verifyIssueLinks(flutterRoot);
+  print('$clock Links for creating GitHub issues');
+  await verifyIssueLinks(flutterRoot);
 
-  //print('$clock Unexpected binaries...');
-  //await verifyNoBinaries(flutterRoot);
+  print('$clock Unexpected binaries...');
+  await verifyNoBinaries(flutterRoot);
 
-  //print('$clock Trailing spaces...');
-  //await verifyNoTrailingSpaces(flutterRoot); // assumes no unexpected binaries, so should be after verifyNoBinaries
+  print('$clock Trailing spaces...');
+  await verifyNoTrailingSpaces(flutterRoot); // assumes no unexpected binaries, so should be after verifyNoBinaries
 
-  //print('$clock Deprecations...');
-  //await verifyDeprecations(flutterRoot);
+  print('$clock Deprecations...');
+  await verifyDeprecations(flutterRoot);
 
-  //print('$clock Goldens...');
-  //await verifyGoldenTags(flutterPackages);
+  print('$clock Goldens...');
+  await verifyGoldenTags(flutterPackages);
 
-  //print('$clock Skip test comments...');
-  //await verifySkipTestComments(flutterRoot);
+  print('$clock Skip test comments...');
+  await verifySkipTestComments(flutterRoot);
 
-  //print('$clock Licenses...');
-  //await verifyNoMissingLicense(flutterRoot);
+  print('$clock Licenses...');
+  await verifyNoMissingLicense(flutterRoot);
 
-  //print('$clock Test imports...');
-  //await verifyNoTestImports(flutterRoot);
+  print('$clock Test imports...');
+  await verifyNoTestImports(flutterRoot);
 
-  //print('$clock Bad imports (framework)...');
-  //await verifyNoBadImportsInFlutter(flutterRoot);
+  print('$clock Bad imports (framework)...');
+  await verifyNoBadImportsInFlutter(flutterRoot);
 
-  //print('$clock Bad imports (tools)...');
-  //await verifyNoBadImportsInFlutterTools(flutterRoot);
+  print('$clock Bad imports (tools)...');
+  await verifyNoBadImportsInFlutterTools(flutterRoot);
 
-  //print('$clock Internationalization...');
-  //await verifyInternationalizations(flutterRoot, dart);
+  print('$clock Internationalization...');
+  await verifyInternationalizations(flutterRoot, dart);
 
-  //print('$clock Integration test timeouts...');
-  //await verifyIntegrationTestTimeouts(flutterRoot);
+  print('$clock Integration test timeouts...');
+  await verifyIntegrationTestTimeouts(flutterRoot);
 
-  //print('$clock null initialized debug fields...');
-  //await verifyNullInitializedDebugExpensiveFields(flutterRoot);
+  print('$clock null initialized debug fields...');
+  await verifyNullInitializedDebugExpensiveFields(flutterRoot);
 
-  //// Ensure that all package dependencies are in sync.
-  //print('$clock Package dependencies...');
-  //await runCommand(flutter, <String>['update-packages', '--verify-only'],
-  //  workingDirectory: flutterRoot,
-  //);
+  // Ensure that all package dependencies are in sync.
+  print('$clock Package dependencies...');
+  await runCommand(flutter, <String>['update-packages', '--verify-only'],
+    workingDirectory: flutterRoot,
+  );
 
-  ///// Ensure that no new dependencies have been accidentally
-  ///// added to core packages.
-  //print('$clock Package Allowlist...');
-  //await _checkConsumerDependencies();
+  /// Ensure that no new dependencies have been accidentally
+  /// added to core packages.
+  print('$clock Package Allowlist...');
+  await _checkConsumerDependencies();
 
-  //// Analyze all the Dart code in the repo.
-  //print('$clock Dart analysis...');
-  //await _runFlutterAnalyze(flutterRoot, options: <String>[
-  //  '--flutter-repo',
-  //  ...arguments,
-  //]);
+  // Analyze all the Dart code in the repo.
+  print('$clock Dart analysis...');
+  await _runFlutterAnalyze(flutterRoot, options: <String>[
+    '--flutter-repo',
+    ...arguments,
+  ]);
 
   print('$clock Executable allowlist...');
   await _checkForNewExecutables();
-  exit(0);
 
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
