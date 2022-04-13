@@ -10,7 +10,10 @@ declare_args() {
   impeller_enable_playground = false
 
   # Whether Impeller is supported on the platform.
-  impeller_supports_platform = is_mac || is_ios
+  impeller_supports_platform = true
+
+  # Whether Impeller shaders are supported on the platform.
+  impeller_shaders_supports_platform = is_mac || is_ios
 }
 
 # ------------------------------------------------------------------------------
@@ -289,7 +292,7 @@ template("impeller_shaders_real") {
 # @see             impeller_shaders_real
 #
 template("impeller_shaders") {
-  if (impeller_supports_platform) {
+  if (impeller_shaders_supports_platform) {
     impeller_shaders_real(target_name) {
       forward_variables_from(invoker, "*")
     }

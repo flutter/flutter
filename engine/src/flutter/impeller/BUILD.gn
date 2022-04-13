@@ -12,6 +12,10 @@ config("impeller_public_config") {
   if (impeller_supports_platform) {
     defines += [ "IMPELLER_SUPPORTS_PLATFORM=1" ]
   }
+
+  if (is_win) {
+    defines += [ "_USE_MATH_DEFINES" ]
+  }
 }
 
 group("impeller") {
