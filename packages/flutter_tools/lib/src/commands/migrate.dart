@@ -24,7 +24,7 @@ class MigrateCommand extends FlutterCommand {
     required FileSystem fileSystem,
     required Terminal terminal,
   }) : _verbose = verbose {
-    addSubcommand(MigrateAbandonCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));
+    addSubcommand(MigrateAbandonCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, terminal: terminal));
     addSubcommand(MigrateApplyCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, terminal: terminal));
     addSubcommand(MigrateResolveConflictsCommand(logger: logger, fileSystem: fileSystem, terminal: terminal));
     addSubcommand(MigrateStartCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));

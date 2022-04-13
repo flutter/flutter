@@ -69,6 +69,7 @@ const List<String> _skippedMergeFileExt = <String>[
 ];
 
 const Set<String> _alwaysMigrateFiles = <String>{
+  '.metadata', // .metadata tracks key migration information.
   'android/gradle/wrapper/gradle-wrapper.jar',
   // Always add .gitignore back in even if user-deleted as it makes it
   // difficult to migrate in the future and the migrate tool enforces git
