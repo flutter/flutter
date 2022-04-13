@@ -55,7 +55,10 @@ external set debugH5vccSetter(H5vcc? value);
 
 @JS()
 @anonymous
-abstract class H5vcc {
+@staticInterop
+abstract class H5vcc {}
+
+extension H5vccExtension on H5vcc {
   external CanvasKit? get canvasKit;
 }
 
