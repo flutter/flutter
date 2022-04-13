@@ -128,8 +128,6 @@ void main() {
       '     RepaintBoundary-[GlobalKey#00000]\n'
       '     IgnorePointer\n'
       '     AnimatedBuilder\n'
-      '     RepaintBoundary\n'
-      '     _FadeTransition\n'
       '     FadeTransition\n'
       '     FractionalTranslation\n'
       '     SlideTransition\n'
