@@ -62,3 +62,8 @@ FlEngine* make_mock_engine_with_project(FlDartProject* project) {
 
   return static_cast<FlEngine*>(g_object_ref(engine));
 }
+
+void PrintTo(FlValue* v, std::ostream* os) {
+  g_autofree gchar* s = fl_value_to_string(v);
+  *os << s;
+}
