@@ -16,12 +16,12 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity() const {
   switch (style) {
     case Style::kFill: {
       auto solid_color = std::make_shared<SolidColorContents>();
-      solid_color->SetColor(color.Premultiply());
+      solid_color->SetColor(color);
       return solid_color;
     }
     case Style::kStroke: {
       auto solid_stroke = std::make_shared<SolidStrokeContents>();
-      solid_stroke->SetColor(color.Premultiply());
+      solid_stroke->SetColor(color);
       solid_stroke->SetStrokeSize(stroke_width);
       solid_stroke->SetStrokeMiter(stroke_miter);
       solid_stroke->SetStrokeCap(stroke_cap);
