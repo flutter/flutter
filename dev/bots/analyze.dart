@@ -88,75 +88,79 @@ Future<void> run(List<String> arguments) async {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  print('$clock All tool test files end in _test.dart...');
-  await verifyToolTestsEndInTestDart(flutterRoot);
+  //print('$clock All tool test files end in _test.dart...');
+  //await verifyToolTestsEndInTestDart(flutterRoot);
 
-  print('$clock No sync*/async*');
-  await verifyNoSyncAsyncStar(flutterPackages);
-  await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
+  //print('$clock No sync*/async*');
+  //await verifyNoSyncAsyncStar(flutterPackages);
+  //await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
 
-  print('$clock No runtimeType in toString...');
-  await verifyNoRuntimeTypeInToString(flutterRoot);
+  //print('$clock No runtimeType in toString...');
+  //await verifyNoRuntimeTypeInToString(flutterRoot);
 
-  print('$clock Debug mode instead of checked mode...');
-  await verifyNoCheckedMode(flutterRoot);
+  //print('$clock Debug mode instead of checked mode...');
+  //await verifyNoCheckedMode(flutterRoot);
 
-  print('$clock Links for creating GitHub issues');
-  await verifyIssueLinks(flutterRoot);
+  //print('$clock Links for creating GitHub issues');
+  //await verifyIssueLinks(flutterRoot);
 
-  print('$clock Unexpected binaries...');
-  await verifyNoBinaries(flutterRoot);
+  //print('$clock Unexpected binaries...');
+  //await verifyNoBinaries(flutterRoot);
 
-  print('$clock Trailing spaces...');
-  await verifyNoTrailingSpaces(flutterRoot); // assumes no unexpected binaries, so should be after verifyNoBinaries
+  //print('$clock Trailing spaces...');
+  //await verifyNoTrailingSpaces(flutterRoot); // assumes no unexpected binaries, so should be after verifyNoBinaries
 
-  print('$clock Deprecations...');
-  await verifyDeprecations(flutterRoot);
+  //print('$clock Deprecations...');
+  //await verifyDeprecations(flutterRoot);
 
-  print('$clock Goldens...');
-  await verifyGoldenTags(flutterPackages);
+  //print('$clock Goldens...');
+  //await verifyGoldenTags(flutterPackages);
 
-  print('$clock Skip test comments...');
-  await verifySkipTestComments(flutterRoot);
+  //print('$clock Skip test comments...');
+  //await verifySkipTestComments(flutterRoot);
 
-  print('$clock Licenses...');
-  await verifyNoMissingLicense(flutterRoot);
+  //print('$clock Licenses...');
+  //await verifyNoMissingLicense(flutterRoot);
 
-  print('$clock Test imports...');
-  await verifyNoTestImports(flutterRoot);
+  //print('$clock Test imports...');
+  //await verifyNoTestImports(flutterRoot);
 
-  print('$clock Bad imports (framework)...');
-  await verifyNoBadImportsInFlutter(flutterRoot);
+  //print('$clock Bad imports (framework)...');
+  //await verifyNoBadImportsInFlutter(flutterRoot);
 
-  print('$clock Bad imports (tools)...');
-  await verifyNoBadImportsInFlutterTools(flutterRoot);
+  //print('$clock Bad imports (tools)...');
+  //await verifyNoBadImportsInFlutterTools(flutterRoot);
 
-  print('$clock Internationalization...');
-  await verifyInternationalizations(flutterRoot, dart);
+  //print('$clock Internationalization...');
+  //await verifyInternationalizations(flutterRoot, dart);
 
-  print('$clock Integration test timeouts...');
-  await verifyIntegrationTestTimeouts(flutterRoot);
+  //print('$clock Integration test timeouts...');
+  //await verifyIntegrationTestTimeouts(flutterRoot);
 
-  print('$clock null initialized debug fields...');
-  await verifyNullInitializedDebugExpensiveFields(flutterRoot);
+  //print('$clock null initialized debug fields...');
+  //await verifyNullInitializedDebugExpensiveFields(flutterRoot);
 
-  // Ensure that all package dependencies are in sync.
-  print('$clock Package dependencies...');
-  await runCommand(flutter, <String>['update-packages', '--verify-only'],
-    workingDirectory: flutterRoot,
-  );
+  //// Ensure that all package dependencies are in sync.
+  //print('$clock Package dependencies...');
+  //await runCommand(flutter, <String>['update-packages', '--verify-only'],
+  //  workingDirectory: flutterRoot,
+  //);
 
-  /// Ensure that no new dependencies have been accidentally
-  /// added to core packages.
-  print('$clock Package Allowlist...');
-  await _checkConsumerDependencies();
+  ///// Ensure that no new dependencies have been accidentally
+  ///// added to core packages.
+  //print('$clock Package Allowlist...');
+  //await _checkConsumerDependencies();
 
-  // Analyze all the Dart code in the repo.
-  print('$clock Dart analysis...');
-  await _runFlutterAnalyze(flutterRoot, options: <String>[
-    '--flutter-repo',
-    ...arguments,
-  ]);
+  //// Analyze all the Dart code in the repo.
+  //print('$clock Dart analysis...');
+  //await _runFlutterAnalyze(flutterRoot, options: <String>[
+  //  '--flutter-repo',
+  //  ...arguments,
+  //]);
+
+  print('$clock Executable allowlist...');
+  await _checkForNewExecutables();
+  exit(0);
 
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
@@ -1680,6 +1684,63 @@ Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
     <String>['analyze', ...options],
     workingDirectory: workingDirectory,
   );
+}
+
+// These files legitimately require executable permissions
+const Set<String> kExecutableAllowlist = <String>{
+  'bin/dart',
+  'bin/flutter',
+  'bin/internal/update_dart_sdk.sh',
+
+  'dev/bots/accept_android_sdk_licenses.sh',
+  'dev/bots/codelabs_build_test.sh',
+  'dev/bots/docs.sh',
+
+  'dev/conductor/bin/conductor',
+  'dev/conductor/core/lib/src/proto/compile_proto.sh',
+
+  'dev/customer_testing/ci.sh',
+
+  'dev/integration_tests/flutter_gallery/tool/run_instrumentation_test.sh',
+
+  'dev/integration_tests/ios_add2app_life_cycle/build_and_test.sh',
+
+  'dev/integration_tests/deferred_components_test/download_assets.sh',
+  'dev/integration_tests/deferred_components_test/run_release_test.sh',
+
+  'dev/tools/gen_keycodes/bin/gen_keycodes',
+  'dev/tools/repackage_gradle_wrapper.sh',
+
+  'packages/flutter_tools/bin/macos_assemble.sh',
+  'packages/flutter_tools/bin/tool_backend.sh',
+  'packages/flutter_tools/bin/xcode_backend.sh',
+};
+
+Future<void> _checkForNewExecutables() async {
+  // 0b001001001
+  const int executableBitMask = 0x49;
+
+  final List<File> files = await _gitFiles(flutterRoot);
+  int unexpectedExecutableCount = 0;
+  for (final File file in files) {
+    final String relativePath = path.relative(
+      file.path,
+      from: flutterRoot,
+    );
+    final FileStat stat = file.statSync();
+    final bool isExecutable = stat.mode & executableBitMask != 0x0;
+    if (isExecutable && !kExecutableAllowlist.contains(relativePath)) {
+      unexpectedExecutableCount += 1;
+      print('$relativePath is executable: ${(stat.mode & 0x1FF).toRadixString(2)}');
+    }
+  }
+  if (unexpectedExecutableCount > 0) {
+    throw Exception(
+      'found $unexpectedExecutableCount unexpected executable file'
+      '${unexpectedExecutableCount == 1 ? '' : 's'}! If this was intended, you '
+      'must add this file to kExecutableAllowlist in dev/bots/analyze.dart',
+    );
+  }
 }
 
 final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');
