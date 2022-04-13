@@ -1,4 +1,4 @@
-Signature: a76c665a527a298ba502e221ff131b30
+Signature: 33aa88aa8d2685e5cc5f4223f189985b
 
 UNUSED LICENSES:
 
@@ -785,6 +785,7 @@ FILE: ../../../third_party/skia/include/pathops/BUILD.bazel
 FILE: ../../../third_party/skia/include/ports/BUILD.bazel
 FILE: ../../../third_party/skia/include/private/BUILD.bazel
 FILE: ../../../third_party/skia/include/private/chromium/BUILD.bazel
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/BUILD.bazel
 FILE: ../../../third_party/skia/include/private/gpu/graphite/BUILD.bazel
 FILE: ../../../third_party/skia/include/sksl/BUILD.bazel
 FILE: ../../../third_party/skia/include/svg/BUILD.bazel
@@ -2743,9 +2744,9 @@ FILE: ../../../third_party/skia/include/gpu/graphite/SkStuff.h
 FILE: ../../../third_party/skia/include/gpu/graphite/TextureInfo.h
 FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlTypes.h
-FILE: ../../../third_party/skia/include/private/GrDawnTypesPriv.h
-FILE: ../../../third_party/skia/include/private/GrMockTypesPriv.h
 FILE: ../../../third_party/skia/include/private/chromium/GrSlug.h
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrDawnTypesPriv.h
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrMockTypesPriv.h
 FILE: ../../../third_party/skia/include/sksl/DSLSymbols.h
 FILE: ../../../third_party/skia/include/sksl/SkSLOperator.h
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings_gen.cpp
@@ -3435,10 +3436,10 @@ FILE: ../../../third_party/skia/include/effects/SkLumaColorFilter.h
 FILE: ../../../third_party/skia/include/effects/SkPerlinNoiseShader.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLExtensions.h
 FILE: ../../../third_party/skia/include/ports/SkFontConfigInterface.h
-FILE: ../../../third_party/skia/include/private/GrTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkOnce.h
 FILE: ../../../third_party/skia/include/private/SkTFitsIn.h
 FILE: ../../../third_party/skia/include/private/SkTLogic.h
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrTypesPriv.h
 FILE: ../../../third_party/skia/include/utils/SkCanvasStateUtils.h
 FILE: ../../../third_party/skia/samplecode/SampleChart.cpp
 FILE: ../../../third_party/skia/samplecode/SampleClock.cpp
@@ -3565,8 +3566,8 @@ FILE: ../../../third_party/skia/gm/skbug_9319.cpp
 FILE: ../../../third_party/skia/include/effects/SkImageFilters.h
 FILE: ../../../third_party/skia/include/effects/SkRuntimeEffect.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleHelpers.h
-FILE: ../../../third_party/skia/include/private/GrGLTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkThreadAnnotations.h
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrGLTypesPriv.h
 FILE: ../../../third_party/skia/modules/canvaskit/WasmCommon.h
 FILE: ../../../third_party/skia/modules/canvaskit/debugger_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings.cpp
@@ -3730,10 +3731,10 @@ FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkarounds.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkMemoryAllocator.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkVulkan.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_fuchsia.h
-FILE: ../../../third_party/skia/include/private/GrVkTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkMacros.h
 FILE: ../../../third_party/skia/include/private/SkSafe32.h
 FILE: ../../../third_party/skia/include/private/SkTo.h
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrVkTypesPriv.h
 FILE: ../../../third_party/skia/include/utils/SkAnimCodecPlayer.h
 FILE: ../../../third_party/skia/include/utils/SkTextUtils.h
 FILE: ../../../third_party/skia/modules/skottie/include/SkottieProperty.h
@@ -4230,9 +4231,9 @@ FILE: ../../../third_party/skia/include/gpu/GrYUVABackendTextures.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypes.h
 FILE: ../../../third_party/skia/include/ports/SkImageGeneratorNDK.h
-FILE: ../../../third_party/skia/include/private/GrD3DTypesMinimal.h
 FILE: ../../../third_party/skia/include/private/SkIDChangeListener.h
 FILE: ../../../third_party/skia/include/private/SkSLSampleUsage.h
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrD3DTypesMinimal.h
 FILE: ../../../third_party/skia/include/sksl/DSL.h
 FILE: ../../../third_party/skia/include/sksl/DSLCore.h
 FILE: ../../../third_party/skia/include/sksl/DSLExpression.h
@@ -5761,7 +5762,7 @@ FILE: ../../../third_party/skia/gm/drawglyphs.cpp
 FILE: ../../../third_party/skia/gm/largeclippedpath.cpp
 FILE: ../../../third_party/skia/gm/skbug_12212.cpp
 FILE: ../../../third_party/skia/gm/slug.cpp
-FILE: ../../../third_party/skia/include/private/GrMtlTypesPriv.h
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrMtlTypesPriv.h
 FILE: ../../../third_party/skia/include/private/gpu/graphite/MtlTypesPriv.h
 FILE: ../../../third_party/skia/include/utils/SkOrderedFontMgr.h
 FILE: ../../../third_party/skia/infra/bots/task_drivers/push_apps_from_skia_image/push_apps_from_skia_image.go
@@ -6105,7 +6106,6 @@ ORIGIN: ../../../third_party/skia/example/VulkanBasic.cpp + ../../../third_party
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/example/VulkanBasic.cpp
 FILE: ../../../third_party/skia/gm/bug12866.cpp
-FILE: ../../../third_party/skia/gm/crbug_1313579.cpp
 FILE: ../../../third_party/skia/include/core/SkAlphaType.h
 FILE: ../../../third_party/skia/include/core/SkColorType.h
 FILE: ../../../third_party/skia/include/gpu/GpuTypes.h
@@ -6240,10 +6240,10 @@ FILE: ../../../third_party/skia/include/gpu/GrContextThreadSafeProxy.h
 FILE: ../../../third_party/skia/include/gpu/GrRecordingContext.h
 FILE: ../../../third_party/skia/include/gpu/dawn/GrDawnTypes.h
 FILE: ../../../third_party/skia/include/ports/SkCFObject.h
-FILE: ../../../third_party/skia/include/private/GrContext_Base.h
-FILE: ../../../third_party/skia/include/private/GrImageContext.h
 FILE: ../../../third_party/skia/include/private/SkSLDefines.h
 FILE: ../../../third_party/skia/include/private/SkVx.h
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrContext_Base.h
+FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrImageContext.h
 FILE: ../../../third_party/skia/modules/skottie/src/Composition.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Composition.h
 FILE: ../../../third_party/skia/modules/skottie/src/Layer.cpp
