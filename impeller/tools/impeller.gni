@@ -12,6 +12,9 @@ declare_args() {
   # Whether Impeller is supported on the platform.
   impeller_supports_platform = true
 
+  # Whether Impeller supports rendering on the platform.
+  impeller_supports_rendering = is_mac || is_ios
+
   # Whether Impeller shaders are supported on the platform.
   impeller_shaders_supports_platform = is_mac || is_ios
 }
