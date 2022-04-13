@@ -183,18 +183,20 @@ void main() {
 
     /********************* 800x600 screen
      *o                  * y=0
-     *|                  * }- 20.0 vertical offset, of which 10.0 is in the screen edge margin
-     *+----+             * \- (5.0 padding in height)
-     *|    |             * |- 20 height
-     *+----+             * /- (5.0 padding in height)
-     *                   *
-     *********************/
-
+     * \                 * }- 20.0 vertical offset, of which 10.0 is in the screen edge margin
+     *  +----+           * \- (5.0 padding in height)
+     *  |    |           * |- 20 height
+     *  +----+           * /- (5.0 padding in height)
+     * ^                 *
+     * | *****************
+     * 10.0 margin       */
     final RenderBox tip = tester.renderObject(
       _findTooltipContainer(tooltipText),
     );
+    final Offset tipOffset = tip.localToGlobal(tip.size.topLeft(Offset.zero));
     expect(tip.size.height, equals(24.0)); // 14.0 height + 5.0 padding * 2 (top, bottom)
-    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
+    expect(tipOffset.dx.round(), equals(14));
+    expect(tipOffset.dy.round(), equals(14));
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) async {
@@ -472,10 +474,10 @@ void main() {
 
     /********************* 800x600 screen
      *                   *
-     *                   *
-     *                o  * y=300.0
-     *              __|  * }-10.0 vertical offset
-     *             |___| * }-10.0 height
+     *          ____     *
+     *         |____|--o * y=300.0
+     *                   * }-10.0 vertical offset
+     *                   * }-10.0 height
      *                   *
      *                   * }-10.0 margin
      *********************/
@@ -484,9 +486,9 @@ void main() {
       _findTooltipContainer(tooltipText),
     );
     expect(tip.size.height, equals(14.0));
-    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(293.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(770.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(307.0));
   });
 
   testWidgets('Custom tooltip margin', (WidgetTester tester) async {

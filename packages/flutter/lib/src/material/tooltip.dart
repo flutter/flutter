@@ -787,7 +787,12 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   /// Returns an [Offset] based on [offset] that is guaranteed to be inside of
   /// [rect].
+  ///
+  /// If [rect] is empty, offset will be returned, unchanged.
   Offset _clampOffsetToRect(Offset offset, Rect rect) {
+    if (rect.isEmpty) {
+      return offset;
+    }
     return Offset(
       offset.dx.clamp(rect.left, rect.right),
       offset.dy.clamp(rect.top, rect.bottom),
@@ -813,10 +818,10 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
     bool _tooltipIsInWindow(Offset offset) {
       final Rect tooltipRect = offset & tooltipSize;
-      return windowWithMargins.contains(tooltipRect.topLeft)
-          && windowWithMargins.contains(tooltipRect.topRight)
-          && windowWithMargins.contains(tooltipRect.bottomLeft)
-          && windowWithMargins.contains(tooltipRect.bottomRight);
+      return windowWithMargins.left <= tooltipRect.left
+          && windowWithMargins.right >= tooltipRect.right
+          && windowWithMargins.top <= tooltipRect.top
+          && windowWithMargins.bottom >= tooltipRect.bottom;
     }
 
     // Figure out where to put tooltip based on the [preferredDirection] and
@@ -848,7 +853,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     final Iterable<Offset> proposedOffsets = possibleDirections.map(_tooltipOffsetInDirection);
     return proposedOffsets.firstWhere(
         _tooltipIsInWindow,
-        orElse: () => _clampOffsetToRect(target, acceptableTooltipPlacementRect),
+        orElse: () => _clampOffsetToRect(proposedOffsets.first, acceptableTooltipPlacementRect),
     );
   }
 
