@@ -1547,21 +1547,16 @@ abstract class DiagnosticsNode {
   /// Converts the properties ([getProperties]) of this node to a form useful
   /// for [Timeline] event arguments (as in [Timeline.startSync]).
   ///
-  /// The properties specified by [timelineArgumentsIndicatingLandmarkEvent] are
-  /// included in the result.
-  ///
   /// Children ([getChildren]) are omitted.
   ///
   /// This method is only valid in debug builds. In profile builds, this method
-  /// throws an exception. In release builds, it returns a copy of
-  /// [timelineArgumentsIndicatingLandmarkEvent] with no arguments added.
+  /// throws an exception. In release builds it returns null.
   ///
   /// See also:
   ///
   ///  * [toJsonMap], which converts this node to a structured form intended for
   ///    data exchange (e.g. with an IDE).
-  Map<String, String> toTimelineArguments() {
-    final Map<String, String> result = Map<String, String>.of(timelineArgumentsIndicatingLandmarkEvent);
+  Map<String, String>? toTimelineArguments() {
     if (!kReleaseMode) {
       // We don't throw in release builds, to avoid hurting users. We also don't do anything useful.
       if (kProfileMode) {
@@ -1573,13 +1568,15 @@ abstract class DiagnosticsNode {
           'this application is compiled in profile mode and yet still invoked the method.'
         );
       }
+      final Map<String, String> result = <String, String>{};
       for (final DiagnosticsNode property in getProperties()) {
         if (property.name != null) {
           result[property.name!] = property.toDescription(parentConfiguration: singleLineTextConfiguration);
         }
       }
+      return result;
     }
-    return result;
+    return null;
   }
 
   /// Serialize the node to a JSON map according to the configuration provided
