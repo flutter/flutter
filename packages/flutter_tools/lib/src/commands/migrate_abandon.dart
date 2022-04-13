@@ -4,6 +4,7 @@
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../cache.dart';
 import '../migrate/migrate_utils.dart';
 import '../project.dart';
@@ -16,6 +17,7 @@ class MigrateAbandonCommand extends FlutterCommand {
     bool verbose = false,
     required this.logger,
     required this.fileSystem,
+    required this.terminal,
   }) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
@@ -31,6 +33,8 @@ class MigrateAbandonCommand extends FlutterCommand {
   final Logger logger;
 
   final FileSystem fileSystem;
+
+  final Terminal terminal;
 
   @override
   final String name = 'abandon';
@@ -66,8 +70,24 @@ class MigrateAbandonCommand extends FlutterCommand {
       MigrateUtils.printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
-    if (_verbose) {
-      logger.printStatus('Abandoning the existing migration will delete the migration working directory at ${workingDirectory.path}');
+
+    logger.printStatus('\nAbandoning the existing migration will delete the migration working directory at ${workingDirectory.path}');
+    String selection = 'y';
+    try {
+      selection = await terminal.promptForCharInput(
+        <String>['y', 'n'],
+        logger: logger,
+        prompt: 'Are you sure you wish to continue with abandoning? (y)es, (N)o',
+        defaultChoiceIndex: 1,
+      );
+    } on StateError catch(e) {
+      logger.printError(
+        e.message,
+        indent: 0,
+      );
+    }
+    if (selection != 'y') {
+      return const FlutterCommandResult(ExitStatus.success);
     }
 
     workingDirectory.deleteSync(recursive: true);
