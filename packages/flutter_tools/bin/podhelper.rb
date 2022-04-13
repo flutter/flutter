@@ -63,7 +63,7 @@ def flutter_additional_ios_build_settings(target)
       continue if xcframework_file.start_with?(".") # Hidden file, possibly on external disk.
       if xcframework_file.end_with?("-simulator") # ios-arm64_x86_64-simulator
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
-      elsif xcframework_file.start_with?("ios-") # ios-armv7_arm64
+      elsif xcframework_file.start_with?("ios-") # ios-arm64
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
       else
         # Info.plist or another platform.
@@ -81,6 +81,7 @@ def flutter_additional_ios_build_settings(target)
     # Override legacy Xcode 11 style VALID_ARCHS[sdk=iphonesimulator*]=x86_64 and prefer Xcode 12 EXCLUDED_ARCHS.
     build_configuration.build_settings['VALID_ARCHS[sdk=iphonesimulator*]'] = '$(ARCHS_STANDARD)'
     build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = '$(inherited) i386'
+    build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphoneos*]'] = '$(inherited) armv7'
   end
 end
 

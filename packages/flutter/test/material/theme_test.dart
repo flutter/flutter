@@ -755,6 +755,8 @@ class _TextStyleProxy implements TextStyle {
   @override
   List<ui.FontFeature>? get fontFeatures => _delegate.fontFeatures;
   @override
+  List<ui.FontVariation>? get fontVariations => _delegate.fontVariations;
+  @override
   TextOverflow? get overflow => _delegate.overflow;
 
   @override
@@ -797,6 +799,7 @@ class _TextStyleProxy implements TextStyle {
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
     TextOverflow? overflow,
     String? package,
   }) {
@@ -828,6 +831,7 @@ class _TextStyleProxy implements TextStyle {
     ui.Paint? background,
     List<Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
     TextDecoration? decoration,
     Color? decorationColor,
     TextDecorationStyle? decorationStyle,

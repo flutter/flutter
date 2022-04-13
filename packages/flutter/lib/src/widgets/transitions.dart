@@ -274,6 +274,9 @@ class ScaleTransition extends AnimatedWidget {
 
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
+  /// When the animation is stopped (either in [AnimationStatus.dismissed] or
+  /// [AnimationStatus.completed]), the filter quality argument will be ignored.
+  ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
 
@@ -284,10 +287,25 @@ class ScaleTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The ImageFilter layer created by setting filterQuality will introduce
+    // a saveLayer call. This is usually worthwhile when animating the layer,
+    // but leaving it in the layer tree before the animation has started or after
+    // it has finished significantly hurts performance.
+    final bool useFilterQuality;
+    switch (scale.status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        useFilterQuality = false;
+        break;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        useFilterQuality = true;
+        break;
+    }
     return Transform.scale(
       scale: scale.value,
       alignment: alignment,
-      filterQuality: filterQuality,
+      filterQuality: useFilterQuality ? filterQuality : null,
       child: child,
     );
   }
@@ -340,6 +358,9 @@ class RotationTransition extends AnimatedWidget {
 
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
+  /// When the animation is stopped (either in [AnimationStatus.dismissed] or
+  /// [AnimationStatus.completed]), the filter quality argument will be ignored.
+  ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
 
@@ -350,10 +371,25 @@ class RotationTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The ImageFilter layer created by setting filterQuality will introduce
+    // a saveLayer call. This is usually worthwhile when animating the layer,
+    // but leaving it in the layer tree before the animation has started or after
+    // it has finished significantly hurts performance.
+    final bool useFilterQuality;
+    switch (turns.status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        useFilterQuality = false;
+        break;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        useFilterQuality = true;
+        break;
+    }
     return Transform.rotate(
       angle: turns.value * math.pi * 2.0,
       alignment: alignment,
-      filterQuality: filterQuality,
+      filterQuality: useFilterQuality ? filterQuality : null,
       child: child,
     );
   }
@@ -483,7 +519,7 @@ class SizeTransition extends AnimatedWidget {
 ///  * [Opacity], which does not animate changes in opacity.
 ///  * [AnimatedOpacity], which animates changes in opacity without taking an
 ///    explicit [Animation] argument.
-class FadeTransition extends SingleChildRenderObjectWidget {
+class FadeTransition extends StatelessWidget {
   /// Creates an opacity transition.
   ///
   /// The [opacity] argument must not be null.
@@ -491,9 +527,9 @@ class FadeTransition extends SingleChildRenderObjectWidget {
     Key? key,
     required this.opacity,
     this.alwaysIncludeSemantics = false,
-    Widget? child,
+    this.child,
   }) : assert(opacity != null),
-       super(key: key, child: child);
+       super(key: key);
 
   /// The animation that controls the opacity of the child.
   ///
@@ -513,6 +549,44 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   /// would otherwise contribute relevant semantics.
   final bool alwaysIncludeSemantics;
 
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return _FadeTransition(
+      opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
+      child: RepaintBoundary(
+        child: child,
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
+    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+  }
+}
+
+/// The backing implementation of a [FadeTransition].
+class _FadeTransition extends SingleChildRenderObjectWidget {
+  const _FadeTransition({
+    Key? key,
+    required this.opacity,
+    this.alwaysIncludeSemantics = false,
+    Widget? child,
+  }) : assert(opacity != null),
+       super(key: key, child: child);
+
+  final Animation<double> opacity;
+
+  final bool alwaysIncludeSemantics;
+
   @override
   RenderAnimatedOpacity createRenderObject(BuildContext context) {
     return RenderAnimatedOpacity(
@@ -526,13 +600,6 @@ class FadeTransition extends SingleChildRenderObjectWidget {
     renderObject
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 

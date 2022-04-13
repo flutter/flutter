@@ -13,10 +13,14 @@ import 'dart:typed_data';
 /// The byte order used is [Endian.host] throughout.
 class WriteBuffer {
   /// Creates an interface for incrementally building a [ByteData] instance.
-  factory WriteBuffer() {
+  /// [startCapacity] determines the start size of the [WriteBuffer] in bytes.
+  /// The closer that value is to the real size used, the better the
+  /// performance.
+  factory WriteBuffer({int startCapacity = 8}) {
+    assert(startCapacity > 0);
     final ByteData eightBytes = ByteData(8);
     final Uint8List eightBytesAsList = eightBytes.buffer.asUint8List();
-    return WriteBuffer._(Uint8List(8), eightBytes, eightBytesAsList);
+    return WriteBuffer._(Uint8List(startCapacity), eightBytes, eightBytesAsList);
   }
 
   WriteBuffer._(this._buffer, this._eightBytes, this._eightBytesAsList);

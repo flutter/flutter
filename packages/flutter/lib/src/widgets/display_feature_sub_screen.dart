@@ -4,9 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:ui' show DisplayFeature, DisplayFeatureState;
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'debug.dart';

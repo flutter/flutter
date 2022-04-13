@@ -1369,15 +1369,15 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (debugProfileLayoutsEnabled) {
+        if (debugEnhanceLayoutTimelineArguments) {
           debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
         } else {
-          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
+          debugTimelineArguments = <String, String>{};
         }
-        debugTimelineArguments['intrinsics dimension'] = describeEnum(dimension);
-        debugTimelineArguments['intrinsics argument'] = '$argument';
+        debugTimelineArguments!['intrinsics dimension'] = describeEnum(dimension);
+        debugTimelineArguments!['intrinsics argument'] = '$argument';
         return true;
       }());
       if (!kReleaseMode) {
@@ -1833,14 +1833,14 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (debugProfileLayoutsEnabled) {
+        if (debugEnhanceLayoutTimelineArguments) {
           debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
         } else {
-          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
+          debugTimelineArguments = <String, String>{};
         }
-        debugTimelineArguments['getDryLayout constraints'] = '$constraints';
+        debugTimelineArguments!['getDryLayout constraints'] = '$constraints';
         return true;
       }());
       if (!kReleaseMode) {

@@ -346,11 +346,11 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   void _handlePointerEventImmediately(PointerEvent event) {
     HitTestResult? hitTestResult;
-    if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent) {
+    if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent || event is PointerPanZoomStartEvent) {
       assert(!_hitTests.containsKey(event.pointer));
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
-      if (event is PointerDownEvent) {
+      if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
         _hitTests[event.pointer] = hitTestResult;
       }
       assert(() {
@@ -358,9 +358,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
           debugPrint('$event: $hitTestResult');
         return true;
       }());
-    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+    } else if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       hitTestResult = _hitTests.remove(event.pointer);
-    } else if (event.down) {
+    } else if (event.down || event is PointerPanZoomUpdateEvent) {
       // Because events that occur with the pointer down (like
       // [PointerMoveEvent]s) should be dispatched to the same place that their
       // initial PointerDownEvent was, we want to re-use the path we found when
@@ -443,9 +443,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   @override // from HitTestTarget
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     pointerRouter.route(event);
-    if (event is PointerDownEvent) {
+    if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
       gestureArena.close(event.pointer);
-    } else if (event is PointerUpEvent) {
+    } else if (event is PointerUpEvent || event is PointerPanZoomEndEvent) {
       gestureArena.sweep(event.pointer);
     } else if (event is PointerSignalEvent) {
       pointerSignalResolver.resolve(event);

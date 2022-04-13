@@ -682,13 +682,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     switch (kind) {
       case PointerDeviceKind.touch:
+      case PointerDeviceKind.trackpad:
         return paddedRect.contains(position);
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.unknown:
-      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         return interactiveRect.contains(position);
     }
   }
@@ -713,6 +712,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     switch (kind) {
       case PointerDeviceKind.touch:
+      case PointerDeviceKind.trackpad:
         final Rect touchThumbRect = _thumbRect!.expandToInclude(
           Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
         );
@@ -721,8 +721,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.unknown:
-      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         return _thumbRect!.contains(position);
     }
   }
@@ -1963,6 +1961,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
               onExit: (PointerExitEvent event) {
                 switch(event.kind) {
                   case PointerDeviceKind.mouse:
+                  case PointerDeviceKind.trackpad:
                     if (enableGestures)
                       handleHoverExit(event);
                     break;
@@ -1970,14 +1969,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   case PointerDeviceKind.invertedStylus:
                   case PointerDeviceKind.unknown:
                   case PointerDeviceKind.touch:
-                  default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-                           // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
                     break;
                 }
               },
               onHover: (PointerHoverEvent event) {
                 switch(event.kind) {
                   case PointerDeviceKind.mouse:
+                  case PointerDeviceKind.trackpad:
                     if (enableGestures)
                       handleHover(event);
                     break;
@@ -1985,8 +1983,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   case PointerDeviceKind.invertedStylus:
                   case PointerDeviceKind.unknown:
                   case PointerDeviceKind.touch:
-                  default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-                           // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
                     break;
                 }
               },

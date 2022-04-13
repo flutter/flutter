@@ -2563,11 +2563,10 @@ class BuildOwner {
       return true;
     }());
     if (!kReleaseMode) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (debugProfileBuildsEnabled) {
+        if (debugEnhanceBuildTimelineArguments) {
           debugTimelineArguments = <String, String>{
-            ...debugTimelineArguments,
             'dirty count': '${_dirtyElements.length}',
             'dirty list': '$_dirtyElements',
             'lock level': '$_debugStateLockLevel',
@@ -2643,9 +2642,9 @@ class BuildOwner {
         }());
         final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(element.widget);
         if (isTimelineTracked) {
-          Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+          Map<String, String>? debugTimelineArguments;
           assert(() {
-            if (kDebugMode) {
+            if (kDebugMode && debugEnhanceBuildTimelineArguments) {
               debugTimelineArguments = element.widget.toDiagnosticsNode().toTimelineArguments();
             }
             return true;
@@ -2926,7 +2925,7 @@ class BuildOwner {
   @pragma('vm:notify-debugger-on-exception')
   void finalizeTree() {
     if (!kReleaseMode) {
-      Timeline.startSync('FINALIZE TREE', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      Timeline.startSync('FINALIZE TREE');
     }
     try {
       lockState(_inactiveElements._unmountAll); // this unregisters the GlobalKeys
@@ -3515,9 +3514,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           updateSlotForChild(child, newSlot);
         final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(newWidget);
         if (isTimelineTracked) {
-          Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+          Map<String, String>? debugTimelineArguments;
           assert(() {
-            if (kDebugMode) {
+            if (kDebugMode && debugEnhanceBuildTimelineArguments) {
               debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
             }
             return true;
@@ -3780,9 +3779,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
     final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(newWidget);
     if (isTimelineTracked) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (kDebugMode) {
+        if (kDebugMode && debugEnhanceBuildTimelineArguments) {
           debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
         }
         return true;

@@ -77,5 +77,5 @@ void main() {
     await start();
     await sendEvent(<String, Object>{'type': 'DevtoolsEvent'});
     await warning;
-  });
+  }, skip: true); // Skipping for 'https://github.com/dart-lang/webdev/issues/1562'
 }
