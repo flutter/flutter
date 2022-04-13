@@ -92,5 +92,20 @@ void main() {
 
   watch.reset();
 
+  watch.start();
+  for (int i = 0; i < _kNumIterations; i += 1) {
+    codec.encodeMessage('special chars >\u263A\u{1F602}<');
+  }
+  watch.stop();
+
+  printer.addResult(
+    description: 'StandardMessageCodec unicode',
+    value: watch.elapsedMicroseconds.toDouble() / _kNumIterations,
+    unit: 'us per iteration',
+    name: 'StandardMessageCodec_unicode',
+  );
+
+  watch.reset();
+
   printer.printToStdout();
 }
