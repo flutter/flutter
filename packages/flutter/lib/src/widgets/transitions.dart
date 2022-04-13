@@ -519,7 +519,7 @@ class SizeTransition extends AnimatedWidget {
 ///  * [Opacity], which does not animate changes in opacity.
 ///  * [AnimatedOpacity], which animates changes in opacity without taking an
 ///    explicit [Animation] argument.
-class FadeTransition extends StatelessWidget {
+class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
   /// The [opacity] argument must not be null.
@@ -527,9 +527,9 @@ class FadeTransition extends StatelessWidget {
     Key? key,
     required this.opacity,
     this.alwaysIncludeSemantics = false,
-    this.child,
+    Widget? child,
   }) : assert(opacity != null),
-       super(key: key);
+       super(key: key, child: child);
 
   /// The animation that controls the opacity of the child.
   ///
@@ -549,44 +549,6 @@ class FadeTransition extends StatelessWidget {
   /// would otherwise contribute relevant semantics.
   final bool alwaysIncludeSemantics;
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    return _FadeTransition(
-      opacity: opacity,
-      alwaysIncludeSemantics: alwaysIncludeSemantics,
-      child: RepaintBoundary(
-        child: child,
-      ),
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
-  }
-}
-
-/// The backing implementation of a [FadeTransition].
-class _FadeTransition extends SingleChildRenderObjectWidget {
-  const _FadeTransition({
-    Key? key,
-    required this.opacity,
-    this.alwaysIncludeSemantics = false,
-    Widget? child,
-  }) : assert(opacity != null),
-       super(key: key, child: child);
-
-  final Animation<double> opacity;
-
-  final bool alwaysIncludeSemantics;
-
   @override
   RenderAnimatedOpacity createRenderObject(BuildContext context) {
     return RenderAnimatedOpacity(
@@ -600,6 +562,13 @@ class _FadeTransition extends SingleChildRenderObjectWidget {
     renderObject
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
+    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
