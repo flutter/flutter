@@ -193,5 +193,89 @@ TEST_F(LayerTreeTest, NeedsSystemComposite) {
                                                child_path2, child_paint2}}}));
 }
 
+TEST_F(LayerTreeTest, PrerollContextInitialization) {
+  // This EXPECT macro will ensure that if any fields get added to the
+  // PrerollContext that this test must be revisited and updated.
+  // If any fields get removed or replaced, then the expect_defaults closure
+  // will fail to compile, again bringing attention to updating this test.
+  EXPECT_EQ(sizeof(PrerollContext), size_t(104));
+
+  MutatorsStack mock_mutators;
+  FixedRefreshRateStopwatch mock_raster_time;
+  FixedRefreshRateStopwatch mock_ui_time;
+  TextureRegistry mock_registry;
+
+  auto expect_defaults = [&mock_mutators, &mock_raster_time, &mock_ui_time,
+                          &mock_registry](const PrerollContext& context) {
+    EXPECT_EQ(context.raster_cache, nullptr);
+    EXPECT_EQ(context.gr_context, nullptr);
+    EXPECT_EQ(context.view_embedder, nullptr);
+    EXPECT_EQ(&context.mutators_stack, &mock_mutators);
+    EXPECT_EQ(context.dst_color_space, nullptr);
+    EXPECT_EQ(context.cull_rect, SkRect::MakeEmpty());
+    EXPECT_EQ(context.surface_needs_readback, false);
+
+    EXPECT_EQ(&context.raster_time, &mock_raster_time);
+    EXPECT_EQ(&context.ui_time, &mock_ui_time);
+    EXPECT_EQ(&context.texture_registry, &mock_registry);
+    EXPECT_EQ(context.checkerboard_offscreen_layers, false);
+    EXPECT_EQ(context.frame_device_pixel_ratio, 1.0f);
+
+    EXPECT_EQ(context.has_platform_view, false);
+    EXPECT_EQ(context.has_texture_layer, false);
+
+    EXPECT_EQ(context.subtree_can_inherit_opacity, false);
+  };
+
+  // These 4 initializers are required because they are handled by reference
+  PrerollContext context{
+      .mutators_stack = mock_mutators,
+      .raster_time = mock_raster_time,
+      .ui_time = mock_ui_time,
+      .texture_registry = mock_registry,
+  };
+  expect_defaults(context);
+}
+
+TEST_F(LayerTreeTest, PaintContextInitialization) {
+  // This EXPECT macro will ensure that if any fields get added to the
+  // PaintContext that this test must be revisited and updated.
+  // If any fields get removed or replaced, then the expect_defaults closure
+  // will fail to compile, again bringing attention to updating this test.
+  EXPECT_EQ(sizeof(Layer::PaintContext), size_t(96));
+
+  FixedRefreshRateStopwatch mock_raster_time;
+  FixedRefreshRateStopwatch mock_ui_time;
+  TextureRegistry mock_registry;
+
+  auto expect_defaults = [&mock_raster_time, &mock_ui_time,
+                          &mock_registry](const Layer::PaintContext& context) {
+    EXPECT_EQ(context.internal_nodes_canvas, nullptr);
+    EXPECT_EQ(context.leaf_nodes_canvas, nullptr);
+    EXPECT_EQ(context.gr_context, nullptr);
+    EXPECT_EQ(context.view_embedder, nullptr);
+    EXPECT_EQ(&context.raster_time, &mock_raster_time);
+    EXPECT_EQ(&context.ui_time, &mock_ui_time);
+    EXPECT_EQ(&context.texture_registry, &mock_registry);
+    EXPECT_EQ(context.raster_cache, nullptr);
+    EXPECT_EQ(context.checkerboard_offscreen_layers, false);
+    EXPECT_EQ(context.frame_device_pixel_ratio, 1.0f);
+
+    EXPECT_EQ(context.enable_leaf_layer_tracing, false);
+    EXPECT_EQ(context.layer_snapshot_store, nullptr);
+
+    EXPECT_EQ(context.inherited_opacity, SK_Scalar1);
+    EXPECT_EQ(context.leaf_nodes_builder, nullptr);
+  };
+
+  // These 4 initializers are required because they are handled by reference
+  Layer::PaintContext context{
+      .raster_time = mock_raster_time,
+      .ui_time = mock_ui_time,
+      .texture_registry = mock_registry,
+  };
+  expect_defaults(context);
+}
+
 }  // namespace testing
 }  // namespace flutter
