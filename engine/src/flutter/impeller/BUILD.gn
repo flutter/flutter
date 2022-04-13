@@ -20,38 +20,48 @@ config("impeller_public_config") {
 
 group("impeller") {
   public_deps = [
-    "aiks",
     "archivist",
     "base",
-    "display_list",
-    "entity",
     "geometry",
-    "image",
-    "renderer",
     "tessellator",
-    "typographer",
   ]
+
+  if (impeller_supports_rendering) {
+    public_deps += [
+      "aiks",
+      "display_list",
+      "entity",
+      "image",
+      "renderer",
+      "typographer",
+    ]
+  }
 }
 
 executable("impeller_unittests") {
   testonly = true
 
   deps = [
-    "aiks:aiks_unittests",
     "archivist:archivist_unittests",
     "base:base_unittests",
     "compiler:compiler_unittests",
-    "display_list:display_list_unittests",
-    "entity:entity_unittests",
     "fixtures",
     "geometry:geometry_unittests",
-    "image:image_unittests",
-    "playground",
-    "renderer:renderer_unittests",
-    "typographer:typographer_unittests",
 
     # FML depends on the Dart VM for tracing and getting the current
     # timepoint.
     "//flutter/runtime:libdart",
   ]
+
+  if (impeller_supports_rendering) {
+    deps += [
+      "aiks:aiks_unittests",
+      "display_list:display_list_unittests",
+      "entity:entity_unittests",
+      "image:image_unittests",
+      "playground",
+      "renderer:renderer_unittests",
+      "typographer:typographer_unittests",
+    ]
+  }
 }
