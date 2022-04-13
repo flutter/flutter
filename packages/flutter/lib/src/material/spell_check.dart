@@ -51,26 +51,25 @@ class MaterialSpellCheckService implements SpellCheckService {
     assert(locale != null);
     assert(value.text != null);
 
+    List<SpellCheckerSuggestionSpan> spellCheckResults = <SpellCheckerSuggestionSpan>[];
+
     spellCheckChannel.invokeMethod<void>(
         'SpellCheck.initiateSpellCheck',
         <String>[ locale.toLanguageTag(), value.text ],
       );
     
-    List<SpellCheckerSuggestionSpan> spellCheckResults = <SpellCheckerSuggestionSpan>[];
 
     await for (final result in controller.stream) {
       TextRange composingRange = value.composing;
       result.forEach((SpellCheckerSuggestionSpan span) {
-          if (composingRange.start == span.start && composingRange.end == span.end) {
-
-          }
-          else {
+        if (composingRange.start != span.start || composingRange.end != span.end) {
             spellCheckResults.add(span);
-          }
+        }
       });
+      pastResults = spellCheckResults;
       return spellCheckResults;
     }
-
+    
     //TODO(camillesimon): Maybe return an exception
     return spellCheckResults;
   }

@@ -27,6 +27,7 @@ class SpellCheckerSuggestionSpan {
         assert(start != null);
         assert(end != null);
         assert(replacementSuggestions != null);
+
         this.start = start;
         this.end = end;
         this.replacementSuggestions = replacementSuggestions;
@@ -189,11 +190,11 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
               text_consumed_index = text.length + text_consumed_index;
           }
           scssSpans_consumed_index = scss_pointer;
-          print("IF CASE ${tsTreeChildren}");
+        //   print("IF CASE ${tsTreeChildren}");
           return tsTreeChildren;
       } else {
           text_consumed_index = text.length;
-          print("ELSE CASE: ${ <TextSpan>[TextSpan(text: text, style: isComposing ? composingStyle : style)]}");
+        //   print("ELSE CASE: ${ <TextSpan>[TextSpan(text: text, style: isComposing ? composingStyle : style)]}");
           return <TextSpan>[TextSpan(text: text, style: isComposing ? composingStyle : style)];
       }
   }
