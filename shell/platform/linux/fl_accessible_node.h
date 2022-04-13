@@ -45,10 +45,13 @@ FlAccessibleNode* fl_accessible_node_new(FlEngine* engine, int32_t id);
  * fl_accessible_node_new:
  * @node: an #FlAccessibleNode.
  * @parent: an #AtkObject.
+ * @index: the index of this node in the parent.
  *
  * Sets the parent of this node. The parent can be changed at any time.
  */
-void fl_accessible_node_set_parent(FlAccessibleNode* node, AtkObject* parent);
+void fl_accessible_node_set_parent(FlAccessibleNode* node,
+                                   AtkObject* parent,
+                                   gint index);
 
 /**
  * fl_accessible_node_new:

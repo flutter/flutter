@@ -14,9 +14,9 @@ TEST(FlAccessibleNodeTest, BuildTree) {
 
   g_autoptr(FlAccessibleNode) root = fl_accessible_node_new(engine, 0);
   g_autoptr(FlAccessibleNode) child1 = fl_accessible_node_new(engine, 1);
-  fl_accessible_node_set_parent(child1, ATK_OBJECT(root));
+  fl_accessible_node_set_parent(child1, ATK_OBJECT(root), 0);
   g_autoptr(FlAccessibleNode) child2 = fl_accessible_node_new(engine, 1);
-  fl_accessible_node_set_parent(child2, ATK_OBJECT(root));
+  fl_accessible_node_set_parent(child2, ATK_OBJECT(root), 1);
   g_autoptr(GPtrArray) children =
       g_ptr_array_new_with_free_func(g_object_unref);
   g_ptr_array_add(children, g_object_ref(child1));
@@ -24,6 +24,7 @@ TEST(FlAccessibleNodeTest, BuildTree) {
   fl_accessible_node_set_children(root, children);
 
   EXPECT_EQ(atk_object_get_n_accessible_children(ATK_OBJECT(root)), 2);
+  EXPECT_EQ(atk_object_get_index_in_parent(ATK_OBJECT(root)), 0);
   g_autoptr(AtkObject) c1 =
       atk_object_ref_accessible_child(ATK_OBJECT(root), 0);
   EXPECT_EQ(ATK_OBJECT(child1), c1);
@@ -33,9 +34,11 @@ TEST(FlAccessibleNodeTest, BuildTree) {
   EXPECT_EQ(atk_object_get_parent(ATK_OBJECT(root)), nullptr);
 
   EXPECT_EQ(atk_object_get_parent(ATK_OBJECT(child1)), ATK_OBJECT(root));
+  EXPECT_EQ(atk_object_get_index_in_parent(ATK_OBJECT(child1)), 0);
   EXPECT_EQ(atk_object_get_n_accessible_children(ATK_OBJECT(child1)), 0);
 
   EXPECT_EQ(atk_object_get_parent(ATK_OBJECT(child2)), ATK_OBJECT(root));
+  EXPECT_EQ(atk_object_get_index_in_parent(ATK_OBJECT(child2)), 1);
   EXPECT_EQ(atk_object_get_n_accessible_children(ATK_OBJECT(child2)), 0);
 }
 
