@@ -11,49 +11,29 @@ config("internal_config") {
     "$source_root/src/OpenGL",
   ]
 
-  if (is_win) {
-    cflags = [
-      "/wd4005",
-      "/wd4018",
-      "/wd4141",
-      "/wd4146",
-      "/wd4201",
-      "/wd4245",
-      "/wd4267",
-      "/wd4291",
-      "/wd4310",
-      "/wd4324",
-      "/wd4334",
-      "/wd4389",
-      "/wd4701",
-      "/wd4702",
-      "/wd4703",
-      "/wd4706",
-      "/wd4800",
-      "/wd5030",
-    ]
+  defines = [ "NO_SANITIZE_FUNCTION=" ]
 
+  cflags = [
+    "-Wno-header-hygiene",
+    "-Wno-newline-eof",
+    "-Wno-nonportable-include-path",
+    "-Wno-range-loop-construct",
+    "-Wno-thread-safety-analysis",
+    "-Wno-undefined-var-template",
+    "-Wno-unneeded-internal-declaration",
+    "-Wno-c++17-extensions",
+    "-Wno-unused-variable",
+    "-Wno-deprecated-declarations",
+  ]
+
+  if (is_win) {
     libs = [
       "user32.lib",
       "gdi32.lib",
     ]
   } else {
-    cflags = [
-      "-fPIC",
-      "-Wno-header-hygiene",
-      "-Wno-newline-eof",
-      "-Wno-nonportable-include-path",
-      "-Wno-range-loop-construct",
-      "-Wno-thread-safety-analysis",
-      "-Wno-undefined-var-template",
-      "-Wno-unneeded-internal-declaration",
-      "-Wno-c++17-extensions",
-      "-Wno-unused-variable",
-      "-Wno-deprecated-declarations",
-    ]
+    cflags += [ "-fPIC" ]
   }
-
-  defines = [ "NO_SANITIZE_FUNCTION=" ]
 }
 
 config("swiftshader_config") {
