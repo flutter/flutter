@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -51,7 +50,7 @@ class MaterialButton extends StatelessWidget {
   /// [highlightElevation], and [disabledElevation] must be non-negative, if
   /// specified.
   const MaterialButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.onLongPress,
     this.onHighlightChanged,
@@ -89,8 +88,7 @@ class MaterialButton extends StatelessWidget {
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
-       assert(disabledElevation == null || disabledElevation >= 0.0),
-       super(key: key);
+       assert(disabledElevation == null || disabledElevation >= 0.0);
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///

@@ -246,7 +246,7 @@ class ListTileTheme extends InheritedTheme {
   /// Only the [data] parameter should be used. The other parameters are
   /// redundant (are now obsolete) and will be deprecated in a future update.
   const ListTileTheme({
-    Key? key,
+    super.key,
     ListTileThemeData? data,
     bool? dense,
     ShapeBorder? shape,
@@ -262,7 +262,7 @@ class ListTileTheme extends InheritedTheme {
     double? horizontalTitleGap,
     double? minVerticalPadding,
     double? minLeadingWidth,
-    required Widget child,
+    required super.child,
   }) : assert(
          data == null ||
          (shape ??
@@ -291,8 +291,7 @@ class ListTileTheme extends InheritedTheme {
        _mouseCursor = mouseCursor,
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
-       _minLeadingWidth = minLeadingWidth,
-       super(key: key, child: child);
+       _minLeadingWidth = minLeadingWidth;
 
   final ListTileThemeData? _data;
   final bool? _dense;

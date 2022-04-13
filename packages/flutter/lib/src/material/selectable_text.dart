@@ -176,7 +176,7 @@ class SelectableText extends StatefulWidget {
   /// the [maxLines] argument must be greater than zero.
   const SelectableText(
     String this.data, {
-    Key? key,
+    super.key,
     this.focusNode,
     this.style,
     this.strutStyle,
@@ -223,8 +223,7 @@ class SelectableText extends StatefulWidget {
           const ToolbarOptions(
             selectAll: true,
             copy: true,
-          ),
-        super(key: key);
+          );
 
   /// Creates a selectable text widget with a [TextSpan].
   ///
@@ -234,7 +233,7 @@ class SelectableText extends StatefulWidget {
   /// The [autofocus] and [dragStartBehavior] arguments must not be null.
   const SelectableText.rich(
     TextSpan this.textSpan, {
-    Key? key,
+    super.key,
     this.focusNode,
     this.style,
     this.strutStyle,
@@ -279,8 +278,7 @@ class SelectableText extends StatefulWidget {
       const ToolbarOptions(
         selectAll: true,
         copy: true,
-      ),
-    super(key: key);
+      );
 
   /// The text to display.
   ///

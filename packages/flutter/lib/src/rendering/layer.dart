@@ -1637,9 +1637,8 @@ class TransformLayer extends OffsetLayer {
   ///
   /// The [transform] and [offset] properties must be non-null before the
   /// compositing phase of the pipeline.
-  TransformLayer({ Matrix4? transform, Offset offset = Offset.zero })
-    : _transform = transform,
-      super(offset: offset);
+  TransformLayer({ Matrix4? transform, super.offset })
+    : _transform = transform;
 
   /// The matrix to apply.
   ///
@@ -1737,9 +1736,8 @@ class OpacityLayer extends OffsetLayer {
   /// the pipeline.
   OpacityLayer({
     int? alpha,
-    Offset offset = Offset.zero,
-  }) : _alpha = alpha,
-       super(offset: offset);
+    super.offset,
+  }) : _alpha = alpha;
 
   /// The amount to multiply into the alpha channel.
   ///

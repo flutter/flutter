@@ -79,7 +79,7 @@ class NavigationRail extends StatefulWidget {
   ///
   /// Typically used within a [Row] that defines the [Scaffold.body] property.
   const NavigationRail({
-    Key? key,
+    super.key,
     this.backgroundColor,
     this.extended = false,
     this.leading,
@@ -105,8 +105,7 @@ class NavigationRail extends StatefulWidget {
         assert(minExtendedWidth == null || minExtendedWidth > 0),
         assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
         assert(extended != null),
-        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none)),
-        super(key: key);
+        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none));
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
   /// contents.
@@ -753,13 +752,12 @@ class _RailDestination extends StatelessWidget {
 /// indicator will be a stadium shape.
 class _AddIndicator extends StatelessWidget {
   const _AddIndicator({
-    Key? key,
     required this.addIndicator,
     required this.isCircular,
     required this.indicatorColor,
     required this.indicatorAnimation,
     required this.child,
-  }) : super(key: key);
+  });
 
   final bool addIndicator;
   final bool isCircular;
@@ -882,11 +880,9 @@ class NavigationRailDestination {
 
 class _ExtendedNavigationRailAnimation extends InheritedWidget {
   const _ExtendedNavigationRailAnimation({
-    Key? key,
     required this.animation,
-    required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(child != null);
 
   final Animation<double> animation;
 

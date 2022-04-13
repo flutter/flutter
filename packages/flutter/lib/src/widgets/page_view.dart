@@ -268,19 +268,13 @@ class PageController extends ScrollController {
 class PageMetrics extends FixedScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [PageView].
   PageMetrics({
-    required double? minScrollExtent,
-    required double? maxScrollExtent,
-    required double? pixels,
-    required double? viewportDimension,
-    required AxisDirection axisDirection,
+    required super.minScrollExtent,
+    required super.maxScrollExtent,
+    required super.pixels,
+    required super.viewportDimension,
+    required super.axisDirection,
     required this.viewportFraction,
-  }) : super(
-         minScrollExtent: minScrollExtent,
-         maxScrollExtent: maxScrollExtent,
-         pixels: pixels,
-         viewportDimension: viewportDimension,
-         axisDirection: axisDirection,
-       );
+  });
 
   @override
   PageMetrics copyWith({
@@ -315,12 +309,12 @@ class PageMetrics extends FixedScrollMetrics {
 
 class _PagePosition extends ScrollPositionWithSingleContext implements PageMetrics {
   _PagePosition({
-    required ScrollPhysics physics,
-    required ScrollContext context,
+    required super.physics,
+    required super.context,
     this.initialPage = 0,
     bool keepPage = true,
     double viewportFraction = 1.0,
-    ScrollPosition? oldPosition,
+    super.oldPosition,
   }) : assert(initialPage != null),
        assert(keepPage != null),
        assert(viewportFraction != null),
@@ -328,11 +322,8 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
        _viewportFraction = viewportFraction,
        _pageToUseOnStartup = initialPage.toDouble(),
        super(
-         physics: physics,
-         context: context,
          initialPixels: null,
          keepScrollOffset: keepPage,
-         oldPosition: oldPosition,
        );
 
   final int initialPage;
@@ -501,9 +492,8 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 class _ForceImplicitScrollPhysics extends ScrollPhysics {
   const _ForceImplicitScrollPhysics({
     required this.allowImplicitScrolling,
-    ScrollPhysics? parent,
-  }) : assert(allowImplicitScrolling != null),
-       super(parent: parent);
+    super.parent,
+  }) : assert(allowImplicitScrolling != null);
 
   @override
   _ForceImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -528,7 +518,7 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
 ///  * [PageView.physics], which can override the physics used by a page view.
 class PageScrollPhysics extends ScrollPhysics {
   /// Creates physics for a [PageView].
-  const PageScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const PageScrollPhysics({ super.parent });
 
   @override
   PageScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -632,7 +622,7 @@ class PageView extends StatefulWidget {
   /// rather than into the contents of the [PageView].
   /// {@endtemplate}
   PageView({
-    Key? key,
+    super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     PageController? controller,
@@ -649,8 +639,7 @@ class PageView extends StatefulWidget {
   }) : assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
-       childrenDelegate = SliverChildListDelegate(children),
-       super(key: key);
+       childrenDelegate = SliverChildListDelegate(children);
 
   /// Creates a scrollable list that works page by page using widgets that are
   /// created on demand.
@@ -676,7 +665,7 @@ class PageView extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
   PageView.builder({
-    Key? key,
+    super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     PageController? controller,
@@ -699,8 +688,7 @@ class PageView extends StatefulWidget {
          itemBuilder,
          findChildIndexCallback: findChildIndexCallback,
          childCount: itemCount,
-       ),
-       super(key: key);
+       );
 
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
@@ -787,7 +775,7 @@ class PageView extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
   PageView.custom({
-    Key? key,
+    super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     PageController? controller,
@@ -804,8 +792,7 @@ class PageView extends StatefulWidget {
   }) : assert(childrenDelegate != null),
        assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
-       controller = controller ?? _defaultPageController,
-       super(key: key);
+       controller = controller ?? _defaultPageController;
 
   /// Controls whether the widget's pages will respond to
   /// [RenderObject.showOnScreen], which will allow for implicit accessibility

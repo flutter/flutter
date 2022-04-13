@@ -1841,31 +1841,20 @@ class StringProperty extends DiagnosticsProperty<String> {
   ///
   /// The [showName], [quoted], [style], and [level] arguments must not be null.
   StringProperty(
-    String name,
-    String? value, {
-    String? description,
-    String? tooltip,
-    bool showName = true,
-    Object? defaultValue = kNoDefaultValue,
+    String super.name,
+    super.value, {
+    super.description,
+    super.tooltip,
+    super.showName,
+    super.defaultValue,
     this.quoted = true,
-    String? ifEmpty,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-    DiagnosticLevel level = DiagnosticLevel.info,
+    super.ifEmpty,
+    super.style,
+    super.level,
   }) : assert(showName != null),
        assert(quoted != null),
        assert(style != null),
-       assert(level != null),
-       super(
-    name,
-    value,
-    description: description,
-    defaultValue: defaultValue,
-    tooltip: tooltip,
-    showName: showName,
-    ifEmpty: ifEmpty,
-    style: style,
-    level: level,
-  );
+       assert(level != null);
 
   /// Whether the value is enclosed in double quotes.
   final bool quoted;
@@ -1902,46 +1891,28 @@ class StringProperty extends DiagnosticsProperty<String> {
 
 abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
   _NumProperty(
-    String name,
-    T? value, {
-    String? ifNull,
+    String super.name,
+    super.value, {
+    super.ifNull,
     this.unit,
-    bool showName = true,
-    Object? defaultValue = kNoDefaultValue,
-    String? tooltip,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-    DiagnosticLevel level = DiagnosticLevel.info,
-  }) : super(
-    name,
-    value,
-    ifNull: ifNull,
-    showName: showName,
-    defaultValue: defaultValue,
-    tooltip: tooltip,
-    level: level,
-    style: style,
-  );
+    super.showName,
+    super.defaultValue,
+    super.tooltip,
+    super.style,
+    super.level,
+  });
 
   _NumProperty.lazy(
-    String name,
-    ComputePropertyValueCallback<T?> computeValue, {
-    String? ifNull,
+    String super.name,
+    super.computeValue, {
+    super.ifNull,
     this.unit,
-    bool showName = true,
-    Object? defaultValue = kNoDefaultValue,
-    String? tooltip,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-    DiagnosticLevel level = DiagnosticLevel.info,
-  }) : super.lazy(
-    name,
-    computeValue,
-    ifNull: ifNull,
-    showName: showName,
-    defaultValue: defaultValue,
-    tooltip: tooltip,
-    style: style,
-    level: level,
-  );
+    super.showName,
+    super.defaultValue,
+    super.tooltip,
+    super.style,
+    super.level,
+  }) : super.lazy();
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
@@ -1979,29 +1950,18 @@ class DoubleProperty extends _NumProperty<double> {
   ///
   /// The [showName], [style], and [level] arguments must not be null.
   DoubleProperty(
-    String name,
-    double? value, {
-    String? ifNull,
-    String? unit,
-    String? tooltip,
-    Object? defaultValue = kNoDefaultValue,
-    bool showName = true,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-    DiagnosticLevel level = DiagnosticLevel.info,
+    super.name,
+    super.value, {
+    super.ifNull,
+    super.unit,
+    super.tooltip,
+    super.defaultValue,
+    super.showName,
+    super.style,
+    super.level,
   }) : assert(showName != null),
        assert(style != null),
-       assert(level != null),
-       super(
-    name,
-    value,
-    ifNull: ifNull,
-    unit: unit,
-    tooltip: tooltip,
-    defaultValue: defaultValue,
-    showName: showName,
-    style :style,
-    level: level,
-  );
+       assert(level != null);
 
   /// Property with a [value] that is computed only when needed.
   ///
@@ -2010,26 +1970,17 @@ class DoubleProperty extends _NumProperty<double> {
   ///
   /// The [showName] and [level] arguments must not be null.
   DoubleProperty.lazy(
-    String name,
-    ComputePropertyValueCallback<double?> computeValue, {
-    String? ifNull,
-    bool showName = true,
-    String? unit,
-    String? tooltip,
-    Object? defaultValue = kNoDefaultValue,
-    DiagnosticLevel level = DiagnosticLevel.info,
+    super.name,
+    super.computeValue, {
+    super.ifNull,
+    super.showName,
+    super.unit,
+    super.tooltip,
+    super.defaultValue,
+    super.level,
   }) : assert(showName != null),
        assert(level != null),
-       super.lazy(
-    name,
-    computeValue,
-    showName: showName,
-    ifNull: ifNull,
-    unit: unit,
-    tooltip: tooltip,
-    defaultValue: defaultValue,
-    level: level,
-  );
+       super.lazy();
 
   @override
   String numberToString() => debugFormatDouble(value);
@@ -2043,27 +1994,17 @@ class IntProperty extends _NumProperty<int> {
   ///
   /// The [showName], [style], and [level] arguments must not be null.
   IntProperty(
-    String name,
-    int? value, {
-    String? ifNull,
-    bool showName = true,
-    String? unit,
-    Object? defaultValue = kNoDefaultValue,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-    DiagnosticLevel level = DiagnosticLevel.info,
+    super.name,
+    super.value, {
+    super.ifNull,
+    super.showName,
+    super.unit,
+    super.defaultValue,
+    super.style,
+    super.level,
   }) : assert(showName != null),
        assert(level != null),
-       assert(style != null),
-       super(
-    name,
-    value,
-    ifNull: ifNull,
-    showName: showName,
-    unit: unit,
-    defaultValue: defaultValue,
-    style: style,
-    level: level,
-  );
+       assert(style != null);
 
   @override
   String numberToString() => value.toString();
@@ -2081,24 +2022,15 @@ class PercentProperty extends DoubleProperty {
   ///
   /// The [showName] and [level] arguments must not be null.
   PercentProperty(
-    String name,
-    double? fraction, {
-    String? ifNull,
-    bool showName = true,
-    String? tooltip,
-    String? unit,
-    DiagnosticLevel level  = DiagnosticLevel.info,
+    super.name,
+    super.fraction, {
+    super.ifNull,
+    super.showName,
+    super.tooltip,
+    super.unit,
+    super.level,
   }) : assert(showName != null),
-       assert(level != null),
-       super(
-    name,
-    fraction,
-    ifNull: ifNull,
-    showName: showName,
-    tooltip: tooltip,
-    unit: unit,
-    level: level,
-  );
+       assert(level != null);
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
@@ -2259,30 +2191,19 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   ///
   /// The [style], [showName], [showSeparator], and [level] arguments must not be null.
   IterableProperty(
-    String name,
-    Iterable<T>? value, {
-    Object? defaultValue = kNoDefaultValue,
-    String? ifNull,
-    String? ifEmpty = '[]',
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-    bool showName = true,
-    bool showSeparator = true,
-    DiagnosticLevel level = DiagnosticLevel.info,
+    String super.name,
+    super.value, {
+    super.defaultValue,
+    super.ifNull,
+    super.ifEmpty = '[]',
+    super.style,
+    super.showName,
+    super.showSeparator,
+    super.level,
   }) : assert(style != null),
        assert(showName != null),
        assert(showSeparator != null),
-       assert(level != null),
-       super(
-    name,
-    value,
-    defaultValue: defaultValue,
-    ifNull: ifNull,
-    ifEmpty: ifEmpty,
-    style: style,
-    showName: showName,
-    showSeparator: showSeparator,
-    level: level,
-  );
+       assert(level != null);
 
   @override
   String valueToString({TextTreeConfiguration? parentConfiguration}) {
@@ -2353,17 +2274,11 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
   ///
   /// The [level] argument must also not be null.
   EnumProperty(
-    String name,
-    T? value, {
-    Object? defaultValue = kNoDefaultValue,
-    DiagnosticLevel level  = DiagnosticLevel.info,
-  }) : assert(level != null),
-       super (
-    name,
-    value,
-    defaultValue: defaultValue,
-    level: level,
-  );
+    String super.name,
+    super.value, {
+    super.defaultValue,
+    super.level,
+  }) : assert(level != null);
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
@@ -2403,22 +2318,15 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   /// The [showName] and [level] arguments must not be null. Additionally, at
   /// least one of [ifPresent] and [ifNull] must not be null.
   ObjectFlagProperty(
-    String name,
-    T? value, {
+    String super.name,
+    super.value, {
     this.ifPresent,
-    String? ifNull,
-    bool showName = false,
-    DiagnosticLevel level  = DiagnosticLevel.info,
+    super.ifNull,
+    super.showName = false,
+    super.level,
   }) : assert(ifPresent != null || ifNull != null),
        assert(showName != null),
-       assert(level != null),
-       super(
-    name,
-    value,
-    showName: showName,
-    ifNull: ifNull,
-    level: level,
-  );
+       assert(level != null);
 
   /// Shorthand constructor to describe whether the property has a value.
   ///
@@ -2427,17 +2335,14 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   ///
   /// The [name] and [level] arguments must not be null.
   ObjectFlagProperty.has(
-    String name,
-    T? value, {
-    DiagnosticLevel level = DiagnosticLevel.info,
+    String super.name,
+    super.value, {
+    super.level,
   }) : assert(name != null),
        assert(level != null),
        ifPresent = 'has $name',
        super(
-    name,
-    value,
     showName: false,
-    level: level,
   );
 
   /// Description to use if the property [value] is not null.
@@ -2521,24 +2426,16 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   /// The [value], [showName], [showSeparator] and [level] arguments must not be
   /// null.
   FlagsSummary(
-    String name,
-    Map<String, T?> value, {
-    String? ifEmpty,
-    bool showName = true,
-    bool showSeparator = true,
-    DiagnosticLevel level  = DiagnosticLevel.info,
+    String super.name,
+    Map<String, T?> super.value, {
+    super.ifEmpty,
+    super.showName,
+    super.showSeparator,
+    super.level,
   }) : assert(value != null),
        assert(showName != null),
        assert(showSeparator != null),
-       assert(level != null),
-       super(
-         name,
-         value,
-         ifEmpty: ifEmpty,
-         showName: showName,
-         showSeparator: showSeparator,
-         level: level,
-       );
+       assert(level != null);
 
   @override
   Map<String, T?> get value => super.value!;
@@ -2624,16 +2521,16 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     String? description,
     String? ifNull,
     this.ifEmpty,
-    bool showName = true,
-    bool showSeparator = true,
+    super.showName,
+    super.showSeparator,
     this.defaultValue = kNoDefaultValue,
     this.tooltip,
     this.missingIfNull = false,
-    String? linePrefix,
+    super.linePrefix,
     this.expandableValue = false,
     this.allowWrap = true,
     this.allowNameWrap = true,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
+    DiagnosticsTreeStyle super.style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(showSeparator != null),
@@ -2647,10 +2544,6 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
        _defaultLevel = level,
        super(
          name: name,
-         showName: showName,
-         showSeparator: showSeparator,
-         style: style,
-         linePrefix: linePrefix,
       );
 
   /// Property with a [value] that is computed only when needed.
@@ -2671,15 +2564,15 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     String? description,
     String? ifNull,
     this.ifEmpty,
-    bool showName = true,
-    bool showSeparator = true,
+    super.showName,
+    super.showSeparator,
     this.defaultValue = kNoDefaultValue,
     this.tooltip,
     this.missingIfNull = false,
     this.expandableValue = false,
     this.allowWrap = true,
     this.allowNameWrap = true,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
+    DiagnosticsTreeStyle super.style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(showSeparator != null),
@@ -2695,9 +2588,6 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
        ifNull = ifNull ?? (missingIfNull ? 'MISSING' : null),
        super(
          name: name,
-         showName: showName,
-         showSeparator: showSeparator,
-         style: style,
        );
 
   final String? _description;
@@ -2962,14 +2852,10 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   ///
   /// The [value] argument must not be null.
   DiagnosticableNode({
-    String? name,
+    super.name,
     required this.value,
-    required DiagnosticsTreeStyle? style,
-  }) : assert(value != null),
-       super(
-         name: name,
-         style: style,
-       );
+    required super.style,
+  }) : assert(value != null);
 
   @override
   final T value;
@@ -3025,14 +2911,10 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 class DiagnosticableTreeNode extends DiagnosticableNode<DiagnosticableTree> {
   /// Creates a [DiagnosticableTreeNode].
   DiagnosticableTreeNode({
-    String? name,
-    required DiagnosticableTree value,
-    required DiagnosticsTreeStyle? style,
-  }) : super(
-         name: name,
-         value: value,
-         style: style,
-       );
+    super.name,
+    required super.value,
+    required super.style,
+  });
 
   @override
   List<DiagnosticsNode> getChildren() => value.debugDescribeChildren();
@@ -3580,11 +3462,11 @@ class DiagnosticsBlock extends DiagnosticsNode {
   /// Creates a diagnostic with properties specified by [properties] and
   /// children specified by [children].
   DiagnosticsBlock({
-    String? name,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.whitespace,
+    super.name,
+    DiagnosticsTreeStyle super.style = DiagnosticsTreeStyle.whitespace,
     bool showName = true,
-    bool showSeparator = true,
-    String? linePrefix,
+    super.showSeparator,
+    super.linePrefix,
     this.value,
     String? description,
     this.level = DiagnosticLevel.info,
@@ -3595,11 +3477,7 @@ class DiagnosticsBlock extends DiagnosticsNode {
        _children = children,
        _properties = properties,
     super(
-    name: name,
-    style: style,
     showName: showName && name != null,
-    showSeparator: showSeparator,
-    linePrefix: linePrefix,
   );
 
   final List<DiagnosticsNode> _children;

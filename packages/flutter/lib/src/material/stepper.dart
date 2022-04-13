@@ -193,7 +193,7 @@ class Stepper extends StatefulWidget {
   ///
   /// The [steps], [type], and [currentStep] arguments must not be null.
   const Stepper({
-    Key? key,
+    super.key,
     required this.steps,
     this.physics,
     this.type = StepperType.vertical,
@@ -207,8 +207,7 @@ class Stepper extends StatefulWidget {
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
-       assert(0 <= currentStep && currentStep < steps.length),
-       super(key: key);
+       assert(0 <= currentStep && currentStep < steps.length);
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
   ///

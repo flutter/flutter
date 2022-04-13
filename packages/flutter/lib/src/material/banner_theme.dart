@@ -133,10 +133,10 @@ class MaterialBannerTheme extends InheritedTheme {
   /// Creates a banner theme that controls the configurations for
   /// [MaterialBanner]s in its widget subtree.
   const MaterialBannerTheme({
-    Key? key,
+    super.key,
     this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// The properties for descendant [MaterialBanner] widgets.
   final MaterialBannerThemeData? data;

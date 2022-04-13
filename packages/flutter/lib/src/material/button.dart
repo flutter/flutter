@@ -44,7 +44,7 @@ class RawMaterialButton extends StatefulWidget {
   /// [elevation], [focusElevation], [hoverElevation], [highlightElevation], and
   /// [disabledElevation] must be non-negative.
   const RawMaterialButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.onLongPress,
     this.onHighlightChanged,
@@ -82,8 +82,7 @@ class RawMaterialButton extends StatefulWidget {
        assert(constraints != null),
        assert(animationDuration != null),
        assert(clipBehavior != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(autofocus != null);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -445,10 +444,9 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
 /// "tap target", but not its material or its ink splashes.
 class _InputPadding extends SingleChildRenderObjectWidget {
   const _InputPadding({
-    Key? key,
-    Widget? child,
+    super.child,
     required this.minSize,
-  }) : super(key: key, child: child);
+  });
 
   final Size minSize;
 

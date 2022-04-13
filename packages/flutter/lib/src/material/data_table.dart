@@ -372,7 +372,7 @@ class DataTable extends StatelessWidget {
   /// the sort order is ascending, this should be true (the default),
   /// otherwise it should be false.
   DataTable({
-    Key? key,
+    super.key,
     required this.columns,
     this.sortColumnIndex,
     this.sortAscending = true,
@@ -400,8 +400,7 @@ class DataTable extends StatelessWidget {
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        assert(dividerThickness == null || dividerThickness >= 0),
-       _onlyTextColumn = _initOnlyTextColumn(columns),
-       super(key: key);
+       _onlyTextColumn = _initOnlyTextColumn(columns);
 
   /// The configuration and labels for the columns in the table.
   final List<DataColumn> columns;
@@ -1066,23 +1065,16 @@ class DataTable extends StatelessWidget {
 class TableRowInkWell extends InkResponse {
   /// Creates an ink well for a table row.
   const TableRowInkWell({
-    Key? key,
-    Widget? child,
-    GestureTapCallback? onTap,
-    GestureTapCallback? onDoubleTap,
-    GestureLongPressCallback? onLongPress,
-    ValueChanged<bool>? onHighlightChanged,
-    MaterialStateProperty<Color?>? overlayColor,
+    super.key,
+    super.child,
+    super.onTap,
+    super.onDoubleTap,
+    super.onLongPress,
+    super.onHighlightChanged,
+    super.overlayColor,
   }) : super(
-    key: key,
-    child: child,
-    onTap: onTap,
-    onDoubleTap: onDoubleTap,
-    onLongPress: onLongPress,
-    onHighlightChanged: onHighlightChanged,
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
-    overlayColor: overlayColor,
   );
 
   @override
@@ -1121,11 +1113,10 @@ class TableRowInkWell extends InkResponse {
 
 class _SortArrow extends StatefulWidget {
   const _SortArrow({
-    Key? key,
     required this.visible,
     required this.up,
     required this.duration,
-  }) : super(key: key);
+  });
 
   final bool visible;
 

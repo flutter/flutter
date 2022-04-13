@@ -123,7 +123,7 @@ class Slider extends StatefulWidget {
   /// [inactiveColor] properties, although more fine-grained control of the
   /// appearance is achieved using a [SliderThemeData].
   const Slider({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.onChangeStart,
@@ -145,8 +145,7 @@ class Slider extends StatefulWidget {
        assert(max != null),
        assert(min <= max),
        assert(value >= min && value <= max),
-       assert(divisions == null || divisions > 0),
-       super(key: key);
+       assert(divisions == null || divisions > 0);
 
   /// Creates an adaptive [Slider] based on the target platform, following
   /// Material design's
@@ -160,7 +159,7 @@ class Slider extends StatefulWidget {
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Slider.adaptive({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.onChangeStart,
@@ -182,8 +181,7 @@ class Slider extends StatefulWidget {
        assert(max != null),
        assert(min <= max),
        assert(value >= min && value <= max),
-       assert(divisions == null || divisions > 0),
-       super(key: key);
+       assert(divisions == null || divisions > 0);
 
   /// The currently selected value for this slider.
   ///
@@ -815,7 +813,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
 class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _SliderRenderObjectWidget({
-    Key? key,
+    super.key,
     required this.value,
     required this.divisions,
     required this.label,
@@ -829,7 +827,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     required this.semanticFormatterCallback,
     required this.hasFocus,
     required this.hovering,
-  }) : super(key: key);
+  });
 
   final double value;
   final int? divisions;

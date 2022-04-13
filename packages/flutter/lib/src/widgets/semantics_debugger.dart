@@ -25,7 +25,7 @@ class SemanticsDebugger extends StatefulWidget {
   ///
   /// [labelStyle] dictates the [TextStyle] used for the semantics labels.
   const SemanticsDebugger({
-    Key? key,
+    super.key,
     required this.child,
     this.labelStyle = const TextStyle(
       color: Color(0xFF000000),
@@ -33,8 +33,7 @@ class SemanticsDebugger extends StatefulWidget {
       height: 0.8,
     ),
   }) : assert(child != null),
-       assert(labelStyle != null),
-       super(key: key);
+       assert(labelStyle != null);
 
   /// The widget below this widget in the tree.
   ///

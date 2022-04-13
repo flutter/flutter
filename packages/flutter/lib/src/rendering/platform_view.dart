@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -438,9 +437,8 @@ class RenderUiKitView extends RenderBox {
 class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _UiKitViewGestureRecognizer(
     this.controller,
-    this.gestureRecognizerFactories, {
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(supportedDevices: supportedDevices) {
+    this.gestureRecognizerFactories
+  ) {
     team = GestureArenaTeam()
       ..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -515,9 +513,8 @@ typedef _HandlePointerEvent = Future<void> Function(PointerEvent event);
 class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _PlatformViewGestureRecognizer(
     _HandlePointerEvent handlePointerEvent,
-    this.gestureRecognizerFactories, {
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(supportedDevices: supportedDevices) {
+    this.gestureRecognizerFactories
+  ) {
     team = GestureArenaTeam()
       ..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(

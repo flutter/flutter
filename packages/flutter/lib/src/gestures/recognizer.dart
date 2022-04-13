@@ -285,18 +285,14 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   OneSequenceGestureRecognizer({
-    Object? debugOwner,
+    super.debugOwner,
     @Deprecated(
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
-       );
+    super.kind,
+    super.supportedDevices,
+  });
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
   final Set<int> _trackedPointers = HashSet<int>();
@@ -496,13 +492,13 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     this.deadline,
     this.preAcceptSlopTolerance = kTouchSlop,
     this.postAcceptSlopTolerance = kTouchSlop,
-    Object? debugOwner,
+    super.debugOwner,
     @Deprecated(
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
+    super.kind,
+    super.supportedDevices,
   }) : assert(
          preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be positive or null',
@@ -510,11 +506,6 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
        assert(
          postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
          'The postAcceptSlopTolerance must be positive or null',
-       ),
-       super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
        );
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this

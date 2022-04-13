@@ -71,7 +71,7 @@ enum PopupMenuPosition {
 abstract class PopupMenuEntry<T> extends StatefulWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const PopupMenuEntry({ Key? key }) : super(key: key);
+  const PopupMenuEntry({ super.key });
 
   /// The amount of vertical space occupied by this entry.
   ///
@@ -110,7 +110,7 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
-  const PopupMenuDivider({ Key? key, this.height = _kMenuDividerHeight }) : super(key: key);
+  const PopupMenuDivider({ super.key, this.height = _kMenuDividerHeight });
 
   /// The height of the divider entry.
   ///
@@ -136,10 +136,9 @@ class _PopupMenuDividerState extends State<PopupMenuDivider> {
 // item lines up with the center of its PopupMenuButton.
 class _MenuItem extends SingleChildRenderObjectWidget {
   const _MenuItem({
-    Key? key,
     required this.onLayout,
-    required Widget? child,
-  }) : assert(onLayout != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(onLayout != null);
 
   final ValueChanged<Size> onLayout;
 
@@ -227,7 +226,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   ///
   /// The `enabled` and `height` arguments must not be null.
   const PopupMenuItem({
-    Key? key,
+    super.key,
     this.value,
     this.onTap,
     this.enabled = true,
@@ -237,8 +236,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
     this.mouseCursor,
     required this.child,
   }) : assert(enabled != null),
-       assert(height != null),
-       super(key: key);
+       assert(height != null);
 
   /// The value that will be returned by [showMenu] if this entry is selected.
   final T? value;
@@ -456,22 +454,14 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   ///
   /// The `checked` and `enabled` arguments must not be null.
   const CheckedPopupMenuItem({
-    Key? key,
-    T? value,
+    super.key,
+    super.value,
     this.checked = false,
-    bool enabled = true,
-    EdgeInsets? padding,
-    double height = kMinInteractiveDimension,
-    Widget? child,
-  }) : assert(checked != null),
-       super(
-         key: key,
-         value: value,
-         enabled: enabled,
-         padding: padding,
-         height: height,
-         child: child,
-       );
+    super.enabled,
+    super.padding,
+    super.height,
+    super.child,
+  }) : assert(checked != null);
 
   /// Whether to display a checkmark next to the menu item.
   ///
@@ -535,11 +525,11 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
 
 class _PopupMenu<T> extends StatelessWidget {
   const _PopupMenu({
-    Key? key,
+    super.key,
     required this.route,
     required this.semanticLabel,
     this.constraints,
-  }) : super(key: key);
+  });
 
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
@@ -997,7 +987,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// The [itemBuilder] argument must not be null.
   const PopupMenuButton({
-    Key? key,
+    super.key,
     required this.itemBuilder,
     this.initialValue,
     this.onSelected,
@@ -1021,8 +1011,7 @@ class PopupMenuButton<T> extends StatefulWidget {
        assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
-       ),
-       super(key: key);
+       );
 
   /// Called when the button is pressed to create the items to show in the menu.
   final PopupMenuItemBuilder<T> itemBuilder;

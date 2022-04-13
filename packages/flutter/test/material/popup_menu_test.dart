@@ -2807,10 +2807,10 @@ void main() {
 
 class TestApp extends StatefulWidget {
   const TestApp({
-    Key? key,
+    super.key,
     required this.textDirection,
     this.child,
-  }) : super(key: key);
+  });
 
   final TextDirection textDirection;
   final Widget? child;

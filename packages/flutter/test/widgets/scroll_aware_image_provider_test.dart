@@ -411,7 +411,7 @@ class TestWidgetState extends State<TestWidget> {
 }
 
 class RecordingPhysics extends ScrollPhysics {
-  RecordingPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  RecordingPhysics({ super.parent });
 
   final List<double> velocities = <double>[];
 
@@ -431,7 +431,7 @@ class RecordingPhysics extends ScrollPhysics {
 // times without worrying about actual scrolling mechanics.
 // ignore: must_be_immutable
 class ControllablePhysics extends ScrollPhysics {
-  ControllablePhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  ControllablePhysics({ super.parent });
 
   bool recommendDeferredLoadingValue = false;
 

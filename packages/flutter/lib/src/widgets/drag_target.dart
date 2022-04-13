@@ -184,7 +184,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// The [child] and [feedback] arguments must not be null. If
   /// [maxSimultaneousDrags] is non-null, it must be non-negative.
   const Draggable({
-    Key? key,
+    super.key,
     required this.child,
     required this.feedback,
     this.data,
@@ -212,8 +212,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
-       assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
-       super(key: key);
+       assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
 
   /// The data that will be dropped by this draggable.
   final T? data;
@@ -425,48 +424,31 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
   /// The [child] and [feedback] arguments must not be null. If
   /// [maxSimultaneousDrags] is non-null, it must be non-negative.
   const LongPressDraggable({
-    Key? key,
-    required Widget child,
-    required Widget feedback,
-    T? data,
-    Axis? axis,
-    Widget? childWhenDragging,
-    Offset feedbackOffset = Offset.zero,
+    super.key,
+    required super.child,
+    required super.feedback,
+    super.data,
+    super.axis,
+    super.childWhenDragging,
+    super.feedbackOffset,
     @Deprecated(
       'Use dragAnchorStrategy instead. '
       'Replace "dragAnchor: DragAnchor.child" with "dragAnchorStrategy: childDragAnchorStrategy". '
       'Replace "dragAnchor: DragAnchor.pointer" with "dragAnchorStrategy: pointerDragAnchorStrategy". '
       'This feature was deprecated after v2.1.0-10.0.pre.',
     )
-    DragAnchor dragAnchor = DragAnchor.child,
-    DragAnchorStrategy? dragAnchorStrategy,
-    int? maxSimultaneousDrags,
-    VoidCallback? onDragStarted,
-    DragUpdateCallback? onDragUpdate,
-    DraggableCanceledCallback? onDraggableCanceled,
-    DragEndCallback? onDragEnd,
-    VoidCallback? onDragCompleted,
+    super.dragAnchor,
+    super.dragAnchorStrategy,
+    super.maxSimultaneousDrags,
+    super.onDragStarted,
+    super.onDragUpdate,
+    super.onDraggableCanceled,
+    super.onDragEnd,
+    super.onDragCompleted,
     this.hapticFeedbackOnStart = true,
-    bool ignoringFeedbackSemantics = true,
+    super.ignoringFeedbackSemantics,
     this.delay = kLongPressTimeout,
-  }) : super(
-    key: key,
-    child: child,
-    feedback: feedback,
-    data: data,
-    axis: axis,
-    childWhenDragging: childWhenDragging,
-    feedbackOffset: feedbackOffset,
-    dragAnchor: dragAnchor,
-    dragAnchorStrategy: dragAnchorStrategy,
-    maxSimultaneousDrags: maxSimultaneousDrags,
-    onDragStarted: onDragStarted,
-    onDragUpdate: onDragUpdate,
-    onDraggableCanceled: onDraggableCanceled,
-    onDragEnd: onDragEnd,
-    onDragCompleted: onDragCompleted,
-    ignoringFeedbackSemantics: ignoringFeedbackSemantics,
-  );
+  });
 
   /// Whether haptic feedback should be triggered on drag start.
   final bool hapticFeedbackOnStart;
@@ -669,7 +651,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
   ///
   /// The [builder] argument must not be null.
   const DragTarget({
-    Key? key,
+    super.key,
     required this.builder,
     this.onWillAccept,
     this.onAccept,
@@ -677,7 +659,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
     this.onLeave,
     this.onMove,
     this.hitTestBehavior = HitTestBehavior.translucent,
-  }) : super(key: key);
+  });
 
   /// Called to build the contents of this widget.
   ///

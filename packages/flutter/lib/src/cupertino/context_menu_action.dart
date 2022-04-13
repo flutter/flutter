@@ -14,7 +14,7 @@ import 'colors.dart';
 class CupertinoContextMenuAction extends StatefulWidget {
   /// Construct a CupertinoContextMenuAction.
   const CupertinoContextMenuAction({
-    Key? key,
+    super.key,
     required this.child,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
@@ -22,8 +22,7 @@ class CupertinoContextMenuAction extends StatefulWidget {
     this.trailingIcon,
   }) : assert(child != null),
        assert(isDefaultAction != null),
-       assert(isDestructiveAction != null),
-       super(key: key);
+       assert(isDestructiveAction != null);
 
   /// The widget that will be placed inside the action.
   final Widget child;

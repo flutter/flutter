@@ -14,7 +14,7 @@ class TestNotifier extends ChangeNotifier {
 }
 
 class HasListenersTester<T> extends ValueNotifier<T> {
-  HasListenersTester(T value) : super(value);
+  HasListenersTester(super.value);
   bool get testHasListeners => hasListeners;
 }
 

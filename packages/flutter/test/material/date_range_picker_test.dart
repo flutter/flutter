@@ -1080,9 +1080,8 @@ void main() {
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {
   const _RestorableDateRangePickerDialogTestWidget({
-    Key? key,
     this.datePickerEntryMode = DatePickerEntryMode.calendar,
-  }) : super(key: key);
+  });
 
   final DatePickerEntryMode datePickerEntryMode;
 
