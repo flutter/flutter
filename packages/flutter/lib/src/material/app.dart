@@ -82,6 +82,14 @@ enum ThemeMode {
 /// This widget also configures the observer of the top-level [Navigator] (if
 /// any) to perform [Hero] animations.
 ///
+/// {@template flutter.material.MaterialApp.defaultSelectionStyle}
+/// The [MaterialApp] automatically creates a [DefaultSelectionStyle]. It uses
+/// the colors in the [ThemeData.textSelectionTheme] if they are not null;
+/// otherwise, the [MaterialApp] sets [DefaultSelectionStyle.selectionColor] to
+/// [ColorScheme.primary] with 0.4 opacity and
+/// [DefaultSelectionStyle.cursorColor] to [ColorScheme.primary].
+/// {@endtemplate}
+///
 /// If [home], [routes], [onGenerateRoute], and [onUnknownRoute] are all null,
 /// and [builder] is not null, then no [Navigator] is created.
 ///
@@ -874,29 +882,35 @@ class _MaterialAppState extends State<MaterialApp> {
       theme = widget.highContrastTheme;
     }
     theme ??= widget.theme ?? ThemeData.light();
+    final Color effectiveSelectionColor = theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+    final Color effectiveCursorColor = theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
 
     return ScaffoldMessenger(
       key: widget.scaffoldMessengerKey,
-      child: AnimatedTheme(
-        data: theme,
-        child: widget.builder != null
-          ? Builder(
-              builder: (BuildContext context) {
-                // Why are we surrounding a builder with a builder?
-                //
-                // The widget.builder may contain code that invokes
-                // Theme.of(), which should return the theme we selected
-                // above in AnimatedTheme. However, if we invoke
-                // widget.builder() directly as the child of AnimatedTheme
-                // then there is no Context separating them, and the
-                // widget.builder() will not find the theme. Therefore, we
-                // surround widget.builder with yet another builder so that
-                // a context separates them and Theme.of() correctly
-                // resolves to the theme we passed to AnimatedTheme.
-                return widget.builder!(context, child);
-              },
-            )
-          : child ?? const SizedBox.shrink(),
+      child: DefaultSelectionStyle(
+        selectionColor: effectiveSelectionColor,
+        cursorColor: effectiveCursorColor,
+        child: AnimatedTheme(
+          data: theme,
+          child: widget.builder != null
+            ? Builder(
+                builder: (BuildContext context) {
+                  // Why are we surrounding a builder with a builder?
+                  //
+                  // The widget.builder may contain code that invokes
+                  // Theme.of(), which should return the theme we selected
+                  // above in AnimatedTheme. However, if we invoke
+                  // widget.builder() directly as the child of AnimatedTheme
+                  // then there is no Context separating them, and the
+                  // widget.builder() will not find the theme. Therefore, we
+                  // surround widget.builder with yet another builder so that
+                  // a context separates them and Theme.of() correctly
+                  // resolves to the theme we passed to AnimatedTheme.
+                  return widget.builder!(context, child);
+                },
+              )
+            : child ?? const SizedBox.shrink(),
+        ),
       ),
     );
   }
