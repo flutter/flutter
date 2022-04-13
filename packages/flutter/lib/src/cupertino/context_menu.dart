@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -368,20 +367,17 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-      child: GestureDetector(
-        onTapCancel: _onTapCancel,
-        onTapDown: _onTapDown,
-        onTapUp: _onTapUp,
-        onTap: _onTap,
-        child: TickerMode(
-          enabled: !_childHidden,
-          child: Opacity(
-            key: _childGlobalKey,
-            opacity: _childHidden ? 0.0 : 1.0,
-            child: widget.child,
-          ),
+    return GestureDetector(
+      onTapCancel: _onTapCancel,
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTap: _onTap,
+      child: TickerMode(
+        enabled: !_childHidden,
+        child: Opacity(
+          key: _childGlobalKey,
+          opacity: _childHidden ? 0.0 : 1.0,
+          child: widget.child,
         ),
       ),
     );
