@@ -538,9 +538,9 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 ///
 /// See also:
 ///
-///  * [RenderUnconstrainedBox] for a render object that allows its children
-///    to render themselves unconstrained, expands to fit them, and considers
-///    overflow to be an error.
+///  * [RenderConstraintsTransformBox] for a render object that applies an
+///    arbitrary transform to its constraints before sizing its child using
+///    the new constraints, treating any overflow as error.
 ///  * [RenderSizedOverflowBox], a render object that is a specific size but
 ///    passes its original constraints through to its child, which it allows to
 ///    overflow.
@@ -675,8 +675,9 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 ///  * [RenderConstrainedOverflowBox], which renders a box that imposes different
 ///    constraints on its child than it gets from its parent, possibly allowing
 ///    the child to overflow the parent.
-///  * [RenderUnconstrainedBox] which allows its children to render themselves
-///    unconstrained, expands to fit them, and considers overflow to be an error.
+///  * [RenderConstraintsTransformBox] for a render object that applies an
+///    arbitrary transform to its constraints before sizing its child using
+///    the new constraints, treating any overflow as error.
 class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
   /// Creates a [RenderBox] that sizes itself to the child and modifies the
   /// [constraints] before passing it down to that child.
@@ -942,9 +943,9 @@ class RenderUnconstrainedBox extends RenderConstraintsTransformBox {
 ///
 /// See also:
 ///
-///  * [RenderUnconstrainedBox] for a render object that allows its children
-///    to render themselves unconstrained, expands to fit them, and considers
-///    overflow to be an error.
+///  * [RenderConstraintsTransformBox] for a render object that applies an
+///    arbitrary transform to its constraints before sizing its child using
+///    the new constraints, treating any overflow as error.
 ///  * [RenderConstrainedOverflowBox] for a render object that imposes
 ///    different constraints on its child than it gets from its parent,
 ///    possibly allowing the child to overflow the parent.
