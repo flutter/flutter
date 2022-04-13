@@ -27,6 +27,22 @@ config("internal_config") {
   ]
 
   if (is_win) {
+    cflags += [
+      # Silence warnings about redeclaration of vk_icdGetInstanceProcAddr,
+      # vk_icdNegotiateLoaderICDInterfaceVersion, vkGetInstanceProcAddr in
+      # //third_party/swiftshader/src/Vulkan/libVulkan.cpp.
+      "-Wno-dll-attribute-on-redeclaration",
+      # Silence warnings about strings (ab)used in assertions in
+      # FrameBufferDD.cpp. e.g. assert(!"Failed to initialize graphics:...")
+      "-Wno-string-conversion",
+    ]
+
+    defines += [
+      # std::iterator is deprecated as a base class, but used in
+      # third_party/swiftshader/third_party/llvm-subzero/include/llvm/ADT/iterator.h
+      "_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING",
+    ]
+
     libs = [
       "user32.lib",
       "gdi32.lib",
