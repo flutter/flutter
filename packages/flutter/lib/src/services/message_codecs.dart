@@ -402,7 +402,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
       }
       if (utf8Bytes != null) {
         writeSize(buffer, utf8Offset + utf8Bytes.length);
-        buffer.putUint8List(asciiBytes.sublist(0, utf8Offset));
+        buffer.putUint8List(Uint8List.sublistView(asciiBytes, 0, utf8Offset));
         buffer.putUint8List(utf8Bytes);
       } else {
         writeSize(buffer, asciiBytes.length);
