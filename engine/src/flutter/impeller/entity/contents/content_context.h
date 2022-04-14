@@ -11,6 +11,8 @@
 #include "flutter/fml/macros.h"
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
+#include "impeller/entity/border_mask_blur.frag.h"
+#include "impeller/entity/border_mask_blur.vert.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/gaussian_blur.frag.h"
 #include "impeller/entity/gaussian_blur.vert.h"
@@ -44,6 +46,8 @@ using TexturePipeline =
     PipelineT<TextureFillVertexShader, TextureFillFragmentShader>;
 using GaussianBlurPipeline =
     PipelineT<GaussianBlurVertexShader, GaussianBlurFragmentShader>;
+using BorderMaskBlurPipeline =
+    PipelineT<BorderMaskBlurVertexShader, BorderMaskBlurFragmentShader>;
 using SolidStrokePipeline =
     PipelineT<SolidStrokeVertexShader, SolidStrokeFragmentShader>;
 using GlyphAtlasPipeline =
@@ -114,6 +118,11 @@ class ContentContext {
     return GetPipeline(gaussian_blur_pipelines_, opts);
   }
 
+  std::shared_ptr<Pipeline> GetBorderMaskBlurPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(border_mask_blur_pipelines_, opts);
+  }
+
   std::shared_ptr<Pipeline> GetSolidStrokePipeline(
       ContentContextOptions opts) const {
     return GetPipeline(solid_stroke_pipelines_, opts);
@@ -156,6 +165,7 @@ class ContentContext {
   mutable Variants<TextureBlendScreenPipeline> texture_blend_screen_pipelines_;
   mutable Variants<TexturePipeline> texture_pipelines_;
   mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
+  mutable Variants<BorderMaskBlurPipeline> border_mask_blur_pipelines_;
   mutable Variants<SolidStrokePipeline> solid_stroke_pipelines_;
   mutable Variants<ClipPipeline> clip_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;

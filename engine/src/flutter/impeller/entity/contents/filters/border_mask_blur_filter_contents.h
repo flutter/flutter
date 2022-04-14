@@ -11,19 +11,15 @@
 
 namespace impeller {
 
-class DirectionalGaussianBlurFilterContents final : public FilterContents {
+class BorderMaskBlurFilterContents final : public FilterContents {
  public:
-  DirectionalGaussianBlurFilterContents();
+  BorderMaskBlurFilterContents();
 
-  ~DirectionalGaussianBlurFilterContents() override;
+  ~BorderMaskBlurFilterContents() override;
 
-  void SetSigma(Sigma sigma);
-
-  void SetDirection(Vector2 direction);
+  void SetSigma(Sigma sigma_x, Sigma sigma_y);
 
   void SetBlurStyle(BlurStyle blur_style);
-
-  void SetSourceOverride(FilterInput::Ref alpha_mask);
 
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
@@ -35,15 +31,14 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
                     const Entity& entity,
                     RenderPass& pass,
                     const Rect& coverage) const override;
-  Sigma blur_sigma_;
-  Vector2 blur_direction_;
+  Sigma sigma_x_;
+  Sigma sigma_y_;
   BlurStyle blur_style_ = BlurStyle::kNormal;
   bool src_color_factor_ = false;
   bool inner_blur_factor_ = true;
   bool outer_blur_factor_ = true;
-  FilterInput::Ref source_override_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DirectionalGaussianBlurFilterContents);
+  FML_DISALLOW_COPY_AND_ASSIGN(BorderMaskBlurFilterContents);
 };
 
 }  // namespace impeller
