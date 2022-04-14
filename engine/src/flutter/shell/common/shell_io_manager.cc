@@ -119,8 +119,4 @@ std::shared_ptr<impeller::Context> ShellIOManager::GetImpellerContext() const {
   return impeller_context_;
 }
 
-sk_sp<GrDirectContext> ShellIOManager::GetSharedResourceContext() const {
-  return resource_context_;
-};
-
 }  // namespace flutter
