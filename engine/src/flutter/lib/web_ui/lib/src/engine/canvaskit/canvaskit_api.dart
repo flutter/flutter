@@ -391,7 +391,10 @@ SkTextAlign toSkTextAlign(ui.TextAlign align) {
 }
 
 @JS()
-class SkTextHeightBehaviorEnum {
+@staticInterop
+class SkTextHeightBehaviorEnum {}
+
+extension SkTextHeightBehaviorEnumExtension on SkTextHeightBehaviorEnum {
   external SkTextHeightBehavior get All;
   external SkTextHeightBehavior get DisableFirstAscent;
   external SkTextHeightBehavior get DisableLastDescent;
@@ -399,7 +402,10 @@ class SkTextHeightBehaviorEnum {
 }
 
 @JS()
-class SkTextHeightBehavior {
+@staticInterop
+class SkTextHeightBehavior {}
+
+extension SkTextHeightBehaviorExtension on SkTextHeightBehavior {
   external int get value;
 }
 
@@ -418,7 +424,10 @@ SkTextHeightBehavior toSkTextHeightBehavior(ui.TextHeightBehavior behavior) {
 }
 
 @JS()
-class SkRectHeightStyleEnum {
+@staticInterop
+class SkRectHeightStyleEnum {}
+
+extension SkRectHeightStyleEnumExtension on SkRectHeightStyleEnum {
   external SkRectHeightStyle get Tight;
   external SkRectHeightStyle get Max;
   external SkRectHeightStyle get IncludeLineSpacingMiddle;
@@ -428,7 +437,10 @@ class SkRectHeightStyleEnum {
 }
 
 @JS()
-class SkRectHeightStyle {
+@staticInterop
+class SkRectHeightStyle {}
+
+extension SkRectHeightStyleExtension on SkRectHeightStyle {
   external int get value;
 }
 
@@ -446,13 +458,19 @@ SkRectHeightStyle toSkRectHeightStyle(ui.BoxHeightStyle style) {
 }
 
 @JS()
-class SkRectWidthStyleEnum {
+@staticInterop
+class SkRectWidthStyleEnum {}
+
+extension SkRectWidthStyleEnumExtension on SkRectWidthStyleEnum {
   external SkRectWidthStyle get Tight;
   external SkRectWidthStyle get Max;
 }
 
 @JS()
-class SkRectWidthStyle {
+@staticInterop
+class SkRectWidthStyle {}
+
+extension SkRectWidthStyleExtension on SkRectWidthStyle {
   external int get value;
 }
 
@@ -467,14 +485,20 @@ SkRectWidthStyle toSkRectWidthStyle(ui.BoxWidthStyle style) {
 }
 
 @JS()
-class SkVertexModeEnum {
+@staticInterop
+class SkVertexModeEnum {}
+
+extension SkVertexModeEnumExtension on SkVertexModeEnum {
   external SkVertexMode get Triangles;
   external SkVertexMode get TrianglesStrip;
   external SkVertexMode get TriangleFan;
 }
 
 @JS()
-class SkVertexMode {
+@staticInterop
+class SkVertexMode {}
+
+extension SkVertexModeExtension on SkVertexMode {
   external int get value;
 }
 
@@ -489,14 +513,20 @@ SkVertexMode toSkVertexMode(ui.VertexMode mode) {
 }
 
 @JS()
-class SkPointModeEnum {
+@staticInterop
+class SkPointModeEnum {}
+
+extension SkPointModeEnumExtension on SkPointModeEnum {
   external SkPointMode get Points;
   external SkPointMode get Lines;
   external SkPointMode get Polygon;
 }
 
 @JS()
-class SkPointMode {
+@staticInterop
+class SkPointMode {}
+
+extension SkPointModeExtension on SkPointMode {
   external int get value;
 }
 
@@ -511,13 +541,19 @@ SkPointMode toSkPointMode(ui.PointMode mode) {
 }
 
 @JS()
-class SkClipOpEnum {
+@staticInterop
+class SkClipOpEnum {}
+
+extension SkClipOpEnumExtension on SkClipOpEnum {
   external SkClipOp get Difference;
   external SkClipOp get Intersect;
 }
 
 @JS()
-class SkClipOp {
+@staticInterop
+class SkClipOp {}
+
+extension SkClipOpExtension on SkClipOp {
   external int get value;
 }
 
@@ -531,13 +567,19 @@ SkClipOp toSkClipOp(ui.ClipOp clipOp) {
 }
 
 @JS()
-class SkFillTypeEnum {
+@staticInterop
+class SkFillTypeEnum {}
+
+extension SkFillTypeEnumExtension on SkFillTypeEnum {
   external SkFillType get Winding;
   external SkFillType get EvenOdd;
 }
 
 @JS()
-class SkFillType {
+@staticInterop
+class SkFillType {}
+
+extension SkFillTypeExtension on SkFillType {
   external int get value;
 }
 
@@ -551,7 +593,10 @@ SkFillType toSkFillType(ui.PathFillType fillType) {
 }
 
 @JS()
-class SkPathOpEnum {
+@staticInterop
+class SkPathOpEnum {}
+
+extension SkPathOpEnumExtension on SkPathOpEnum {
   external SkPathOp get Difference;
   external SkPathOp get Intersect;
   external SkPathOp get Union;
@@ -560,7 +605,10 @@ class SkPathOpEnum {
 }
 
 @JS()
-class SkPathOp {
+@staticInterop
+class SkPathOp {}
+
+extension SkPathOpExtension on SkPathOp {
   external int get value;
 }
 
@@ -577,7 +625,10 @@ SkPathOp toSkPathOp(ui.PathOperation pathOp) {
 }
 
 @JS()
-class SkBlurStyleEnum {
+@staticInterop
+class SkBlurStyleEnum {}
+
+extension SkBlurStyleEnumExtension on SkBlurStyleEnum {
   external SkBlurStyle get Normal;
   external SkBlurStyle get Solid;
   external SkBlurStyle get Outer;
@@ -585,7 +636,10 @@ class SkBlurStyleEnum {
 }
 
 @JS()
-class SkBlurStyle {
+@staticInterop
+class SkBlurStyle {}
+
+extension SkBlurStyleExtension on SkBlurStyle {
   external int get value;
 }
 
@@ -601,14 +655,20 @@ SkBlurStyle toSkBlurStyle(ui.BlurStyle style) {
 }
 
 @JS()
-class SkStrokeCapEnum {
+@staticInterop
+class SkStrokeCapEnum {}
+
+extension SkStrokeCapEnumExtension on SkStrokeCapEnum {
   external SkStrokeCap get Butt;
   external SkStrokeCap get Round;
   external SkStrokeCap get Square;
 }
 
 @JS()
-class SkStrokeCap {
+@staticInterop
+class SkStrokeCap {}
+
+extension SkStrokeCapExtension on SkStrokeCap {
   external int get value;
 }
 
@@ -623,13 +683,19 @@ SkStrokeCap toSkStrokeCap(ui.StrokeCap strokeCap) {
 }
 
 @JS()
-class SkPaintStyleEnum {
+@staticInterop
+class SkPaintStyleEnum {}
+
+extension SkPaintStyleEnumExtension on SkPaintStyleEnum {
   external SkPaintStyle get Stroke;
   external SkPaintStyle get Fill;
 }
 
 @JS()
-class SkPaintStyle {
+@staticInterop
+class SkPaintStyle {}
+
+extension SkPaintStyleExtension on SkPaintStyle {
   external int get value;
 }
 
@@ -643,7 +709,10 @@ SkPaintStyle toSkPaintStyle(ui.PaintingStyle paintStyle) {
 }
 
 @JS()
-class SkBlendModeEnum {
+@staticInterop
+class SkBlendModeEnum {}
+
+extension SkBlendModeEnumExtension on SkBlendModeEnum {
   external SkBlendMode get Clear;
   external SkBlendMode get Src;
   external SkBlendMode get Dst;
@@ -676,7 +745,10 @@ class SkBlendModeEnum {
 }
 
 @JS()
-class SkBlendMode {
+@staticInterop
+class SkBlendMode {}
+
+extension SkBlendModeExtension on SkBlendMode {
   external int get value;
 }
 
@@ -717,14 +789,20 @@ SkBlendMode toSkBlendMode(ui.BlendMode blendMode) {
 }
 
 @JS()
-class SkStrokeJoinEnum {
+@staticInterop
+class SkStrokeJoinEnum {}
+
+extension SkStrokeJoinEnumExtension on SkStrokeJoinEnum {
   external SkStrokeJoin get Miter;
   external SkStrokeJoin get Round;
   external SkStrokeJoin get Bevel;
 }
 
 @JS()
-class SkStrokeJoin {
+@staticInterop
+class SkStrokeJoin {}
+
+extension SkStrokeJoinExtension on SkStrokeJoin {
   external int get value;
 }
 
@@ -739,7 +817,10 @@ SkStrokeJoin toSkStrokeJoin(ui.StrokeJoin strokeJoin) {
 }
 
 @JS()
-class SkTileModeEnum {
+@staticInterop
+class SkTileModeEnum {}
+
+extension SkTileModeEnumExtension on SkTileModeEnum {
   external SkTileMode get Clamp;
   external SkTileMode get Repeat;
   external SkTileMode get Mirror;
@@ -747,7 +828,10 @@ class SkTileModeEnum {
 }
 
 @JS()
-class SkTileMode {
+@staticInterop
+class SkTileMode {}
+
+extension SkTileModeExtension on SkTileMode {
   external int get value;
 }
 
@@ -763,13 +847,19 @@ SkTileMode toSkTileMode(ui.TileMode mode) {
 }
 
 @JS()
-class SkFilterModeEnum {
+@staticInterop
+class SkFilterModeEnum {}
+
+extension SkFilterModeEnumExtension on SkFilterModeEnum {
   external SkFilterMode get Nearest;
   external SkFilterMode get Linear;
 }
 
 @JS()
-class SkFilterMode {
+@staticInterop
+class SkFilterMode {}
+
+extension SkFilterModeExtension on SkFilterMode {
   external int get value;
 }
 
@@ -780,14 +870,20 @@ SkFilterMode toSkFilterMode(ui.FilterQuality filterQuality) {
 }
 
 @JS()
-class SkMipmapModeEnum {
+@staticInterop
+class SkMipmapModeEnum {}
+
+extension SkMipmapModeEnumExtension on SkMipmapModeEnum {
   external SkMipmapMode get None;
   external SkMipmapMode get Nearest;
   external SkMipmapMode get Linear;
 }
 
 @JS()
-class SkMipmapMode {
+@staticInterop
+class SkMipmapMode {}
+
+extension SkMipmapModeExtension on SkMipmapMode {
   external int get value;
 }
 
@@ -798,19 +894,28 @@ SkMipmapMode toSkMipmapMode(ui.FilterQuality filterQuality) {
 }
 
 @JS()
-class SkAlphaTypeEnum {
+@staticInterop
+class SkAlphaTypeEnum {}
+
+extension SkAlphaTypeEnumExtension on SkAlphaTypeEnum {
   external SkAlphaType get Opaque;
   external SkAlphaType get Premul;
   external SkAlphaType get Unpremul;
 }
 
 @JS()
-class SkAlphaType {
+@staticInterop
+class SkAlphaType {}
+
+extension SkAlphaTypeExtension on SkAlphaType {
   external int get value;
 }
 
 @JS()
-class SkColorTypeEnum {
+@staticInterop
+class SkColorTypeEnum {}
+
+extension SkColorTypeEnumExtension on SkColorTypeEnum {
   external SkColorType get Alpha_8;
   external SkColorType get RGB_565;
   external SkColorType get ARGB_4444;
@@ -825,7 +930,10 @@ class SkColorTypeEnum {
 }
 
 @JS()
-class SkColorType {
+@staticInterop
+class SkColorType {}
+
+extension SkColorTypeExtension on SkColorType {
   external int get value;
 }
 
