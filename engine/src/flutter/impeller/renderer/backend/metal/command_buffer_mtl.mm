@@ -55,14 +55,20 @@ static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
 
 // TODO(dnfield): remove this declaration when we no longer need to build on
 // machines with lower SDK versions than 11.0.s
-#if !defined(MAC_OS_X_VERSION_11_0) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_11_0
-typedef enum MTLCommandEncoderErrorState : NSInteger {
+#if !defined(MAC_OS_VERSION_11_0) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_VERSION_11_0
+typedef NS_ENUM(NSInteger, MTLCommandEncoderErrorState) {
   MTLCommandEncoderErrorStateUnknown = 0,
   MTLCommandEncoderErrorStateCompleted = 1,
   MTLCommandEncoderErrorStateAffected = 2,
   MTLCommandEncoderErrorStatePending = 3,
   MTLCommandEncoderErrorStateFaulted = 4,
 } API_AVAILABLE(macos(11.0), ios(14.0));
+#endif
+
+
+#if !defined(MAC_OS_VERSION_12_0) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_VERSION_12_0
+constexpr int MTLCommandBufferErrorAccessRevoked = 4;
+constexpr int MTLCommandBufferErrorStackOverflow = 12;
 #endif
 
 API_AVAILABLE(ios(14.0), macos(11.0))
