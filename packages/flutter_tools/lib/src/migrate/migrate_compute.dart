@@ -703,41 +703,48 @@ Future<void> computeMerge(
         }
       }
       if (result == null) {
+        late String basePath; 
+        late String currentPath; 
+        late String targetPath; 
+
         // Use two way merge if diff between base and target are the same.
         // This prevents the three way merge re-deleting the base->target changes.
-        if (preferTwoWayMerge || (
-              (userDiff.diff.contains('@@') && targetDiff.diff.contains('@@')) &&
-              userDiff.diff.substring(userDiff.diff.indexOf('@@')) == targetDiff.diff.substring(targetDiff.diff.indexOf('@@')))) {
+        if (preferTwoWayMerge) {
           mergeType = MergeType.twoWay;
         }
         switch (mergeType) {
           case MergeType.twoWay: {
-            result = await MigrateUtils.gitMergeFile(
-              base: currentFile.path,
-              current: currentFile.path,
-              target: fileSystem.path.join(migrateResult.generatedTargetTemplateDirectory!.path, localPath),
-              localPath: localPath,
-            );
+            basePath = currentFile.path;
+            currentPath = currentFile.path;
+            targetPath = fileSystem.path.join(migrateResult.generatedTargetTemplateDirectory!.path, localPath);
             break;
           }
           case MergeType.threeWay: {
-            result = await MigrateUtils.gitMergeFile(
-              base: fileSystem.path.join(migrateResult.generatedBaseTemplateDirectory!.path, localPath),
-              current: currentFile.path,
-              target: fileSystem.path.join(migrateResult.generatedTargetTemplateDirectory!.path, localPath),
-              localPath: localPath,
-            );
+            basePath = fileSystem.path.join(migrateResult.generatedBaseTemplateDirectory!.path, localPath);
+            currentPath = currentFile.path;
+            targetPath = fileSystem.path.join(migrateResult.generatedTargetTemplateDirectory!.path, localPath);
             break;
           }
           case MergeType.custom: {
             break; // handled above
           }
         }
+        if (mergeType != MergeType.custom) {
+          result = await MigrateUtils.gitMergeFile(
+            base: basePath,
+            current: currentPath,
+            target: targetPath,
+            localPath: localPath,
+          );
+        }
       }
       if (result != null) {
         // Don't include if result is identical to the current file.
         if (result.mergedString != null) {
           if (result.mergedString == currentFile.readAsStringSync()) {
+            status.pause();
+            logger.printStatus('$localPath was merged with a $mergeType.');
+            status.resume();
             continue;
           }
         } else {
