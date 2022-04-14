@@ -50,8 +50,10 @@ class FilterInput final {
  private:
   FilterInput(Variant input);
 
-  std::optional<Snapshot> RenderToTexture(const ContentContext& renderer,
-                                          const Entity& entity) const;
+  std::optional<Snapshot> MakeSnapshot(const ContentContext& renderer,
+                                       const Entity& entity) const;
+
+  std::optional<Snapshot> MakeSnapshotForTexture(const Entity& entity) const;
 
   Variant input_;
   mutable std::optional<Snapshot> snapshot_;

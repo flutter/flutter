@@ -139,21 +139,24 @@ struct TRect {
   }
 
   constexpr std::array<TPoint<T>, 4> GetPoints() const {
-    const auto left = std::min(origin.x, origin.x + size.width);
-    const auto top = std::min(origin.y, origin.y + size.height);
-    const auto right = std::max(origin.x, origin.x + size.width);
-    const auto bottom = std::max(origin.y, origin.y + size.height);
+    auto [left, top, right, bottom] = GetLTRB();
     return {TPoint(left, top), TPoint(right, top), TPoint(left, bottom),
             TPoint(right, bottom)};
+  }
+
+  constexpr std::array<TPoint<T>, 4> GetTransformedPoints(
+      const Matrix& transform) const {
+    auto points = GetPoints();
+    for (uint i = 0; i < points.size(); i++) {
+      points[i] = transform * points[i];
+    }
+    return points;
   }
 
   /// @brief  Creates a new bounding box that contains this transformed
   ///         rectangle.
   constexpr TRect TransformBounds(const Matrix& transform) const {
-    auto points = GetPoints();
-    for (uint i = 0; i < points.size(); i++) {
-      points[i] = transform * points[i];
-    }
+    auto points = GetTransformedPoints(transform);
     return TRect::MakePointBounds({points.begin(), points.end()}).value();
   }
 

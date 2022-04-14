@@ -39,11 +39,11 @@ class Contents {
   /// @brief Get the screen space bounding rectangle that this contents affects.
   virtual std::optional<Rect> GetCoverage(const Entity& entity) const;
 
-  /// @brief Render this contents to a texture, respecting the entity's
+  /// @brief Render this contents to a snapshot, respecting the entity's
   ///        transform, path, stencil depth, blend mode, etc.
   ///        The result texture size is always the size of
   ///        `GetCoverage(entity)`.
-  virtual std::optional<Snapshot> RenderToTexture(
+  virtual std::optional<Snapshot> RenderToSnapshot(
       const ContentContext& renderer,
       const Entity& entity) const;
 

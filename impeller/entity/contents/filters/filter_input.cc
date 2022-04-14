@@ -7,6 +7,7 @@
 #include <cstdarg>
 #include <initializer_list>
 #include <memory>
+#include <optional>
 
 #include "impeller/entity/contents/snapshot.h"
 #include "impeller/entity/entity.h"
@@ -32,7 +33,7 @@ FilterInput::Variant FilterInput::GetInput() const {
 
 std::optional<Rect> FilterInput::GetCoverage(const Entity& entity) const {
   if (snapshot_) {
-    return Rect(snapshot_->position, Size(snapshot_->texture->GetSize()));
+    return snapshot_->GetCoverage();
   }
 
   if (auto contents = std::get_if<std::shared_ptr<Contents>>(&input_)) {
@@ -51,7 +52,7 @@ std::optional<Snapshot> FilterInput::GetSnapshot(const ContentContext& renderer,
   if (snapshot_) {
     return snapshot_;
   }
-  snapshot_ = RenderToTexture(renderer, entity);
+  snapshot_ = MakeSnapshot(renderer, entity);
 
   return snapshot_;
 }
@@ -60,15 +61,26 @@ FilterInput::FilterInput(Variant input) : input_(input) {}
 
 FilterInput::~FilterInput() = default;
 
-std::optional<Snapshot> FilterInput::RenderToTexture(
+std::optional<Snapshot> FilterInput::MakeSnapshot(
     const ContentContext& renderer,
     const Entity& entity) const {
   if (auto contents = std::get_if<std::shared_ptr<Contents>>(&input_)) {
-    return contents->get()->RenderToTexture(renderer, entity);
+    return contents->get()->RenderToSnapshot(renderer, entity);
   }
 
   if (auto texture = std::get_if<std::shared_ptr<Texture>>(&input_)) {
-    return Snapshot::FromTransformedTexture(renderer, entity, *texture);
+    // Rendered textures stretch to fit the entity path coverage, so we
+    // incorporate this behavior by translating and scaling the snapshot
+    // transform.
+    auto path_bounds = entity.GetPath().GetBoundingBox();
+    if (!path_bounds.has_value()) {
+      return std::nullopt;
+    }
+    auto transform = entity.GetTransformation() *
+                     Matrix::MakeTranslation(path_bounds->origin) *
+                     Matrix::MakeScale(Vector2(path_bounds->size) /
+                                       texture->get()->GetSize());
+    return Snapshot{.texture = *texture, .transform = transform};
   }
 
   FML_UNREACHABLE();

@@ -50,7 +50,9 @@ std::shared_ptr<FilterContents> FilterContents::MakeBlend(
       new_blend = std::make_shared<BlendFilterContents>();
       new_blend->SetInputs({blend_input, *in_i});
       new_blend->SetBlendMode(blend_mode);
-      blend_input = FilterInput::Make(new_blend);
+      if (in_i < inputs.end() - 1) {
+        blend_input = FilterInput::Make(new_blend);
+      }
     }
     // new_blend will always be assigned because inputs.size() >= 2.
     return new_blend;
@@ -104,7 +106,7 @@ bool FilterContents::Render(const ContentContext& renderer,
 
   // Run the filter.
 
-  auto maybe_snapshot = RenderToTexture(renderer, entity);
+  auto maybe_snapshot = RenderToSnapshot(renderer, entity);
   if (!maybe_snapshot.has_value()) {
     return false;
   }
@@ -147,7 +149,7 @@ std::optional<Rect> FilterContents::GetCoverage(const Entity& entity) const {
   return result;
 }
 
-std::optional<Snapshot> FilterContents::RenderToTexture(
+std::optional<Snapshot> FilterContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity) const {
   auto bounds = GetCoverage(entity);
@@ -166,7 +168,8 @@ std::optional<Snapshot> FilterContents::RenderToTexture(
     return std::nullopt;
   }
 
-  return Snapshot{.texture = texture, .position = bounds->origin};
+  return Snapshot{.texture = texture,
+                  .transform = Matrix::MakeTranslation(bounds->origin)};
 }
 
 }  // namespace impeller

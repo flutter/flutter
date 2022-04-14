@@ -21,16 +21,19 @@ class Entity;
 /// Represents a texture and its intended draw position.
 struct Snapshot {
   std::shared_ptr<Texture> texture;
-  /// The offset from the origin where this texture is intended to be
-  /// rendered.
-  Vector2 position;
+  /// The transform that should be applied to this texture for rendering.
+  Matrix transform;
 
-  /// Transform a texture by the given `entity`'s transformation matrix to a new
-  /// texture.
-  static std::optional<Snapshot> FromTransformedTexture(
-      const ContentContext& renderer,
-      const Entity& entity,
-      std::shared_ptr<Texture> texture);
+  std::optional<Rect> GetCoverage() const;
+
+  /// @brief  Get the transform that converts screen space coordinates to the UV
+  ///         space of this snapshot.
+  std::optional<Matrix> GetUVTransform() const;
+
+  /// @brief  Map a coverage rect to this filter input's UV space.
+  ///         Result order: Top left, top right, bottom left, bottom right.
+  std::optional<std::array<Point, 4>> GetCoverageUVs(
+      const Rect& coverage) const;
 };
 
 }  // namespace impeller

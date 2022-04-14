@@ -11,7 +11,9 @@
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/scalar.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
 
 namespace impeller {
@@ -69,8 +71,8 @@ void DirectionalGaussianBlurFilterContents::SetBlurStyle(BlurStyle blur_style) {
 }
 
 void DirectionalGaussianBlurFilterContents::SetSourceOverride(
-    FilterInput::Ref alpha_mask) {
-  source_override_ = alpha_mask;
+    FilterInput::Ref source_override) {
+  source_override_ = source_override;
 }
 
 bool DirectionalGaussianBlurFilterContents::RenderFilter(
@@ -78,7 +80,7 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass,
-    const Rect& bounds) const {
+    const Rect& coverage) const {
   if (inputs.empty()) {
     return true;
   }
@@ -88,79 +90,61 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
-  auto input = inputs[0]->GetSnapshot(renderer, entity);
-  if (!input.has_value()) {
-    return true;
-  }
+  // Input 0 snapshot and UV mapping.
 
-  auto input_bounds = inputs[0]->GetCoverage(entity);
-  if (!input_bounds.has_value() || input_bounds->IsEmpty()) {
+  auto input_snapshot = inputs[0]->GetSnapshot(renderer, entity);
+  if (!input_snapshot.has_value()) {
     return true;
   }
-  auto filter_bounds = GetCoverage(entity);
-  if (!filter_bounds.has_value() || filter_bounds->IsEmpty()) {
-    FML_LOG(ERROR) << "The gaussian blur filter coverage is missing or empty "
-                      "even though the filter's input has coverage.";
-    return false;
+  auto maybe_input_uvs = input_snapshot->GetCoverageUVs(coverage);
+  if (!maybe_input_uvs.has_value()) {
+    return true;
   }
+  auto input_uvs = maybe_input_uvs.value();
+
+  // Source override snapshot and UV mapping.
+
+  auto source = source_override_ ? source_override_ : inputs[0];
+  auto source_snapshot = source->GetSnapshot(renderer, entity);
+  if (!source_snapshot.has_value()) {
+    return true;
+  }
+  auto maybe_source_uvs = source_snapshot->GetCoverageUVs(coverage);
+  if (!maybe_source_uvs.has_value()) {
+    return true;
+  }
+  auto source_uvs = maybe_source_uvs.value();
+
+  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+  vtx_builder.AddVertices({
+      {Point(0, 0), input_uvs[0], source_uvs[0]},
+      {Point(1, 0), input_uvs[1], source_uvs[1]},
+      {Point(1, 1), input_uvs[3], source_uvs[3]},
+      {Point(0, 0), input_uvs[0], source_uvs[0]},
+      {Point(1, 1), input_uvs[3], source_uvs[3]},
+      {Point(0, 1), input_uvs[2], source_uvs[2]},
+  });
+  auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
   auto transformed_blur = entity.GetTransformation().TransformDirection(
       blur_direction_ * blur_sigma_.sigma);
 
-  // LTRB
-  Scalar uv[4] = {
-      (filter_bounds->GetLeft() - input_bounds->GetLeft()) /
-          input_bounds->size.width,
-      (filter_bounds->GetTop() - input_bounds->GetTop()) /
-          input_bounds->size.height,
-      1 + (filter_bounds->GetRight() - input_bounds->GetRight()) /
-              input_bounds->size.width,
-      1 + (filter_bounds->GetBottom() - input_bounds->GetBottom()) /
-              input_bounds->size.height,
-  };
-
-  auto source = source_override_ ? source_override_ : inputs[0];
-  auto source_texture = source->GetSnapshot(renderer, entity);
-  auto source_bounds = source->GetCoverage(entity);
-  if (!source_texture.has_value() || !source_bounds.has_value() ||
-      source_bounds->IsEmpty()) {
-    VALIDATION_LOG << "The gaussian blur source override has no coverage.";
-    return false;
-  }
-
-  // LTRB
-  Scalar uv_src[4] = {
-      (filter_bounds->GetLeft() - source_bounds->GetLeft()) /
-          source_bounds->size.width,
-      (filter_bounds->GetTop() - source_bounds->GetTop()) /
-          source_bounds->size.height,
-      1 + (filter_bounds->GetRight() - source_bounds->GetRight()) /
-              source_bounds->size.width,
-      1 + (filter_bounds->GetBottom() - source_bounds->GetBottom()) /
-              source_bounds->size.height,
-  };
-
-  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-  vtx_builder.AddVertices({
-      {Point(0, 0), Point(uv[0], uv[1]), Point(uv_src[0], uv_src[1])},
-      {Point(1, 0), Point(uv[2], uv[1]), Point(uv_src[2], uv_src[1])},
-      {Point(1, 1), Point(uv[2], uv[3]), Point(uv_src[2], uv_src[3])},
-      {Point(0, 0), Point(uv[0], uv[1]), Point(uv_src[0], uv_src[1])},
-      {Point(1, 1), Point(uv[2], uv[3]), Point(uv_src[2], uv_src[3])},
-      {Point(0, 1), Point(uv[0], uv[3]), Point(uv_src[0], uv_src[3])},
-  });
-  auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
-
   VS::FrameInfo frame_info;
-  frame_info.texture_size = Point(input_bounds->size);
+  frame_info.texture_size = Point(input_snapshot->GetCoverage().value().size);
   frame_info.blur_sigma = transformed_blur.GetLength();
   frame_info.blur_radius = Radius{Sigma{frame_info.blur_sigma}}.radius;
-  frame_info.blur_direction = transformed_blur.Normalize();
+  frame_info.blur_direction = input_snapshot->transform.Invert()
+                                  .TransformDirection(transformed_blur)
+                                  .Normalize();
   frame_info.src_factor = src_color_factor_;
   frame_info.inner_blur_factor = inner_blur_factor_;
   frame_info.outer_blur_factor = outer_blur_factor_;
 
-  auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
+  SamplerDescriptor sampler_desc;
+  sampler_desc.min_filter = MinMagFilter::kLinear;
+  sampler_desc.mag_filter = MinMagFilter::kLinear;
+  auto sampler =
+      renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
 
   Command cmd;
   cmd.label = "Gaussian Blur Filter";
@@ -169,8 +153,8 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
   cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
   cmd.BindVertices(vtx_buffer);
 
-  FS::BindTextureSampler(cmd, input->texture, sampler);
-  FS::BindAlphaMaskSampler(cmd, source_texture->texture, sampler);
+  FS::BindTextureSampler(cmd, input_snapshot->texture, sampler);
+  FS::BindAlphaMaskSampler(cmd, source_snapshot->texture, sampler);
 
   frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
   auto uniform_view = host_buffer.EmplaceUniform(frame_info);
@@ -181,8 +165,8 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
 
 std::optional<Rect> DirectionalGaussianBlurFilterContents::GetCoverage(
     const Entity& entity) const {
-  auto bounds = FilterContents::GetCoverage(entity);
-  if (!bounds.has_value()) {
+  auto coverage = FilterContents::GetCoverage(entity);
+  if (!coverage.has_value()) {
     return std::nullopt;
   }
 
@@ -191,8 +175,8 @@ std::optional<Rect> DirectionalGaussianBlurFilterContents::GetCoverage(
           .TransformDirection(blur_direction_ *
                               ceil(Radius{blur_sigma_}.radius))
           .Abs();
-  auto extent = bounds->size + transformed_blur_vector * 2;
-  return Rect(bounds->origin - transformed_blur_vector,
+  auto extent = coverage->size + transformed_blur_vector * 2;
+  return Rect(coverage->origin - transformed_blur_vector,
               Size(extent.x, extent.y));
 }
 
