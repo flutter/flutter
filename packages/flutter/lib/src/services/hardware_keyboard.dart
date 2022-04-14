@@ -205,18 +205,12 @@ abstract class KeyEvent with Diagnosticable {
 class KeyDownEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyDownEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    String? character,
-    required Duration timeStamp,
-    bool synthesized = false,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         character: character,
-         timeStamp: timeStamp,
-         synthesized: synthesized,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    super.character,
+    required super.timeStamp,
+    super.synthesized,
+  });
 }
 
 /// An event indicating that the user has released a key on the keyboard.
@@ -231,16 +225,11 @@ class KeyDownEvent extends KeyEvent {
 class KeyUpEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyUpEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    required Duration timeStamp,
-    bool synthesized = false,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         timeStamp: timeStamp,
-         synthesized: synthesized,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    required super.timeStamp,
+    super.synthesized,
+  });
 }
 
 /// An event indicating that the user has been holding a key on the keyboard
@@ -256,16 +245,11 @@ class KeyUpEvent extends KeyEvent {
 class KeyRepeatEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyRepeatEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    String? character,
-    required Duration timeStamp,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         character: character,
-         timeStamp: timeStamp,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    super.character,
+    required super.timeStamp,
+  });
 }
 
 /// The signature for [HardwareKeyboard.addHandler], a callback to to decide whether

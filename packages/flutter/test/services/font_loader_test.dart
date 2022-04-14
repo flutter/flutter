@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestFontLoader extends FontLoader {
-  TestFontLoader(String family) : super(family);
+  TestFontLoader(super.family);
 
   @override
   Future<void> loadFont(Uint8List list, String family) async {

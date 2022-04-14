@@ -1207,20 +1207,15 @@ class FocusScopeNode extends FocusNode {
   ///
   /// All parameters are optional.
   FocusScopeNode({
-    String? debugLabel,
-    FocusOnKeyEventCallback? onKeyEvent,
-    FocusOnKeyCallback? onKey,
-    bool skipTraversal = false,
-    bool canRequestFocus = true,
+    super.debugLabel,
+    super.onKeyEvent,
+    super.onKey,
+    super.skipTraversal,
+    super.canRequestFocus,
   })  : assert(skipTraversal != null),
         assert(canRequestFocus != null),
         super(
-          debugLabel: debugLabel,
-          onKeyEvent: onKeyEvent,
-          onKey: onKey,
-          canRequestFocus: canRequestFocus,
           descendantsAreFocusable: true,
-          skipTraversal: skipTraversal,
         );
 
   @override

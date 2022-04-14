@@ -10,9 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 class Leaf extends StatefulWidget {
   const Leaf({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
   final Widget child;
   @override
   State<Leaf> createState() => _LeafState();

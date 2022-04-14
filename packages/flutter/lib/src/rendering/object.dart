@@ -3605,8 +3605,7 @@ abstract class _SemanticsFragment {
 /// obtained via [interestingFragments].
 class _ContainerSemanticsFragment extends _SemanticsFragment {
 
-  _ContainerSemanticsFragment({ required bool dropsSemanticsOfPreviousSiblings })
-    : super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+  _ContainerSemanticsFragment({ required super.dropsSemanticsOfPreviousSiblings });
 
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
@@ -3626,10 +3625,9 @@ class _ContainerSemanticsFragment extends _SemanticsFragment {
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
     required RenderObject owner,
-    required bool dropsSemanticsOfPreviousSiblings,
+    required super.dropsSemanticsOfPreviousSiblings,
   }) : assert(owner != null),
-       _ancestorChain = <RenderObject>[owner],
-       super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+       _ancestorChain = <RenderObject>[owner];
 
   /// The [RenderObject] that owns this fragment (and any new [SemanticsNode]
   /// introduced by it).
@@ -3713,9 +3711,9 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
 /// [children].
 class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   _RootSemanticsFragment({
-    required RenderObject owner,
-    required bool dropsSemanticsOfPreviousSiblings,
-  }) : super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+    required super.owner,
+    required super.dropsSemanticsOfPreviousSiblings,
+  });
 
   @override
   void compileChildren({ Rect? parentSemanticsClipRect, Rect? parentPaintClipRect, required double elevationAdjustment, required List<SemanticsNode> result }) {
@@ -3795,13 +3793,12 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   _SwitchableSemanticsFragment({
     required bool mergeIntoParent,
     required SemanticsConfiguration config,
-    required RenderObject owner,
-    required bool dropsSemanticsOfPreviousSiblings,
+    required super.owner,
+    required super.dropsSemanticsOfPreviousSiblings,
   }) : _mergeIntoParent = mergeIntoParent,
        _config = config,
        assert(mergeIntoParent != null),
-       assert(config != null),
-       super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+       assert(config != null);
 
   final bool _mergeIntoParent;
   SemanticsConfiguration _config;

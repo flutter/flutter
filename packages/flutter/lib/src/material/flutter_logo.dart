@@ -20,7 +20,7 @@ class FlutterLogo extends StatelessWidget {
   /// The [textColor], [style], [duration], and [curve] arguments must not be
   /// null.
   const FlutterLogo({
-    Key? key,
+    super.key,
     this.size,
     this.textColor = const Color(0xFF757575),
     this.style = FlutterLogoStyle.markOnly,
@@ -29,8 +29,7 @@ class FlutterLogo extends StatelessWidget {
   }) : assert(textColor != null),
        assert(style != null),
        assert(duration != null),
-       assert(curve != null),
-       super(key: key);
+       assert(curve != null);
 
   /// The size of the logo in logical pixels.
   ///

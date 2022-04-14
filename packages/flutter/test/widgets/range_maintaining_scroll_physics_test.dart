@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ExpandingBox extends StatefulWidget {
-  const ExpandingBox({ Key? key, required this.collapsedSize, required this.expandedSize }) : super(key: key);
+  const ExpandingBox({ super.key, required this.collapsedSize, required this.expandedSize });
 
   final double collapsedSize;
   final double expandedSize;
@@ -342,7 +342,7 @@ void main() {
 }
 
 class TabBarDemo extends StatelessWidget {
-  const TabBarDemo({Key? key}) : super(key: key);
+  const TabBarDemo({super.key});
 
   @override
   Widget build(BuildContext context) {

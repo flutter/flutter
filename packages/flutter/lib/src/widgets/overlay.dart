@@ -246,12 +246,11 @@ class Overlay extends StatefulWidget {
   /// Rather than creating an overlay, consider using the overlay that is
   /// created by the [Navigator] in a [WidgetsApp] or a [MaterialApp] for the application.
   const Overlay({
-    Key? key,
+    super.key,
     this.initialEntries = const <OverlayEntry>[],
     this.clipBehavior = Clip.hardEdge,
   }) : assert(initialEntries != null),
-       assert(clipBehavior != null),
-       super(key: key);
+       assert(clipBehavior != null);
 
   /// The entries to include in the overlay initially.
   ///
@@ -533,16 +532,14 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 /// The first [skipCount] children are considered "offstage".
 class _Theatre extends MultiChildRenderObjectWidget {
   _Theatre({
-    Key? key,
     this.skipCount = 0,
     this.clipBehavior = Clip.hardEdge,
-    List<Widget> children = const <Widget>[],
+    super.children,
   }) : assert(skipCount != null),
        assert(skipCount >= 0),
        assert(children != null),
        assert(children.length >= skipCount),
-       assert(clipBehavior != null),
-       super(key: key, children: children);
+       assert(clipBehavior != null);
 
   final int skipCount;
 
@@ -576,7 +573,7 @@ class _Theatre extends MultiChildRenderObjectWidget {
 }
 
 class _TheatreElement extends MultiChildRenderObjectElement {
-  _TheatreElement(_Theatre widget) : super(widget);
+  _TheatreElement(_Theatre super.widget);
 
   @override
   _RenderTheatre get renderObject => super.renderObject as _RenderTheatre;

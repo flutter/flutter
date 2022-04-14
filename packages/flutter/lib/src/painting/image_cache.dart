@@ -630,8 +630,7 @@ abstract class _CachedImageBase {
 }
 
 class _CachedImage extends _CachedImageBase {
-  _CachedImage(ImageStreamCompleter completer, {int? sizeBytes})
-      : super(completer, sizeBytes: sizeBytes);
+  _CachedImage(super.completer, {super.sizeBytes});
 }
 
 class _LiveImage extends _CachedImageBase {

@@ -39,12 +39,11 @@ class Theme extends StatelessWidget {
   ///
   /// The [data] and [child] arguments must not be null.
   const Theme({
-    Key? key,
+    super.key,
     required this.data,
     required this.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key);
+       assert(data != null);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
@@ -141,11 +140,9 @@ class Theme extends StatelessWidget {
 
 class _InheritedTheme extends InheritedTheme {
   const _InheritedTheme({
-    Key? key,
     required this.theme,
-    required Widget child,
-  }) : assert(theme != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(theme != null);
 
   final Theme theme;
 
@@ -170,7 +167,7 @@ class ThemeDataTween extends Tween<ThemeData> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  ThemeDataTween({ ThemeData? begin, ThemeData? end }) : super(begin: begin, end: end);
+  ThemeDataTween({ super.begin, super.end });
 
   @override
   ThemeData lerp(double t) => ThemeData.lerp(begin!, end!, t);
@@ -196,15 +193,14 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   /// By default, the theme transition uses a linear curve. The [data] and
   /// [child] arguments must not be null.
   const AnimatedTheme({
-    Key? key,
+    super.key,
     required this.data,
-    Curve curve = Curves.linear,
-    Duration duration = kThemeAnimationDuration,
-    VoidCallback? onEnd,
+    super.curve,
+    super.duration = kThemeAnimationDuration,
+    super.onEnd,
     required this.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+       assert(data != null);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;

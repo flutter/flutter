@@ -431,10 +431,10 @@ class PlatformMenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   ///
   /// The [body] and [menus] attributes are required.
   const PlatformMenuBar({
-    Key? key,
+    super.key,
     required this.body,
     required this.menus,
-  }) : super(key: key);
+  });
 
   /// The widget to be rendered in the Flutter window that these platform menus
   /// are associated with.

@@ -1991,15 +1991,11 @@ double _getOpacity(GlobalKey key, WidgetTester tester) {
 
 class ModifiedReverseTransitionDurationRoute<T> extends MaterialPageRoute<T> {
   ModifiedReverseTransitionDurationRoute({
-    required WidgetBuilder builder,
-    RouteSettings? settings,
+    required super.builder,
+    super.settings,
     required this.reverseTransitionDuration,
-    bool fullscreenDialog = false,
-  }) : super(
-         builder: builder,
-         settings: settings,
-         fullscreenDialog: fullscreenDialog,
-       );
+    super.fullscreenDialog,
+  });
 
   @override
   final Duration reverseTransitionDuration;
@@ -2037,7 +2033,7 @@ class MockRouteAware extends Fake implements RouteAware {
 }
 
 class TestPageRouteBuilder extends PageRouteBuilder<void> {
-  TestPageRouteBuilder({required RoutePageBuilder pageBuilder}) : super(pageBuilder: pageBuilder);
+  TestPageRouteBuilder({required super.pageBuilder});
 
   @override
   Animation<double> createAnimation() {
@@ -2111,7 +2107,7 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
 }
 
 class WidgetWithLocalHistory extends StatefulWidget {
-  const WidgetWithLocalHistory({Key? key}) : super(key: key);
+  const WidgetWithLocalHistory({super.key});
 
   @override
   WidgetWithLocalHistoryState createState() => WidgetWithLocalHistoryState();
@@ -2139,7 +2135,7 @@ class WidgetWithLocalHistoryState extends State<WidgetWithLocalHistory> {
 }
 
 class WidgetWithNoLocalHistory extends StatefulWidget {
-  const WidgetWithNoLocalHistory({Key? key}) : super(key: key);
+  const WidgetWithNoLocalHistory({super.key});
 
   @override
   WidgetWithNoLocalHistoryState createState() => WidgetWithNoLocalHistoryState();

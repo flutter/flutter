@@ -1146,7 +1146,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 }
 
 class _TappableColorWidget extends StatefulWidget {
-  const _TappableColorWidget({required this.tappedColor, required this.untappedColor, Key? key,}) : super(key: key);
+  const _TappableColorWidget({required this.tappedColor, required this.untappedColor, super.key,});
 
   final Color tappedColor;
   final Color untappedColor;

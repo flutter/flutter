@@ -1432,11 +1432,10 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// The [clipBehavior] must not be null. If [clipBehavior] is
   /// [Clip.none], no clipping will be applied.
   RenderClipRect({
-    RenderBox? child,
-    CustomClipper<Rect>? clipper,
-    Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != null),
-       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+    super.child,
+    super.clipper,
+    super.clipBehavior,
+  }) : assert(clipBehavior != null);
 
   @override
   Rect get _defaultClip => Offset.zero & size;
@@ -1503,15 +1502,15 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// The [clipBehavior] argument must not be null. If [clipBehavior] is
   /// [Clip.none], no clipping will be applied.
   RenderClipRRect({
-    RenderBox? child,
+    super.child,
     BorderRadiusGeometry borderRadius = BorderRadius.zero,
     CustomClipper<RRect>? clipper,
-    Clip clipBehavior = Clip.antiAlias,
+    super.clipBehavior,
     TextDirection? textDirection,
   }) : assert(clipBehavior != null),
        _borderRadius = borderRadius,
        _textDirection = textDirection,
-       super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
+       super(clipper: clipper) {
     assert(_borderRadius != null || clipper != null);
   }
 
@@ -1605,11 +1604,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// The [clipBehavior] argument must not be null. If [clipBehavior] is
   /// [Clip.none], no clipping will be applied.
   RenderClipOval({
-    RenderBox? child,
-    CustomClipper<Rect>? clipper,
-    Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != null),
-       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+    super.child,
+    super.clipper,
+    super.clipBehavior,
+  }) : assert(clipBehavior != null);
 
   Rect? _cachedRect;
   late Path _cachedPath;
@@ -1699,11 +1697,10 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// The [clipBehavior] argument must not be null. If [clipBehavior] is
   /// [Clip.none], no clipping will be applied.
   RenderClipPath({
-    RenderBox? child,
-    CustomClipper<Path>? clipper,
-    Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != null),
-       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+    super.child,
+    super.clipper,
+    super.clipBehavior,
+  }) : assert(clipBehavior != null);
 
   @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
@@ -1763,20 +1760,19 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   /// The [shape], [elevation], [color], and [shadowColor] must not be null.
   /// Additionally, the [elevation] must be non-negative.
   _RenderPhysicalModelBase({
-    required RenderBox? child,
+    required super.child,
     required double elevation,
     required Color color,
     required Color shadowColor,
-    Clip clipBehavior = Clip.none,
-    CustomClipper<T>? clipper,
+    super.clipBehavior = Clip.none,
+    super.clipper,
   }) : assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        assert(clipBehavior != null),
        _elevation = elevation,
        _color = color,
-       _shadowColor = shadowColor,
-       super(child: child, clipBehavior: clipBehavior, clipper: clipper);
+       _shadowColor = shadowColor;
 
   /// The z-coordinate relative to the parent at which to place this material.
   ///
@@ -1850,27 +1846,20 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   /// arguments must not be null. Additionally, the [elevation] must be
   /// non-negative.
   RenderPhysicalModel({
-    RenderBox? child,
+    super.child,
     BoxShape shape = BoxShape.rectangle,
-    Clip clipBehavior = Clip.none,
+    super.clipBehavior,
     BorderRadius? borderRadius,
-    double elevation = 0.0,
-    required Color color,
-    Color shadowColor = const Color(0xFF000000),
+    super.elevation = 0.0,
+    required super.color,
+    super.shadowColor = const Color(0xFF000000),
   }) : assert(shape != null),
        assert(clipBehavior != null),
        assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
        _shape = shape,
-       _borderRadius = borderRadius,
-       super(
-         clipBehavior: clipBehavior,
-         child: child,
-         elevation: elevation,
-         color: color,
-         shadowColor: shadowColor,
-       );
+       _borderRadius = borderRadius;
 
   @override
   PhysicalModelLayer? get layer => super.layer as PhysicalModelLayer?;
@@ -1994,24 +1983,16 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   /// The [clipper], [elevation], [color] and [shadowColor] must not be null.
   /// Additionally, the [elevation] must be non-negative.
   RenderPhysicalShape({
-    RenderBox? child,
-    required CustomClipper<Path> clipper,
-    Clip clipBehavior = Clip.none,
-    double elevation = 0.0,
-    required Color color,
-    Color shadowColor = const Color(0xFF000000),
+    super.child,
+    required CustomClipper<Path> super.clipper,
+    super.clipBehavior,
+    super.elevation = 0.0,
+    required super.color,
+    super.shadowColor = const Color(0xFF000000),
   }) : assert(clipper != null),
        assert(elevation != null && elevation >= 0.0),
        assert(color != null),
-       assert(shadowColor != null),
-       super(
-         child: child,
-         elevation: elevation,
-         color: color,
-         shadowColor: shadowColor,
-         clipper: clipper,
-         clipBehavior: clipBehavior,
-       );
+       assert(shadowColor != null);
 
   @override
   PhysicalModelLayer? get layer => super.layer as PhysicalModelLayer?;
@@ -2904,9 +2885,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     this.onPointerPanZoomUpdate,
     this.onPointerPanZoomEnd,
     this.onPointerSignal,
-    HitTestBehavior behavior = HitTestBehavior.deferToChild,
-    RenderBox? child,
-  }) : super(behavior: behavior, child: child);
+    super.behavior,
+    super.child,
+  });
 
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -3019,14 +3000,14 @@ class RenderMouseRegion extends RenderProxyBoxWithHitTestBehavior implements Mou
     MouseCursor cursor = MouseCursor.defer,
     bool validForMouseTracker = true,
     bool opaque = true,
-    RenderBox? child,
+    super.child,
     HitTestBehavior? hitTestBehavior = HitTestBehavior.opaque,
   }) : assert(opaque != null),
        assert(cursor != null),
        _cursor = cursor,
        _validForMouseTracker = validForMouseTracker,
        _opaque = opaque,
-       super(behavior: hitTestBehavior ?? HitTestBehavior.opaque, child: child);
+       super(behavior: hitTestBehavior ?? HitTestBehavior.opaque);
 
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
@@ -3646,9 +3627,9 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
   /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
   RenderMetaData({
     this.metaData,
-    HitTestBehavior behavior = HitTestBehavior.deferToChild,
-    RenderBox? child,
-  }) : super(behavior: behavior, child: child);
+    super.behavior,
+    super.child,
+  });
 
   /// Opaque meta data ignored by the render tree.
   dynamic metaData;
@@ -3667,19 +3648,18 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   ///
   /// The [scrollFactor] and [behavior] arguments must not be null.
   RenderSemanticsGestureHandler({
-    RenderBox? child,
+    super.child,
     GestureTapCallback? onTap,
     GestureLongPressCallback? onLongPress,
     GestureDragUpdateCallback? onHorizontalDragUpdate,
     GestureDragUpdateCallback? onVerticalDragUpdate,
     this.scrollFactor = 0.8,
-    HitTestBehavior behavior = HitTestBehavior.deferToChild,
+    super.behavior,
   }) : assert(scrollFactor != null),
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onHorizontalDragUpdate = onHorizontalDragUpdate,
-       _onVerticalDragUpdate = onVerticalDragUpdate,
-       super(behavior: behavior, child: child);
+       _onVerticalDragUpdate = onVerticalDragUpdate;
 
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.

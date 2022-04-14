@@ -95,7 +95,7 @@ class TextFormField extends FormField<String> {
   /// For documentation about the various parameters, see the [TextField] class
   /// and [TextField.new], the constructor.
   TextFormField({
-    Key? key,
+    super.key,
     this.controller,
     String? initialValue,
     FocusNode? focusNode,
@@ -127,8 +127,8 @@ class TextFormField extends FormField<String> {
     GestureTapCallback? onTap,
     VoidCallback? onEditingComplete,
     ValueChanged<String>? onFieldSubmitted,
-    FormFieldSetter<String>? onSaved,
-    FormFieldValidator<String>? validator,
+    super.onSaved,
+    super.validator,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
     double cursorWidth = 2.0,
@@ -144,7 +144,7 @@ class TextFormField extends FormField<String> {
     Iterable<String>? autofillHints,
     AutovalidateMode? autovalidateMode,
     ScrollController? scrollController,
-    String? restorationId,
+    super.restorationId,
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
   }) : assert(initialValue == null || controller == null),
@@ -171,11 +171,7 @@ class TextFormField extends FormField<String> {
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        assert(enableIMEPersonalizedLearning != null),
        super(
-         key: key,
-         restorationId: restorationId,
          initialValue: controller != null ? controller.text : (initialValue ?? ''),
-         onSaved: onSaved,
-         validator: validator,
          enabled: enabled ?? decoration?.enabled ?? true,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<String> field) {

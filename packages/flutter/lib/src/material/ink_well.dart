@@ -35,14 +35,13 @@ abstract class InteractiveInkFeature extends InkFeature {
   ///
   /// The [controller] and [referenceBox] arguments must not be null.
   InteractiveInkFeature({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
+    required super.controller,
+    required super.referenceBox,
     required Color color,
-    VoidCallback? onRemoved,
+    super.onRemoved,
   }) : assert(controller != null),
        assert(referenceBox != null),
-       _color = color,
-       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved);
+       _color = color;
 
   /// Called when the user input that triggered this feature's appearance was confirmed.
   ///
@@ -186,8 +185,8 @@ abstract class _ParentInkResponseState {
 class _ParentInkResponseProvider extends InheritedWidget {
   const _ParentInkResponseProvider({
     required this.state,
-    required Widget child,
-  }) : super(child: child);
+    required super.child,
+  });
 
   final _ParentInkResponseState state;
 
@@ -291,7 +290,7 @@ class InkResponse extends StatelessWidget {
   /// The [containedInkWell], [highlightShape], [enableFeedback],
   /// and [excludeFromSemantics] arguments must not be null.
   const InkResponse({
-    Key? key,
+    super.key,
     this.child,
     this.onTap,
     this.onTapDown,
@@ -324,8 +323,7 @@ class InkResponse extends StatelessWidget {
        assert(enableFeedback != null),
        assert(excludeFromSemantics != null),
        assert(autofocus != null),
-       assert(canRequestFocus != null),
-       super(key: key);
+       assert(canRequestFocus != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -1222,60 +1220,35 @@ class InkWell extends InkResponse {
   /// The [enableFeedback], and [excludeFromSemantics] arguments
   /// must not be null.
   const InkWell({
-    Key? key,
-    Widget? child,
-    GestureTapCallback? onTap,
-    GestureTapCallback? onDoubleTap,
-    GestureLongPressCallback? onLongPress,
-    GestureTapDownCallback? onTapDown,
-    GestureTapUpCallback? onTapUp,
-    GestureTapCancelCallback? onTapCancel,
-    ValueChanged<bool>? onHighlightChanged,
-    ValueChanged<bool>? onHover,
-    MouseCursor? mouseCursor,
-    Color? focusColor,
-    Color? hoverColor,
-    Color? highlightColor,
-    MaterialStateProperty<Color?>? overlayColor,
-    Color? splashColor,
-    InteractiveInkFeatureFactory? splashFactory,
-    double? radius,
-    BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
+    super.key,
+    super.child,
+    super.onTap,
+    super.onDoubleTap,
+    super.onLongPress,
+    super.onTapDown,
+    super.onTapUp,
+    super.onTapCancel,
+    super.onHighlightChanged,
+    super.onHover,
+    super.mouseCursor,
+    super.focusColor,
+    super.hoverColor,
+    super.highlightColor,
+    super.overlayColor,
+    super.splashColor,
+    super.splashFactory,
+    super.radius,
+    super.borderRadius,
+    super.customBorder,
     bool? enableFeedback = true,
-    bool excludeFromSemantics = false,
-    FocusNode? focusNode,
-    bool canRequestFocus = true,
-    ValueChanged<bool>? onFocusChange,
-    bool autofocus = false,
+    super.excludeFromSemantics,
+    super.focusNode,
+    super.canRequestFocus,
+    super.onFocusChange,
+    super.autofocus,
   }) : super(
-    key: key,
-    child: child,
-    onTap: onTap,
-    onDoubleTap: onDoubleTap,
-    onLongPress: onLongPress,
-    onTapDown: onTapDown,
-    onTapUp: onTapUp,
-    onTapCancel: onTapCancel,
-    onHighlightChanged: onHighlightChanged,
-    onHover: onHover,
-    mouseCursor: mouseCursor,
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
-    focusColor: focusColor,
-    hoverColor: hoverColor,
-    highlightColor: highlightColor,
-    overlayColor: overlayColor,
-    splashColor: splashColor,
-    splashFactory: splashFactory,
-    radius: radius,
-    borderRadius: borderRadius,
-    customBorder: customBorder,
     enableFeedback: enableFeedback ?? true,
-    excludeFromSemantics: excludeFromSemantics,
-    focusNode: focusNode,
-    canRequestFocus: canRequestFocus,
-    onFocusChange: onFocusChange,
-    autofocus: autofocus,
   );
 }

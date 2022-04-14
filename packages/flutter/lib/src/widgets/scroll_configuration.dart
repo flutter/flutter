@@ -370,10 +370,10 @@ class ScrollConfiguration extends InheritedWidget {
   ///
   /// The [behavior] and [child] arguments must not be null.
   const ScrollConfiguration({
-    Key? key,
+    super.key,
     required this.behavior,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// How [Scrollable] widgets that are descendants of [child] should behave.
   final ScrollBehavior behavior;

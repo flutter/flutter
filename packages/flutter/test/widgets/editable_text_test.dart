@@ -660,6 +660,36 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
+  testWidgets('use DefaultSelectionStyle for selection color', (WidgetTester tester) async {
+    const TextEditingValue value = TextEditingValue(
+      text: 'test test',
+      selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 5, extentOffset: 7),
+    );
+    const Color selectionColor = Colors.orange;
+    controller.value = value;
+    await tester.pumpWidget(
+      DefaultSelectionStyle(
+        selectionColor: selectionColor,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              keyboardType: TextInputType.multiline,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        )
+      ),
+    );
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.renderEditable.selectionColor, selectionColor);
+  });
+
   testWidgets('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
@@ -12141,12 +12171,11 @@ class _CustomTextSelectionControls extends TextSelectionControls {
 // A fake text selection toolbar with only a paste button.
 class _CustomTextSelectionToolbar extends StatefulWidget {
   const _CustomTextSelectionToolbar({
-    Key? key,
     required this.anchorAbove,
     required this.anchorBelow,
     this.handlePaste,
     this.handleCut,
-  }) : super(key: key);
+  });
 
   final Offset anchorAbove;
   final Offset anchorBelow;
@@ -12187,18 +12216,13 @@ class _CustomTextSelectionToolbarState extends State<_CustomTextSelectionToolbar
 
 class CustomStyleEditableText extends EditableText {
   CustomStyleEditableText({
-    Key? key,
-    required TextEditingController controller,
-    required Color cursorColor,
-    required FocusNode focusNode,
-    required TextStyle style,
+    super.key,
+    required super.controller,
+    required super.cursorColor,
+    required super.focusNode,
+    required super.style,
   }) : super(
-          key: key,
-          controller: controller,
-          cursorColor: cursorColor,
           backgroundCursorColor: Colors.grey,
-          focusNode: focusNode,
-          style: style,
         );
   @override
   CustomStyleEditableTextState createState() =>
@@ -12217,10 +12241,10 @@ class CustomStyleEditableTextState extends EditableTextState {
 
 class TransformedEditableText extends StatefulWidget {
   const TransformedEditableText({
-    Key? key,
+    super.key,
     required this.offset,
     required this.transformButtonKey,
-  }) : super(key: key);
+  });
 
   final Offset offset;
   final Key transformButtonKey;
@@ -12268,7 +12292,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
 }
 
 class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
-  const NoImplicitScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const NoImplicitScrollPhysics({ super.parent });
 
   @override
   bool get allowImplicitScrolling => false;
@@ -12280,7 +12304,7 @@ class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
 }
 
 class SkipPainting extends SingleChildRenderObjectWidget {
-  const SkipPainting({ Key? key, required Widget child }): super(key: key, child: child);
+  const SkipPainting({ super.key, required Widget super.child });
 
   @override
   SkipPaintingRenderObject createRenderObject(BuildContext context) => SkipPaintingRenderObject();

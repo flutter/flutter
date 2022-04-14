@@ -167,7 +167,7 @@ class ToggleButtons extends StatelessWidget {
   /// list of non-null nodes. [renderBorder] and [direction] must not be null.
   /// If [direction] is [Axis.vertical], [verticalDirection] must not be null.
   const ToggleButtons({
-    Key? key,
+    super.key,
     required this.children,
     required this.isSelected,
     this.onPressed,
@@ -197,8 +197,7 @@ class ToggleButtons extends StatelessWidget {
     assert(isSelected != null),
     assert(children.length == isSelected.length),
     assert(direction != null),
-    assert(direction == Axis.horizontal || verticalDirection != null),
-    super(key: key);
+    assert(direction == Axis.horizontal || verticalDirection != null);
 
   static const double _defaultBorderWidth = 1.0;
 
@@ -768,7 +767,6 @@ class _ToggleButton extends StatelessWidget {
   /// which is used by [ToggleButtons] to customize borders based on the
   /// order in which this button appears in the list.
   const _ToggleButton({
-    Key? key,
     this.selected = false,
     this.textStyle,
     this.constraints,
@@ -793,7 +791,7 @@ class _ToggleButton extends StatelessWidget {
     required this.direction,
     required this.verticalDirection,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// Determines if the button is displayed as active/selected or enabled.
   final bool selected;
@@ -1032,8 +1030,8 @@ class _DefaultFillColor extends MaterialStateProperty<Color> with Diagnosticable
 
 class _SelectToggleButton extends SingleChildRenderObjectWidget {
   const _SelectToggleButton({
-    Key? key,
-    required Widget child,
+    super.key,
+    required Widget super.child,
     required this.leadingBorderSide,
     required this.borderSide,
     required this.trailingBorderSide,
@@ -1042,10 +1040,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
     required this.isLastButton,
     required this.direction,
     required this.verticalDirection,
-  }) : super(
-    key: key,
-    child: child,
-  );
+  });
 
   // The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
@@ -1588,11 +1583,10 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 /// visually smaller to the user.
 class _InputPadding extends SingleChildRenderObjectWidget {
   const _InputPadding({
-    Key? key,
-    Widget? child,
+    super.child,
     required this.minSize,
     required this.direction,
-  }) : super(key: key, child: child);
+  });
 
   final Size minSize;
   final Axis direction;

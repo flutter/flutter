@@ -1112,7 +1112,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   /// The [RenderObject] created by this element is not automatically set as a
   /// child of the hosting [RenderObject]. To actually attach this element to
   /// the render tree, call [RenderObjectToWidgetAdapter.attachToRenderTree].
-  RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
+  RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> super.widget);
 
   Element? _child;
 

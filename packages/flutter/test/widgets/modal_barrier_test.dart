@@ -924,7 +924,7 @@ void main() {
 }
 
 class FirstWidget extends StatelessWidget {
-  const FirstWidget({Key? key}) : super(key: key);
+  const FirstWidget({super.key});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -937,7 +937,7 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatelessWidget {
-  const SecondWidget({Key? key, this.onDismiss}) : super(key: key);
+  const SecondWidget({super.key, this.onDismiss});
 
   final VoidCallback? onDismiss;
 
@@ -951,7 +951,7 @@ class SecondWidget extends StatelessWidget {
 }
 
 class AnimatedSecondWidget extends StatelessWidget {
-  const AnimatedSecondWidget({Key? key, this.onDismiss}) : super(key: key);
+  const AnimatedSecondWidget({super.key, this.onDismiss});
 
   final VoidCallback? onDismiss;
 
@@ -966,7 +966,7 @@ class AnimatedSecondWidget extends StatelessWidget {
 }
 
 class SecondWidgetWithCompetence extends StatelessWidget {
-  const SecondWidgetWithCompetence({Key? key}) : super(key: key);
+  const SecondWidgetWithCompetence({super.key});
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -984,7 +984,7 @@ class SecondWidgetWithCompetence extends StatelessWidget {
   }
 }
 class AnimatedSecondWidgetWithCompetence extends StatelessWidget {
-  const AnimatedSecondWidgetWithCompetence({Key? key}) : super(key: key);
+  const AnimatedSecondWidgetWithCompetence({super.key});
   @override
   Widget build(BuildContext context) {
     return Stack(

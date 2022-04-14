@@ -65,21 +65,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   DragGestureRecognizer({
-    Object? debugOwner,
+    super.debugOwner,
     @Deprecated(
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    PointerDeviceKind? kind,
+    super.kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : assert(dragStartBehavior != null),
-       super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
-       );
+    super.supportedDevices,
+  }) : assert(dragStartBehavior != null);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
 
@@ -546,18 +541,14 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   VerticalDragGestureRecognizer({
-    Object? debugOwner,
+    super.debugOwner,
     @Deprecated(
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
-       );
+    super.kind,
+    super.supportedDevices,
+  });
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
@@ -596,18 +587,14 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   HorizontalDragGestureRecognizer({
-    Object? debugOwner,
+    super.debugOwner,
     @Deprecated(
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
-       );
+    super.kind,
+    super.supportedDevices,
+  });
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
@@ -643,12 +630,9 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
 class PanGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for tracking movement on a plane.
   PanGestureRecognizer({
-    Object? debugOwner,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(
-         debugOwner: debugOwner,
-         supportedDevices: supportedDevices,
-       );
+    super.debugOwner,
+    super.supportedDevices,
+  });
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {

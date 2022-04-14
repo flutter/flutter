@@ -951,7 +951,7 @@ void main() {
       );
 
       await expectLater(
-        find.byType(RepaintBoundary).first,
+        find.byType(RepaintBoundary).last,
         matchesGoldenFile('nav_bar_test.large_title.png'),
       );
     },

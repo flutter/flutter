@@ -554,7 +554,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
   /// The [elevation] must be null or non-negative.
   const Chip({
-    Key? key,
+    super.key,
     this.avatar,
     required this.label,
     this.labelStyle,
@@ -582,8 +582,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   }) : assert(label != null),
        assert(autofocus != null),
        assert(clipBehavior != null),
-       assert(elevation == null || elevation >= 0.0),
-       super(key: key);
+       assert(elevation == null || elevation >= 0.0);
 
   @override
   final Widget? avatar;
@@ -707,7 +706,7 @@ class RawChip extends StatefulWidget
   /// null or non-negative. Typically, [pressElevation] is greater than
   /// [elevation].
   const RawChip({
-    Key? key,
+    super.key,
     this.avatar,
     required this.label,
     this.labelStyle,
@@ -752,8 +751,7 @@ class RawChip extends StatefulWidget
        assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
-       deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
-       super(key: key);
+       deleteIcon = deleteIcon ?? _kDefaultDeleteIcon;
 
   @override
   final Widget? avatar;
@@ -1275,10 +1273,9 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
 /// to trigger the child ink feature without increasing the size of the material.
 class _ChipRedirectingHitDetectionWidget extends SingleChildRenderObjectWidget {
   const _ChipRedirectingHitDetectionWidget({
-    Key? key,
-    Widget? child,
+    super.child,
     required this.constraints,
-  }) : super(key: key, child: child);
+  });
 
   final BoxConstraints constraints;
 
@@ -1317,7 +1314,6 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
 
 class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_ChipSlot> {
   const _ChipRenderWidget({
-    Key? key,
     required this.theme,
     this.value,
     this.isEnabled,
@@ -1326,8 +1322,7 @@ class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderO
     required this.deleteDrawerAnimation,
     required this.enableAnimation,
     this.avatarBorder,
-  }) : assert(theme != null),
-       super(key: key);
+  }) : assert(theme != null);
 
   final _ChipRenderTheme theme;
   final bool? value;

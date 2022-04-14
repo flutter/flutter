@@ -96,7 +96,7 @@ void main() {
 }
 
 class DummyWidget extends StatelessWidget {
-  const DummyWidget({ Key? key, this.child }) : super(key: key);
+  const DummyWidget({ super.key, this.child });
 
   final Widget? child;
 
