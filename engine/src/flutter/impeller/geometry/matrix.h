@@ -165,6 +165,17 @@ struct Matrix {
     // clang-format on
   }
 
+  constexpr Matrix Basis() const {
+    // clang-format off
+    return Matrix(
+      m[0], m[1], m[2],  0.0,
+      m[4], m[5], m[6],  0.0,
+      m[8], m[9], m[10], 0.0,
+      0.0,  0.0,  0.0,   1.0
+    );
+    // clang-format on
+  }
+
   constexpr Matrix Translate(const Vector3& t) const {
     // clang-format off
     return Matrix(m[0], m[1], m[2], m[3],

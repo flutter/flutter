@@ -116,7 +116,7 @@ class FilterContents : public Contents {
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
-  virtual std::optional<Snapshot> RenderToTexture(
+  virtual std::optional<Snapshot> RenderToSnapshot(
       const ContentContext& renderer,
       const Entity& entity) const override;
 

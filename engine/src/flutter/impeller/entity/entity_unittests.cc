@@ -733,8 +733,9 @@ TEST_F(EntityTest, GaussianBlurFilter) {
     }
     ImGui::End();
 
-    auto blend = FilterContents::MakeBlend(
-        Entity::BlendMode::kPlus, FilterInput::Make({boston, bridge, bridge}));
+    auto blend =
+        FilterContents::MakeBlend(Entity::BlendMode::kScreen,
+                                  FilterInput::Make({boston, bridge, kalimba}));
 
     auto blur = FilterContents::MakeGaussianBlur(
         FilterInput::Make(blend), FilterContents::Sigma{blur_amount[0]},
@@ -745,7 +746,7 @@ TEST_F(EntityTest, GaussianBlurFilter) {
     auto rect = Rect(-Point(input_size) / 2, Size(input_size));
     auto ctm = Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
                Matrix::MakeRotationZ(Radians(rotation)) *
-               Matrix::MakeScale(Vector3(scale[0], scale[1])) *
+               Matrix::MakeScale(Vector2(scale[0], scale[1])) *
                Matrix::MakeSkew(skew[0], skew[1]);
 
     auto target_contents = blur;

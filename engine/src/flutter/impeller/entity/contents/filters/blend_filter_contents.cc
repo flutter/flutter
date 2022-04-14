@@ -25,23 +25,43 @@ static bool AdvancedBlend(const FilterInput::Vector& inputs,
                           const ContentContext& renderer,
                           const Entity& entity,
                           RenderPass& pass,
-                          const Rect& bounds,
+                          const Rect& coverage,
                           PipelineProc pipeline_proc) {
   if (inputs.size() < 2) {
     return false;
   }
+
+  auto dst_snapshot = inputs[1]->GetSnapshot(renderer, entity);
+  if (!dst_snapshot.has_value()) {
+    return true;
+  }
+  auto maybe_dst_uvs = dst_snapshot->GetCoverageUVs(coverage);
+  if (!maybe_dst_uvs.has_value()) {
+    return true;
+  }
+  auto dst_uvs = maybe_dst_uvs.value();
+
+  auto src_snapshot = inputs[0]->GetSnapshot(renderer, entity);
+  if (!src_snapshot.has_value()) {
+    return true;
+  }
+  auto maybe_src_uvs = src_snapshot->GetCoverageUVs(coverage);
+  if (!maybe_src_uvs.has_value()) {
+    return true;
+  }
+  auto src_uvs = maybe_src_uvs.value();
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
   auto size = pass.GetRenderTargetSize();
   VertexBufferBuilder<typename VS::PerVertexData> vtx_builder;
   vtx_builder.AddVertices({
-      {Point(0, 0), Point(0, 0)},
-      {Point(size.width, 0), Point(1, 0)},
-      {Point(size.width, size.height), Point(1, 1)},
-      {Point(0, 0), Point(0, 0)},
-      {Point(size.width, size.height), Point(1, 1)},
-      {Point(0, size.height), Point(0, 1)},
+      {Point(0, 0), dst_uvs[0], src_uvs[0]},
+      {Point(size.width, 0), dst_uvs[1], src_uvs[1]},
+      {Point(size.width, size.height), dst_uvs[3], src_uvs[3]},
+      {Point(0, 0), dst_uvs[0], src_uvs[0]},
+      {Point(size.width, size.height), dst_uvs[3], src_uvs[3]},
+      {Point(0, size.height), dst_uvs[2], src_uvs[2]},
   });
   auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
@@ -56,24 +76,11 @@ static bool AdvancedBlend(const FilterInput::Vector& inputs,
   cmd.pipeline = std::move(pipeline);
 
   auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
+  FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, sampler);
+  FS::BindTextureSamplerSrc(cmd, src_snapshot->texture, sampler);
+
   typename VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(size);
-
-  auto dst_snapshot = inputs[1]->GetSnapshot(renderer, entity);
-  FS::BindTextureSamplerSrc(cmd, dst_snapshot->texture, sampler);
-  frame_info.dst_uv_transform =
-      Matrix::MakeTranslation(-(dst_snapshot->position - bounds.origin) /
-                              size) *
-      Matrix::MakeScale(
-          Vector3(Size(size) / Size(dst_snapshot->texture->GetSize())));
-
-  auto src_snapshot = inputs[0]->GetSnapshot(renderer, entity);
-  FS::BindTextureSamplerDst(cmd, src_snapshot->texture, sampler);
-  frame_info.src_uv_transform =
-      Matrix::MakeTranslation(-(src_snapshot->position - bounds.origin) /
-                              size) *
-      Matrix::MakeScale(
-          Vector3(Size(size) / Size(src_snapshot->texture->GetSize())));
 
   auto uniform_view = host_buffer.EmplaceUniform(frame_info);
   VS::BindFrameInfo(cmd, uniform_view);
@@ -99,11 +106,11 @@ void BlendFilterContents::SetBlendMode(Entity::BlendMode blend_mode) {
         advanced_blend_proc_ = [](const FilterInput::Vector& inputs,
                                   const ContentContext& renderer,
                                   const Entity& entity, RenderPass& pass,
-                                  const Rect& bounds) {
+                                  const Rect& coverage) {
           PipelineProc p = &ContentContext::GetTextureBlendScreenPipeline;
           return AdvancedBlend<TextureBlendScreenPipeline::VertexShader,
                                TextureBlendScreenPipeline::FragmentShader>(
-              inputs, renderer, entity, pass, bounds, p);
+              inputs, renderer, entity, pass, coverage, p);
         };
         break;
       default:
@@ -116,49 +123,62 @@ static bool BasicBlend(const FilterInput::Vector& inputs,
                        const ContentContext& renderer,
                        const Entity& entity,
                        RenderPass& pass,
-                       const Rect& bounds,
+                       const Rect& coverage,
                        Entity::BlendMode basic_blend) {
   using VS = TextureBlendPipeline::VertexShader;
   using FS = TextureBlendPipeline::FragmentShader;
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
-  auto size = pass.GetRenderTargetSize();
-  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-  vtx_builder.AddVertices({
-      {Point(0, 0), Point(0, 0)},
-      {Point(size.width, 0), Point(1, 0)},
-      {Point(size.width, size.height), Point(1, 1)},
-      {Point(0, 0), Point(0, 0)},
-      {Point(size.width, size.height), Point(1, 1)},
-      {Point(0, size.height), Point(0, 1)},
-  });
-  auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
-
   auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
-
-  // Draw the first texture using kSource.
 
   Command cmd;
   cmd.label = "Basic Blend Filter";
-  cmd.BindVertices(vtx_buffer);
   auto options = OptionsFromPass(pass);
-  options.blend_mode = Entity::BlendMode::kSource;
-  cmd.pipeline = renderer.GetTextureBlendPipeline(options);
-  {
-    auto input = inputs[0]->GetSnapshot(renderer, entity);
+
+  auto add_blend_command = [&](std::optional<Snapshot> input) {
+    if (!input.has_value()) {
+      return false;
+    }
+    auto input_coverage = input->GetCoverage();
+    if (!input_coverage.has_value()) {
+      return false;
+    }
+
     FS::BindTextureSamplerSrc(cmd, input->texture, sampler);
 
+    auto size = input->texture->GetSize();
+    VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+    vtx_builder.AddVertices({
+        {Point(0, 0), Point(0, 0)},
+        {Point(size.width, 0), Point(1, 0)},
+        {Point(size.width, size.height), Point(1, 1)},
+        {Point(0, 0), Point(0, 0)},
+        {Point(size.width, size.height), Point(1, 1)},
+        {Point(0, size.height), Point(0, 1)},
+    });
+    auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
+    cmd.BindVertices(vtx_buffer);
+
     VS::FrameInfo frame_info;
-    frame_info.mvp =
-        Matrix::MakeOrthographic(size) *
-        Matrix::MakeTranslation(input->position - bounds.origin) *
-        Matrix::MakeScale(Size(input->texture->GetSize()) / Size(size));
+    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                     Matrix::MakeTranslation(-coverage.origin) *
+                     input->transform;
 
     auto uniform_view = host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(cmd, uniform_view);
+
+    pass.AddCommand(cmd);
+    return true;
+  };
+
+  // Draw the first texture using kSource.
+
+  options.blend_mode = Entity::BlendMode::kSource;
+  cmd.pipeline = renderer.GetTextureBlendPipeline(options);
+  if (!add_blend_command(inputs[0]->GetSnapshot(renderer, entity))) {
+    return true;
   }
-  pass.AddCommand(cmd);
 
   if (inputs.size() < 2) {
     return true;
@@ -172,17 +192,9 @@ static bool BasicBlend(const FilterInput::Vector& inputs,
   for (auto texture_i = inputs.begin() + 1; texture_i < inputs.end();
        texture_i++) {
     auto input = texture_i->get()->GetSnapshot(renderer, entity);
-    FS::BindTextureSamplerSrc(cmd, input->texture, sampler);
-
-    VS::FrameInfo frame_info;
-    frame_info.mvp = frame_info.mvp =
-        Matrix::MakeOrthographic(size) *
-        Matrix::MakeTranslation(input->position - bounds.origin) *
-        Matrix::MakeScale(Size(input->texture->GetSize()) / Size(size));
-
-    auto uniform_view = host_buffer.EmplaceUniform(frame_info);
-    VS::BindFrameInfo(cmd, uniform_view);
-    pass.AddCommand(cmd);
+    if (!add_blend_command(input)) {
+      return true;
+    }
   }
 
   return true;
@@ -192,23 +204,23 @@ bool BlendFilterContents::RenderFilter(const FilterInput::Vector& inputs,
                                        const ContentContext& renderer,
                                        const Entity& entity,
                                        RenderPass& pass,
-                                       const Rect& bounds) const {
+                                       const Rect& coverage) const {
   if (inputs.empty()) {
     return true;
   }
 
   if (inputs.size() == 1) {
     // Nothing to blend.
-    return BasicBlend(inputs, renderer, entity, pass, bounds,
+    return BasicBlend(inputs, renderer, entity, pass, coverage,
                       Entity::BlendMode::kSource);
   }
 
   if (blend_mode_ <= Entity::BlendMode::kLastPipelineBlendMode) {
-    return BasicBlend(inputs, renderer, entity, pass, bounds, blend_mode_);
+    return BasicBlend(inputs, renderer, entity, pass, coverage, blend_mode_);
   }
 
   if (blend_mode_ <= Entity::BlendMode::kLastAdvancedBlendMode) {
-    return advanced_blend_proc_(inputs, renderer, entity, pass, bounds);
+    return advanced_blend_proc_(inputs, renderer, entity, pass, coverage);
   }
 
   FML_UNREACHABLE();

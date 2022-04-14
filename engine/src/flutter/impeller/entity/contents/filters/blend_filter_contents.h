@@ -16,7 +16,7 @@ class BlendFilterContents : public FilterContents {
                          const ContentContext& renderer,
                          const Entity& entity,
                          RenderPass& pass,
-                         const Rect& bounds)>;
+                         const Rect& coverage)>;
 
   BlendFilterContents();
 
@@ -30,7 +30,7 @@ class BlendFilterContents : public FilterContents {
                     const ContentContext& renderer,
                     const Entity& entity,
                     RenderPass& pass,
-                    const Rect& bounds) const override;
+                    const Rect& coverage) const override;
 
   Entity::BlendMode blend_mode_;
   AdvancedBlendProc advanced_blend_proc_;
