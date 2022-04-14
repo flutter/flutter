@@ -390,7 +390,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// See also:
   ///
-  ///  * [scrolledUnderElevation], which will be used when the App Bar has
+  ///  * [scrolledUnderElevation], which will be used when the app bar has
   ///    something scrolled underneath it.
   ///  * [shadowColor], which is the color of the shadow below the app bar.
   ///  * [surfaceTintColor], which determines the elevation overlay that will
@@ -400,7 +400,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final double? elevation;
 
   /// {@template flutter.material.appbar.scrolledUnderElevation}
-  /// The elevation that will be used if this App Bar has something
+  /// The elevation that will be used if this app bar has something
   /// scrolled underneath it.
   ///
   /// If non-null then it [AppBarTheme.scrolledUnderElevation] of

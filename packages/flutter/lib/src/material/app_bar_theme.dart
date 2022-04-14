@@ -335,6 +335,7 @@ class AppBarTheme with Diagnosticable {
     backgroundColor,
     foregroundColor,
     elevation,
+    scrolledUnderElevation,
     shadowColor,
     surfaceTintColor,
     shape,
