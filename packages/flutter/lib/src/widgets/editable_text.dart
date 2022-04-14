@@ -1427,22 +1427,26 @@ class EditableText extends StatefulWidget {
   /// using the `TextField` widget.
   ///
   /// ```dart
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     body: Column(
-  ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
-  ///         Text('Here\'s a text field that supports inserting gif content:'),
-  ///         TextField(
-  ///           contentCommitMimeTypes: ['image/gif', 'image/png'],
-  ///           onContentCommitted: (CommittedContent data) async {
-  ///             // Handle committed content here
-  ///           },
-  ///         ),
-  ///       ],
-  ///     ),
-  ///   );
+  /// class ContentWidget extends StatelessWidget {
+  ///   const ContentWidget({ Key? key }) : super(key: key);
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Scaffold(
+  ///       body: Column(
+  ///         mainAxisAlignment: MainAxisAlignment.center,
+  ///         children: <Widget>[
+  ///           const Text('Here\'s a text field that supports inserting gif content:'),
+  ///           TextField(
+  ///             contentCommitMimeTypes: const ['image/gif', 'image/png'],
+  ///             onContentCommitted: (CommittedContent data) async {
+  ///               // Handle committed content here
+  ///             },
+  ///           ),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
   /// }
   /// ```
   /// {@end-tool}
