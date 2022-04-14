@@ -312,7 +312,7 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty("shrink")) {
             return project.property("shrink").toBoolean()
         }
-        return true
+        return false
     }
 
     /**
