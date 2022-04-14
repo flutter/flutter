@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -17,7 +18,6 @@ import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
@@ -38,7 +38,7 @@ public class PluginComponentTest {
 
     // Execute behavior under test.
     FlutterEngine flutterEngine =
-        new FlutterEngine(RuntimeEnvironment.application, flutterLoader, flutterJNI);
+        new FlutterEngine(ApplicationProvider.getApplicationContext(), flutterLoader, flutterJNI);
 
     // As soon as our plugin is registered it will look up asset paths and store them
     // for our verification.

@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.dart.DartExecutor.DartEntrypoint;
@@ -33,7 +34,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 // It's a component test because it tests the FlutterEngineGroup its components such as the
@@ -41,6 +41,7 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterEngineGroupComponentTest {
+  private final Context ctx = ApplicationProvider.getApplicationContext();
   @Mock FlutterJNI mockflutterJNI;
   @Mock FlutterLoader mockFlutterLoader;
   FlutterEngineGroup engineGroupUnderTest;
@@ -64,13 +65,13 @@ public class FlutterEngineGroupComponentTest {
     firstEngineUnderTest =
         spy(
             new FlutterEngine(
-                RuntimeEnvironment.application,
+                ctx,
                 mock(FlutterLoader.class),
                 mockflutterJNI,
                 /*dartVmArgs=*/ new String[] {},
                 /*automaticallyRegisterPlugins=*/ false));
     engineGroupUnderTest =
-        new FlutterEngineGroup(RuntimeEnvironment.application) {
+        new FlutterEngineGroup(ctx) {
           @Override
           FlutterEngine createEngine(Context context) {
             return firstEngineUnderTest;
@@ -88,8 +89,7 @@ public class FlutterEngineGroupComponentTest {
   @Test
   public void listensToEngineDestruction() {
     FlutterEngine firstEngine =
-        engineGroupUnderTest.createAndRunEngine(
-            RuntimeEnvironment.application, mock(DartEntrypoint.class));
+        engineGroupUnderTest.createAndRunEngine(ctx, mock(DartEntrypoint.class));
     assertEquals(1, engineGroupUnderTest.activeEngines.size());
 
     firstEngine.destroy();
@@ -99,16 +99,14 @@ public class FlutterEngineGroupComponentTest {
   @Test
   public void canRecreateEngines() {
     FlutterEngine firstEngine =
-        engineGroupUnderTest.createAndRunEngine(
-            RuntimeEnvironment.application, mock(DartEntrypoint.class));
+        engineGroupUnderTest.createAndRunEngine(ctx, mock(DartEntrypoint.class));
     assertEquals(1, engineGroupUnderTest.activeEngines.size());
 
     firstEngine.destroy();
     assertEquals(0, engineGroupUnderTest.activeEngines.size());
 
     FlutterEngine secondEngine =
-        engineGroupUnderTest.createAndRunEngine(
-            RuntimeEnvironment.application, mock(DartEntrypoint.class));
+        engineGroupUnderTest.createAndRunEngine(ctx, mock(DartEntrypoint.class));
     assertEquals(1, engineGroupUnderTest.activeEngines.size());
     // They happen to be equal in our test since we mocked it to be so.
     assertEquals(firstEngine, secondEngine);
@@ -117,8 +115,7 @@ public class FlutterEngineGroupComponentTest {
   @Test
   public void canSpawnMoreEngines() {
     FlutterEngine firstEngine =
-        engineGroupUnderTest.createAndRunEngine(
-            RuntimeEnvironment.application, mock(DartEntrypoint.class));
+        engineGroupUnderTest.createAndRunEngine(ctx, mock(DartEntrypoint.class));
     assertEquals(1, engineGroupUnderTest.activeEngines.size());
 
     doReturn(mock(FlutterEngine.class))
@@ -130,8 +127,7 @@ public class FlutterEngineGroupComponentTest {
             nullable(List.class));
 
     FlutterEngine secondEngine =
-        engineGroupUnderTest.createAndRunEngine(
-            RuntimeEnvironment.application, mock(DartEntrypoint.class));
+        engineGroupUnderTest.createAndRunEngine(ctx, mock(DartEntrypoint.class));
     assertEquals(2, engineGroupUnderTest.activeEngines.size());
 
     firstEngine.destroy();
@@ -147,8 +143,7 @@ public class FlutterEngineGroupComponentTest {
         .thenReturn(mock(FlutterEngine.class));
 
     FlutterEngine thirdEngine =
-        engineGroupUnderTest.createAndRunEngine(
-            RuntimeEnvironment.application, mock(DartEntrypoint.class));
+        engineGroupUnderTest.createAndRunEngine(ctx, mock(DartEntrypoint.class));
     assertEquals(2, engineGroupUnderTest.activeEngines.size());
   }
 
@@ -156,7 +151,7 @@ public class FlutterEngineGroupComponentTest {
   public void canCreateAndRunCustomEntrypoints() {
     FlutterEngine firstEngine =
         engineGroupUnderTest.createAndRunEngine(
-            RuntimeEnvironment.application,
+            ctx,
             new DartEntrypoint(
                 FlutterInjector.instance().flutterLoader().findAppBundlePath(),
                 "other entrypoint"));
@@ -175,8 +170,7 @@ public class FlutterEngineGroupComponentTest {
     when(firstEngineUnderTest.getNavigationChannel()).thenReturn(mock(NavigationChannel.class));
 
     FlutterEngine firstEngine =
-        engineGroupUnderTest.createAndRunEngine(
-            RuntimeEnvironment.application, mock(DartEntrypoint.class), "/foo");
+        engineGroupUnderTest.createAndRunEngine(ctx, mock(DartEntrypoint.class), "/foo");
     assertEquals(1, engineGroupUnderTest.activeEngines.size());
     verify(firstEngine.getNavigationChannel(), times(1)).setInitialRoute("/foo");
 
@@ -194,8 +188,7 @@ public class FlutterEngineGroupComponentTest {
             nullable(List.class));
 
     FlutterEngine secondEngine =
-        engineGroupUnderTest.createAndRunEngine(
-            RuntimeEnvironment.application, mock(DartEntrypoint.class), "/bar");
+        engineGroupUnderTest.createAndRunEngine(ctx, mock(DartEntrypoint.class), "/bar");
 
     assertEquals(2, engineGroupUnderTest.activeEngines.size());
     verify(mockflutterJNI, times(1))
@@ -207,7 +200,7 @@ public class FlutterEngineGroupComponentTest {
     List<String> firstDartEntrypointArgs = new ArrayList<String>();
     FlutterEngine firstEngine =
         engineGroupUnderTest.createAndRunEngine(
-            new FlutterEngineGroup.Options(RuntimeEnvironment.application)
+            new FlutterEngineGroup.Options(ctx)
                 .setDartEntrypoint(mock(DartEntrypoint.class))
                 .setDartEntrypointArgs(firstDartEntrypointArgs));
     assertEquals(1, engineGroupUnderTest.activeEngines.size());
@@ -234,7 +227,7 @@ public class FlutterEngineGroupComponentTest {
     List<String> secondDartEntrypointArgs = new ArrayList<String>();
     FlutterEngine secondEngine =
         engineGroupUnderTest.createAndRunEngine(
-            new FlutterEngineGroup.Options(RuntimeEnvironment.application)
+            new FlutterEngineGroup.Options(ctx)
                 .setDartEntrypoint(mock(DartEntrypoint.class))
                 .setDartEntrypointArgs(secondDartEntrypointArgs));
 

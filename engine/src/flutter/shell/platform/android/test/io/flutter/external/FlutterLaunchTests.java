@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Intent;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
@@ -14,7 +15,6 @@ import io.flutter.embedding.android.RobolectricFlutterActivity;
 import io.flutter.embedding.android.TransparencyMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
@@ -22,7 +22,8 @@ import org.robolectric.annotation.Config;
 public class FlutterLaunchTests {
   @Test
   public void launchFlutterActivity_with_defaultIntent_expect_defaultConfiguration() {
-    Intent intent = FlutterActivity.createDefaultIntent(RuntimeEnvironment.application);
+    Intent intent =
+        FlutterActivity.createDefaultIntent(ApplicationProvider.getApplicationContext());
     FlutterActivity flutterActivity = RobolectricFlutterActivity.createFlutterActivity(intent);
 
     assertEquals("main", flutterActivity.getDartEntrypointFunctionName());

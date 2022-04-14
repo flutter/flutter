@@ -5,11 +5,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import android.content.Context;
 import android.text.Editable;
 import android.text.Selection;
 import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.KeyboardManager;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -19,16 +21,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class ListenableEditingStateTest {
+  private final Context ctx = ApplicationProvider.getApplicationContext();
   @Mock KeyboardManager mockKeyboardManager;
 
   private BaseInputConnection getTestInputConnection(View view, Editable mEditable) {
-    new View(RuntimeEnvironment.application);
+    new View(ctx);
     return new BaseInputConnection(view, true) {
       @Override
       public Editable getEditable() {
@@ -46,17 +48,15 @@ public class ListenableEditingStateTest {
   public void testConstructor() {
     // When provided valid composing range, should not fail
     new ListenableEditingState(
-        new TextInputChannel.TextEditState("hello", 1, 4, 1, 4),
-        new View(RuntimeEnvironment.application));
+        new TextInputChannel.TextEditState("hello", 1, 4, 1, 4), new View(ctx));
   }
 
   // -------- Start: Test BatchEditing   -------
   @Test
   public void testBatchEditing() {
-    final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    final ListenableEditingState editingState = new ListenableEditingState(null, new View(ctx));
     final Listener listener = new Listener();
-    final View testView = new View(RuntimeEnvironment.application);
+    final View testView = new View(ctx);
     final BaseInputConnection inputConnection = getTestInputConnection(testView, editingState);
 
     editingState.addEditingStateListener(listener);
@@ -108,8 +108,7 @@ public class ListenableEditingStateTest {
 
   @Test
   public void testBatchingEditing_callEndBeforeBegin() {
-    final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    final ListenableEditingState editingState = new ListenableEditingState(null, new View(ctx));
     final Listener listener = new Listener();
     editingState.addEditingStateListener(listener);
 
@@ -131,8 +130,7 @@ public class ListenableEditingStateTest {
 
   @Test
   public void testBatchingEditing_addListenerDuringBatchEdit() {
-    final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    final ListenableEditingState editingState = new ListenableEditingState(null, new View(ctx));
     final Listener listener = new Listener();
 
     editingState.beginBatchEdit();
@@ -166,8 +164,7 @@ public class ListenableEditingStateTest {
 
   @Test
   public void testBatchingEditing_removeListenerDuringBatchEdit() {
-    final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    final ListenableEditingState editingState = new ListenableEditingState(null, new View(ctx));
     final Listener listener = new Listener();
     editingState.addEditingStateListener(listener);
 
@@ -181,8 +178,7 @@ public class ListenableEditingStateTest {
 
   @Test
   public void testBatchingEditing_listenerCallsReplaceWhenBatchEditEnds() {
-    final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    final ListenableEditingState editingState = new ListenableEditingState(null, new View(ctx));
 
     final Listener listener =
         new Listener() {
@@ -208,8 +204,7 @@ public class ListenableEditingStateTest {
 
   @Test
   public void testSetComposingRegion() {
-    final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    final ListenableEditingState editingState = new ListenableEditingState(null, new View(ctx));
     editingState.replace(0, editingState.length(), "text");
 
     // (-1, -1) clears the composing region.
@@ -238,8 +233,7 @@ public class ListenableEditingStateTest {
 
   @Test
   public void testClearBatchDeltas() {
-    final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    final ListenableEditingState editingState = new ListenableEditingState(null, new View(ctx));
     editingState.replace(0, editingState.length(), "text");
     editingState.delete(0, 1);
     editingState.insert(0, "This is t");
@@ -249,8 +243,7 @@ public class ListenableEditingStateTest {
 
   @Test
   public void testExtractBatchTextEditingDeltas() {
-    final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    final ListenableEditingState editingState = new ListenableEditingState(null, new View(ctx));
 
     // Creating some deltas.
     editingState.replace(0, editingState.length(), "test");
@@ -266,7 +259,7 @@ public class ListenableEditingStateTest {
   public void inputMethod_batchEditingBeginAndEnd() {
     final ArrayList<String> batchMarkers = new ArrayList<>();
     final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application)) {
+        new ListenableEditingState(null, new View(ctx)) {
           @Override
           public final void beginBatchEdit() {
             super.beginBatchEdit();
@@ -281,7 +274,7 @@ public class ListenableEditingStateTest {
         };
 
     final Listener listener = new Listener();
-    final View testView = new View(RuntimeEnvironment.application);
+    final View testView = new View(ctx);
     final InputConnectionAdaptor inputConnection =
         new InputConnectionAdaptor(
             testView,
@@ -304,10 +297,9 @@ public class ListenableEditingStateTest {
 
   @Test
   public void inputMethod_testSetSelection() {
-    final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    final ListenableEditingState editingState = new ListenableEditingState(null, new View(ctx));
     final Listener listener = new Listener();
-    final View testView = new View(RuntimeEnvironment.application);
+    final View testView = new View(ctx);
     final InputConnectionAdaptor inputConnection =
         new InputConnectionAdaptor(
             testView,
@@ -339,10 +331,9 @@ public class ListenableEditingStateTest {
 
   @Test
   public void inputMethod_testSetComposition() {
-    final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    final ListenableEditingState editingState = new ListenableEditingState(null, new View(ctx));
     final Listener listener = new Listener();
-    final View testView = new View(RuntimeEnvironment.application);
+    final View testView = new View(ctx);
     final InputConnectionAdaptor inputConnection =
         new InputConnectionAdaptor(
             testView,
@@ -400,10 +391,9 @@ public class ListenableEditingStateTest {
 
   @Test
   public void inputMethod_testCommitText() {
-    final ListenableEditingState editingState =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+    final ListenableEditingState editingState = new ListenableEditingState(null, new View(ctx));
     final Listener listener = new Listener();
-    final View testView = new View(RuntimeEnvironment.application);
+    final View testView = new View(ctx);
     final InputConnectionAdaptor inputConnection =
         new InputConnectionAdaptor(
             testView,
