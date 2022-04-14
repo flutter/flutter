@@ -31,12 +31,17 @@ class Compiler {
     kUnknown,
     kMacOS,
     kIPhoneOS,
+    kFlutterSPIRV,
   };
 
   static SourceType SourceTypeFromFileName(const std::string& file_name);
 
   static std::string EntryPointFromSourceName(const std::string& file_name,
                                               SourceType type);
+
+  static bool TargetPlatformNeedsMSL(TargetPlatform platform);
+
+  static bool TargetPlatformNeedsReflection(TargetPlatform platform);
 
   struct SourceOptions {
     SourceType type = SourceType::kUnknown;
