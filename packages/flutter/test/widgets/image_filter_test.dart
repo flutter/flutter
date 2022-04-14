@@ -42,7 +42,7 @@ void main() {
       find.byType(ImageFiltered),
       matchesGoldenFile('image_filter_dilate.png'),
     );
-  });
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/101874
 
   testWidgets('Image filter - erode', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -57,7 +57,7 @@ void main() {
       find.byType(ImageFiltered),
       matchesGoldenFile('image_filter_erode.png'),
     );
-  });
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/101874
 
   testWidgets('Image filter - matrix', (WidgetTester tester) async {
     final ImageFilter matrix = ImageFilter.matrix(Float64List.fromList(<double>[
