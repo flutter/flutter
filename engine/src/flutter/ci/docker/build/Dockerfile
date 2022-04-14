@@ -1,9 +1,10 @@
-FROM debian:stretch
+FROM ubuntu:bionic@sha256:512274f1739676880585e70eea6a883db7b6d92841b02647b6c92b478356572c
 
 ENV DEPOT_TOOLS_PATH $HOME/depot_tools
 ENV BUILDROOT_PATH $HOME/buildroot
 ENV ENGINE_PATH $HOME/engine
 ENV PATH $PATH:$DEPOT_TOOLS_PATH
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Notes:
 # - libx11-dev is used by Flutter for desktop linux (see also install-build-deps-linux-desktop.sh)
@@ -59,10 +60,8 @@ RUN apt-get install -y \
     mtools             \
     nasm               \
     net-tools          \
-    openjdk-8-jdk      \
     pkg-config         \
     python             \
-    python-m2crypto    \
     python2.7-dev      \
     tcpdump            \
     texinfo            \
@@ -85,7 +84,6 @@ RUN apt-get install -y \
 
 # Install browsers
 RUN apt-get install -y \
-    firefox-esr        \
     google-chrome-stable
 
 # Install and config gcloud
