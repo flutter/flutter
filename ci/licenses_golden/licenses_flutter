@@ -424,7 +424,7 @@ FILE: ../../../flutter/impeller/archivist/archivist_unittests.cc
 FILE: ../../../flutter/impeller/base/allocation.cc
 FILE: ../../../flutter/impeller/base/allocation.h
 FILE: ../../../flutter/impeller/base/backend_cast.h
-FILE: ../../../flutter/impeller/base/base_unittests.cc
+FILE: ../../../flutter/impeller/base/base.h
 FILE: ../../../flutter/impeller/base/comparable.cc
 FILE: ../../../flutter/impeller/base/comparable.h
 FILE: ../../../flutter/impeller/base/config.h
@@ -432,10 +432,6 @@ FILE: ../../../flutter/impeller/base/promise.cc
 FILE: ../../../flutter/impeller/base/promise.h
 FILE: ../../../flutter/impeller/base/strings.cc
 FILE: ../../../flutter/impeller/base/strings.h
-FILE: ../../../flutter/impeller/base/thread.cc
-FILE: ../../../flutter/impeller/base/thread.h
-FILE: ../../../flutter/impeller/base/thread_safety.cc
-FILE: ../../../flutter/impeller/base/thread_safety.h
 FILE: ../../../flutter/impeller/base/validation.cc
 FILE: ../../../flutter/impeller/base/validation.h
 FILE: ../../../flutter/impeller/compiler/code_gen_template.h
