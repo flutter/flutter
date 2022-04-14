@@ -377,7 +377,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// This property controls the size of the shadow below the app bar if
   /// [shadowColor] is not null.
   ///
-  /// If [surfaceTint] is not null then it will apply a surface tint overlay
+  /// If [surfaceTintColor] is not null then it will apply a surface tint overlay
   /// to the background color (see [Material.surfaceTintColor] for more
   /// detail).
   ///
@@ -394,7 +394,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///    something scrolled underneath it.
   ///  * [shadowColor], which is the color of the shadow below the app bar.
   ///  * [surfaceTintColor], which determines the elevation overlay that will
-  ///    be applied to the background of the app bar.  ///  * [shape], which defines the shape of the app bar's [Material] and its
+  ///    be applied to the background of the app bar.
+  ///  * [shape], which defines the shape of the app bar's [Material] and its
   ///    shadow.
   final double? elevation;
 
