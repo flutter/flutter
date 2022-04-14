@@ -1052,15 +1052,16 @@ class EditableText extends StatefulWidget {
   final ValueChanged<String>? onChanged;
 
   /// {@template flutter.widgets.editableText.onContentCommitted}
-  /// Called when a user inserts image-based content through the device keyboard
+  /// Called when a user inserts content through the device keyboard
   /// on Android only.
   ///
   /// The map will contain the following data:
-  ///  - MIME Type (supporting png, bmp, jpg, tiff, gif, jpeg, and webp)
+  ///  - MIME Type (supporting png, bmp, jpg, tiff, gif, jpeg, and webp by default)
   ///  - Bytes
   ///  - URI
   ///
-  /// You will want to use the bytes to display the image.
+  /// The bytes represent the content being committed through the keyboard. This can
+  /// be an image, video, or any other file type
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
