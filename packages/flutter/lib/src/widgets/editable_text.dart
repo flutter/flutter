@@ -1051,6 +1051,7 @@ class EditableText extends StatefulWidget {
   ///    which are more specialized input change notifications.
   final ValueChanged<String>? onChanged;
 
+  /// {@template flutter.widgets.editableText.onContentCommitted}
   /// Called when a user inserts image-based content through the device keyboard
   /// on Android only.
   ///
@@ -1395,7 +1396,48 @@ class EditableText extends StatefulWidget {
   /// [AutofillClient]. This property may override [autofillHints].
   final AutofillClient? autofillClient;
 
-  /// {@macro flutter.services.TextInputConfiguration.contentCommitMimeTypes}
+  /// {@template flutter.widgets.editableText.contentCommitMimeTypes}
+  /// Used when a user inserts image-based content through the device keyboard
+  /// on Android only.
+  ///
+  /// The passed list of strings will determine which MIME types are allowed to
+  /// be inserted via the device keyboard. If no `onContentCommitted` callback
+  /// is provided, this field will be ignored.
+  ///
+  /// Defaults to ['image/png', 'image/bmp', 'image/jpg', 'image/tiff', 'image/gif', 'image/jpeg', 'image/webp']
+  ///
+  /// This example shows how to limit your keyboard commits to specific file types
+  /// using the `TextField` widget.
+  ///
+  /// ```dart
+  /// final TextEditingController _controller = TextEditingController();
+  ///
+  /// @override
+  /// void dispose() {
+  ///   _controller.dispose();
+  ///   super.dispose();
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     body: Column(
+  ///       mainAxisAlignment: MainAxisAlignment.center,
+  ///       children: <Widget>[
+  ///         const Text('Here's a text field that supports inserting gif content:'),
+  ///         TextField(
+  ///           controller: _controller,
+  ///           contentCommitMimeTypes: ['image/gif', 'image/png'],
+  ///           onContentCommitted: (CommittedContent data) async {
+  ///             ...
+  ///           },
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@endtemplate}
   final List<String> contentCommitMimeTypes;
 
   /// {@macro flutter.material.Material.clipBehavior}
