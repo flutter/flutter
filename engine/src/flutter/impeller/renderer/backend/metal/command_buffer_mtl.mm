@@ -7,55 +7,11 @@
 #include "impeller/renderer/backend/metal/render_pass_mtl.h"
 
 namespace impeller {
-
-id<MTLCommandBuffer> CreateCommandBuffer(id<MTLCommandQueue> queue) {
-  if (@available(iOS 14.0, macOS 11.0, *)) {
-    auto desc = [[MTLCommandBufferDescriptor alloc] init];
-    // Degrades CPU performance slightly but is well worth the cost for typical
-    // Impeller workloads.
-    desc.errorOptions = MTLCommandBufferErrorOptionEncoderExecutionStatus;
-    return [queue commandBufferWithDescriptor:desc];
-  }
-  return [queue commandBuffer];
-}
-
-CommandBufferMTL::CommandBufferMTL(id<MTLCommandQueue> queue)
-    : buffer_(CreateCommandBuffer(queue)) {
-  if (!buffer_) {
-    return;
-  }
-  is_valid_ = true;
-}
-
-CommandBufferMTL::~CommandBufferMTL() = default;
-
-bool CommandBufferMTL::IsValid() const {
-  return is_valid_;
-}
-
-void CommandBufferMTL::SetLabel(const std::string& label) const {
-  if (label.empty()) {
-    return;
-  }
-
-  [buffer_ setLabel:@(label.data())];
-}
-
-static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
-  switch (status) {
-    case MTLCommandBufferStatusCompleted:
-      return CommandBufferMTL::Status::kCompleted;
-    case MTLCommandBufferStatusEnqueued:
-      return CommandBufferMTL::Status::kPending;
-    default:
-      break;
-  }
-  return CommandBufferMTL::Status::kError;
-}
-
+namespace {
 // TODO(dnfield): remove this declaration when we no longer need to build on
-// machines with lower SDK versions than 11.0.s
-#if !defined(MAC_OS_VERSION_11_0) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_VERSION_11_0
+// machines with lower SDK versions than 11.0.
+#if !defined(MAC_OS_VERSION_11_0) || \
+    MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_VERSION_11_0
 typedef NS_ENUM(NSInteger, MTLCommandEncoderErrorState) {
   MTLCommandEncoderErrorStateUnknown = 0,
   MTLCommandEncoderErrorStateCompleted = 1,
@@ -63,12 +19,6 @@ typedef NS_ENUM(NSInteger, MTLCommandEncoderErrorState) {
   MTLCommandEncoderErrorStatePending = 3,
   MTLCommandEncoderErrorStateFaulted = 4,
 } API_AVAILABLE(macos(11.0), ios(14.0));
-#endif
-
-
-#if !defined(MAC_OS_VERSION_12_0) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_VERSION_12_0
-constexpr int MTLCommandBufferErrorAccessRevoked = 4;
-constexpr int MTLCommandBufferErrorStackOverflow = 12;
 #endif
 
 API_AVAILABLE(ios(14.0), macos(11.0))
@@ -88,6 +38,14 @@ NSString* MTLCommandEncoderErrorStateToString(
   }
   return @"unknown";
 }
+
+// TODO(dnfield): This can be removed when all bots have been sufficiently
+// upgraded for MAC_OS_VERSION_12_0.
+#if !defined(MAC_OS_VERSION_12_0) || \
+    MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_VERSION_12_0
+constexpr int MTLCommandBufferErrorAccessRevoked = 4;
+constexpr int MTLCommandBufferErrorStackOverflow = 12;
+#endif
 
 static NSString* MTLCommandBufferErrorToString(MTLCommandBufferError code) {
   switch (code) {
@@ -172,6 +130,52 @@ static void LogMTLCommandBufferErrorIfPresent(id<MTLCommandBuffer> buffer) {
 
   stream << "<<<<<<<";
   VALIDATION_LOG << stream.str();
+}
+}  // namespace
+
+id<MTLCommandBuffer> CreateCommandBuffer(id<MTLCommandQueue> queue) {
+  if (@available(iOS 14.0, macOS 11.0, *)) {
+    auto desc = [[MTLCommandBufferDescriptor alloc] init];
+    // Degrades CPU performance slightly but is well worth the cost for typical
+    // Impeller workloads.
+    desc.errorOptions = MTLCommandBufferErrorOptionEncoderExecutionStatus;
+    return [queue commandBufferWithDescriptor:desc];
+  }
+  return [queue commandBuffer];
+}
+
+CommandBufferMTL::CommandBufferMTL(id<MTLCommandQueue> queue)
+    : buffer_(CreateCommandBuffer(queue)) {
+  if (!buffer_) {
+    return;
+  }
+  is_valid_ = true;
+}
+
+CommandBufferMTL::~CommandBufferMTL() = default;
+
+bool CommandBufferMTL::IsValid() const {
+  return is_valid_;
+}
+
+void CommandBufferMTL::SetLabel(const std::string& label) const {
+  if (label.empty()) {
+    return;
+  }
+
+  [buffer_ setLabel:@(label.data())];
+}
+
+static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
+  switch (status) {
+    case MTLCommandBufferStatusCompleted:
+      return CommandBufferMTL::Status::kCompleted;
+    case MTLCommandBufferStatusEnqueued:
+      return CommandBufferMTL::Status::kPending;
+    default:
+      break;
+  }
+  return CommandBufferMTL::Status::kError;
 }
 
 bool CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
