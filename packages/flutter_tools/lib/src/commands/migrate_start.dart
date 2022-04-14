@@ -5,6 +5,7 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../migrate/migrate_compute.dart';
+import '../migrate/migrate_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'migrate.dart';
