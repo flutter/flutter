@@ -179,7 +179,7 @@ void TextInputManagerWin32::MoveImeWindow(HIMC imm_context) {
   COMPOSITIONFORM cf = {CFS_POINT, {x, y}};
   ::ImmSetCompositionWindow(imm_context, &cf);
 
-  CANDIDATEFORM candidate_form = {0, CFS_CANDIDATEPOS, {x, y}, {0, 0, 0, 0}};
+  CANDIDATEFORM candidate_form = {0, CFS_EXCLUDE, {x, y}, {0, 0, 0, 0}};
   ::ImmSetCandidateWindow(imm_context, &candidate_form);
 }
 
