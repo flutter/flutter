@@ -1406,6 +1406,8 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to ['image/png', 'image/bmp', 'image/jpg', 'image/tiff', 'image/gif', 'image/jpeg', 'image/webp']
   ///
+  /// {@tool snippet}
+  ///
   /// This example shows how to limit your keyboard commits to specific file types
   /// using the `TextField` widget.
   ///
@@ -1437,6 +1439,7 @@ class EditableText extends StatefulWidget {
   ///   );
   /// }
   /// ```
+  /// {@end-tool}
   /// {@endtemplate}
   final List<String> contentCommitMimeTypes;
 
