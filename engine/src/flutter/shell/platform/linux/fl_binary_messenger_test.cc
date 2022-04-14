@@ -14,13 +14,13 @@
 #include "flutter/shell/platform/linux/testing/mock_binary_messenger_response_handle.h"
 #include "flutter/shell/platform/linux/testing/mock_renderer.h"
 
-G_DECLARE_FINAL_TYPE(FlMockBinaryMessenger,
-                     fl_mock_binary_messenger,
+G_DECLARE_FINAL_TYPE(FlFakeBinaryMessenger,
+                     fl_fake_binary_messenger,
                      FL,
-                     MOCK_BINARY_MESSENGER,
+                     FAKE_BINARY_MESSENGER,
                      GObject)
 
-struct _FlMockBinaryMessenger {
+struct _FlFakeBinaryMessenger {
   GObject parent_instance;
 
   GMainLoop* loop;
@@ -30,21 +30,21 @@ struct _FlMockBinaryMessenger {
   gpointer message_handler_user_data;
 };
 
-static void fl_mock_binary_messenger_iface_init(
+static void fl_fake_binary_messenger_iface_init(
     FlBinaryMessengerInterface* iface);
 
 G_DEFINE_TYPE_WITH_CODE(
-    FlMockBinaryMessenger,
-    fl_mock_binary_messenger,
+    FlFakeBinaryMessenger,
+    fl_fake_binary_messenger,
     G_TYPE_OBJECT,
     G_IMPLEMENT_INTERFACE(fl_binary_messenger_get_type(),
-                          fl_mock_binary_messenger_iface_init))
+                          fl_fake_binary_messenger_iface_init))
 
-static void fl_mock_binary_messenger_class_init(
-    FlMockBinaryMessengerClass* klass) {}
+static void fl_fake_binary_messenger_class_init(
+    FlFakeBinaryMessengerClass* klass) {}
 
 static gboolean send_message_cb(gpointer user_data) {
-  FlMockBinaryMessenger* self = FL_MOCK_BINARY_MESSENGER(user_data);
+  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(user_data);
 
   const char* text = "Marco!";
   g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
@@ -62,7 +62,7 @@ static void set_message_handler_on_channel(
     FlBinaryMessengerMessageHandler handler,
     gpointer user_data,
     GDestroyNotify destroy_notify) {
-  FlMockBinaryMessenger* self = FL_MOCK_BINARY_MESSENGER(messenger);
+  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(messenger);
 
   EXPECT_STREQ(channel, "CHANNEL");
 
@@ -76,7 +76,7 @@ static gboolean send_response(FlBinaryMessenger* messenger,
                               FlBinaryMessengerResponseHandle* response_handle,
                               GBytes* response,
                               GError** error) {
-  FlMockBinaryMessenger* self = FL_MOCK_BINARY_MESSENGER(messenger);
+  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(messenger);
 
   EXPECT_TRUE(FL_IS_MOCK_BINARY_MESSENGER_RESPONSE_HANDLE(response_handle));
 
@@ -91,7 +91,7 @@ static gboolean send_response(FlBinaryMessenger* messenger,
 }
 
 static gboolean send_ready_cb(gpointer user_data) {
-  FlMockBinaryMessenger* self = FL_MOCK_BINARY_MESSENGER(user_data);
+  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(user_data);
 
   self->send_callback(G_OBJECT(self), NULL, self->send_callback_user_data);
 
@@ -104,7 +104,7 @@ static void send_on_channel(FlBinaryMessenger* messenger,
                             GCancellable* cancellable,
                             GAsyncReadyCallback callback,
                             gpointer user_data) {
-  FlMockBinaryMessenger* self = FL_MOCK_BINARY_MESSENGER(messenger);
+  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(messenger);
 
   EXPECT_STREQ(channel, "CHANNEL");
   g_autofree gchar* text =
@@ -125,7 +125,7 @@ static GBytes* send_on_channel_finish(FlBinaryMessenger* messenger,
   return g_bytes_new(text, strlen(text));
 }
 
-static void fl_mock_binary_messenger_iface_init(
+static void fl_fake_binary_messenger_iface_init(
     FlBinaryMessengerInterface* iface) {
   iface->set_message_handler_on_channel = set_message_handler_on_channel;
   iface->send_response = send_response;
@@ -133,17 +133,17 @@ static void fl_mock_binary_messenger_iface_init(
   iface->send_on_channel_finish = send_on_channel_finish;
 }
 
-static void fl_mock_binary_messenger_init(FlMockBinaryMessenger* self) {}
+static void fl_fake_binary_messenger_init(FlFakeBinaryMessenger* self) {}
 
-static FlBinaryMessenger* fl_mock_binary_messenger_new(GMainLoop* loop) {
-  FlMockBinaryMessenger* self = FL_MOCK_BINARY_MESSENGER(
-      g_object_new(fl_mock_binary_messenger_get_type(), NULL));
+static FlBinaryMessenger* fl_fake_binary_messenger_new(GMainLoop* loop) {
+  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(
+      g_object_new(fl_fake_binary_messenger_get_type(), NULL));
   self->loop = loop;
   return FL_BINARY_MESSENGER(self);
 }
 
-// Called when the message response is received in the MockMessengerSend test.
-static void mock_response_cb(GObject* object,
+// Called when the message response is received in the FakeMessengerSend test.
+static void fake_response_cb(GObject* object,
                              GAsyncResult* result,
                              gpointer user_data) {
   g_autoptr(GError) error = nullptr;
@@ -160,24 +160,24 @@ static void mock_response_cb(GObject* object,
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
 }
 
-// Checks can make a mock messenger and send a message.
-TEST(FlBinaryMessengerTest, MockMessengerSend) {
+// Checks can make a fake messenger and send a message.
+TEST(FlBinaryMessengerTest, FakeMessengerSend) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
-  g_autoptr(FlBinaryMessenger) messenger = fl_mock_binary_messenger_new(loop);
-  EXPECT_TRUE(FL_IS_MOCK_BINARY_MESSENGER(messenger));
+  g_autoptr(FlBinaryMessenger) messenger = fl_fake_binary_messenger_new(loop);
+  EXPECT_TRUE(FL_IS_FAKE_BINARY_MESSENGER(messenger));
 
   const char* text = "Marco!";
   g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
   fl_binary_messenger_send_on_channel(messenger, "CHANNEL", message, nullptr,
-                                      mock_response_cb, loop);
+                                      fake_response_cb, loop);
 
-  // Blocks here until mock_response_cb is called.
+  // Blocks here until fake_response_cb is called.
   g_main_loop_run(loop);
 }
 
-// Called when a message is received in the MockMessengerReceive test.
-static void mock_message_cb(FlBinaryMessenger* messenger,
+// Called when a message is received in the FakeMessengerReceive test.
+static void fake_message_cb(FlBinaryMessenger* messenger,
                             const gchar* channel,
                             GBytes* message,
                             FlBinaryMessengerResponseHandle* response_handle,
@@ -199,17 +199,17 @@ static void mock_message_cb(FlBinaryMessenger* messenger,
   EXPECT_EQ(error, nullptr);
 }
 
-// Checks can make a mock messenger and receive a message.
-TEST(FlBinaryMessengerTest, MockMessengerReceive) {
+// Checks can make a fake messenger and receive a message.
+TEST(FlBinaryMessengerTest, FakeMessengerReceive) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
-  g_autoptr(FlBinaryMessenger) messenger = fl_mock_binary_messenger_new(loop);
-  EXPECT_TRUE(FL_IS_MOCK_BINARY_MESSENGER(messenger));
+  g_autoptr(FlBinaryMessenger) messenger = fl_fake_binary_messenger_new(loop);
+  EXPECT_TRUE(FL_IS_FAKE_BINARY_MESSENGER(messenger));
 
   fl_binary_messenger_set_message_handler_on_channel(
-      messenger, "CHANNEL", mock_message_cb, nullptr, nullptr);
+      messenger, "CHANNEL", fake_message_cb, nullptr, nullptr);
 
-  // Blocks here until response is received in mock messenger.
+  // Blocks here until response is received in fake messenger.
   g_main_loop_run(loop);
 }
 
