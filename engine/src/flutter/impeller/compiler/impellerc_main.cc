@@ -69,49 +69,65 @@ bool Main(const fml::CommandLine& command_line) {
     return false;
   }
 
-  if (!fml::WriteAtomically(*switches.working_directory,
-                            switches.metal_file_name.c_str(),
-                            *compiler.GetMSLShaderSource())) {
-    std::cerr << "Could not write file to " << switches.spirv_file_name
-              << std::endl;
-    return false;
-  }
-
-  if (!switches.reflection_json_name.empty()) {
+  if (Compiler::TargetPlatformNeedsMSL(options.target_platform)) {
     if (!fml::WriteAtomically(*switches.working_directory,
-                              switches.reflection_json_name.c_str(),
-                              *compiler.GetReflector()->GetReflectionJSON())) {
-      std::cerr << "Could not write reflection json to "
-                << switches.reflection_json_name << std::endl;
+                              switches.metal_file_name.c_str(),
+                              *compiler.GetMSLShaderSource())) {
+      std::cerr << "Could not write file to " << switches.spirv_file_name
+                << std::endl;
       return false;
     }
   }
 
-  if (!switches.reflection_header_name.empty()) {
-    if (!fml::WriteAtomically(
-            *switches.working_directory,
-            switches.reflection_header_name.c_str(),
-            *compiler.GetReflector()->GetReflectionHeader())) {
-      std::cerr << "Could not write reflection header to "
-                << switches.reflection_header_name << std::endl;
-      return false;
-    }
-  }
 
-  if (!switches.reflection_cc_name.empty()) {
-    if (!fml::WriteAtomically(*switches.working_directory,
-                              switches.reflection_cc_name.c_str(),
-                              *compiler.GetReflector()->GetReflectionCC())) {
-      std::cerr << "Could not write reflection CC to "
-                << switches.reflection_cc_name << std::endl;
-      return false;
+  if (Compiler::TargetPlatformNeedsReflection(options.target_platform)) {
+    if (!switches.reflection_json_name.empty()) {
+      if (!fml::WriteAtomically(*switches.working_directory,
+                                switches.reflection_json_name.c_str(),
+                                *compiler.GetReflector()->GetReflectionJSON())) {
+        std::cerr << "Could not write reflection json to "
+                  << switches.reflection_json_name << std::endl;
+        return false;
+      }
+    }
+
+    if (!switches.reflection_header_name.empty()) {
+      if (!fml::WriteAtomically(
+              *switches.working_directory,
+              switches.reflection_header_name.c_str(),
+              *compiler.GetReflector()->GetReflectionHeader())) {
+        std::cerr << "Could not write reflection header to "
+                  << switches.reflection_header_name << std::endl;
+        return false;
+      }
+    }
+
+    if (!switches.reflection_cc_name.empty()) {
+      if (!fml::WriteAtomically(*switches.working_directory,
+                                switches.reflection_cc_name.c_str(),
+                                *compiler.GetReflector()->GetReflectionCC())) {
+        std::cerr << "Could not write reflection CC to "
+                  << switches.reflection_cc_name << std::endl;
+        return false;
+      }
     }
   }
 
   if (!switches.depfile_path.empty()) {
+    std::string result_file;
+    switch (switches.target_platform) {
+      case Compiler::TargetPlatform::kMacOS:
+      case Compiler::TargetPlatform::kIPhoneOS:
+        result_file = switches.metal_file_name;
+        break;
+      case Compiler::TargetPlatform::kFlutterSPIRV:
+      case Compiler::TargetPlatform::kUnknown:
+        result_file = switches.spirv_file_name;
+        break;
+    }
     if (!fml::WriteAtomically(
             *switches.working_directory, switches.depfile_path.c_str(),
-            *compiler.CreateDepfileContents({switches.metal_file_name}))) {
+            *compiler.CreateDepfileContents({result_file}))) {
       std::cerr << "Could not write depfile to " << switches.depfile_path
                 << std::endl;
       return false;

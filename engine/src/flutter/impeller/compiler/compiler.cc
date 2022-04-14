@@ -206,6 +206,7 @@ CompilerTargetPlatformToCompilerMSLTargetPlatform(
       return spirv_cross::CompilerMSL::Options::Platform::iOS;
     case Compiler::TargetPlatform::kMacOS:
     // Unknown should not happen due to prior validation.
+    case Compiler::TargetPlatform::kFlutterSPIRV:
     case Compiler::TargetPlatform::kUnknown:
       return spirv_cross::CompilerMSL::Options::Platform::macOS;
   }
@@ -239,18 +240,29 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   // will be processed later by backend specific compilers. So optimizations
   // here are irrelevant and get in the way of generating reflection code.
   options.SetGenerateDebugInfo();
-  options.SetOptimizationLevel(
-      shaderc_optimization_level::shaderc_optimization_level_zero);
 
   // Expects GLSL 4.60 (Core Profile).
   // https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.60.pdf
   options.SetSourceLanguage(
       shaderc_source_language::shaderc_source_language_glsl);
   options.SetForcedVersionProfile(460, shaderc_profile::shaderc_profile_core);
-  options.SetTargetEnvironment(
-      shaderc_target_env::shaderc_target_env_vulkan,
-      shaderc_env_version::shaderc_env_version_vulkan_1_1);
-  options.SetTargetSpirv(shaderc_spirv_version::shaderc_spirv_version_1_3);
+  if (source_options.target_platform == TargetPlatform::kFlutterSPIRV) {
+    options.SetOptimizationLevel(
+      shaderc_optimization_level::shaderc_optimization_level_size);
+    options.SetTargetEnvironment(
+        shaderc_target_env::shaderc_target_env_opengl,
+        shaderc_env_version::shaderc_env_version_opengl_4_5
+    );
+    options.SetTargetSpirv(shaderc_spirv_version::shaderc_spirv_version_1_0);
+  } else {
+    options.SetOptimizationLevel(
+        shaderc_optimization_level::shaderc_optimization_level_zero);
+    options.SetTargetEnvironment(
+        shaderc_target_env::shaderc_target_env_vulkan,
+        shaderc_env_version::shaderc_env_version_vulkan_1_1
+    );
+    options.SetTargetSpirv(shaderc_spirv_version::shaderc_spirv_version_1_3);
+  }
 
   options.SetAutoBindUniforms(true);
   options.SetAutoMapLocations(true);
@@ -293,6 +305,11 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   } else {
     included_file_names_ = std::move(included_file_names);
+  }
+
+  if (!TargetPlatformNeedsMSL(source_options.target_platform)) {
+    is_valid_ = true;
+    return;
   }
 
   // MSL Generation.
@@ -416,6 +433,26 @@ std::string Compiler::EntryPointFromSourceName(const std::string& file_name,
   }
   stream << "_main";
   return stream.str();
+}
+
+bool Compiler::TargetPlatformNeedsMSL(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform::kIPhoneOS:
+    case TargetPlatform::kMacOS:
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool Compiler::TargetPlatformNeedsReflection(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform::kIPhoneOS:
+    case TargetPlatform::kMacOS:
+      return true;
+    default:
+      return false;
+  }
 }
 
 std::string Compiler::GetSourcePrefix() const {
