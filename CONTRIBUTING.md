@@ -65,6 +65,25 @@ If you want to help us triage, you are very welcome to do so!
    page for details.
 
 
+Quality Assurance
+-----------------
+
+One of the most useful tasks, closely related to triage, is finding and filing bugs. Testing
+beta releases, looking for regressions, creating test cases, adding to our test suites, and
+other work along these lines can really drive the quality of the product up. Creating tests
+that increase our test coverage, writing tests for issues others have filed, all these tasks
+are really valuable contributions to open source projects.
+
+If this interests you, you can jump in and submit bugs without needing anyone's permission!
+The #hackers-tests channel on our [Discord server](https://github.com/flutter/flutter/wiki/Chat)
+is a good place to talk about what you're doing. If you want to contribute test cases, you
+can also submit PRs, see the next section for how to set up your development environment.
+
+> As a personal side note, this is exactly the kind of work that first got me into open
+> source. I was a Quality Assurance volunteer on the Mozilla project, writing test cases for
+> browsers, long before I wrote a line of code for any open source project. —Hixie
+
+
 Developing for Flutter
 ----------------------
 
