@@ -1441,12 +1441,12 @@ class EditableText extends StatefulWidget {
   ///     body: Column(
   ///       mainAxisAlignment: MainAxisAlignment.center,
   ///       children: <Widget>[
-  ///         const Text('Here's a text field that supports inserting gif content:'),
+  ///         Text('Here's a text field that supports inserting gif content:'),
   ///         TextField(
   ///           controller: _controller,
   ///           contentCommitMimeTypes: ['image/gif', 'image/png'],
   ///           onContentCommitted: (CommittedContent data) async {
-  ///             ...
+  ///             // Handle committed content here
   ///           },
   ///         ),
   ///       ],
