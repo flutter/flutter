@@ -1474,6 +1474,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       if (isRunningDebug) {
         commandHelp.g.print();
       }
+      commandHelp.j.print();
     }
   }
 
