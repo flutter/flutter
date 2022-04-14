@@ -4703,7 +4703,7 @@ class CommittedContent {
   ///
   /// Any parameters can be null.
   const CommittedContent({this.mimeType, this.uri, this.data});
-  
+
   /// Converts Map received from Flutter Engine into the Dart class
   CommittedContent.fromMap(Map<String, dynamic>? metadata):
     mimeType = metadata != null && metadata.isNotEmpty ? metadata['mimeType'] as String? : null,
