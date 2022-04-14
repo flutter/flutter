@@ -15,6 +15,7 @@ namespace compiler {
 static const std::map<std::string, Compiler::TargetPlatform> kKnownPlatforms = {
     {"macos", Compiler::TargetPlatform::kMacOS},
     {"ios", Compiler::TargetPlatform::kIPhoneOS},
+    {"flutter-spirv", Compiler::TargetPlatform::kFlutterSPIRV},
 };
 
 void Switches::PrintHelp(std::ostream& stream) {
@@ -112,7 +113,7 @@ bool Switches::AreValid(std::ostream& explain) const {
     valid = false;
   }
 
-  if (metal_file_name.empty()) {
+  if (metal_file_name.empty() && Compiler::TargetPlatformNeedsMSL(target_platform)) {
     explain << "Metal file name was empty." << std::endl;
     valid = false;
   }

@@ -23,14 +23,15 @@ class CompilerTest : public ::testing::Test {
 
   ~CompilerTest() = default;
 
-  bool CanCompileFixture(const char* fixture_name) const {
+  bool CanCompileFixture(const char* fixture_name,
+                         Compiler::TargetPlatform target_platform) const {
     auto fixture = flutter::testing::OpenFixtureAsMapping(fixture_name);
     if (!fixture->GetMapping()) {
       VALIDATION_LOG << "Could not find shader in fixtures: " << fixture_name;
       return false;
     }
     Compiler::SourceOptions compiler_options(fixture_name);
-    compiler_options.target_platform = Compiler::TargetPlatform::kMacOS;
+    compiler_options.target_platform = target_platform;
     compiler_options.working_directory = std::make_shared<fml::UniqueFD>(
         flutter::testing::OpenFixturesDirectory());
     Reflector::Options reflector_options;
@@ -60,7 +61,13 @@ TEST_F(CompilerTest, ShaderKindMatchingIsSuccessful) {
 }
 
 TEST_F(CompilerTest, CanCompileSample) {
-  ASSERT_TRUE(CanCompileFixture("sample.vert"));
+  ASSERT_TRUE(CanCompileFixture(
+      "sample.vert", Compiler::TargetPlatform::kMacOS));
+}
+
+TEST_F(CompilerTest, CanTargetFlutterSPIRV) {
+  ASSERT_TRUE(CanCompileFixture(
+    "test_texture.frag", Compiler::TargetPlatform::kFlutterSPIRV));
 }
 
 }  // namespace testing
