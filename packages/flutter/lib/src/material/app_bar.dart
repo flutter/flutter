@@ -435,10 +435,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [shape], which defines the shape of the app bar and its shadow.
   final Color? shadowColor;
 
+  /// {@template flutter.material.appbar.surfaceTintColor}
   /// The color of the surface tint overlay applied to the app bar's
   /// background color to indicate elevation.
   ///
   /// If null no overlay will be applied.
+  /// {@endtemplate}
   ///
   /// See also:
   ///   * [Material.surfaceTintColor], which described this feature in more detail.
@@ -872,7 +874,7 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.elevation
       ?? defaults.elevation!;
 
-    final double effectiveElevation = _scrolledUnder
+    final double effectiveElevation = states.contains(MaterialState.scrolledUnder)
       ? widget.scrolledUnderElevation
         ?? appBarTheme.scrolledUnderElevation
         ?? defaults.scrolledUnderElevation
@@ -1140,7 +1142,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.flexibleSpace,
     required this.bottom,
     required this.elevation,
+    required this.scrolledUnderElevation,
     required this.shadowColor,
+    required this.surfaceTintColor,
     required this.forceElevated,
     required this.backgroundColor,
     required this.foregroundColor,
@@ -1182,7 +1186,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget? flexibleSpace;
   final PreferredSizeWidget? bottom;
   final double? elevation;
+  final double? scrolledUnderElevation;
   final Color? shadowColor;
+  final Color? surfaceTintColor;
   final bool forceElevated;
   final Color? backgroundColor;
   final Color? foregroundColor;
@@ -1256,8 +1262,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
             )
           : flexibleSpace,
         bottom: bottom,
-        elevation: forceElevated || isScrolledUnder ? elevation : 0.0,
+        elevation: forceElevated ? elevation : 0,
+        scrolledUnderElevation: scrolledUnderElevation,
         shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
         brightness: brightness,
@@ -1424,7 +1432,9 @@ class SliverAppBar extends StatefulWidget {
     this.flexibleSpace,
     this.bottom,
     this.elevation,
+    this.scrolledUnderElevation,
     this.shadowColor,
+    this.surfaceTintColor,
     this.forceElevated = false,
     this.backgroundColor,
     this.foregroundColor,
@@ -1510,10 +1520,20 @@ class SliverAppBar extends StatefulWidget {
   /// This property is used to configure an [AppBar].
   final double? elevation;
 
+  /// {@macro flutter.material.appbar.scrolledUnderElevation}
+  ///
+  /// This property is used to configure an [AppBar].
+  final double? scrolledUnderElevation;
+
   /// {@macro flutter.material.appbar.shadowColor}
   ///
   /// This property is used to configure an [AppBar].
   final Color? shadowColor;
+
+  /// {@macro flutter.material.appbar.surfaceTintColor}
+  ///
+  /// This property is used to configure an [AppBar].
+  final Color? surfaceTintColor;
 
   /// Whether to show the shadow appropriate for the [elevation] even if the
   /// content is not scrolled under the [AppBar].
@@ -1816,7 +1836,9 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           flexibleSpace: widget.flexibleSpace,
           bottom: widget.bottom,
           elevation: widget.elevation,
+          scrolledUnderElevation: widget.scrolledUnderElevation,
           shadowColor: widget.shadowColor,
+          surfaceTintColor: widget.surfaceTintColor,
           forceElevated: widget.forceElevated,
           backgroundColor: widget.backgroundColor,
           foregroundColor: widget.foregroundColor,
