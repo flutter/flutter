@@ -32,6 +32,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.ibm.icu.lang.UCharacter;
 import com.ibm.icu.lang.UProperty;
@@ -51,7 +52,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -63,6 +63,7 @@ import org.robolectric.shadows.ShadowInputMethodManager;
     shadows = {InputConnectionAdaptorTest.TestImm.class})
 @RunWith(AndroidJUnit4.class)
 public class InputConnectionAdaptorTest {
+  private final Context ctx = ApplicationProvider.getApplicationContext();
   @Mock KeyboardManager mockKeyboardManager;
   // Verifies the method and arguments for a captured method call.
   private void verifyMethodCall(ByteBuffer buffer, String methodName, String[] expectedArgs)
@@ -86,7 +87,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void inputConnectionAdaptor_ReceivesEnter() throws NullPointerException {
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJni, mock(AssetManager.class)));
     int inputTargetId = 0;
@@ -122,8 +123,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformContextMenuAction_cut() {
-    ClipboardManager clipboardManager =
-        RuntimeEnvironment.application.getSystemService(ClipboardManager.class);
+    ClipboardManager clipboardManager = ctx.getSystemService(ClipboardManager.class);
     int selStart = 6;
     int selEnd = 11;
     ListenableEditingState editable = sampleEditable(selStart, selEnd);
@@ -140,8 +140,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformContextMenuAction_copy() {
-    ClipboardManager clipboardManager =
-        RuntimeEnvironment.application.getSystemService(ClipboardManager.class);
+    ClipboardManager clipboardManager = ctx.getSystemService(ClipboardManager.class);
     int selStart = 6;
     int selEnd = 11;
     ListenableEditingState editable = sampleEditable(selStart, selEnd);
@@ -160,8 +159,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformContextMenuAction_paste() {
-    ClipboardManager clipboardManager =
-        RuntimeEnvironment.application.getSystemService(ClipboardManager.class);
+    ClipboardManager clipboardManager = ctx.getSystemService(ClipboardManager.class);
     String textToBePasted = "deadbeef";
     clipboardManager.setText(textToBePasted);
     ListenableEditingState editable = sampleEditable(0, 0);
@@ -175,7 +173,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformPrivateCommand_dataIsNull() throws JSONException {
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     int client = 0;
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
@@ -204,7 +202,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformPrivateCommand_dataIsByteArray() throws JSONException {
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     int client = 0;
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
@@ -239,7 +237,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformPrivateCommand_dataIsByte() throws JSONException {
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     int client = 0;
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
@@ -272,7 +270,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformPrivateCommand_dataIsCharArray() throws JSONException {
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     int client = 0;
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
@@ -308,7 +306,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformPrivateCommand_dataIsChar() throws JSONException {
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     int client = 0;
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
@@ -341,7 +339,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformPrivateCommand_dataIsCharSequenceArray() throws JSONException {
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     int client = 0;
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
@@ -378,7 +376,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformPrivateCommand_dataIsCharSequence() throws JSONException {
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     int client = 0;
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
@@ -413,7 +411,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformPrivateCommand_dataIsFloat() throws JSONException {
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     int client = 0;
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
@@ -446,7 +444,7 @@ public class InputConnectionAdaptorTest {
 
   @Test
   public void testPerformPrivateCommand_dataIsFloatArray() throws JSONException {
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     int client = 0;
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJNI, mock(AssetManager.class)));
@@ -980,7 +978,7 @@ public class InputConnectionAdaptorTest {
       return;
     }
     ListenableEditingState editable = sampleEditable(5, 5);
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
             testView,
@@ -989,9 +987,7 @@ public class InputConnectionAdaptorTest {
             mockKeyboardManager,
             editable,
             new EditorInfo());
-    TestImm testImm =
-        Shadow.extract(
-            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
 
     testImm.resetStates();
 
@@ -1037,7 +1033,7 @@ public class InputConnectionAdaptorTest {
     }
 
     ListenableEditingState editable = sampleEditable(5, 5);
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ctx);
     InputConnectionAdaptor adaptor =
         new InputConnectionAdaptor(
             testView,
@@ -1046,9 +1042,7 @@ public class InputConnectionAdaptorTest {
             mockKeyboardManager,
             editable,
             new EditorInfo());
-    TestImm testImm =
-        Shadow.extract(
-            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
 
     testImm.resetStates();
 
@@ -1167,7 +1161,7 @@ public class InputConnectionAdaptorTest {
 
   private static ListenableEditingState sampleEditable(int selStart, int selEnd) {
     ListenableEditingState sample =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+        new ListenableEditingState(null, new View(ApplicationProvider.getApplicationContext()));
     sample.replace(0, 0, SAMPLE_TEXT);
     Selection.setSelection(sample, selStart, selEnd);
     return sample;
@@ -1175,7 +1169,7 @@ public class InputConnectionAdaptorTest {
 
   private static ListenableEditingState sampleEditable(int selStart, int selEnd, String text) {
     ListenableEditingState sample =
-        new ListenableEditingState(null, new View(RuntimeEnvironment.application));
+        new ListenableEditingState(null, new View(ApplicationProvider.getApplicationContext()));
     sample.replace(0, 0, text);
     Selection.setSelection(sample, selStart, selEnd);
     return sample;
@@ -1188,7 +1182,7 @@ public class InputConnectionAdaptorTest {
 
   private static InputConnectionAdaptor sampleInputConnectionAdaptor(
       ListenableEditingState editable, KeyboardManager mockKeyboardManager) {
-    View testView = new View(RuntimeEnvironment.application);
+    View testView = new View(ApplicationProvider.getApplicationContext());
     int client = 0;
     TextInputChannel textInputChannel = mock(TextInputChannel.class);
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);

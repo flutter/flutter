@@ -23,6 +23,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
 import java.util.Arrays;
@@ -32,12 +33,12 @@ import java.util.concurrent.ExecutorService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterLoaderTest {
+  private final Context ctx = ApplicationProvider.getApplicationContext();
 
   @Test
   public void itReportsUninitializedAfterCreating() {
@@ -51,8 +52,8 @@ public class FlutterLoaderTest {
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
 
     assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(RuntimeEnvironment.application);
-    flutterLoader.ensureInitializationComplete(RuntimeEnvironment.application, null);
+    flutterLoader.startInitialization(ctx);
+    flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
     assertTrue(flutterLoader.initialized());
     verify(mockFlutterJNI, times(1)).loadLibrary();
@@ -65,25 +66,19 @@ public class FlutterLoaderTest {
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
 
     assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(RuntimeEnvironment.application);
-    flutterLoader.ensureInitializationComplete(RuntimeEnvironment.application, null);
+    flutterLoader.startInitialization(ctx);
+    flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
     ActivityManager activityManager =
-        (ActivityManager) RuntimeEnvironment.application.getSystemService(Context.ACTIVITY_SERVICE);
+        (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
     ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
     activityManager.getMemoryInfo(memInfo);
     int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
     final String oldGenHeapArg = "--old-gen-heap-size=" + oldGenHeapSizeMegaBytes;
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(RuntimeEnvironment.application),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(oldGenHeapArg));
   }
@@ -94,12 +89,11 @@ public class FlutterLoaderTest {
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
 
     assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(RuntimeEnvironment.application);
-    flutterLoader.ensureInitializationComplete(RuntimeEnvironment.application, null);
+    flutterLoader.startInitialization(ctx);
+    flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
-    DisplayMetrics displayMetrics =
-        RuntimeEnvironment.application.getResources().getDisplayMetrics();
+    DisplayMetrics displayMetrics = ctx.getResources().getDisplayMetrics();
     int screenWidth = displayMetrics.widthPixels;
     int screenHeight = displayMetrics.heightPixels;
     int resourceCacheMaxBytesThreshold = screenWidth * screenHeight * 12 * 4;
@@ -107,13 +101,7 @@ public class FlutterLoaderTest {
         "--resource-cache-max-bytes-threshold=" + resourceCacheMaxBytesThreshold;
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(RuntimeEnvironment.application),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(resourceCacheMaxBytesThresholdArg));
   }
@@ -124,20 +112,14 @@ public class FlutterLoaderTest {
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
 
     assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(RuntimeEnvironment.application);
-    flutterLoader.ensureInitializationComplete(RuntimeEnvironment.application, null);
+    flutterLoader.startInitialization(ctx);
+    flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
     final String leakVMArg = "--leak-vm=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(RuntimeEnvironment.application),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(leakVMArg));
   }
@@ -148,24 +130,18 @@ public class FlutterLoaderTest {
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
     metaData.putBoolean("io.flutter.embedding.android.LeakVM", false);
-    RuntimeEnvironment.application.getApplicationInfo().metaData = metaData;
+    ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
     assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(RuntimeEnvironment.application, settings);
-    flutterLoader.ensureInitializationComplete(RuntimeEnvironment.application, null);
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
     final String leakVMArg = "--leak-vm=false";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(RuntimeEnvironment.application),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(leakVMArg));
   }
@@ -177,7 +153,7 @@ public class FlutterLoaderTest {
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI, mockExecutorService);
 
     assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(RuntimeEnvironment.application);
+    flutterLoader.startInitialization(ctx);
     verify(mockExecutorService, times(1)).submit(any(Callable.class));
   }
 
@@ -188,7 +164,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
 
-    Context appContextSpy = spy(RuntimeEnvironment.application);
+    Context appContextSpy = spy(ctx);
 
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(appContextSpy);

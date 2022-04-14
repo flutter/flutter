@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -33,13 +34,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterEngineTest {
+  private final Context ctx = ApplicationProvider.getApplicationContext();
   @Mock FlutterJNI flutterJNI;
   boolean jniAttached;
 
@@ -74,8 +75,7 @@ public class FlutterEngineTest {
     assertTrue(GeneratedPluginRegistrant.getRegisteredEngines().isEmpty());
     FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
     when(mockFlutterLoader.automaticallyRegisterPlugins()).thenReturn(true);
-    FlutterEngine flutterEngine =
-        new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, flutterJNI);
+    FlutterEngine flutterEngine = new FlutterEngine(ctx, mockFlutterLoader, flutterJNI);
 
     List<FlutterEngine> registeredEngines = GeneratedPluginRegistrant.getRegisteredEngines();
     assertEquals(1, registeredEngines.size());
@@ -91,8 +91,7 @@ public class FlutterEngineTest {
         new RuntimeException("I'm a bug in the plugin");
     FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
     when(mockFlutterLoader.automaticallyRegisterPlugins()).thenReturn(true);
-    FlutterEngine flutterEngine =
-        new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, flutterJNI);
+    FlutterEngine flutterEngine = new FlutterEngine(ctx, mockFlutterLoader, flutterJNI);
 
     List<FlutterEngine> registeredEngines = GeneratedPluginRegistrant.getRegisteredEngines();
     // When it crashes, it doesn't end up registering anything.
@@ -117,7 +116,7 @@ public class FlutterEngineTest {
     assertTrue(GeneratedPluginRegistrant.getRegisteredEngines().isEmpty());
     FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
     when(mockFlutterLoader.automaticallyRegisterPlugins()).thenReturn(false);
-    new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, flutterJNI);
+    new FlutterEngine(ctx, mockFlutterLoader, flutterJNI);
 
     List<FlutterEngine> registeredEngines = GeneratedPluginRegistrant.getRegisteredEngines();
     assertTrue(registeredEngines.isEmpty());
@@ -129,7 +128,7 @@ public class FlutterEngineTest {
     FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
     when(mockFlutterLoader.automaticallyRegisterPlugins()).thenReturn(true);
     new FlutterEngine(
-        RuntimeEnvironment.application,
+        ctx,
         mockFlutterLoader,
         flutterJNI,
         /*dartVmArgs=*/ new String[] {},
@@ -152,7 +151,7 @@ public class FlutterEngineTest {
 
     // Execute behavior under test.
     new FlutterEngine(
-        RuntimeEnvironment.application,
+        ctx,
         mock(FlutterLoader.class),
         mockFlutterJNI,
         platformViewsController,
@@ -181,7 +180,7 @@ public class FlutterEngineTest {
     // Execute behavior under test.
     FlutterEngine engine =
         new FlutterEngine(
-            RuntimeEnvironment.application,
+            ctx,
             mock(FlutterLoader.class),
             flutterJNI,
             platformViewsController,

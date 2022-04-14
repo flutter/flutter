@@ -13,8 +13,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.FragmentActivity;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
@@ -26,12 +28,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterFragmentTest {
+  private final Context ctx = ApplicationProvider.getApplicationContext();
   boolean isDelegateAttached;
 
   @Test
@@ -234,8 +236,7 @@ public class FlutterFragmentTest {
     when(flutterJNI.isAttached()).thenReturn(true);
 
     FlutterEngine flutterEngine =
-        new FlutterEngine(
-            RuntimeEnvironment.application, new FlutterLoader(), flutterJNI, null, false);
+        new FlutterEngine(ctx, new FlutterLoader(), flutterJNI, null, false);
     FlutterEngineCache.getInstance().put("my_cached_engine", flutterEngine);
 
     FlutterFragment fragment =
@@ -268,8 +269,7 @@ public class FlutterFragmentTest {
     when(flutterJNI.isAttached()).thenReturn(true);
 
     FlutterEngine flutterEngine =
-        new FlutterEngine(
-            RuntimeEnvironment.application, new FlutterLoader(), flutterJNI, null, false);
+        new FlutterEngine(ctx, new FlutterLoader(), flutterJNI, null, false);
     FlutterEngineCache.getInstance().put("my_cached_engine", flutterEngine);
 
     FlutterFragment fragment =
