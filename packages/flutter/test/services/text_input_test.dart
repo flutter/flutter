@@ -364,7 +364,7 @@ void main() {
         ],
         'method': 'TextInputClient.performAction',
       });
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
             (ByteData? _) {},
