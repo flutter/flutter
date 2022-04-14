@@ -188,8 +188,12 @@ Future<MigrateResult?> computeMigration({
 
   final Set<String?> blacklistPrefixes = <String?>{};
   platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
-  SupportedPlatform.values.forEach((v) => blacklistPrefixes.add(platformToSubdirectoryPrefix(v)));
-  platforms.forEach((v) => blacklistPrefixes.remove(platformToSubdirectoryPrefix(v)));
+  for (final SupportedPlatform platform in SupportedPlatform.values) {
+    blacklistPrefixes.add(platformToSubdirectoryPrefix(platform));
+  }
+  for (final SupportedPlatform platform in platforms) {
+    blacklistPrefixes.remove(platformToSubdirectoryPrefix(platform));
+  }
   blacklistPrefixes.remove('root');
   blacklistPrefixes.remove(null);
 
@@ -268,8 +272,8 @@ Future<MigrateResult?> computeMigration({
     }
   }
 
-  await MigrateUtils.gitInit(migrateResult.generatedBaseTemplateDirectory!.absolute.path);
-  await MigrateUtils.gitInit(migrateResult.generatedTargetTemplateDirectory!.absolute.path);
+  await MigrateUtils.gitInit(migrateResult.generatedBaseTemplateDirectory!.absolute.path, logger);
+  await MigrateUtils.gitInit(migrateResult.generatedTargetTemplateDirectory!.absolute.path, logger);
 
   final String name = flutterProject.manifest.appName;
   final String androidLanguage = flutterProject.android.isKotlin ? 'kotlin' : 'java';
@@ -317,11 +321,13 @@ Future<MigrateResult?> computeMigration({
       name: name,
       androidLanguage: androidLanguage,
       iosLanguage: iosLanguage,
-      outputDirectory: migrateResult.generatedTargetTemplateDirectory!.absolute.path
+      outputDirectory: migrateResult.generatedTargetTemplateDirectory!.absolute.path,
+      logger: logger,
+      fileSystem: fileSystem,
     );
   }
 
-  await MigrateUtils.gitInit(flutterProject.directory.absolute.path);
+  await MigrateUtils.gitInit(flutterProject.directory.absolute.path, logger);
 
   // Generate diffs. These diffs are used to determine if a file is newly added, needs merging,
   // or deleted (rare). Only files with diffs between the base and target revisions need to be
@@ -469,7 +475,7 @@ Future<void> createBase(
             status.pause();
             logger.printStatus('Cloning SDK $activeRevision', indent: 2, color: TerminalColor.grey);
             status.resume();
-            sdkAvailable = await MigrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path, Cache.flutterRoot!);
+            sdkAvailable = await MigrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path, Cache.flutterRoot!, logger);
             revisionToFlutterSdkDir[revision] = sdkDir;
           }
         } else {
@@ -482,15 +488,17 @@ Future<void> createBase(
       status.pause();
       logger.printStatus('Creating base app for $platforms with revision $revision.', indent: 2, color: TerminalColor.grey);
       status.resume();
-      String newDirectoryPath = await MigrateUtils.createFromTemplates(
+      final String newDirectoryPath = await MigrateUtils.createFromTemplates(
         sdkDir.childDirectory('bin').absolute.path,
         name: name,
         androidLanguage: androidLanguage,
         iosLanguage: iosLanguage,
         outputDirectory: migrateResult.generatedBaseTemplateDirectory!.absolute.path,
         platforms: platforms,
+        logger: logger,
+        fileSystem: fileSystem,
       );
-      if (newDirectoryPath != migrateResult.generatedBaseTemplateDirectory) {
+      if (newDirectoryPath != migrateResult.generatedBaseTemplateDirectory?.path) {
         migrateResult.generatedBaseTemplateDirectory = fileSystem.directory(newDirectoryPath);
       }
       // Determine merge type for each newly generated file.
@@ -506,7 +514,7 @@ Future<void> createBase(
           migrateResult.mergeTypeMap[localPath] = revision == targetRevision ? MergeType.twoWay : MergeType.threeWay;
         }
       }
-      if (newDirectoryPath != migrateResult.generatedBaseTemplateDirectory) {
+      if (newDirectoryPath != migrateResult.generatedBaseTemplateDirectory?.path) {
         migrateResult.generatedBaseTemplateDirectory = fileSystem.directory(newDirectoryPath);
         break; // The create command is old and does not distinguish between platforms so it only needs to be called once.
       }
@@ -535,12 +543,12 @@ Future<void> diffBaseAndTarget(
     if (_skipped(localPath, blacklistPrefixes: blacklistPrefixes)) {
       continue;
     }
-    if (await MigrateUtils.isGitIgnored(baseTemplateFile.absolute.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path)) {
+    if (await MigrateUtils.isGitIgnored(baseTemplateFile.absolute.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path, logger)) {
       migrateResult.diffMap[localPath] = DiffResult.ignored();
     }
     final File targetTemplateFile = migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
     if (targetTemplateFile.existsSync()) {
-      final DiffResult diff = await MigrateUtils.diffFiles(baseTemplateFile, targetTemplateFile);
+      final DiffResult diff = await MigrateUtils.diffFiles(baseTemplateFile, targetTemplateFile, logger);
       migrateResult.diffMap[localPath] = diff;
       if (verbose && diff.diff != '') {
         status.pause();
@@ -581,7 +589,7 @@ Future<void> computeNewlyAddedFiles(
     if (migrateResult.diffMap.containsKey(localPath) || _skipped(localPath, blacklistPrefixes: blacklistPrefixes)) {
       continue;
     }
-    if (await MigrateUtils.isGitIgnored(targetTemplateFile.absolute.path, migrateResult.generatedTargetTemplateDirectory!.absolute.path)) {
+    if (await MigrateUtils.isGitIgnored(targetTemplateFile.absolute.path, migrateResult.generatedTargetTemplateDirectory!.absolute.path, logger)) {
       migrateResult.diffMap[localPath] = DiffResult.ignored();
     }
     migrateResult.diffMap[localPath] = DiffResult.addition();
@@ -640,15 +648,15 @@ Future<void> computeMerge(
     final String localPath = getLocalPath(currentFile.path, projectRootPath, fileSystem);
     missingAlwaysMigrateFiles.remove(localPath);
     if (migrateResult.diffMap.containsKey(localPath) && migrateResult.diffMap[localPath]!.isIgnored ||
-        await MigrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path) ||
+        await MigrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path, logger) ||
         _skipped(localPath, blacklistPrefixes: blacklistPrefixes) ||
         _skippedMerge(localPath)) {
       continue;
     }
     final File baseTemplateFile = migrateResult.generatedBaseTemplateDirectory!.childFile(localPath);
     final File targetTemplateFile = migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
-    final DiffResult userDiff = await MigrateUtils.diffFiles(currentFile, baseTemplateFile);
-    final DiffResult targetDiff = await MigrateUtils.diffFiles(currentFile, targetTemplateFile);
+    final DiffResult userDiff = await MigrateUtils.diffFiles(currentFile, baseTemplateFile, logger);
+    final DiffResult targetDiff = await MigrateUtils.diffFiles(currentFile, targetTemplateFile, logger);
     if (targetDiff.exitCode == 0) {
       // current file is already the same as the target file.
       continue;
@@ -735,6 +743,7 @@ Future<void> computeMerge(
             current: currentPath,
             target: targetPath,
             localPath: localPath,
+            logger: logger,
           );
         }
       }

@@ -5,7 +5,6 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../cache.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
 import '../project.dart';
@@ -73,7 +72,7 @@ class MigrateStatusCommand extends FlutterCommand {
     }
     if (!workingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Start a new migration with:');
-      MigrateUtils.printCommandText('flutter migrate start', logger);
+      printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -96,7 +95,7 @@ class MigrateStatusCommand extends FlutterCommand {
       files.addAll(manifest.resolvedConflictFiles(workingDirectory));
       files.addAll(manifest.remainingConflictFiles(workingDirectory));
       for (final String localPath in files) {
-        final DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
+        final DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath), logger);
         if (result.diff != '') {
           // Print with different colors for better visibility.
           int lineNumber = -1;
@@ -128,12 +127,12 @@ class MigrateStatusCommand extends FlutterCommand {
 
     if (!readyToApply) {
       logger.printStatus('Guided conflict resolution wizard:');
-      MigrateUtils.printCommandText('flutter migrate resolve-conflicts', logger);
+      printCommandText('flutter migrate resolve-conflicts', logger);
       logger.printStatus('Resolve conflicts and accept changes with:');
     } else {
       logger.printStatus('All conflicts resolved. Review changes above and apply the migration with:', color: TerminalColor.green);
     }
-    MigrateUtils.printCommandText('flutter migrate apply', logger);
+    printCommandText('flutter migrate apply', logger);
 
     return const FlutterCommandResult(ExitStatus.success);
   }

@@ -5,9 +5,7 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../cache.dart';
 import '../migrate/migrate_manifest.dart';
-import '../migrate/migrate_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'migrate.dart';
@@ -35,7 +33,6 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     argParser.addFlag(
       'confirm-commit',
       defaultsTo: true,
-      negatable: true,
       help: 'Indicates if proposed changes require user verification before writing to disk.',
     );
   }
@@ -77,7 +74,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     }
     if (!workingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Start a new migration with:');
-      MigrateUtils.printCommandText('flutter migrate start', logger);
+      printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -93,7 +90,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     terminal.usesTerminalUi = true;
 
     for (int i = 0; i < conflictFiles.length; i++) {
-      final localPath = conflictFiles[i];
+      final String localPath = conflictFiles[i];
       final File file = workingDirectory.childFile(localPath);
       final List<String> lines = file.readAsStringSync().split('\n');
       // We write a newline in the output, this counteracts it.
@@ -184,7 +181,6 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
       int lastPrintedLine = 0;
       String result = '';
       bool hasChanges = false;
-      print(lines);
       for (final Conflict conflict in conflicts) {
         if (conflict.keepOriginal != null) {
           hasChanges = true; // don't unecessarily write file if no changes were made.

@@ -9,43 +9,39 @@ import 'dart:typed_data';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/terminal.dart';
 import '../commands/migrate.dart';
-import '../globals.dart' as globals;
-
-// TODO(garyq): support windows.
 
 /// Utility class that contains static methods that wrap git and other shell commands.
 class MigrateUtils {
   MigrateUtils();
 
   /// Calls `git diff` on two files and returns the diff as a DiffResult.
-  static Future<DiffResult> diffFiles(File one, File two) async {
+  static Future<DiffResult> diffFiles(File one, File two, Logger logger) async {
     if (one.existsSync() && !two.existsSync()) {
       return DiffResult.deletion();
     }
     if (!one.existsSync() && two.existsSync()) {
       return DiffResult.addition();
     }
-    final List<String> cmdArgs = <String>['diff', '--no-index', '${one.absolute.path}', '${two.absolute.path}'];
+    final List<String> cmdArgs = <String>['diff', '--no-index', one.absolute.path, two.absolute.path];
     final ProcessResult result = await Process.run('git', cmdArgs);
 
     // diff exits with 1 if diffs are found.
-    checkForErrors(result, allowedExitCodes: <int>[1], commandDescription: 'git ${cmdArgs.join(' ')}');
+    checkForErrors(result, logger, allowedExitCodes: <int>[1], commandDescription: 'git ${cmdArgs.join(' ')}');
     return DiffResult(result);
   }
 
   // Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
-  static Future<bool> cloneFlutter(String revision, String destination, String flutterDirectory) async {
+  static Future<bool> cloneFlutter(String revision, String destination, String flutterDirectory, Logger logger) async {
     // Use https url instead of ssh to avoid need to setup ssh on git.
     List<String> cmdArgs = <String>['clone', '--single-branch', '--filter=blob:none', '--shallow-exclude=v1.0.0', 'https://github.com/flutter/flutter.git', destination];
     ProcessResult result = await Process.run('git', cmdArgs);
-    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
+    checkForErrors(result, logger, commandDescription: 'git ${cmdArgs.join(' ')}');
 
     cmdArgs.clear();
     cmdArgs = <String>['reset', '--hard', revision];
     result = await Process.run('git', cmdArgs, workingDirectory: destination);
-    if (!checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}', exit: false)) {
+    if (!checkForErrors(result, logger, commandDescription: 'git ${cmdArgs.join(' ')}', exit: false)) {
       return false;
     }
     return true;
@@ -60,6 +56,8 @@ class MigrateUtils {
     required String outputDirectory,
     String? createVersion,
     List<String> platforms = const <String>[],
+    required Logger logger,
+    required FileSystem fileSystem,
   }) async {
     final List<String> cmdArgs = <String>['create'];
     if (!legacyNameParameter) {
@@ -83,9 +81,8 @@ class MigrateUtils {
     } else {
       cmdArgs.add(outputDirectory);
     }
-    ProcessResult result = await Process.run('$flutterBinPath/flutter', ['create', '-h'], workingDirectory: outputDirectory);
-    result = await Process.run('$flutterBinPath/flutter', cmdArgs, workingDirectory: outputDirectory);
-    final String error = result.stderr;
+    final ProcessResult result = await Process.run('$flutterBinPath/flutter', cmdArgs, workingDirectory: outputDirectory);
+    final String error = result.stderr as String;
 
     // Catch errors due to parameters not existing.
 
@@ -98,6 +95,8 @@ class MigrateUtils {
         androidLanguage: androidLanguage,
         iosLanguage: iosLanguage,
         outputDirectory: outputDirectory,
+        logger: logger,
+        fileSystem: fileSystem,
       );
     }
     // Old versions of the tool does not include the project-name option.
@@ -110,6 +109,8 @@ class MigrateUtils {
         iosLanguage: iosLanguage,
         outputDirectory: outputDirectory,
         platforms: platforms,
+        logger: logger,
+        fileSystem: fileSystem,
       );
     }
     if (error.contains('Multiple output directories specified.')) {
@@ -121,13 +122,15 @@ class MigrateUtils {
           androidLanguage: androidLanguage,
           iosLanguage: iosLanguage,
           outputDirectory: outputDirectory,
+          logger: logger,
+          fileSystem: fileSystem,
         );
       }
     }
-    checkForErrors(result, commandDescription: '${flutterBinPath}flutter ${cmdArgs.join(' ')}', silent: true);
+    checkForErrors(result, logger, commandDescription: '${flutterBinPath}flutter ${cmdArgs.join(' ')}', silent: true);
 
     if (legacyNameParameter) {
-      return globals.fs.path.join(outputDirectory, name);
+      return fileSystem.path.join(outputDirectory, name);
     }
     return outputDirectory;
   }
@@ -139,26 +142,27 @@ class MigrateUtils {
     required String base,
     required String current,
     required String target,
-    required String localPath
+    required String localPath,
+    required Logger logger
   }) async {
     final List<String> cmdArgs = <String>['merge-file', '-p', current, base, target];
     final ProcessResult result = await Process.run('git', cmdArgs);
-    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
+    checkForErrors(result, logger, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
     return MergeResult(result, localPath);
   }
 
   /// Calls `git init` on the workingDirectory.
-  static Future<void> gitInit(String workingDirectory) async {
+  static Future<void> gitInit(String workingDirectory, Logger logger) async {
     final List<String> cmdArgs = <String>['init'];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: 'git ${cmdArgs.join(' ')}');
+    checkForErrors(result, logger, allowedExitCodes: <int>[0], commandDescription: 'git ${cmdArgs.join(' ')}');
   }
 
   /// Returns true if the workingDirectory git repo has any uncommited changes.
-  static Future<bool> hasUncommitedChanges(String workingDirectory) async {
+  static Future<bool> hasUncommitedChanges(String workingDirectory, Logger logger) async {
     final List<String> cmdArgs = <String>['diff', '--quiet', 'HEAD', '--', '.', "':(exclude)$kDefaultMigrateWorkingDirectoryName'"];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
+    checkForErrors(result, logger, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
     if (result.exitCode == 0) {
       return false;
     }
@@ -166,10 +170,10 @@ class MigrateUtils {
   }
 
   /// Returns true if the workingDirectory is a git repo.
-  static Future<bool> isGitRepo(String workingDirectory) async {
+  static Future<bool> isGitRepo(String workingDirectory, Logger logger) async {
     final List<String> cmdArgs = <String>['rev-parse', '--is-inside-work-tree'];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
+    checkForErrors(result, logger, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
     if (result.exitCode == 0) {
       return true;
     }
@@ -177,49 +181,39 @@ class MigrateUtils {
   }
 
   /// Returns true if the file at `filePath` is covered by the `.gitignore`
-  static Future<bool> isGitIgnored(String filePath, String workingDirectory) async {
+  static Future<bool> isGitIgnored(String filePath, String workingDirectory, Logger logger) async {
     final List<String> cmdArgs = <String>['check-ignore', filePath];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[0, 1, 128], commandDescription: 'git ${cmdArgs.join(' ')}');
+    checkForErrors(result, logger, allowedExitCodes: <int>[0, 1, 128], commandDescription: 'git ${cmdArgs.join(' ')}');
     return result.exitCode == 0;
   }
 
-  /// Deletes the files or directories at the provided paths.
-  static void deleteTempDirectories({List<String> paths = const <String>[], List<Directory> directories = const <Directory>[]}) {
-    for (final Directory d in directories) {
-      d.deleteSync(recursive: true);
-    }
-    for (final String p in paths) {
-      globals.fs.directory(p).deleteSync(recursive: true);
-    }
-  }
-
-  static Future<void> flutterPubUpgrade(String workingDirectory) async {
+  static Future<void> flutterPubUpgrade(String workingDirectory, Logger logger) async {
     final List<String> cmdArgs = <String>['pub', 'upgrade', '--major-versions'];
     final ProcessResult result = await Process.run('flutter', cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: 'flutter ${cmdArgs.join(' ')}');
+    checkForErrors(result, logger, allowedExitCodes: <int>[0], commandDescription: 'flutter ${cmdArgs.join(' ')}');
   }
 
-  static Future<void> gradlewTasks(String workingDirectory) async {
-    final baseCommand = Platform.isWindows ? 'gradlew.bat' : './gradlew';
+  static Future<void> gradlewTasks(String workingDirectory, Logger logger) async {
+    final String baseCommand = Platform.isWindows ? 'gradlew.bat' : './gradlew';
     final List<String> cmdArgs = <String>['tasks'];
     final ProcessResult result = await Process.run(baseCommand, cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: '$baseCommand ${cmdArgs.join(' ')}');
+    checkForErrors(result, logger, allowedExitCodes: <int>[0], commandDescription: '$baseCommand ${cmdArgs.join(' ')}');
   }
 
-  static bool checkForErrors(ProcessResult result, {List<int> allowedExitCodes = const <int>[], String? commandDescription, bool exit = true, bool silent = false}) {
+  static bool checkForErrors(ProcessResult result, Logger logger, {List<int> allowedExitCodes = const <int>[], String? commandDescription, bool exit = true, bool silent = false}) {
     // -1 in allowed exit codes means all exit codes are valid.
     if ((result.exitCode != 0 && !allowedExitCodes.contains(result.exitCode)) && !allowedExitCodes.contains(-1)) {
       if (!silent) {
-        globals.printError('Command encountered an error with exit code ${result.exitCode}.');
+        logger.printError('Command encountered an error with exit code ${result.exitCode}.');
         if (commandDescription != null) {
-          globals.printError('Command:');
-          globals.printError(commandDescription, indent: 2);
+          logger.printError('Command:');
+          logger.printError(commandDescription, indent: 2);
         }
-        globals.printError('Stdout:');
-        globals.printStatus(result.stdout as String, indent: 2);
-        globals.printError('Stderr:');
-        globals.printError(result.stderr as String, indent: 2);
+        logger.printError('Stdout:');
+        logger.printStatus(result.stdout as String, indent: 2);
+        logger.printError('Stderr:');
+        logger.printError(result.stderr as String, indent: 2);
       }
       if (exit) {
         throwToolExit('Command failed with exit code ${result.exitCode}', exitCode: result.exitCode);
@@ -235,16 +229,6 @@ class MigrateUtils {
       return false;
     }
     return true;
-  }
-
-  /// Prints a command to logger with appropriate formatting.
-  static void printCommandText(String command, Logger logger) {
-    logger.printStatus(
-      '\n\$ $command\n',
-      color: TerminalColor.grey,
-      indent: 4,
-      newline: false,
-    );
   }
 }
 

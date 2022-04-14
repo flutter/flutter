@@ -5,8 +5,6 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../cache.dart';
-import '../migrate/migrate_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'migrate.dart';
@@ -14,11 +12,10 @@ import 'migrate.dart';
 /// Abandons the existing migration by deleting the migrate working directory.
 class MigrateAbandonCommand extends FlutterCommand {
   MigrateAbandonCommand({
-    bool verbose = false,
     required this.logger,
     required this.fileSystem,
     required this.terminal,
-  }) : _verbose = verbose {
+  }) {
     requiresPubspecYaml();
     argParser.addOption(
       'working-directory',
@@ -27,8 +24,6 @@ class MigrateAbandonCommand extends FlutterCommand {
       valueHelp: 'path',
     );
   }
-
-  final bool _verbose;
 
   final Logger logger;
 
@@ -67,7 +62,7 @@ class MigrateAbandonCommand extends FlutterCommand {
     }
     if (!workingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Start a new migration with:');
-      MigrateUtils.printCommandText('flutter migrate start', logger);
+      printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -94,7 +89,7 @@ class MigrateAbandonCommand extends FlutterCommand {
     workingDirectory.deleteSync(recursive: true);
     
     logger.printStatus('\nAbandon complete. Start a new migration with:');
-    MigrateUtils.printCommandText('flutter migrate start', logger);
+    printCommandText('flutter migrate start', logger);
     return const FlutterCommandResult(ExitStatus.success);
   }
 }
