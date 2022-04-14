@@ -13,8 +13,6 @@ import 'migrate_resolve_conflicts.dart';
 import 'migrate_start.dart';
 import 'migrate_status.dart';
 
-const String kDefaultMigrateWorkingDirectoryName = 'migrate_working_dir';
-
 /// Base command for the migration tool.
 class MigrateCommand extends FlutterCommand {
   MigrateCommand({
