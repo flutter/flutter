@@ -566,7 +566,7 @@ import 'package:{{name}}/{{file}}';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 // ignore: public_member_api_docs
-void registerPlugins(Registrar registrar) {
+void registerPlugins(final Registrar registrar) {
 {{#methodChannelPlugins}}
   {{class}}.registerWith(registrar);
 {{/methodChannelPlugins}}
