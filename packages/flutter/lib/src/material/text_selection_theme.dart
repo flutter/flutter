@@ -137,9 +137,8 @@ class TextSelectionTheme extends InheritedTheme {
   const TextSelectionTheme({
     super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null),
-       super(child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties for descendant [TextField] and [SelectableText] widgets.
   final TextSelectionThemeData data;
