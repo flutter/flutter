@@ -128,6 +128,7 @@ class IOSDeploy {
     required List<String> launchArguments,
     required IOSDeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
+    int printBacktraceTimeoutSeconds = 10,
   }) {
     appDeltaDirectory?.createSync(recursive: true);
     // Interactive debug session to support sending the lldb detach command.
@@ -146,6 +147,9 @@ class IOSDeploy {
         appDeltaDirectory.path,
       ],
       '--debug',
+      // start printing backtraces for all threads periodically
+      '--detect_deadlocks',
+      printBacktraceTimeoutSeconds.toString(),
       if (interfaceType != IOSDeviceConnectionInterface.network)
         '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
@@ -185,9 +189,6 @@ class IOSDeploy {
       if (interfaceType != IOSDeviceConnectionInterface.network)
         '--no-wifi',
       '--justlaunch',
-      // start printing backtraces for all threads periodically after 10 seconds
-      '--detect_deadlocks',
-      '10',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
         launchArguments.join(' '),
