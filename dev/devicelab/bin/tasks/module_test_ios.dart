@@ -294,7 +294,6 @@ post_install do |installer|
 end
           ''';
         await podfile.writeAsString(podfileContent, flush: true);
-        print(podfileContent);
 
         await exec(
           'pod',
