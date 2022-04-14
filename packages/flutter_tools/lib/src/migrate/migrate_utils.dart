@@ -9,7 +9,6 @@ import 'dart:typed_data';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../commands/migrate.dart';
 
 /// The default name of the migrate working directory used to stage proposed changes.
 const String kDefaultMigrateWorkingDirectoryName = 'migrate_working_dir';
