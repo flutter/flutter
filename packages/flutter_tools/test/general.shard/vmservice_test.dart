@@ -514,6 +514,35 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
+  testWithoutContext('renderWithStats forwards stats correctly', () async {
+    // ignore: always_specify_types
+    const Map<String, dynamic> response = {
+      'type': 'RenderFrameWithRasterStats',
+      'snapshots':<dynamic>[
+        // ignore: always_specify_types
+        {
+          'layer_unique_id':1512,
+          'duration_micros':477,
+          'snapshot':''
+        },
+      ],
+    };
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: kRenderFrameWithRasterStatsMethod, args: <String, Object>{
+          'isolateId': 'isolate/123',
+          'viewId': 'view/1',
+        }, jsonResponse: response),
+      ]
+    );
+
+    final Map<String, Object> rasterStats =
+      await fakeVmServiceHost.vmService.renderFrameWithRasterStats(viewId: 'view/1', uiIsolateId: 'isolate/123');
+    expect(rasterStats, equals(response));
+
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
   testWithoutContext('getFlutterViews polls until a view is returned', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
