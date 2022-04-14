@@ -71,6 +71,14 @@ class DraggableScrollableController extends ChangeNotifier {
     return _attachedController!.extent.sizeToPixels(size);
   }
 
+  /// Returns Whether any [DraggableScrollableController] objects have attached themselves to the
+  /// [DraggableScrollableSheet].
+  ///
+  /// If this is false, then members that interact with the [ScrollPosition],
+  /// such as [sizeToPixels], [size], [animateTo], and [jumpTo], must not be
+  /// called.
+  bool get isAttached => _attachedController != null && _attachedController!.hasClients;
+
   /// Convert a sheet's pixel height to size (fractional value of parent container height).
   double pixelsToSize(double pixels) {
     _assertAttached();
@@ -157,7 +165,7 @@ class DraggableScrollableController extends ChangeNotifier {
 
   void _assertAttached() {
     assert(
-      _attachedController != null,
+      isAttached,
       'DraggableScrollableController is not attached to a sheet. A DraggableScrollableController '
         'must be used in a DraggableScrollableSheet before any of its methods are called.',
     );
