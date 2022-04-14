@@ -823,9 +823,9 @@ class _AppBarState extends State<AppBar> {
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
-    final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
-
+    final bool requiresAppBarDismiss = scaffold?.requiresAppBarDismiss ?? false;
+    final bool hasActiveRouteBelow = parentRoute?.hasActiveRouteBelow ?? false;
     final double toolbarHeight = widget.toolbarHeight ?? appBarTheme.toolbarHeight ?? kToolbarHeight;
     final bool backwardsCompatibility = widget.backwardsCompatibility ?? appBarTheme.backwardsCompatibility ?? false;
 
@@ -896,7 +896,7 @@ class _AppBarState extends State<AppBar> {
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
       } else {
-        if (!hasEndDrawer && canPop)
+        if (hasActiveRouteBelow || requiresAppBarDismiss)
           leading = useCloseButton ? const CloseButton() : const BackButton();
       }
     }
