@@ -4703,6 +4703,13 @@ class CommittedContent {
   ///
   /// Any parameters can be null.
   const CommittedContent({this.mimeType, this.uri, this.data});
+  
+  /// Converts Map received from Flutter Engine into the Dart class
+  CommittedContent.fromMap(Map<String, dynamic>? metadata):
+    mimeType = metadata != null && metadata.isNotEmpty ? metadata['mimeType'] as String? : null,
+    uri = metadata != null && metadata.isNotEmpty ? metadata['uri'] as String? : null,
+    data = metadata != null && metadata.isNotEmpty ? Uint8List.fromList(
+      List<int>.from(metadata['data'] as Iterable<dynamic>)) : null;
 
   /// Mime type of inserted content
   final String? mimeType;
@@ -4715,13 +4722,6 @@ class CommittedContent {
 
   /// Convenience getter to check if bytedata is available for the inserted content
   bool get hasData => data != null && data!.isNotEmpty;
-
-  /// Converts Map received from Flutter Engine into the Dart class
-  CommittedContent.fromMap(Map<String, dynamic>? metadata):
-    mimeType = metadata != null && metadata.isNotEmpty ? metadata['mimeType'] as String? : null,
-    uri = metadata != null && metadata.isNotEmpty ? metadata['uri'] as String? : null,
-    data = metadata != null && metadata.isNotEmpty ? Uint8List.fromList(
-      List<int>.from(metadata['data'] as Iterable<dynamic>)) : null;
 
   @override
   String toString() => '${objectRuntimeType(this, 'CommittedContent')}($mimeType, $uri, $data)';
