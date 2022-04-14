@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
 import 'text_selection.dart';
+import 'text_selection_theme.dart';
 import 'theme.dart';
 
 /// An eyeballed value that moves the cursor slightly left of where it is
@@ -356,14 +357,9 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius? cursorRadius;
 
-  /// The color of the cursor.
+  /// The color to use when painting the cursor.
   ///
-  /// The cursor indicates the current text insertion point.
-  ///
-  /// If null then [DefaultSelectionStyle.cursorColor] is used. If that is also
-  /// null and [ThemeData.platform] is [TargetPlatform.iOS] or
-  /// [TargetPlatform.macOS], then [CupertinoThemeData.primaryColor] is used.
-  /// Otherwise [ColorScheme.primary] of [ThemeData.colorScheme] is used.
+  /// Defaults to the theme's `cursorColor` when null.
   final Color? cursorColor;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -599,14 +595,14 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     );
 
     final ThemeData theme = Theme.of(context);
-    final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
+    final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
     final FocusNode focusNode = _effectiveFocusNode;
 
     TextSelectionControls? textSelectionControls =  widget.selectionControls;
     final bool paintCursorAboveText;
     final bool cursorOpacityAnimates;
     Offset? cursorOffset;
-    final Color cursorColor;
+    Color? cursorColor = widget.cursorColor;
     final Color selectionColor;
     Radius? cursorRadius = widget.cursorRadius;
 
@@ -617,8 +613,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
-        selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
@@ -629,8 +625,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
-        selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
@@ -641,8 +637,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
-        selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
 
       case TargetPlatform.linux:
@@ -651,8 +647,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSelectionControls ??= desktopTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
-        cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
-        selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
     }
 

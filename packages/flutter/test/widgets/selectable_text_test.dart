@@ -297,27 +297,6 @@ void main() {
     expect(tester.testTextInput.hasAnyClients, false);
   });
 
-  testWidgets('uses DefaultSelectionStyle for selection and cursor colors if provided', (WidgetTester tester) async {
-    const Color selectionColor = Colors.orange;
-    const Color cursorColor = Colors.red;
-
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: DefaultSelectionStyle(
-            selectionColor: selectionColor,
-            cursorColor: cursorColor,
-            child: SelectableText('text'),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    expect(state.widget.selectionColor, selectionColor);
-    expect(state.widget.cursorColor, cursorColor);
-  });
-
   testWidgets('Selectable Text has adaptive size', (WidgetTester tester) async {
     await tester.pumpWidget(
         boilerplate(
