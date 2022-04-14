@@ -1427,14 +1427,6 @@ class EditableText extends StatefulWidget {
   /// using the `TextField` widget.
   ///
   /// ```dart
-  /// final TextEditingController _controller = TextEditingController();
-  ///
-  /// @override
-  /// void dispose() {
-  ///   _controller.dispose();
-  ///   super.dispose();
-  /// }
-  ///
   /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
@@ -1443,7 +1435,6 @@ class EditableText extends StatefulWidget {
   ///       children: <Widget>[
   ///         Text('Here\'s a text field that supports inserting gif content:'),
   ///         TextField(
-  ///           controller: _controller,
   ///           contentCommitMimeTypes: ['image/gif', 'image/png'],
   ///           onContentCommitted: (CommittedContent data) async {
   ///             // Handle committed content here
