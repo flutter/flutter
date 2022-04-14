@@ -5,7 +5,6 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../cache.dart';
 import '../migrate/migrate_utils.dart';
 import '../runner/flutter_command.dart';
 import 'migrate_abandon.dart';
@@ -24,7 +23,7 @@ class MigrateCommand extends FlutterCommand {
     required FileSystem fileSystem,
     required Terminal terminal,
   }) : _verbose = verbose {
-    addSubcommand(MigrateAbandonCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, terminal: terminal));
+    addSubcommand(MigrateAbandonCommand(logger: logger, fileSystem: fileSystem, terminal: terminal));
     addSubcommand(MigrateApplyCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, terminal: terminal));
     addSubcommand(MigrateResolveConflictsCommand(logger: logger, fileSystem: fileSystem, terminal: terminal));
     addSubcommand(MigrateStartCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));
@@ -54,18 +53,28 @@ class MigrateCommand extends FlutterCommand {
 }
 
 Future<bool> gitRepoExists(String projectDirectory, Logger logger) async {
-  if (await MigrateUtils.isGitRepo(projectDirectory)) {
+  if (await MigrateUtils.isGitRepo(projectDirectory, logger)) {
     return true;
   }
   logger.printStatus('Project is not a git repo. Please initialize a git repo and try again.');
-  MigrateUtils.printCommandText('git init', logger);
+  printCommandText('git init', logger);
   return false;
 }
 
 Future<bool> hasUncommittedChanges(String projectDirectory, Logger logger) async {
-  if (await MigrateUtils.hasUncommitedChanges(projectDirectory)) {
+  if (await MigrateUtils.hasUncommitedChanges(projectDirectory, logger)) {
     logger.printStatus('There are uncommitted changes in your project. Please git commit, abandon, or stash your changes before trying again.');
     return true;
   }
   return false;
+}
+
+/// Prints a command to logger with appropriate formatting.
+void printCommandText(String command, Logger logger) {
+  logger.printStatus(
+    '\n\$ $command\n',
+    color: TerminalColor.grey,
+    indent: 4,
+    newline: false,
+  );
 }

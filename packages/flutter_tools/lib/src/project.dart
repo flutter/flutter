@@ -69,7 +69,6 @@ String? platformToSubdirectoryPrefix(SupportedPlatform platform) {
       return 'root';
     }
   }
-  return null;
 }
 
 class FlutterProjectFactory {

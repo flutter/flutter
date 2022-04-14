@@ -4,9 +4,7 @@
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../cache.dart';
 import '../migrate/migrate_compute.dart';
-import '../migrate/migrate_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'migrate.dart';
@@ -116,9 +114,9 @@ class MigrateStartCommand extends FlutterCommand {
       logger.printStatus('Old migration already in progress.', emphasis: true);
       logger.printStatus('Pending migration files exist in `${workingDirectory.path}/$kDefaultMigrateWorkingDirectoryName`');
       logger.printStatus('Resolve merge conflicts and accept changes with by running:');
-      MigrateUtils.printCommandText('flutter migrate apply', logger);
+      printCommandText('flutter migrate apply', logger);
       logger.printStatus('You may also abandon the existing migration and start a new one with:');
-      MigrateUtils.printCommandText('flutter migrate abandon', logger);
+      printCommandText('flutter migrate abandon', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -154,7 +152,7 @@ class MigrateStartCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    MigrateUtils.deleteTempDirectories(
+    _deleteTempDirectories(
       paths: <String>[],
       directories: migrateResult.tempDirectories,
     );
@@ -163,14 +161,24 @@ class MigrateStartCommand extends FlutterCommand {
 
     logger.printStatus('The migrate tool has staged proposed changes in the migrate working directory.\n');
     logger.printStatus('Guided conflict resolution wizard:');
-    MigrateUtils.printCommandText('flutter migrate resolve-conflicts', logger);
+    printCommandText('flutter migrate resolve-conflicts', logger);
     logger.printStatus('Check the status and diffs of the migration with:');
-    MigrateUtils.printCommandText('flutter migrate status', logger);
+    printCommandText('flutter migrate status', logger);
     logger.printStatus('Abandon the proposed migration with:');
-    MigrateUtils.printCommandText('flutter migrate abandon', logger);
+    printCommandText('flutter migrate abandon', logger);
     logger.printStatus('Accept staged changes after resolving any merge conflicts with:');
-    MigrateUtils.printCommandText('flutter migrate apply', logger);
+    printCommandText('flutter migrate apply', logger);
 
     return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  /// Deletes the files or directories at the provided paths.
+  void _deleteTempDirectories({List<String> paths = const <String>[], List<Directory> directories = const <Directory>[]}) {
+    for (final Directory d in directories) {
+      d.deleteSync(recursive: true);
+    }
+    for (final String p in paths) {
+      fileSystem.directory(p).deleteSync(recursive: true);
+    }
   }
 }

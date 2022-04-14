@@ -5,7 +5,6 @@
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../cache.dart';
 import '../flutter_project_metadata.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
@@ -67,7 +66,7 @@ class MigrateApplyCommand extends FlutterCommand {
 
     if (!await gitRepoExists(flutterProject.directory.path, logger)) {
       logger.printStatus('No git repo found. Please run in a project with an initialized git repo or initialize one with:');
-      MigrateUtils.printCommandText('git init', logger);
+      printCommandText('git init', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -87,7 +86,7 @@ class MigrateApplyCommand extends FlutterCommand {
     }
     if (!workingDirectory.existsSync()) {
       logger.printStatus('No migration in progress. Please run:');
-      MigrateUtils.printCommandText('flutter migrate start', logger);
+      printCommandText('flutter migrate start', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -96,7 +95,7 @@ class MigrateApplyCommand extends FlutterCommand {
     if (!checkAndPrintMigrateStatus(manifest, workingDirectory, warnConflict: true, logger: logger) && !force) {
       logger.printStatus('Conflicting files found. Resolve these conflicts and try again.');
       logger.printStatus('Guided conflict resolution wizard:');
-      MigrateUtils.printCommandText('flutter migrate resolve-conflicts', logger);
+      printCommandText('flutter migrate resolve-conflicts', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -195,7 +194,7 @@ class MigrateApplyCommand extends FlutterCommand {
     }
     if (selection == 'y') {
       // Runs `flutter pub upgrade --major-versions`
-      MigrateUtils.flutterPubUpgrade(flutterProject.directory.path);
+      await MigrateUtils.flutterPubUpgrade(flutterProject.directory.path, logger);
     }
   }
 
@@ -204,7 +203,7 @@ class MigrateApplyCommand extends FlutterCommand {
     if (!androidDir.existsSync()) {
       return;
     }
-    final List<FileSystemEntity> androidFiles = androidDir.listSync(recursive: false);
+    final List<FileSystemEntity> androidFiles = androidDir.listSync();
     final List<File> lockfiles = <File>[];
     final List<String> backedUpFilePaths = <String>[];
     for (final FileSystemEntity entity in androidFiles) {
@@ -245,11 +244,10 @@ class MigrateApplyCommand extends FlutterCommand {
         );
       }
       if (selection == 'y') {
-        print('UPGRADING GRADLE');
         for (final File file in lockfiles) {
           int counter = 0;
           while (true) {
-            String newPath = '${file.absolute.path}_backup_$counter';
+            final String newPath = '${file.absolute.path}_backup_$counter';
             if (!fileSystem.file(newPath).existsSync()) {
               file.renameSync(newPath);
               backedUpFilePaths.add(newPath);
@@ -260,7 +258,7 @@ class MigrateApplyCommand extends FlutterCommand {
           }
         }
         // Runs `./gradelw tasks`in the project's android directory.
-        MigrateUtils.gradlewTasks(flutterProject.directory.childDirectory('android').path);
+        await MigrateUtils.gradlewTasks(flutterProject.directory.childDirectory('android').path, logger);
         logger.printStatus('Old lockfiles renamed to:');
         for (final String path in backedUpFilePaths) {
           logger.printStatus(path, color: TerminalColor.grey, indent: 2);
