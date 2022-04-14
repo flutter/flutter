@@ -62,8 +62,6 @@ class ShellIOManager final : public IOManager {
   // |IOManager|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
 
-  sk_sp<GrDirectContext> GetSharedResourceContext() const;
-
  private:
   // Resource context management.
   sk_sp<GrDirectContext> resource_context_;

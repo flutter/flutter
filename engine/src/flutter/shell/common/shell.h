@@ -476,8 +476,6 @@ class Shell final : public PlatformView::Delegate,
   // How many frames have been timed since last report.
   size_t UnreportedFramesCount() const;
 
-  sk_sp<GrDirectContext> shared_resource_context_;
-
   Shell(DartVMRef vm,
         TaskRunners task_runners,
         fml::RefPtr<fml::RasterThreadMerger> parent_merger,

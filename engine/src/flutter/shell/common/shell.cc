@@ -544,7 +544,6 @@ std::unique_ptr<Shell> Shell::Spawn(
                              /*io_manager=*/std::move(io_manager));
       },
       is_gpu_disabled);
-  result->shared_resource_context_ = io_manager_->GetSharedResourceContext();
   result->RunEngine(std::move(run_configuration));
   return result;
 }
@@ -803,16 +802,11 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
 
   auto io_task = [io_manager = io_manager_->GetWeakPtr(), platform_view,
                   ui_task_runner = task_runners_.GetUITaskRunner(), ui_task,
-                  shared_resource_context = shared_resource_context_,
                   raster_task_runner = task_runners_.GetRasterTaskRunner(),
                   raster_task, should_post_raster_task, &latch] {
     if (io_manager && !io_manager->GetResourceContext()) {
-      sk_sp<GrDirectContext> resource_context;
-      if (shared_resource_context) {
-        resource_context = shared_resource_context;
-      } else {
-        resource_context = platform_view->CreateResourceContext();
-      }
+      sk_sp<GrDirectContext> resource_context =
+          platform_view->CreateResourceContext();
       io_manager->NotifyResourceContextAvailable(resource_context);
     }
     // Step 1: Post a task on the UI thread to tell the engine that it has
