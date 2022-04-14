@@ -39,13 +39,6 @@ const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 const double _kDefaultIconSize = 24.0;
 
-/// Used to configure how the [PopupMenuButton] positions its popup menu.
-enum PopupMenuPosition {
-  /// Menu is positioned over the anchor.
-  over,
-  /// Menu is positioned under the anchor.
-  under,
-}
 
 /// A base class for entries in a material design popup menu.
 ///
@@ -969,6 +962,12 @@ typedef PopupMenuCanceled = void Function();
 /// Used by [PopupMenuButton.itemBuilder].
 typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext context);
 
+
+/// A default offset builder to be used when
+/// no offset builder is provided.
+/// Used by [PopupMenuButtonState.showButtonMenu]
+Offset _defaultOffsetBuilder(Size _) => Offset.zero;
+
 /// Displays a menu when pressed and calls [onSelected] when the menu is dismissed
 /// because an item was selected. The value passed to [onSelected] is the value of
 /// the selected menu item.
@@ -1009,13 +1008,12 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.splashRadius,
     this.icon,
     this.iconSize,
-    this.offset = Offset.zero,
+    this.offsetBuilder = _defaultOffsetBuilder,
     this.enabled = true,
     this.shape,
     this.color,
     this.enableFeedback,
     this.constraints,
-    this.position = PopupMenuPosition.over,
   }) : assert(itemBuilder != null),
        assert(enabled != null),
        assert(
@@ -1071,11 +1069,13 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// and the button will behave like an [IconButton].
   final Widget? icon;
 
-  /// The offset is applied relative to the initial position
-  /// set by the [position].
+  /// The offset returned by this method is used to place the
+  /// menu button. The origin of this offset's coordinate system
+  /// is at the top left of the menu button.
+  /// The size of the menu button will be passed to this method.
   ///
   /// When not set, the offset defaults to [Offset.zero].
-  final Offset offset;
+  final Offset Function(Size) offsetBuilder;
 
   /// Whether this popup menu button is interactive.
   ///
@@ -1139,15 +1139,6 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// the default maximum width.
   final BoxConstraints? constraints;
 
-  /// Whether the popup menu is positioned over or under the popup menu button.
-  ///
-  /// [offset] is used to change the position of the popup menu relative to the
-  /// position set by this parameter.
-  ///
-  /// When not set, the position defaults to [PopupMenuPosition.over] which makes the
-  /// popup menu appear directly over the button that was used to create it.
-  final PopupMenuPosition position;
-
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1169,15 +1160,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
-    final Offset offset;
-    switch (widget.position) {
-      case PopupMenuPosition.over:
-        offset = widget.offset;
-        break;
-      case PopupMenuPosition.under:
-        offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2)) + widget.offset;
-        break;
-    }
+    final Offset offset = widget.offsetBuilder(button.size);
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(offset, ancestor: overlay),

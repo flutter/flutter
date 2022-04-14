@@ -955,9 +955,9 @@ void main() {
   });
 
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
-    PopupMenuButton<int> buildMenuButton({Offset offset = Offset.zero}) {
+    PopupMenuButton<int> buildMenuButton({Offset Function(Size)? offsetBuilder}) {
       return PopupMenuButton<int>(
-        offset: offset,
+        offsetBuilder: offsetBuilder?? (_) => Offset.zero,
         itemBuilder: (BuildContext context) {
           return <PopupMenuItem<int>>[
             PopupMenuItem<int>(
@@ -1000,7 +1000,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Material(
-            child: buildMenuButton(offset: const Offset(50.0, 50.0)),
+            child: buildMenuButton(offsetBuilder: (Size size) => const Offset(50.0, 50.0)),
           ),
         ),
       ),
@@ -2630,10 +2630,10 @@ void main() {
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).width, 500);
   });
 
-  testWidgets('Can change menu position and offset', (WidgetTester tester) async {
-    PopupMenuButton<int> buildMenuButton({required PopupMenuPosition position}) {
+  testWidgets('Can change menu button offset', (WidgetTester tester) async {
+    PopupMenuButton<int> buildMenuButton({Offset Function(Size)? offsetBuilder}) {
       return PopupMenuButton<int>(
-        position: position,
+        offsetBuilder: offsetBuilder ?? (Size size) => Offset.zero,
         itemBuilder: (BuildContext context) {
           return <PopupMenuItem<int>>[
             PopupMenuItem<int>(
@@ -2649,12 +2649,12 @@ void main() {
       );
     }
 
-    // Popup menu with `MenuPosition.over (default) with default offset`.
+    // Popup menu with the menu's top left exactly over menu button's top left.
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Material(
-            child: buildMenuButton(position: PopupMenuPosition.over),
+            child: buildMenuButton(),
           ),
         ),
       ),
@@ -2670,12 +2670,12 @@ void main() {
     await tester.tapAt(Offset.zero);
     await tester.pump();
 
-    // Popup menu with `MenuPosition.under`(custom) with default offset`.
+    // Popup menu with the menu's top left exactly over menu button's bottom left.
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Material(
-            child: buildMenuButton(position: PopupMenuPosition.under),
+            child: buildMenuButton(offsetBuilder: (Size size) => Offset(0.0, size.height)),
           ),
         ),
       ),
@@ -2685,19 +2685,19 @@ void main() {
     await tester.tap(find.byType(IconButton));
     await tester.pumpAndSettle();
 
-    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 40.0));
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), Offset(8.0, tester.getSize(find.byWidgetPredicate((Widget w) => w is PopupMenuButton)).height));
 
     // Close the popup menu.
     await tester.tapAt(Offset.zero);
     await tester.pump();
 
-    // Popup menu with `MenuPosition.over (default) with custom offset`.
+    // Popup menu with custom offset using button height.
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Material(
             child: PopupMenuButton<int>(
-              offset: const Offset(0.0, 50),
+              offsetBuilder: (Size size) => Offset(0.0, 10.0 + size.height),
               itemBuilder: (BuildContext context) {
                 return <PopupMenuItem<int>>[
                   PopupMenuItem<int>(
@@ -2720,20 +2720,19 @@ void main() {
     await tester.tap(find.byType(IconButton));
     await tester.pumpAndSettle();
 
-    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 50.0));
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), Offset(8.0, 10.0 + tester.getSize(find.byWidgetPredicate((Widget w) => w is PopupMenuButton)).height));
 
     // Close the popup menu.
     await tester.tapAt(Offset.zero);
     await tester.pump();
 
-    // Popup menu with `MenuPosition.under (custom) with custom offset`.
+    // Popup menu with custom offset using button width.
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Material(
             child: PopupMenuButton<int>(
-              offset: const Offset(0.0, 50),
-              position: PopupMenuPosition.under,
+              offsetBuilder: (Size size) => Offset(10.0 + size.width, 0.0),
               itemBuilder: (BuildContext context) {
                 return <PopupMenuItem<int>>[
                   PopupMenuItem<int>(
@@ -2756,7 +2755,7 @@ void main() {
     await tester.tap(find.byType(IconButton));
     await tester.pumpAndSettle();
 
-    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 90.0));
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), Offset(10.0 + tester.getSize(find.byWidgetPredicate((Widget w) => w is PopupMenuButton)).width, 8.0));
   });
 
   testWidgets("PopupMenuButton icon inherits IconTheme's size", (WidgetTester tester) async {
