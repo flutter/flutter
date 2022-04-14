@@ -292,6 +292,12 @@ bool Paint::sync_to(DisplayListBuilder* builder,
     builder->setDither(uint_data[kDitherIndex] != 0);
   }
 
+  if (flags.applies_path_effect()) {
+    // The paint API exposed to Dart does not support path effects.  But other
+    // operations such as text may set a path effect, which must be cleared.
+    builder->setPathEffect(nullptr);
+  }
+
   if (flags.applies_mask_filter()) {
     switch (uint_data[kMaskFilterIndex]) {
       case Null:
