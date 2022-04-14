@@ -57,6 +57,19 @@ TEST(GeometryTest, InvertMultMatrix) {
   }
 }
 
+TEST(GeometryTest, MatrixBasis) {
+  auto matrix = Matrix{1,  2,  3,  4,   //
+                       5,  6,  7,  8,   //
+                       9,  10, 11, 12,  //
+                       13, 14, 15, 16};
+  auto basis = matrix.Basis();
+  auto expect = Matrix{1, 2,  3,  0,  //
+                       5, 6,  7,  0,  //
+                       9, 10, 11, 0,  //
+                       0, 0,  0,  1};
+  ASSERT_MATRIX_NEAR(basis, expect);
+}
+
 TEST(GeometryTest, MutliplicationMatrix) {
   auto rotation = Matrix::MakeRotationZ(Radians{M_PI_4});
   auto invert = rotation.Invert();
@@ -860,6 +873,15 @@ TEST(GeometryTest, RectGetPoints) {
   ASSERT_POINT_NEAR(points[1], Point(400, 200));
   ASSERT_POINT_NEAR(points[2], Point(100, 600));
   ASSERT_POINT_NEAR(points[3], Point(400, 600));
+}
+
+TEST(GeometryTest, RectGetTransformedPoints) {
+  Rect r(100, 200, 300, 400);
+  auto points = r.GetTransformedPoints(Matrix::MakeTranslation({10, 20}));
+  ASSERT_POINT_NEAR(points[0], Point(110, 220));
+  ASSERT_POINT_NEAR(points[1], Point(410, 220));
+  ASSERT_POINT_NEAR(points[2], Point(110, 620));
+  ASSERT_POINT_NEAR(points[3], Point(410, 620));
 }
 
 TEST(GeometryTest, RectMakePointBounds) {

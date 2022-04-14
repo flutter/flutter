@@ -33,7 +33,7 @@ std::optional<Rect> Contents::GetCoverage(const Entity& entity) const {
   return entity.GetPathCoverage();
 }
 
-std::optional<Snapshot> Contents::RenderToTexture(
+std::optional<Snapshot> Contents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity) const {
   auto bounds = GetCoverage(entity);
@@ -58,7 +58,8 @@ std::optional<Snapshot> Contents::RenderToTexture(
     return std::nullopt;
   }
 
-  return Snapshot{.texture = texture, .position = bounds->origin};
+  return Snapshot{.texture = texture,
+                  .transform = Matrix::MakeTranslation(bounds->origin)};
 }
 
 }  // namespace impeller

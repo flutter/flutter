@@ -11,35 +11,28 @@
 
 namespace impeller {
 
-std::optional<Snapshot> Snapshot::FromTransformedTexture(
-    const ContentContext& renderer,
-    const Entity& entity,
-    std::shared_ptr<Texture> texture) {
-  auto bounds = entity.GetPathCoverage();
-  if (!bounds.has_value()) {
+std::optional<Rect> Snapshot::GetCoverage() const {
+  if (!texture) {
     return std::nullopt;
   }
+  return Rect(Size(texture->GetSize())).TransformBounds(transform);
+}
 
-  auto result = renderer.MakeSubpass(
-      ISize(bounds->size),
-      [&texture, &entity, &bounds](const ContentContext& renderer,
-                                   RenderPass& pass) -> bool {
-        TextureContents contents;
-        contents.SetTexture(texture);
-        contents.SetSourceRect(Rect::MakeSize(Size(texture->GetSize())));
-        Entity sub_entity;
-        sub_entity.SetPath(entity.GetPath());
-        sub_entity.SetBlendMode(Entity::BlendMode::kSource);
-        sub_entity.SetTransformation(
-            Matrix::MakeTranslation(Vector3(-bounds->origin)) *
-            entity.GetTransformation());
-        return contents.Render(renderer, sub_entity, pass);
-      });
-  if (!result) {
+std::optional<Matrix> Snapshot::GetUVTransform() const {
+  if (!texture || texture->GetSize().IsZero()) {
     return std::nullopt;
   }
+  return Matrix::MakeScale(1 / Vector2(texture->GetSize())) *
+         transform.Invert();
+}
 
-  return Snapshot{.texture = result, .position = bounds->origin};
+std::optional<std::array<Point, 4>> Snapshot::GetCoverageUVs(
+    const Rect& coverage) const {
+  auto uv_transform = GetUVTransform();
+  if (!uv_transform.has_value()) {
+    return std::nullopt;
+  }
+  return coverage.GetTransformedPoints(uv_transform.value());
 }
 
 }  // namespace impeller
