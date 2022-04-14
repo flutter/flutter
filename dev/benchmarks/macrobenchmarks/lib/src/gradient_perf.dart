@@ -55,7 +55,7 @@ class GradientPerfHomePage extends StatelessWidget {
 }
 
 class _PainterPage extends StatefulWidget {
-  const _PainterPage({Key? key, required this.title, required this.factory}) : super(key: key);
+  const _PainterPage({super.key, required this.title, required this.factory});
 
   final String title;
   final CustomPaintFactory factory;
@@ -65,8 +65,8 @@ class _PainterPage extends StatefulWidget {
 }
 
 class RecreateDynamicPainterPage extends _PainterPage {
-  const RecreateDynamicPainterPage({Key? key})
-      : super(key: key, title: 'Recreate Dynamic Gradients', factory: makePainter);
+  const RecreateDynamicPainterPage({super.key})
+      : super(title: 'Recreate Dynamic Gradients', factory: makePainter);
 
   static CustomPainter makePainter(double f) {
     return RecreatedDynamicGradients(baseFactor: f);
@@ -74,8 +74,8 @@ class RecreateDynamicPainterPage extends _PainterPage {
 }
 
 class RecreateConsistentPainterPage extends _PainterPage {
-  const RecreateConsistentPainterPage({Key? key})
-      : super(key: key, title: 'Recreate Same Gradients', factory: makePainter);
+  const RecreateConsistentPainterPage({super.key})
+      : super(title: 'Recreate Same Gradients', factory: makePainter);
 
   static CustomPainter makePainter(double f) {
     return RecreatedConsistentGradients(baseFactor: f);
@@ -83,8 +83,8 @@ class RecreateConsistentPainterPage extends _PainterPage {
 }
 
 class StaticConsistentPainterPage extends _PainterPage {
-  const StaticConsistentPainterPage({Key? key})
-      : super(key: key, title: 'Reuse Same Gradients', factory: makePainter);
+  const StaticConsistentPainterPage({super.key})
+      : super(title: 'Reuse Same Gradients', factory: makePainter);
 
   static CustomPainter makePainter(double f) {
     return StaticConsistentGradients(baseFactor: f);
