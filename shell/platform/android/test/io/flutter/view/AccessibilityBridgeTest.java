@@ -39,6 +39,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
@@ -51,7 +52,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
@@ -1439,7 +1439,7 @@ public class AccessibilityBridgeTest {
     PlatformViewsAccessibilityDelegate accessibilityDelegate =
         mock(PlatformViewsAccessibilityDelegate.class);
 
-    Context context = RuntimeEnvironment.application.getApplicationContext();
+    Context context = ApplicationProvider.getApplicationContext();
     View rootAccessibilityView = new View(context);
     AccessibilityViewEmbedder accessibilityViewEmbedder = mock(AccessibilityViewEmbedder.class);
     AccessibilityBridge accessibilityBridge =
@@ -1482,7 +1482,7 @@ public class AccessibilityBridgeTest {
     PlatformViewsAccessibilityDelegate accessibilityDelegate =
         mock(PlatformViewsAccessibilityDelegate.class);
 
-    Context context = RuntimeEnvironment.application.getApplicationContext();
+    Context context = ApplicationProvider.getApplicationContext();
     View rootAccessibilityView = new View(context);
     AccessibilityViewEmbedder accessibilityViewEmbedder = mock(AccessibilityViewEmbedder.class);
     AccessibilityBridge accessibilityBridge =
@@ -1516,7 +1516,7 @@ public class AccessibilityBridgeTest {
     PlatformViewsAccessibilityDelegate accessibilityDelegate =
         mock(PlatformViewsAccessibilityDelegate.class);
 
-    Context context = RuntimeEnvironment.application.getApplicationContext();
+    Context context = ApplicationProvider.getApplicationContext();
     View rootAccessibilityView = new View(context);
     AccessibilityViewEmbedder accessibilityViewEmbedder = mock(AccessibilityViewEmbedder.class);
     AccessibilityBridge accessibilityBridge =

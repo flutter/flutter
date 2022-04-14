@@ -17,6 +17,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewParent;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.FlutterImageView;
 import io.flutter.embedding.android.FlutterView;
@@ -45,7 +46,6 @@ import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -313,7 +313,7 @@ public class PlatformViewsControllerTest {
     PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
     PlatformView platformView = mock(PlatformView.class);
 
-    Context context = RuntimeEnvironment.application.getApplicationContext();
+    Context context = ApplicationProvider.getApplicationContext();
     View androidView = new View(context);
 
     when(platformView.getView()).thenReturn(androidView);
@@ -354,7 +354,7 @@ public class PlatformViewsControllerTest {
     PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
     PlatformView platformView = mock(PlatformView.class);
 
-    Context context = RuntimeEnvironment.application.getApplicationContext();
+    Context context = ApplicationProvider.getApplicationContext();
     View androidView = new View(context);
     when(platformView.getView()).thenReturn(androidView);
     when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
@@ -891,7 +891,7 @@ public class PlatformViewsControllerTest {
 
   private static FlutterView attach(
       FlutterJNI jni, PlatformViewsController platformViewsController) {
-    final Context context = RuntimeEnvironment.application.getApplicationContext();
+    final Context context = ApplicationProvider.getApplicationContext();
     final FlutterView flutterView =
         new FlutterView(context, RenderMode.surface) {
           @Override
@@ -910,7 +910,7 @@ public class PlatformViewsControllerTest {
     final DartExecutor executor = new DartExecutor(jni, mock(AssetManager.class));
     executor.onAttachedToJNI();
 
-    final Context context = RuntimeEnvironment.application.getApplicationContext();
+    final Context context = ApplicationProvider.getApplicationContext();
     final TextureRegistry registry =
         new TextureRegistry() {
           public void TextureRegistry() {}
