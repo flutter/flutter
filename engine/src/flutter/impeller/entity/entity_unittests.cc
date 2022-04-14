@@ -698,16 +698,18 @@ TEST_F(EntityTest, GaussianBlurFilter) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     if (first_frame) {
       first_frame = false;
-      ImGui::SetNextWindowSize({500, 220});
-      ImGui::SetNextWindowPos({300, 550});
+      ImGui::SetNextWindowSize({500, 250});
+      ImGui::SetNextWindowPos({300, 500});
     }
 
+    const char* blur_type_names[] = {"Image blur", "Mask blur"};
     const char* blur_style_names[] = {"Normal", "Solid", "Outer", "Inner"};
     const FilterContents::BlurStyle blur_styles[] = {
         FilterContents::BlurStyle::kNormal, FilterContents::BlurStyle::kSolid,
         FilterContents::BlurStyle::kOuter, FilterContents::BlurStyle::kInner};
 
     // UI state.
+    static int selected_blur_type = 0;
     static float blur_amount[2] = {20, 20};
     static int selected_blur_style = 0;
     static Color cover_color(1, 0, 0, 0.2);
@@ -719,6 +721,8 @@ TEST_F(EntityTest, GaussianBlurFilter) {
 
     ImGui::Begin("Controls");
     {
+      ImGui::Combo("Blur type", &selected_blur_type, blur_type_names,
+                   sizeof(blur_type_names) / sizeof(char*));
       ImGui::SliderFloat2("Blur", &blur_amount[0], 0, 200);
       ImGui::Combo("Blur style", &selected_blur_style, blur_style_names,
                    sizeof(blur_style_names) / sizeof(char*));
@@ -742,6 +746,11 @@ TEST_F(EntityTest, GaussianBlurFilter) {
         FilterContents::Sigma{blur_amount[1]},
         blur_styles[selected_blur_style]);
 
+    auto mask_blur = FilterContents::MakeBorderMaskBlur(
+        FilterInput::Make(boston), FilterContents::Sigma{blur_amount[0]},
+        FilterContents::Sigma{blur_amount[1]},
+        blur_styles[selected_blur_style]);
+
     ISize input_size = boston->GetSize();
     auto rect = Rect(-Point(input_size) / 2, Size(input_size));
     auto ctm = Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
@@ -749,7 +758,7 @@ TEST_F(EntityTest, GaussianBlurFilter) {
                Matrix::MakeScale(Vector2(scale[0], scale[1])) *
                Matrix::MakeSkew(skew[0], skew[1]);
 
-    auto target_contents = blur;
+    auto target_contents = selected_blur_type == 0 ? blur : mask_blur;
 
     Entity entity;
     entity.SetPath(PathBuilder{}.AddRect(rect).TakePath());
