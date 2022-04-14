@@ -286,27 +286,6 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgets('uses DefaultSelectionStyle for selection and cursor colors if provided', (WidgetTester tester) async {
-    const Color selectionColor = Colors.orange;
-    const Color cursorColor = Colors.red;
-
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: DefaultSelectionStyle(
-            selectionColor: selectionColor,
-            cursorColor: cursorColor,
-            child: TextField(autofocus: true),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    expect(state.widget.selectionColor, selectionColor);
-    expect(state.widget.cursorColor, cursorColor);
-  });
-
   testWidgets('Activates the text field when receives semantics focus on Mac, Windows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;

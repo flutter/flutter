@@ -17,7 +17,6 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind, kSecondaryMouseButton, kDoubleTapTimeout;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -404,32 +403,6 @@ void main() {
         tester.getSize(find.byType(CupertinoTextField)),
         const Size(200, 29), // 29 is the height of the default font (17) + decoration (12).
       );
-    },
-  );
-
-  testWidgets(
-    'uses DefaultSelectionStyle for selection and cursor colors if provided',
-    (WidgetTester tester) async {
-      const Color selectionColor = Colors.black;
-      const Color cursorColor = Colors.white;
-
-      await tester.pumpWidget(
-        const CupertinoApp(
-          home: Center(
-            child: DefaultSelectionStyle(
-              selectionColor: selectionColor,
-              cursorColor: cursorColor,
-              child: CupertinoTextField(
-                autofocus: true,
-              )
-            ),
-          ),
-        ),
-      );
-      await tester.pump();
-      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-      expect(state.widget.selectionColor, selectionColor);
-      expect(state.widget.cursorColor, cursorColor);
     },
   );
 
