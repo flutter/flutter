@@ -154,8 +154,8 @@ Future<bool> fuzzyGoldenImageCompare(
 
     final Codec codec = await instantiateImageCodec(goldenData);
     final FrameInfo frame = await codec.getNextFrame();
-    expect(frame.image.height, equals(image.width));
-    expect(frame.image.width, equals(image.height));
+    expect(frame.image.height, equals(image.height));
+    expect(frame.image.width, equals(image.width));
 
     areEqual = await fuzzyCompareImages(frame.image, image);
   }
@@ -316,4 +316,45 @@ void main() {
     }
     expect(areEqual, true);
   });
+
+  test('Path effects from Paragraphs do not affect further rendering', () async {
+    void drawText(Canvas canvas, String content, Offset offset,
+        {TextDecorationStyle style = TextDecorationStyle.solid}) {
+      final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
+      builder.pushStyle(TextStyle(
+        decoration: TextDecoration.underline,
+        decorationColor: const Color(0xFF0000FF),
+        fontSize: 10,
+        color: const Color(0xFF000000),
+        decorationStyle: style,
+      ));
+      builder.addText(content);
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 100));
+      canvas.drawParagraph(paragraph, offset);
+    }
+
+    final Image image = await toImage((Canvas canvas) {
+      canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.srcOver);
+      final Paint paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5;
+      drawText(canvas, 'Hello World', const Offset(20, 10));
+      canvas.drawCircle(const Offset(150, 25), 15, paint..color = const Color(0xFF00FF00));
+      drawText(canvas, 'Regular text', const Offset(20, 60));
+      canvas.drawCircle(const Offset(150, 75), 15, paint..color = const Color(0xFFFFFF00));
+      drawText(canvas, 'Dotted text', const Offset(20, 110), style: TextDecorationStyle.dotted);
+      canvas.drawCircle(const Offset(150, 125), 15, paint..color = const Color(0xFFFF0000));
+      drawText(canvas, 'Dashed text', const Offset(20, 160), style: TextDecorationStyle.dashed);
+      canvas.drawCircle(const Offset(150, 175), 15, paint..color = const Color(0xFFFF0000));
+      drawText(canvas, 'Wavy text', const Offset(20, 210), style: TextDecorationStyle.wavy);
+      canvas.drawCircle(const Offset(150, 225), 15, paint..color = const Color(0xFFFF0000));
+    }, 200, 250);
+    expect(image.width, equals(200));
+    expect(image.height, equals(250));
+
+    final bool areEqual =
+        await fuzzyGoldenImageCompare(image, 'dotted_path_effect_mixed_with_stroked_geometry.png');
+    expect(areEqual, true);
+  }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
 }
