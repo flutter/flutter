@@ -185,6 +185,9 @@ class IOSDeploy {
       if (interfaceType != IOSDeviceConnectionInterface.network)
         '--no-wifi',
       '--justlaunch',
+      // start printing backtraces for all threads periodically after 10 seconds
+      '--detect_deadlocks',
+      '10',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
         launchArguments.join(' '),
