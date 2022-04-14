@@ -73,6 +73,7 @@ class MigrateAbandonCommand extends FlutterCommand {
 
     logger.printStatus('\nAbandoning the existing migration will delete the migration working directory at ${workingDirectory.path}');
     String selection = 'y';
+    terminal.usesTerminalUi = true;
     try {
       selection = await terminal.promptForCharInput(
         <String>['y', 'n'],
