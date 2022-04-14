@@ -4719,9 +4719,9 @@ class CommittedContent {
   /// Converts Map received from Flutter Engine into the Dart class
   CommittedContent.fromMap(Map<String, dynamic>? data) {
     if (data == null || data.isEmpty) return;
-    mimeType = data['mimeType'] as String?;
-    uri = data['uri'] as String?;
-    data = Uint8List.fromList(List<int>.from(data['data'] as Iterable<dynamic>));
+    this.mimeType = data['mimeType'] as String?;
+    this.uri = data['uri'] as String?;
+    this.data = Uint8List.fromList(List<int>.from(data['data'] as Iterable<dynamic>));
   }
 
   @override
