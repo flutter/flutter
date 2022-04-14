@@ -1006,7 +1006,6 @@ class SelectionOverlay {
 class _SelectionToolbarOverlay extends StatefulWidget {
   /// Creates a toolbar overlay.
   const _SelectionToolbarOverlay({
-    Key? key,
     required this.preferredLineHeight,
     required this.toolbarLocation,
     required this.layerLink,
@@ -1017,7 +1016,7 @@ class _SelectionToolbarOverlay extends StatefulWidget {
     required this.selectionEndpoints,
     required this.selectionDelegate,
     required this.clipboardStatus,
-  }) : super(key: key);
+  });
 
   final double preferredLineHeight;
   final Offset? toolbarLocation;
@@ -1105,7 +1104,6 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
 class _SelectionHandleOverlay extends StatefulWidget {
   /// Create selection overlay.
   const _SelectionHandleOverlay({
-    Key? key,
     required this.type,
     required this.handleLayerLink,
     this.onSelectionHandleTapped,
@@ -1116,7 +1114,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
     this.visibility,
     required this.preferredLineHeight,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : super(key: key);
+  });
 
   final LayerLink handleLayerLink;
   final VoidCallback? onSelectionHandleTapped;
@@ -1836,7 +1834,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Multiple callbacks can be called for one sequence of input gesture.
   /// The [child] parameter must not be null.
   const TextSelectionGestureDetector({
-    Key? key,
+    super.key,
     this.onTapDown,
     this.onForcePressStart,
     this.onForcePressEnd,
@@ -1853,8 +1851,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onDragSelectionEnd,
     this.behavior,
     required this.child,
-  }) : assert(child != null),
-       super(key: key);
+  }) : assert(child != null);
 
   /// Called for every tap down including every tap down that's part of a
   /// double click or a long press, except touches that include enough movement

@@ -58,7 +58,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// The [child] parameter must not be null.
   InteractiveViewer({
-    Key? key,
+    super.key,
     this.clipBehavior = Clip.hardEdge,
     this.alignPanAxis = false,
     this.boundaryMargin = EdgeInsets.zero,
@@ -95,8 +95,7 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
            && boundaryMargin.left.isFinite),
        ),
-       builder = null,
-       super(key: key);
+       builder = null;
 
   /// Creates an InteractiveViewer for a child that is created on demand.
   ///
@@ -106,7 +105,7 @@ class InteractiveViewer extends StatefulWidget {
   /// The [builder] parameter must not be null. See its docs for an example of
   /// using it to optimize a large child.
   InteractiveViewer.builder({
-    Key? key,
+    super.key,
     this.clipBehavior = Clip.hardEdge,
     this.alignPanAxis = false,
     this.boundaryMargin = EdgeInsets.zero,
@@ -143,8 +142,7 @@ class InteractiveViewer extends StatefulWidget {
                  boundaryMargin.left.isFinite),
        ),
        constrained = false,
-       child = null,
-       super(key: key);
+       child = null;
 
   /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
   /// but it will not receive gestures in these areas.
@@ -1068,13 +1066,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 // InteractiveViewer's depending on if it's using a builder or a child.
 class _InteractiveViewerBuilt extends StatelessWidget {
   const _InteractiveViewerBuilt({
-    Key? key,
     required this.child,
     required this.childKey,
     required this.clipBehavior,
     required this.constrained,
     required this.matrix,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final GlobalKey childKey;

@@ -31,7 +31,7 @@ import 'widget_inspector_test_utils.dart';
 // columns will impact whether tests pass.
 
 class ClockDemo extends StatefulWidget {
-  const ClockDemo({ Key? key }) : super(key: key);
+  const ClockDemo({ super.key });
   @override
   State<ClockDemo> createState() => _ClockDemoState();
 }
@@ -69,9 +69,9 @@ class _ClockDemoState extends State<ClockDemo> {
 
 class ClockText extends StatefulWidget {
   const ClockText({
-    Key? key,
+    super.key,
     this.utcOffset = 0,
-  }) : super(key: key);
+  });
 
   final int utcOffset;
 
@@ -216,9 +216,9 @@ class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
 class RepaintBoundaryWithDebugPaint extends RepaintBoundary {
   /// Creates a widget that isolates repaints.
   const RepaintBoundaryWithDebugPaint({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.key,
+    super.child,
+  });
 
   @override
   RenderRepaintBoundary createRenderObject(BuildContext context) {

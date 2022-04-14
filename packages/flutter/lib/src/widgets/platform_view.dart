@@ -63,7 +63,7 @@ class AndroidView extends StatefulWidget {
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   /// {@endtemplate}
   const AndroidView({
-    Key? key,
+    super.key,
     required this.viewType,
     this.onPlatformViewCreated,
     this.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
@@ -75,8 +75,7 @@ class AndroidView extends StatefulWidget {
   }) : assert(viewType != null),
        assert(hitTestBehavior != null),
        assert(creationParams == null || creationParamsCodec != null),
-       assert(clipBehavior != null),
-       super(key: key);
+       assert(clipBehavior != null);
 
   /// The unique identifier for Android view type to be embedded by this widget.
   ///
@@ -217,7 +216,7 @@ class UiKitView extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.AndroidView.constructorArgs}
   const UiKitView({
-    Key? key,
+    super.key,
     required this.viewType,
     this.onPlatformViewCreated,
     this.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
@@ -227,8 +226,7 @@ class UiKitView extends StatefulWidget {
     this.gestureRecognizers,
   }) : assert(viewType != null),
        assert(hitTestBehavior != null),
-       assert(creationParams == null || creationParamsCodec != null),
-       super(key: key);
+       assert(creationParams == null || creationParamsCodec != null);
 
   // TODO(amirh): reference the iOS API doc once available.
   /// The unique identifier for iOS view type to be embedded by this widget.
@@ -343,12 +341,11 @@ class HtmlElementView extends StatelessWidget {
   ///
   /// `viewType` identifies the type of platform view to create.
   const HtmlElementView({
-    Key? key,
+    super.key,
     required this.viewType,
     this.onPlatformViewCreated,
   }) : assert(viewType != null),
-       assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.'),
-       super(key: key);
+       assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.');
 
   /// The unique identifier for the HTML view type to be embedded by this widget.
   ///
@@ -654,7 +651,6 @@ class _UiKitViewState extends State<UiKitView> {
 
 class _AndroidPlatformView extends LeafRenderObjectWidget {
   const _AndroidPlatformView({
-    Key? key,
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
@@ -662,8 +658,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   }) : assert(controller != null),
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
-       assert(clipBehavior != null),
-       super(key: key);
+       assert(clipBehavior != null);
 
   final AndroidViewController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
@@ -690,14 +685,12 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
 
 class _UiKitPlatformView extends LeafRenderObjectWidget {
   const _UiKitPlatformView({
-    Key? key,
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
   }) : assert(controller != null),
        assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null),
-       super(key: key);
+       assert(gestureRecognizers != null);
 
   final UiKitViewController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
@@ -814,7 +807,7 @@ class PlatformViewLink extends StatefulWidget {
   ///  * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
   ///  * [PlatformViewCreationParams] for how each parameter can be used when implementing `createPlatformView`.
   const PlatformViewLink({
-    Key? key,
+    super.key,
     required PlatformViewSurfaceFactory surfaceFactory,
     required CreatePlatformViewCallback onCreatePlatformView,
     required this.viewType,
@@ -822,8 +815,7 @@ class PlatformViewLink extends StatefulWidget {
          assert(onCreatePlatformView != null),
          assert(viewType != null),
          _surfaceFactory = surfaceFactory,
-         _onCreatePlatformView = onCreatePlatformView,
-         super(key: key);
+         _onCreatePlatformView = onCreatePlatformView;
 
 
   final PlatformViewSurfaceFactory _surfaceFactory;
@@ -947,14 +939,13 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///
   /// The [controller] must not be null.
   const PlatformViewSurface({
-    Key? key,
+    super.key,
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
   }) : assert(controller != null),
        assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null),
-       super(key: key);
+       assert(gestureRecognizers != null);
 
   /// The controller for the platform view integrated by this [PlatformViewSurface].
   ///
@@ -1038,19 +1029,13 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 class AndroidViewSurface extends PlatformViewSurface {
   /// Construct an `AndroidPlatformViewSurface`.
   const AndroidViewSurface({
-    Key? key,
-    required AndroidViewController controller,
-    required PlatformViewHitTestBehavior hitTestBehavior,
-    required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+    super.key,
+    required AndroidViewController super.controller,
+    required super.hitTestBehavior,
+    required super.gestureRecognizers,
   }) : assert(controller != null),
        assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null),
-       super(
-         key: key,
-         controller: controller,
-         hitTestBehavior: hitTestBehavior,
-         gestureRecognizers: gestureRecognizers,
-       );
+       assert(gestureRecognizers != null);
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -1106,9 +1091,8 @@ class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
 /// notify the size of the render object to its parent.
 class _PlatformViewPlaceHolder extends SingleChildRenderObjectWidget {
   const _PlatformViewPlaceHolder({
-    Key? key,
     required this.onLayout,
-  }) : super(key: key);
+  });
 
   final _OnLayoutCallback onLayout;
 

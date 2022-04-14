@@ -888,7 +888,7 @@ class RawScrollbar extends StatefulWidget {
   /// The [child], [fadeDuration], [pressDuration], and [timeToFade] arguments
   /// must not be null.
   const RawScrollbar({
-    Key? key,
+    super.key,
     required this.child,
     this.controller,
     this.thumbVisibility,
@@ -934,8 +934,7 @@ class RawScrollbar extends StatefulWidget {
        assert(timeToFade != null),
        assert(pressDuration != null),
        assert(mainAxisMargin != null),
-       assert(crossAxisMargin != null),
-       super(key: key);
+       assert(crossAxisMargin != null);
 
   /// {@template flutter.widgets.Scrollbar.child}
   /// The widget below this widget in the tree.
@@ -2003,16 +2002,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 // thumb and ignores everything else.
 class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
   _ThumbPressGestureRecognizer({
-    double? postAcceptSlopTolerance,
-    Set<PointerDeviceKind>? supportedDevices,
-    required Object debugOwner,
+    required Object super.debugOwner,
     required GlobalKey customPaintKey,
     required Duration pressDuration,
   }) : _customPaintKey = customPaintKey,
        super(
-         postAcceptSlopTolerance: postAcceptSlopTolerance,
-         supportedDevices: supportedDevices,
-         debugOwner: debugOwner,
          duration: pressDuration,
        );
 

@@ -49,10 +49,10 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   /// Creates a widget that positions its child so that it avoids display
   /// features.
   const DisplayFeatureSubScreen({
-    Key? key,
+    super.key,
     this.anchorPoint,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// {@template flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   /// The anchor point used to pick the closest sub-screen.

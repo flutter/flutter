@@ -87,7 +87,7 @@ class MaterialBanner extends StatefulWidget {
   /// The [actions].length must be greater than 0. The [elevation] must be null or
   /// non-negative.
   const MaterialBanner({
-    Key? key,
+    super.key,
     required this.content,
     this.contentTextStyle,
     required this.actions,
@@ -103,8 +103,7 @@ class MaterialBanner extends StatefulWidget {
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(actions != null),
-       assert(forceActionsBelow != null),
-       super(key: key);
+       assert(forceActionsBelow != null);
 
   /// The content of the [MaterialBanner].
   ///

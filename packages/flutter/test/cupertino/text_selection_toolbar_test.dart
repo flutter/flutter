@@ -55,7 +55,7 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
 }
 
 class TestBox extends SizedBox {
-  const TestBox({Key? key}) : super(key: key, width: itemWidth, height: itemHeight);
+  const TestBox({super.key}) : super(width: itemWidth, height: itemHeight);
 
   static const double itemHeight = 44.0;
   static const double itemWidth = 100.0;

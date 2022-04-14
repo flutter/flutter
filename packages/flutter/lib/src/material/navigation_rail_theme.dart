@@ -222,10 +222,10 @@ class NavigationRailTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const NavigationRailTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// Specifies the background color, elevation, label text style, icon theme,
   /// group alignment, and label type and border values for descendant

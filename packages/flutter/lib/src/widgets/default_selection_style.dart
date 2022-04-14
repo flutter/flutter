@@ -22,11 +22,11 @@ class DefaultSelectionStyle extends InheritedTheme {
   /// Creates a default selection style widget that specifies the selection
   /// properties for all widgets below it in the widget tree.
   const DefaultSelectionStyle({
-    Key? key,
+    super.key,
     this.cursorColor,
     this.selectionColor,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// A const-constructable default selection style that provides fallback
   /// values.
@@ -36,10 +36,10 @@ class DefaultSelectionStyle extends InheritedTheme {
   ///
   /// This constructor creates a [DefaultTextStyle] with an invalid [child],
   /// which means the constructed value cannot be incorporated into the tree.
-  const DefaultSelectionStyle.fallback({ Key? key })
+  const DefaultSelectionStyle.fallback({ super.key })
     : cursorColor = null,
       selectionColor = null,
-      super(key: key, child: const _NullWidget());
+      super(child: const _NullWidget());
 
   /// The color of the text field's cursor.
   ///

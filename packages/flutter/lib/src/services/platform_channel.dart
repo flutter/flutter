@@ -427,8 +427,7 @@ class MethodChannel {
 /// {@macro flutter.services.method_channel.FIFO}
 class OptionalMethodChannel extends MethodChannel {
   /// Creates a [MethodChannel] that ignores missing platform plugins.
-  const OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])
-    : super(name, codec, binaryMessenger);
+  const OptionalMethodChannel(super.name, [super.codec, super.binaryMessenger]);
 
   @override
   Future<T?> invokeMethod<T>(String method, [ dynamic arguments ]) async {

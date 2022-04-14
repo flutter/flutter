@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
 class _CustomPhysics extends ClampingScrollPhysics {
-  const _CustomPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const _CustomPhysics({ super.parent });
 
   @override
   _CustomPhysics applyTo(ScrollPhysics? ancestor) {

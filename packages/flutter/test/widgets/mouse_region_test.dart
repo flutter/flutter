@@ -11,12 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 class HoverClient extends StatefulWidget {
   const HoverClient({
-    Key? key,
+    super.key,
     this.onHover,
     this.child,
     this.onEnter,
     this.onExit,
-  }) : super(key: key);
+  });
 
   final ValueChanged<bool>? onHover;
   final Widget? child;
@@ -49,7 +49,7 @@ class HoverClientState extends State<HoverClient> {
 }
 
 class HoverFeedback extends StatefulWidget {
-  const HoverFeedback({Key? key, this.onEnter, this.onExit}) : super(key: key);
+  const HoverFeedback({super.key, this.onEnter, this.onExit});
 
   final VoidCallback? onEnter;
   final VoidCallback? onExit;

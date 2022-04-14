@@ -37,8 +37,8 @@ import 'transitions.dart';
 abstract class OverlayRoute<T> extends Route<T> {
   /// Creates a route that knows how to interact with an [Overlay].
   OverlayRoute({
-    RouteSettings? settings,
-  }) : super(settings: settings);
+    super.settings,
+  });
 
   /// Subclasses should override this getter to return the builders for the overlay.
   @factory
@@ -87,8 +87,8 @@ abstract class OverlayRoute<T> extends Route<T> {
 abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// Creates a route that animates itself when it is pushed or popped.
   TransitionRoute({
-    RouteSettings? settings,
-  }) : super(settings: settings);
+    super.settings,
+  });
 
   /// This future completes only once the transition itself has finished, after
   /// the overlay entries have been removed from the navigator's overlay.
@@ -695,16 +695,14 @@ class _DismissModalAction extends DismissAction {
 
 class _ModalScopeStatus extends InheritedWidget {
   const _ModalScopeStatus({
-    Key? key,
     required this.isCurrent,
     required this.canPop,
     required this.route,
-    required Widget child,
+    required super.child,
   }) : assert(isCurrent != null),
        assert(canPop != null),
        assert(route != null),
-       assert(child != null),
-       super(key: key, child: child);
+       assert(child != null);
 
   final bool isCurrent;
   final bool canPop;
@@ -727,9 +725,9 @@ class _ModalScopeStatus extends InheritedWidget {
 
 class _ModalScope<T> extends StatefulWidget {
   const _ModalScope({
-    Key? key,
+    super.key,
     required this.route,
-  }) : super(key: key);
+  });
 
   final ModalRoute<T> route;
 
@@ -904,9 +902,9 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
-    RouteSettings? settings,
+    super.settings,
     this.filter,
-  }) : super(settings: settings);
+  });
 
   /// The filter to add to the barrier.
   ///
@@ -1650,12 +1648,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 abstract class PopupRoute<T> extends ModalRoute<T> {
   /// Initializes the [PopupRoute].
   PopupRoute({
-    RouteSettings? settings,
-    ui.ImageFilter? filter,
-  }) : super(
-         filter: filter,
-         settings: settings,
-       );
+    super.settings,
+    super.filter,
+  });
 
   @override
   bool get opaque => false;
@@ -1896,7 +1891,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     String? barrierLabel,
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
-    RouteSettings? settings,
+    super.settings,
     this.anchorPoint,
   }) : assert(barrierDismissible != null),
        _pageBuilder = pageBuilder,
@@ -1904,8 +1899,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
        _barrierLabel = barrierLabel,
        _barrierColor = barrierColor,
        _transitionDuration = transitionDuration,
-       _transitionBuilder = transitionBuilder,
-       super(settings: settings);
+       _transitionBuilder = transitionBuilder;
 
   final RoutePageBuilder _pageBuilder;
 
@@ -2094,9 +2088,9 @@ class FocusTrap extends SingleChildRenderObjectWidget {
   /// Create a new [FocusTrap] widget scoped to the provided [focusScopeNode].
   const FocusTrap({
     required this.focusScopeNode,
-    required Widget child,
-    Key? key,
-  }) : super(child: child, key: key);
+    required Widget super.child,
+    super.key,
+  });
 
   /// The [focusScopeNode] that this focus trap widget operates on.
   final FocusScopeNode focusScopeNode;
@@ -2128,7 +2122,7 @@ class FocusTrap extends SingleChildRenderObjectWidget {
 class FocusTrapArea extends SingleChildRenderObjectWidget {
 
   /// Create a new [FocusTrapArea] that expands the area of the provided [focusNode].
-  const FocusTrapArea({required this.focusNode, Key? key, Widget? child}) : super(key: key, child: child);
+  const FocusTrapArea({required this.focusNode, super.key, super.child});
 
   /// The [FocusNode] that the focus trap area will expand to.
   final FocusNode focusNode;

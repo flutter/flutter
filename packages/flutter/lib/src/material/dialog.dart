@@ -42,7 +42,7 @@ class Dialog extends StatelessWidget {
   ///
   /// Typically used in conjunction with [showDialog].
   const Dialog({
-    Key? key,
+    super.key,
     this.backgroundColor,
     this.elevation,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
@@ -52,8 +52,7 @@ class Dialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.child,
-  }) : assert(clipBehavior != null),
-       super(key: key);
+  }) : assert(clipBehavior != null);
 
   /// {@template flutter.material.dialog.backgroundColor}
   /// The background color of the surface of this [Dialog].
@@ -253,7 +252,7 @@ class AlertDialog extends StatelessWidget {
   /// null, which implies a default that depends on the values of the other
   /// properties. See the documentation of [titlePadding] for details.
   const AlertDialog({
-    Key? key,
+    super.key,
     this.title,
     this.titlePadding,
     this.titleTextStyle,
@@ -276,8 +275,7 @@ class AlertDialog extends StatelessWidget {
     this.alignment,
     this.scrollable = false,
   }) : assert(contentPadding != null),
-       assert(clipBehavior != null),
-       super(key: key);
+       assert(clipBehavior != null);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -659,11 +657,11 @@ class AlertDialog extends StatelessWidget {
 class SimpleDialogOption extends StatelessWidget {
   /// Creates an option for a [SimpleDialog].
   const SimpleDialogOption({
-    Key? key,
+    super.key,
     this.onPressed,
     this.padding,
     this.child,
-  }) : super(key: key);
+  });
 
   /// The callback that is called when this option is selected.
   ///
@@ -774,7 +772,7 @@ class SimpleDialog extends StatelessWidget {
   ///
   /// The [titlePadding] and [contentPadding] arguments must not be null.
   const SimpleDialog({
-    Key? key,
+    super.key,
     this.title,
     this.titlePadding = const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
     this.titleTextStyle,
@@ -788,8 +786,7 @@ class SimpleDialog extends StatelessWidget {
     this.shape,
     this.alignment,
   }) : assert(titlePadding != null),
-       assert(contentPadding != null),
-       super(key: key);
+       assert(contentPadding != null);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -1136,12 +1133,12 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     required BuildContext context,
     required WidgetBuilder builder,
     CapturedThemes? themes,
-    Color? barrierColor = Colors.black54,
-    bool barrierDismissible = true,
+    super.barrierColor = Colors.black54,
+    super.barrierDismissible,
     String? barrierLabel,
     bool useSafeArea = true,
-    RouteSettings? settings,
-    Offset? anchorPoint,
+    super.settings,
+    super.anchorPoint,
   }) : assert(barrierDismissible != null),
        super(
          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -1152,13 +1149,9 @@ class DialogRoute<T> extends RawDialogRoute<T> {
            }
            return dialog;
          },
-         barrierDismissible: barrierDismissible,
-         barrierColor: barrierColor,
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
          transitionDuration: const Duration(milliseconds: 150),
          transitionBuilder: _buildMaterialDialogTransitions,
-         settings: settings,
-         anchorPoint: anchorPoint,
        );
 }
 

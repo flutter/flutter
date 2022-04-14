@@ -140,15 +140,14 @@ class Drawer extends StatelessWidget {
   ///
   /// The [elevation] must be non-negative.
   const Drawer({
-    Key? key,
+    super.key,
     this.backgroundColor,
     this.elevation,
     this.shape,
     this.width,
     this.child,
     this.semanticLabel,
-  }) : assert(elevation == null || elevation >= 0.0),
-       super(key: key);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// Sets the color of the [Material] that holds all of the [Drawer]'s
   /// contents.

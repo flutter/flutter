@@ -257,23 +257,15 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
   ///
   /// Such properties are used with [SemanticsData] objects.
   AttributedStringProperty(
-    String name,
-    AttributedString? value, {
-    bool showName = true,
+    String super.name,
+    super.value, {
+    super.showName,
     this.showWhenEmpty = false,
-    Object? defaultValue = kNoDefaultValue,
-    DiagnosticLevel level = DiagnosticLevel.info,
-    String? description,
+    super.defaultValue,
+    super.level,
+    super.description,
   }) : assert(showName != null),
-       assert(level != null),
-       super(
-         name,
-         value,
-         showName: showName,
-         defaultValue: defaultValue,
-         level: level,
-         description: description,
-       );
+       assert(level != null);
 
   /// Whether to show the property when the [value] is an [AttributedString]
   /// whose [AttributedString.string] is the empty string.
@@ -682,15 +674,11 @@ class SemanticsData with Diagnosticable {
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
   _SemanticsDiagnosticableNode({
-    String? name,
-    required SemanticsNode value,
-    required DiagnosticsTreeStyle? style,
+    super.name,
+    required super.value,
+    required super.style,
     required this.childOrder,
-  }) : super(
-    name: name,
-    value: value,
-    style: style,
-  );
+  });
 
   final DebugSemanticsDumpOrder childOrder;
 
@@ -4610,12 +4598,11 @@ class OrdinalSortKey extends SemanticsSortKey {
   /// The [order] must be a finite number, and must not be null.
   const OrdinalSortKey(
     this.order, {
-    String? name,
+    super.name,
   }) : assert(order != null),
        assert(order != double.nan),
        assert(order > double.negativeInfinity),
-       assert(order < double.infinity),
-       super(name: name);
+       assert(order < double.infinity);
 
   /// Determines the placement of this key in a sequence of keys that defines
   /// the order in which this node is traversed by the platform's accessibility

@@ -133,7 +133,7 @@ class RangeSlider extends StatefulWidget {
   /// equal to the [min] and less than or equal to the [max]. The [divisions]
   /// must be null or greater than 0.
   RangeSlider({
-    Key? key,
+    super.key,
     required this.values,
     required this.onChanged,
     this.onChangeStart,
@@ -152,8 +152,7 @@ class RangeSlider extends StatefulWidget {
        assert(values.start <= values.end),
        assert(values.start >= min && values.start <= max),
        assert(values.end >= min && values.end <= max),
-       assert(divisions == null || divisions > 0),
-       super(key: key);
+       assert(divisions == null || divisions > 0);
 
   /// The currently selected values for this range slider.
   ///
@@ -656,7 +655,6 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
 class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _RangeSliderRenderObjectWidget({
-    Key? key,
     required this.values,
     required this.divisions,
     required this.labels,
@@ -668,7 +666,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
     required this.onChangeEnd,
     required this.state,
     required this.semanticFormatterCallback,
-  }) : super(key: key);
+  });
 
   final RangeValues values;
   final int? divisions;
