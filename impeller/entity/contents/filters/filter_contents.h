@@ -96,6 +96,12 @@ class FilterContents : public Contents {
       Sigma sigma_y,
       BlurStyle blur_style = BlurStyle::kNormal);
 
+  static std::shared_ptr<FilterContents> MakeBorderMaskBlur(
+      FilterInput::Ref input,
+      Sigma sigma_x,
+      Sigma sigma_y,
+      BlurStyle blur_style = BlurStyle::kNormal);
+
   FilterContents();
 
   ~FilterContents() override;

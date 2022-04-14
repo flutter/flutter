@@ -236,6 +236,12 @@ struct Matrix {
 
   Scalar GetMaxBasisLength() const;
 
+  constexpr Vector3 GetScale() const {
+    return Vector3(Vector3(m[0], m[1], m[2]).Length(),
+                   Vector3(m[4], m[5], m[6]).Length(),
+                   Vector3(m[8], m[9], m[10]).Length());
+  }
+
   constexpr bool IsAffine() const {
     return (m[2] == 0 && m[3] == 0 && m[6] == 0 && m[7] == 0 && m[8] == 0 &&
             m[9] == 0 && m[10] == 1 && m[11] == 0 && m[14] == 0 && m[15] == 1);

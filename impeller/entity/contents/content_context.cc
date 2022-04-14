@@ -29,6 +29,8 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
   texture_pipelines_[{}] = std::make_unique<TexturePipeline>(*context_);
   gaussian_blur_pipelines_[{}] =
       std::make_unique<GaussianBlurPipeline>(*context_);
+  border_mask_blur_pipelines_[{}] =
+      std::make_unique<BorderMaskBlurPipeline>(*context_);
   solid_stroke_pipelines_[{}] =
       std::make_unique<SolidStrokePipeline>(*context_);
   glyph_atlas_pipelines_[{}] = std::make_unique<GlyphAtlasPipeline>(*context_);
