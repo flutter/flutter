@@ -1058,8 +1058,7 @@ class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGe
 }
 
 class FakeEditableText extends EditableText {
-  FakeEditableText({Key? key}): super(
-    key: key,
+  FakeEditableText({super.key}): super(
     controller: TextEditingController(),
     focusNode: FocusNode(),
     backgroundCursorColor: Colors.white,
@@ -1094,8 +1093,8 @@ class FakeEditableTextState extends EditableTextState {
 class FakeEditable extends LeafRenderObjectWidget {
   const FakeEditable(
     this.delegate, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   final EditableTextState delegate;
 
   @override

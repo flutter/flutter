@@ -445,9 +445,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     final String javaPath = globals.platform.isMacOS ?
-        version != null && version.major >= 2020 ?
-        globals.fs.path.join(directory, 'jre', 'Contents', 'Home') :
+        version != null && version.major < 2020 ?
         globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home') :
+        globals.fs.path.join(directory, 'jre', 'Contents', 'Home') :
         globals.fs.path.join(directory, 'jre');
     final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');
     if (!globals.processManager.canRun(javaExecutable)) {

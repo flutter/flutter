@@ -513,7 +513,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     await super.performReassemble();
     if (BindingBase.debugReassembleConfig?.widgetName == null) {
       if (!kReleaseMode) {
-        Timeline.startSync('Preparing Hot Reload (layout)', arguments: timelineArgumentsIndicatingLandmarkEvent);
+        Timeline.startSync('Preparing Hot Reload (layout)');
       }
       try {
         renderView.reassemble();

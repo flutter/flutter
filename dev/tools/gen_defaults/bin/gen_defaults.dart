@@ -17,6 +17,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/fab_template.dart';
@@ -77,6 +78,9 @@ Future<void> main(List<String> args) async {
   tokens['colorsLight'] = _readTokenFile('color_light.json');
   tokens['colorsDark'] = _readTokenFile('color_dark.json');
 
+  ButtonTemplate('md.comp.elevated-button', '$materialLib/elevated_button.dart', tokens).updateFile();
+  ButtonTemplate('md.comp.outlined-button', '$materialLib/outlined_button.dart', tokens).updateFile();
+  ButtonTemplate('md.comp.text-button', '$materialLib/text_button.dart', tokens).updateFile();
   CardTemplate('$materialLib/card.dart', tokens).updateFile();
   DialogTemplate('$materialLib/dialog.dart', tokens).updateFile();
   FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();

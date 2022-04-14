@@ -69,7 +69,7 @@ class Radio<T> extends StatefulWidget {
   ///   selected.
   /// * [onChanged] is called when the user selects this radio button.
   const Radio({
-    Key? key,
+    super.key,
     required this.value,
     required this.groupValue,
     required this.onChanged,
@@ -86,8 +86,7 @@ class Radio<T> extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   }) : assert(autofocus != null),
-       assert(toggleable != null),
-       super(key: key);
+       assert(toggleable != null);
 
   /// The value represented by this radio button.
   final T value;

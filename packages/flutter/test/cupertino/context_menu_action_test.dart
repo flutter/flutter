@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -122,4 +125,29 @@ void main() {
     expect(_getTextStyle(tester).fontWeight, kDefaultActionWeight);
   });
 
+  testWidgets(
+    'Hovering over Cupertino context menu action updates cursor to clickable on Web',
+    (WidgetTester tester) async {
+      /// Cupertino context menu action without "onPressed" callback.
+      await tester.pumpWidget(_getApp());
+      final Offset contextMenuAction = tester.getCenter(find.text('I am a CupertinoContextMenuAction'));
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+      await gesture.addPointer(location: contextMenuAction);
+      await tester.pumpAndSettle();
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+      // / Cupertino context menu action with "onPressed" callback.
+      await tester.pumpWidget(_getApp(onPressed: (){}));
+      await gesture.moveTo(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+      await gesture.moveTo(contextMenuAction);
+      addTearDown(gesture.removePointer);
+      await tester.pumpAndSettle();
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+  });
 }

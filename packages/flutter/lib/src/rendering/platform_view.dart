@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -176,7 +175,12 @@ class RenderAndroidView extends PlatformViewRenderBox {
     Size targetSize;
     do {
       targetSize = size;
-      _currentTextureSize = await _viewController.setSize(targetSize);
+      if (_viewController.isCreated) {
+        _currentTextureSize = await _viewController.setSize(targetSize);
+      } else {
+        await _viewController.create(size: targetSize);
+        _currentTextureSize = targetSize;
+      }
       // We've resized the platform view to targetSize, but it is possible that
       // while we were resizing the render object's size was changed again.
       // In that case we will resize the platform view again.
@@ -433,9 +437,8 @@ class RenderUiKitView extends RenderBox {
 class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _UiKitViewGestureRecognizer(
     this.controller,
-    this.gestureRecognizerFactories, {
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(supportedDevices: supportedDevices) {
+    this.gestureRecognizerFactories
+  ) {
     team = GestureArenaTeam()
       ..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -510,9 +513,8 @@ typedef _HandlePointerEvent = Future<void> Function(PointerEvent event);
 class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _PlatformViewGestureRecognizer(
     _HandlePointerEvent handlePointerEvent,
-    this.gestureRecognizerFactories, {
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(supportedDevices: supportedDevices) {
+    this.gestureRecognizerFactories
+  ) {
     team = GestureArenaTeam()
       ..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(

@@ -2302,9 +2302,9 @@ void main() {
       '     PhysicalModel\n'
       '     AnimatedPhysicalModel\n'
       '     Material\n'
-      '     _ScrollNotificationObserverScope\n'
-      '     NotificationListener<ScrollNotification>\n'
-      '     ScrollNotificationObserver\n'
+      '     _ScrollMetricsNotificationObserverScope\n'
+      '     NotificationListener<ScrollMetricsNotification>\n'
+      '     ScrollMetricsNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold\n'
       '     MediaQuery\n'
@@ -2447,11 +2447,10 @@ class _GeometryCachePainter extends CustomPainter {
 class _CustomPageRoute<T> extends PageRoute<T> {
   _CustomPageRoute({
     required this.builder,
-    RouteSettings settings = const RouteSettings(),
+    RouteSettings super.settings = const RouteSettings(),
     this.maintainState = true,
-    bool fullscreenDialog = false,
-  }) : assert(builder != null),
-       super(settings: settings, fullscreenDialog: fullscreenDialog);
+    super.fullscreenDialog,
+  }) : assert(builder != null);
 
   final WidgetBuilder builder;
 

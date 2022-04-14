@@ -75,6 +75,10 @@ class CodesignCommand extends Command<void> {
   FrameworkRepository get framework {
     return _framework ??= FrameworkRepository(
       checkouts,
+      upstreamRemote: Remote(
+        name: RemoteName.upstream,
+        url: argResults![kUpstream] as String,
+      ),
     );
   }
 

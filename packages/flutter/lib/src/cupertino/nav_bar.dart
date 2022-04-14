@@ -82,12 +82,11 @@ class _HeroTag {
 // property.
 class _FixedSizeSlidingTransition extends AnimatedWidget {
   const _FixedSizeSlidingTransition({
-    Key? key,
     required this.isLTR,
     required this.offsetAnimation,
     required this.size,
     required this.child,
-  }) : super(key: key, listenable: offsetAnimation);
+  }) : super(listenable: offsetAnimation);
 
   // Whether the writing direction used in the navigation bar transition is
   // left-to-right.
@@ -241,7 +240,7 @@ bool _isTransitionable(BuildContext context) {
 class CupertinoNavigationBar extends StatefulWidget implements ObstructingPreferredSizeWidget {
   /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
-    Key? key,
+    super.key,
     this.leading,
     this.automaticallyImplyLeading = true,
     this.automaticallyImplyMiddle = true,
@@ -266,8 +265,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
          'transition due to transitionBetweenRoutes = false.',
-       ),
-       super(key: key);
+       );
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.leading}
   /// Widget to place at the start of the navigation bar. Normally a back button
@@ -580,7 +578,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///
   /// The [largeTitle] argument is required and must not be null.
   const CupertinoSliverNavigationBar({
-    Key? key,
+    super.key,
     this.largeTitle,
     this.leading,
     this.automaticallyImplyLeading = true,
@@ -602,8 +600,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
          'true.',
-       ),
-       super(key: key);
+       );
 
   /// The navigation bar's title.
   ///
@@ -915,11 +912,10 @@ class _LargeTitleNavigationBarSliverDelegate
 /// doesn't scroll.
 class _PersistentNavigationBar extends StatelessWidget {
   const _PersistentNavigationBar({
-    Key? key,
     required this.components,
     this.padding,
     this.middleVisible,
-  }) : super(key: key);
+  });
 
   final _NavigationBarStaticComponents components;
 
@@ -1287,13 +1283,12 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   ///
   /// The [color] parameter must not be null.
   const CupertinoNavigationBarBackButton({
-    Key? key,
+    super.key,
     this.color,
     this.previousPageTitle,
     this.onPressed,
   }) : _backChevron = null,
-       _backLabel = null,
-       super(key: key);
+       _backLabel = null;
 
   // Allow the back chevron and label to be separately created (and keyed)
   // because they animate separately during page transitions.
@@ -1386,7 +1381,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
 
 
 class _BackChevron extends StatelessWidget {
-  const _BackChevron({ Key? key }) : super(key: key);
+  const _BackChevron();
 
   @override
   Widget build(BuildContext context) {
@@ -1431,10 +1426,9 @@ class _BackChevron extends StatelessWidget {
 /// is true.
 class _BackLabel extends StatelessWidget {
   const _BackLabel({
-    Key? key,
     required this.specifiedPreviousTitle,
     required this.route,
-  }) : super(key: key);
+  });
 
   final String? specifiedPreviousTitle;
   final ModalRoute<dynamic>? route;

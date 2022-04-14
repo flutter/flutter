@@ -28,9 +28,9 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   ///
   /// The [builder] argument must not be null.
   const SliverLayoutBuilder({
-    Key? key,
-    required SliverLayoutWidgetBuilder builder,
-  }) : super(key: key, builder: builder);
+    super.key,
+    required super.builder,
+  });
 
   /// Called at layout time to construct the widget tree.
   ///
