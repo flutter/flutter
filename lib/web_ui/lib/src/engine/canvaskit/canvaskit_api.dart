@@ -1072,23 +1072,20 @@ class SkPaint {
 
 @JS()
 @anonymous
+@staticInterop
 abstract class CkFilterOptions {}
 
 @JS()
 @anonymous
+@staticInterop
 class _CkCubicFilterOptions extends CkFilterOptions {
-  external double get B;
-  external double get C;
-
   external factory _CkCubicFilterOptions({double B, double C});
 }
 
 @JS()
 @anonymous
+@staticInterop
 class _CkTransformFilterOptions extends CkFilterOptions {
-  external SkFilterMode get filter;
-  external SkMipmapMode get mipmap;
-
   external factory _CkTransformFilterOptions(
       {SkFilterMode filter, SkMipmapMode mipmap});
 }
@@ -1119,12 +1116,18 @@ CkFilterOptions toSkFilterOptions(ui.FilterQuality filterQuality) {
 
 @JS()
 @anonymous
-class SkMaskFilter {
+@staticInterop
+class SkMaskFilter {}
+
+extension SkMaskFilterExtension on SkMaskFilter {
   external void delete();
 }
 
 @JS()
-class SkColorFilterNamespace {
+@staticInterop
+class SkColorFilterNamespace {}
+
+extension SkColorFilterNamespaceExtension on SkColorFilterNamespace {
   external SkColorFilter? MakeBlend(Float32List color, SkBlendMode blendMode);
   external SkColorFilter MakeMatrix(
     Float32List matrix, // 20-element matrix
@@ -1136,12 +1139,18 @@ class SkColorFilterNamespace {
 
 @JS()
 @anonymous
-class SkColorFilter {
+@staticInterop
+class SkColorFilter {}
+
+extension SkColorFilterExtension on SkColorFilter {
   external void delete();
 }
 
 @JS()
-class SkImageFilterNamespace {
+@staticInterop
+class SkImageFilterNamespace {}
+
+extension SkImageFilterNamespaceExtension on SkImageFilterNamespace {
   external SkImageFilter MakeBlur(
     double sigmaX,
     double sigmaY,
@@ -1168,12 +1177,18 @@ class SkImageFilterNamespace {
 
 @JS()
 @anonymous
-class SkImageFilter {
+@staticInterop
+class SkImageFilter {}
+
+extension SkImageFilterExtension on SkImageFilter {
   external void delete();
 }
 
 @JS()
-class SkPathNamespace {
+@staticInterop
+class SkPathNamespace {}
+
+extension SkPathNamespaceExtension on SkPathNamespace {
   /// Creates an [SkPath] using commands obtained from [SkPath.toCmds].
   external SkPath MakeFromCmds(List<dynamic> pathCommands);
 
@@ -1264,6 +1279,7 @@ Float32List toSkColorStops(List<double>? colorStops) {
 external _NativeFloat32ArrayType get _nativeFloat32ArrayType;
 
 @JS()
+@staticInterop
 class _NativeFloat32ArrayType {}
 
 @JS('window.flutterCanvasKit.Malloc')
@@ -1294,7 +1310,10 @@ external void freeFloat32List(SkFloat32List list);
 /// when WASM grows its memory. Call [toTypedArray] to get a new instance
 /// that's attached to the current WASM memory block.
 @JS()
-class SkFloat32List {
+@staticInterop
+class SkFloat32List {}
+
+extension SkFloat32ListExtension on SkFloat32List {
   /// Returns the [Float32List] object backed by WASM memory.
   ///
   /// Do not reuse the returned list across multiple WASM function/method
@@ -1349,8 +1368,12 @@ Float32List toSharedSkColor3(ui.Color color) {
 final SkFloat32List _sharedSkColor3 = mallocFloat32List(4);
 
 @JS('window.flutterCanvasKit.Path')
+@staticInterop
 class SkPath {
-  external SkPath([SkPath? other]);
+  external factory SkPath([SkPath? other]);
+}
+
+extension SkPathExtension on SkPath {
   external void setFillType(SkFillType fillType);
   external void addArc(
     Float32List oval,
