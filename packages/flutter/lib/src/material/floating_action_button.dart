@@ -81,7 +81,7 @@ class FloatingActionButton extends StatelessWidget {
   /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
   /// must be non-negative.
   const FloatingActionButton({
-    Key? key,
+    super.key,
     this.child,
     this.tooltip,
     this.foregroundColor,
@@ -118,8 +118,7 @@ class FloatingActionButton extends StatelessWidget {
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
-       extendedTextStyle = null,
-       super(key: key);
+       extendedTextStyle = null;
 
   /// Creates a small circular floating action button.
   ///
@@ -131,7 +130,7 @@ class FloatingActionButton extends StatelessWidget {
   /// [highlightElevation], and [disabledElevation] (if specified) must be
   /// non-negative.
   const FloatingActionButton.small({
-    Key? key,
+    super.key,
     this.child,
     this.tooltip,
     this.foregroundColor,
@@ -166,8 +165,7 @@ class FloatingActionButton extends StatelessWidget {
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
-       extendedTextStyle = null,
-       super(key: key);
+       extendedTextStyle = null;
 
   /// Creates a large circular floating action button.
   ///
@@ -179,7 +177,7 @@ class FloatingActionButton extends StatelessWidget {
   /// [highlightElevation], and [disabledElevation] (if specified) must be
   /// non-negative.
   const FloatingActionButton.large({
-    Key? key,
+    super.key,
     this.child,
     this.tooltip,
     this.foregroundColor,
@@ -214,8 +212,7 @@ class FloatingActionButton extends StatelessWidget {
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
-       extendedTextStyle = null,
-       super(key: key);
+       extendedTextStyle = null;
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with
   /// an optional [icon] and a [label].
@@ -224,7 +221,7 @@ class FloatingActionButton extends StatelessWidget {
   /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
   /// (if specified) must be non-negative.
   const FloatingActionButton.extended({
-    Key? key,
+    super.key,
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
@@ -262,8 +259,7 @@ class FloatingActionButton extends StatelessWidget {
        mini = false,
        _floatingActionButtonType = _FloatingActionButtonType.extended,
        child = icon,
-       _extendedLabel = label,
-       super(key: key);
+       _extendedLabel = label;
 
   /// The widget below this widget in the tree.
   ///
@@ -656,9 +652,8 @@ class FloatingActionButton extends StatelessWidget {
 // and MainAxisSize.min, to be as wide as their label and icon.
 class _ChildOverflowBox extends SingleChildRenderObjectWidget {
   const _ChildOverflowBox({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.child,
+  });
 
   @override
   _RenderChildOverflowBox createRenderObject(BuildContext context) {
@@ -675,9 +670,8 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
 
 class _RenderChildOverflowBox extends RenderAligningShiftedBox {
   _RenderChildOverflowBox({
-    RenderBox? child,
-    TextDirection? textDirection,
-  }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
+    super.textDirection,
+  }) : super(alignment: Alignment.center);
 
   @override
   double computeMinIntrinsicWidth(double height) => 0.0;
@@ -773,12 +767,10 @@ class _M2Defaults extends FloatingActionButtonThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_76
+// Generated version v0_92
 class _M3Defaults extends FloatingActionButtonThemeData {
   _M3Defaults(this.context, this.type, this.hasChild)
-    : _colors = Theme.of(context).colorScheme,
-      _textTheme = Theme.of(context).textTheme,
-      super(
+    : super(
         elevation: 6.0,
         focusElevation: 6.0,
         hoverElevation: 8.0,
@@ -805,8 +797,8 @@ class _M3Defaults extends FloatingActionButtonThemeData {
   final BuildContext context;
   final _FloatingActionButtonType type;
   final bool hasChild;
-  final ColorScheme _colors;
-  final TextTheme _textTheme;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   bool get _isExtended => type == _FloatingActionButtonType.extended;
 

@@ -37,6 +37,24 @@ void main() {
     expect(caretOffset.dx, painter.width);
   });
 
+  test('TextPainter caret test with WidgetSpan', () {
+    // Regression test for https://github.com/flutter/flutter/issues/98458.
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'before'),
+      WidgetSpan(child: Text('widget')),
+      TextSpan(text: 'after'),
+    ]);
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+    painter.layout();
+    final Offset caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: painter.text!.toPlainText().length), ui.Rect.zero);
+    expect(caretOffset.dx, painter.width);
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
   test('TextPainter null text test', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;

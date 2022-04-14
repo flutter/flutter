@@ -158,7 +158,7 @@ abstract class FlutterTestDriver {
       _vmService!.streamListen('Debug'),
     ]);
 
-    if ((await _vmService!.getVM()).isolates?.isEmpty != false) {
+    if ((await _vmService!.getVM()).isolates?.isEmpty ?? true) {
       await isolateStarted.future;
     }
 
@@ -287,7 +287,7 @@ abstract class FlutterTestDriver {
     return _vmService!.onDebugEvent
       .where((Event event) {
         return event.isolate?.id == isolateId
-            && event.kind?.startsWith(kind) == true;
+            && (event.kind?.startsWith(kind) ?? false);
       }).first;
   }
 
@@ -302,7 +302,7 @@ abstract class FlutterTestDriver {
         // don't need to wait for the event.
         final VmService vmService = _vmService!;
         final Isolate isolate = await vmService.getIsolate(isolateId);
-        if (isolate.pauseEvent?.kind?.startsWith(kind) == true) {
+        if (isolate.pauseEvent?.kind?.startsWith(kind) ?? false) {
           _debugPrint('Isolate was already at "$kind" (${isolate.pauseEvent!.kind}).');
           event.ignore();
         } else {
@@ -324,7 +324,7 @@ abstract class FlutterTestDriver {
 
   Future<bool> isAtAsyncSuspension() async {
     final Isolate isolate = await getFlutterIsolate();
-    return isolate.pauseEvent?.atAsyncSuspension == true;
+    return isolate.pauseEvent?.atAsyncSuspension ?? false;
   }
 
   Future<Isolate?> stepOverOrOverAsyncSuspension({ bool waitForNextPause = true }) async {
@@ -489,10 +489,10 @@ abstract class FlutterTestDriver {
 
 class FlutterRunTestDriver extends FlutterTestDriver {
   FlutterRunTestDriver(
-    Directory projectFolder, {
-    String? logPrefix,
+    super.projectFolder, {
+    super.logPrefix,
     this.spawnDdsInstance = true,
-  }) : super(projectFolder, logPrefix: logPrefix);
+  });
 
   String? _currentRunningAppId;
 
@@ -760,8 +760,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 }
 
 class FlutterTestTestDriver extends FlutterTestDriver {
-  FlutterTestTestDriver(Directory projectFolder, {String? logPrefix})
-    : super(projectFolder, logPrefix: logPrefix);
+  FlutterTestTestDriver(super.projectFolder, {super.logPrefix});
 
   Future<void> test({
     String testFile = 'test/test.dart',

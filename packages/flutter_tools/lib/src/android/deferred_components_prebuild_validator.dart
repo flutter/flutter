@@ -8,7 +8,6 @@ import '../base/deferred_component.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../template.dart';
@@ -29,12 +28,11 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// When [exitOnFail] is set to true, the [handleResults] and [attemptToolExit]
   /// methods will exit the tool when this validator detects a recommended
   /// change. This defaults to true.
-  DeferredComponentsPrebuildValidator(Directory projectDir, Logger logger, Platform platform, {
-    bool exitOnFail = true,
-    String? title,
+  DeferredComponentsPrebuildValidator(super.projectDir, super.logger, super.platform, {
+    super.exitOnFail,
+    super.title,
     Directory? templatesDir,
-  }) : _templatesDir = templatesDir,
-       super(projectDir, logger, platform, exitOnFail: exitOnFail, title: title);
+  }) : _templatesDir = templatesDir;
 
   final Directory? _templatesDir;
 

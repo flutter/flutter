@@ -152,4 +152,29 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
+
+  testUsingContext('nullable-getter help message is expected string', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    fileSystem.file('l10n.yaml').createSync();
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    await createTestCommandRunner(command).run(<String>['gen-l10n']);
+    expect(command.usage, contains(' If this value is set to false, then '));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }

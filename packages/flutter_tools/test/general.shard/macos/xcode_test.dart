@@ -133,85 +133,50 @@ void main() {
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
-        testWithoutContext('xcodeVersionSatisfactory is false when version is less than minimum', () {
+        testWithoutContext('version checks fail when version is less than minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(9, 0, 0);
+          xcodeProjectInterpreter.version = Version(9, null, null);
 
           expect(xcode.isRequiredVersionSatisfactory, isFalse);
-        });
-
-        testWithoutContext('xcodeVersionSatisfactory is false when xcodebuild tools are not installed', () {
-          xcodeProjectInterpreter.isInstalled = false;
-
-          expect(xcode.isRequiredVersionSatisfactory, isFalse);
-        });
-
-        testWithoutContext('xcodeVersionSatisfactory is true when version meets minimum', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 3, null);
-
-          expect(xcode.isRequiredVersionSatisfactory, isTrue);
-        });
-
-        testWithoutContext('xcodeVersionSatisfactory is true when major version exceeds minimum', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(13, 0, 0);
-
-          expect(xcode.isRequiredVersionSatisfactory, isTrue);
-        });
-
-        testWithoutContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 5, 0);
-
-          expect(xcode.isRequiredVersionSatisfactory, isTrue);
-        });
-
-        testWithoutContext('xcodeVersionSatisfactory is true when patch version exceeds minimum', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 3, 1);
-
-          expect(xcode.isRequiredVersionSatisfactory, isTrue);
-        });
-
-        testWithoutContext('isRecommendedVersionSatisfactory is false when version is less than minimum', () {
-          xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, null, null);
-
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
 
-        testWithoutContext('isRecommendedVersionSatisfactory is false when xcodebuild tools are not installed', () {
+        testWithoutContext('version checks fail when xcodebuild tools are not installed', () {
           xcodeProjectInterpreter.isInstalled = false;
 
+          expect(xcode.isRequiredVersionSatisfactory, isFalse);
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
 
-        testWithoutContext('isRecommendedVersionSatisfactory is true when version meets minimum', () {
+        testWithoutContext('version checks pass when version meets minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(13, 0, 0);
+          xcodeProjectInterpreter.version = Version(13, null, null);
 
+          expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
-        testWithoutContext('isRecommendedVersionSatisfactory is true when major version exceeds minimum', () {
+        testWithoutContext('version checks pass when major version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(14, 0, 0);
 
+          expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
-        testWithoutContext('isRecommendedVersionSatisfactory is true when minor version exceeds minimum', () {
+        testWithoutContext('version checks pass when minor version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(13, 3, 0);
 
+          expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
-        testWithoutContext('isRecommendedVersionSatisfactory is true when patch version exceeds minimum', () {
+        testWithoutContext('version checks pass when patch version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(13, 0, 2);
 
+          expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
@@ -232,7 +197,7 @@ void main() {
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(12, 3, null);
+          xcodeProjectInterpreter.version = Version(13, null, null);
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);

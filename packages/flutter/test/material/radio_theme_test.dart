@@ -66,7 +66,7 @@ void main() {
     expect(description[2], 'overlayColor: MaterialStateProperty.all(Color(0xfffffff1))');
     expect(description[3], 'splashRadius: 1.0');
     expect(description[4], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
-    expect(description[5], 'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)');
+    expect(description[5], equalsIgnoringHashCodes('visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)'));
   });
 
   testWidgets('Radio is themeable', (WidgetTester tester) async {

@@ -9,7 +9,9 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -508,18 +510,43 @@ void main() {
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, nullAssertions: true)), '--null_assertions');
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo', nullAssertions: true)), '--foo,--null_assertions');
   });
+
+  group('JSON encode DebuggingOptions', () {
+    testWithoutContext('can preserve the original options', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        enableDds: false,
+        dartEntrypointArgs: <String>['a', 'b'],
+        dartFlags: 'c',
+        deviceVmServicePort: 1234,
+        enableImpeller: true,
+      );
+      final String jsonString = json.encode(original.toJson());
+      final Map<String, dynamic> decoded = castStringKeyedMap(json.decode(jsonString))!;
+      final DebuggingOptions deserialized = DebuggingOptions.fromJson(decoded, BuildInfo.debug);
+      expect(deserialized.startPaused, original.startPaused);
+      expect(deserialized.disableServiceAuthCodes, original.disableServiceAuthCodes);
+      expect(deserialized.enableDds, original.enableDds);
+      expect(deserialized.dartEntrypointArgs, original.dartEntrypointArgs);
+      expect(deserialized.dartFlags, original.dartFlags);
+      expect(deserialized.deviceVmServicePort, original.deviceVmServicePort);
+      expect(deserialized.enableImpeller, original.enableImpeller);
+    });
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager(
     List<Device> allDevices, {
     List<DeviceDiscovery>? deviceDiscoveryOverrides,
-    required Logger logger,
-    required Terminal terminal,
+    required super.logger,
+    required super.terminal,
     String? wellKnownId,
   }) : _fakeDeviceDiscoverer = FakePollingDeviceDiscovery(),
        _deviceDiscoverers = <DeviceDiscovery>[],
-       super(logger: logger, terminal: terminal, userMessages: UserMessages()) {
+       super(userMessages: UserMessages()) {
     if (wellKnownId != null) {
       _fakeDeviceDiscoverer.wellKnownIds.add(wellKnownId);
     }

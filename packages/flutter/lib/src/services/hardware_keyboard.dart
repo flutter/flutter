@@ -205,18 +205,12 @@ abstract class KeyEvent with Diagnosticable {
 class KeyDownEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyDownEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    String? character,
-    required Duration timeStamp,
-    bool synthesized = false,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         character: character,
-         timeStamp: timeStamp,
-         synthesized: synthesized,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    super.character,
+    required super.timeStamp,
+    super.synthesized,
+  });
 }
 
 /// An event indicating that the user has released a key on the keyboard.
@@ -231,16 +225,11 @@ class KeyDownEvent extends KeyEvent {
 class KeyUpEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyUpEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    required Duration timeStamp,
-    bool synthesized = false,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         timeStamp: timeStamp,
-         synthesized: synthesized,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    required super.timeStamp,
+    super.synthesized,
+  });
 }
 
 /// An event indicating that the user has been holding a key on the keyboard
@@ -256,16 +245,11 @@ class KeyUpEvent extends KeyEvent {
 class KeyRepeatEvent extends KeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const KeyRepeatEvent({
-    required PhysicalKeyboardKey physicalKey,
-    required LogicalKeyboardKey logicalKey,
-    String? character,
-    required Duration timeStamp,
-  }) : super(
-         physicalKey: physicalKey,
-         logicalKey: logicalKey,
-         character: character,
-         timeStamp: timeStamp,
-       );
+    required super.physicalKey,
+    required super.logicalKey,
+    super.character,
+    required super.timeStamp,
+  });
 }
 
 /// The signature for [HardwareKeyboard.addHandler], a callback to to decide whether
@@ -887,6 +871,7 @@ class KeyEventManager {
     final PhysicalKeyboardKey physicalKey = rawEvent.physicalKey;
     final LogicalKeyboardKey logicalKey = rawEvent.logicalKey;
     final Set<PhysicalKeyboardKey> physicalKeysPressed = _hardwareKeyboard.physicalKeysPressed;
+    final List<KeyEvent> eventAfterwards = <KeyEvent>[];
     final KeyEvent? mainEvent;
     final LogicalKeyboardKey? recordedLogicalMain = _hardwareKeyboard.lookUpLayout(physicalKey);
     final Duration timeStamp = ServicesBinding.instance.currentSystemFrameTimeStamp;
@@ -923,12 +908,24 @@ class KeyEventManager {
       }
     }
     for (final PhysicalKeyboardKey key in physicalKeysPressed.difference(_rawKeyboard.physicalKeysPressed)) {
-      _keyEventsSinceLastMessage.add(KeyUpEvent(
-        physicalKey: key,
-        logicalKey: _hardwareKeyboard.lookUpLayout(key)!,
-        timeStamp: timeStamp,
-        synthesized: true,
-      ));
+      if (key == physicalKey) {
+        // Somehow, a down event is dispatched but the key is absent from
+        // keysPressed. Synthesize a up event for the key, but this event must
+        // be added after the main key down event.
+        eventAfterwards.add(KeyUpEvent(
+          physicalKey: key,
+          logicalKey: logicalKey,
+          timeStamp: timeStamp,
+          synthesized: true,
+        ));
+      } else {
+        _keyEventsSinceLastMessage.add(KeyUpEvent(
+          physicalKey: key,
+          logicalKey: _hardwareKeyboard.lookUpLayout(key)!,
+          timeStamp: timeStamp,
+          synthesized: true,
+        ));
+      }
     }
     for (final PhysicalKeyboardKey key in _rawKeyboard.physicalKeysPressed.difference(physicalKeysPressed)) {
       _keyEventsSinceLastMessage.add(KeyDownEvent(
@@ -938,8 +935,10 @@ class KeyEventManager {
         synthesized: true,
       ));
     }
-    if (mainEvent != null)
+    if (mainEvent != null) {
       _keyEventsSinceLastMessage.add(mainEvent);
+    }
+    _keyEventsSinceLastMessage.addAll(eventAfterwards);
   }
 
   /// Reset the inferred platform transit mode and related states.

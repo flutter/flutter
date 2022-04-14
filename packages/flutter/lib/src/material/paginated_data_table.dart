@@ -64,7 +64,7 @@ class PaginatedDataTable extends StatefulWidget {
   /// To modify the border or background color of the [PaginatedDataTable], use
   /// [CardTheme], since a [Card] wraps the inner [DataTable].
   PaginatedDataTable({
-    Key? key,
+    super.key,
     this.header,
     this.actions,
     required this.columns,
@@ -105,8 +105,7 @@ class PaginatedDataTable extends StatefulWidget {
            assert(availableRowsPerPage != null && availableRowsPerPage.contains(rowsPerPage));
          return true;
        }()),
-       assert(source != null),
-       super(key: key);
+       assert(source != null);
 
   /// The table card's optional header.
   ///

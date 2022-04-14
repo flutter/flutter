@@ -2479,6 +2479,14 @@ void main() {
       RawKeyEventDataWeb.modifierScrollLock: ModifierKey.scrollLockModifier,
     };
 
+    const Map<String, LogicalKeyboardKey> modifierTestsWithNoLocation =
+        <String, LogicalKeyboardKey>{
+      'Alt': LogicalKeyboardKey.altLeft,
+      'Shift': LogicalKeyboardKey.shiftLeft,
+      'Control': LogicalKeyboardKey.controlLeft,
+      'Meta': LogicalKeyboardKey.metaLeft,
+    };
+
     test('modifier keys are recognized individually', () {
       for (final int modifier in modifierTests.keys) {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
@@ -2536,6 +2544,19 @@ void main() {
             );
           }
         }
+      }
+    });
+
+    test('modifier keys with no location are mapped to left', () {
+      for (final String modifierKey in modifierTestsWithNoLocation.keys) {
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
+          'type': 'keydown',
+          'keymap': 'web',
+          'key': modifierKey,
+          'location': 0,
+        });
+        final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
+        expect(data.logicalKey, modifierTestsWithNoLocation[modifierKey]);
       }
     });
 

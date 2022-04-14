@@ -458,7 +458,7 @@ class _DefaultProcessUtils implements ProcessUtils {
         }
         if (mappedLine != null) {
           final String message = '$prefix$mappedLine';
-          if (stdoutErrorMatcher?.hasMatch(mappedLine) == true) {
+          if (stdoutErrorMatcher?.hasMatch(mappedLine) ?? false) {
             _logger.printError(message, wrap: false);
           } else if (trace) {
             _logger.printTrace(message);

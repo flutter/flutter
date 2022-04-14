@@ -199,7 +199,7 @@ class TestSemantics {
   ///
   /// See also:
   ///
-  ///  * [new TestSemantics.root], which uses this value to describe the root
+  ///  * [TestSemantics.root], which uses this value to describe the root
   ///    node.
   static const Rect rootRect = Rect.fromLTWH(0.0, 0.0, 2400.0, 1800.0);
 
@@ -367,7 +367,7 @@ class TestSemantics {
       buf.writeln("$indent  hint: '$hint',");
     if (textDirection != null)
       buf.writeln('$indent  textDirection: $textDirection,');
-    if (textSelection?.isValid == true)
+    if (textSelection?.isValid ?? false)
       buf.writeln('$indent  textSelection:\n[${textSelection!.start}, ${textSelection!.end}],');
     if (scrollIndex != null)
       buf.writeln('$indent scrollIndex: $scrollIndex,');

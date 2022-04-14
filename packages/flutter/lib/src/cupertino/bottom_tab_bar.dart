@@ -4,6 +4,7 @@
 
 import 'dart:ui' show ImageFilter;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -57,7 +58,7 @@ const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a tab bar in the iOS style.
   const CupertinoTabBar({
-    Key? key,
+    super.key,
     required this.items,
     this.onTap,
     this.currentIndex = 0,
@@ -81,8 +82,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
        assert(height != null && height >= 0.0),
-       assert(inactiveColor != null),
-       super(key: key);
+       assert(inactiveColor != null);
 
   /// The interactive items laid out within the bottom navigation bar.
   ///
@@ -235,14 +235,17 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
                 tabIndex: index + 1,
                 tabCount: items.length,
               ),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onTap == null ? null : () { onTap!(index); },
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 4.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: _buildSingleTabItem(items[index], active),
+              child: MouseRegion(
+                cursor:  kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onTap == null ? null : () { onTap!(index); },
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: _buildSingleTabItem(items[index], active),
+                    ),
                   ),
                 ),
               ),

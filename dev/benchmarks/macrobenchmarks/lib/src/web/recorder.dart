@@ -262,7 +262,7 @@ abstract class SceneBuilderRecorder extends Recorder {
     final Completer<Profile> profileCompleter = Completer<Profile>();
     _profile = Profile(name: name);
 
-    window.onBeginFrame = (_) {
+    PlatformDispatcher.instance.onBeginFrame = (_) {
       try {
         startMeasureFrame(profile!);
         onBeginFrame();
@@ -271,7 +271,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    window.onDrawFrame = () {
+    PlatformDispatcher.instance.onDrawFrame = () {
       try {
         _profile!.record('drawFrameDuration', () {
           final SceneBuilder sceneBuilder = SceneBuilder();
@@ -286,7 +286,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         endMeasureFrame();
 
         if (shouldContinue()) {
-          window.scheduleFrame();
+          PlatformDispatcher.instance.scheduleFrame();
         } else {
           profileCompleter.complete(_profile);
         }
@@ -295,7 +295,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    window.scheduleFrame();
+    PlatformDispatcher.instance.scheduleFrame();
     return profileCompleter.future;
   }
 }
@@ -403,7 +403,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     profile!.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed, reported: true);
 
     if (shouldContinue()) {
-      window.scheduleFrame();
+      PlatformDispatcher.instance.scheduleFrame();
     } else {
       for (final VoidCallback fn in _didStopCallbacks)
         fn();

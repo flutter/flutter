@@ -191,24 +191,22 @@ class BottomNavigationBarThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      backgroundColor,
-      elevation,
-      selectedIconTheme,
-      unselectedIconTheme,
-      selectedItemColor,
-      unselectedItemColor,
-      selectedLabelStyle,
-      unselectedLabelStyle,
-      showSelectedLabels,
-      showUnselectedLabels,
-      type,
-      enableFeedback,
-      landscapeLayout,
-      mouseCursor,
-    );
-  }
+  int get hashCode => Object.hash(
+    backgroundColor,
+    elevation,
+    selectedIconTheme,
+    unselectedIconTheme,
+    selectedItemColor,
+    unselectedItemColor,
+    selectedLabelStyle,
+    unselectedLabelStyle,
+    showSelectedLabels,
+    showUnselectedLabels,
+    type,
+    enableFeedback,
+    landscapeLayout,
+    mouseCursor,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -274,10 +272,10 @@ class BottomNavigationBarTheme extends InheritedWidget {
   ///
   /// The [data] must not be null.
   const BottomNavigationBarTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties used for all descendant [BottomNavigationBar] widgets.
   final BottomNavigationBarThemeData data;

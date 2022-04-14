@@ -33,6 +33,9 @@ void main() {
             onTapDown: (TapDownDetails details) {
               log.add('tap-down');
             },
+            onTapUp: (TapUpDetails details) {
+              log.add('tap-up');
+            },
             onTapCancel: () {
               log.add('tap-cancel');
             },
@@ -47,7 +50,7 @@ void main() {
 
     await tester.pump(const Duration(seconds: 1));
 
-    expect(log, equals(<String>['tap-down', 'tap']));
+    expect(log, equals(<String>['tap-down', 'tap-up', 'tap']));
     log.clear();
 
     await tester.tap(find.byType(InkWell), pointer: 2);
@@ -67,6 +70,7 @@ void main() {
     expect(log, equals(<String>['tap-down']));
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
+    expect(log, equals(<String>['tap-down', 'tap-up', 'tap']));
 
     log.clear();
     gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
@@ -1419,5 +1423,91 @@ void main() {
       isFocusable: true,
       textDirection: TextDirection.ltr,
     ));
+  });
+
+  testWidgets('InkWell highlight should not survive after [onTapDown, onDoubleTap] sequence', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onTap: () {
+              log.add('tap');
+            },
+            onDoubleTap: () {
+              log.add('double-tap');
+            },
+            onTapDown: (TapDownDetails details) {
+              log.add('tap-down');
+            },
+            onTapCancel: () {
+              log.add('tap-cancel');
+            },
+          ),
+        ),
+      ),
+    ));
+
+    final Offset taplocation = tester.getRect(find.byType(InkWell)).center;
+
+    final TestGesture gesture = await tester.startGesture(taplocation);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(log, equals(<String>['tap-down']));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byType(InkWell));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(log, equals(<String>['tap-down', 'double-tap']));
+
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
+  });
+
+  testWidgets('InkWell splash should not survive after [onTapDown, onTapDown, onTapCancel, onDoubleTap] sequence', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onTap: () {
+              log.add('tap');
+            },
+            onDoubleTap: () {
+              log.add('double-tap');
+            },
+            onTapDown: (TapDownDetails details) {
+              log.add('tap-down');
+            },
+            onTapCancel: () {
+              log.add('tap-cancel');
+            },
+          ),
+        ),
+      ),
+    ));
+
+    final Offset tapLocation = tester.getRect(find.byType(InkWell)).center;
+
+    final TestGesture gesture1 = await tester.startGesture(tapLocation);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(log, equals(<String>['tap-down']));
+    await gesture1.up();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final TestGesture gesture2 = await tester.startGesture(tapLocation);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(log, equals(<String>['tap-down', 'tap-down']));
+    await gesture2.up();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(log, equals(<String>['tap-down', 'tap-down', 'tap-cancel', 'double-tap']));
+
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
   });
 }

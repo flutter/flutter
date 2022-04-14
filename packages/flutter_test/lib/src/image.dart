@@ -6,8 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/painting.dart';
-
 import 'test_async_utils.dart';
 
 final Map<int, ui.Image> _cache = <int, ui.Image>{};
@@ -35,7 +33,7 @@ Future<ui.Image> createTestImage({
   assert(height != null && height > 0);
   assert(cache != null);
 
-  final int cacheKey = hashValues(width, height);
+  final int cacheKey = Object.hash(width, height);
   if (cache && _cache.containsKey(cacheKey)) {
     return _cache[cacheKey]!.clone();
   }

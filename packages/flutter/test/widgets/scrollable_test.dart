@@ -1273,6 +1273,35 @@ void main() {
     expect(tester.takeException(), null);
   });
 
+  testWidgets('Accepts drag with unknown device kind by default', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/90912.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+          ],
+        ),
+      )
+    );
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.unknown);
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 200);
+
+    await gesture.moveBy(const Offset(0.0, 200));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(getScrollOffset(tester), 0.0);
+
+    await gesture.removePointer();
+    await tester.pump();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android }));
+
   testWidgets('Does not scroll with mouse pointer drag when behavior is configured to ignore them', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride, enableMouseDrag: false);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
@@ -1374,7 +1403,7 @@ void main() {
 
 // ignore: must_be_immutable
 class SuperPessimisticScrollPhysics extends ScrollPhysics {
-  SuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
+  SuperPessimisticScrollPhysics({super.parent});
 
   int count = 0;
 
@@ -1391,7 +1420,7 @@ class SuperPessimisticScrollPhysics extends ScrollPhysics {
 }
 
 class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
-  const ExtraSuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
+  const ExtraSuperPessimisticScrollPhysics({super.parent});
 
   @override
   bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {

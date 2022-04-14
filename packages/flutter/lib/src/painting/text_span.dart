@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'basic_types.dart';
 import 'inline_span.dart';
 import 'text_painter.dart';
-import 'text_style.dart';
 
 /// An immutable span of text.
 ///
@@ -68,7 +67,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   const TextSpan({
     this.text,
     this.children,
-    TextStyle? style,
+    super.style,
     this.recognizer,
     MouseCursor? mouseCursor,
     this.onEnter,
@@ -78,8 +77,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     this.spellOut,
   }) : mouseCursor = mouseCursor ??
          (recognizer == null ? MouseCursor.defer : SystemMouseCursors.click),
-       assert(!(text == null && semanticsLabel != null)),
-       super(style: style);
+       assert(!(text == null && semanticsLabel != null));
 
   /// The text contained in this span.
   ///
@@ -518,7 +516,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     super.hashCode,
     text,
     recognizer,
@@ -526,7 +524,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     onEnter,
     onExit,
     mouseCursor,
-    hashList(children),
+    children == null ? null : Object.hashAll(children!),
   );
 
   @override

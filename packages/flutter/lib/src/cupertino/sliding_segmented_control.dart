@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -283,6 +284,15 @@ class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProvide
 /// [thumbColor], [backgroundColor] arguments can be used to override the
 /// segmented control's colors from its defaults.
 ///
+/// {@tool dartpad}
+/// This example shows a [CupertinoSlidingSegmentedControl] with an enum type.
+///
+/// The callback provided to [onValueChanged] should update the state of
+/// the parent [StatefulWidget] using the [State.setState] method, so that
+/// the parent gets rebuilt; for example:
+///
+/// ** See code in examples/api/lib/cupertino/segmented_control/cupertino_sliding_segmented_control.0.dart **
+/// {@end-tool}
 /// See also:
 ///
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
@@ -303,7 +313,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// appear as selected. The [groupValue] must be either null or one of the keys
   /// in the [children] map.
   CupertinoSlidingSegmentedControl({
-    Key? key,
+    super.key,
     required this.children,
     required this.onValueChanged,
     this.groupValue,
@@ -317,8 +327,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
        assert(
          groupValue == null || children.keys.contains(groupValue),
          'The groupValue must be either null or one of the keys in the children map.',
-       ),
-       super(key: key);
+       );
 
   /// The identifying keys and corresponding widget values in the
   /// segmented control.
@@ -647,12 +656,15 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
           onTap: () { widget.onValueChanged(entry.key); },
           inMutuallyExclusiveGroup: true,
           selected: widget.groupValue == entry.key,
-          child: _Segment<T>(
-            key: ValueKey<T>(entry.key),
-            highlighted: isHighlighted,
-            pressed: pressed == entry.key,
-            isDragging: isThumbDragging,
-            child: entry.value,
+          child: MouseRegion(
+            cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+            child: _Segment<T>(
+              key: ValueKey<T>(entry.key),
+              highlighted: isHighlighted,
+              pressed: pressed == entry.key,
+              isDragging: isThumbDragging,
+              child: entry.value,
+            ),
           ),
         ),
       );
@@ -701,13 +713,13 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
 
 class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   _SegmentedControlRenderWidget({
-    Key? key,
-    List<Widget> children = const <Widget>[],
+    super.key,
+    super.children,
     required this.highlightedIndex,
     required this.thumbColor,
     required this.thumbScale,
     required this.state,
-  }) : super(key: key, children: children);
+  });
 
   final int? highlightedIndex;
   final Color thumbColor;

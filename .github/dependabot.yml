@@ -10,7 +10,7 @@ updates:
     reviewers:
       - "jmagman"
       - "keyonghan"
-      - "yusufm"
+      - "yusuf-goog"
     labels:
       - "team"
       - "team: infra"
@@ -21,8 +21,8 @@ updates:
       interval: "weekly"
     reviewers:
       - "keyonghan"
-      - "yusufm"
-      - "fujino"
+      - "yusuf-goog"
+      - "christopherfujino"
     labels:
       - "team"
       - "team: infra"

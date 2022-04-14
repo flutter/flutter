@@ -280,7 +280,7 @@ class Router<T> extends StatefulWidget {
   ///
   /// The [routerDelegate] must not be null.
   const Router({
-    Key? key,
+    super.key,
     this.routeInformationProvider,
     this.routeInformationParser,
     required this.routerDelegate,
@@ -290,8 +290,7 @@ class Router<T> extends StatefulWidget {
           (routeInformationProvider == null && restorationScopeId == null) || routeInformationParser != null,
           'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.'
         ),
-        assert(routerDelegate != null),
-        super(key: key);
+        assert(routerDelegate != null);
 
   /// The route information provider for the router.
   ///
@@ -466,7 +465,7 @@ class Router<T> extends StatefulWidget {
 }
 
 typedef _AsyncPassthrough<Q> = Future<Q> Function(Q);
-typedef _DelegateRouteSetter<T> = Future<void> Function(T);
+typedef _RouteSetter<T> = Future<void> Function(T);
 
 /// The [Router]'s intention when it reports a new [RouteInformation] to the
 /// [RouteInformationProvider].
@@ -492,8 +491,7 @@ enum RouteInformationReportingType {
 }
 
 class _RouterState<T> extends State<Router<T>> with RestorationMixin {
-  Object? _currentRouteInformationParserTransaction;
-  Object? _currentRouterDelegateTransaction;
+  Object? _currentRouterTransaction;
   RouteInformationReportingType? _currentIntentionToReport;
   final _RestorableRouteInformation _routeInformation = _RestorableRouteInformation();
 
@@ -593,8 +591,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
         widget.backButtonDispatcher != oldWidget.backButtonDispatcher ||
         widget.routeInformationParser != oldWidget.routeInformationParser ||
         widget.routerDelegate != oldWidget.routerDelegate) {
-      _currentRouteInformationParserTransaction = Object();
-      _currentRouterDelegateTransaction = Object();
+      _currentRouterTransaction = Object();
     }
     if (widget.routeInformationProvider != oldWidget.routeInformationProvider) {
       oldWidget.routeInformationProvider?.removeListener(_handleRouteInformationProviderNotification);
@@ -619,20 +616,27 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     widget.routeInformationProvider?.removeListener(_handleRouteInformationProviderNotification);
     widget.backButtonDispatcher?.removeCallback(_handleBackButtonDispatcherNotification);
     widget.routerDelegate.removeListener(_handleRouterDelegateNotification);
-    _currentRouteInformationParserTransaction = null;
-    _currentRouterDelegateTransaction = null;
+    _currentRouterTransaction = null;
     super.dispose();
   }
 
-  void _processRouteInformation(RouteInformation information, ValueGetter<_DelegateRouteSetter<T>> delegateRouteSetter) {
-    _currentRouteInformationParserTransaction = Object();
-    _currentRouterDelegateTransaction = Object();
+  void _processRouteInformation(RouteInformation information, ValueGetter<_RouteSetter<T>> delegateRouteSetter) {
+    _currentRouterTransaction = Object();
     widget.routeInformationParser!
       .parseRouteInformation(information)
-      .then<T>(_verifyRouteInformationParserStillCurrent(_currentRouteInformationParserTransaction, widget))
-      .then<void>(delegateRouteSetter())
-      .then<void>(_verifyRouterDelegatePushStillCurrent(_currentRouterDelegateTransaction, widget))
-      .then<void>(_rebuild);
+      .then<void>(_processParsedRouteInformation(_currentRouterTransaction, delegateRouteSetter));
+  }
+
+  _RouteSetter<T> _processParsedRouteInformation(Object? transaction, ValueGetter<_RouteSetter<T>> delegateRouteSetter) {
+    return (T data) async {
+      if (_currentRouterTransaction != transaction) {
+        return;
+      }
+      await delegateRouteSetter()(data);
+      if (_currentRouterTransaction == transaction) {
+        _rebuild();
+      }
+    };
   }
 
   void _handleRouteInformationProviderNotification() {
@@ -641,56 +645,21 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   }
 
   Future<bool> _handleBackButtonDispatcherNotification() {
-    _currentRouteInformationParserTransaction = Object();
-    _currentRouterDelegateTransaction = Object();
+    _currentRouterTransaction = Object();
     return widget.routerDelegate
       .popRoute()
-      .then<bool>(_verifyRouterDelegatePopStillCurrent(_currentRouterDelegateTransaction, widget))
-      .then<bool>((bool data) {
-        _rebuild();
-        return SynchronousFuture<bool>(data);
-      });
+      .then<bool>(_handleRoutePopped(_currentRouterTransaction));
   }
 
-  static final Future<dynamic> _never = Completer<dynamic>().future; // won't ever complete
-
-  _AsyncPassthrough<T> _verifyRouteInformationParserStillCurrent(Object? transaction, Router<T> originalWidget) {
-    return (T data) {
-      if (transaction == _currentRouteInformationParserTransaction &&
-          widget.routeInformationProvider == originalWidget.routeInformationProvider &&
-          widget.backButtonDispatcher == originalWidget.backButtonDispatcher &&
-          widget.routeInformationParser == originalWidget.routeInformationParser &&
-          widget.routerDelegate == originalWidget.routerDelegate) {
-        return SynchronousFuture<T>(data);
-      }
-      return _never as Future<T>;
-    };
-  }
-
-  _AsyncPassthrough<void> _verifyRouterDelegatePushStillCurrent(Object? transaction, Router<T> originalWidget) {
-    return (void data) {
-      if (transaction == _currentRouterDelegateTransaction &&
-          widget.routeInformationProvider == originalWidget.routeInformationProvider &&
-          widget.backButtonDispatcher == originalWidget.backButtonDispatcher &&
-          widget.routeInformationParser == originalWidget.routeInformationParser &&
-          widget.routerDelegate == originalWidget.routerDelegate)
-        return SynchronousFuture<void>(data);
-      return _never;
-    };
-  }
-
-  _AsyncPassthrough<bool> _verifyRouterDelegatePopStillCurrent(Object? transaction, Router<T> originalWidget) {
+  _AsyncPassthrough<bool> _handleRoutePopped(Object? transaction) {
     return (bool data) {
-      if (transaction == _currentRouterDelegateTransaction &&
-          widget.routeInformationProvider == originalWidget.routeInformationProvider &&
-          widget.backButtonDispatcher == originalWidget.backButtonDispatcher &&
-          widget.routeInformationParser == originalWidget.routeInformationParser &&
-          widget.routerDelegate == originalWidget.routerDelegate) {
-        return SynchronousFuture<bool>(data);
+      if (transaction != _currentRouterTransaction) {
+        // A rebuilt was trigger from a different source. Returns true to
+        // prevent bubbling.
+        return SynchronousFuture<bool>(true);
       }
-      // A rebuilt was trigger from a different source. Returns true to
-      // prevent bubbling.
-      return SynchronousFuture<bool>(true);
+      _rebuild();
+      return SynchronousFuture<bool>(data);
     };
   }
 
@@ -727,17 +696,15 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
 
 class _RouterScope extends InheritedWidget {
   const _RouterScope({
-    Key? key,
     required this.routeInformationProvider,
     required this.backButtonDispatcher,
     required this.routeInformationParser,
     required this.routerDelegate,
     required this.routerState,
-    required Widget child,
+    required super.child,
   })  : assert(routeInformationProvider == null || routeInformationParser != null),
         assert(routerDelegate != null),
-        assert(routerState != null),
-        super(key: key, child: child);
+        assert(routerState != null);
 
   final ValueListenable<RouteInformation?>? routeInformationProvider;
   final BackButtonDispatcher? backButtonDispatcher;
@@ -1051,10 +1018,10 @@ class BackButtonListener extends StatefulWidget {
   ///
   /// The [child] and [onBackButtonPressed] arguments must not be null.
   const BackButtonListener({
-    Key? key,
+    super.key,
     required this.child,
     required this.onBackButtonPressed,
-  }) : super(key: key);
+  });
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -1368,7 +1335,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   RouteInformation get value => _value;
   RouteInformation _value;
 
-  RouteInformation _valueInEngine = RouteInformation(location: WidgetsBinding.instance.window.defaultRouteName);
+  RouteInformation _valueInEngine = RouteInformation(location: WidgetsBinding.instance.platformDispatcher.defaultRouteName);
 
   void _platformReportsNewRouteInformation(RouteInformation routeInformation) {
     if (_value == routeInformation)

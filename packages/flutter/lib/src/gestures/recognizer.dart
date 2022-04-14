@@ -96,6 +96,43 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// coming from.
   final Map<int, PointerDeviceKind> _pointerToKind = <int, PointerDeviceKind>{};
 
+  /// Registers a new pointer pan/zoom that might be relevant to this gesture
+  /// detector.
+  ///
+  /// A pointer pan/zoom is a stream of events that conveys data covering
+  /// pan, zoom, and rotate data from a multi-finger trackpad gesture.
+  ///
+  /// The owner of this gesture recognizer calls addPointerPanZoom() with the
+  /// PointerPanZoomStartEvent of each pointer that should be considered for
+  /// this gesture.
+  ///
+  /// It's the GestureRecognizer's responsibility to then add itself
+  /// to the global pointer router (see [PointerRouter]) to receive
+  /// subsequent events for this pointer, and to add the pointer to
+  /// the global gesture arena manager (see [GestureArenaManager]) to track
+  /// that pointer.
+  ///
+  /// This method is called for each and all pointers being added. In
+  /// most cases, you want to override [addAllowedPointerPanZoom] instead.
+  void addPointerPanZoom(PointerPanZoomStartEvent event) {
+    _pointerToKind[event.pointer] = event.kind;
+    if (isPointerPanZoomAllowed(event)) {
+      addAllowedPointerPanZoom(event);
+    } else {
+      handleNonAllowedPointerPanZoom(event);
+    }
+  }
+
+  /// Registers a new pointer pan/zoom that's been checked to be allowed by this
+  /// gesture recognizer.
+  ///
+  /// Subclasses of [GestureRecognizer] are supposed to override this method
+  /// instead of [addPointerPanZoom] because [addPointerPanZoom] will be called for each
+  /// pointer being added while [addAllowedPointerPanZoom] is only called for pointers
+  /// that are allowed by this recognizer.
+  @protected
+  void addAllowedPointerPanZoom(PointerPanZoomStartEvent event) { }
+
   /// Registers a new pointer that might be relevant to this gesture
   /// detector.
   ///
@@ -147,6 +184,18 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     return _supportedDevices == null || _supportedDevices!.contains(event.kind);
   }
 
+  /// Handles a pointer pan/zoom being added that's not allowed by this recognizer.
+  ///
+  /// Subclasses can override this method and reject the gesture.
+  @protected
+  void handleNonAllowedPointerPanZoom(PointerPanZoomStartEvent event) { }
+
+  /// Checks whether or not a pointer pan/zoom is allowed to be tracked by this recognizer.
+  @protected
+  bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) {
+    return _supportedDevices == null || _supportedDevices!.contains(event.kind);
+  }
+
   /// For a given pointer ID, returns the device kind associated with it.
   ///
   /// The pointer ID is expected to be a valid one i.e. an event was received
@@ -191,7 +240,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
           // The 19 in the line below is the width of the prefix used by
           // _debugLogDiagnostic in arena.dart.
           final String prefix = debugPrintGestureArenaDiagnostics ? '${' ' * 19}❙ ' : '';
-          debugPrint('$prefix$this calling $name callback.${ report?.isNotEmpty == true ? " $report" : "" }');
+          debugPrint('$prefix$this calling $name callback.${ (report?.isNotEmpty ?? false) ? " $report" : "" }');
         }
         return true;
       }());
@@ -236,18 +285,14 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   OneSequenceGestureRecognizer({
-    Object? debugOwner,
+    super.debugOwner,
     @Deprecated(
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
-       );
+    super.kind,
+    super.supportedDevices,
+  });
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
   final Set<int> _trackedPointers = HashSet<int>();
@@ -397,7 +442,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// a [PointerUpEvent] or a [PointerCancelEvent] event.
   @protected
   void stopTrackingIfPointerNoLongerDown(PointerEvent event) {
-    if (event is PointerUpEvent || event is PointerCancelEvent)
+    if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent)
       stopTrackingPointer(event.pointer);
   }
 }
@@ -447,13 +492,13 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     this.deadline,
     this.preAcceptSlopTolerance = kTouchSlop,
     this.postAcceptSlopTolerance = kTouchSlop,
-    Object? debugOwner,
+    super.debugOwner,
     @Deprecated(
       'Migrate to supportedDevices. '
       'This feature was deprecated after v2.3.0-1.0.pre.',
     )
-    PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
+    super.kind,
+    super.supportedDevices,
   }) : assert(
          preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be positive or null',
@@ -461,11 +506,6 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
        assert(
          postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
          'The postAcceptSlopTolerance must be positive or null',
-       ),
-       super(
-         debugOwner: debugOwner,
-         kind: kind,
-         supportedDevices: supportedDevices,
        );
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this

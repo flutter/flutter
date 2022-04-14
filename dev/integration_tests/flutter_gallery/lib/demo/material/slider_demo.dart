@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class SliderDemo extends StatefulWidget {
-  const SliderDemo({Key? key}) : super(key: key);
+  const SliderDemo({super.key});
 
   static const String routeName = '/material/slider';
 

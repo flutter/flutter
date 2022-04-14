@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:developer' as developer;
 import 'dart:ui' as ui show Image;
 
@@ -208,7 +207,7 @@ class DecorationImage {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     image,
     colorFilter,
     fit,

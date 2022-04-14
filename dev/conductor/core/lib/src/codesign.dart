@@ -73,9 +73,12 @@ class CodesignCommand extends Command<void> {
 
   FrameworkRepository? _framework;
   FrameworkRepository get framework {
-    return _framework ??= FrameworkRepository.localRepoAsUpstream(
+    return _framework ??= FrameworkRepository(
       checkouts,
-      upstreamPath: flutterRoot.path,
+      upstreamRemote: Remote(
+        name: RemoteName.upstream,
+        url: argResults![kUpstream] as String,
+      ),
     );
   }
 
@@ -113,7 +116,7 @@ class CodesignCommand extends Command<void> {
     } else {
       revision = ((await processManager.run(
         <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: (await framework.checkoutDirectory).path,
+        workingDirectory: flutterRoot.path,
       )).stdout as String).trim();
       assert(revision.isNotEmpty);
     }

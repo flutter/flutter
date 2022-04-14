@@ -227,8 +227,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 
 
 class FuchsiaDevice extends Device {
-  FuchsiaDevice(String id, {required this.name}) : super(
-      id,
+  FuchsiaDevice(super.id, {required this.name}) : super(
       platformType: PlatformType.fuchsia,
       category: null,
       ephemeral: true,
@@ -723,7 +722,7 @@ class FuchsiaDevice extends Device {
             continue;
           }
           final int? port = vmService.httpAddress?.port;
-          if (port != null && uiIsolate.name?.contains(isolateName) == true) {
+          if (port != null && (uiIsolate.name?.contains(isolateName) ?? false)) {
             return port;
           }
         }
@@ -821,7 +820,7 @@ class FuchsiaIsolateDiscoveryProtocol {
           continue;
         }
         final int? port = service?.httpAddress?.port;
-        if (port != null && uiIsolate.name?.contains(_isolateName) == true) {
+        if (port != null && (uiIsolate.name?.contains(_isolateName) ?? false)) {
           _foundUri.complete(_device.ipv6
               ? Uri.parse('http://[$_ipv6Loopback]:$port/')
               : Uri.parse('http://$_ipv4Loopback:$port/'));

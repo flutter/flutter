@@ -57,6 +57,7 @@ class GenSnapshot {
     DarwinArch? darwinArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
+    assert(darwinArch != DarwinArch.armv7);
     assert(snapshotType.platform != TargetPlatform.ios || darwinArch != null);
     final List<String> args = <String>[
       ...additionalArgs,
@@ -64,10 +65,12 @@ class GenSnapshot {
 
     String snapshotterPath = getSnapshotterPath(snapshotType);
 
-    // iOS has a separate gen_snapshot for armv7 and arm64 in the same,
-    // directory. So we need to select the right one.
-    if (snapshotType.platform == TargetPlatform.ios) {
-      snapshotterPath += '_${getNameForDarwinArch(darwinArch!)}';
+    // iOS and macOS have separate gen_snapshot binaries for each target
+    // architecture (iOS: armv7, arm64; macOS: x86_64, arm64). Select the right
+    // one for the target architecture in question.
+    if (snapshotType.platform == TargetPlatform.ios ||
+        snapshotType.platform == TargetPlatform.darwin) {
+      snapshotterPath += '_${getDartNameForDarwinArch(darwinArch!)}';
     }
 
     return _processUtils.stream(
@@ -169,9 +172,8 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--strip');
     }
 
-    if (platform == TargetPlatform.android_arm || darwinArch == DarwinArch.armv7) {
+    if (platform == TargetPlatform.android_arm) {
       // Use softfp for Android armv7 devices.
-      // This is the default for armv7 iOS builds, but harmless to set.
       // TODO(cbracken): eliminate this when we fix https://github.com/flutter/flutter/issues/17489
       genSnapshotArgs.add('--no-sim-use-hardfp');
 

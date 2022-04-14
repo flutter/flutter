@@ -63,7 +63,7 @@ class Checkbox extends StatefulWidget {
   ///
   /// The values of [tristate] and [autofocus] must not be null.
   const Checkbox({
-    Key? key,
+    super.key,
     required this.value,
     this.tristate = false,
     required this.onChanged,
@@ -83,8 +83,7 @@ class Checkbox extends StatefulWidget {
     this.side,
   }) : assert(tristate != null),
        assert(tristate || value != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(autofocus != null);
 
   /// Whether this checkbox is checked.
   ///
@@ -468,7 +467,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
       ?? const Color(0xFFFFFFFF);
 
     return Semantics(
-      checked: widget.value == true,
+      checked: widget.value ?? false,
       child: buildToggleable(
         mouseCursor: effectiveMouseCursor,
         focusNode: widget.focusNode,
@@ -660,13 +659,13 @@ class _CheckboxPainter extends ToggleablePainter {
       _drawBox(canvas, outer, paint, side, true);
       if (tNormalized <= 0.5) {
         final double tShrink = 1.0 - tNormalized * 2.0;
-        if (previousValue == true)
+        if (previousValue ?? false)
           _drawCheck(canvas, origin, tShrink, strokePaint);
         else
           _drawDash(canvas, origin, tShrink, strokePaint);
       } else {
         final double tExpand = (tNormalized - 0.5) * 2.0;
-        if (value == true)
+        if (value ?? false)
           _drawCheck(canvas, origin, tExpand, strokePaint);
         else
           _drawDash(canvas, origin, tExpand, strokePaint);

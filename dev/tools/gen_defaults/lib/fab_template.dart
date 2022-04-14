@@ -5,20 +5,21 @@
 import 'template.dart';
 
 class FABTemplate extends TokenTemplate {
-  const FABTemplate(String fileName, Map<String, dynamic> tokens) : super(fileName, tokens);
+  const FABTemplate(super.fileName, super.tokens)
+    : super(colorSchemePrefix: '_colors.',
+        textThemePrefix: '_textTheme.',
+      );
 
   @override
   String generate() => '''
 // Generated version ${tokens["version"]}
 class _M3Defaults extends FloatingActionButtonThemeData {
   _M3Defaults(this.context, this.type, this.hasChild)
-    : _colors = Theme.of(context).colorScheme,
-      _textTheme = Theme.of(context).textTheme,
-      super(
-        elevation: ${elevation("md.comp.fab.primary.container.elevation")},
-        focusElevation: ${elevation("md.comp.fab.primary.focus.container.elevation")},
-        hoverElevation: ${elevation("md.comp.fab.primary.hover.container.elevation")},
-        highlightElevation: ${elevation("md.comp.fab.primary.pressed.container.elevation")},
+    : super(
+        elevation: ${elevation("md.comp.fab.primary.container")},
+        focusElevation: ${elevation("md.comp.fab.primary.focus.container")},
+        hoverElevation: ${elevation("md.comp.fab.primary.hover.container")},
+        highlightElevation: ${elevation("md.comp.fab.primary.pressed.container")},
         enableFeedback: true,
         sizeConstraints: const BoxConstraints.tightFor(
           width: ${tokens["md.comp.fab.primary.container.width"]},
@@ -41,28 +42,28 @@ class _M3Defaults extends FloatingActionButtonThemeData {
   final BuildContext context;
   final _FloatingActionButtonType type;
   final bool hasChild;
-  final ColorScheme _colors;
-  final TextTheme _textTheme;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   bool get _isExtended => type == _FloatingActionButtonType.extended;
 
-  @override Color? get foregroundColor => _colors.${color("md.comp.fab.primary.icon")};
-  @override Color? get backgroundColor => _colors.${color("md.comp.fab.primary.container")};
-  @override Color? get splashColor => _colors.${color("md.comp.fab.primary.pressed.state-layer")};
-  @override Color? get focusColor => _colors.${color("md.comp.fab.primary.focus.state-layer")};
-  @override Color? get hoverColor => _colors.${color("md.comp.fab.primary.hover.state-layer")};
+  @override Color? get foregroundColor => ${componentColor("md.comp.fab.primary.icon")};
+  @override Color? get backgroundColor => ${componentColor("md.comp.fab.primary.container")};
+  @override Color? get splashColor => ${componentColor("md.comp.fab.primary.pressed.state-layer")};
+  @override Color? get focusColor => ${componentColor("md.comp.fab.primary.focus.state-layer")};
+  @override Color? get hoverColor => ${componentColor("md.comp.fab.primary.hover.state-layer")};
 
   @override
   ShapeBorder? get shape {
     switch (type) {
       case _FloatingActionButtonType.regular:
-       return ${shape("md.comp.fab.primary.container.shape")};
+       return ${shape("md.comp.fab.primary.container")};
       case _FloatingActionButtonType.small:
-       return ${shape("md.comp.fab.primary.small.container.shape")};
+       return ${shape("md.comp.fab.primary.small.container")};
       case _FloatingActionButtonType.large:
-       return ${shape("md.comp.fab.primary.large.container.shape")};
+       return ${shape("md.comp.fab.primary.large.container")};
       case _FloatingActionButtonType.extended:
-       return ${shape("md.comp.extended-fab.primary.container.shape")};
+       return ${shape("md.comp.extended-fab.primary.container")};
      }
   }
 
@@ -77,7 +78,7 @@ class _M3Defaults extends FloatingActionButtonThemeData {
   }
 
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
-  @override TextStyle? get extendedTextStyle => _textTheme.${textStyle("md.comp.extended-fab.primary.label-text")};
+  @override TextStyle? get extendedTextStyle => ${textStyle("md.comp.extended-fab.primary.label-text")};
 }
 ''';
 }

@@ -120,16 +120,14 @@ class RadioThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      mouseCursor,
-      fillColor,
-      overlayColor,
-      splashRadius,
-      materialTapTargetSize,
-      visualDensity,
-    );
-  }
+  int get hashCode => Object.hash(
+    mouseCursor,
+    fillColor,
+    overlayColor,
+    splashRadius,
+    materialTapTargetSize,
+    visualDensity,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -202,10 +200,10 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
 class RadioTheme extends InheritedWidget {
   /// Constructs a radio theme that configures all descendant [Radio] widgets.
   const RadioTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// The properties used for all descendant [Radio] widgets.
   final RadioThemeData data;

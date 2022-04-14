@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
 
@@ -1168,10 +1169,8 @@ void main() {
         ),
       );
 
-      expect(
-        find.byType(ClipRect),
-        findsNothing,
-      );
+      final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      expect(renderClip.clipBehavior, equals(Clip.none));
 
       await tester.pumpWidget(
         MaterialApp(

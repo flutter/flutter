@@ -94,15 +94,13 @@ class ProgressIndicatorThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      color,
-      linearTrackColor,
-      linearMinHeight,
-      circularTrackColor,
-      refreshBackgroundColor,
-    );
-  }
+  int get hashCode => Object.hash(
+    color,
+    linearTrackColor,
+    linearMinHeight,
+    circularTrackColor,
+    refreshBackgroundColor,
+  );
 
   @override
   bool operator==(Object other) {
@@ -153,10 +151,10 @@ class ProgressIndicatorTheme extends InheritedTheme {
   /// Creates a theme that controls the configurations for [ProgressIndicator]
   /// widgets.
   const ProgressIndicatorTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties for descendant [ProgressIndicator] widgets.
   final ProgressIndicatorThemeData data;

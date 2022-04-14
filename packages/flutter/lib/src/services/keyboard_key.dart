@@ -48,7 +48,7 @@ abstract class KeyboardKey with Diagnosticable {
 ///
 /// {@tool dartpad}
 /// This example shows how to detect if the user has selected the logical "Q"
-/// key.
+/// key and handle the key if they have.
 ///
 /// ** See code in examples/api/lib/services/keyboard_key/logical_keyboard_key.0.dart **
 /// {@end-tool}
@@ -56,8 +56,9 @@ abstract class KeyboardKey with Diagnosticable {
 ///
 ///  * [RawKeyEvent], the keyboard event object received by widgets that listen
 ///    to keyboard events.
-///  * [RawKeyboardListener], a widget used to listen to and supply handlers for
-///    keyboard events.
+///  * [Focus.onKey], the handler on a widget that lets you handle key events.
+///  * [RawKeyboardListener], a widget used to listen to keyboard events (but
+///    not handle them).
 @immutable
 class LogicalKeyboardKey extends KeyboardKey {
   /// Creates a new LogicalKeyboardKey object for a key ID.
@@ -3503,8 +3504,9 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///
 ///  * [RawKeyEvent], the keyboard event object received by widgets that listen
 ///    to keyboard events.
-///  * [RawKeyboardListener], a widget used to listen to and supply handlers for
-///    keyboard events.
+///  * [Focus.onKey], the handler on a widget that lets you handle key events.
+///  * [RawKeyboardListener], a widget used to listen to keyboard events (but
+///    not handle them).
 @immutable
 class PhysicalKeyboardKey extends KeyboardKey {
   /// Creates a new PhysicalKeyboardKey object for a USB HID usage.

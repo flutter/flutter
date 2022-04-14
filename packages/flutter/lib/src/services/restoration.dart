@@ -895,7 +895,7 @@ class RestorationBucket {
       return;
     }
     _childrenToAdd[child.restorationId]?.remove(child);
-    if (_childrenToAdd[child.restorationId]?.isEmpty == true) {
+    if (_childrenToAdd[child.restorationId]?.isEmpty ?? false) {
       _childrenToAdd.remove(child.restorationId);
     }
   }

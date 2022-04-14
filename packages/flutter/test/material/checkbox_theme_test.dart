@@ -70,7 +70,7 @@ void main() {
     expect(description[3], 'overlayColor: MaterialStateProperty.all(Color(0xfffffff2))');
     expect(description[4], 'splashRadius: 1.0');
     expect(description[5], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
-    expect(description[6], 'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)');
+    expect(description[6], equalsIgnoringHashCodes('visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)'));
   });
 
   testWidgets('Checkbox is themeable', (WidgetTester tester) async {

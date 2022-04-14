@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -161,6 +160,7 @@ Future<void> _runTest({
   required String name,
   required int numMessages,
 }) async {
+  print('running $name');
   resetChannel.send(true);
   // Prime test.
   await test(1);
@@ -247,38 +247,35 @@ Future<void> _runTests() async {
     name: 'platform_channel_basic_standard_2host_small_parallel_3',
     numMessages: numMessages,
   );
-  if (Platform.isAndroid) {
-    // Background platform channels aren't yet implemented for iOS.
-    const BasicMessageChannel<Object?> backgroundStandard =
-        BasicMessageChannel<Object?>(
-      'dev.flutter.echo.background.standard',
-      StandardMessageCodec(),
-    );
-    await _runTest(
-      test: (int x) => _runBasicStandardSmall(backgroundStandard, x),
-      resetChannel: resetChannel,
-      printer: printer,
-      description:
-          'BasicMessageChannel/StandardMessageCodec/Flutter->Host (background)/Small',
-      name: 'platform_channel_basic_standard_2hostbackground_small',
-      numMessages: numMessages,
-    );
-    await _runTest(
-      test: (int x) =>
-          _runBasicStandardParallel(backgroundStandard, x, 1234, 3),
-      resetChannel: resetChannel,
-      printer: printer,
-      description:
-          'BasicMessageChannel/StandardMessageCodec/Flutter->Host (background)/SmallParallel3',
-      name: 'platform_channel_basic_standard_2hostbackground_small_parallel_3',
-      numMessages: numMessages,
-    );
-  }
+  // Background platform channels aren't yet implemented for iOS.
+  const BasicMessageChannel<Object?> backgroundStandard =
+      BasicMessageChannel<Object?>(
+    'dev.flutter.echo.background.standard',
+    StandardMessageCodec(),
+  );
+  await _runTest(
+    test: (int x) => _runBasicStandardSmall(backgroundStandard, x),
+    resetChannel: resetChannel,
+    printer: printer,
+    description:
+        'BasicMessageChannel/StandardMessageCodec/Flutter->Host (background)/Small',
+    name: 'platform_channel_basic_standard_2hostbackground_small',
+    numMessages: numMessages,
+  );
+  await _runTest(
+    test: (int x) => _runBasicStandardParallel(backgroundStandard, x, 1234, 3),
+    resetChannel: resetChannel,
+    printer: printer,
+    description:
+        'BasicMessageChannel/StandardMessageCodec/Flutter->Host (background)/SmallParallel3',
+    name: 'platform_channel_basic_standard_2hostbackground_small_parallel_3',
+    numMessages: numMessages,
+  );
   printer.printToStdout();
 }
 
 class _BenchmarkWidget extends StatefulWidget {
-  const _BenchmarkWidget(this.tests, {Key? key}) : super(key: key);
+  const _BenchmarkWidget(this.tests);
 
   final Future<void> Function() tests;
 

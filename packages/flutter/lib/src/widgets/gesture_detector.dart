@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 
 export 'package:flutter/gestures.dart' show
   DragDownDetails,
@@ -170,10 +171,12 @@ class GestureDetector extends StatelessWidget {
   /// because a combination of a horizontal and vertical drag is a pan. Simply
   /// use the pan callbacks instead.
   ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=WhVXkCFPmK4}
+  ///
   /// By default, gesture detectors contribute semantic information to the tree
   /// that is used by assistive technology.
   GestureDetector({
-    Key? key,
+    super.key,
     this.child,
     this.onTapDown,
     this.onTapUp,
@@ -262,8 +265,7 @@ class GestureDetector extends StatelessWidget {
            }
          }
          return true;
-       }()),
-       super(key: key);
+       }());
 
   /// The widget below this widget in the tree.
   ///
@@ -955,6 +957,7 @@ class GestureDetector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
 
     if (onTapDown != null ||
         onTapUp != null ||
@@ -982,7 +985,8 @@ class GestureDetector extends StatelessWidget {
             ..onSecondaryTapCancel = onSecondaryTapCancel
             ..onTertiaryTapDown = onTertiaryTapDown
             ..onTertiaryTapUp = onTertiaryTapUp
-            ..onTertiaryTapCancel = onTertiaryTapCancel;
+            ..onTertiaryTapCancel = onTertiaryTapCancel
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -994,7 +998,8 @@ class GestureDetector extends StatelessWidget {
           instance
             ..onDoubleTapDown = onDoubleTapDown
             ..onDoubleTap = onDoubleTap
-            ..onDoubleTapCancel = onDoubleTapCancel;
+            ..onDoubleTapCancel = onDoubleTapCancel
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1044,7 +1049,8 @@ class GestureDetector extends StatelessWidget {
             ..onTertiaryLongPressStart = onTertiaryLongPressStart
             ..onTertiaryLongPressMoveUpdate = onTertiaryLongPressMoveUpdate
             ..onTertiaryLongPressUp = onTertiaryLongPressUp
-            ..onTertiaryLongPressEnd = onTertiaryLongPressEnd;
+            ..onTertiaryLongPressEnd = onTertiaryLongPressEnd
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1063,7 +1069,8 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onVerticalDragUpdate
             ..onEnd = onVerticalDragEnd
             ..onCancel = onVerticalDragCancel
-            ..dragStartBehavior = dragStartBehavior;
+            ..dragStartBehavior = dragStartBehavior
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1082,7 +1089,8 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onHorizontalDragUpdate
             ..onEnd = onHorizontalDragEnd
             ..onCancel = onHorizontalDragCancel
-            ..dragStartBehavior = dragStartBehavior;
+            ..dragStartBehavior = dragStartBehavior
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1101,7 +1109,8 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onPanUpdate
             ..onEnd = onPanEnd
             ..onCancel = onPanCancel
-            ..dragStartBehavior = dragStartBehavior;
+            ..dragStartBehavior = dragStartBehavior
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1114,7 +1123,8 @@ class GestureDetector extends StatelessWidget {
             ..onStart = onScaleStart
             ..onUpdate = onScaleUpdate
             ..onEnd = onScaleEnd
-            ..dragStartBehavior = dragStartBehavior;
+            ..dragStartBehavior = dragStartBehavior
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1130,7 +1140,8 @@ class GestureDetector extends StatelessWidget {
             ..onStart = onForcePressStart
             ..onPeak = onForcePressPeak
             ..onUpdate = onForcePressUpdate
-            ..onEnd = onForcePressEnd;
+            ..onEnd = onForcePressEnd
+            ..gestureSettings = gestureSettings;
         },
       );
     }
@@ -1197,15 +1208,14 @@ class RawGestureDetector extends StatefulWidget {
   /// used by assistive technology. The behavior can be configured by
   /// [semantics], or disabled with [excludeFromSemantics].
   const RawGestureDetector({
-    Key? key,
+    super.key,
     this.child,
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics = false,
     this.semantics,
   }) : assert(gestures != null),
-       assert(excludeFromSemantics != null),
-       super(key: key);
+       assert(excludeFromSemantics != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -1423,6 +1433,13 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       recognizer.addPointer(event);
   }
 
+  void _handlePointerPanZoomStart(PointerPanZoomStartEvent event) {
+    assert(_recognizers != null);
+    for (final GestureRecognizer recognizer in _recognizers!.values) {
+      recognizer.addPointerPanZoom(event);
+    }
+  }
+
   HitTestBehavior get _defaultBehavior {
     return widget.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
@@ -1437,6 +1454,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   Widget build(BuildContext context) {
     Widget result = Listener(
       onPointerDown: _handlePointerDown,
+      onPointerPanZoomStart: _handlePointerPanZoomStart,
       behavior: widget.behavior ?? _defaultBehavior,
       child: widget.child,
     );
@@ -1472,12 +1490,10 @@ typedef _AssignSemantics = void Function(RenderSemanticsGestureHandler);
 
 class _GestureSemantics extends SingleChildRenderObjectWidget {
   const _GestureSemantics({
-    Key? key,
-    Widget? child,
+    super.child,
     required this.behavior,
     required this.assignSemantics,
-  }) : assert(assignSemantics != null),
-       super(key: key, child: child);
+  }) : assert(assignSemantics != null);
 
   final HitTestBehavior behavior;
   final _AssignSemantics assignSemantics;

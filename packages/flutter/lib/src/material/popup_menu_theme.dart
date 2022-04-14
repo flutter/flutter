@@ -104,16 +104,14 @@ class PopupMenuThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      color,
-      shape,
-      elevation,
-      textStyle,
-      enableFeedback,
-      mouseCursor,
-    );
-  }
+  int get hashCode => Object.hash(
+    color,
+    shape,
+    elevation,
+    textStyle,
+    enableFeedback,
+    mouseCursor,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -153,10 +151,10 @@ class PopupMenuTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const PopupMenuTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties for descendant popup menu widgets.
   final PopupMenuThemeData data;

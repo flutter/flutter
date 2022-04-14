@@ -104,7 +104,7 @@ void main() {
       testUsingContext('finds observatory port and forwards', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
         testDeviceManager.addDevice(device);
@@ -133,7 +133,7 @@ void main() {
       testUsingContext('Fails with tool exit on bad Observatory uri', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           fakeLogReader.dispose();
           return fakeLogReader;
         };
@@ -148,7 +148,7 @@ void main() {
       testUsingContext('accepts filesystem parameters', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
         testDeviceManager.addDevice(device);
@@ -223,7 +223,7 @@ void main() {
       testUsingContext('exits when observatory-port is specified and debug-port is not', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
         testDeviceManager.addDevice(device);
@@ -631,7 +631,11 @@ class StreamLogger extends Logger {
   }
 
   @override
-  Status startSpinner({ VoidCallback onFinish }) {
+  Status startSpinner({
+    VoidCallback onFinish,
+    Duration timeout,
+    SlowWarningCallback slowWarningCallback,
+  }) {
     return SilentStatus(
       stopwatch: Stopwatch(),
       onFinish: onFinish,
@@ -798,6 +802,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     int hostPort,
     bool ipv6,
     bool disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
   }) async {}
 
   @override

@@ -7,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 class SizeChanger extends StatefulWidget {
   const SizeChanger({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -43,9 +43,9 @@ class SizeChangerState extends State<SizeChanger> {
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 

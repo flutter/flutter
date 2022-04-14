@@ -10,10 +10,10 @@ import 'package:flutter/painting.dart';
 
 class TestImageInfo extends ImageInfo {
   const TestImageInfo(this.value, {
-    required ui.Image image,
-    double scale = 1.0,
-    String? debugLabel,
-  }) : super(image: image, scale: scale, debugLabel: debugLabel);
+    required super.image,
+    super.scale,
+    super.debugLabel,
+  });
 
   final int value;
 
@@ -26,7 +26,7 @@ class TestImageInfo extends ImageInfo {
   }
 
   @override
-  int get hashCode => hashValues(value, image, scale, debugLabel);
+  int get hashCode => Object.hash(value, image, scale, debugLabel);
 
   @override
   bool operator ==(Object other) {
@@ -65,7 +65,7 @@ class TestImageProvider extends ImageProvider<int> {
 }
 
 class FailingTestImageProvider extends TestImageProvider {
-  const FailingTestImageProvider(int key, int imageValue, { required ui.Image image }) : super(key, imageValue, image: image);
+  const FailingTestImageProvider(super.key, super.imageValue, { required super.image });
 
   @override
   ImageStreamCompleter load(int key, DecoderCallback decode) {

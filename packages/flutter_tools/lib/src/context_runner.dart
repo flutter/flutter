@@ -181,7 +181,6 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         logger: globals.logger,
         flutterProjectFactory: globals.projectFactory,
-        client: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => FlutterDeviceManager(

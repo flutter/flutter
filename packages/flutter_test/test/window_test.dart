@@ -127,6 +127,18 @@ void main() {
     );
   });
 
+  testWidgets('TestWindow can fake brieflyShowPassword', (WidgetTester tester) async {
+    verifyThatTestWindowCanFakeProperty<bool>(
+      tester: tester,
+      realValue: ui.window.brieflyShowPassword,
+      fakeValue: !ui.window.brieflyShowPassword,
+      propertyRetriever: () => WidgetsBinding.instance.window.brieflyShowPassword,
+      propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
+        binding.window.brieflyShowPasswordTestValue = fakeValue;
+      },
+    );
+  });
+
   testWidgets('TestWindow can fake default route name', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<String>(
       tester: tester,

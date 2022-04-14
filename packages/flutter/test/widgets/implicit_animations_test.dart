@@ -614,11 +614,11 @@ abstract class RebuildCountingState<T extends StatefulWidget> extends State<T> {
 
 class TestAnimatedWidget extends StatefulWidget {
   const TestAnimatedWidget({
-    Key? key,
+    super.key,
     this.callback,
     required this.switchKey,
     required this.state,
-  }) : super(key: key);
+  });
   final VoidCallback? callback;
   final Key switchKey;
   final State<StatefulWidget> state;

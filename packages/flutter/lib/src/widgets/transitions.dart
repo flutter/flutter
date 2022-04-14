@@ -76,10 +76,9 @@ abstract class AnimatedWidget extends StatefulWidget {
   ///
   /// The [listenable] argument is required.
   const AnimatedWidget({
-    Key? key,
+    super.key,
     required this.listenable,
-  }) : assert(listenable != null),
-       super(key: key);
+  }) : assert(listenable != null);
 
   /// The [Listenable] to which this widget is listening.
   ///
@@ -170,13 +169,13 @@ class SlideTransition extends AnimatedWidget {
   ///
   /// The [position] argument must not be null.
   const SlideTransition({
-    Key? key,
+    super.key,
     required Animation<Offset> position,
     this.transformHitTests = true,
     this.textDirection,
     this.child,
   }) : assert(position != null),
-       super(key: key, listenable: position);
+       super(listenable: position);
 
   /// The animation that controls the position of the child.
   ///
@@ -251,13 +250,13 @@ class ScaleTransition extends AnimatedWidget {
   /// The [scale] argument must not be null. The [alignment] argument defaults
   /// to [Alignment.center].
   const ScaleTransition({
-    Key? key,
+    super.key,
     required Animation<double> scale,
     this.alignment = Alignment.center,
     this.filterQuality,
     this.child,
   }) : assert(scale != null),
-       super(key: key, listenable: scale);
+       super(listenable: scale);
 
   /// The animation that controls the scale of the child.
   ///
@@ -274,6 +273,9 @@ class ScaleTransition extends AnimatedWidget {
 
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
+  /// When the animation is stopped (either in [AnimationStatus.dismissed] or
+  /// [AnimationStatus.completed]), the filter quality argument will be ignored.
+  ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
 
@@ -284,10 +286,25 @@ class ScaleTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The ImageFilter layer created by setting filterQuality will introduce
+    // a saveLayer call. This is usually worthwhile when animating the layer,
+    // but leaving it in the layer tree before the animation has started or after
+    // it has finished significantly hurts performance.
+    final bool useFilterQuality;
+    switch (scale.status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        useFilterQuality = false;
+        break;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        useFilterQuality = true;
+        break;
+    }
     return Transform.scale(
       scale: scale.value,
       alignment: alignment,
-      filterQuality: filterQuality,
+      filterQuality: useFilterQuality ? filterQuality : null,
       child: child,
     );
   }
@@ -317,13 +334,13 @@ class RotationTransition extends AnimatedWidget {
   ///
   /// The [turns] argument must not be null.
   const RotationTransition({
-    Key? key,
+    super.key,
     required Animation<double> turns,
     this.alignment = Alignment.center,
     this.filterQuality,
     this.child,
   }) : assert(turns != null),
-       super(key: key, listenable: turns);
+       super(listenable: turns);
 
   /// The animation that controls the rotation of the child.
   ///
@@ -340,6 +357,9 @@ class RotationTransition extends AnimatedWidget {
 
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
+  /// When the animation is stopped (either in [AnimationStatus.dismissed] or
+  /// [AnimationStatus.completed]), the filter quality argument will be ignored.
+  ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
 
@@ -350,10 +370,25 @@ class RotationTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The ImageFilter layer created by setting filterQuality will introduce
+    // a saveLayer call. This is usually worthwhile when animating the layer,
+    // but leaving it in the layer tree before the animation has started or after
+    // it has finished significantly hurts performance.
+    final bool useFilterQuality;
+    switch (turns.status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        useFilterQuality = false;
+        break;
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        useFilterQuality = true;
+        break;
+    }
     return Transform.rotate(
       angle: turns.value * math.pi * 2.0,
       alignment: alignment,
-      filterQuality: filterQuality,
+      filterQuality: useFilterQuality ? filterQuality : null,
       child: child,
     );
   }
@@ -401,7 +436,7 @@ class SizeTransition extends AnimatedWidget {
   /// defaults to 0.0, which centers the child along the main axis during the
   /// transition.
   const SizeTransition({
-    Key? key,
+    super.key,
     this.axis = Axis.vertical,
     required Animation<double> sizeFactor,
     this.axisAlignment = 0.0,
@@ -409,7 +444,7 @@ class SizeTransition extends AnimatedWidget {
   }) : assert(axis != null),
        assert(sizeFactor != null),
        assert(axisAlignment != null),
-       super(key: key, listenable: sizeFactor);
+       super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
   /// [Axis.vertical].
@@ -488,12 +523,11 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   ///
   /// The [opacity] argument must not be null.
   const FadeTransition({
-    Key? key,
+    super.key,
     required this.opacity,
     this.alwaysIncludeSemantics = false,
-    Widget? child,
-  }) : assert(opacity != null),
-       super(key: key, child: child);
+    super.child,
+  }) : assert(opacity != null);
 
   /// The animation that controls the opacity of the child.
   ///
@@ -559,12 +593,12 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
   ///
   /// The [opacity] argument must not be null.
   const SliverFadeTransition({
-    Key? key,
+    super.key,
     required this.opacity,
     this.alwaysIncludeSemantics = false,
     Widget? sliver,
   }) : assert(opacity != null),
-      super(key: key, child: sliver);
+      super(child: sliver);
 
   /// The animation that controls the opacity of the sliver child.
   ///
@@ -618,8 +652,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as [RelativeRect.fill].
-  RelativeRectTween({ RelativeRect? begin, RelativeRect? end })
-    : super(begin: begin, end: end);
+  RelativeRectTween({ super.begin, super.end });
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -662,11 +695,11 @@ class PositionedTransition extends AnimatedWidget {
   ///
   /// The [rect] argument must not be null.
   const PositionedTransition({
-    Key? key,
+    super.key,
     required Animation<RelativeRect> rect,
     required this.child,
   }) : assert(rect != null),
-       super(key: key, listenable: rect);
+       super(listenable: rect);
 
   /// The animation that controls the child's size and position.
   Animation<RelativeRect> get rect => listenable as Animation<RelativeRect>;
@@ -721,14 +754,14 @@ class RelativePositionedTransition extends AnimatedWidget {
   /// current value of the [rect] argument assuming that the stack has the given
   /// [size]. Both [rect] and [size] must not be null.
   const RelativePositionedTransition({
-    Key? key,
+    super.key,
     required Animation<Rect?> rect,
     required this.size,
     required this.child,
   }) : assert(rect != null),
        assert(size != null),
        assert(child != null),
-       super(key: key, listenable: rect);
+       super(listenable: rect);
 
   /// The animation that controls the child's size and position.
   ///
@@ -789,15 +822,15 @@ class DecoratedBoxTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  ///  * [new DecoratedBox]
+  ///  * [DecoratedBox.new]
   const DecoratedBoxTransition({
-    Key? key,
+    super.key,
     required this.decoration,
     this.position = DecorationPosition.background,
     required this.child,
   }) : assert(decoration != null),
        assert(child != null),
-       super(key: key, listenable: decoration);
+       super(listenable: decoration);
 
   /// Animation of the decoration to paint.
   ///
@@ -856,16 +889,16 @@ class AlignTransition extends AnimatedWidget {
   ///
   /// See also:
   ///
-  ///  * [new Align].
+  ///  * [Align.new].
   const AlignTransition({
-    Key? key,
+    super.key,
     required Animation<AlignmentGeometry> alignment,
     required this.child,
     this.widthFactor,
     this.heightFactor,
   }) : assert(alignment != null),
        assert(child != null),
-       super(key: key, listenable: alignment);
+       super(listenable: alignment);
 
   /// The animation that controls the child's alignment.
   Animation<AlignmentGeometry> get alignment => listenable as Animation<AlignmentGeometry>;
@@ -912,7 +945,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
   /// Creates an animated [DefaultTextStyle] whose [TextStyle] animation updates
   /// the widget.
   const DefaultTextStyleTransition({
-    Key? key,
+    super.key,
     required Animation<TextStyle> style,
     required this.child,
     this.textAlign,
@@ -921,7 +954,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
     this.maxLines,
   }) : assert(style != null),
        assert(child != null),
-       super(key: key, listenable: style);
+       super(listenable: style);
 
   /// The animation that controls the descendants' text style.
   Animation<TextStyle> get style => listenable as Animation<TextStyle>;
@@ -979,7 +1012,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// rebuilding it on every animation tick.
 ///
 /// If you pass the pre-built subtree as the [child] parameter, the
-/// AnimatedBuilder will pass it back to your builder function so that you
+/// [AnimatedBuilder] will pass it back to your builder function so that you
 /// can incorporate it into your build.
 ///
 /// Using this pre-built child is entirely optional, but can improve
@@ -993,6 +1026,25 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// ** See code in examples/api/lib/widgets/transitions/animated_builder.0.dart **
 /// {@end-tool}
 ///
+/// {@template flutter.flutter.animatedbuilder_changenotifier.rebuild}
+/// ## Improve rebuilds performance using AnimatedBuilder
+///
+/// Despite the name, [AnimatedBuilder] is not limited to [Animation]s. Any subtype
+/// of [Listenable] (such as [ChangeNotifier] and [ValueNotifier]) can be used with
+/// an [AnimatedBuilder] to rebuild only certain parts of a widget when the
+/// [Listenable] notifies its listeners. This technique is a performance improvement
+/// that allows rebuilding only specific widgets leaving others untouched.
+///
+/// {@tool dartpad}
+/// The following example implements a simple counter that utilizes an
+/// [AnimatedBuilder] to limit rebuilds to only the [Text] widget. The current count
+/// is stored in a [ValueNotifier], which rebuilds the [AnimatedBuilder]'s contents
+/// when its value is changed.
+///
+/// ** See code in examples/api/lib/foundation/change_notifier/change_notifier.0.dart **
+/// {@end-tool}
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [TweenAnimationBuilder], which animates a property to a target value
@@ -1002,13 +1054,13 @@ class AnimatedBuilder extends AnimatedWidget {
   ///
   /// The [animation] and [builder] arguments must not be null.
   const AnimatedBuilder({
-    Key? key,
+    super.key,
     required Listenable animation,
     required this.builder,
     this.child,
   }) : assert(animation != null),
        assert(builder != null),
-       super(key: key, listenable: animation);
+       super(listenable: animation);
 
   /// Called every time the animation changes value.
   final TransitionBuilder builder;

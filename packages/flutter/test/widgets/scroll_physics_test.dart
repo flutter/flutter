@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 class TestScrollPhysics extends ScrollPhysics {
   const TestScrollPhysics({
     required this.name,
-    ScrollPhysics? parent,
-  }) : super(parent: parent);
+    super.parent,
+  });
   final String name;
 
   @override

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -667,11 +666,10 @@ class _DayPeriodControl extends StatelessWidget {
 /// A widget to pad the area around the [_DayPeriodControl]'s inner [Material].
 class _DayPeriodInputPadding extends SingleChildRenderObjectWidget {
   const _DayPeriodInputPadding({
-    Key? key,
-    required Widget child,
+    required Widget super.child,
     required this.minSize,
     required this.orientation,
-  }) : super(key: key, child: child);
+  });
 
   final Size minSize;
   final Orientation orientation;
@@ -1287,7 +1285,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
 class _TimePickerInput extends StatefulWidget {
   const _TimePickerInput({
-    Key? key,
     required this.initialSelectedTime,
     required this.helpText,
     required this.errorInvalidText,
@@ -1298,8 +1295,7 @@ class _TimePickerInput extends StatefulWidget {
     required this.onChanged,
     this.restorationId,
   }) : assert(initialSelectedTime != null),
-       assert(onChanged != null),
-       super(key: key);
+       assert(onChanged != null);
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialSelectedTime;
@@ -1567,7 +1563,6 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
 
 class _HourTextField extends StatelessWidget {
   const _HourTextField({
-    Key? key,
     required this.selectedTime,
     required this.style,
     required this.autofocus,
@@ -1576,7 +1571,7 @@ class _HourTextField extends StatelessWidget {
     required this.onChanged,
     required this.hourLabelText,
     this.restorationId,
-  }) : super(key: key);
+  });
 
   final TimeOfDay selectedTime;
   final TextStyle style;
@@ -1605,7 +1600,6 @@ class _HourTextField extends StatelessWidget {
 
 class _MinuteTextField extends StatelessWidget {
   const _MinuteTextField({
-    Key? key,
     required this.selectedTime,
     required this.style,
     required this.autofocus,
@@ -1613,7 +1607,7 @@ class _MinuteTextField extends StatelessWidget {
     required this.onSavedSubmitted,
     required this.minuteLabelText,
     this.restorationId,
-  }) : super(key: key);
+  });
 
   final TimeOfDay selectedTime;
   final TextStyle style;
@@ -1640,7 +1634,6 @@ class _MinuteTextField extends StatelessWidget {
 
 class _HourMinuteTextField extends StatefulWidget {
   const _HourMinuteTextField({
-    Key? key,
     required this.selectedTime,
     required this.isHour,
     required this.autofocus,
@@ -1650,7 +1643,7 @@ class _HourMinuteTextField extends StatefulWidget {
     required this.onSavedSubmitted,
     this.restorationId,
     this.onChanged,
-  }) : super(key: key);
+  });
 
   final TimeOfDay selectedTime;
   final bool isHour;
@@ -1746,7 +1739,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     //
     // TODO(rami-a): Once https://github.com/flutter/flutter/issues/67571 is
     // resolved, remove the window check for semantics being enabled on web.
-    final String? hintText = MediaQuery.of(context).accessibleNavigation || ui.window.semanticsEnabled
+    final String? hintText = MediaQuery.of(context).accessibleNavigation || WidgetsBinding.instance.window.semanticsEnabled
         ? widget.semanticHintText
         : (focusNode.hasFocus ? null : _formattedValue);
     inputDecoration = inputDecoration.copyWith(
@@ -1800,7 +1793,7 @@ class TimePickerDialog extends StatefulWidget {
   ///
   /// [initialTime] must not be null.
   const TimePickerDialog({
-    Key? key,
+    super.key,
     required this.initialTime,
     this.cancelText,
     this.confirmText,
@@ -1811,8 +1804,7 @@ class TimePickerDialog extends StatefulWidget {
     this.restorationId,
     this.initialEntryMode = TimePickerEntryMode.dial,
     this.onEntryModeChanged,
-  }) : assert(initialTime != null),
-       super(key: key);
+  }) : assert(initialTime != null);
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialTime;
@@ -2366,6 +2358,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 /// [hourLabelText], [minuteLabelText] and [confirmText] can be provided to
 /// override the default values.
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// By default, the time picker gets its colors from the overall theme's
 /// [ColorScheme]. The time picker can be further customized by providing a
 /// [TimePickerThemeData] to the overall theme.
@@ -2410,6 +2404,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 ///    date picker.
 ///  * [TimePickerThemeData], which allows you to customize the colors,
 ///    typography, and shape of the time picker.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 Future<TimeOfDay?> showTimePicker({
   required BuildContext context,
   required TimeOfDay initialTime,
@@ -2424,6 +2420,7 @@ Future<TimeOfDay?> showTimePicker({
   String? minuteLabelText,
   RouteSettings? routeSettings,
   EntryModeChangeCallback? onEntryModeChanged,
+  Offset? anchorPoint,
 }) async {
   assert(context != null);
   assert(initialTime != null);
@@ -2449,6 +2446,7 @@ Future<TimeOfDay?> showTimePicker({
       return builder == null ? dialog : builder(context, dialog);
     },
     routeSettings: routeSettings,
+    anchorPoint: anchorPoint,
   );
 }
 

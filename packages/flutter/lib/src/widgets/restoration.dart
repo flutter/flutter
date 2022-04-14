@@ -57,11 +57,10 @@ class RestorationScope extends StatefulWidget {
   ///
   /// The [child] must not be null.
   const RestorationScope({
-    Key? key,
+    super.key,
     required this.restorationId,
     required this.child,
-  }) : assert(child != null),
-       super(key: key);
+  }) : assert(child != null);
 
   /// Returns the [RestorationBucket] inserted into the widget tree by the
   /// closest ancestor [RestorationScope] of `context`.
@@ -147,11 +146,10 @@ class UnmanagedRestorationScope extends InheritedWidget {
   ///
   /// The [child] must not be null.
   const UnmanagedRestorationScope({
-    Key? key,
+    super.key,
     this.bucket,
-    required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(child != null);
 
   /// The [RestorationBucket] that this widget will insert into the widget tree.
   ///
@@ -222,11 +220,10 @@ class RootRestorationScope extends StatefulWidget {
   ///
   /// The [child] must not be null.
   const RootRestorationScope({
-    Key? key,
+    super.key,
     required this.restorationId,
     required this.child,
-  }) : assert(child != null),
-       super(key: key);
+  }) : assert(child != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -747,7 +744,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     assert(_debugDoingRestore || !_properties.keys.map((RestorableProperty<Object?> r) => r._restorationId).contains(restorationId),
            '"$restorationId" is already registered to another property.',
     );
-    final bool hasSerializedValue = bucket?.contains(restorationId) == true;
+    final bool hasSerializedValue = bucket?.contains(restorationId) ?? false;
     final Object? initialValue = hasSerializedValue
         ? property.fromPrimitives(bucket!.read<Object>(restorationId))
         : property.createDefaultValue();
@@ -850,7 +847,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
       return false;
     }
     final RestorationBucket? potentialNewParent = RestorationScope.of(context);
-    return potentialNewParent != _currentParent && potentialNewParent?.isReplacing == true;
+    return potentialNewParent != _currentParent && (potentialNewParent?.isReplacing ?? false);
   }
 
   List<RestorableProperty<Object?>>? _debugPropertiesWaitingForReregistration;

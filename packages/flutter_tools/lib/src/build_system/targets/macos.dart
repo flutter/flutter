@@ -80,7 +80,7 @@ abstract class UnpackMacOS extends Target {
   }
 
   void _thinFramework(Environment environment, String frameworkBinaryPath) {
-    final String archs = environment.defines[kDarwinArchs] ?? 'x86_64';
+    final String archs = environment.defines[kDarwinArchs] ?? 'x86_64 arm64';
     final List<String> archList = archs.split(' ').toList();
     final ProcessResult infoResult = environment.processManager.runSync(<String>[
       'lipo',
@@ -186,7 +186,7 @@ class DebugMacOSFramework extends Target {
     final Iterable<DarwinArch> darwinArchs = environment.defines[kDarwinArchs]
       ?.split(' ')
       .map(getDarwinArchForName)
-      ?? <DarwinArch>[DarwinArch.x86_64];
+      ?? <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
 
     final Iterable<String> darwinArchArguments =
         darwinArchs.expand((DarwinArch arch) => <String>['-arch', getNameForDarwinArch(arch)]);
@@ -256,7 +256,7 @@ class CompileMacOSFramework extends Target {
       ?.split(' ')
       .map(getDarwinArchForName)
       .toList()
-      ?? <DarwinArch>[DarwinArch.x86_64];
+      ?? <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.darwin) {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }

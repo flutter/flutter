@@ -71,12 +71,13 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   permissionDeniedErrorHandler,
   flavorUndefinedHandler,
   r8FailureHandler,
-  minSdkVersion,
-  transformInputIssue,
-  lockFileDepMissing,
+  minSdkVersionHandler,
+  transformInputIssueHandler,
+  lockFileDepMissingHandler,
   multidexErrorHandler,
   incompatibleKotlinVersionHandler,
   minCompileSdkVersionHandler,
+  jvm11RequiredHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -167,7 +168,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
       }
     } else {
       globals.printBox(
-        'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --mutidex flag.',
+        'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --multidex flag.',
         title: _boxTitle,
       );
     }
@@ -226,8 +227,8 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     required bool multidexEnabled,
   }) async {
     globals.printError(
-      '${globals.logger.terminal.warningMark} Gradle threw an error while downloading artifacts from the network. '
-      'Retrying to download...'
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
     );
     try {
       final String? homeDir = globals.platform.environment['HOME'];
@@ -380,7 +381,7 @@ final RegExp _minSdkVersionPattern = RegExp(r'uses-sdk:minSdkVersion ([0-9]+) ca
 
 /// Handler when a plugin requires a higher Android API level.
 @visibleForTesting
-final GradleHandledError minSdkVersion = GradleHandledError(
+final GradleHandledError minSdkVersionHandler = GradleHandledError(
   test: (String line) {
     return _minSdkVersionPattern.hasMatch(line);
   },
@@ -410,7 +411,8 @@ final GradleHandledError minSdkVersion = GradleHandledError(
       'The plugin ${minSdkVersionMatch?.group(3)} requires a higher Android SDK version.\n'
       '$textInBold\n'
       "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n"
-      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.',
+      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.\n'
+      'For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
@@ -421,7 +423,7 @@ final GradleHandledError minSdkVersion = GradleHandledError(
 /// Handler when https://issuetracker.google.com/issues/141126614 or
 /// https://github.com/flutter/flutter/issues/58247 is triggered.
 @visibleForTesting
-final GradleHandledError transformInputIssue = GradleHandledError(
+final GradleHandledError transformInputIssueHandler = GradleHandledError(
   test: (String line) {
     return line.contains('https://issuetracker.google.com/issues/158753935');
   },
@@ -455,7 +457,7 @@ final GradleHandledError transformInputIssue = GradleHandledError(
 
 /// Handler when a dependency is missing in the lockfile.
 @visibleForTesting
-final GradleHandledError lockFileDepMissing = GradleHandledError(
+final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
   test: (String line) {
     return line.contains('which is not part of the dependency lock state');
   },
@@ -518,8 +520,8 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    final Match? minSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
-    assert(minSdkVersionMatch?.groupCount == 1);
+    final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
+    assert(minCompileSdkVersionMatch?.groupCount == 1);
 
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -529,11 +531,33 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
       '${globals.logger.terminal.warningMark} Your project requires a higher compileSdkVersion.\n'
       'Fix this issue by bumping the compileSdkVersion in ${gradleFile.path}:\n'
       'android {\n'
-      '  compileSdkVersion ${minSdkVersionMatch?.group(1)}\n'
+      '  compileSdkVersion ${minCompileSdkVersionMatch?.group(1)}\n'
       '}',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
   },
   eventLabel: 'min-compile-sdk-version',
+);
+
+@visibleForTesting
+final GradleHandledError jvm11RequiredHandler = GradleHandledError(
+  test: (String line) {
+    return line.contains('Android Gradle plugin requires Java 11 to run');
+  },
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} You need Java 11 or higher to build your app with this version of Gradle.\n\n'
+      'To get Java 11, update to the latest version of Android Studio on https://developer.android.com/studio/install.\n\n'
+      'To check the Java version used by Flutter, run `flutter doctor -v`.',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'java11-required',
 );
