@@ -411,11 +411,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
   if (buildResult != null && buildResult.exitCode != 0) {
     globals.printStatus('Failed to build iOS app');
-    if (buildResult.stderr.isNotEmpty) {
+    if (buildResult.stderr.isNotEmpty && (xcResult == null || !xcResult.parseSuccess)) {
       globals.printStatus('Error output from Xcode build:\n↳');
       globals.printStatus(buildResult.stderr, indent: 4);
     }
-    if (buildResult.stdout.isNotEmpty) {
+    if (buildResult.stdout.isNotEmpty && (xcResult == null || !xcResult.parseSuccess)) {
       globals.printStatus("Xcode's output:\n↳");
       globals.printStatus(buildResult.stdout, indent: 4);
     }

@@ -128,6 +128,7 @@ void main() {
     String deviceId,
     int exitCode = 0,
     String stdout,
+    String stderr,
     void Function() onRun,
   }) {
     return FakeCommand(
@@ -173,6 +174,7 @@ void main() {
       $stdout
 ''',
       exitCode: exitCode,
+      stderr: stderr,
       onRun: onRun,
     );
   }
@@ -584,6 +586,68 @@ void main() {
           stdout: '''
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
+          onRun: () {
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          }
+        ),
+        _setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
+        _setUpRsyncCommand(),
+      ]),
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    });
+
+    testUsingContext('Do not log stdout/stderr if xcresult is parsed.', () async {
+      final BuildCommand command = BuildCommand();
+
+      _createMinimalMockProjectFiles();
+
+      await expectLater(
+        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        throwsToolExit(),
+      );
+
+      expect(testLogger.statusText, isNot(contains('Some error message in stdout.')));
+      expect(testLogger.statusText, isNot(contains('Some error message in stderr.')));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrCommand,
+        _setUpFakeXcodeBuildHandler(
+          exitCode: 1,
+          stdout: 'Some error message in stdout.',
+          stderr: 'Some error message in stderr.',
+          onRun: () {
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          }
+        ),
+        _setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
+        _setUpRsyncCommand(),
+      ]),
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    });
+
+    testUsingContext('Log stdout/stderr if xcresult is not parsed.', () async {
+      final BuildCommand command = BuildCommand();
+
+      _createMinimalMockProjectFiles();
+
+      await expectLater(
+        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        throwsToolExit(),
+      );
+
+      expect(testLogger.statusText, contains('Some error message in stdout.'));
+      expect(testLogger.statusText, contains('Some error message in stderr.'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrCommand,
+        _setUpFakeXcodeBuildHandler(
+          exitCode: 1,
+          stdout: 'Some error message in stdout.',
+          stderr: 'Some error message in stderr.',
           onRun: () {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           }
