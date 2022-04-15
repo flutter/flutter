@@ -267,7 +267,7 @@ class DiffResult {
   /// Creates a DiffResult that represents a deleted file.
   DiffResult.deletion() :
     diff = '',
-    isDeletion = true, 
+    isDeletion = true,
     isAddition = false,
     isIgnored = false,
     exitCode = 0;
@@ -275,7 +275,7 @@ class DiffResult {
   /// Creates a DiffResult that represents an ignored file.
   DiffResult.ignored() :
     diff = '',
-    isDeletion = false, 
+    isDeletion = false,
     isAddition = false,
     isIgnored = true,
     exitCode = 0;
