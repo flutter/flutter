@@ -173,7 +173,7 @@ void main() {
     const int disabledExtensions = kIsWeb ? 2 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 35 + widgetInspectorExtensionCount - disabledExtensions);
+    expect(binding.extensions.length, 36 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -438,6 +438,35 @@ void main() {
     result = await binding.testExtension('profileWidgetBuilds', <String, String>{});
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugProfileBuildsEnabled, false);
+
+    expect(binding.frameScheduled, isFalse);
+  });
+
+  test('Service extensions - profileUserWidgetBuilds', () async {
+    Map<String, dynamic> result;
+
+    expect(binding.frameScheduled, isFalse);
+    expect(debugProfileBuildsEnabledUserWidgets, false);
+
+    result = await binding.testExtension('profileUserWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(debugProfileBuildsEnabledUserWidgets, false);
+
+    result = await binding.testExtension('profileUserWidgetBuilds', <String, String>{'enabled': 'true'});
+    expect(result, <String, String>{'enabled': 'true'});
+    expect(debugProfileBuildsEnabledUserWidgets, true);
+
+    result = await binding.testExtension('profileUserWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{'enabled': 'true'});
+    expect(debugProfileBuildsEnabledUserWidgets, true);
+
+    result = await binding.testExtension('profileUserWidgetBuilds', <String, String>{'enabled': 'false'});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(debugProfileBuildsEnabledUserWidgets, false);
+
+    result = await binding.testExtension('profileUserWidgetBuilds', <String, String>{});
+    expect(result, <String, String>{'enabled': 'false'});
+    expect(debugProfileBuildsEnabledUserWidgets, false);
 
     expect(binding.frameScheduled, isFalse);
   });
