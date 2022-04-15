@@ -219,7 +219,6 @@ class Draggable<T extends Object> extends StatefulWidget {
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
        assert(ignoringFeedbackPointer != null),
-       assert(ignoringPointer != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
 
   /// The data that will be dropped by this draggable.
@@ -462,7 +461,6 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.onDragEnd,
     super.onDragCompleted,
     this.hapticFeedbackOnStart = true,
-    super.ignoringFeedbackPointer = true,
     super.ignoringFeedbackSemantics,
     super.ignoringFeedbackPointer,
     this.delay = kLongPressTimeout,
