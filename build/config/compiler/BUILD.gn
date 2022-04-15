@@ -269,6 +269,12 @@ config("compiler") {
         assert(false, "unknown current_cpu " + current_cpu)
       }
     }
+
+    # Don't warn about open, close, read, and other deprecated stdlib functions.
+    defines += [
+      "_CRT_NONSTDC_NO_WARNINGS",
+      "_CRT_NONSTDC_NO_DEPRECATE",
+    ]
   }
 
   if (operator_new_alignment != "default" && is_clang) {
