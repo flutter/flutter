@@ -1,4 +1,4 @@
-Signature: 1cac7f42445c365b4d0267c4c823ef93
+Signature: 89c0f65faf8448ecce9ca7f6467fe1e5
 
 UNUSED LICENSES:
 
@@ -541,6 +541,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/meta.json
@@ -1294,6 +1295,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/meta.json
@@ -1944,6 +1946,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/meta.json
@@ -2306,8 +2309,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/log_settings.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.test/realm.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/signal_processing.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/codec_connect.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/dai_connect.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/codec_connector.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/dai_connector.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/health.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_sync.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/port.fidl
@@ -3337,9 +3340,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/device_id_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/styles.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/audio.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/stream.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/stream_config_connector.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_address_space.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_control.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_pipe.fidl
@@ -3406,6 +3409,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/settings.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/setup.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/secure_mem.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.test/suite.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/thermal.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/control.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity/activity.fidl
@@ -3615,76 +3619,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
-ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/component_context.dart + ../../../LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/optional_nullable.dart + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/component_context.dart
-----------------------------------------------------------------------------------------------------
-Copyright 2021 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: fuchsia_sdk
-ORIGIN: ../../../fuchsia/sdk/linux/dart/zircon/lib/src/fakes/handle_disposition.dart + ../../../flutter/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../fuchsia/sdk/linux/dart/zircon/lib/src/fakes/handle_disposition.dart
-----------------------------------------------------------------------------------------------------
-Copyright 2021 The Flutter Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: fuchsia_sdk
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
-TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/optional_nullable.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.audio.effects/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/overview.fidl
@@ -3804,6 +3741,74 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: fuchsia_sdk
+ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/component_context.dart + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/component_context.dart
+----------------------------------------------------------------------------------------------------
+Copyright 2021 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: fuchsia_sdk
+ORIGIN: ../../../fuchsia/sdk/linux/dart/zircon/lib/src/fakes/handle_disposition.dart + ../../../flutter/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/dart/zircon/lib/src/fakes/handle_disposition.dart
+----------------------------------------------------------------------------------------------------
+Copyright 2021 The Flutter Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
