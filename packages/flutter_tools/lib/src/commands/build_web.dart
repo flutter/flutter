@@ -65,7 +65,7 @@ class BuildWebCommand extends BuildSubCommand {
     );
     argParser.addOption('dart2js-optimization',
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
-          'Valid values range from O0 to O4. '
+          'Valid values range from O0 to O4.'
     );
   }
 
