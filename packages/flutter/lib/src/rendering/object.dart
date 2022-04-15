@@ -108,7 +108,7 @@ class PaintingContext extends ClipContext {
     bool debugAlsoPaintedParent = false,
     PaintingContext? childContext,
   }) {
-    assert(child.isRepaintBoundary);
+    assert(child.isRepaintBoundary || child._wasRepaintBoundary);
     assert(() {
       // register the call for RepaintBoundary metrics
       child.debugRegisterRepaintBoundaryPaint(
@@ -143,8 +143,9 @@ class PaintingContext extends ClipContext {
     child._paintWithContext(childContext, Offset.zero);
 
     // Double-check that the paint method did not replace the layer (the first
-    // check is done in the [layer] setter itself).
-    assert(identical(childLayer, child._layerHandle.layer));
+    // check is done in the [layer] setter itself), unless the replacement was
+    // a removal as the child is no longer a repaint boundary.
+    assert(child.isRepaintBoundary && identical(childLayer, child._layerHandle.layer) || child._layerHandle.layer == null);
     childContext.stopRecordingIfNeeded();
   }
 
