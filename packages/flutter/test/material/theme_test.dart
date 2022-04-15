@@ -47,6 +47,46 @@ void main() {
     expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.dark));
   });
 
+  testWidgets('Theme overrides selection style', (WidgetTester tester) async {
+    const Color defaultSelectionColor = Color(0x11111111);
+    const Color defaultCursorColor = Color(0x22222222);
+    const Color themeSelectionColor = Color(0x33333333);
+    const Color themeCursorColor = Color(0x44444444);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(brightness: Brightness.dark),
+        home: Scaffold(
+          body: DefaultSelectionStyle(
+            selectionColor: defaultSelectionColor,
+            cursorColor: defaultCursorColor,
+            child: Theme(
+              data: ThemeData(
+                textSelectionTheme: const TextSelectionThemeData(
+                  selectionColor: themeSelectionColor,
+                  cursorColor: themeCursorColor,
+                ),
+              ),
+              child: const TextField(),
+            )
+          ),
+        ),
+      ),
+    );
+    // Finds RenderEditable.
+    final RenderObject root = tester.renderObject(find.byType(EditableText));
+    late RenderEditable renderEditable;
+    void recursiveFinder(RenderObject child) {
+      if (child is RenderEditable) {
+        renderEditable = child;
+        return;
+      }
+      child.visitChildren(recursiveFinder);
+    }
+    root.visitChildren(recursiveFinder);
+    expect(renderEditable.selectionColor, themeSelectionColor);
+    expect(tester.widget<EditableText>(find.byType(EditableText)).cursorColor, themeCursorColor);
+  });
+
   testWidgets('Fallback theme', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
