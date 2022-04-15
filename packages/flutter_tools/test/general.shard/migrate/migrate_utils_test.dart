@@ -11,6 +11,7 @@ import 'package:file/local.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
@@ -189,4 +190,14 @@ void main() {
       expect(result.exitCode, 0);
     });
   });
+
+  group('sdk', () {
+    testWithoutContext('clone', () async {
+      projectRoot = fileSystem.systemTempDirectory.createTempSync('flutter_sdk_test');;
+      expect(await MigrateUtils.cloneFlutter('5391447fae6209bb21a89e6a5a6583cac1af9b4b', projectRoot.path, logger), true);
+      expect(projectRoot.childFile('README.md').existsSync());
+      projectRoot.deleteSync(recursive: true);
+    });
+  });
+
 }
