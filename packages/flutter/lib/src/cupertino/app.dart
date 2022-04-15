@@ -142,7 +142,7 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   const CupertinoApp({
-    Key? key,
+    super.key,
     this.navigatorKey,
     this.home,
     this.theme,
@@ -182,12 +182,11 @@ class CupertinoApp extends StatefulWidget {
        routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
-       backButtonDispatcher = null,
-       super(key: key);
+       backButtonDispatcher = null;
 
   /// Creates a [CupertinoApp] that uses the [Router] instead of a [Navigator].
   const CupertinoApp.router({
-    Key? key,
+    super.key,
     this.routeInformationProvider,
     required RouteInformationParser<Object> this.routeInformationParser,
     required RouterDelegate<Object> this.routerDelegate,
@@ -225,8 +224,7 @@ class CupertinoApp extends StatefulWidget {
        onGenerateInitialRoutes = null,
        onUnknownRoute = null,
        routes = null,
-       initialRoute = null,
-       super(key: key);
+       initialRoute = null;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -319,7 +317,7 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performance-overlay>
   final bool showPerformanceOverlay;
 
   /// Turns on checkerboarding of raster cache images.

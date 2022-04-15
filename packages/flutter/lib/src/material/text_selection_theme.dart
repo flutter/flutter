@@ -81,13 +81,11 @@ class TextSelectionThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      cursorColor,
-      selectionColor,
-      selectionHandleColor,
-    );
-  }
+  int get hashCode => Object.hash(
+    cursorColor,
+    selectionColor,
+    selectionHandleColor,
+  );
 
   @override
   bool operator==(Object other) {
@@ -137,10 +135,10 @@ class TextSelectionTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const TextSelectionTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties for descendant [TextField] and [SelectableText] widgets.
   final TextSelectionThemeData data;

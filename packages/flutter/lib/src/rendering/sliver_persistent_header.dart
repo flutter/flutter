@@ -342,12 +342,9 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
   /// Creates a sliver that shrinks when it hits the start of the viewport, then
   /// scrolls off.
   RenderSliverScrollingPersistentHeader({
-    RenderBox? child,
-    OverScrollHeaderStretchConfiguration? stretchConfiguration,
-  }) : super(
-    child: child,
-    stretchConfiguration: stretchConfiguration,
-  );
+    super.child,
+    super.stretchConfiguration,
+  });
 
   // Distance from our leading edge to the child's leading edge, in the axis
   // direction. Negative if we're scrolled off the top.
@@ -359,7 +356,7 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
   @protected
   double updateGeometry() {
     double stretchOffset = 0.0;
-    if (stretchConfiguration != null && _childPosition == 0.0) {
+    if (stretchConfiguration != null) {
       stretchOffset += constraints.overlap.abs();
     }
     final double maxExtent = this.maxExtent;
@@ -408,13 +405,10 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   /// Creates a sliver that shrinks when it hits the start of the viewport, then
   /// stays pinned there.
   RenderSliverPinnedPersistentHeader({
-    RenderBox? child,
-    OverScrollHeaderStretchConfiguration? stretchConfiguration,
+    super.child,
+    super.stretchConfiguration,
     this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
-  }) : super(
-    child: child,
-    stretchConfiguration: stretchConfiguration,
-  );
+  });
 
   /// Specifies the persistent header's behavior when `showOnScreen` is called.
   ///
@@ -523,16 +517,12 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// scrolls off, and comes back immediately when the user reverses the scroll
   /// direction.
   RenderSliverFloatingPersistentHeader({
-    RenderBox? child,
+    super.child,
     TickerProvider? vsync,
     this.snapConfiguration,
-    OverScrollHeaderStretchConfiguration? stretchConfiguration,
+    super.stretchConfiguration,
     required this.showOnScreenConfiguration,
-  }) : _vsync = vsync,
-       super(
-    child: child,
-    stretchConfiguration: stretchConfiguration,
-  );
+  }) : _vsync = vsync;
 
   AnimationController? _controller;
   late Animation<double> _animation;
@@ -596,7 +586,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   @protected
   double updateGeometry() {
     double stretchOffset = 0.0;
-    if (stretchConfiguration != null && _childPosition == 0.0) {
+    if (stretchConfiguration != null) {
       stretchOffset += constraints.overlap.abs();
     }
     final double maxExtent = this.maxExtent;
@@ -801,18 +791,12 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
   /// stays pinned there, and grows immediately when the user reverses the
   /// scroll direction.
   RenderSliverFloatingPinnedPersistentHeader({
-    RenderBox? child,
-    TickerProvider? vsync,
-    FloatingHeaderSnapConfiguration? snapConfiguration,
-    OverScrollHeaderStretchConfiguration? stretchConfiguration,
-    PersistentHeaderShowOnScreenConfiguration? showOnScreenConfiguration,
-  }) : super(
-    child: child,
-    vsync: vsync,
-    snapConfiguration: snapConfiguration,
-    stretchConfiguration: stretchConfiguration,
-    showOnScreenConfiguration: showOnScreenConfiguration,
-  );
+    super.child,
+    super.vsync,
+    super.snapConfiguration,
+    super.stretchConfiguration,
+    super.showOnScreenConfiguration,
+  });
 
   @override
   double updateGeometry() {

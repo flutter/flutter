@@ -156,22 +156,20 @@ class TooltipThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      height,
-      padding,
-      margin,
-      verticalOffset,
-      preferBelow,
-      excludeFromSemantics,
-      decoration,
-      textStyle,
-      waitDuration,
-      showDuration,
-      triggerMode,
-      enableFeedback,
-    );
-  }
+  int get hashCode => Object.hash(
+    height,
+    padding,
+    margin,
+    verticalOffset,
+    preferBelow,
+    excludeFromSemantics,
+    decoration,
+    textStyle,
+    waitDuration,
+    showDuration,
+    triggerMode,
+    enableFeedback,
+  );
 
   @override
   bool operator==(Object other) {
@@ -252,10 +250,10 @@ class TooltipTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const TooltipTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties for descendant [Tooltip] widgets.
   final TooltipThemeData data;

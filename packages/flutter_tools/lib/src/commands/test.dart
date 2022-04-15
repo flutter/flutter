@@ -378,8 +378,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
-        packagesPath: globals.fs.file(buildInfo.packagesPath)
-          .parent.parent.childFile('.packages').path
+        packagesPath: buildInfo.packagesPath
       );
     }
 
@@ -459,7 +458,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     );
 
     if (collector != null) {
-      final bool collectionResult = await collector.collectCoverageData(
+      final bool collectionResult = collector.collectCoverageData(
         stringArg('coverage-path'),
         mergeCoverageData: boolArg('merge-coverage'),
       );

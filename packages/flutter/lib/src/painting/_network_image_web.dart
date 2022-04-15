@@ -167,7 +167,7 @@ class NetworkImage
   }
 
   @override
-  int get hashCode => ui.hashValues(url, scale);
+  int get hashCode => Object.hash(url, scale);
 
   @override
   String toString() =>

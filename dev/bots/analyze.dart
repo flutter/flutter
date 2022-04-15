@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
@@ -16,6 +15,7 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:pub_semver/pub_semver.dart';
 
 import 'allowlist.dart';
 import 'run_command.dart';
@@ -88,6 +88,9 @@ Future<void> run(List<String> arguments) async {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  print('$clock All tool test files end in _test.dart...');
+  await verifyToolTestsEndInTestDart(flutterRoot);
+
   print('$clock No sync*/async*');
   await verifyNoSyncAsyncStar(flutterPackages);
   await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
@@ -155,6 +158,9 @@ Future<void> run(List<String> arguments) async {
     ...arguments,
   ]);
 
+  print('$clock Executable allowlist...');
+  await _checkForNewExecutables();
+
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
   print('$clock Dart analysis (with --watch)...');
@@ -196,6 +202,53 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+/// Verify tool test files end in `_test.dart`.
+///
+/// The test runner will only recognize files ending in `_test.dart` as tests to
+/// be run: https://github.com/dart-lang/test/tree/master/pkgs/test#running-tests
+Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
+  final String toolsTestPath = path.join(
+    workingDirectory,
+    'packages',
+    'flutter_tools',
+    'test',
+  );
+  final List<String> violations = <String>[];
+
+  // detect files that contains calls to test(), testUsingContext(), and testWithoutContext()
+  final RegExp callsTestFunctionPattern = RegExp(r'(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))');
+
+  await for (final File file in _allFiles(toolsTestPath, 'dart', minimumMatches: 300)) {
+    final bool isValidTestFile = file.path.endsWith('_test.dart');
+    if (isValidTestFile) {
+      continue;
+    }
+
+    final bool isTestData = file.path.contains(r'test_data');
+    if (isTestData) {
+      continue;
+    }
+
+    final bool isInTestShard = file.path.contains(r'.shard/');
+    if (!isInTestShard) {
+      continue;
+    }
+
+    final bool callsTestFunction = file.readAsStringSync().contains(callsTestFunctionPattern);
+    if (!callsTestFunction) {
+      continue;
+    }
+
+    violations.add(file.path);
+  }
+  if (violations.isNotEmpty) {
+    exitWithError(<String>[
+      '${bold}Found flutter_tools tests that do not end in `_test.dart`; these will not be run by the test runner$reset',
+      ...violations,
+    ]);
+  }
+}
 
 Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches = 2000 }) async {
   final RegExp syncPattern = RegExp(r'\s*?a?sync\*\s*?{');
@@ -473,7 +526,7 @@ class _TestSkip {
 
 Iterable<_TestSkip> _getTestSkips(File file) {
   final ParseStringResult parseResult = parseFile(
-    featureSet: FeatureSet.latestLanguageVersion(),
+    featureSet: FeatureSet.fromEnableFlags2(sdkLanguageVersion: Version.parse('2.17.0-0'), flags: <String>['super-parameters']),
     path: file.absolute.path,
   );
   final _TestSkipLinesVisitor<CompilationUnit> visitor = _TestSkipLinesVisitor<CompilationUnit>(parseResult);
@@ -1515,24 +1568,50 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 }
 
 Future<void> _checkConsumerDependencies() async {
-  final ProcessResult result = await Process.run(flutter, <String>[
-    'update-packages',
-    '--transitive-closure',
-    '--consumer-only',
-  ]);
-  if (result.exitCode != 0) {
-    print(result.stdout as Object);
-    print(result.stderr as Object);
-    exit(result.exitCode);
-  }
+  const List<String> kCorePackages = <String>[
+    'flutter',
+    'flutter_test',
+    'flutter_driver',
+    'flutter_localizations',
+    'integration_test',
+    'fuchsia_remote_debug_protocol',
+  ];
   final Set<String> dependencies = <String>{};
-  for (final String line in result.stdout.toString().split('\n')) {
-    if (!line.contains('->')) {
-      continue;
+
+  // Parse the output of pub deps --json to determine all of the
+  // current packages used by the core set of flutter packages.
+  for (final String package in kCorePackages) {
+    final ProcessResult result = await Process.run(flutter, <String>[
+      'pub',
+      'deps',
+      '--json',
+      '--directory=${path.join(flutterRoot, 'packages', package)}'
+    ]);
+    if (result.exitCode != 0) {
+      print(result.stdout as Object);
+      print(result.stderr as Object);
+      exit(result.exitCode);
     }
-    final List<String> parts = line.split('->');
-    final String name = parts[0].trim();
-    dependencies.add(name);
+    final Map<String, Object?> rawJson = json.decode(result.stdout as String) as Map<String, Object?>;
+    final Map<String, Map<String, Object?>> dependencyTree = <String, Map<String, Object?>>{
+      for (final Map<String, Object?> package in (rawJson['packages']! as List<Object?>).cast<Map<String, Object?>>())
+        package['name']! as String : package,
+    };
+    final List<Map<String, Object?>> workset = <Map<String, Object?>>[];
+    workset.add(dependencyTree[package]!);
+
+    while (workset.isNotEmpty) {
+      final Map<String, Object?> currentPackage = workset.removeLast();
+      if (currentPackage['kind'] == 'dev') {
+        continue;
+      }
+      dependencies.add(currentPackage['name']! as String);
+
+      final List<String> currentDependencies = (currentPackage['dependencies']! as List<Object?>).cast<String>();
+      for (final String dependency in currentDependencies) {
+        workset.add(dependencyTree[dependency]!);
+      }
+    }
   }
 
   final Set<String> removed = kCorePackageAllowList.difference(dependencies);
@@ -1604,6 +1683,63 @@ Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
     <String>['analyze', ...options],
     workingDirectory: workingDirectory,
   );
+}
+
+// These files legitimately require executable permissions
+const Set<String> kExecutableAllowlist = <String>{
+  'bin/dart',
+  'bin/flutter',
+  'bin/internal/update_dart_sdk.sh',
+
+  'dev/bots/accept_android_sdk_licenses.sh',
+  'dev/bots/codelabs_build_test.sh',
+  'dev/bots/docs.sh',
+
+  'dev/conductor/bin/conductor',
+  'dev/conductor/core/lib/src/proto/compile_proto.sh',
+
+  'dev/customer_testing/ci.sh',
+
+  'dev/integration_tests/flutter_gallery/tool/run_instrumentation_test.sh',
+
+  'dev/integration_tests/ios_add2app_life_cycle/build_and_test.sh',
+
+  'dev/integration_tests/deferred_components_test/download_assets.sh',
+  'dev/integration_tests/deferred_components_test/run_release_test.sh',
+
+  'dev/tools/gen_keycodes/bin/gen_keycodes',
+  'dev/tools/repackage_gradle_wrapper.sh',
+
+  'packages/flutter_tools/bin/macos_assemble.sh',
+  'packages/flutter_tools/bin/tool_backend.sh',
+  'packages/flutter_tools/bin/xcode_backend.sh',
+};
+
+Future<void> _checkForNewExecutables() async {
+  // 0b001001001
+  const int executableBitMask = 0x49;
+
+  final List<File> files = await _gitFiles(flutterRoot);
+  int unexpectedExecutableCount = 0;
+  for (final File file in files) {
+    final String relativePath = path.relative(
+      file.path,
+      from: flutterRoot,
+    );
+    final FileStat stat = file.statSync();
+    final bool isExecutable = stat.mode & executableBitMask != 0x0;
+    if (isExecutable && !kExecutableAllowlist.contains(relativePath)) {
+      unexpectedExecutableCount += 1;
+      print('$relativePath is executable: ${(stat.mode & 0x1FF).toRadixString(2)}');
+    }
+  }
+  if (unexpectedExecutableCount > 0) {
+    throw Exception(
+      'found $unexpectedExecutableCount unexpected executable file'
+      '${unexpectedExecutableCount == 1 ? '' : 's'}! If this was intended, you '
+      'must add this file to kExecutableAllowlist in dev/bots/analyze.dart',
+    );
+  }
 }
 
 final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');

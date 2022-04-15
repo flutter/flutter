@@ -34,7 +34,7 @@ class TestDataSource extends DataTableSource {
   final Set<int> _selectedRows = <int>{};
 
   void _handleSelected(int index, bool? selected) {
-    if (selected == true) {
+    if (selected ?? false) {
       _selectedRows.add(index);
     } else {
       _selectedRows.remove(index);
@@ -69,8 +69,7 @@ class TestDataSource extends DataTableSource {
 }
 
 void main() {
-  final TestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();

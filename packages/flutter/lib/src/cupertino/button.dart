@@ -39,7 +39,7 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
 class CupertinoButton extends StatefulWidget {
   /// Creates an iOS-style button.
   const CupertinoButton({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.color,
@@ -52,8 +52,7 @@ class CupertinoButton extends StatefulWidget {
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(disabledColor != null),
        assert(alignment != null),
-       _filled = false,
-       super(key: key);
+       _filled = false;
 
   /// Creates an iOS-style button with a filled background.
   ///
@@ -62,7 +61,7 @@ class CupertinoButton extends StatefulWidget {
   /// To specify a custom background color, use the [color] argument of the
   /// default constructor.
   const CupertinoButton.filled({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
@@ -75,8 +74,7 @@ class CupertinoButton extends StatefulWidget {
        assert(disabledColor != null),
        assert(alignment != null),
        color = null,
-       _filled = true,
-       super(key: key);
+       _filled = true;
 
   /// The widget below this widget in the tree.
   ///
@@ -245,43 +243,46 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
     final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: enabled ? _handleTapDown : null,
-      onTapUp: enabled ? _handleTapUp : null,
-      onTapCancel: enabled ? _handleTapCancel : null,
-      onTap: widget.onPressed,
-      child: Semantics(
-        button: true,
-        child: ConstrainedBox(
-          constraints: widget.minSize == null
-            ? const BoxConstraints()
-            : BoxConstraints(
-                minWidth: widget.minSize!,
-                minHeight: widget.minSize!,
-              ),
-          child: FadeTransition(
-            opacity: _opacityAnimation,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: widget.borderRadius,
-                color: backgroundColor != null && !enabled
-                  ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
-                  : backgroundColor,
-              ),
-              child: Padding(
-                padding: widget.padding ?? (backgroundColor != null
-                  ? _kBackgroundButtonPadding
-                  : _kButtonPadding),
-                child: Align(
-                  alignment: widget.alignment,
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: DefaultTextStyle(
-                    style: textStyle,
-                    child: IconTheme(
-                      data: IconThemeData(color: foregroundColor),
-                      child: widget.child,
+    return MouseRegion(
+      cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: enabled ? _handleTapDown : null,
+        onTapUp: enabled ? _handleTapUp : null,
+        onTapCancel: enabled ? _handleTapCancel : null,
+        onTap: widget.onPressed,
+        child: Semantics(
+          button: true,
+          child: ConstrainedBox(
+            constraints: widget.minSize == null
+              ? const BoxConstraints()
+              : BoxConstraints(
+                  minWidth: widget.minSize!,
+                  minHeight: widget.minSize!,
+                ),
+            child: FadeTransition(
+              opacity: _opacityAnimation,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: widget.borderRadius,
+                  color: backgroundColor != null && !enabled
+                    ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
+                    : backgroundColor,
+                ),
+                child: Padding(
+                  padding: widget.padding ?? (backgroundColor != null
+                    ? _kBackgroundButtonPadding
+                    : _kButtonPadding),
+                  child: Align(
+                    alignment: widget.alignment,
+                    widthFactor: 1.0,
+                    heightFactor: 1.0,
+                    child: DefaultTextStyle(
+                      style: textStyle,
+                      child: IconTheme(
+                        data: IconThemeData(color: foregroundColor),
+                        child: widget.child,
+                      ),
                     ),
                   ),
                 ),

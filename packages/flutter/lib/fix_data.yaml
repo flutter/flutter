@@ -17,6 +17,20 @@
 
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/100381
+  - title: "Migrate 'TextSelectionOverlay.fadeDuration' to SelectionOverlay.fadeDuration"
+    date: 2022-03-18
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'fadeDuration'
+      inClass: 'TextSelectionOverlay'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+          field: 'fadeDuration'
+          inClass: 'SelectionOverlay'
+
   # Changes made in https://github.com/flutter/flutter/pull/96174
   - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
     date: 2022-01-05

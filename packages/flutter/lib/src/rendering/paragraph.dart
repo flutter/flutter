@@ -57,7 +57,7 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
   }
 
   @override
-  int get hashCode => hashValues(PlaceholderSpanIndexSemanticsTag, index);
+  int get hashCode => Object.hash(PlaceholderSpanIndexSemanticsTag, index);
 }
 
 /// A render object that displays a paragraph of text.
@@ -493,6 +493,12 @@ class RenderParagraph extends RenderBox
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
+  /// Whether this paragraph currently has overflow and needs clipping.
+  ///
+  /// Used to test this object. Not for use in production.
+  @visibleForTesting
+  bool get debugNeedsClipping => _needsClipping;
+
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(
@@ -644,7 +650,7 @@ class RenderParagraph extends RenderBox
     size = constraints.constrain(textSize);
 
     final bool didOverflowHeight = size.height < textSize.height || textDidExceedMaxLines;
-    final bool didOverflowWidth = size.width < textSize.width;
+    final bool didOverflowWidth = size.width < textSize.width || size.width < _textPainter.longestLine;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
     // visual overflow when there actually is visual overflow. This can become
@@ -908,7 +914,7 @@ class RenderParagraph extends RenderBox
   // can be re-used when [assembleSemanticsNode] is called again. This ensures
   // stable ids for the [SemanticsNode]s of [TextSpan]s across
   // [assembleSemanticsNode] invocations.
-  Queue<SemanticsNode>? _cachedChildNodes;
+  LinkedHashMap<Key, SemanticsNode>? _cachedChildNodes;
 
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
@@ -921,7 +927,7 @@ class RenderParagraph extends RenderBox
     int placeholderIndex = 0;
     int childIndex = 0;
     RenderBox? child = firstChild;
-    final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
+    final LinkedHashMap<Key, SemanticsNode> newChildCache = LinkedHashMap<Key, SemanticsNode>();
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       final TextSelection selection = TextSelection(
@@ -1004,13 +1010,24 @@ class RenderParagraph extends RenderBox
             assert(false, '${recognizer.runtimeType} is not supported.');
           }
         }
-        final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
-            ? _cachedChildNodes!.removeFirst()
-            : SemanticsNode();
+        if (node.parentPaintClipRect != null) {
+          final Rect paintRect = node.parentPaintClipRect!.intersect(currentRect);
+          configuration.isHidden = paintRect.isEmpty && !currentRect.isEmpty;
+        }
+        late final SemanticsNode newChild;
+        if (_cachedChildNodes?.isNotEmpty ?? false) {
+          newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first)!;
+        } else {
+          final UniqueKey key = UniqueKey();
+          newChild = SemanticsNode(
+            key: key,
+            showOnScreen: _createShowOnScreenFor(key),
+          );
+        }
         newChild
           ..updateWith(config: configuration)
           ..rect = currentRect;
-        newChildCache.addLast(newChild);
+        newChildCache[newChild.key!] = newChild;
         newChildren.add(newChild);
       }
     }
@@ -1020,6 +1037,13 @@ class RenderParagraph extends RenderBox
 
     _cachedChildNodes = newChildCache;
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
+  }
+
+  VoidCallback? _createShowOnScreenFor(Key key) {
+    return () {
+      final SemanticsNode node = _cachedChildNodes![key]!;
+      showOnScreen(descendant: this, rect: node.rect);
+    };
   }
 
   @override

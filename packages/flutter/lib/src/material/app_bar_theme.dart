@@ -314,26 +314,24 @@ class AppBarTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      brightness,
-      backgroundColor,
-      foregroundColor,
-      elevation,
-      shadowColor,
-      shape,
-      iconTheme,
-      actionsIconTheme,
-      textTheme,
-      centerTitle,
-      titleSpacing,
-      toolbarHeight,
-      toolbarTextStyle,
-      titleTextStyle,
-      systemOverlayStyle,
-      backwardsCompatibility,
-    );
-  }
+  int get hashCode => Object.hash(
+    brightness,
+    backgroundColor,
+    foregroundColor,
+    elevation,
+    shadowColor,
+    shape,
+    iconTheme,
+    actionsIconTheme,
+    textTheme,
+    centerTitle,
+    titleSpacing,
+    toolbarHeight,
+    toolbarTextStyle,
+    titleTextStyle,
+    systemOverlayStyle,
+    backwardsCompatibility,
+  );
 
   @override
   bool operator ==(Object other) {

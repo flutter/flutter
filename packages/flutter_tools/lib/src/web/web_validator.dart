@@ -8,7 +8,7 @@ import 'chrome.dart';
 
 /// A validator for Chromium-based browsers.
 abstract class ChromiumValidator extends DoctorValidator {
-  const ChromiumValidator(String title) : super(title);
+  const ChromiumValidator(super.title);
 
   Platform get _platform;
   ChromiumLauncher get _chromiumLauncher;

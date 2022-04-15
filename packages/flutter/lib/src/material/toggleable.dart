@@ -185,12 +185,12 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     if (tristate) {
       if (value == null)
         _positionController.value = 0.0;
-      if (value != false)
+      if (value ?? true)
         _positionController.forward();
       else
         _positionController.reverse();
     } else {
-      if (value == true)
+      if (value ?? false)
         _positionController.forward();
       else
         _positionController.reverse();
@@ -282,7 +282,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     if (!isInteractive) MaterialState.disabled,
     if (_hovering) MaterialState.hovered,
     if (_focused) MaterialState.focused,
-    if (value != false) MaterialState.selected,
+    if (value ?? true) MaterialState.selected,
   };
 
   /// Typically wraps a `painter` that draws the actual visuals of the

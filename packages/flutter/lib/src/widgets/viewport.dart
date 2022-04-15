@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'scroll_notification.dart';
 
 export 'package:flutter/rendering.dart' show
   AxisDirection,
@@ -43,6 +44,8 @@ export 'package:flutter/rendering.dart' show
 ///    sliver context (the opposite of this widget).
 ///  * [ShrinkWrappingViewport], a variant of [Viewport] that shrink-wraps its
 ///    contents along the main axis.
+///  * [ViewportElementMixin], which should be mixed in to the [Element] type used
+///    by viewport-like widgets to correctly handle scroll notifications.
 class Viewport extends MultiChildRenderObjectWidget {
   /// Creates a widget that is bigger on the inside.
   ///
@@ -54,7 +57,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The [cacheExtent] must be specified if the [cacheExtentStyle] is
   /// not [CacheExtentStyle.pixel].
   Viewport({
-    Key? key,
+    super.key,
     this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
     this.anchor = 0.0,
@@ -70,7 +73,7 @@ class Viewport extends MultiChildRenderObjectWidget {
        assert(cacheExtentStyle != null),
        assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
        assert(clipBehavior != null),
-       super(key: key, children: slivers);
+       super(children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
   ///
@@ -207,15 +210,12 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 }
 
-class _ViewportElement extends MultiChildRenderObjectElement {
+class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElementMixin, ViewportElementMixin {
   /// Creates an element that uses the given widget as its configuration.
-  _ViewportElement(Viewport widget) : super(widget);
+  _ViewportElement(Viewport super.widget);
 
   bool _doingMountOrUpdate = false;
   int? _centerSlotIndex;
-
-  @override
-  Viewport get widget => super.widget as Viewport;
 
   @override
   RenderViewport get renderObject => super.renderObject as RenderViewport;
@@ -242,10 +242,11 @@ class _ViewportElement extends MultiChildRenderObjectElement {
 
   void _updateCenter() {
     // TODO(ianh): cache the keys to make this faster
-    if (widget.center != null) {
+    final Viewport viewport = widget as Viewport;
+    if (viewport.center != null) {
       int elementIndex = 0;
       for (final Element e in children) {
-        if (e.widget.key == widget.center) {
+        if (e.widget.key == viewport.center) {
           renderObject.center = e.renderObject as RenderSliver?;
           break;
         }
@@ -329,14 +330,14 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   ///
   /// The [offset] argument must not be null.
   ShrinkWrappingViewport({
-    Key? key,
+    super.key,
     this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
     required this.offset,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
   }) : assert(offset != null),
-       super(key: key, children: slivers);
+       super(children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
   ///

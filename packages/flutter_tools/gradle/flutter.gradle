@@ -139,6 +139,11 @@ class FlutterPlugin implements Plugin<Project> {
     private Properties localProperties
     private String engineVersion
 
+    /**
+     * Flutter Docs Website URLs for help messages.
+     */
+    private final String kWebsiteDeploymentAndroidBuildConfig = 'https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration'
+
     @Override
     void apply(Project project) {
         this.project = project
@@ -409,16 +414,19 @@ class FlutterPlugin implements Plugin<Project> {
 
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
+            // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
                 project.logger.quiet("Warning: The plugin ${pluginName} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)}.")
+                project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
             }
+
             project.android.buildTypes.all addEmbeddingDependencyToPlugin
         }
     }
 
     /**
      * Compares semantic versions ignoring labels.
-     * 
+     *
      * If the versions are equal (ignoring labels), returns one of the two strings arbitrarily.
      *
      * If minor or patch are omitted (non-conformant to semantic versioning), they are considered zero.
@@ -476,7 +484,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-        }  
+        }
     }
 
     /**

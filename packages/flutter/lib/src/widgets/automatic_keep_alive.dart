@@ -27,14 +27,14 @@ class AutomaticKeepAlive extends StatefulWidget {
   /// Creates a widget that listens to [KeepAliveNotification]s and maintains a
   /// [KeepAlive] widget appropriately.
   const AutomaticKeepAlive({
-    Key? key,
-    this.child,
-  }) : super(key: key);
+    super.key,
+    required this.child,
+  });
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget? child;
+  final Widget child;
 
   @override
   State<AutomaticKeepAlive> createState() => _AutomaticKeepAliveState();
@@ -42,7 +42,7 @@ class AutomaticKeepAlive extends StatefulWidget {
 
 class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   Map<Listenable, VoidCallback>? _handles;
-  Widget? _child;
+  late Widget _child;
   bool _keepingAlive = false;
 
   @override
@@ -60,7 +60,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   void _updateChild() {
     _child = NotificationListener<KeepAliveNotification>(
       onNotification: _addClient,
-      child: widget.child!,
+      child: widget.child,
     );
   }
 
@@ -89,7 +89,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         // If the child doesn't exist yet, we got called during the very first
         // build of this subtree. Wait until the end of the frame to update
         // the child when the child is guaranteed to be present.
-        SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
           if (!mounted) {
             return;
           }
@@ -155,7 +155,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
       }());
       _handles!.remove(handle);
       if (_handles!.isEmpty) {
-        if (SchedulerBinding.instance!.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {
+        if (SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {
           // Build/layout haven't started yet so let's just schedule this for
           // the next frame.
           setState(() { _keepingAlive = false; });
@@ -228,10 +228,9 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 
   @override
   Widget build(BuildContext context) {
-    assert(_child != null);
     return KeepAlive(
       keepAlive: _keepingAlive,
-      child: _child!,
+      child: _child,
     );
   }
 

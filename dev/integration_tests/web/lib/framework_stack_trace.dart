@@ -62,7 +62,7 @@ bool _errorMessageFormattedCorrectly(String errorMessage) {
 }
 
 class ThrowingWidget extends StatefulWidget {
-  const ThrowingWidget({Key? key}) : super(key: key);
+  const ThrowingWidget({super.key});
 
   @override
   State<ThrowingWidget> createState() => _ThrowingWidgetState();

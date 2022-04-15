@@ -81,14 +81,14 @@ class OutOfProcessDapTestServer extends DapTestServer {
         .listen((String error) {
       logger?.call(error);
       if (!_isShuttingDown) {
-        throw error;
+        throw Exception(error);
       }
     });
     unawaited(_process.exitCode.then((int code) {
       final String message = 'Out-of-process DAP server terminated with code $code';
       logger?.call(message);
       if (!_isShuttingDown && code != 0) {
-        throw message;
+        throw Exception(message);
       }
     }));
   }

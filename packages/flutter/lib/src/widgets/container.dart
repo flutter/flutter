@@ -58,13 +58,12 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   /// The [decoration] and [position] arguments must not be null. By default the
   /// decoration paints behind the child.
   const DecoratedBox({
-    Key? key,
+    super.key,
     required this.decoration,
     this.position = DecorationPosition.background,
-    Widget? child,
+    super.child,
   }) : assert(decoration != null),
-       assert(position != null),
-       super(key: key, child: child);
+       assert(position != null);
 
   /// What decoration to paint.
   ///
@@ -222,12 +221,12 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   padding: const EdgeInsets.all(8.0),
 ///   color: Colors.blue[600],
 ///   alignment: Alignment.center,
+///   transform: Matrix4.rotationZ(0.1),
 ///   child: Text('Hello World',
 ///     style: Theme.of(context)
 ///         .textTheme
 ///         .headline4!
 ///         .copyWith(color: Colors.white)),
-///   transform: Matrix4.rotationZ(0.1),
 /// )
 /// ```
 /// {@end-tool}
@@ -251,7 +250,7 @@ class Container extends StatelessWidget {
   /// color. To supply a decoration with a color, use `decoration:
   /// BoxDecoration(color: color)`.
   Container({
-    Key? key,
+    super.key,
     this.alignment,
     this.padding,
     this.color,
@@ -279,8 +278,7 @@ class Container extends StatelessWidget {
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
             ?? BoxConstraints.tightFor(width: width, height: height)
-          : constraints,
-       super(key: key);
+          : constraints;
 
   /// The [child] contained by the container.
   ///
@@ -389,10 +387,9 @@ class Container extends StatelessWidget {
         maxHeight: 0.0,
         child: ConstrainedBox(constraints: const BoxConstraints.expand()),
       );
-    }
-
-    if (alignment != null)
+    } else if (alignment != null) {
       current = Align(alignment: alignment!, child: current);
+    }
 
     final EdgeInsetsGeometry? effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)

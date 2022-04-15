@@ -19,7 +19,7 @@ import 'framework.dart';
 ///  * [PageStorage], which is the closet ancestor for [PageStorageKey].
 class PageStorageKey<T> extends ValueKey<T> {
   /// Creates a [ValueKey] that defines where [PageStorage] values will be saved.
-  const PageStorageKey(T value) : super(value);
+  const PageStorageKey(super.value);
 }
 
 @immutable
@@ -40,7 +40,7 @@ class _StorageEntryIdentifier {
   }
 
   @override
-  int get hashCode => hashList(keys);
+  int get hashCode => Object.hashAll(keys);
 
   @override
   String toString() {
@@ -153,11 +153,10 @@ class PageStorage extends StatelessWidget {
   ///
   /// The [bucket] argument must not be null.
   const PageStorage({
-    Key? key,
+    super.key,
     required this.bucket,
     required this.child,
-  }) : assert(bucket != null),
-       super(key: key);
+  }) : assert(bucket != null);
 
   /// The widget below this widget in the tree.
   ///

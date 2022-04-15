@@ -680,7 +680,7 @@ flutter:
   testWithoutContext('FlutterManifest parses major.minor+build version clause', () {
     const String manifest = '''
 name: test
-version: 1.0+2
+version: 1.0.0+2
 dependencies:
   flutter:
     sdk: flutter
@@ -693,8 +693,8 @@ flutter:
     );
 
     expect(flutterManifest, matchesManifest(
-      appVersion: '1.0+2',
-      buildName: '1.0',
+      appVersion: '1.0.0+2',
+      buildName: '1.0.0',
       buildNumber: '2',
     ));
   });

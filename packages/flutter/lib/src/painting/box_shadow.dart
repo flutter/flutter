@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 import 'dart:ui' as ui show Shadow, lerpDouble;
 
@@ -32,12 +31,12 @@ class BoxShadow extends ui.Shadow {
   /// By default, the shadow is solid black with zero [offset], [blurRadius],
   /// and [spreadRadius].
   const BoxShadow({
-    Color color = const Color(0xFF000000),
-    Offset offset = Offset.zero,
-    double blurRadius = 0.0,
+    super.color,
+    super.offset,
+    super.blurRadius,
     this.spreadRadius = 0.0,
     this.blurStyle = BlurStyle.normal,
-  }) : super(color: color, offset: offset, blurRadius: blurRadius);
+  });
 
   /// The amount the box should be inflated prior to applying the blur.
   final double spreadRadius;
@@ -136,7 +135,7 @@ class BoxShadow extends ui.Shadow {
   }
 
   @override
-  int get hashCode => hashValues(color, offset, blurRadius, spreadRadius, blurStyle);
+  int get hashCode => Object.hash(color, offset, blurRadius, spreadRadius, blurStyle);
 
   @override
   String toString() => 'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)}), $blurStyle';

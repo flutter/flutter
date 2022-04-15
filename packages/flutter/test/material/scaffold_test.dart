@@ -2447,11 +2447,10 @@ class _GeometryCachePainter extends CustomPainter {
 class _CustomPageRoute<T> extends PageRoute<T> {
   _CustomPageRoute({
     required this.builder,
-    RouteSettings settings = const RouteSettings(),
+    RouteSettings super.settings = const RouteSettings(),
     this.maintainState = true,
-    bool fullscreenDialog = false,
-  }) : assert(builder != null),
-       super(settings: settings, fullscreenDialog: fullscreenDialog);
+    super.fullscreenDialog,
+  }) : assert(builder != null);
 
   final WidgetBuilder builder;
 

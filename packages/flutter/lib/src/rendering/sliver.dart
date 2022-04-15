@@ -479,20 +479,18 @@ class SliverConstraints extends Constraints {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      axisDirection,
-      growthDirection,
-      scrollOffset,
-      overlap,
-      remainingPaintExtent,
-      crossAxisExtent,
-      crossAxisDirection,
-      viewportMainAxisExtent,
-      remainingCacheExtent,
-      cacheOrigin,
-    );
-  }
+  int get hashCode => Object.hash(
+    axisDirection,
+    growthDirection,
+    scrollOffset,
+    overlap,
+    remainingPaintExtent,
+    crossAxisExtent,
+    crossAxisDirection,
+    viewportMainAxisExtent,
+    remainingCacheExtent,
+    cacheOrigin,
+  );
 
   @override
   String toString() {
@@ -816,7 +814,7 @@ class SliverHitTestResult extends HitTestResult {
   ///    generic [HitTestResult].
   ///  * [BoxHitTestResult.wrap], which turns a [SliverHitTestResult] into a
   ///    [BoxHitTestResult] for hit testing on [RenderBox] children.
-  SliverHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+  SliverHitTestResult.wrap(super.result) : super.wrap();
 
   /// Transforms `mainAxisPosition` and `crossAxisPosition` to the local
   /// coordinate system of a child for hit-testing the child.
@@ -875,12 +873,11 @@ class SliverHitTestEntry extends HitTestEntry<RenderSliver> {
   ///
   /// The [mainAxisPosition] and [crossAxisPosition] arguments must not be null.
   SliverHitTestEntry(
-    RenderSliver target, {
+    super.target, {
     required this.mainAxisPosition,
     required this.crossAxisPosition,
   }) : assert(mainAxisPosition != null),
-       assert(crossAxisPosition != null),
-       super(target);
+       assert(crossAxisPosition != null);
 
   /// The distance in the [AxisDirection] from the edge of the sliver's painted
   /// area (as given by the [SliverConstraints.scrollOffset]) to the hit point.
@@ -1793,8 +1790,8 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
 class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a [RenderBox].
   RenderSliverToBoxAdapter({
-    RenderBox? child,
-  }) : super(child: child);
+    super.child,
+  });
 
   @override
   void performLayout() {

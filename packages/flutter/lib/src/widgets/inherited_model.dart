@@ -95,7 +95,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
   /// Creates an inherited widget that supports dependencies qualified by
   /// "aspects", i.e. a descendant widget can indicate that it should
   /// only be rebuilt if a specific aspect of the model changes.
-  const InheritedModel({ Key? key, required Widget child }) : super(key: key, child: child);
+  const InheritedModel({ super.key, required super.child });
 
   @override
   InheritedModelElement<T> createElement() => InheritedModelElement<T>(this);
@@ -182,10 +182,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
 /// An [Element] that uses a [InheritedModel] as its configuration.
 class InheritedModelElement<T> extends InheritedElement {
   /// Creates an element that uses the given widget as its configuration.
-  InheritedModelElement(InheritedModel<T> widget) : super(widget);
-
-  @override
-  InheritedModel<T> get widget => super.widget as InheritedModel<T>;
+  InheritedModelElement(InheritedModel<T> super.widget);
 
   @override
   void updateDependencies(Element dependent, Object? aspect) {
@@ -206,7 +203,7 @@ class InheritedModelElement<T> extends InheritedElement {
     final Set<T>? dependencies = getDependencies(dependent) as Set<T>?;
     if (dependencies == null)
       return;
-    if (dependencies.isEmpty || widget.updateShouldNotifyDependent(oldWidget, dependencies))
+    if (dependencies.isEmpty || (widget as InheritedModel<T>).updateShouldNotifyDependent(oldWidget, dependencies))
       dependent.didChangeDependencies();
   }
 }

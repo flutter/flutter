@@ -89,16 +89,27 @@ void main() {
     ]);
   });
 
-  testWithoutContext('buildModeOptions removes matching profile define', () {
+  testWithoutContext('buildModeOptions removes matching profile define in debug mode', () {
     expect(buildModeOptions(BuildMode.debug, <String>['dart.vm.profile=true']), <String>[
       '-Ddart.vm.product=false',
       '--enable-asserts',
     ]);
   });
 
-  testWithoutContext('buildModeOptions removes both matching profile and release define', () {
+  testWithoutContext('buildModeOptions removes both matching profile and release define in debug mode', () {
     expect(buildModeOptions(BuildMode.debug, <String>['dart.vm.profile=true', 'dart.vm.product=true']), <String>[
       '--enable-asserts',
+    ]);
+  });
+
+  testWithoutContext('buildModeOptions removes matching profile define in profile mode', () {
+    expect(buildModeOptions(BuildMode.profile, <String>['dart.vm.profile=true']), <String>[
+      '-Ddart.vm.product=false',
+    ]);
+  });
+
+  testWithoutContext('buildModeOptions removes both matching profile and release define in profile mode', () {
+    expect(buildModeOptions(BuildMode.profile, <String>['dart.vm.profile=false', 'dart.vm.product=true']), <String>[
     ]);
   });
 }

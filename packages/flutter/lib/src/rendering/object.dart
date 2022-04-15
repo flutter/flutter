@@ -858,11 +858,10 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
     if (!kReleaseMode) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (debugProfileLayoutsEnabled) {
+        if (debugEnhanceLayoutTimelineArguments) {
           debugTimelineArguments = <String, String>{
-            ...debugTimelineArguments,
             'dirty count': '${_nodesNeedingLayout.length}',
             'dirty list': '$_nodesNeedingLayout',
           };
@@ -931,7 +930,7 @@ class PipelineOwner {
   /// [flushPaint].
   void flushCompositingBits() {
     if (!kReleaseMode) {
-      Timeline.startSync('UPDATING COMPOSITING BITS', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      Timeline.startSync('UPDATING COMPOSITING BITS');
     }
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (final RenderObject node in _nodesNeedingCompositingBitsUpdate) {
@@ -964,11 +963,10 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
     if (!kReleaseMode) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        if (debugProfilePaintsEnabled) {
+        if (debugEnhancePaintTimelineArguments) {
           debugTimelineArguments = <String, String>{
-            ...debugTimelineArguments,
             'dirty count': '${_nodesNeedingPaint.length}',
             'dirty list': '$_nodesNeedingPaint',
           };
@@ -1080,7 +1078,7 @@ class PipelineOwner {
     if (_semanticsOwner == null)
       return;
     if (!kReleaseMode) {
-      Timeline.startSync('SEMANTICS', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      Timeline.startSync('SEMANTICS');
     }
     assert(_semanticsOwner != null);
     assert(() {
@@ -1629,7 +1627,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       assert(_debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout());
       return;
     }
-    assert(_relayoutBoundary != null);
+    if (_relayoutBoundary == null) {
+      _needsLayout = true;
+      if (parent != null) {
+        // _relayoutBoundary is cleaned by an ancestor in RenderObject.layout.
+        // Conservatively mark everything dirty until it reaches the closest
+        // known relayout boundary.
+        markParentNeedsLayout();
+      }
+      return;
+    }
     if (_relayoutBoundary != this) {
       markParentNeedsLayout();
     } else {
@@ -1683,14 +1690,29 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _cleanRelayoutBoundary() {
     if (_relayoutBoundary != this) {
       _relayoutBoundary = null;
-      _needsLayout = true;
       visitChildren(_cleanChildRelayoutBoundary);
+    }
+  }
+
+  void _propagateRelayoutBoundary() {
+    if (_relayoutBoundary == this) {
+      return;
+    }
+    final RenderObject? parentRelayoutBoundary = (parent as RenderObject?)?._relayoutBoundary;
+    assert(parentRelayoutBoundary != null);
+    if (parentRelayoutBoundary != _relayoutBoundary) {
+      _relayoutBoundary = parentRelayoutBoundary;
+      visitChildren(_propagateRelayoutBoundaryToChild);
     }
   }
 
   // Reduces closure allocation for visitChildren use cases.
   static void _cleanChildRelayoutBoundary(RenderObject child) {
     child._cleanRelayoutBoundary();
+  }
+
+  static void _propagateRelayoutBoundaryToChild(RenderObject child) {
+    child._propagateRelayoutBoundary();
   }
 
   /// Bootstrap the rendering pipeline by scheduling the very first layout.
@@ -1772,9 +1794,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
     assert(!_debugDisposed);
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        if (debugEnhanceLayoutTimelineArguments) {
+          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        }
         return true;
       }());
       Timeline.startSync(
@@ -1814,17 +1838,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     ));
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
-    RenderObject? relayoutBoundary;
-    if (!parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject) {
-      relayoutBoundary = this;
-    } else {
-      relayoutBoundary = (parent! as RenderObject)._relayoutBoundary;
-    }
+    final bool isRelayoutBoundary = !parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject;
+    final RenderObject relayoutBoundary = isRelayoutBoundary ? this : (parent! as RenderObject)._relayoutBoundary!;
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
       return true;
     }());
-    if (!_needsLayout && constraints == _constraints && relayoutBoundary == _relayoutBoundary) {
+
+    if (!_needsLayout && constraints == _constraints) {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
         // to itself, so it has the right internal debug values.
@@ -1838,6 +1859,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         _debugDoingThisResize = false;
         return true;
       }());
+
+      if (relayoutBoundary != _relayoutBoundary) {
+        _relayoutBoundary = relayoutBoundary;
+        visitChildren(_propagateRelayoutBoundaryToChild);
+      }
 
       if (!kReleaseMode && debugProfileLayoutsEnabled)
         Timeline.finishSync();
@@ -2374,9 +2400,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (_needsLayout)
       return;
     if (!kReleaseMode && debugProfilePaintsEnabled) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
-        debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        if (debugEnhancePaintTimelineArguments) {
+          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        }
         return true;
       }());
       Timeline.startSync(
@@ -2719,7 +2747,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // RenderObject are still up-to date. Therefore, we will later only rebuild
     // the semantics subtree starting at the identified semantics boundary.
 
-    final bool wasSemanticsBoundary = _semantics != null && _cachedSemanticsConfiguration?.isSemanticBoundary == true;
+    final bool wasSemanticsBoundary = _semantics != null && (_cachedSemanticsConfiguration?.isSemanticBoundary ?? false);
     _cachedSemanticsConfiguration = null;
     bool isEffectiveSemanticsBoundary = _semanticsConfiguration.isSemanticBoundary && wasSemanticsBoundary;
     RenderObject node = this;
@@ -3021,7 +3049,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     super.debugFillProperties(properties);
     properties.add(FlagProperty('needsCompositing', value: _needsCompositing, ifTrue: 'needs compositing'));
     properties.add(DiagnosticsProperty<Object?>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
+    properties.add(DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: (_debugCanParentUseSize ?? false) ? 'can use size' : null, missingIfNull: true));
     properties.add(DiagnosticsProperty<Constraints>('constraints', _constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
     properties.add(DiagnosticsProperty<ContainerLayer>('layer', _layerHandle.layer, defaultValue: null));
@@ -3531,12 +3559,12 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
   @override
   void attach(covariant PipelineOwner owner) {
     super.attach(owner);
-    PaintingBinding.instance!.systemFonts.addListener(systemFontsDidChange);
+    PaintingBinding.instance.systemFonts.addListener(systemFontsDidChange);
   }
 
   @override
   void detach() {
-    PaintingBinding.instance!.systemFonts.removeListener(systemFontsDidChange);
+    PaintingBinding.instance.systemFonts.removeListener(systemFontsDidChange);
     super.detach();
   }
 }
@@ -3577,8 +3605,7 @@ abstract class _SemanticsFragment {
 /// obtained via [interestingFragments].
 class _ContainerSemanticsFragment extends _SemanticsFragment {
 
-  _ContainerSemanticsFragment({ required bool dropsSemanticsOfPreviousSiblings })
-    : super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+  _ContainerSemanticsFragment({ required super.dropsSemanticsOfPreviousSiblings });
 
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
@@ -3598,10 +3625,9 @@ class _ContainerSemanticsFragment extends _SemanticsFragment {
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
     required RenderObject owner,
-    required bool dropsSemanticsOfPreviousSiblings,
+    required super.dropsSemanticsOfPreviousSiblings,
   }) : assert(owner != null),
-       _ancestorChain = <RenderObject>[owner],
-       super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+       _ancestorChain = <RenderObject>[owner];
 
   /// The [RenderObject] that owns this fragment (and any new [SemanticsNode]
   /// introduced by it).
@@ -3685,9 +3711,9 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
 /// [children].
 class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   _RootSemanticsFragment({
-    required RenderObject owner,
-    required bool dropsSemanticsOfPreviousSiblings,
-  }) : super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+    required super.owner,
+    required super.dropsSemanticsOfPreviousSiblings,
+  });
 
   @override
   void compileChildren({ Rect? parentSemanticsClipRect, Rect? parentPaintClipRect, required double elevationAdjustment, required List<SemanticsNode> result }) {
@@ -3767,13 +3793,12 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   _SwitchableSemanticsFragment({
     required bool mergeIntoParent,
     required SemanticsConfiguration config,
-    required RenderObject owner,
-    required bool dropsSemanticsOfPreviousSiblings,
+    required super.owner,
+    required super.dropsSemanticsOfPreviousSiblings,
   }) : _mergeIntoParent = mergeIntoParent,
        _config = config,
        assert(mergeIntoParent != null),
-       assert(config != null),
-       super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+       assert(config != null);
 
   final bool _mergeIntoParent;
   SemanticsConfiguration _config;
@@ -3804,7 +3829,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         ? _SemanticsGeometry(parentSemanticsClipRect: parentSemanticsClipRect, parentPaintClipRect: parentPaintClipRect, ancestors: _ancestorChain)
         : null;
 
-    if (!_mergeIntoParent && (geometry?.dropFromTree == true))
+    if (!_mergeIntoParent && (geometry?.dropFromTree ?? false))
       return;  // Drop the node, it's not going to be visible.
 
     owner._semantics ??= SemanticsNode(showOnScreen: owner.showOnScreen);

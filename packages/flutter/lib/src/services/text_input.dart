@@ -11,8 +11,7 @@ import 'dart:ui' show
   Size,
   Rect,
   TextAlign,
-  TextDirection,
-  hashValues;
+  TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/src/widgets/text_selection.dart' show ToolbarType;
@@ -128,7 +127,7 @@ class TextInputType {
   ///
   /// Requests a default keyboard with ready access to the number keys.
   /// Additional options, such as decimal point and/or positive/negative
-  /// signs, can be requested using [new TextInputType.numberWithOptions].
+  /// signs, can be requested using [TextInputType.numberWithOptions].
   static const TextInputType number = TextInputType.numberWithOptions();
 
   /// Optimize for telephone numbers.
@@ -220,7 +219,7 @@ class TextInputType {
   }
 
   @override
-  int get hashCode => hashValues(index, signed, decimal);
+  int get hashCode => Object.hash(index, signed, decimal);
 }
 
 /// An action the user has requested the text input control to perform.
@@ -464,6 +463,7 @@ class TextInputConfiguration {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
+    this.enableInteractiveSelection = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
@@ -581,6 +581,15 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final bool enableSuggestions;
 
+  /// Whether a user can change its selection.
+  ///
+  /// This flag only affects iOS VoiceOver. On Android Talkback, the selection
+  /// change is sent through semantics actions and is directly disabled from
+  /// the widget side.
+  ///
+  /// Defaults to true. Cannot be null.
+  final bool enableInteractiveSelection;
+
   /// What text to display in the text input control's action button.
   final String? actionLabel;
 
@@ -628,6 +637,7 @@ class TextInputConfiguration {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     bool? enableSuggestions,
+    bool? enableInteractiveSelection,
     String? actionLabel,
     TextInputAction? inputAction,
     Brightness? keyboardAppearance,
@@ -645,6 +655,7 @@ class TextInputConfiguration {
       smartDashesType: smartDashesType ?? this.smartDashesType,
       smartQuotesType: smartQuotesType ?? this.smartQuotesType,
       enableSuggestions: enableSuggestions ?? this.enableSuggestions,
+      enableInteractiveSelection: enableInteractiveSelection ?? this.enableInteractiveSelection,
       inputAction: inputAction ?? this.inputAction,
       textCapitalization: textCapitalization ?? this.textCapitalization,
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
@@ -692,6 +703,7 @@ class TextInputConfiguration {
       'smartDashesType': smartDashesType.index.toString(),
       'smartQuotesType': smartQuotesType.index.toString(),
       'enableSuggestions': enableSuggestions,
+      'enableInteractiveSelection': enableInteractiveSelection,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
@@ -925,7 +937,7 @@ class TextEditingValue {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     text.hashCode,
     selection.hashCode,
     composing.hashCode,
@@ -977,17 +989,6 @@ enum SelectionChangedCause {
 mixin TextSelectionDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
-
-  /// Indicates that the user has requested the delegate to replace its current
-  /// text editing state with [value].
-  ///
-  /// The new [value] is treated as user input and thus may subject to input
-  /// formatting.
-  @Deprecated(
-    'Use the userUpdateTextEditingValue instead. '
-    'This feature was deprecated after v1.26.0-17.2.pre.',
-  )
-  set textEditingValue(TextEditingValue value) {}
 
   /// Indicates that the user has requested the delegate to replace its current
   /// text editing state with [value].
@@ -1189,7 +1190,7 @@ class SelectionRect {
   }
 
   @override
-  int get hashCode => hashValues(position, bounds);
+  int get hashCode => Object.hash(position, bounds);
 
   @override
   String toString() => 'SelectionRect($position, $bounds)';
@@ -1211,16 +1212,23 @@ abstract class DeltaTextInputClient extends TextInputClient {
   /// to the client's editing state. A change is any mutation to the raw text
   /// value, or any updates to the selection and/or composing region.
   ///
-  /// Here is an example of what implementation of this method could look like:
   /// {@tool snippet}
+  /// This example shows what an implementation of this method could look like.
+  ///
+  /// ```dart
+  /// TextEditingValue? _localValue;
   /// @override
   /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
-  ///   TextEditingValue newValue = _previousValue;
+  ///   if (_localValue == null) {
+  ///     return;
+  ///   }
+  ///   TextEditingValue newValue = _localValue!;
   ///   for (final TextEditingDelta delta in textEditingDeltas) {
   ///     newValue = delta.apply(newValue);
   ///   }
   ///   _localValue = newValue;
   /// }
+  /// ```
   /// {@end-tool}
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
@@ -1742,7 +1750,7 @@ class TextInput {
 
         final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
 
-        for (final dynamic encodedDelta in encoded['deltas']) {
+        for (final dynamic encodedDelta in encoded['deltas'] as List<dynamic>) {
           final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
           deltas.add(delta);
         }

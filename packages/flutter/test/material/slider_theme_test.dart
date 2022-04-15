@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -378,7 +376,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScale),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
             child: Material(
               child: Row(
                 children: <Widget>[
@@ -555,7 +553,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScale),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
             child: Material(
               child: Row(
                 children: <Widget>[
@@ -1258,7 +1256,7 @@ void main() {
     addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Slider)));
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 }
 

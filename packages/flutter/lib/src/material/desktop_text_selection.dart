@@ -34,7 +34,7 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
     ToolbarType toolbarType,
     SpellCheckConfiguration? spellCheckConfiguration,
@@ -43,8 +43,8 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
       clipboardStatus: clipboardStatus,
       endpoints: endpoints,
       globalEditableRegion: globalEditableRegion,
-      handleCut: canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
+      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       selectionMidpoint: selectionMidpoint,
@@ -55,13 +55,13 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
 
   /// Builds the text selection handles, but desktop has none.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     return const SizedBox.shrink();
   }
 
   /// Gets the position for the text selection handles, but desktop has none.
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
   }
 
@@ -74,6 +74,12 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
            value.text.isNotEmpty &&
            !(value.selection.start == 0 && value.selection.end == value.text.length);
   }
+
+  @override
+  void handleSelectAll(TextSelectionDelegate delegate) {
+    super.handleSelectAll(delegate);
+    delegate.hideToolbar();
+  }
 }
 
 /// Text selection controls that loosely follows Material design conventions.
@@ -83,7 +89,6 @@ final TextSelectionControls desktopTextSelectionControls =
 // Generates the child that's passed into DesktopTextSelectionToolbar.
 class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
   const _DesktopTextSelectionControlsToolbar({
-    Key? key,
     required this.clipboardStatus,
     required this.endpoints,
     required this.globalEditableRegion,
@@ -94,7 +99,7 @@ class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
     required this.selectionMidpoint,
     required this.textLineHeight,
     required this.lastSecondaryTapDownPosition,
-  }) : super(key: key);
+  });
 
   final ClipboardStatusNotifier? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
@@ -112,8 +117,6 @@ class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
 }
 
 class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelectionControlsToolbar> {
-  ClipboardStatusNotifier? _clipboardStatus;
-
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
@@ -123,46 +126,28 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
   @override
   void initState() {
     super.initState();
-    if (widget.handlePaste != null) {
-      _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-      _clipboardStatus!.addListener(_onChangedClipboardStatus);
-      _clipboardStatus!.update();
-    }
+    widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
   }
 
   @override
   void didUpdateWidget(_DesktopTextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.clipboardStatus != widget.clipboardStatus) {
-      if (_clipboardStatus != null) {
-        _clipboardStatus!.removeListener(_onChangedClipboardStatus);
-        _clipboardStatus!.dispose();
-      }
-      _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-      _clipboardStatus!.addListener(_onChangedClipboardStatus);
-      if (widget.handlePaste != null) {
-        _clipboardStatus!.update();
-      }
+      oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
+      widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
     }
   }
 
   @override
   void dispose() {
     super.dispose();
-    // When used in an Overlay, this can be disposed after its creator has
-    // already disposed _clipboardStatus.
-    if (_clipboardStatus != null && !_clipboardStatus!.disposed) {
-      _clipboardStatus!.removeListener(_onChangedClipboardStatus);
-      if (widget.clipboardStatus == null) {
-        _clipboardStatus!.dispose();
-      }
-    }
+    widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
   }
 
   @override
   Widget build(BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
-    if (widget.handlePaste != null && _clipboardStatus!.value == ClipboardStatus.unknown) {
+    if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
@@ -199,7 +184,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
       addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
     }
     if (widget.handlePaste != null
-        && _clipboardStatus!.value == ClipboardStatus.pasteable) {
+        && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
       addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
     }
     if (widget.handleSelectAll != null) {
@@ -235,11 +220,9 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
 class _DesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of _DesktopTextSelectionToolbar.
   const _DesktopTextSelectionToolbar({
-    Key? key,
     required this.anchor,
     required this.children,
-  }) : assert(children.length > 0),
-       super(key: key);
+  }) : assert(children.length > 0);
 
   /// The point at which the toolbar will attempt to position itself as closely
   /// as possible.
@@ -312,15 +295,13 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
 class _DesktopTextSelectionToolbarButton extends StatelessWidget {
   /// Creates an instance of DesktopTextSelectionToolbarButton.
   const _DesktopTextSelectionToolbarButton({
-    Key? key,
     required this.onPressed,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// Create an instance of [_DesktopTextSelectionToolbarButton] whose child is
   /// a [Text] widget in the style of the Material text selection toolbar.
   _DesktopTextSelectionToolbarButton.text({
-    Key? key,
     required BuildContext context,
     required this.onPressed,
     required String text,
@@ -332,8 +313,7 @@ class _DesktopTextSelectionToolbarButton extends StatelessWidget {
                ? Colors.white
                : Colors.black87,
          ),
-       ),
-       super(key: key);
+       );
 
   /// {@macro flutter.material.TextSelectionToolbarTextButton.onPressed}
   final VoidCallback onPressed;
@@ -353,6 +333,8 @@ class _DesktopTextSelectionToolbarButton extends StatelessWidget {
       child: TextButton(
         style: TextButton.styleFrom(
           alignment: Alignment.centerLeft,
+          enabledMouseCursor: SystemMouseCursors.basic,
+          disabledMouseCursor: SystemMouseCursors.basic,
           primary: primary,
           shape: const RoundedRectangleBorder(),
           minimumSize: const Size(kMinInteractiveDimension, 36.0),

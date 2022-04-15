@@ -259,7 +259,7 @@ class CupertinoDatePicker extends StatefulWidget {
   /// [dateOrder] determines the order of the columns inside [CupertinoDatePicker] in date mode.
   /// Defaults to the locale's default date format/order.
   CupertinoDatePicker({
-    Key? key,
+    super.key,
     this.mode = CupertinoDatePickerMode.dateAndTime,
     required this.onDateTimeChanged,
     DateTime? initialDateTime,
@@ -278,8 +278,7 @@ class CupertinoDatePicker extends StatefulWidget {
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
          'minute interval is not a positive integer factor of 60',
-       ),
-       super(key: key) {
+       ) {
     assert(this.initialDateTime != null);
     assert(
       mode != CupertinoDatePickerMode.dateAndTime || minimumDate == null || !this.initialDateTime.isBefore(minimumDate!),
@@ -595,7 +594,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     minuteController = FixedExtentScrollController(initialItem: initialDateTime.minute ~/ widget.minuteInterval);
     dateController = FixedExtentScrollController();
 
-    PaintingBinding.instance!.systemFonts.addListener(_handleSystemFontsChange);
+    PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
   }
 
   void _handleSystemFontsChange () {
@@ -614,7 +613,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     minuteController.dispose();
     meridiemController.dispose();
 
-    PaintingBinding.instance!.systemFonts.removeListener(_handleSystemFontsChange);
+    PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
     super.dispose();
   }
 
@@ -673,8 +672,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   void _onSelectedItemChange(int index) {
     final DateTime selected = selectedDateTime;
 
-    final bool isDateInvalid = widget.minimumDate?.isAfter(selected) == true
-                            || widget.maximumDate?.isBefore(selected) == true;
+    final bool isDateInvalid = (widget.minimumDate?.isAfter(selected) ?? false)
+        || (widget.maximumDate?.isBefore(selected) ?? false);
 
     if (isDateInvalid)
       return;
@@ -939,7 +938,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   void _scrollToDate(DateTime newDate, DateTime fromDate) {
     assert(newDate != null);
-    SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
       if (fromDate.year != newDate.year || fromDate.month != newDate.month || fromDate.day != newDate.day) {
         _animateColumnControllerToItem(dateController, selectedDayFromInitial);
       }
@@ -1113,7 +1112,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     monthController = FixedExtentScrollController(initialItem: selectedMonth - 1);
     yearController = FixedExtentScrollController(initialItem: selectedYear);
 
-    PaintingBinding.instance!.systemFonts.addListener(_handleSystemFontsChange);
+    PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
   }
 
   void _handleSystemFontsChange() {
@@ -1129,7 +1128,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     monthController.dispose();
     yearController.dispose();
 
-    PaintingBinding.instance!.systemFonts.removeListener(_handleSystemFontsChange);
+    PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
     super.dispose();
   }
 
@@ -1335,7 +1334,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
   void _scrollToDate(DateTime newDate) {
     assert(newDate != null);
-    SchedulerBinding.instance!.addPostFrameCallback((Duration timestamp) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
       if (selectedYear != newDate.year) {
         _animateColumnControllerToItem(yearController, newDate.year);
       }
@@ -1525,7 +1524,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// [secondInterval] is the granularity of the second spinner. Must be a
   /// positive integer factor of 60.
   CupertinoTimerPicker({
-    Key? key,
+    super.key,
     this.mode = CupertinoTimerPickerMode.hms,
     this.initialTimerDuration = Duration.zero,
     this.minuteInterval = 1,
@@ -1541,8 +1540,7 @@ class CupertinoTimerPicker extends StatefulWidget {
        assert(secondInterval > 0 && 60 % secondInterval == 0),
        assert(initialTimerDuration.inMinutes % minuteInterval == 0),
        assert(initialTimerDuration.inSeconds % secondInterval == 0),
-       assert(alignment != null),
-       super(key: key);
+       assert(alignment != null);
 
   /// The mode of the timer picker.
   final CupertinoTimerPickerMode mode;
@@ -1623,7 +1621,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     if (widget.mode != CupertinoTimerPickerMode.hm)
       selectedSecond = widget.initialTimerDuration.inSeconds % 60;
 
-    PaintingBinding.instance!.systemFonts.addListener(_handleSystemFontsChange);
+    PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
   }
 
   void _handleSystemFontsChange() {
@@ -1636,7 +1634,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   @override
   void dispose() {
-    PaintingBinding.instance!.systemFonts.removeListener(_handleSystemFontsChange);
+    PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
     super.dispose();
   }
 

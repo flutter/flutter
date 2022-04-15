@@ -66,15 +66,14 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   /// [iconMargin] is only useful when [icon] and either one of [text] or
   /// [child] is non-null.
   const Tab({
-    Key? key,
+    super.key,
     this.text,
     this.icon,
     this.iconMargin = const EdgeInsets.only(bottom: 10.0),
     this.height,
     this.child,
   }) : assert(text != null || child != null || icon != null),
-       assert(text == null || child == null),
-       super(key: key);
+       assert(text == null || child == null);
 
   /// The text to display as the tab's label.
   ///
@@ -163,7 +162,6 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
 
 class _TabStyle extends AnimatedWidget {
   const _TabStyle({
-    Key? key,
     required Animation<double> animation,
     required this.selected,
     required this.labelColor,
@@ -171,7 +169,7 @@ class _TabStyle extends AnimatedWidget {
     required this.labelStyle,
     required this.unselectedLabelStyle,
     required this.child,
-  }) : super(key: key, listenable: animation);
+  }) : super(listenable: animation);
 
   final TextStyle? labelStyle;
   final TextStyle? unselectedLabelStyle;
@@ -228,25 +226,15 @@ typedef _LayoutCallback = void Function(List<double> xOffsets, TextDirection tex
 
 class _TabLabelBarRenderer extends RenderFlex {
   _TabLabelBarRenderer({
-    List<RenderBox>? children,
-    required Axis direction,
-    required MainAxisSize mainAxisSize,
-    required MainAxisAlignment mainAxisAlignment,
-    required CrossAxisAlignment crossAxisAlignment,
-    required TextDirection textDirection,
-    required VerticalDirection verticalDirection,
+    required super.direction,
+    required super.mainAxisSize,
+    required super.mainAxisAlignment,
+    required super.crossAxisAlignment,
+    required TextDirection super.textDirection,
+    required super.verticalDirection,
     required this.onPerformLayout,
   }) : assert(onPerformLayout != null),
-       assert(textDirection != null),
-       super(
-         children: children,
-         direction: direction,
-         mainAxisSize: mainAxisSize,
-         mainAxisAlignment: mainAxisAlignment,
-         crossAxisAlignment: crossAxisAlignment,
-         textDirection: textDirection,
-         verticalDirection: verticalDirection,
-       );
+       assert(textDirection != null);
 
   _LayoutCallback onPerformLayout;
 
@@ -283,12 +271,9 @@ class _TabLabelBarRenderer extends RenderFlex {
 // or in response to input.
 class _TabLabelBar extends Flex {
   _TabLabelBar({
-    Key? key,
-    List<Widget> children = const <Widget>[],
+    super.children,
     required this.onPerformLayout,
   }) : super(
-    key: key,
-    children: children,
     direction: Axis.horizontal,
     mainAxisSize: MainAxisSize.max,
     mainAxisAlignment: MainAxisAlignment.start,
@@ -517,15 +502,12 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
 // pixels value) after the TabBar viewport width and scroll limits are known.
 class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
   _TabBarScrollPosition({
-    required ScrollPhysics physics,
-    required ScrollContext context,
-    required ScrollPosition? oldPosition,
+    required super.physics,
+    required super.context,
+    required super.oldPosition,
     required this.tabBar,
   }) : super(
-    physics: physics,
-    context: context,
     initialPixels: null,
-    oldPosition: oldPosition,
   );
 
   final _TabBarState tabBar;
@@ -621,7 +603,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If [indicator] is not null or provided from [TabBarTheme],
   /// then [indicatorWeight], [indicatorPadding], and [indicatorColor] are ignored.
   const TabBar({
-    Key? key,
+    super.key,
     required this.tabs,
     this.controller,
     this.isScrollable = false,
@@ -644,12 +626,12 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.onTap,
     this.physics,
     this.splashFactory,
+    this.splashBorderRadius,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(dragStartBehavior != null),
        assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
-       assert(indicator != null || (indicatorPadding != null)),
-       super(key: key);
+       assert(indicator != null || (indicatorPadding != null));
 
   /// Typically a list of two or more [Tab] widgets.
   ///
@@ -720,6 +702,11 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// occupied by the tab in the tab bar. If [indicatorSize] is
   /// [TabBarIndicatorSize.label], then the tab's bounds are only as wide as
   /// the tab widget itself.
+  ///
+  /// See also:
+  ///
+  ///  * [splashBorderRadius], which defines the clipping radius of the splash
+  ///    and is generally used with [BoxDecoration.borderRadius].
   final Decoration? indicator;
 
   /// Whether this tab bar should automatically adjust the [indicatorColor].
@@ -797,10 +784,23 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@template flutter.material.tabs.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// individual tab widgets.
   ///
-  /// If this property is null, [SystemMouseCursors.click] will be used.
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  /// {@endtemplate}
+  ///
+  /// If null, then the value of [TabBarTheme.mouseCursor] is used. If
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -848,6 +848,22 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// )
   /// ```
   final InteractiveInkFeatureFactory? splashFactory;
+
+  /// Defines the clipping radius of splashes that extend outside the bounds of the tab.
+  ///
+  /// This can be useful to match the [BoxDecoration.borderRadius] provided as [indicator].
+  /// ```dart
+  /// TabBar(
+  ///   indicator: BoxDecoration(
+  ///     borderRadius: BorderRadius.circular(40),
+  ///   ),
+  ///   splashBorderRadius: BorderRadius.circular(40),
+  ///   ...
+  /// )
+  /// ```
+  ///
+  /// If this property is null, it is interpreted as [BorderRadius.zero].
+  final BorderRadius? splashBorderRadius;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -1200,12 +1216,21 @@ class _TabBarState extends State<TabBar> {
     // the same share of the tab bar's overall width.
     final int tabCount = widget.tabs.length;
     for (int index = 0; index < tabCount; index += 1) {
+      final Set<MaterialState> states = <MaterialState>{
+        if (index == _currentIndex) MaterialState.selected,
+      };
+
+      final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+        ?? tabBarTheme.mouseCursor?.resolve(states)
+        ?? MaterialStateMouseCursor.clickable.resolve(states);
+
       wrappedTabs[index] = InkWell(
-        mouseCursor: widget.mouseCursor ?? SystemMouseCursors.click,
+        mouseCursor: effectiveMouseCursor,
         onTap: () { _handleTap(index); },
         enableFeedback: widget.enableFeedback ?? true,
         overlayColor: widget.overlayColor ?? tabBarTheme.overlayColor,
         splashFactory: widget.splashFactory ?? tabBarTheme.splashFactory,
+        borderRadius: widget.splashBorderRadius,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
           child: Stack(
@@ -1279,14 +1304,14 @@ class TabBarView extends StatefulWidget {
   ///
   /// The length of [children] must be the same as the [controller]'s length.
   const TabBarView({
-    Key? key,
+    super.key,
     required this.children,
     this.controller,
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.viewportFraction = 1.0,
   }) : assert(children != null),
-       assert(dragStartBehavior != null),
-       super(key: key);
+       assert(dragStartBehavior != null);
 
   /// This widget's selection and animation state.
   ///
@@ -1313,6 +1338,9 @@ class TabBarView extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// {@macro flutter.widgets.pageview.viewportFraction}
+  final double viewportFraction;
 
   @override
   State<TabBarView> createState() => _TabBarViewState();
@@ -1367,7 +1395,10 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
-    _pageController = PageController(initialPage: _currentIndex!);
+    _pageController = PageController(
+      initialPage: _currentIndex!,
+      viewportFraction: widget.viewportFraction,
+    );
   }
 
   @override
@@ -1376,7 +1407,9 @@ class _TabBarViewState extends State<TabBarView> {
     if (widget.controller != oldWidget.controller) {
       _updateTabController();
       _currentIndex = _controller!.index;
+      _warpUnderwayCount += 1;
       _pageController.jumpToPage(_currentIndex!);
+      _warpUnderwayCount -= 1;
     }
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
       _updateChildren();
@@ -1517,15 +1550,14 @@ class TabPageSelectorIndicator extends StatelessWidget {
   ///
   /// The [backgroundColor], [borderColor], and [size] parameters must not be null.
   const TabPageSelectorIndicator({
-    Key? key,
+    super.key,
     required this.backgroundColor,
     required this.borderColor,
     required this.size,
     this.borderStyle = BorderStyle.solid,
   }) : assert(backgroundColor != null),
        assert(borderColor != null),
-       assert(size != null),
-       super(key: key);
+       assert(size != null);
 
   /// The indicator circle's background color.
   final Color backgroundColor;
@@ -1569,14 +1601,13 @@ class TabPageSelectorIndicator extends StatelessWidget {
 class TabPageSelector extends StatelessWidget {
   /// Creates a compact widget that indicates which tab has been selected.
   const TabPageSelector({
-    Key? key,
+    super.key,
     this.controller,
     this.indicatorSize = 12.0,
     this.color,
     this.selectedColor,
     this.borderStyle,
-  }) : assert(indicatorSize != null && indicatorSize > 0.0),
-       super(key: key);
+  }) : assert(indicatorSize != null && indicatorSize > 0.0);
 
   /// This widget's selection and animation state.
   ///

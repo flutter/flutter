@@ -10,7 +10,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'gesture_tester.dart';
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('toString control tests', (GestureTester tester) {
     expect(const PointerDownEvent(), hasOneLineDescription);
@@ -501,6 +501,39 @@ void main() {
     );
     _expectTransformedEvent(
       original: scroll,
+      transform: transform,
+      localPosition: localPosition,
+    );
+
+    const PointerPanZoomStartEvent panZoomStart = PointerPanZoomStartEvent(
+      timeStamp: Duration(seconds: 2),
+      device: 1,
+      position: Offset(20, 30),
+    );
+    _expectTransformedEvent(
+      original: panZoomStart,
+      transform: transform,
+      localPosition: localPosition,
+    );
+
+    const PointerPanZoomUpdateEvent panZoomUpdate = PointerPanZoomUpdateEvent(
+      timeStamp: Duration(seconds: 2),
+      device: 1,
+      position: Offset(20, 30),
+    );
+    _expectTransformedEvent(
+      original: panZoomUpdate,
+      transform: transform,
+      localPosition: localPosition,
+    );
+
+    const PointerPanZoomEndEvent panZoomEnd = PointerPanZoomEndEvent(
+      timeStamp: Duration(seconds: 2),
+      device: 1,
+      position: Offset(20, 30),
+    );
+    _expectTransformedEvent(
+      original: panZoomEnd,
       transform: transform,
       localPosition: localPosition,
     );

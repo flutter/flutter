@@ -119,7 +119,7 @@ Future<void> precacheImage(
       // Give callers until at least the end of the frame to subscribe to the
       // image stream.
       // See ImageCache._liveImages
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         stream.removeListener(listener!);
       });
     },
@@ -237,12 +237,12 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 /// Several constructors are provided for the various ways that an image can be
 /// specified:
 ///
-///  * [new Image], for obtaining an image from an [ImageProvider].
-///  * [new Image.asset], for obtaining an image from an [AssetBundle]
+///  * [Image.new], for obtaining an image from an [ImageProvider].
+///  * [Image.asset], for obtaining an image from an [AssetBundle]
 ///    using a key.
-///  * [new Image.network], for obtaining an image from a URL.
-///  * [new Image.file], for obtaining an image from a [File].
-///  * [new Image.memory], for obtaining an image from a [Uint8List].
+///  * [Image.network], for obtaining an image from a URL.
+///  * [Image.file], for obtaining an image from a [File].
+///  * [Image.memory], for obtaining an image from a [Uint8List].
 ///
 /// The following image formats are supported: {@macro dart.ui.imageFormats}
 ///
@@ -292,7 +292,7 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 /// See also:
 ///
 ///  * [Icon], which shows an image from a font.
-///  * [new Ink.image], which is the preferred way to show an image in a
+///  * [Ink.image], which is the preferred way to show an image in a
 ///    material application (especially if the image is in a [Material] and will
 ///    have an [InkWell] on top of it).
 ///  * [Image](dart-ui/Image-class.html), the class in the [dart:ui] library.
@@ -303,7 +303,7 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an image.
   ///
   /// To show an image from the network or from an asset bundle, consider using
-  /// [new Image.network] and [new Image.asset] respectively.
+  /// [Image.network] and [Image.asset] respectively.
   ///
   /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
   /// must not be null.
@@ -319,7 +319,7 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   const Image({
-    Key? key,
+    super.key,
     required this.image,
     this.frameBuilder,
     this.loadingBuilder,
@@ -344,8 +344,7 @@ class Image extends StatefulWidget {
        assert(repeat != null),
        assert(filterQuality != null),
        assert(matchTextDirection != null),
-       assert(isAntiAlias != null),
-       super(key: key);
+       assert(isAntiAlias != null);
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
@@ -379,7 +378,7 @@ class Image extends StatefulWidget {
   // on Web as well, see https://github.com/flutter/flutter/issues/42789.
   Image.network(
     String src, {
-    Key? key,
+    super.key,
     double scale = 1.0,
     this.frameBuilder,
     this.loadingBuilder,
@@ -408,8 +407,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null),
-       super(key: key);
+       assert(isAntiAlias != null);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
   ///
@@ -443,7 +441,7 @@ class Image extends StatefulWidget {
   ///  * [FileImage] provider for evicting the underlying file easily.
   Image.file(
     File file, {
-    Key? key,
+    super.key,
     double scale = 1.0,
     this.frameBuilder,
     this.errorBuilder,
@@ -479,8 +477,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null),
-       super(key: key);
+       assert(isAntiAlias != null);
 
   // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
   //
@@ -611,7 +608,7 @@ class Image extends StatefulWidget {
   ///    Flutter.
   Image.asset(
     String name, {
-    Key? key,
+    super.key,
     AssetBundle? bundle,
     this.frameBuilder,
     this.errorBuilder,
@@ -647,8 +644,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null),
-       super(key: key);
+       assert(isAntiAlias != null);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
@@ -682,7 +678,7 @@ class Image extends StatefulWidget {
   /// to reduce the memory usage of [ImageCache].
   Image.memory(
     Uint8List bytes, {
-    Key? key,
+    super.key,
     double scale = 1.0,
     this.frameBuilder,
     this.errorBuilder,
@@ -710,8 +706,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
-       assert(isAntiAlias != null),
-       super(key: key);
+       assert(isAntiAlias != null);
 
   /// The image to display.
   final ImageProvider image;
@@ -1050,14 +1045,14 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     _scrollAwareContext = DisposableBuildContext<State<Image>>(this);
   }
 
   @override
   void dispose() {
     assert(_imageStream != null);
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _stopListeningToStream();
     _completerHandle?.dispose();
     _scrollAwareContext.dispose();
@@ -1107,7 +1102,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   void _updateInvertColors() {
     _invertColors = MediaQuery.maybeOf(context)?.invertColors
-        ?? SemanticsBinding.instance!.accessibilityFeatures.invertColors;
+        ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
   }
 
   void _resolveImage() {

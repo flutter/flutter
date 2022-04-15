@@ -586,6 +586,15 @@ class TextPainter {
     return _paragraph!.didExceedMaxLines;
   }
 
+  /// The distance from the left edge of the leftmost glyph to the right edge of
+  /// the rightmost glyph in the paragraph.
+  ///
+  /// Valid only after [layout] has been called.
+  double get longestLine {
+    assert(!_debugNeedsLayout);
+    return _paragraph!.longestLine;
+  }
+
   double? _lastMinWidth;
   double? _lastMaxWidth;
 
@@ -648,7 +657,8 @@ class TextPainter {
       _createParagraph();
     _lastMinWidth = minWidth;
     _lastMaxWidth = maxWidth;
-    // A change in layout invalidates the cached caret metrics as well.
+    // A change in layout invalidates the cached caret and line metrics as well.
+    _lineMetricsCache = null;
     _previousCaretPosition = null;
     _previousCaretPrototype = null;
     _layoutParagraph(minWidth, maxWidth);
@@ -738,7 +748,7 @@ class TextPainter {
   // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character upstream from the given string offset.
   Rect? _getRectFromUpstream(int offset, Rect caretPrototype) {
-    final String flattenedText = _text!.toPlainText(includePlaceholders: false);
+    final String flattenedText = _text!.toPlainText(includeSemanticsLabels: false);
     final int? prevCodeUnit = _text!.codeUnitAt(max(0, offset - 1));
     if (prevCodeUnit == null)
       return null;
@@ -788,7 +798,7 @@ class TextPainter {
   // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character downstream from the given string offset.
   Rect? _getRectFromDownstream(int offset, Rect caretPrototype) {
-    final String flattenedText = _text!.toPlainText(includePlaceholders: false);
+    final String flattenedText = _text!.toPlainText(includeSemanticsLabels: false);
     // We cap the offset at the final index of the _text.
     final int? nextCodeUnit = _text!.codeUnitAt(min(offset, flattenedText.length - 1));
     if (nextCodeUnit == null)
