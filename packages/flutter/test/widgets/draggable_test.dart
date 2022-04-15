@@ -3082,7 +3082,7 @@ void main() {
         home: Column(
           children: <Widget>[
             Draggable<int>(
-              ignoringPointer: false,
+              ignoringFeedbackPointer: false,
               feedback: GestureDetector(
                 onTap: () => onTap = true,
                 child: const SizedBox(height: 50.0, child: Text('Draggable')),
@@ -3111,7 +3111,7 @@ void main() {
         home: Column(
           children: <Widget>[
             LongPressDraggable<int>(
-              ignoringPointer: false,
+              ignoringFeedbackPointer: false,
               feedback: GestureDetector(
                 onTap: () => onTap = true,
                 child: const SizedBox(height: 50.0, child: Text('Draggable')),

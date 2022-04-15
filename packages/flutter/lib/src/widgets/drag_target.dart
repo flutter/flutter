@@ -207,12 +207,13 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.onDragEnd,
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
-    this.ignoringPointer = true,
+    this.ignoringFeedbackPointer = true,
     this.rootOverlay = false,
     this.hitTestBehavior = HitTestBehavior.deferToChild,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
+       assert(ignoringFeedbackPointer != null),
        assert(ignoringPointer != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
 
@@ -318,7 +319,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// still consume space during layout and be visible during painting.
   ///
   /// Defaults to true.
-  final bool ignoringPointer;
+  final bool ignoringFeedbackPointer;
 
   /// Controls how this widget competes with other gestures to initiate a drag.
   ///
@@ -456,6 +457,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.onDragEnd,
     super.onDragCompleted,
     this.hapticFeedbackOnStart = true,
+    super.ignoringFeedbackPointer = true,
     super.ignoringFeedbackSemantics,
     super.ignoringFeedbackPointer,
     this.delay = kLongPressTimeout,
@@ -553,7 +555,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
       ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
-      ignoringPointer: widget.ignoringPointer,
+      ignoringPointer: widget.ignoringFeedbackPointer,
       onDragUpdate: (DragUpdateDetails details) {
         if (mounted && widget.onDragUpdate != null) {
           widget.onDragUpdate!(details);
