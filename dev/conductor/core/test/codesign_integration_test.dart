@@ -4,7 +4,7 @@
 
 // This test clones the framework and downloads pre-built binaries; it sometimes
 // times out with the default 5 minutes: https://github.com/flutter/flutter/issues/100937
-@Timeout(Duration(minutes: 10))
+@Timeout(Duration(minutes: 50)) // should be 10
 
 import 'dart:io' as io;
 
@@ -141,20 +141,15 @@ void main() {
 
 class TODOFileCodesignVisitor extends FileCodesignVisitor {
   TODOFileCodesignVisitor({
-    required Directory tempDir,
-    required String engineHash,
-    required ProcessManager processManager,
-    required String codesignCertName,
-    required Stdio stdio,
+    required super.tempDir,
+    required super.engineHash,
+    required super.processManager,
+    required super.codesignCertName,
+    required super.stdio,
   }) : super(
-    tempDir: tempDir,
-    engineHash: engineHash,
-    processManager: processManager,
-    codesignCertName: codesignCertName,
     appSpecificPassword: appSpecificPasswordEnv,
     codesignUserName: codesignUserNameEnv,
     codesignPrimaryBundleId: 'dev.flutter.sdk',
-    stdio: stdio,
   );
 
   static final String appSpecificPasswordEnv = io.Platform.environment['APP_SPECIFIC_PASSWORD']!;
@@ -181,13 +176,10 @@ class TODOFileCodesignVisitor extends FileCodesignVisitor {
 
 class _FileValidationVisitor extends FileCodesignVisitor {
   _FileValidationVisitor({
-    required Directory tempDir,
-    required String engineHash,
-    required ProcessManager processManager,
+    required super.tempDir,
+    required super.engineHash,
+    required super.processManager,
   }) : super(
-    tempDir: tempDir,
-    engineHash: engineHash,
-    processManager: processManager,
     codesignCertName: 'FLUTTER',
     appSpecificPassword: 'unused',
     codesignUserName: 'unused',
