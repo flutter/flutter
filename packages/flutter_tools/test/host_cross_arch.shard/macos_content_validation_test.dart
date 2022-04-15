@@ -30,14 +30,14 @@ void main() {
   for (final String buildMode in <String>['Debug', 'Release']) {
     final String buildModeLower = buildMode.toLowerCase();
 
-    final String workingDirectory = fileSystem.path.join(
-      getFlutterRoot(),
-      'dev',
-      'integration_tests',
-      'flutter_gallery',
-    );
-
     test('flutter build macos --$buildModeLower builds a valid app', () {
+      final String workingDirectory = fileSystem.path.join(
+        getFlutterRoot(),
+        'dev',
+        'integration_tests',
+        'flutter_gallery',
+      );
+
       processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
