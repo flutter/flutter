@@ -480,7 +480,7 @@ void main() {
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-   testUsingContext('Display xcresult issues with default bundle identifier.', () async {
+   testUsingContext('Default bundle identifier error should be hidden if there is another xcresult issue.', () async {
       final BuildCommand command = BuildCommand();
 
       _createMinimalMockProjectFiles();
@@ -492,7 +492,7 @@ void main() {
 
       expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
       expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
-      expect(testLogger.errorText, contains('It appears that your application still contains the default signing identifier.'));
+      expect(testLogger.errorText, isNot(contains('It appears that your application still contains the default signing identifier.')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -507,6 +507,33 @@ void main() {
       EnvironmentType: () => EnvironmentType.physical,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(productBundleIdentifier: 'com.example'),
     });
+
+    testUsingContext('Show default bundle identifier error if there are no other errors.', () async {
+      final BuildCommand command = BuildCommand();
+
+      _createMinimalMockProjectFiles();
+
+      await expectLater(
+        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        throwsToolExit(),
+      );
+
+      expect(testLogger.errorText, contains('It appears that your application still contains the default signing identifier.'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrCommand,
+        _setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+        }),
+        _setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
+        _setUpRsyncCommand(),
+      ]),
+      Platform: () => macosPlatform,
+      EnvironmentType: () => EnvironmentType.physical,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(productBundleIdentifier: 'com.example'),
+    });
+
 
     testUsingContext('Display xcresult issues with no provisioning profile.', () async {
       final BuildCommand command = BuildCommand();
