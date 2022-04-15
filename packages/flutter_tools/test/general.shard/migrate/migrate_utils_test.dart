@@ -191,11 +191,28 @@ void main() {
     });
   });
 
-  group('sdk', () {
-    testWithoutContext('clone', () async {
-      projectRoot = fileSystem.systemTempDirectory.createTempSync('flutter_sdk_test');;
+  group('legacy app creation', () {
+    testWithoutContext('clone and create', () async {
+      projectRoot = fileSystem.systemTempDirectory.createTempSync('flutter_sdk_test');
       expect(await MigrateUtils.cloneFlutter('5391447fae6209bb21a89e6a5a6583cac1af9b4b', projectRoot.path, logger), true);
-      expect(projectRoot.childFile('README.md').existsSync());
+      expect(projectRoot.childFile('README.md').existsSync(), true);
+
+      final Directory appDir = fileSystem.systemTempDirectory.createTempSync('flutter_app');
+      await MigrateUtils.createFromTemplates(
+        projectRoot.childDirectory('bin').path,
+        name: 'testapp',
+        androidLanguage: 'java',
+        iosLanguage: 'objc',
+        outputDirectory: appDir.path,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+      expect(appDir.childFile('pubspec.yaml').existsSync(), true);
+      expect(appDir.childFile('.metadata').existsSync(), true);
+      expect(appDir.childDirectory('android').existsSync(), true);
+      expect(appDir.childDirectory('ios').existsSync(), true);
+      expect(appDir.childDirectory('web').existsSync(), false);
+
       projectRoot.deleteSync(recursive: true);
     });
   });
