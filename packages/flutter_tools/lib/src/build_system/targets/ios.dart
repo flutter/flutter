@@ -602,9 +602,9 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
       '-fembed-bitcode-marker',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=9.0'
+        '-miphoneos-version-min=11.0'
       else
-        '-miphonesimulator-version-min=9.0',
+        '-miphonesimulator-version-min=11.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
