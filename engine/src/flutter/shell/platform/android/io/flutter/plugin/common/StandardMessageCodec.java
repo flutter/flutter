@@ -217,7 +217,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
    * <p>Subclasses can extend the codec by overriding this method, calling super for values that the
    * extension does not handle.
    */
-  protected void writeValue(@NonNull ByteArrayOutputStream stream, @NonNull Object value) {
+  protected void writeValue(@NonNull ByteArrayOutputStream stream, @Nullable Object value) {
     if (value == null || value.equals(null)) {
       stream.write(NULL);
     } else if (value instanceof Boolean) {
