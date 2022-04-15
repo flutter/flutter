@@ -212,6 +212,11 @@ void WindowWin32::OnImeComposition(UINT const message,
   // Update the IME window position.
   text_input_manager_->UpdateImeWindow();
 
+  if (lparam == 0) {
+    OnComposeChange(u"", 0);
+    OnComposeCommit();
+  }
+
   if (lparam & GCS_COMPSTR) {
     // Read the in-progress composing string.
     long pos = text_input_manager_->GetComposingCursorPosition();
