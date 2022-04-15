@@ -265,11 +265,36 @@ dependencies:
       final File objectiveCAnalyticsOutputFile = File(path.join(tempDir.path, 'analytics-objc.log'));
       final Directory objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
 
-      section('Build iOS Objective-C host app');
-
       final File dummyAppFramework = File(path.join(projectDir.path, '.ios', 'Flutter', 'App.framework', 'App'));
       checkFileNotExists(dummyAppFramework.path);
       await inDirectory(objectiveCHostApp, () async {
+        section('Validate iOS Objective-C host app Podfile');
+
+        final File podfile = File(path.join(objectiveCHostApp.path, 'Podfile'));
+        String podfileContent = await podfile.readAsString();
+        final String podFailure = await eval(
+          'pod',
+          <String>['install'],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
+          canFail: true,
+        );
+
+        if (!podFailure.contains('Missing `flutter_post_install(installer)` in Podfile `post_install` block')
+            || !podFailure.contains('Add `flutter_post_install(installer)` to your Podfile `post_install` block to build Flutter plugins')) {
+          print(podfileContent);
+          throw TaskResult.failure('pod install unexpectedly succeed without "flutter_post_install" post_install block');
+        }
+        podfileContent = '''
+$podfileContent
+
+post_install do |installer|
+  flutter_post_install(installer)
+end
+          ''';
+        await podfile.writeAsString(podfileContent, flush: true);
+
         await exec(
           'pod',
           <String>['install'],
@@ -297,6 +322,8 @@ dependencies:
         if (version != '9.0') {
           throw TaskResult.failure('Minimum version set to $version, expected 9.0');
         }
+
+        section('Build iOS Objective-C host app');
 
         await exec(
           'xcodebuild',
@@ -377,6 +404,86 @@ dependencies:
           'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
         );
       }
+
+      section('Archive iOS Objective-C host app');
+
+      await inDirectory(objectiveCHostApp, () async {
+        final Directory objectiveCBuildArchiveDirectory = Directory(path.join(tempDir.path, 'build-objc-archive'));
+        await exec(
+          'xcodebuild',
+          <String>[
+            '-workspace',
+            'Host.xcworkspace',
+            '-scheme',
+            'Host',
+            '-configuration',
+            'Release',
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGN_IDENTITY=-',
+            'EXPANDED_CODE_SIGN_IDENTITY=-',
+            '-archivePath',
+            objectiveCBuildArchiveDirectory.path,
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+            'archive'
+          ],
+          environment: <String, String> {
+            'FLUTTER_ANALYTICS_LOG_FILE': objectiveCAnalyticsOutputFile.path,
+          },
+        );
+
+        final String archivedAppPath = path.join(
+          '${objectiveCBuildArchiveDirectory.path}.xcarchive',
+          'Products',
+          'Applications',
+          'Host.app',
+        );
+
+        checkFileExists(path.join(
+          archivedAppPath,
+          'Host',
+        ));
+
+        checkFileNotExists(path.join(
+          archivedAppPath,
+          'Frameworks',
+          'App.framework',
+          'flutter_assets',
+          'isolate_snapshot_data',
+        ));
+
+        final String builtFlutterBinary = path.join(
+          archivedAppPath,
+          'Frameworks',
+          'Flutter.framework',
+          'Flutter',
+        );
+        checkFileExists(builtFlutterBinary);
+        if ((await fileType(builtFlutterBinary)).contains('armv7')) {
+          throw TaskResult.failure('Unexpected armv7 architecture slice in $builtFlutterBinary');
+        }
+        await containsBitcode(builtFlutterBinary);
+
+        final String builtAppBinary = path.join(
+          archivedAppPath,
+          'Frameworks',
+          'App.framework',
+          'App',
+        );
+        checkFileExists(builtAppBinary);
+        if ((await fileType(builtAppBinary)).contains('armv7')) {
+          throw TaskResult.failure('Unexpected armv7 architecture slice in $builtAppBinary');
+        }
+        await containsBitcode(builtAppBinary);
+
+        // The host app example builds plugins statically, url_launcher_ios.framework
+        // should not exist.
+        checkDirectoryNotExists(path.join(
+          archivedAppPath,
+          'Frameworks',
+          'url_launcher_ios.framework',
+        ));
+      });
 
       section('Run platform unit tests');
 
