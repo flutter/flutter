@@ -125,12 +125,14 @@ class PaintingContext extends ClipContext {
       // replace the layer for repaint boundaries. That assertion does not
       // apply here because this is exactly the place designed to create a
       // layer for repaint boundaries.
-      final OffsetLayer layer = OffsetLayer();
+      final OffsetLayer layer = child.createCompositedLayer();
       child._layerHandle.layer = childLayer = layer;
     } else {
       assert(debugAlsoPaintedParent || childLayer.attached);
       childLayer.removeAllChildren();
     }
+    child.updateCompositedLayer(childLayer);
+
     assert(identical(childLayer, child._layerHandle.layer));
     assert(child._layerHandle.layer is OffsetLayer);
     assert(() {
@@ -194,7 +196,7 @@ class PaintingContext extends ClipContext {
     assert(_canvas == null || _canvas!.getSaveCount() == 1);
 
     // Create a layer for our child, and paint the child into it.
-    if (child._needsPaint) {
+    if (child._needsPaint || child.layer == null) {
       repaintCompositedChild(child, debugAlsoPaintedParent: true);
     } else {
       assert(() {
@@ -2098,6 +2100,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   bool get alwaysNeedsCompositing => false;
 
+  OffsetLayer createCompositedLayer() {
+    return OffsetLayer();
+  }
+
+  void updateCompositedLayer(covariant OffsetLayer layer) { }
+
   /// The compositing layer that this render object uses to repaint.
   ///
   /// If this render object is not a repaint boundary, it is the responsibility
@@ -2280,7 +2288,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (_needsPaint)
       return;
     _needsPaint = true;
-    if (isRepaintBoundary) {
+    if (isRepaintBoundary && _layerHandle.layer != null) {
       assert(() {
         if (debugPrintMarkNeedsPaintStacks)
           debugPrintStack(label: 'markNeedsPaint() called for $this');

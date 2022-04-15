@@ -845,6 +845,18 @@ class RenderOpacity extends RenderProxyBox {
   @override
   bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
 
+  @override
+  bool get isRepaintBoundary => alwaysNeedsCompositing;
+
+
+  OffsetLayer createCompositedLayer() {
+    return OpacityLayer(alpha: _alpha);
+  }
+
+  void updateCompositedLayer(covariant OpacityLayer layer) {
+    layer.alpha = _alpha;
+  }
+
   int _alpha;
 
   /// The fraction to scale the child's alpha value.
@@ -891,15 +903,10 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+    if (_alpha == 0) {
+      return;
     }
+    super.paint(context, offset);
   }
 
   @override
@@ -927,6 +934,17 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   @override
   bool get alwaysNeedsCompositing => child != null && _currentlyNeedsCompositing!;
   bool? _currentlyNeedsCompositing;
+
+  @override
+  bool get isRepaintBoundary => alwaysNeedsCompositing;
+
+  OffsetLayer createCompositedLayer() {
+    return OpacityLayer(alpha: _alpha);
+  }
+
+  void updateCompositedLayer(covariant OpacityLayer layer) {
+    layer.alpha = _alpha;
+  }
 
   /// The animation that drives this render object's opacity.
   ///
@@ -998,15 +1016,10 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha!, super.paint, oldLayer: layer as OpacityLayer?);
+    if (_alpha == 0) {
+      return;
     }
+    super.paint(context, offset);
   }
 
   @override
