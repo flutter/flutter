@@ -171,9 +171,14 @@ void main() {
     // 1. exit
     // 2. showPerformanceOverlay
     const int disabledExtensions = kIsWeb ? 2 : 0;
-    // If you add a service extension... TEST IT! :-)
-    // ...then increment this number.
-    expect(binding.extensions.length, 36 + widgetInspectorExtensionCount - disabledExtensions);
+
+    // The expected number of registered service extensions in the Flutter
+    // framework, excluding any that for the widget inspector
+    // (see widget_inspector_test.dart for tests of the ext.flutter.inspector
+    // service extensions).
+    const int serviceExtensionCount = 36;
+
+    expect(binding.extensions.length, serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
