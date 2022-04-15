@@ -319,8 +319,8 @@ end
         // it as a framework that needs to be embedded, before Flutter actually creates it.
         checkFileExists(dummyAppFramework.path);
         final String? version = await minPhoneOSVersion(dummyAppFramework.path);
-        if (version != '9.0') {
-          throw TaskResult.failure('Minimum version set to $version, expected 9.0');
+        if (version != '11.0') {
+          throw TaskResult.failure('Minimum version set to $version, expected 11.0');
         }
 
         section('Build iOS Objective-C host app');

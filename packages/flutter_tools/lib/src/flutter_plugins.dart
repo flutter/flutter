@@ -759,7 +759,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(methodChannelPlugins, IOSPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'ios',
-    'deploymentTarget': '9.0',
+    'deploymentTarget': '11.0',
     'framework': 'Flutter',
     'methodChannelPlugins': iosPlugins,
   };
