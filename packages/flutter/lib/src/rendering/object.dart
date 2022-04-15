@@ -196,7 +196,7 @@ class PaintingContext extends ClipContext {
     assert(_canvas == null || _canvas!.getSaveCount() == 1);
 
     // Create a layer for our child, and paint the child into it.
-    if (child._needsPaint || child.layer == null) {
+    if (child._needsPaint) {
       repaintCompositedChild(child, debugAlsoPaintedParent: true);
     } else {
       assert(() {
@@ -1238,6 +1238,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Initializes internal fields for subclasses.
   RenderObject() {
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
+    _wasRepaintBoundary = isRepaintBoundary;
   }
 
   /// Cause the entire subtree rooted at the given [RenderObject] to be marked
@@ -2100,6 +2101,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   bool get alwaysNeedsCompositing => false;
 
+  late bool _wasRepaintBoundary;
+
   OffsetLayer createCompositedLayer() {
     return OffsetLayer();
   }
@@ -2192,11 +2195,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       final RenderObject parent = this.parent! as RenderObject;
       if (parent._needsCompositingBitsUpdate)
         return;
-      if (!isRepaintBoundary && !parent.isRepaintBoundary) {
+      if (!_wasRepaintBoundary && !parent.isRepaintBoundary) {
         parent.markNeedsCompositingBitsUpdate();
         return;
       }
     }
+    _wasRepaintBoundary = isRepaintBoundary;
     assert(() {
       final AbstractNode? parent = this.parent;
       if (parent is RenderObject)
@@ -2288,7 +2292,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (_needsPaint)
       return;
     _needsPaint = true;
-    if (isRepaintBoundary && _layerHandle.layer != null) {
+    // If this was not previously a repaint boundary it will not have
+    // a layer we can paint from.
+    if (isRepaintBoundary && _wasRepaintBoundary) {
       assert(() {
         if (debugPrintMarkNeedsPaintStacks)
           debugPrintStack(label: 'markNeedsPaint() called for $this');

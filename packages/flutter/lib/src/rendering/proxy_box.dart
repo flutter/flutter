@@ -904,6 +904,7 @@ class RenderOpacity extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_alpha == 0) {
+      layer = null;
       return;
     }
     super.paint(context, offset);
