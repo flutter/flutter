@@ -38,6 +38,7 @@ class MaterialSpellCheckService implements SpellCheckService {
           print('RAW SPELLCHECK RESULTS: ${resultParsed}');
           spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
         });
+        print("---------------------------------------------------------------");
 
         controller.sink.add(spellCheckerSuggestionSpans);
         break;
@@ -55,18 +56,19 @@ class MaterialSpellCheckService implements SpellCheckService {
 
     spellCheckChannel.invokeMethod<void>(
         'SpellCheck.initiateSpellCheck',
-        <String>[ locale.toLanguageTag(), value.text ],
+        <String>[ locale.toLanguageTag(), value.text],
       );
     
-
     await for (final result in controller.stream) {
       TextRange composingRange = value.composing;
       result.forEach((SpellCheckerSuggestionSpan span) {
-        if (composingRange.start != span.start || composingRange.end != span.end) {
+        bool isWithinComposingRegion = composingRange.start == span.start && composingRange.end == span.end;
+
+        if (!isWithinComposingRegion) {
             spellCheckResults.add(span);
         }
       });
-      pastResults = spellCheckResults;
+
       return spellCheckResults;
     }
     

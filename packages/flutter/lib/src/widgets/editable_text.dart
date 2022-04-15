@@ -2592,17 +2592,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
         ) ?? value;
 
-        if (_spellCheckEnabled! && value.text.length > 0) && _value.text != value.text) {
-          print("CURRENT WORD: ${renderEditable.getWordBoundary(TextPosition(offset: value.text.length-1)).textInside(value.text)}"); // this works in _handleselecionchanged
+        if (_spellCheckEnabled! && value.text.length > 0 && _value.text != value.text) {
+          // print("CURRENT WORD: ${renderEditable.getWordBoundary(TextPosition(offset: value.text.length-1)).textInside(value.text)}"); // this works in _handleselecionchanged
           Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
           Future<List<SpellCheckerSuggestionSpan>> spellCheckResultsFuture = _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckService!.fetchSpellCheckSuggestions(localeForSpellChecking as Locale, value);
-          print("REQUESTING SPELL CHECK RESULTS |${value.text}|");
+          // print("REQUESTING SPELL CHECK RESULTS |${value.text}|");
           final String foo = value.text;
           spellCheckResultsFuture.then((results) {
-            print("SPELL CHECK RESULTS GETTING UPDATED |${foo}|");
-            results.forEach((SpellCheckerSuggestionSpan result) {
-              print(result.replacementSuggestions);
-            });
+            // print("SPELL CHECK RESULTS GETTING UPDATED |${foo}|");
+            // results.forEach((SpellCheckerSuggestionSpan result) {
+            //   print(result.replacementSuggestions);
+            // });
             _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results;
             renderEditable.text = buildTextSpan();
       });
