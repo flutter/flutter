@@ -2103,10 +2103,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   late bool _wasRepaintBoundary;
 
+  /// Create a new [OffsetLayer] instance for this render object.
+  ///
+  /// This method is called by the framework for render objects which are
+  /// repaint boundaries.
   OffsetLayer createCompositedLayer() {
     return OffsetLayer();
   }
 
+  /// Update the composited layer owned by this render object.
+  ///
+  /// This method is called to give the render object a chance to update
+  /// the properties on its managed layer if the render object is
+  /// a render object.
   void updateCompositedLayer(covariant OffsetLayer layer) { }
 
   /// The compositing layer that this render object uses to repaint.
@@ -2200,7 +2209,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         return;
       }
     }
-    _wasRepaintBoundary = isRepaintBoundary;
     assert(() {
       final AbstractNode? parent = this.parent;
       if (parent is RenderObject)
@@ -2489,6 +2497,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return true;
     }());
     _needsPaint = false;
+    _wasRepaintBoundary = isRepaintBoundary;
     try {
       paint(context, offset);
       assert(!_needsLayout); // check that the paint() method didn't mark us dirty again

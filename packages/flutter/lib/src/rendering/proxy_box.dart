@@ -848,11 +848,12 @@ class RenderOpacity extends RenderProxyBox {
   @override
   bool get isRepaintBoundary => alwaysNeedsCompositing;
 
-
+  @override
   OffsetLayer createCompositedLayer() {
     return OpacityLayer(alpha: _alpha);
   }
 
+  @override
   void updateCompositedLayer(covariant OpacityLayer layer) {
     layer.alpha = _alpha;
   }
@@ -939,10 +940,12 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   @override
   bool get isRepaintBoundary => alwaysNeedsCompositing;
 
+  @override
   OffsetLayer createCompositedLayer() {
     return OpacityLayer(alpha: _alpha);
   }
 
+  @override
   void updateCompositedLayer(covariant OpacityLayer layer) {
     layer.alpha = _alpha;
   }
@@ -1018,6 +1021,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_alpha == 0) {
+      layer = null;
       return;
     }
     super.paint(context, offset);
