@@ -439,15 +439,15 @@ end
           'Host.app',
         );
 
-        final String builtAppBinary = path.join(
+        final String builtHostBinary = path.join(
           archivedAppPath,
           'Host',
         );
-        checkFileExists(builtAppBinary);
-        if ((await fileType(builtAppBinary)).contains('armv7')) {
-          throw TaskResult.failure('Unexpected armv7 architecture slice in $builtAppBinary');
+        checkFileExists(builtHostBinary);
+        if ((await fileType(builtHostBinary)).contains('armv7')) {
+          throw TaskResult.failure('Unexpected armv7 architecture slice in $builtHostBinary');
         }
-        await containsBitcode(builtAppBinary);
+        await containsBitcode(builtHostBinary);
 
         checkFileNotExists(path.join(
           archivedAppPath,
