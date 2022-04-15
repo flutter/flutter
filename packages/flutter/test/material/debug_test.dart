@@ -289,13 +289,13 @@ void main() {
       '   Scaffold widgets require a ScaffoldMessenger widget ancestor.\n'
       '   The specific widget that could not find a ScaffoldMessenger\n'
       '   ancestor was:\n'
-      '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00000]\n'
+      '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00829]\n'
       '   The ancestors of this widget were:\n'
       '     MediaQuery\n'
       '     Directionality\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
-      '   MaterialApp at the top of your application widget tree.\n'
+      '   MaterialApp at the top of your application widget tree.\n',
     ));
   });
 }
