@@ -883,7 +883,7 @@ class RenderOpacity extends RenderProxyBox {
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
     if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
-    markNeedsPaint();
+    markNeedsLayerPropertyUpdate();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
@@ -1012,7 +1012,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
       _currentlyNeedsCompositing = _alpha! > 0;
       if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
         markNeedsCompositingBitsUpdate();
-      markNeedsPaint();
+      markNeedsLayerPropertyUpdate();
       if (oldAlpha == 0 || _alpha == 0)
         markNeedsSemanticsUpdate();
     }

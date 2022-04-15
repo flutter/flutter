@@ -132,6 +132,7 @@ class PaintingContext extends ClipContext {
       childLayer.removeAllChildren();
     }
     child.updateCompositedLayer(childLayer);
+    child._needsLayerUpdate = false;
 
     assert(identical(childLayer, child._layerHandle.layer));
     assert(child._layerHandle.layer is OffsetLayer);
@@ -139,6 +140,7 @@ class PaintingContext extends ClipContext {
       childLayer!.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
     }());
+
     childContext ??= PaintingContext(childLayer, child.paintBounds);
     child._paintWithContext(childContext, Offset.zero);
 
@@ -147,6 +149,16 @@ class PaintingContext extends ClipContext {
     // a removal as the child is no longer a repaint boundary.
     assert(child.isRepaintBoundary && identical(childLayer, child._layerHandle.layer) || child._layerHandle.layer == null);
     childContext.stopRecordingIfNeeded();
+  }
+
+  /// Update the layer of [child] without repainting its children.
+  static void updateLayerProperties(RenderObject child) {
+    assert(child.isRepaintBoundary);
+    assert(!child._needsPaint);
+    final OffsetLayer? childLayer = child._layerHandle.layer as OffsetLayer?;
+    assert(childLayer != null);
+    child.updateCompositedLayer(childLayer!);
+    child._needsLayerUpdate = false;
   }
 
   /// In debug mode, repaint the given render object using a custom painting
@@ -991,9 +1003,13 @@ class PipelineOwner {
       // Sort the dirty nodes in reverse order (deepest first).
       for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
         assert(node._layerHandle.layer != null);
-        if (node._needsPaint && node.owner == this) {
+        if ((node._needsPaint || node._needsLayerUpdate) && node.owner == this) {
           if (node._layerHandle.layer!.attached) {
-            PaintingContext.repaintCompositedChild(node);
+            if (node._needsPaint) {
+              PaintingContext.repaintCompositedChild(node);
+            } else {
+              PaintingContext.updateLayerProperties(node);
+            }
           } else {
             node._skippedPaintingOnLayer();
           }
@@ -2274,6 +2290,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     return result;
   }
   bool _needsPaint = true;
+  bool _needsLayerUpdate = false;
 
   /// Mark this render object as having changed its visual appearance.
   ///
@@ -2335,6 +2352,29 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
   }
 
+  /// mark the properties of this repaint boundary as needing to be updated.
+  void markNeedsLayerPropertyUpdate() {
+    assert(!_debugDisposed);
+    assert(owner == null || !owner!.debugDoingPaint);
+    if (_needsLayerUpdate) {
+      return;
+    }
+    _needsLayerUpdate = true;
+    // If this was not previously a repaint boundary it will not have
+    // a layer we can paint from.
+    if (isRepaintBoundary && _wasRepaintBoundary) {
+      // If we always have our own layer, then we can just repaint
+      // ourselves without involving any other nodes.
+      assert(_layerHandle.layer is OffsetLayer);
+      if (owner != null) {
+        owner!._nodesNeedingPaint.add(this);
+        owner!.requestVisualUpdate();
+      }
+    } else {
+      markNeedsPaint();
+    }
+  }
+
   // Called when flushPaint() tries to make us paint but our layer is detached.
   // To make sure that our subtree is repainted when it's finally reattached,
   // even in the case where some ancestor layer is itself never marked dirty, we
@@ -2343,7 +2383,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _skippedPaintingOnLayer() {
     assert(attached);
     assert(isRepaintBoundary);
-    assert(_needsPaint);
+    assert(_needsPaint || _needsLayerUpdate);
     assert(_layerHandle.layer != null);
     assert(!_layerHandle.layer!.attached);
     AbstractNode? node = parent;
@@ -2498,6 +2538,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return true;
     }());
     _needsPaint = false;
+    _needsLayerUpdate = false;
     _wasRepaintBoundary = isRepaintBoundary;
     try {
       paint(context, offset);
