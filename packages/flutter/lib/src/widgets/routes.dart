@@ -2232,12 +2232,13 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
         break;
       }
     }
-    if (!hitCurrentFocus)
+    if (!hitCurrentFocus) {
       _previousFocus = focusNode;
       // Check post-frame to see that the focus hasn't changed before
       // unfocusing. This also allows a button tap to capture the previously
       // active focus before FocusTrap tries to unfocus it, and avoids a bounce
       // through the scope's focus node in between.
       SchedulerBinding.instance.scheduleTask<void>(_checkForUnfocus, Priority.idle);
+    }
   }
 }
