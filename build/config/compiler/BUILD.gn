@@ -605,6 +605,12 @@ if (is_win) {
       "-Wno-nonportable-system-include-path",
     ]
   }
+  if (is_clang) {
+    default_warning_flags += [
+      # No support for #pragma optimize. https://crbug.com/505314#c13
+      "-Wno-ignored-pragma-optimize",
+    ]
+  }
 } else {
   # Common GCC warning setup.
   default_warning_flags += [
