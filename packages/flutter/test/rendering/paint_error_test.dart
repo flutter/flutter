@@ -66,7 +66,7 @@ void main() {
     final RenderBox root = RenderRepaintBoundary(child: RenderSizedBox(const Size(100, 100)));
     try {
       layout(root);
-      PaintingContext.repaintCompositedChild(root, debugAlsoPaintedParent: true);
+      PaintingContext.repaintCompositedChild(root, debugAlsoPaintedParent: true, offset: Offset.zero);
     } on FlutterError catch (exception) {
       flutterError = exception;
     }

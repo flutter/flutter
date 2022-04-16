@@ -227,7 +227,7 @@ void main() {
     final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
     // Force a layer to get set.
     renderObject.isRepaintBoundary = true;
-    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
+    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true, offset: Offset.zero);
     expect(renderObject.debugLayer, isA<OffsetLayer>());
 
     // Dispose with repaint boundary still being true.
@@ -239,7 +239,7 @@ void main() {
     final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
     // Force a layer to get set.
     renderObject.isRepaintBoundary = true;
-    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
+    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true, offset: Offset.zero);
 
     // Dispose with repaint boundary being false.
     renderObject.isRepaintBoundary = false;
