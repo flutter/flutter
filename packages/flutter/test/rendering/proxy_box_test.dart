@@ -561,6 +561,50 @@ void main() {
     // The follower is still hit testable because there is a leader layer.
     expect(follower.hitTest(hitTestResult, position: Offset.zero), isTrue);
   });
+
+  test('RenderObject can become a repaint boundary', () {
+    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(childBox);
+
+    layout(renderBox, phase: EnginePhase.composite);
+
+    expect(childBox.paintCount, 1);
+    expect(renderBox.paintCount, 1);
+
+    renderBox.isRepaintBoundary = true;
+    renderBox.markNeedsCompositingBitsUpdate();
+    renderBox.markNeedsLayerPropertyUpdate();
+
+    pumpFrame(phase: EnginePhase.composite);
+
+    // The first time the render object becomes a repaint boundary
+    // we must repaint from the parent to allow the layer to be
+    // created.
+    expect(childBox.paintCount, 2);
+    expect(renderBox.paintCount, 2);
+    expect(renderBox.debugLayer, isA<OffsetLayer>());
+
+    renderBox.markNeedsLayerPropertyUpdate();
+
+    pumpFrame(phase: EnginePhase.composite);
+
+    // The second time the layer exists and we can skip paint.
+    expect(childBox.paintCount, 2);
+    expect(renderBox.paintCount, 2);
+    expect(renderBox.debugLayer, isA<OffsetLayer>());
+
+    renderBox.isRepaintBoundary = false;
+    renderBox.markNeedsCompositingBitsUpdate();
+
+    pumpFrame(phase: EnginePhase.composite);
+
+    // Once it stops being a repaint boundary we must repaint to
+    // remove the layer. its required that the render object
+    // perform this action in paint.
+    expect(childBox.paintCount, 3);
+    expect(renderBox.paintCount, 3);
+    expect(renderBox.debugLayer, null);
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -629,5 +673,23 @@ class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTr
   void markNeedsSemanticsUpdate() {
     markNeedsSemanticsUpdateCallCount++;
     super.markNeedsSemanticsUpdate();
+  }
+}
+
+class ConditionalRepaintBoundary extends RenderProxyBox {
+  ConditionalRepaintBoundary([super.child]);
+
+  @override
+  bool isRepaintBoundary = false;
+
+  int paintCount = 0;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (!isRepaintBoundary) {
+      layer = null;
+    }
+    paintCount += 1;
+    super.paint(context, offset);
   }
 }
