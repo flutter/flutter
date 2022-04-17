@@ -246,16 +246,6 @@ void main() {
     renderObject.dispose();
     expect(renderObject.debugLayer, null);
   });
-
-  test('markNeedsLayerPropertyUpdate asserts if called on a non-repaint boundary', () {
-    final TestRenderObject renderObject = TestRenderObject();
-
-    expect(renderObject.markNeedsLayerPropertyUpdate, throwsAssertionError);
-
-    renderObject.isRepaintBoundary = true;
-
-    expect(renderObject.markNeedsLayerPropertyUpdate, returnsNormally);
-  });
 }
 
 // Tests the create-update cycle by pumping two frames. The first frame has no

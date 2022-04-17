@@ -585,6 +585,8 @@ void main() {
     expect(renderBox.debugLayer, isA<OffsetLayer>());
 
     renderBox.markNeedsLayerPropertyUpdate();
+    expect(renderBox.debugNeedsPaint, false);
+    expect(renderBox.debugNeedsLayerUpdate, true);
 
     pumpFrame(phase: EnginePhase.composite);
 
@@ -604,6 +606,14 @@ void main() {
     expect(childBox.paintCount, 3);
     expect(renderBox.paintCount, 3);
     expect(renderBox.debugLayer, null);
+
+    // When the render object is not a repaint boundary, calling
+    // markNeedsLayerPropertyUpdate is the same as calling
+    // markNeedsPaint.
+
+    renderBox.markNeedsLayerPropertyUpdate();
+    expect(renderBox.debugNeedsPaint, true);
+    expect(renderBox.debugNeedsLayerUpdate, true);
   });
 }
 

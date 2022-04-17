@@ -2310,6 +2310,23 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     return result;
   }
   bool _needsPaint = true;
+
+  /// Whether this render object's layer information is dirty.
+  ///
+  /// This is only set in debug mode. In general, render objects should not need
+  /// to condition their runtime behavior on whether they are dirty or not,
+  /// since they should only be marked dirty immediately prior to being laid
+  /// out and painted. (In release builds, this throws.)
+  ///
+  /// It is intended to be used by tests and asserts.
+  bool get debugNeedsLayerUpdate {
+    late bool result;
+    assert(() {
+      result = _needsLayerUpdate;
+      return true;
+    }());
+    return result;
+  }
   bool _needsLayerUpdate = false;
 
   /// Mark this render object as having changed its visual appearance.
@@ -2381,8 +2398,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// not yet have a composited layer created for it, this method will instead
   /// mark the nearest repaint boundary parent as needing to be painted.
   ///
-  /// It is only valid to call this method on render objects that are repaint
-  /// boundaries.
+  /// if this method is called on a render object that is not a repaint boundary
+  /// or is a repaint boundary but hasn't been composited yet, it is equivalent
+  /// to calling [markNeedsPaint].
   ///
   /// See also:
   ///
@@ -2390,7 +2408,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///    update the layer opacity without repainting children.
   void markNeedsLayerPropertyUpdate() {
     assert(!_debugDisposed);
-    assert(isRepaintBoundary);
     assert(owner == null || !owner!.debugDoingPaint);
     if (_needsLayerUpdate) {
       return;
