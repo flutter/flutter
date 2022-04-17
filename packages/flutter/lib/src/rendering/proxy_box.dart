@@ -849,12 +849,9 @@ class RenderOpacity extends RenderProxyBox {
   bool get isRepaintBoundary => alwaysNeedsCompositing;
 
   @override
-  ContainerLayer updateCompositedLayer({covariant OpacityLayer? layer, Offset? offset}) {
-    final OpacityLayer updatedLayer = layer ?? OpacityLayer();
-    offset ??= updatedLayer.offset;
-    updatedLayer
-      ..offset = offset
-      ..alpha = _alpha;
+  OffsetLayer updateCompositedLayer(covariant OpacityLayer? oldLayer) {
+    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
+    updatedLayer.alpha = _alpha;
     return updatedLayer;
   }
 
@@ -941,12 +938,9 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   bool get isRepaintBoundary => alwaysNeedsCompositing;
 
   @override
-  ContainerLayer updateCompositedLayer({covariant OpacityLayer? layer, Offset? offset}) {
-    final OpacityLayer updatedLayer = layer ?? OpacityLayer();
-    offset ??= updatedLayer.offset;
-    updatedLayer
-      ..offset = offset
-      ..alpha = _alpha;
+  OffsetLayer updateCompositedLayer(covariant OpacityLayer? oldLayer) {
+    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
+    updatedLayer.alpha = _alpha;
     return updatedLayer;
   }
 
@@ -1143,7 +1137,6 @@ class RenderShaderMask extends RenderProxyBox {
 ///
 /// This effect is relatively expensive, especially if the filter is non-local,
 /// such as a blur.
-// Note: BackdropFilterLayer cannot accept or use an offset, cannot be a repaint boundary.
 class RenderBackdropFilter extends RenderProxyBox {
   /// Creates a backdrop filter.
   ///
@@ -1373,7 +1366,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
 
   void _markNeedsClip() {
     _clip = null;
-    markNeedsLayerPropertyUpdate();
+    markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
 
@@ -1384,7 +1377,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   set clipBehavior(Clip value) {
     if (value != _clipBehavior) {
       _clipBehavior = value;
-      markNeedsLayerPropertyUpdate();
+      markNeedsPaint();
     }
   }
   Clip _clipBehavior;
@@ -1809,7 +1802,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     _elevation = value;
     if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
-    markNeedsLayerPropertyUpdate();
+    markNeedsPaint();
   }
 
   /// The shadow color.
@@ -1820,7 +1813,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     if (shadowColor == value)
       return;
     _shadowColor = value;
-    markNeedsLayerPropertyUpdate();
+    markNeedsPaint();
   }
 
   /// The background color.
@@ -1831,7 +1824,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     if (color == value)
       return;
     _color = value;
-    markNeedsLayerPropertyUpdate();
+    markNeedsPaint();
   }
 
   @override

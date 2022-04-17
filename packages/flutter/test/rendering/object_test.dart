@@ -227,7 +227,7 @@ void main() {
     final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
     // Force a layer to get set.
     renderObject.isRepaintBoundary = true;
-    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true, offset: Offset.zero);
+    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
     expect(renderObject.debugLayer, isA<OffsetLayer>());
 
     // Dispose with repaint boundary still being true.
@@ -239,12 +239,22 @@ void main() {
     final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
     // Force a layer to get set.
     renderObject.isRepaintBoundary = true;
-    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true, offset: Offset.zero);
+    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
 
     // Dispose with repaint boundary being false.
     renderObject.isRepaintBoundary = false;
     renderObject.dispose();
     expect(renderObject.debugLayer, null);
+  });
+
+  test('markNeedsLayerPropertyUpdate asserts if called on a non-repaint boundary', () {
+    final TestRenderObject renderObject = TestRenderObject();
+
+    expect(renderObject.markNeedsLayerPropertyUpdate, throwsAssertionError);
+
+    renderObject.isRepaintBoundary = true;
+
+    expect(renderObject.markNeedsLayerPropertyUpdate, returnsNormally);
   });
 }
 

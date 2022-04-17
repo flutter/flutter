@@ -95,12 +95,11 @@ class PaintingContext extends ClipContext {
   ///
   ///  * [RenderObject.isRepaintBoundary], which determines if a [RenderObject]
   ///    has a composited layer.
-  static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent = false, Offset? offset }) {
+  static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent = false }) {
     assert(child._needsPaint);
     _repaintCompositedChild(
       child,
       debugAlsoPaintedParent: debugAlsoPaintedParent,
-      offset: offset,
     );
   }
 
@@ -108,7 +107,6 @@ class PaintingContext extends ClipContext {
     RenderObject child, {
     bool debugAlsoPaintedParent = false,
     PaintingContext? childContext,
-    Offset? offset,
   }) {
     assert(child.isRepaintBoundary || child._wasRepaintBoundary);
     assert(() {
@@ -119,21 +117,21 @@ class PaintingContext extends ClipContext {
       );
       return true;
     }());
-    ContainerLayer? childLayer = child._layerHandle.layer;
+    OffsetLayer? childLayer = child._layerHandle.layer as OffsetLayer?;
     if (childLayer == null) {
       assert(debugAlsoPaintedParent);
       assert(child._layerHandle.layer == null);
-      assert(offset != null);
+
       // Not using the `layer` setter because the setter asserts that we not
       // replace the layer for repaint boundaries. That assertion does not
       // apply here because this is exactly the place designed to create a
       // layer for repaint boundaries.
-      final ContainerLayer layer = child.updateCompositedLayer(offset: offset);
+      final OffsetLayer layer = child.updateCompositedLayer(null);
       child._layerHandle.layer = childLayer = layer;
     } else {
       assert(debugAlsoPaintedParent || childLayer.attached);
       childLayer.removeAllChildren();
-      childLayer = child.updateCompositedLayer(layer: childLayer);
+      childLayer = child.updateCompositedLayer(childLayer);
     }
     child._needsLayerUpdate = false;
 
@@ -155,14 +153,14 @@ class PaintingContext extends ClipContext {
     childContext.stopRecordingIfNeeded();
   }
 
-  /// Update the layer of [child] without repainting its children.
-  static void updateLayerProperties(RenderObject child, {Offset? offset}) {
+  /// Update the composited layer of [child] without repainting its children.
+  static void updateLayerProperties(RenderObject child) {
     assert(child.isRepaintBoundary);
     assert(!child._needsPaint);
     assert(child._layerHandle.layer != null);
 
-    final ContainerLayer childLayer = child._layerHandle.layer!;
-    final ContainerLayer newLayer = child.updateCompositedLayer(layer: childLayer, offset: offset);
+    final OffsetLayer childLayer = child._layerHandle.layer! as OffsetLayer;
+    final OffsetLayer newLayer = child.updateCompositedLayer(childLayer);
     /// The layer updated to a new type or instance. Transfer children into
     /// new layer.
     if (!identical(newLayer, childLayer)) {
@@ -192,14 +190,12 @@ class PaintingContext extends ClipContext {
     RenderObject child, {
     bool debugAlsoPaintedParent = false,
     required PaintingContext customContext,
-    Offset? offset,
   }) {
     assert(() {
       _repaintCompositedChild(
         child,
         debugAlsoPaintedParent: debugAlsoPaintedParent,
         childContext: customContext,
-        offset: offset,
       );
       return true;
     }());
@@ -231,9 +227,9 @@ class PaintingContext extends ClipContext {
 
     // Create a layer for our child, and paint the child into it.
     if (child._needsPaint) {
-      repaintCompositedChild(child, debugAlsoPaintedParent: true, offset: offset);
+      repaintCompositedChild(child, debugAlsoPaintedParent: true);
     } else {
-      updateLayerProperties(child, offset: offset);
+      updateLayerProperties(child);
       assert(() {
         // register the call for RepaintBoundary metrics
         child.debugRegisterRepaintBoundaryPaint();
@@ -241,7 +237,9 @@ class PaintingContext extends ClipContext {
         return true;
       }());
     }
-    assert(child._layerHandle.layer != null);
+    assert(child._layerHandle.layer is OffsetLayer);
+    final OffsetLayer childOffsetLayer = child._layerHandle.layer! as OffsetLayer;
+    childOffsetLayer.offset = offset;
     appendLayer(child._layerHandle.layer!);
   }
 
@@ -2142,16 +2140,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Update the composited layer owned by this render object.
   ///
+  /// If [oldLayer] is `null`, this method should create a new [OffsetLayer]
+  /// or subtype. if [oldLayer] is not `null`, then this method should reuse
+  /// the layer unless the specific type of offset layer needs to be updated.
+  ///
+  /// The [OffsetLayer.offset] property will be managed by the framework and
+  /// does not need to be updated.
+  ///
   /// This method is called to give the render object a chance to update
   /// the properties on its managed layer if the render object is
-  /// a render object.
-  ContainerLayer updateCompositedLayer({covariant ContainerLayer? layer, Offset? offset}) {
-    assert(layer is OffsetLayer?);
-    final OffsetLayer? oldLayer = layer as OffsetLayer?;
-    final OffsetLayer updatedLayer = oldLayer ?? OffsetLayer();
-    offset ??= updatedLayer.offset;
-    updatedLayer.offset = offset;
-    return updatedLayer;
+  /// a repaint boundary.
+  OffsetLayer updateCompositedLayer(covariant OffsetLayer? oldLayer) {
+    assert(isRepaintBoundary);
+    return oldLayer ?? OffsetLayer();
   }
 
   /// The compositing layer that this render object uses to repaint.
@@ -2347,7 +2348,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }());
       // If we always have our own layer, then we can just repaint
       // ourselves without involving any other nodes.
-      assert(_layerHandle.layer != null);
+      assert(_layerHandle.layer is OffsetLayer);
       if (owner != null) {
         owner!._nodesNeedingPaint.add(this);
         owner!.requestVisualUpdate();
@@ -2371,9 +2372,25 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
   }
 
-  /// mark the properties of this repaint boundary as needing to be updated.
+  /// Mark this render object as having changed a property on its composited
+  /// layer.
+  ///
+  /// Render objects that have a composited layer and are repaint boundaries
+  /// may update the properties of that composited layer without repainting
+  /// their children. If this render object is a repaint boundary but does
+  /// not yet have a composited layer created for it, this method will instead
+  /// mark the nearest repaint boundary parent as needing to be painted.
+  ///
+  /// It is only valid to call this method on render objects that are repaint
+  /// boundaries.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderOpacity], which uses this method when its opacity is updated to
+  ///    update the layer opacity without repainting children.
   void markNeedsLayerPropertyUpdate() {
     assert(!_debugDisposed);
+    assert(isRepaintBoundary);
     assert(owner == null || !owner!.debugDoingPaint);
     if (_needsLayerUpdate) {
       return;
