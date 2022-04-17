@@ -53,7 +53,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
 
   static constexpr auto kResource{{camel_case(buffer.name)}} = ShaderUniformSlot<{{buffer.name}}> { // {{buffer.name}}
     "{{buffer.name}}",     // name
-    {{buffer.msl_res_0}}u, // binding
+    {{buffer.ext_res_0}}u, // binding
   };
 {% endfor %}
 {% endif %}
@@ -91,8 +91,8 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
 
   static constexpr auto kResource{{camel_case(sampled_image.name)}} = SampledImageSlot { // {{sampled_image.name}}
     "{{sampled_image.name}}",      // name
-    {{sampled_image.msl_res_0}}u,  // texture
-    {{sampled_image.msl_res_1}}u,  // sampler
+    {{sampled_image.ext_res_0}}u,  // texture
+    {{sampled_image.ext_res_1}}u,  // sampler
   };
 {% endfor %}
 {% endif %}

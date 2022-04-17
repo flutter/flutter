@@ -12,10 +12,12 @@
 namespace impeller {
 namespace compiler {
 
-static const std::map<std::string, Compiler::TargetPlatform> kKnownPlatforms = {
-    {"macos", Compiler::TargetPlatform::kMacOS},
-    {"ios", Compiler::TargetPlatform::kIPhoneOS},
-    {"flutter-spirv", Compiler::TargetPlatform::kFlutterSPIRV},
+static const std::map<std::string, TargetPlatform> kKnownPlatforms = {
+    {"metal-desktop", TargetPlatform::kMetalDesktop},
+    {"metal-ios", TargetPlatform::kMetalIOS},
+    {"opengl-es", TargetPlatform::kOpenGLES},
+    {"opengl-desktop", TargetPlatform::kOpenGLDesktop},
+    {"flutter-spirv", TargetPlatform::kFlutterSPIRV},
 };
 
 void Switches::PrintHelp(std::ostream& stream) {
@@ -26,7 +28,7 @@ void Switches::PrintHelp(std::ostream& stream) {
   }
   stream << " ]" << std::endl;
   stream << "--input=<glsl_file>" << std::endl;
-  stream << "--metal=<metal_output_file>" << std::endl;
+  stream << "--sl=<sl_output_file>" << std::endl;
   stream << "--spirv=<spirv_output_file>" << std::endl;
   stream << "[optional] --reflection-json=<reflection_json_file>" << std::endl;
   stream << "[optional] --reflection-header=<reflection_header_file>"
@@ -40,16 +42,16 @@ Switches::Switches() = default;
 
 Switches::~Switches() = default;
 
-static Compiler::TargetPlatform TargetPlatformFromCommandLine(
+static TargetPlatform TargetPlatformFromCommandLine(
     const fml::CommandLine& command_line) {
-  auto target = Compiler::TargetPlatform::kUnknown;
+  auto target = TargetPlatform::kUnknown;
   for (const auto& platform : kKnownPlatforms) {
     if (command_line.HasOption(platform.first)) {
       // If the platform has already been determined, the caller may have
       // specified multiple platforms. This is an error and only one must be
       // selected.
-      if (target != Compiler::TargetPlatform::kUnknown) {
-        return Compiler::TargetPlatform::kUnknown;
+      if (target != TargetPlatform::kUnknown) {
+        return TargetPlatform::kUnknown;
       }
       target = platform.second;
       // Keep going to detect duplicates.
@@ -65,7 +67,7 @@ Switches::Switches(const fml::CommandLine& command_line)
                              false,  // create if necessary,
                              fml::FilePermission::kRead))),
       source_file_name(command_line.GetOptionValueWithDefault("input", "")),
-      metal_file_name(command_line.GetOptionValueWithDefault("metal", "")),
+      sl_file_name(command_line.GetOptionValueWithDefault("sl", "")),
       spirv_file_name(command_line.GetOptionValueWithDefault("spirv", "")),
       reflection_json_name(
           command_line.GetOptionValueWithDefault("reflection-json", "")),
@@ -98,7 +100,7 @@ Switches::Switches(const fml::CommandLine& command_line)
 
 bool Switches::AreValid(std::ostream& explain) const {
   bool valid = true;
-  if (target_platform == Compiler::TargetPlatform::kUnknown) {
+  if (target_platform == TargetPlatform::kUnknown) {
     explain << "The target platform (only one) was not specified." << std::endl;
     valid = false;
   }
@@ -113,8 +115,8 @@ bool Switches::AreValid(std::ostream& explain) const {
     valid = false;
   }
 
-  if (metal_file_name.empty() && Compiler::TargetPlatformNeedsMSL(target_platform)) {
-    explain << "Metal file name was empty." << std::endl;
+  if (sl_file_name.empty() && TargetPlatformNeedsSL(target_platform)) {
+    explain << "Target shading language file name was empty." << std::endl;
     valid = false;
   }
 
