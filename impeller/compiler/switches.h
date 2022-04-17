@@ -17,11 +17,11 @@ namespace impeller {
 namespace compiler {
 
 struct Switches {
-  Compiler::TargetPlatform target_platform = Compiler::TargetPlatform::kUnknown;
+  TargetPlatform target_platform = TargetPlatform::kUnknown;
   std::shared_ptr<fml::UniqueFD> working_directory;
   std::vector<IncludeDir> include_directories;
   std::string source_file_name;
-  std::string metal_file_name;
+  std::string sl_file_name;
   std::string spirv_file_name;
   std::string reflection_json_name;
   std::string reflection_header_name;

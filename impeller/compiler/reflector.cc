@@ -90,7 +90,7 @@ static std::string StringToShaderStage(std::string str) {
 
 Reflector::Reflector(Options options,
                      std::shared_ptr<const spirv_cross::ParsedIR> ir,
-                     std::shared_ptr<const spirv_cross::CompilerMSL> compiler)
+                     CompilerBackend compiler)
     : options_(std::move(options)),
       ir_(std::move(ir)),
       compiler_(std::move(compiler)) {
@@ -305,14 +305,10 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectResource(
       resource.id, spv::Decoration::DecorationLocation);
   result["index"] =
       compiler_->get_decoration(resource.id, spv::Decoration::DecorationIndex);
-  result["msl_res_0"] =
-      compiler_->get_automatic_msl_resource_binding(resource.id);
-  result["msl_res_1"] =
-      compiler_->get_automatic_msl_resource_binding_secondary(resource.id);
-  result["msl_res_2"] =
-      compiler_->get_automatic_msl_resource_binding_tertiary(resource.id);
-  result["msl_res_3"] =
-      compiler_->get_automatic_msl_resource_binding_quaternary(resource.id);
+  result["ext_res_0"] = compiler_.GetExtendedMSLResourceBinding(
+      CompilerBackend::ExtendedResourceIndex::kPrimary, resource.id);
+  result["ext_res_1"] = compiler_.GetExtendedMSLResourceBinding(
+      CompilerBackend::ExtendedResourceIndex::kSecondary, resource.id);
   auto type = ReflectType(resource.type_id);
   if (!type.has_value()) {
     return std::nullopt;
@@ -607,7 +603,7 @@ struct VertexType {
 };
 
 static VertexType VertexTypeFromInputResource(
-    const spirv_cross::CompilerMSL& compiler,
+    const spirv_cross::Compiler& compiler,
     const spirv_cross::Resource* resource) {
   VertexType result;
   result.variable_name = resource->name;
@@ -692,7 +688,8 @@ Reflector::ReflectPerVertexStructDefinition(
     if (resource == nullptr) {
       return std::nullopt;
     }
-    const auto vertex_type = VertexTypeFromInputResource(*compiler_, resource);
+    const auto vertex_type =
+        VertexTypeFromInputResource(*compiler_.GetCompiler(), resource);
 
     StructMember member;
     member.name = vertex_type.variable_name;

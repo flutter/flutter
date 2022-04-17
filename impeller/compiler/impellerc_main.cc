@@ -9,6 +9,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/compiler/compiler.h"
+#include "impeller/compiler/source_options.h"
 #include "impeller/compiler/switches.h"
 #include "impeller/compiler/utilities.h"
 #include "third_party/shaderc/libshaderc/include/shaderc/shaderc.hpp"
@@ -36,15 +37,16 @@ bool Main(const fml::CommandLine& command_line) {
     return false;
   }
 
-  Compiler::SourceOptions options;
+  SourceOptions options;
   options.target_platform = switches.target_platform;
-  options.type = Compiler::SourceTypeFromFileName(switches.source_file_name);
+  options.type = SourceTypeFromFileName(switches.source_file_name);
   options.working_directory = switches.working_directory;
   options.file_name = switches.source_file_name;
   options.include_dirs = switches.include_directories;
-  options.entry_point_name = Compiler::EntryPointFromSourceName(
+  options.entry_point_name = EntryPointFunctionNameFromSourceName(
       switches.source_file_name,
-      Compiler::SourceTypeFromFileName(switches.source_file_name));
+      SourceTypeFromFileName(switches.source_file_name),
+      switches.target_platform);
 
   Reflector::Options reflector_options;
   reflector_options.shader_name =
@@ -69,22 +71,22 @@ bool Main(const fml::CommandLine& command_line) {
     return false;
   }
 
-  if (Compiler::TargetPlatformNeedsMSL(options.target_platform)) {
+  if (TargetPlatformNeedsSL(options.target_platform)) {
     if (!fml::WriteAtomically(*switches.working_directory,
-                              switches.metal_file_name.c_str(),
-                              *compiler.GetMSLShaderSource())) {
+                              switches.sl_file_name.c_str(),
+                              *compiler.GetSLShaderSource())) {
       std::cerr << "Could not write file to " << switches.spirv_file_name
                 << std::endl;
       return false;
     }
   }
 
-
-  if (Compiler::TargetPlatformNeedsReflection(options.target_platform)) {
+  if (TargetPlatformNeedsReflection(options.target_platform)) {
     if (!switches.reflection_json_name.empty()) {
-      if (!fml::WriteAtomically(*switches.working_directory,
-                                switches.reflection_json_name.c_str(),
-                                *compiler.GetReflector()->GetReflectionJSON())) {
+      if (!fml::WriteAtomically(
+              *switches.working_directory,
+              switches.reflection_json_name.c_str(),
+              *compiler.GetReflector()->GetReflectionJSON())) {
         std::cerr << "Could not write reflection json to "
                   << switches.reflection_json_name << std::endl;
         return false;
@@ -116,18 +118,20 @@ bool Main(const fml::CommandLine& command_line) {
   if (!switches.depfile_path.empty()) {
     std::string result_file;
     switch (switches.target_platform) {
-      case Compiler::TargetPlatform::kMacOS:
-      case Compiler::TargetPlatform::kIPhoneOS:
-        result_file = switches.metal_file_name;
+      case TargetPlatform::kMetalDesktop:
+      case TargetPlatform::kMetalIOS:
+      case TargetPlatform::kOpenGLES:
+      case TargetPlatform::kOpenGLDesktop:
+        result_file = switches.sl_file_name;
         break;
-      case Compiler::TargetPlatform::kFlutterSPIRV:
-      case Compiler::TargetPlatform::kUnknown:
+      case TargetPlatform::kFlutterSPIRV:
+      case TargetPlatform::kUnknown:
         result_file = switches.spirv_file_name;
         break;
     }
-    if (!fml::WriteAtomically(
-            *switches.working_directory, switches.depfile_path.c_str(),
-            *compiler.CreateDepfileContents({result_file}))) {
+    if (!fml::WriteAtomically(*switches.working_directory,
+                              switches.depfile_path.c_str(),
+                              *compiler.CreateDepfileContents({result_file}))) {
       std::cerr << "Could not write depfile to " << switches.depfile_path
                 << std::endl;
       return false;

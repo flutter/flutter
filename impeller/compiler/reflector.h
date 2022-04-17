@@ -9,6 +9,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "impeller/compiler/compiler_backend.h"
 #include "inja/inja.hpp"
 #include "third_party/spirv_cross/spirv_msl.hpp"
 #include "third_party/spirv_cross/spirv_parser.hpp"
@@ -32,7 +33,7 @@ class Reflector {
 
   Reflector(Options options,
             std::shared_ptr<const spirv_cross::ParsedIR> ir,
-            std::shared_ptr<const spirv_cross::CompilerMSL> compiler);
+            CompilerBackend compiler);
 
   ~Reflector();
 
@@ -65,8 +66,7 @@ class Reflector {
 
   const Options options_;
   const std::shared_ptr<const spirv_cross::ParsedIR> ir_;
-  // TODO(csg): There is no reason this needs to the MSL subtype.
-  const std::shared_ptr<const spirv_cross::CompilerMSL> compiler_;
+  const CompilerBackend compiler_;
   std::unique_ptr<const nlohmann::json> template_arguments_;
   std::shared_ptr<fml::Mapping> reflection_header_;
   std::shared_ptr<fml::Mapping> reflection_cc_;
