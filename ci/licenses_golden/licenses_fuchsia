@@ -1,4 +1,4 @@
-Signature: 89c0f65faf8448ecce9ca7f6467fe1e5
+Signature: cc2b741e9bb4365ab37e06201b163853
 
 UNUSED LICENSES:
 
@@ -2344,14 +2344,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/types.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/transformer.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/transformer.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/wire_format_metadata.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/barrier.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/bridge.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/promise.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/result.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/scheduler.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/scope.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/sequencer.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fit/single_threaded_executor.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_creation_tokens.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_identity.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_creation_tokens.cc
@@ -3713,6 +3705,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/fields.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/zx/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/inline_any.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/inline_any_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_base.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/convert.cc
