@@ -12,6 +12,8 @@
 #include "flutter/fml/mapping.h"
 #include "impeller/compiler/include_dir.h"
 #include "impeller/compiler/reflector.h"
+#include "impeller/compiler/source_options.h"
+#include "impeller/compiler/types.h"
 #include "shaderc/shaderc.hpp"
 #include "third_party/spirv_cross/spirv_msl.hpp"
 #include "third_party/spirv_cross/spirv_parser.hpp"
@@ -21,42 +23,6 @@ namespace compiler {
 
 class Compiler {
  public:
-  enum class SourceType {
-    kUnknown,
-    kVertexShader,
-    kFragmentShader,
-  };
-
-  enum class TargetPlatform {
-    kUnknown,
-    kMacOS,
-    kIPhoneOS,
-    kFlutterSPIRV,
-  };
-
-  static SourceType SourceTypeFromFileName(const std::string& file_name);
-
-  static std::string EntryPointFromSourceName(const std::string& file_name,
-                                              SourceType type);
-
-  static bool TargetPlatformNeedsMSL(TargetPlatform platform);
-
-  static bool TargetPlatformNeedsReflection(TargetPlatform platform);
-
-  struct SourceOptions {
-    SourceType type = SourceType::kUnknown;
-    TargetPlatform target_platform = TargetPlatform::kUnknown;
-    std::shared_ptr<fml::UniqueFD> working_directory;
-    std::vector<IncludeDir> include_dirs;
-    std::string file_name = "main.glsl";
-    std::string entry_point_name = "main";
-
-    SourceOptions() = default;
-
-    SourceOptions(const std::string& file_name)
-        : type(SourceTypeFromFileName(file_name)), file_name(file_name) {}
-  };
-
   Compiler(const fml::Mapping& source_mapping,
            SourceOptions options,
            Reflector::Options reflector_options);
@@ -67,7 +33,7 @@ class Compiler {
 
   std::unique_ptr<fml::Mapping> GetSPIRVAssembly() const;
 
-  std::unique_ptr<fml::Mapping> GetMSLShaderSource() const;
+  std::unique_ptr<fml::Mapping> GetSLShaderSource() const;
 
   std::string GetErrorMessages() const;
 
@@ -81,7 +47,7 @@ class Compiler {
  private:
   SourceOptions options_;
   std::shared_ptr<shaderc::SpvCompilationResult> spv_result_;
-  std::shared_ptr<std::string> msl_string_;
+  std::shared_ptr<std::string> sl_string_;
   std::stringstream error_stream_;
   std::unique_ptr<Reflector> reflector_;
   std::vector<std::string> included_file_names_;

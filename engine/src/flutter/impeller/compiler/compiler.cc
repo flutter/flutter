@@ -9,207 +9,62 @@
 #include <sstream>
 
 #include "flutter/fml/paths.h"
+#include "impeller/compiler/compiler_backend.h"
+#include "impeller/compiler/includer.h"
 #include "impeller/compiler/logger.h"
 
 namespace impeller {
 namespace compiler {
 
-#define COMPILER_ERROR \
-  ::impeller::compiler::AutoLogger(error_stream_) << GetSourcePrefix()
-
-#define COMPILER_ERROR_NO_PREFIX ::impeller::compiler::AutoLogger(error_stream_)
-
-struct IncluderData {
-  std::string file_name;
-  std::unique_ptr<fml::Mapping> mapping;
-
-  IncluderData(std::string p_file_name, std::unique_ptr<fml::Mapping> p_mapping)
-      : file_name(std::move(p_file_name)), mapping(std::move(p_mapping)) {}
-};
-
-class Includer final : public shaderc::CompileOptions::IncluderInterface {
- public:
-  Includer(std::shared_ptr<fml::UniqueFD> working_directory,
-           std::vector<IncludeDir> include_dirs,
-           std::function<void(std::string)> on_file_included)
-      : working_directory_(std::move(working_directory)),
-        include_dirs_(std::move(include_dirs)),
-        on_file_included_(std::move(on_file_included)) {}
-
-  // |shaderc::CompileOptions::IncluderInterface|
-  ~Includer() override = default;
-
-  std::unique_ptr<fml::FileMapping> TryOpenMapping(
-      const IncludeDir& dir,
-      const char* requested_source) {
-    if (!dir.dir || !dir.dir->is_valid()) {
-      return nullptr;
-    }
-
-    if (requested_source == nullptr) {
-      return nullptr;
-    }
-
-    std::string source(requested_source);
-    if (source.empty()) {
-      return nullptr;
-    }
-
-    auto mapping = fml::FileMapping::CreateReadOnly(*dir.dir, requested_source);
-    if (!mapping || !mapping->IsValid()) {
-      return nullptr;
-    }
-
-    on_file_included_(fml::paths::JoinPaths({dir.name, requested_source}));
-
-    return mapping;
-  }
-
-  std::unique_ptr<fml::FileMapping> FindFirstMapping(
-      const char* requested_source) {
-    // Always try the working directory first no matter what the include
-    // directories are.
-    {
-      IncludeDir dir;
-      dir.name = ".";
-      dir.dir = working_directory_;
-      if (auto mapping = TryOpenMapping(dir, requested_source)) {
-        return mapping;
-      }
-    }
-
-    for (const auto& include_dir : include_dirs_) {
-      if (auto mapping = TryOpenMapping(include_dir, requested_source)) {
-        return mapping;
-      }
-    }
-    return nullptr;
-  }
-
-  // |shaderc::CompileOptions::IncluderInterface|
-  shaderc_include_result* GetInclude(const char* requested_source,
-                                     shaderc_include_type type,
-                                     const char* requesting_source,
-                                     size_t include_depth) override {
-    auto result = std::make_unique<shaderc_include_result>();
-
-    // Default initialize to failed inclusion.
-    result->source_name = "";
-    result->source_name_length = 0;
-
-    constexpr const char* kFileNotFoundMessage = "Included file not found.";
-    result->content = kFileNotFoundMessage;
-    result->content_length = ::strlen(kFileNotFoundMessage);
-    result->user_data = nullptr;
-
-    if (!working_directory_ || !working_directory_->is_valid()) {
-      return result.release();
-    }
-
-    if (requested_source == nullptr) {
-      return result.release();
-    }
-
-    auto file = FindFirstMapping(requested_source);
-
-    if (!file || file->GetMapping() == nullptr) {
-      return result.release();
-    }
-
-    auto includer_data =
-        std::make_unique<IncluderData>(requested_source, std::move(file));
-
-    result->source_name = includer_data->file_name.c_str();
-    result->source_name_length = includer_data->file_name.length();
-    result->content = reinterpret_cast<decltype(result->content)>(
-        includer_data->mapping->GetMapping());
-    result->content_length = includer_data->mapping->GetSize();
-    result->user_data = includer_data.release();
-
-    return result.release();
-  }
-
-  // |shaderc::CompileOptions::IncluderInterface|
-  void ReleaseInclude(shaderc_include_result* data) override {
-    delete reinterpret_cast<IncluderData*>(data->user_data);
-    delete data;
-  }
-
- private:
-  std::shared_ptr<fml::UniqueFD> working_directory_;
-  std::vector<IncludeDir> include_dirs_;
-  std::function<void(std::string)> on_file_included_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(Includer);
-};
-
-static std::string ShaderCErrorToString(shaderc_compilation_status status) {
-  switch (status) {
-    case shaderc_compilation_status::shaderc_compilation_status_success:
-      return "Success";
-    case shaderc_compilation_status::shaderc_compilation_status_invalid_stage:
-      return "Invalid Shader Stage Specified";
-    case shaderc_compilation_status::
-        shaderc_compilation_status_compilation_error:
-      return "Compilation Error";
-    case shaderc_compilation_status::shaderc_compilation_status_internal_error:
-      return "Internal Error";
-    case shaderc_compilation_status::
-        shaderc_compilation_status_null_result_object:
-      return "Internal error. Null Result Object";
-    case shaderc_compilation_status::
-        shaderc_compilation_status_invalid_assembly:
-      return "Invalid Assembly";
-    case shaderc_compilation_status::
-        shaderc_compilation_status_validation_error:
-      return "Validation Error";
-    case shaderc_compilation_status::
-        shaderc_compilation_status_transformation_error:
-      return "Transformation Error";
-    case shaderc_compilation_status::
-        shaderc_compilation_status_configuration_error:
-      return "Configuration Error";
-  }
-  return "Unknown Internal Error";
+static CompilerBackend CreateMSLCompiler(const spirv_cross::ParsedIR& ir,
+                                         const SourceOptions& source_options) {
+  auto sl_compiler = std::make_shared<spirv_cross::CompilerMSL>(ir);
+  spirv_cross::CompilerMSL::Options sl_options;
+  sl_options.platform =
+      TargetPlatformToMSLPlatform(source_options.target_platform);
+  // If this version specification changes, the GN rules that process the
+  // Metal to AIR must be updated as well.
+  sl_options.msl_version =
+      spirv_cross::CompilerMSL::Options::make_msl_version(1, 2);
+  sl_compiler->set_msl_options(sl_options);
+  return sl_compiler;
 }
 
-static shaderc_shader_kind ToShaderCShaderKind(Compiler::SourceType type) {
-  switch (type) {
-    case Compiler::SourceType::kVertexShader:
-      return shaderc_shader_kind::shaderc_vertex_shader;
-    case Compiler::SourceType::kFragmentShader:
-      return shaderc_shader_kind::shaderc_fragment_shader;
-    case Compiler::SourceType::kUnknown:
+static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
+                                          const SourceOptions& source_options) {
+  auto gl_compiler = std::make_shared<spirv_cross::CompilerGLSL>(ir);
+  spirv_cross::CompilerGLSL::Options sl_options;
+  sl_options.force_zero_initialized_variables = true;
+  if (source_options.target_platform == TargetPlatform::kOpenGLES) {
+    sl_options.version = 100;
+    sl_options.es = true;
+  }
+  gl_compiler->set_common_options(sl_options);
+  return gl_compiler;
+}
+
+static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
+                                      const SourceOptions& source_options) {
+  CompilerBackend compiler;
+  switch (source_options.target_platform) {
+    case TargetPlatform::kMetalDesktop:
+    case TargetPlatform::kMetalIOS:
+      compiler = CreateMSLCompiler(ir, source_options);
+      break;
+    case TargetPlatform::kUnknown:
+    case TargetPlatform::kFlutterSPIRV:
+    case TargetPlatform::kOpenGLES:
+    case TargetPlatform::kOpenGLDesktop:
+      compiler = CreateGLSLCompiler(ir, source_options);
       break;
   }
-  return shaderc_shader_kind::shaderc_glsl_infer_from_source;
-}
-
-static spv::ExecutionModel ToExecutionModel(Compiler::SourceType type) {
-  switch (type) {
-    case Compiler::SourceType::kVertexShader:
-      return spv::ExecutionModel::ExecutionModelVertex;
-    case Compiler::SourceType::kFragmentShader:
-      return spv::ExecutionModel::ExecutionModelFragment;
-    case Compiler::SourceType::kUnknown:
-      break;
+  if (!compiler) {
+    return {};
   }
-  return spv::ExecutionModel::ExecutionModelMax;
-  ;
-}
-
-static spirv_cross::CompilerMSL::Options::Platform
-CompilerTargetPlatformToCompilerMSLTargetPlatform(
-    Compiler::TargetPlatform platform) {
-  switch (platform) {
-    case Compiler::TargetPlatform::kIPhoneOS:
-      return spirv_cross::CompilerMSL::Options::Platform::iOS;
-    case Compiler::TargetPlatform::kMacOS:
-    // Unknown should not happen due to prior validation.
-    case Compiler::TargetPlatform::kFlutterSPIRV:
-    case Compiler::TargetPlatform::kUnknown:
-      return spirv_cross::CompilerMSL::Options::Platform::macOS;
-  }
+  auto* backend = compiler.GetCompiler();
+  backend->rename_entry_point("main", source_options.entry_point_name,
+                              ToExecutionModel(source_options.type));
+  return compiler;
 }
 
 Compiler::Compiler(const fml::Mapping& source_mapping,
@@ -234,43 +89,51 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   }
 
-  shaderc::CompileOptions options;
+  shaderc::CompileOptions spirv_options;
 
   // Make sure reflection is as effective as possible. The generated shaders
   // will be processed later by backend specific compilers. So optimizations
   // here are irrelevant and get in the way of generating reflection code.
-  options.SetGenerateDebugInfo();
+  spirv_options.SetGenerateDebugInfo();
 
   // Expects GLSL 4.60 (Core Profile).
   // https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.60.pdf
-  options.SetSourceLanguage(
+  spirv_options.SetSourceLanguage(
       shaderc_source_language::shaderc_source_language_glsl);
-  options.SetForcedVersionProfile(460, shaderc_profile::shaderc_profile_core);
-  if (source_options.target_platform == TargetPlatform::kFlutterSPIRV) {
-    options.SetOptimizationLevel(
-      shaderc_optimization_level::shaderc_optimization_level_size);
-    options.SetTargetEnvironment(
-        shaderc_target_env::shaderc_target_env_opengl,
-        shaderc_env_version::shaderc_env_version_opengl_4_5
-    );
-    options.SetTargetSpirv(shaderc_spirv_version::shaderc_spirv_version_1_0);
-  } else {
-    options.SetOptimizationLevel(
-        shaderc_optimization_level::shaderc_optimization_level_zero);
-    options.SetTargetEnvironment(
-        shaderc_target_env::shaderc_target_env_vulkan,
-        shaderc_env_version::shaderc_env_version_vulkan_1_1
-    );
-    options.SetTargetSpirv(shaderc_spirv_version::shaderc_spirv_version_1_3);
+  spirv_options.SetForcedVersionProfile(460,
+                                        shaderc_profile::shaderc_profile_core);
+  switch (source_options.target_platform) {
+    case TargetPlatform::kMetalDesktop:
+    case TargetPlatform::kMetalIOS:
+    case TargetPlatform::kOpenGLES:
+    case TargetPlatform::kOpenGLDesktop:
+      spirv_options.SetOptimizationLevel(
+          shaderc_optimization_level::shaderc_optimization_level_zero);
+      spirv_options.SetTargetEnvironment(
+          shaderc_target_env::shaderc_target_env_vulkan,
+          shaderc_env_version::shaderc_env_version_vulkan_1_1);
+      spirv_options.SetTargetSpirv(
+          shaderc_spirv_version::shaderc_spirv_version_1_3);
+      break;
+    case TargetPlatform::kFlutterSPIRV:
+      spirv_options.SetOptimizationLevel(
+          shaderc_optimization_level::shaderc_optimization_level_size);
+      spirv_options.SetTargetEnvironment(
+          shaderc_target_env::shaderc_target_env_opengl,
+          shaderc_env_version::shaderc_env_version_opengl_4_5);
+      spirv_options.SetTargetSpirv(
+          shaderc_spirv_version::shaderc_spirv_version_1_0);
+      break;
+    case TargetPlatform::kUnknown:
+      COMPILER_ERROR << "Target platform invalid.";
+      return;
   }
 
-  options.SetAutoBindUniforms(true);
-  options.SetAutoMapLocations(true);
-
-  options.AddMacroDefinition("IMPELLER_DEVICE");
+  spirv_options.SetAutoBindUniforms(true);
+  spirv_options.SetAutoMapLocations(true);
 
   std::vector<std::string> included_file_names;
-  options.SetIncluder(std::make_unique<Includer>(
+  spirv_options.SetIncluder(std::make_unique<Includer>(
       options_.working_directory, options_.include_dirs,
       [&included_file_names](auto included_name) {
         included_file_names.emplace_back(std::move(included_name));
@@ -291,7 +154,7 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
           shader_kind,                              // shader_kind
           source_options.file_name.c_str(),         // input_file_name
           source_options.entry_point_name.c_str(),  // entry_point_name
-          options                                   // options
+          spirv_options                             // options
           ));
   if (spv_result_->GetCompilationStatus() !=
       shaderc_compilation_status::shaderc_compilation_status_success) {
@@ -307,7 +170,7 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     included_file_names_ = std::move(included_file_names);
   }
 
-  if (!TargetPlatformNeedsMSL(source_options.target_platform)) {
+  if (!TargetPlatformNeedsSL(source_options.target_platform)) {
     is_valid_ = true;
     return;
   }
@@ -322,34 +185,25 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   const auto parsed_ir =
       std::make_shared<spirv_cross::ParsedIR>(parser.get_parsed_ir());
 
-  const auto msl_compiler =
-      std::make_shared<spirv_cross::CompilerMSL>(*parsed_ir);
+  auto sl_compiler = CreateCompiler(*parsed_ir, options_);
 
-  {
-    msl_compiler->rename_entry_point("main", options_.entry_point_name,
-                                     ToExecutionModel(options_.type));
+  if (!sl_compiler) {
+    COMPILER_ERROR << "Could not create compiler for target platform.";
+    return;
   }
 
-  {
-    spirv_cross::CompilerMSL::Options msl_options;
-    msl_options.platform = CompilerTargetPlatformToCompilerMSLTargetPlatform(
-        options_.target_platform);
-    // If this version specification changes, the GN rules that process the
-    // Metal to AIR must be updated as well.
-    msl_options.msl_version =
-        spirv_cross::CompilerMSL::Options::make_msl_version(1, 2);
-    msl_compiler->set_msl_options(msl_options);
-  }
+  sl_string_ =
+      std::make_shared<std::string>(sl_compiler.GetCompiler()->compile());
 
-  msl_string_ = std::make_shared<std::string>(msl_compiler->compile());
-
-  if (!msl_string_) {
+  if (!sl_string_) {
     COMPILER_ERROR << "Could not generate MSL from SPIRV";
     return;
   }
 
-  reflector_ = std::make_unique<Reflector>(std::move(reflector_options),
-                                           parsed_ir, msl_compiler);
+  reflector_ = std::make_unique<Reflector>(std::move(reflector_options),  //
+                                           parsed_ir,                     //
+                                           sl_compiler                    //
+  );
 
   if (!reflector_->IsValid()) {
     COMPILER_ERROR << "Could not complete reflection on generated shader.";
@@ -374,85 +228,19 @@ std::unique_ptr<fml::Mapping> Compiler::GetSPIRVAssembly() const {
       [result = spv_result_](auto, auto) mutable { result.reset(); });
 }
 
-std::unique_ptr<fml::Mapping> Compiler::GetMSLShaderSource() const {
-  if (!msl_string_) {
+std::unique_ptr<fml::Mapping> Compiler::GetSLShaderSource() const {
+  if (!sl_string_) {
     return nullptr;
   }
 
   return std::make_unique<fml::NonOwnedMapping>(
-      reinterpret_cast<const uint8_t*>(msl_string_->c_str()),
-      msl_string_->length(),
-      [string = msl_string_](auto, auto) mutable { string.reset(); });
+      reinterpret_cast<const uint8_t*>(sl_string_->c_str()),
+      sl_string_->length(),
+      [string = sl_string_](auto, auto) mutable { string.reset(); });
 }
 
 bool Compiler::IsValid() const {
   return is_valid_;
-}
-
-static bool StringEndWith(const std::string& string,
-                          const std::string& suffix) {
-  if (suffix.size() > string.size()) {
-    return false;
-  }
-
-  if (suffix.empty() || suffix.empty()) {
-    return false;
-  }
-
-  return string.rfind(suffix) == (string.size() - suffix.size());
-}
-
-Compiler::SourceType Compiler::SourceTypeFromFileName(
-    const std::string& file_name) {
-  if (StringEndWith(file_name, ".vert")) {
-    return Compiler::SourceType::kVertexShader;
-  }
-
-  if (StringEndWith(file_name, ".frag")) {
-    return Compiler::SourceType::kFragmentShader;
-  }
-
-  return Compiler::SourceType::kUnknown;
-}
-
-std::string Compiler::EntryPointFromSourceName(const std::string& file_name,
-                                               SourceType type) {
-  std::stringstream stream;
-  std::filesystem::path file_path(file_name);
-  stream << file_path.stem().native() << "_";
-  switch (type) {
-    case SourceType::kUnknown:
-      stream << "unknown";
-      break;
-    case SourceType::kVertexShader:
-      stream << "vertex";
-      break;
-    case SourceType::kFragmentShader:
-      stream << "fragment";
-      break;
-  }
-  stream << "_main";
-  return stream.str();
-}
-
-bool Compiler::TargetPlatformNeedsMSL(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform::kIPhoneOS:
-    case TargetPlatform::kMacOS:
-      return true;
-    default:
-      return false;
-  }
-}
-
-bool Compiler::TargetPlatformNeedsReflection(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform::kIPhoneOS:
-    case TargetPlatform::kMacOS:
-      return true;
-    default:
-      return false;
-  }
 }
 
 std::string Compiler::GetSourcePrefix() const {

@@ -185,7 +185,7 @@ template("impeller_shaders_real") {
 
     args = [
       "--input={{source}}",
-      "--metal=$metal_intermediate_path",
+      "--sl=$metal_intermediate_path",
       "--spirv=$spirv_intermediate_path",
       "--reflection-json=$reflection_json_path",
       "--reflection-header=$reflection_header_path",
@@ -195,10 +195,10 @@ template("impeller_shaders_real") {
     ]
 
     if (is_mac) {
-      args += [ "--macos" ]
+      args += [ "--metal-desktop" ]
     }
     if (is_ios) {
-      args += [ "--ios" ]
+      args += [ "--metal-ios" ]
     }
   }
 

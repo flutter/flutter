@@ -9,12 +9,20 @@ impeller_component("compiler_lib") {
     "code_gen_template.h",
     "compiler.cc",
     "compiler.h",
+    "compiler_backend.cc",
+    "compiler_backend.h",
     "include_dir.h",
+    "includer.cc",
+    "includer.h",
     "logger.h",
     "reflector.cc",
     "reflector.h",
+    "source_options.cc",
+    "source_options.h",
     "switches.cc",
     "switches.h",
+    "types.cc",
+    "types.h",
     "utilities.cc",
     "utilities.h",
   ]
@@ -52,7 +60,11 @@ impeller_component("compiler_unittests") {
 
   output_name = "impellerc_unittests"
 
-  sources = [ "compiler_unittests.cc" ]
+  sources = [
+    "compiler_test.cc",
+    "compiler_test.h",
+    "compiler_unittests.cc",
+  ]
 
   deps = [
     ":compiler_lib",
