@@ -11,6 +11,12 @@ import 'framework.dart';
 
 /// Applies an [ImageFilter] to its child.
 ///
+/// An image filter will always apply its filter operation to the child widget,
+/// even if said filter is conceptually a "no-op", such as an ImageFilter.blur
+/// with a radius of 0 or an ImageFilter.matrix with an identity matrix. Setting
+/// [ImageFiltered.enabled] to `false` is a more efficient manner of disabling
+/// an image filter.
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=7Lftorq4i2o}
 ///
 /// See also:
@@ -27,18 +33,28 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
     Key? key,
     required this.imageFilter,
     Widget? child,
+    this.enabled = true,
   }) : assert(imageFilter != null),
        super(key: key, child: child);
 
   /// The image filter to apply to the child of this widget.
   final ImageFilter imageFilter;
 
+  /// Whether or not to apply the image filter opation to the child of this
+  /// widget.
+  ///
+  /// Prefer setting enabled to `false` instead of creating a "no-op" filter
+  /// type.
+  final bool enabled;
+
   @override
-  RenderObject createRenderObject(BuildContext context) => _ImageFilterRenderObject(imageFilter);
+  RenderObject createRenderObject(BuildContext context) => _ImageFilterRenderObject(imageFilter, enabled);
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    (renderObject as _ImageFilterRenderObject).imageFilter = imageFilter;
+    (renderObject as _ImageFilterRenderObject)
+      ..enabled = enabled
+      ..imageFilter = imageFilter;
   }
 
   @override
@@ -49,7 +65,17 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
 }
 
 class _ImageFilterRenderObject extends RenderProxyBox {
-  _ImageFilterRenderObject(this._imageFilter);
+  _ImageFilterRenderObject(this._imageFilter, this._enabled);
+
+  bool get enabled => _enabled;
+  bool _enabled;
+  set enabled(bool value) {
+    if (enabled == value) {
+      return;
+    }
+    _enabled = value;
+    markNeedsPaint();
+  }
 
   ImageFilter get imageFilter => _imageFilter;
   ImageFilter _imageFilter;
@@ -62,11 +88,16 @@ class _ImageFilterRenderObject extends RenderProxyBox {
   }
 
   @override
-  bool get alwaysNeedsCompositing => child != null;
+  bool get alwaysNeedsCompositing => child != null && enabled;
 
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(imageFilter != null);
+    if (!enabled) {
+      layer = null;
+      return super.paint(context, offset);
+    }
+
     if (layer == null) {
       layer = ImageFilterLayer(imageFilter: imageFilter);
     } else {
