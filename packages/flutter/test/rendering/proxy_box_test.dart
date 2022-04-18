@@ -615,6 +615,43 @@ void main() {
     expect(renderBox.debugNeedsPaint, true);
     expect(renderBox.debugNeedsLayerUpdate, true);
   });
+
+  test('RenderObject with repaint boundary asserts when a composited layer is replaced during painting', () {
+    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(childBox);
+    childBox.isRepaintBoundary = true;
+    // Ignore old layer.
+    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+      return TestOffsetLayerA();
+    };
+
+    layout(renderBox, phase: EnginePhase.composite);
+
+    expect(childBox.paintCount, 1);
+    expect(renderBox.paintCount, 1);
+    renderBox.markNeedsPaint();
+
+    pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
+  });
+
+  test('RenderObject with repaint boundary asserts when a composited layer is replaced during layer property update', () {
+    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(childBox);
+    childBox.isRepaintBoundary = true;
+    // Ignore old layer.
+    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+      return TestOffsetLayerA();
+    };
+
+    layout(renderBox, phase: EnginePhase.composite);
+
+    expect(childBox.paintCount, 1);
+    expect(renderBox.paintCount, 1);
+
+    renderBox.markNeedsLayerPropertyUpdate();
+
+    expect(() => PaintingContext.updateLayerProperties(childBox), throwsAssertionError);
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -692,7 +729,17 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
   @override
   bool isRepaintBoundary = false;
 
+  OffsetLayer Function(OffsetLayer?)? offsetLayerFactory;
+
   int paintCount = 0;
+
+  @override
+  OffsetLayer updateCompositedLayer(covariant OffsetLayer? oldLayer) {
+    if (offsetLayerFactory != null) {
+      return offsetLayerFactory!.call(oldLayer);
+    }
+    return super.updateCompositedLayer(oldLayer);
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -701,5 +748,16 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
     }
     paintCount += 1;
     super.paint(context, offset);
+  }
+}
+
+class TestOffsetLayerA extends OffsetLayer {}
+class TestOffsetLayerB extends OffsetLayer {}
+
+void expectAssertionError() {
+  final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+  final bool asserted = errorDetails.toString().contains('Failed assertion');
+  if (!asserted) {
+    FlutterError.reportError(errorDetails);
   }
 }

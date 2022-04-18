@@ -161,20 +161,7 @@ class PaintingContext extends ClipContext {
 
     final OffsetLayer childLayer = child._layerHandle.layer! as OffsetLayer;
     final OffsetLayer newLayer = child.updateCompositedLayer(childLayer);
-    /// The layer updated to a new type or instance. Transfer children into
-    /// new layer.
-    if (!identical(newLayer, childLayer)) {
-      /// Avoid creating a new layer unnecesaryily if they are the same
-      /// type.
-      assert(
-        newLayer.runtimeType != childLayer.runtimeType,
-        'Avoid recreating a layer of the same type instead of re-using the old layer.',
-      );
-
-      while (childLayer.hasChildren) {
-        newLayer.adoptChild(childLayer.firstChild!);
-      }
-    }
+    assert(identical(newLayer, childLayer));
     child._needsLayerUpdate = false;
   }
 
@@ -2140,16 +2127,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Update the composited layer owned by this render object.
   ///
-  /// If [oldLayer] is `null`, this method should create a new [OffsetLayer]
-  /// or subtype. if [oldLayer] is not `null`, then this method should reuse
-  /// the layer unless the specific type of offset layer needs to be updated.
+  /// This method is called by the framework for render object repaint
+  /// boundaries to update the properties on their composited layer, potentially
+  /// without repainting their children.
+  ///
+  /// If [oldLayer] is `null`, this method should return a new [OffsetLayer]
+  /// (or subtype thereof). If [oldLayer] is not `null`, then this method should
+  /// reuse the layer instance that is provided - it is an error to create a new
+  /// layer in this instance.
   ///
   /// The [OffsetLayer.offset] property will be managed by the framework and
   /// does not need to be updated.
-  ///
-  /// This method is called to give the render object a chance to update
-  /// the properties on its managed layer if the render object is
-  /// a repaint boundary.
   OffsetLayer updateCompositedLayer(covariant OffsetLayer? oldLayer) {
     assert(isRepaintBoundary);
     return oldLayer ?? OffsetLayer();
