@@ -1954,14 +1954,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
     expect(value, 0.5);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
-    expect(value, 0.55);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
-    expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (WidgetTester tester) async {
@@ -1993,14 +1985,6 @@ void main() {
     expect(value, 0.6);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pumpAndSettle();
-    expect(value, 0.5);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
-    expect(value, 0.6);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -2039,14 +2023,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
     expect(value, 0.5);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
-    expect(value, 0.55);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
-    expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (WidgetTester tester) async {
@@ -2083,14 +2059,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
     expect(value, 0.5);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pumpAndSettle();
-    expect(value, 0.6);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
-    expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('In directional nav, Slider can be navigated out of by using up and down arrows', (WidgetTester tester) async {
@@ -2111,29 +2079,26 @@ void main() {
           child: Material(
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                return MediaQuery(
-                  data: const MediaQueryData(navigationMode: NavigationMode.directional),
-                  child: Column(
-                      children: <Widget>[
-                        Slider(
-                          value: topSliderValue,
-                          onChanged: (double newValue) {
-                            setState(() {
-                              topSliderValue = newValue;
-                            });
-                          },
-                          autofocus: true,
-                        ),
-                        Slider(
-                          value: bottomSliderValue,
-                          onChanged: (double newValue) {
-                            setState(() {
-                              bottomSliderValue = newValue;
-                            });
-                          },
-                        ),
-                      ]
-                  ),
+                return Column(
+                    children: <Widget>[
+                      Slider(
+                        value: topSliderValue,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            topSliderValue = newValue;
+                          });
+                        },
+                        autofocus: true,
+                      ),
+                      Slider(
+                        value: bottomSliderValue,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            bottomSliderValue = newValue;
+                          });
+                        },
+                      ),
+                    ]
                 );
               }),
             ),
