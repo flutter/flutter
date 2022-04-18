@@ -86,6 +86,6 @@ class AnalyzeProjectCommand extends FlutterCommand {
   }
 
   String getUserPath(){
-    return '';
+    return (argResults == null || argResults!.rest.isEmpty) ? '' : argResults!.rest[0];
   }
 }
