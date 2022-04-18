@@ -2105,7 +2105,7 @@ void main() {
                 return MediaQuery(
                   data: const MediaQueryData(navigationMode: NavigationMode.directional),
                   child: Column(
-                      children: [
+                      children: <Widget>[
                         Slider(
                           value: topSliderValue,
                           onChanged: (double newValue) {
