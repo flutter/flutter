@@ -137,7 +137,11 @@ class PaintingContext extends ClipContext {
       }());
       childLayer.removeAllChildren();
       final OffsetLayer updatedLayer = child.updateCompositedLayer(oldLayer: childLayer);
-      assert(identical(updatedLayer, childLayer));
+      assert(identical(updatedLayer, childLayer),
+        '$child created a new layer instance $updatedLayer instread of reusing the '
+        'existing layer $childLayer. See the documentation of RenderObject.updateCompositedLayer '
+        'for more information on how to correctly implement this method.'
+      );
       assert(oldOffset == updatedLayer.offset);
     }
     child._needsCompositedLayerUpdate = false;
@@ -181,7 +185,11 @@ class PaintingContext extends ClipContext {
       return true;
     }());
     final OffsetLayer updatedLayer = child.updateCompositedLayer(oldLayer: childLayer);
-    assert(identical(updatedLayer, childLayer));
+    assert(identical(updatedLayer, childLayer),
+      '$child created a new layer instance $updatedLayer instread of reusing the '
+      'existing layer $childLayer. See the documentation of RenderObject.updateCompositedLayer '
+      'for more information on how to correctly implement this method.'
+    );
     assert(oldOffset == updatedLayer.offset);
     child._needsCompositedLayerUpdate = false;
   }
@@ -223,6 +231,8 @@ class PaintingContext extends ClipContext {
     if (child.isRepaintBoundary) {
       stopRecordingIfNeeded();
       _compositeChild(child, offset);
+    // If a render object was a repaint boundary but no longer is one, this
+    // is where the framework managed layer is automatically disposed.
     } else if (child._wasRepaintBoundary) {
       assert(child._layerHandle.layer is OffsetLayer);
       child._layerHandle.layer = null;
