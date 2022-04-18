@@ -149,10 +149,8 @@ class PaintingContext extends ClipContext {
     child._paintWithContext(childContext, Offset.zero);
 
     // Double-check that the paint method did not replace the layer (the first
-    // check is done in the [layer] setter itself), unless the replacement was
-    // a removal as the child is no longer a repaint boundary.
-
-    assert(child.isRepaintBoundary && identical(childLayer, child._layerHandle.layer) || child._layerHandle.layer == null);
+    // check is done in the [layer] setter itself).
+    assert(identical(childLayer, child._layerHandle.layer));
     childContext.stopRecordingIfNeeded();
   }
 
@@ -1010,11 +1008,9 @@ class PipelineOwner {
     try {
       List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       _nodesNeedingPaint = <RenderObject>[];
-      // It is possible that one or more render objects in the paint list, decided
-      // to stop being repaint boundaries between the last time they marked as needing
-      // to be painted/composited and now. To handle this case, we need to walk the list
-      // flagging any nodes that are not repaint boundaries, and mark their parents as
-      // needing to be painted and locate a new repaint boundary to being painting from.
+      // It is possible that one or more render objects in the paint list are no
+      // longer repaint boundaries. Instead of painting from these nodes, the
+      // nearest parent render object repaint boundary should be used instead.
       bool updated = false;
       for (final RenderObject object in dirtyNodes) {
         if (!object.isRepaintBoundary) {
@@ -2158,9 +2154,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Update the composited layer owned by this render object.
   ///
-  /// This method is called by the framework for render object repaint
-  /// boundaries to update the properties on their composited layer, potentially
-  /// without repainting their children.
+  /// This method is called by the framework when [isRepaintBoundary] is true.
   ///
   /// If [oldLayer] is `null`, this method should return a new [OffsetLayer]
   /// (or subtype thereof). If [oldLayer] is not `null`, then this method should
@@ -2168,13 +2162,15 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// layer in this instance.
   ///
   /// The [OffsetLayer.offset] property will be managed by the framework and
-  /// does not need to be updated.
+  /// must not be updated by this method.
   ///
   /// If a property of the composited layer needs to be updated, the render object
   /// should call [markNeedsCompositedLayerUpdate] which will schedule this method
   /// to be called without repainting children. If this widget was marked as
   /// needing to paint and needing a composited layer update, this method is only
   /// called once.
+  // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/102102 revisit the
+  // contraint that the instance/type of layer cannot be changed at runtime.
   OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
     assert(isRepaintBoundary);
     return oldLayer ?? OffsetLayer();
@@ -2417,13 +2413,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Mark this render object as having changed a property on its composited
   /// layer.
   ///
-  /// Render objects that have a composited layer and are repaint boundaries
-  /// may update the properties of that composited layer without repainting
+  /// Render objects that have a composited layer have [isRepaintBoundary] equal
+  /// to true may update the properties of that composited layer without repainting
   /// their children. If this render object is a repaint boundary but does
   /// not yet have a composited layer created for it, this method will instead
   /// mark the nearest repaint boundary parent as needing to be painted.
   ///
-  /// if this method is called on a render object that is not a repaint boundary
+  /// If this method is called on a render object that is not a repaint boundary
   /// or is a repaint boundary but hasn't been composited yet, it is equivalent
   /// to calling [markNeedsPaint].
   ///
@@ -2434,7 +2430,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void markNeedsCompositedLayerUpdate() {
     assert(!_debugDisposed);
     assert(owner == null || !owner!.debugDoingPaint);
-    if (_needsCompositedLayerUpdate) {
+    if (_needsCompositedLayerUpdate || _needsPaint) {
       return;
     }
     _needsCompositedLayerUpdate = true;
