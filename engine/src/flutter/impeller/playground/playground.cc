@@ -4,20 +4,17 @@
 
 #include <sstream>
 
+#define GLFW_INCLUDE_NONE
+#import "third_party/glfw/include/GLFW/glfw3.h"
+
 #include "flutter/fml/paths.h"
 #include "flutter/testing/testing.h"
 #include "impeller/base/validation.h"
-#include "impeller/entity/entity_shaders.h"
-#include "impeller/fixtures/shader_fixtures.h"
 #include "impeller/image/compressed_image.h"
 #include "impeller/playground/imgui/imgui_impl_impeller.h"
-#include "impeller/playground/imgui/imgui_shaders.h"
 #include "impeller/playground/playground.h"
+#include "impeller/playground/playground_impl.h"
 #include "impeller/renderer/allocator.h"
-#include "impeller/renderer/backend/metal/context_mtl.h"
-#include "impeller/renderer/backend/metal/formats_mtl.h"
-#include "impeller/renderer/backend/metal/surface_mtl.h"
-#include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
@@ -25,37 +22,35 @@
 #include "third_party/imgui/backends/imgui_impl_glfw.h"
 #include "third_party/imgui/imgui.h"
 
-#define GLFW_INCLUDE_NONE
-#import "third_party/glfw/include/GLFW/glfw3.h"
-#define GLFW_EXPOSE_NATIVE_COCOA
-#import "third_party/glfw/include/GLFW/glfw3native.h"
-
-#include <Metal/Metal.h>
-#include <QuartzCore/QuartzCore.h>
-
 namespace impeller {
 
-static std::vector<std::shared_ptr<fml::Mapping>>
-ShaderLibraryMappingsForPlayground() {
-  return {
-      std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_data,
-                                             impeller_entity_shaders_length),
-      std::make_shared<fml::NonOwnedMapping>(impeller_shader_fixtures_data,
-                                             impeller_shader_fixtures_length),
-      std::make_shared<fml::NonOwnedMapping>(impeller_imgui_shaders_data,
-                                             impeller_imgui_shaders_length),
-
-  };
+std::string PlaygroundBackendToString(PlaygroundBackend backend) {
+  switch (backend) {
+    case PlaygroundBackend::kMetal:
+      return "Metal";
+    case PlaygroundBackend::kOpenGLES:
+      return "OpenGLES";
+  }
+  FML_UNREACHABLE();
 }
 
 Playground::Playground()
-    : renderer_(ContextMTL::Create(ShaderLibraryMappingsForPlayground(),
-                                   "Playground Library")) {}
+    : impl_(PlaygroundImpl::Create(GetParam())),
+      renderer_(impl_->CreateContext()),
+      is_valid_(Playground::is_enabled() && renderer_.IsValid()) {}
 
 Playground::~Playground() = default;
 
+bool Playground::IsValid() const {
+  return is_valid_;
+}
+
+PlaygroundBackend Playground::GetBackend() const {
+  return GetParam();
+}
+
 std::shared_ptr<Context> Playground::GetContext() const {
-  return renderer_.IsValid() ? renderer_.GetContext() : nullptr;
+  return IsValid() ? renderer_.GetContext() : nullptr;
 }
 
 static void PlaygroundKeyCallback(GLFWwindow* window,
@@ -90,6 +85,10 @@ void Playground::SetCursorPosition(Point pos) {
 bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   if (!is_enabled()) {
     return true;
+  }
+
+  if (!IsValid()) {
+    return false;
   }
 
   if (!render_callback) {
@@ -169,13 +168,9 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   fml::ScopedCleanupClosure shutdown_imgui_impeller(
       []() { ImGui_ImplImpeller_Shutdown(); });
 
-  NSWindow* cocoa_window = ::glfwGetCocoaWindow(window);
-  CAMetalLayer* layer = [CAMetalLayer layer];
-  layer.device = ContextMTL::Cast(*renderer_.GetContext()).GetMTLDevice();
-  // This pixel format is one of the documented supported formats.
-  layer.pixelFormat = ToMTLPixelFormat(PixelFormat::kDefaultColor);
-  cocoa_window.contentView.layer = layer;
-  cocoa_window.contentView.wantsLayer = YES;
+  if (!impl_->SetupWindow(window, renderer_.GetContext())) {
+    return false;
+  }
 
   while (true) {
     ::glfwWaitEventsTimeout(1.0 / 30.0);
@@ -185,11 +180,6 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
     }
 
     ImGui_ImplGlfw_NewFrame();
-
-    const auto layer_size = layer.bounds.size;
-    const auto layer_scale = layer.contentsScale;
-    layer.drawableSize = CGSizeMake(layer_size.width * layer_scale,
-                                    layer_size.height * layer_scale);
 
     Renderer::RenderCallback wrapped_callback = [render_callback](auto& pass) {
       pass.SetLabel("Playground Main Render Pass");
@@ -201,12 +191,15 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
       return result;
     };
 
-    if (!renderer_.Render(SurfaceMTL::WrapCurrentMetalLayerDrawable(
-                              renderer_.GetContext(), layer),
+    if (!renderer_.Render(impl_->AcquireSurfaceFrame(renderer_.GetContext()),
                           wrapped_callback)) {
       VALIDATION_LOG << "Could not render into the surface.";
       return false;
     }
+  }
+
+  if (!impl_->TeardownWindow(window, renderer_.GetContext())) {
+    return false;
   }
 
   return true;
@@ -214,6 +207,10 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
 
 std::shared_ptr<Texture> Playground::CreateTextureForFixture(
     const char* fixture_name) const {
+  if (!IsValid()) {
+    return nullptr;
+  }
+
   auto compressed_image = CompressedImage::Create(
       flutter::testing::OpenFixtureAsMapping(fixture_name));
   if (!compressed_image) {

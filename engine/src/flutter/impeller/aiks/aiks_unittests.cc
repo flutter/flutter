@@ -19,8 +19,9 @@ namespace impeller {
 namespace testing {
 
 using AiksTest = AiksPlayground;
+INSTANTIATE_PLAYGROUND_SUITE(AiksTest);
 
-TEST_F(AiksTest, CanvasCTMCanBeUpdated) {
+TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
   Canvas canvas;
   Matrix identity;
   ASSERT_MATRIX_NEAR(canvas.GetCurrentTransformation(), identity);
@@ -29,7 +30,7 @@ TEST_F(AiksTest, CanvasCTMCanBeUpdated) {
                      Matrix::MakeTranslation({100.0, 100.0, 0.0}));
 }
 
-TEST_F(AiksTest, CanvasCanPushPopCTM) {
+TEST_P(AiksTest, CanvasCanPushPopCTM) {
   Canvas canvas;
   ASSERT_EQ(canvas.GetSaveCount(), 1u);
   ASSERT_EQ(canvas.Restore(), false);
@@ -45,7 +46,7 @@ TEST_F(AiksTest, CanvasCanPushPopCTM) {
                      Matrix::MakeTranslation({100.0, 100.0, 0.0}));
 }
 
-TEST_F(AiksTest, CanRenderColoredRect) {
+TEST_P(AiksTest, CanRenderColoredRect) {
   Canvas canvas;
   Paint paint;
   paint.color = Color::Red();
@@ -56,7 +57,7 @@ TEST_F(AiksTest, CanRenderColoredRect) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderImage) {
+TEST_P(AiksTest, CanRenderImage) {
   Canvas canvas;
   Paint paint;
   auto image = std::make_shared<Image>(CreateTextureForFixture("kalimba.jpg"));
@@ -65,7 +66,7 @@ TEST_F(AiksTest, CanRenderImage) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderImageRect) {
+TEST_P(AiksTest, CanRenderImageRect) {
   Canvas canvas;
   Paint paint;
   auto image = std::make_shared<Image>(CreateTextureForFixture("kalimba.jpg"));
@@ -81,7 +82,7 @@ TEST_F(AiksTest, CanRenderImageRect) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderStrokes) {
+TEST_P(AiksTest, CanRenderStrokes) {
   Canvas canvas;
   Paint paint;
   paint.color = Color::Red();
@@ -92,7 +93,7 @@ TEST_F(AiksTest, CanRenderStrokes) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderCurvedStrokes) {
+TEST_P(AiksTest, CanRenderCurvedStrokes) {
   Canvas canvas;
   Paint paint;
   paint.color = Color::Red();
@@ -102,7 +103,7 @@ TEST_F(AiksTest, CanRenderCurvedStrokes) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderClips) {
+TEST_P(AiksTest, CanRenderClips) {
   Canvas canvas;
   Paint paint;
   paint.color = Color::Fuchsia();
@@ -112,7 +113,7 @@ TEST_F(AiksTest, CanRenderClips) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderNestedClips) {
+TEST_P(AiksTest, CanRenderNestedClips) {
   Canvas canvas;
   Paint paint;
   paint.color = Color::Fuchsia();
@@ -125,7 +126,7 @@ TEST_F(AiksTest, CanRenderNestedClips) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderDifferenceClips) {
+TEST_P(AiksTest, CanRenderDifferenceClips) {
   Paint paint;
   Canvas canvas;
   canvas.Translate({400, 400});
@@ -162,7 +163,7 @@ TEST_F(AiksTest, CanRenderDifferenceClips) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, ClipsUseCurrentTransform) {
+TEST_P(AiksTest, ClipsUseCurrentTransform) {
   std::array<Color, 5> colors = {Color::White(), Color::Black(),
                                  Color::SkyBlue(), Color::Red(),
                                  Color::Yellow()};
@@ -180,7 +181,7 @@ TEST_F(AiksTest, ClipsUseCurrentTransform) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanSaveLayerStandalone) {
+TEST_P(AiksTest, CanSaveLayerStandalone) {
   Canvas canvas;
 
   Paint red;
@@ -198,7 +199,7 @@ TEST_F(AiksTest, CanSaveLayerStandalone) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderGroupOpacity) {
+TEST_P(AiksTest, CanRenderGroupOpacity) {
   Canvas canvas;
 
   Paint red;
@@ -222,7 +223,7 @@ TEST_F(AiksTest, CanRenderGroupOpacity) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanPerformFullScreenMSAA) {
+TEST_P(AiksTest, CanPerformFullScreenMSAA) {
   Canvas canvas;
 
   Paint red;
@@ -233,7 +234,7 @@ TEST_F(AiksTest, CanPerformFullScreenMSAA) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanPerformSkew) {
+TEST_P(AiksTest, CanPerformSkew) {
   Canvas canvas;
 
   Paint red;
@@ -245,7 +246,7 @@ TEST_F(AiksTest, CanPerformSkew) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanPerformSaveLayerWithBounds) {
+TEST_P(AiksTest, CanPerformSaveLayerWithBounds) {
   Canvas canvas;
 
   Paint red;
@@ -271,7 +272,7 @@ TEST_F(AiksTest, CanPerformSaveLayerWithBounds) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest,
+TEST_P(AiksTest,
        CanPerformSaveLayerWithBoundsAndLargerIntermediateIsNotAllocated) {
   Canvas canvas;
 
@@ -298,7 +299,7 @@ TEST_F(AiksTest,
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderRoundedRectWithNonUniformRadii) {
+TEST_P(AiksTest, CanRenderRoundedRectWithNonUniformRadii) {
   Canvas canvas;
 
   Paint paint;
@@ -318,7 +319,7 @@ TEST_F(AiksTest, CanRenderRoundedRectWithNonUniformRadii) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderDifferencePaths) {
+TEST_P(AiksTest, CanRenderDifferencePaths) {
   Canvas canvas;
 
   Paint paint;
@@ -393,7 +394,7 @@ bool RenderTextInCanvas(std::shared_ptr<Context> context,
   return true;
 }
 
-TEST_F(AiksTest, CanRenderTextFrame) {
+TEST_P(AiksTest, CanRenderTextFrame) {
   Canvas canvas;
   ASSERT_TRUE(RenderTextInCanvas(
       GetContext(), canvas, "the quick brown fox jumped over the lazy dog!.?",
@@ -401,7 +402,7 @@ TEST_F(AiksTest, CanRenderTextFrame) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderItalicizedText) {
+TEST_P(AiksTest, CanRenderItalicizedText) {
   Canvas canvas;
   ASSERT_TRUE(RenderTextInCanvas(
       GetContext(), canvas, "the quick brown fox jumped over the lazy dog!.?",
@@ -409,7 +410,7 @@ TEST_F(AiksTest, CanRenderItalicizedText) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderEmojiTextFrame) {
+TEST_P(AiksTest, CanRenderEmojiTextFrame) {
   Canvas canvas;
   ASSERT_TRUE(RenderTextInCanvas(
       GetContext(), canvas,
@@ -418,7 +419,7 @@ TEST_F(AiksTest, CanRenderEmojiTextFrame) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanRenderTextInSaveLayer) {
+TEST_P(AiksTest, CanRenderTextInSaveLayer) {
   Canvas canvas;
   canvas.DrawPaint({.color = Color::White()});
   canvas.Translate({100, 100});
@@ -439,7 +440,7 @@ TEST_F(AiksTest, CanRenderTextInSaveLayer) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, CanDrawPaint) {
+TEST_P(AiksTest, CanDrawPaint) {
   Paint paint;
   paint.color = Color::MediumTurquoise();
   Canvas canvas;
@@ -447,7 +448,7 @@ TEST_F(AiksTest, CanDrawPaint) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, PaintBlendModeIsRespected) {
+TEST_P(AiksTest, PaintBlendModeIsRespected) {
   Paint paint;
   Canvas canvas;
   // Default is kSourceOver.
@@ -466,7 +467,7 @@ TEST_F(AiksTest, PaintBlendModeIsRespected) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(AiksTest, TransformMultipliesCorrectly) {
+TEST_P(AiksTest, TransformMultipliesCorrectly) {
   Canvas canvas;
   ASSERT_MATRIX_NEAR(canvas.GetCurrentTransformation(), Matrix());
 
@@ -505,7 +506,7 @@ TEST_F(AiksTest, TransformMultipliesCorrectly) {
   // clang-format on
 }
 
-TEST_F(AiksTest, SolidStrokesRenderCorrectly) {
+TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
   // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
   bool first_frame = true;
   auto callback = [&](AiksContext& renderer, RenderPass& pass) {
@@ -578,7 +579,7 @@ TEST_F(AiksTest, SolidStrokesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-TEST_F(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
+TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
   auto callback = [](AiksContext& renderer, RenderPass& pass) {
     Canvas canvas;
     Paint alpha;
@@ -610,7 +611,7 @@ TEST_F(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-TEST_F(AiksTest, DrawRectStrokesRenderCorrectly) {
+TEST_P(AiksTest, DrawRectStrokesRenderCorrectly) {
   Canvas canvas;
   Paint paint;
   paint.color = Color::Red();

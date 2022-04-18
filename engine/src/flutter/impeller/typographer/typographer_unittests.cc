@@ -12,8 +12,9 @@ namespace impeller {
 namespace testing {
 
 using TypographerTest = Playground;
+INSTANTIATE_PLAYGROUND_SUITE(TypographerTest);
 
-TEST_F(TypographerTest, CanConvertTextBlob) {
+TEST_P(TypographerTest, CanConvertTextBlob) {
   SkFont font;
   auto blob = SkTextBlob::MakeFromString(
       "the quick brown fox jumped over the lazy dog.", font);
@@ -26,12 +27,12 @@ TEST_F(TypographerTest, CanConvertTextBlob) {
   }
 }
 
-TEST_F(TypographerTest, CanCreateRenderContext) {
+TEST_P(TypographerTest, CanCreateRenderContext) {
   auto context = TextRenderContext::Create(GetContext());
   ASSERT_TRUE(context && context->IsValid());
 }
 
-TEST_F(TypographerTest, CanCreateGlyphAtlas) {
+TEST_P(TypographerTest, CanCreateGlyphAtlas) {
   auto context = TextRenderContext::Create(GetContext());
   ASSERT_TRUE(context && context->IsValid());
   SkFont sk_font;

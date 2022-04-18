@@ -18,15 +18,16 @@ namespace impeller {
 namespace testing {
 
 using DisplayListTest = DisplayListPlayground;
+INSTANTIATE_PLAYGROUND_SUITE(DisplayListTest);
 
-TEST_F(DisplayListTest, CanDrawRect) {
+TEST_P(DisplayListTest, CanDrawRect) {
   flutter::DisplayListBuilder builder;
   builder.setColor(SK_ColorBLUE);
   builder.drawRect(SkRect::MakeXYWH(10, 10, 100, 100));
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_F(DisplayListTest, CanDrawTextBlob) {
+TEST_P(DisplayListTest, CanDrawTextBlob) {
   flutter::DisplayListBuilder builder;
   builder.setColor(SK_ColorBLUE);
   builder.drawTextBlob(SkTextBlob::MakeFromString("Hello", CreateTestFont()),
@@ -34,7 +35,7 @@ TEST_F(DisplayListTest, CanDrawTextBlob) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_F(DisplayListTest, CanDrawImage) {
+TEST_P(DisplayListTest, CanDrawImage) {
   auto texture = CreateTextureForFixture("embarcadero.jpg");
   flutter::DisplayListBuilder builder;
   builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(100, 100),
@@ -42,7 +43,7 @@ TEST_F(DisplayListTest, CanDrawImage) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_F(DisplayListTest, CanDrawCapsAndJoins) {
+TEST_P(DisplayListTest, CanDrawCapsAndJoins) {
   flutter::DisplayListBuilder builder;
 
   builder.setStyle(SkPaint::Style::kStroke_Style);
@@ -87,7 +88,7 @@ TEST_F(DisplayListTest, CanDrawCapsAndJoins) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_F(DisplayListTest, CanDrawArc) {
+TEST_P(DisplayListTest, CanDrawArc) {
   bool first_frame = true;
   auto callback = [&]() {
     if (first_frame) {
@@ -127,7 +128,7 @@ TEST_F(DisplayListTest, CanDrawArc) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-TEST_F(DisplayListTest, StrokedPathsDrawCorrectly) {
+TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
   flutter::DisplayListBuilder builder;
   builder.setColor(SK_ColorRED);
   builder.setStyle(SkPaint::Style::kStroke_Style);

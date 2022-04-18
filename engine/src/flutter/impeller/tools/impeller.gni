@@ -12,11 +12,21 @@ declare_args() {
   # Whether Impeller is supported on the platform.
   impeller_supports_platform = true
 
-  # Whether Impeller supports rendering on the platform.
-  impeller_supports_rendering = is_mac || is_ios
+  # Whether the Metal backend is enabled.
+  impeller_enable_metal = is_mac || is_ios
 
+  # Whether the OpenGLES backend is enabled.
+  impeller_enable_opengles = is_mac
+}
+
+declare_args() {
   # Whether Impeller shaders are supported on the platform.
-  impeller_shaders_supports_platform = is_mac || is_ios
+  impeller_shaders_supports_platform =
+      impeller_enable_metal || impeller_enable_opengles
+
+  # Whether Impeller supports rendering on the platform.
+  impeller_supports_rendering =
+      impeller_enable_metal || impeller_enable_opengles
 }
 
 # ------------------------------------------------------------------------------
@@ -106,7 +116,7 @@ template("metal_library") {
 
     script = "//flutter/impeller/tools/build_metal_library.py"
 
-    depfile = "$target_gen_dir/shader_deps/$metal_library_name.depfile"
+    depfile = "$target_gen_dir/mtl/$metal_library_name.depfile"
 
     args = [
       "--output",
@@ -151,17 +161,19 @@ template("impeller_shaders_real") {
   assert(defined(invoker.name), "Name of the shader library must be specified.")
 
   base_target_name = target_name
-  impellerc_target_name = "impellerc_$target_name"
+  impellerc_target_name = "impellerc_mtl_$target_name"
   compiled_action_foreach(impellerc_target_name) {
     tool = "//flutter/impeller/compiler:impellerc"
 
     sources = invoker.shaders
 
-    metal_intermediate = "$target_gen_dir/{{source_file_part}}.metal"
-    spirv_intermediate = "$target_gen_dir/{{source_file_part}}.spirv"
-    reflection_json_intermediate = "$target_gen_dir/{{source_file_part}}.json"
-    reflection_header_intermediate = "$target_gen_dir/{{source_file_part}}.h"
-    reflection_cc_intermediate = "$target_gen_dir/{{source_file_part}}.mm"
+    metal_intermediate = "$target_gen_dir/mtl/{{source_file_part}}.metal"
+    spirv_intermediate = "$target_gen_dir/mtl/{{source_file_part}}.spirv"
+    reflection_json_intermediate =
+        "$target_gen_dir/mtl/{{source_file_part}}.json"
+    reflection_header_intermediate =
+        "$target_gen_dir/mtl/{{source_file_part}}.h"
+    reflection_cc_intermediate = "$target_gen_dir/mtl/{{source_file_part}}.cc"
 
     outputs = [
       metal_intermediate,
@@ -169,7 +181,7 @@ template("impeller_shaders_real") {
       reflection_cc_intermediate,
     ]
 
-    depfile_path = "$target_gen_dir/{{source_file_part}}.d"
+    depfile_path = "$target_gen_dir/mtl/{{source_file_part}}.d"
 
     metal_intermediate_path = rebase_path(metal_intermediate, root_build_dir)
     spirv_intermediate_path = rebase_path(spirv_intermediate, root_build_dir)
@@ -223,6 +235,14 @@ template("impeller_shaders_real") {
       target_gen_dir,
       impeller_root_gen_dir,
     ]
+
+    if (impeller_enable_metal) {
+      include_dirs += [ "$impeller_root_gen_dir/mtl" ]
+    }
+
+    if (impeller_enable_opengles) {
+      include_dirs += [ "$impeller_root_gen_dir/gles" ]
+    }
   }
 
   source_set(shader_glue_target_name) {
@@ -248,8 +268,8 @@ template("impeller_shaders_real") {
     metal_library_files = get_target_outputs(":$metal_library_target_name")
     metal_library_file = metal_library_files[0]
     inputs = [ metal_library_file ]
-    output_header = "$target_gen_dir/$base_target_name.h"
-    output_source = "$target_gen_dir/$base_target_name.c"
+    output_header = "$target_gen_dir/mtl/$base_target_name.h"
+    output_source = "$target_gen_dir/mtl/$base_target_name.c"
     outputs = [
       output_header,
       output_source,

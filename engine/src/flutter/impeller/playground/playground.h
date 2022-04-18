@@ -13,13 +13,26 @@
 
 namespace impeller {
 
-class Playground : public ::testing::Test {
+class PlaygroundImpl;
+
+enum class PlaygroundBackend {
+  kMetal,
+  kOpenGLES,
+};
+
+std::string PlaygroundBackendToString(PlaygroundBackend backend);
+
+class Playground : public ::testing::TestWithParam<PlaygroundBackend> {
  public:
   Playground();
 
   ~Playground();
 
   static constexpr bool is_enabled() { return is_enabled_; }
+
+  PlaygroundBackend GetBackend() const;
+
+  bool IsValid() const;
 
   Point GetCursorPosition() const;
 
@@ -39,9 +52,11 @@ class Playground : public ::testing::Test {
   static const bool is_enabled_ = false;
 #endif  // IMPELLER_ENABLE_PLAYGROUND
 
+  std::unique_ptr<PlaygroundImpl> impl_;
   Renderer renderer_;
   Point cursor_position_;
   ISize window_size_ = ISize{1024, 768};
+  bool is_valid_ = false;
 
   void SetCursorPosition(Point pos);
 
@@ -49,5 +64,12 @@ class Playground : public ::testing::Test {
 
   FML_DISALLOW_COPY_AND_ASSIGN(Playground);
 };
+
+#define INSTANTIATE_PLAYGROUND_SUITE(playground)                        \
+  INSTANTIATE_TEST_SUITE_P(                                             \
+      Play, playground, ::testing::Values(PlaygroundBackend::kMetal),   \
+      [](const ::testing::TestParamInfo<Playground::ParamType>& info) { \
+        return PlaygroundBackendToString(info.param);                   \
+      });
 
 }  // namespace impeller
