@@ -13,8 +13,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: FabExample(),
+    return MaterialApp(
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+      home: const FabExample(),
     );
   }
 }
@@ -29,12 +30,14 @@ class FabExample extends StatelessWidget {
         title: const Text('FloatingActionButton Sample'),
       ),
       body: const Center(child: Text('Press the button below!')),
+      // An example of the floating action button.
+      //
+      // https://m3.material.io/components/floating-action-button/specs
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Add your onPressed code here!
         },
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.navigation),
+        child: const Icon(Icons.add),
       ),
     );
   }
