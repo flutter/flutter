@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -20,11 +22,11 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  late BufferLogger logger;
-  late FileSystem fileSystem;
-  late Directory projectRoot;
-  late String projectRootPath;
-  late MigrateUtils utils;
+  BufferLogger logger;
+  FileSystem fileSystem;
+  Directory projectRoot;
+  String projectRootPath;
+  MigrateUtils utils;
 
   setUpAll(() async {
     fileSystem = LocalFileSystem();
@@ -100,14 +102,14 @@ void main() {
       final File file2 = projectRoot.childFile('some_other_file.dart');
 
       DiffResult result = await utils.diffFiles(file1, file2);
-      expect(result.diff, '');
+      expect(result.diff, null);
       expect(result.diffType, DiffType.deletion);
-      expect(result.exitCode, 0);
+      expect(result.exitCode, null);
 
       result = await utils.diffFiles(file2, file1);
-      expect(result.diff, '');
+      expect(result.diff, null);
       expect(result.diffType, DiffType.addition);
-      expect(result.exitCode, 0);
+      expect(result.exitCode, null);
 
       file2.createSync();
       file2.writeAsStringSync('void main() {}\n', flush: true);
