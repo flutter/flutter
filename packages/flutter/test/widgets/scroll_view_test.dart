@@ -54,6 +54,19 @@ Widget textFieldBoilerplate({ required Widget child }) {
   );
 }
 
+Widget primaryScrollControllerBoilerplate({ required Widget child, required ScrollController controller }) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: MediaQuery(
+      data: const MediaQueryData(),
+      child: PrimaryScrollController(
+        controller: controller,
+        child: child,
+      ),
+    ),
+  );
+}
+
 void main() {
   testWidgets('ListView control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
@@ -887,61 +900,144 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgets('Vertical CustomScrollViews are primary by default', (WidgetTester tester) async {
+  testWidgets('Vertical CustomScrollViews are not primary by default', (WidgetTester tester) async {
     const CustomScrollView view = CustomScrollView();
-    expect(view.primary, isTrue);
+    expect(view.primary, isNull);
   });
 
-  testWidgets('Vertical ListViews are primary by default', (WidgetTester tester) async {
+  testWidgets('Vertical CustomScrollViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: const CustomScrollView(),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isTrue);
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets("Vertical CustomScrollViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+        child: const CustomScrollView(),
+        controller: controller,
+    ));
+    expect(controller.hasClients, isFalse);
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Vertical ListViews are not primary by default', (WidgetTester tester) async {
     final ListView view = ListView();
-    expect(view.primary, isTrue);
+    expect(view.primary, isNull);
   });
 
-  testWidgets('Vertical GridViews are primary by default', (WidgetTester tester) async {
-    final GridView view = GridView.count(
-      crossAxisCount: 1,
-    );
-    expect(view.primary, isTrue);
+  testWidgets('Vertical ListViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: ListView(),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isTrue);
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets("Vertical ListViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: ListView(),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isFalse);
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Vertical GridViews are not primary by default', (WidgetTester tester) async {
+    final GridView view = GridView.count(crossAxisCount: 1);
+    expect(view.primary, isNull);
   });
+
+  testWidgets('Vertical GRidViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: GridView.count(crossAxisCount: 1),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isTrue);
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets("Vertical GridViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: GridView.count(crossAxisCount: 1),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isFalse);
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Horizontal CustomScrollViews are non-primary by default', (WidgetTester tester) async {
-    const CustomScrollView view = CustomScrollView(scrollDirection: Axis.horizontal);
-    expect(view.primary, isFalse);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: CustomScrollView(
+        scrollDirection: Axis.horizontal,
+        controller: ScrollController(),
+      ),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isFalse);
   });
 
   testWidgets('Horizontal ListViews are non-primary by default', (WidgetTester tester) async {
-    final ListView view = ListView(scrollDirection: Axis.horizontal);
-    expect(view.primary, isFalse);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        controller: ScrollController(),
+      ),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isFalse);
   });
 
   testWidgets('Horizontal GridViews are non-primary by default', (WidgetTester tester) async {
-    final GridView view = GridView.count(
-      scrollDirection: Axis.horizontal,
-      crossAxisCount: 1,
-    );
-    expect(view.primary, isFalse);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: GridView.count(
+        scrollDirection: Axis.horizontal,
+        controller: ScrollController(),
+        crossAxisCount: 1,
+      ),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isFalse);
   });
 
   testWidgets('CustomScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
-    final CustomScrollView view = CustomScrollView(
-      controller: ScrollController(),
-    );
-    expect(view.primary, isFalse);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: CustomScrollView(
+        controller: ScrollController(),
+      ),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isFalse);
   });
 
   testWidgets('ListViews with controllers are non-primary by default', (WidgetTester tester) async {
-    final ListView view = ListView(
-      controller: ScrollController(),
-    );
-    expect(view.primary, isFalse);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: ListView(
+        controller: ScrollController(),
+      ),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isFalse);
   });
 
   testWidgets('GridViews with controllers are non-primary by default', (WidgetTester tester) async {
-    final GridView view = GridView.count(
-      controller: ScrollController(),
-      crossAxisCount: 1,
-    );
-    expect(view.primary, isFalse);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(primaryScrollControllerBoilerplate(
+      child: GridView.count(
+        controller: ScrollController(),
+        crossAxisCount: 1,
+      ),
+      controller: controller,
+    ));
+    expect(controller.hasClients, isFalse);
   });
 
   testWidgets('CustomScrollView sets PrimaryScrollController when primary', (WidgetTester tester) async {

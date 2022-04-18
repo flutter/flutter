@@ -87,7 +87,7 @@ abstract class ScrollView extends StatelessWidget {
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.controller,
-    bool? primary,
+    this.primary,
     ScrollPhysics? physics,
     this.scrollBehavior,
     this.shrinkWrap = false,
@@ -104,15 +104,16 @@ abstract class ScrollView extends StatelessWidget {
        assert(shrinkWrap != null),
        assert(dragStartBehavior != null),
        assert(clipBehavior != null),
-       assert(!(controller != null && (primary ?? false)),
-           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
-           'You cannot both set primary to true and pass an explicit controller.',
+       assert(
+         !(controller != null && (primary ?? false)),
+         'Primary ScrollViews obtain their ScrollController via inheritance '
+         'from a PrimaryScrollController widget. You cannot both set primary to '
+         'true and pass an explicit controller.',
        ),
        assert(!shrinkWrap || center == null),
        assert(anchor != null),
        assert(anchor >= 0.0 && anchor <= 1.0),
        assert(semanticChildCount == null || semanticChildCount >= 0),
-       primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        physics = physics ?? ((primary ?? false) || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null);
 
   /// {@template flutter.widgets.scroll_view.scrollDirection}
@@ -169,11 +170,20 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// On iOS, this also identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
-  /// {@endtemplate}
   ///
-  /// Defaults to true when [scrollDirection] is [Axis.vertical] and
-  /// [controller] is null.
-  final bool primary;
+  /// Cannot be true while a [ScrollController] is provided to `controller`,
+  /// only one ScrollController can be associated with a ScrollView.
+  ///
+  /// Setting to false will explicitly prevent inheriting any
+  /// [PrimaryScrollController].
+  ///
+  /// Defaults to null. In the case of null,
+  /// [PrimaryScrollController.shouldInherit] is used to decide automatic
+  /// inheritance. By default, a [PrimaryScrollController] is configured to
+  /// automatically be inherited on [TargetPlatformVariant.mobile] for
+  /// ScrollViews in the [Axis.vertical] scroll direction.
+  /// {@endtemplate}
+  final bool? primary;
 
   /// {@template flutter.widgets.scroll_view.physics}
   /// How the scroll view should respond to user input.
@@ -393,8 +403,13 @@ abstract class ScrollView extends StatelessWidget {
     final List<Widget> slivers = buildSlivers(context);
     final AxisDirection axisDirection = getDirection(context);
 
-    final ScrollController? scrollController =
-        primary ? PrimaryScrollController.of(context) : controller;
+    final bool effectivePrimary = primary
+        ?? controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);
+
+    final ScrollController? scrollController = effectivePrimary
+        ? PrimaryScrollController.of(context)
+        : controller;
+
     final Scrollable scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
@@ -407,7 +422,9 @@ abstract class ScrollView extends StatelessWidget {
         return buildViewport(context, offset, axisDirection, slivers);
       },
     );
-    final Widget scrollableResult = primary && scrollController != null
+
+    final Widget scrollableResult = effectivePrimary && scrollController != null
+        // Further descendant ScrollViews will not inherit the same PrimaryScrollController
         ? PrimaryScrollController.none(child: scrollable)
         : scrollable;
 

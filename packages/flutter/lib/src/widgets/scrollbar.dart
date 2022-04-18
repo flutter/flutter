@@ -849,9 +849,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// This sample shows an app with two scrollables in the same route. Since by
 /// default, there is one [PrimaryScrollController] per route, and they both have a
 /// scroll direction of [Axis.vertical], they would both try to attach to that
-/// controller. The [Scrollbar] cannot support multiple positions attached to
-/// the same controller, so one [ListView], and its [Scrollbar] have been
-/// provided a unique [ScrollController].
+/// controller on mobile platforms. The [Scrollbar] cannot support multiple
+/// positions attached to the same controller, so one [ListView], and its
+/// [Scrollbar] have been provided a unique [ScrollController]. Desktop
+/// platforms do not automatically attach to the PrimaryScrollController,
+/// requiring [ScrollView.primary] to be true instead in order to use the
+/// PrimaryScrollController.
 ///
 /// Alternatively, a new PrimaryScrollController could be created above one of
 /// the [ListView]s.
