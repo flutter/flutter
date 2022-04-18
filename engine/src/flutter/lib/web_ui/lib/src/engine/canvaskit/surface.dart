@@ -282,6 +282,18 @@ class Surface {
       height: _pixelHeight,
     );
     this.htmlCanvas = htmlCanvas;
+
+    // The DOM elements used to render pictures are used purely to put pixels on
+    // the screen. They have no semantic information. If an assistive technology
+    // attempts to scan picture content it will look like garbage and confuse
+    // users. UI semantics are exported as a separate DOM tree rendered parallel
+    // to pictures.
+    //
+    // Why are layer and scene elements not hidden from ARIA? Because those
+    // elements may contain platform views, and platform views must be
+    // accessible.
+    htmlCanvas.setAttribute('aria-hidden', 'true');
+
     htmlCanvas.style.position = 'absolute';
     _updateLogicalHtmlCanvasSize();
 

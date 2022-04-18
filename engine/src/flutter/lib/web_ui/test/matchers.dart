@@ -225,9 +225,12 @@ enum HtmlComparisonMode {
 /// [throwOnUnusedAttributes] to `true` to check that expected HTML strings do
 /// not contain irrelevant attributes. It is ok for actual HTML to contain all
 /// kinds of attributes. They only need to be filtered out before testing.
-String canonicalizeHtml(String htmlContent,
-    {HtmlComparisonMode mode = HtmlComparisonMode.nonLayoutOnly,
-    bool throwOnUnusedAttributes = false}) {
+String canonicalizeHtml(
+  String htmlContent, {
+  HtmlComparisonMode mode = HtmlComparisonMode.nonLayoutOnly,
+  bool throwOnUnusedAttributes = false,
+  List<String>? ignoredAttributes,
+}) {
   if (htmlContent.trim().isEmpty) {
     return '';
   }
@@ -331,6 +334,11 @@ String canonicalizeHtml(String htmlContent,
                 final List<String> parts = attr.split(':');
                 if (parts.length == 2) {
                   final String name = parts.first;
+
+                  if (ignoredAttributes != null && ignoredAttributes.contains(name)) {
+                    return null;
+                  }
+
                   // Whether the attribute is one that's set to the same value and
                   // never changes. Such attributes are usually not interesting to
                   // test.

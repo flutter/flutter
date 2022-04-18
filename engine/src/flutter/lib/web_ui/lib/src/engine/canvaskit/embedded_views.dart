@@ -242,7 +242,7 @@ class HtmlViewEmbedder {
     }
 
     // Apply mutators to the slot
-    _applyMutators(params.mutators, slot, viewId);
+    _applyMutators(params, slot, viewId);
   }
 
   int _countClips(MutatorsStack mutators) {
@@ -309,9 +309,12 @@ class HtmlViewEmbedder {
   }
 
   void _applyMutators(
-      MutatorsStack mutators, html.Element embeddedView, int viewId) {
+      EmbeddedViewParams params, html.Element embeddedView, int viewId) {
+    final MutatorsStack mutators = params.mutators;
     html.Element head = embeddedView;
-    Matrix4 headTransform = Matrix4.identity();
+    Matrix4 headTransform = params.offset == ui.Offset.zero
+      ? Matrix4.identity()
+      : Matrix4.translationValues(params.offset.dx, params.offset.dy, 0);
     double embeddedOpacity = 1.0;
     _resetAnchor(head);
     _cleanUpClipDefs(viewId);

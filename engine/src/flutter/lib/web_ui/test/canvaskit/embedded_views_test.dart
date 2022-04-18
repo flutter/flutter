@@ -130,6 +130,34 @@ void testMain() {
       );
     });
 
+    test('correctly offsets platform views', () async {
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (int viewId) => html.DivElement()..id = 'view-0',
+      );
+      await createPlatformView(0, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+      final LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.addPlatformView(0, offset: const ui.Offset(3, 4), width: 5, height: 6);
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      final html.Element slotHost =
+          flutterViewEmbedder.sceneElement!.querySelector('flt-platform-view-slot')!;
+      final html.CssStyleDeclaration style = slotHost.style;
+
+      expect(style.transform, 'matrix(1, 0, 0, 1, 3, 4)');
+      expect(style.width, '5px');
+      expect(style.height, '6px');
+
+      final html.Rectangle<num> slotRect = slotHost.getBoundingClientRect();
+      expect(slotRect.left, 3);
+      expect(slotRect.top, 4);
+      expect(slotRect.right, 8);
+      expect(slotRect.bottom, 10);
+    });
+
     // Returns the list of CSS transforms applied to the ancestor chain of
     // elements starting from `viewHost`, up until and excluding <flt-scene>.
     List<String> getTransformChain(html.Element viewHost) {
