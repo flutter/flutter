@@ -1,4 +1,4 @@
-Signature: bbcb867847f5ff992469ca2e8f06b4ed
+Signature: 43decaa2a24b1259c74c05283767fe99
 
 UNUSED LICENSES:
 
@@ -8198,7 +8198,7 @@ ORIGIN: ../../../third_party/skia/third_party/vulkanmemoryallocator/include/vk_m
 TYPE: LicenseType.mit
 FILE: ../../../third_party/skia/third_party/vulkanmemoryallocator/include/vk_mem_alloc.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2017-2020 Advanced Micro Devices, Inc. All rights reserved.
+Copyright (c) 2017-2022 Advanced Micro Devices, Inc. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
