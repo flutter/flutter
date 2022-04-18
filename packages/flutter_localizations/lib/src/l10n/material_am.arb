@@ -139,5 +139,6 @@
   "keyboardKeyZenkaku": "ዜንካኩ",
   "keyboardKeyZenkakuHankaku": "ዜንካኩ ሃንካኩ",
   "keyboardKeyMetaMacOs": "ትዕዛዝ",
-  "keyboardKeyMetaWindows": "Win"
+  "keyboardKeyMetaWindows": "Win",
+  "menuBarMenuLabel": "Menu bar menu"
 }

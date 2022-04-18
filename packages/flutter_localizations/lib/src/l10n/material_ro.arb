@@ -144,5 +144,6 @@
   "keyboardKeyZenkaku": "Zenkaku",
   "keyboardKeyZenkakuHankaku": "Zenkaku Hankaku",
   "keyboardKeyMetaMacOs": "Command",
-  "keyboardKeyMetaWindows": "Win"
+  "keyboardKeyMetaWindows": "Win",
+  "menuBarMenuLabel": "Menu bar menu"
 }

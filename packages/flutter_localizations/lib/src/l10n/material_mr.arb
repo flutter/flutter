@@ -141,5 +141,6 @@
   "keyboardKeyZenkaku": "झेनकाकू",
   "keyboardKeyZenkakuHankaku": "झेनकाकू हानकाकू",
   "keyboardKeyMetaMacOs": "कमांड",
-  "keyboardKeyMetaWindows": "Win"
+  "keyboardKeyMetaWindows": "Win",
+  "menuBarMenuLabel": "Menu bar menu"
 }

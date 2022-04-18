@@ -140,5 +140,6 @@
   "keyboardKeyZenkaku": "全角",
   "keyboardKeyZenkakuHankaku": "半 / 全 / 漢字",
   "keyboardKeyMetaMacOs": "Command",
-  "keyboardKeyMetaWindows": "Win"
+  "keyboardKeyMetaWindows": "Win",
+  "menuBarMenuLabel": "Menu bar menu"
 }

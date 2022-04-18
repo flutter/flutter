@@ -140,5 +140,6 @@
   "keyboardKeyZenkaku": "زنکاکو",
   "keyboardKeyZenkakuHankaku": "زنکاکو هانکاکو",
   "keyboardKeyMetaMacOs": "فرمان",
-  "keyboardKeyMetaWindows": "Win"
+  "keyboardKeyMetaWindows": "Win",
+  "menuBarMenuLabel": "Menu bar menu"
 }

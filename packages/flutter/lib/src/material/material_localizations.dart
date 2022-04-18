@@ -200,6 +200,10 @@ abstract class MaterialLocalizations {
   String get popupMenuLabel;
 
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
+  /// [MenuBarMenu] widget is opened.
+  String get menuBarMenuLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// dialog widget is opened.
   String get dialogLabel;
 
@@ -1082,6 +1086,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get drawerLabel => 'Navigation menu';
+
+  @override
+  String get menuBarMenuLabel => 'Menu bar menu';
 
   @override
   String get popupMenuLabel => 'Popup menu';

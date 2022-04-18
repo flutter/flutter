@@ -368,6 +368,11 @@
     "description": "The audio announcement made when the Drawer is opened."
   },
 
+  "menuBarMenuLabel": "Menu bar menu",
+  "@menuBarMenuLabel": {
+    "description": "The audio announcement made when a MenuBarMenu is opened."
+  },
+
   "popupMenuLabel": "Popup menu",
   "@popupMenuLabel": {
     "description": "The audio announcement made when a PopupMenu is opened."

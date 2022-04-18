@@ -140,5 +140,6 @@
   "keyboardKeyZenkaku": "전각",
   "keyboardKeyZenkakuHankaku": "전각 및 반각",
   "keyboardKeyMetaMacOs": "Command",
-  "keyboardKeyMetaWindows": "Win"
+  "keyboardKeyMetaWindows": "Win",
+  "menuBarMenuLabel": "Menu bar menu"
 }
