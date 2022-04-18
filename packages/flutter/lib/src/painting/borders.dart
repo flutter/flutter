@@ -21,6 +21,22 @@ enum BorderStyle {
   // if you add more, think about how they will lerp
 }
 
+/// The direction of the stroke to be painted for a [BorderSide] in a [Border].
+/// When set to [StrokeAlign.inside], the stroke is drawn completely inside the widget.
+/// For [StrokeAlign.center] and [StrokeAlign.outside], a property such as [Container.ClipBehavior] can be
+/// used in an outside widget to clip it.
+enum StrokeAlign {
+  /// Border is drawn inside.
+  inside,
+
+  /// Border is drawn to the center, half the [BorderSide.width] to the inside,
+  /// the other half to the outside.
+  center,
+
+  /// Border is drawn outside.
+  outside,
+}
+
 /// A side of a border of a box.
 ///
 /// A [Border] consists of four [BorderSide] objects: [Border.top],
@@ -66,6 +82,7 @@ class BorderSide {
     this.color = const Color(0xFF000000),
     this.width = 1.0,
     this.style = BorderStyle.solid,
+    this.strokeAlign = StrokeAlign.inside,
   }) : assert(color != null),
        assert(width != null),
        assert(width >= 0.0),
@@ -125,6 +142,9 @@ class BorderSide {
 
   /// A hairline black border that is not rendered.
   static const BorderSide none = BorderSide(width: 0.0, style: BorderStyle.none);
+
+  /// The direction of where the border will be drawn relative to the container.
+  final StrokeAlign strokeAlign;
 
   /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({
@@ -200,7 +220,8 @@ class BorderSide {
         (b.style == BorderStyle.none && b.width == 0.0))
       return true;
     return a.style == b.style
-        && a.color == b.color;
+        && a.color == b.color
+        && a.strokeAlign == b.strokeAlign;
   }
 
   /// Linearly interpolate between two border sides.
@@ -224,6 +245,7 @@ class BorderSide {
         color: Color.lerp(a.color, b.color, t)!,
         width: width,
         style: a.style, // == b.style
+        strokeAlign: a.strokeAlign,
       );
     }
     Color colorA, colorB;
@@ -246,6 +268,7 @@ class BorderSide {
     return BorderSide(
       color: Color.lerp(colorA, colorB, t)!,
       width: width,
+      strokeAlign: a.strokeAlign,
     );
   }
 
@@ -258,14 +281,15 @@ class BorderSide {
     return other is BorderSide
         && other.color == color
         && other.width == width
-        && other.style == style;
+        && other.style == style
+        && other.strokeAlign == strokeAlign;
   }
 
   @override
-  int get hashCode => Object.hash(color, width, style);
+  int get hashCode => Object.hash(color, width, style, strokeAlign);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)';
+  String toString() => '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style, $strokeAlign)';
 }
 
 /// Base class for shape outlines.

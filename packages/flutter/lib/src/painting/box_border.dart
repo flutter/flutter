@@ -210,15 +210,30 @@ abstract class BoxBorder extends ShapeBorder {
     assert(side.style != BorderStyle.none);
     final Paint paint = Paint()
       ..color = side.color;
-    final RRect outer = borderRadius.toRRect(rect);
+    final RRect borderRect = borderRadius.toRRect(rect);
     final double width = side.width;
     if (width == 0.0) {
       paint
         ..style = PaintingStyle.stroke
         ..strokeWidth = 0.0;
-      canvas.drawRRect(outer, paint);
+      canvas.drawRRect(borderRect, paint);
     } else {
-      final RRect inner = outer.deflate(width);
+      final RRect inner;
+      final RRect outer;
+      switch (side.strokeAlign) {
+        case StrokeAlign.inside:
+          inner = borderRect.deflate(width);
+          outer = borderRect;
+          break;
+        case StrokeAlign.center:
+          inner = borderRect.deflate(width / 2);
+          outer = borderRect.inflate(width / 2);
+          break;
+        case StrokeAlign.outside:
+          inner = borderRect;
+          outer = borderRect.inflate(width);
+          break;
+      }
       canvas.drawDRRect(outer, inner, paint);
     }
   }
@@ -227,7 +242,18 @@ abstract class BoxBorder extends ShapeBorder {
     assert(side.style != BorderStyle.none);
     final double width = side.width;
     final Paint paint = side.toPaint();
-    final double radius = (rect.shortestSide - width) / 2.0;
+    final double radius;
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        radius = (rect.shortestSide - width) / 2.0;
+        break;
+      case StrokeAlign.center:
+        radius = rect.shortestSide / 2;
+        break;
+      case StrokeAlign.outside:
+        radius = (rect.shortestSide + width) / 2.0;
+        break;
+    }
     canvas.drawCircle(rect.center, radius, paint);
   }
 
@@ -235,7 +261,20 @@ abstract class BoxBorder extends ShapeBorder {
     assert(side.style != BorderStyle.none);
     final double width = side.width;
     final Paint paint = side.toPaint();
-    canvas.drawRect(rect.deflate(width / 2.0), paint);
+    final Rect rectToBeDrawn;
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        rectToBeDrawn = rect.deflate(width / 2.0);
+        break;
+      case StrokeAlign.center:
+        rectToBeDrawn = rect;
+        break;
+      case StrokeAlign.outside:
+        rectToBeDrawn = rect.inflate(width / 2.0);
+        break;
+    }
+
+    canvas.drawRect(rectToBeDrawn, paint);
   }
 }
 
@@ -349,8 +388,9 @@ class Border extends BoxBorder {
     Color color = const Color(0xFF000000),
     double width = 1.0,
     BorderStyle style = BorderStyle.solid,
+    StrokeAlign strokeAlign = StrokeAlign.inside,
   }) {
-    final BorderSide side = BorderSide(color: color, width: width, style: style);
+    final BorderSide side = BorderSide(color: color, width: width, style: style, strokeAlign: strokeAlign);
     return Border.fromBorderSide(side);
   }
 
@@ -394,7 +434,7 @@ class Border extends BoxBorder {
   }
 
   @override
-  bool get isUniform => _colorIsUniform && _widthIsUniform && _styleIsUniform;
+  bool get isUniform => _colorIsUniform && _widthIsUniform && _styleIsUniform && _strokeAlignIsUniform;
 
   bool get _colorIsUniform {
     final Color topColor = top.color;
@@ -409,6 +449,11 @@ class Border extends BoxBorder {
   bool get _styleIsUniform {
     final BorderStyle topStyle = top.style;
     return right.style == topStyle && bottom.style == topStyle && left.style == topStyle;
+  }
+
+  bool get _strokeAlignIsUniform {
+    final StrokeAlign topStrokeAlign = top.strokeAlign;
+    return right.strokeAlign == topStrokeAlign && bottom.strokeAlign == topStrokeAlign && left.strokeAlign == topStrokeAlign;
   }
 
   @override
@@ -526,6 +571,7 @@ class Border extends BoxBorder {
           if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
           if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
           if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
+          if (!_strokeAlignIsUniform) ErrorDescription('BorderSide.strokeAlign'),
         ]);
       }
       return true;
@@ -538,6 +584,7 @@ class Border extends BoxBorder {
           if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
           if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
           if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
+          if (!_strokeAlignIsUniform) ErrorDescription('BorderSide.strokeAlign'),
         ]);
       }
       return true;
