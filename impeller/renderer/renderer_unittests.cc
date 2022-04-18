@@ -4,12 +4,12 @@
 
 #include "flutter/fml/time/time_point.h"
 #include "flutter/testing/testing.h"
-#include "impeller/fixtures/box_fade.frag.h"
-#include "impeller/fixtures/box_fade.vert.h"
-#include "impeller/fixtures/instanced_draw.frag.h"
-#include "impeller/fixtures/instanced_draw.vert.h"
-#include "impeller/fixtures/test_texture.frag.h"
-#include "impeller/fixtures/test_texture.vert.h"
+#include "impeller/fixtures/mtl/box_fade.frag.h"
+#include "impeller/fixtures/mtl/box_fade.vert.h"
+#include "impeller/fixtures/mtl/instanced_draw.frag.h"
+#include "impeller/fixtures/mtl/instanced_draw.vert.h"
+#include "impeller/fixtures/mtl/test_texture.frag.h"
+#include "impeller/fixtures/mtl/test_texture.vert.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/image/compressed_image.h"
 #include "impeller/image/decompressed_image.h"
@@ -30,8 +30,9 @@ namespace impeller {
 namespace testing {
 
 using RendererTest = Playground;
+INSTANTIATE_PLAYGROUND_SUITE(RendererTest);
 
-TEST_F(RendererTest, CanCreateBoxPrimitive) {
+TEST_P(RendererTest, CanCreateBoxPrimitive) {
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
   auto context = GetContext();
@@ -96,7 +97,7 @@ TEST_F(RendererTest, CanCreateBoxPrimitive) {
   OpenPlaygroundHere(callback);
 }
 
-TEST_F(RendererTest, CanRenderMultiplePrimitives) {
+TEST_P(RendererTest, CanRenderMultiplePrimitives) {
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
   auto context = GetContext();
@@ -168,7 +169,7 @@ TEST_F(RendererTest, CanRenderMultiplePrimitives) {
   OpenPlaygroundHere(callback);
 }
 
-TEST_F(RendererTest, CanRenderToTexture) {
+TEST_P(RendererTest, CanRenderToTexture) {
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
   auto context = GetContext();
@@ -272,7 +273,7 @@ TEST_F(RendererTest, CanRenderToTexture) {
   ASSERT_TRUE(r2t_pass->EncodeCommands(*context->GetTransientsAllocator()));
 }
 
-TEST_F(RendererTest, CanRenderInstanced) {
+TEST_P(RendererTest, CanRenderInstanced) {
   using VS = InstancedDrawVertexShader;
   using FS = InstancedDrawFragmentShader;
 
@@ -290,6 +291,7 @@ TEST_F(RendererTest, CanRenderInstanced) {
                                  builder.AppendVertex(data);
                                }));
 
+  ASSERT_NE(GetContext(), nullptr);
   auto pipeline =
       GetContext()
           ->GetPipelineLibrary()

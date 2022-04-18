@@ -4,6 +4,10 @@
 
 #pragma once
 
+#include <cstdlib>
+
+#include "flutter/fml/logging.h"
+
 #if defined(__GNUC__) || defined(__clang__)
 #define IMPELLER_COMPILER_CLANG 1
 #else  // defined(__GNUC__) || defined(__clang__)
@@ -16,3 +20,18 @@
 #else  // IMPELLER_COMPILER_CLANG
 #define IMPELLER_PRINTF_FORMAT(format_number, args_number)
 #endif  // IMPELLER_COMPILER_CLANG
+
+#define IMPELLER_UNIMPLEMENTED \
+  impeller::ImpellerUnimplemented(__FUNCTION__, __FILE__, __LINE__);
+
+namespace impeller {
+
+[[noreturn]] inline void ImpellerUnimplemented(const char* method,
+                                               const char* file,
+                                               int line) {
+  FML_CHECK(false) << "Unimplemented: " << method << " in " << file << ":"
+                   << line;
+  std::abort();
+}
+
+}  // namespace impeller

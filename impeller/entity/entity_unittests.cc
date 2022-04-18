@@ -24,20 +24,21 @@ namespace impeller {
 namespace testing {
 
 using EntityTest = EntityPlayground;
+INSTANTIATE_PLAYGROUND_SUITE(EntityTest);
 
-TEST_F(EntityTest, CanCreateEntity) {
+TEST_P(EntityTest, CanCreateEntity) {
   Entity entity;
   ASSERT_TRUE(entity.GetTransformation().IsIdentity());
 }
 
-TEST_F(EntityTest, CanDrawRect) {
+TEST_P(EntityTest, CanDrawRect) {
   Entity entity;
   entity.SetPath(PathBuilder{}.AddRect({100, 100, 100, 100}).TakePath());
   entity.SetContents(SolidColorContents::Make(Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
-TEST_F(EntityTest, ThreeStrokesInOnePath) {
+TEST_P(EntityTest, ThreeStrokesInOnePath) {
   Path path = PathBuilder{}
                   .MoveTo({100, 100})
                   .LineTo({100, 200})
@@ -56,7 +57,7 @@ TEST_F(EntityTest, ThreeStrokesInOnePath) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
-TEST_F(EntityTest, TriangleInsideASquare) {
+TEST_P(EntityTest, TriangleInsideASquare) {
   auto callback = [&](ContentContext& context, RenderPass& pass) {
     Point a = IMPELLER_PLAYGROUND_POINT(Point(10, 10), 20, Color::White());
     Point b = IMPELLER_PLAYGROUND_POINT(Point(210, 10), 20, Color::White());
@@ -89,7 +90,7 @@ TEST_F(EntityTest, TriangleInsideASquare) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-TEST_F(EntityTest, StrokeCapAndJoinTest) {
+TEST_P(EntityTest, StrokeCapAndJoinTest) {
   const Point padding(300, 250);
   const Point margin(140, 180);
 
@@ -224,7 +225,7 @@ TEST_F(EntityTest, StrokeCapAndJoinTest) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-TEST_F(EntityTest, CubicCurveTest) {
+TEST_P(EntityTest, CubicCurveTest) {
   // Compare with https://fiddle.skia.org/c/b3625f26122c9de7afe7794fcf25ead3
   Path path =
       PathBuilder{}
@@ -246,7 +247,7 @@ TEST_F(EntityTest, CubicCurveTest) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
-TEST_F(EntityTest, CubicCurveAndOverlapTest) {
+TEST_P(EntityTest, CubicCurveAndOverlapTest) {
   // Compare with https://fiddle.skia.org/c/7a05a3e186c65a8dfb732f68020aae06
   Path path =
       PathBuilder{}
@@ -474,7 +475,7 @@ TEST_F(EntityTest, CubicCurveAndOverlapTest) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
-TEST_F(EntityTest, SolidStrokeContentsSetStrokeCapsAndJoins) {
+TEST_P(EntityTest, SolidStrokeContentsSetStrokeCapsAndJoins) {
   {
     SolidStrokeContents stroke;
     // Defaults.
@@ -495,7 +496,7 @@ TEST_F(EntityTest, SolidStrokeContentsSetStrokeCapsAndJoins) {
   }
 }
 
-TEST_F(EntityTest, SolidStrokeContentsSetMiter) {
+TEST_P(EntityTest, SolidStrokeContentsSetMiter) {
   SolidStrokeContents contents;
   ASSERT_FLOAT_EQ(contents.GetStrokeMiter(), 4);
 
@@ -506,7 +507,7 @@ TEST_F(EntityTest, SolidStrokeContentsSetMiter) {
   ASSERT_FLOAT_EQ(contents.GetStrokeMiter(), 8);
 }
 
-TEST_F(EntityTest, BlendingModeOptions) {
+TEST_P(EntityTest, BlendingModeOptions) {
   std::vector<const char*> blend_mode_names;
   std::vector<Entity::BlendMode> blend_mode_values;
   {
@@ -637,7 +638,7 @@ TEST_F(EntityTest, BlendingModeOptions) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-TEST_F(EntityTest, BezierCircleScaled) {
+TEST_P(EntityTest, BezierCircleScaled) {
   Entity entity;
   auto path = PathBuilder{}
                   .MoveTo({97.325, 34.818})
@@ -662,7 +663,7 @@ TEST_F(EntityTest, BezierCircleScaled) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
-TEST_F(EntityTest, Filters) {
+TEST_P(EntityTest, Filters) {
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
   auto boston = CreateTextureForFixture("boston.jpg");
   auto kalimba = CreateTextureForFixture("kalimba.jpg");
@@ -688,7 +689,7 @@ TEST_F(EntityTest, Filters) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-TEST_F(EntityTest, GaussianBlurFilter) {
+TEST_P(EntityTest, GaussianBlurFilter) {
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
   auto boston = CreateTextureForFixture("boston.jpg");
   auto kalimba = CreateTextureForFixture("kalimba.jpg");
@@ -792,14 +793,14 @@ TEST_F(EntityTest, GaussianBlurFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-TEST_F(EntityTest, SetBlendMode) {
+TEST_P(EntityTest, SetBlendMode) {
   Entity entity;
   ASSERT_EQ(entity.GetBlendMode(), Entity::BlendMode::kSourceOver);
   entity.SetBlendMode(Entity::BlendMode::kClear);
   ASSERT_EQ(entity.GetBlendMode(), Entity::BlendMode::kClear);
 }
 
-TEST_F(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
+TEST_P(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
   Entity entity;
   entity.SetContents(std::make_shared<SolidColorContents>());
   entity.SetPath({});
@@ -807,7 +808,7 @@ TEST_F(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
   ASSERT_FALSE(entity.GetPathCoverage().has_value());
 }
 
-TEST_F(EntityTest, SolidStrokeCoverageIsCorrect) {
+TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
   {
     Entity entity;
     auto contents = std::make_unique<SolidStrokeContents>();
