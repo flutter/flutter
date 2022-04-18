@@ -370,7 +370,7 @@ class BitmapCanvas extends EngineCanvas {
       _renderStrategy.isInsideSvgFilterTree ||
       (_preserveImageData == false && _contains3dTransform) ||
       (_childOverdraw &&
-          _canvasPool.isEmpty &&
+          !_canvasPool.hasCanvas &&
           paint.maskFilter == null &&
           paint.shader == null &&
           paint.style != ui.PaintingStyle.stroke);
@@ -384,7 +384,7 @@ class BitmapCanvas extends EngineCanvas {
       ((_childOverdraw ||
               _renderStrategy.hasImageElements ||
               _renderStrategy.hasParagraphs) &&
-          _canvasPool.isEmpty &&
+          !_canvasPool.hasCanvas &&
           paint.maskFilter == null &&
           paint.shader == null);
 
@@ -469,7 +469,7 @@ class BitmapCanvas extends EngineCanvas {
       element.style.mixBlendMode = blendModeToCssMixBlendMode(blendMode) ?? '';
     }
     // Switch to preferring DOM from now on, and close the current canvas.
-    _closeCurrentCanvas();
+    _closeCanvas();
   }
 
   @override
@@ -626,7 +626,7 @@ class BitmapCanvas extends EngineCanvas {
       _applyTargetSize(
           imageElement, image.width.toDouble(), image.height.toDouble());
     }
-    _closeCurrentCanvas();
+    _closeCanvas();
   }
 
   html.ImageElement _reuseOrCreateImage(HtmlImage htmlImage) {
@@ -770,7 +770,7 @@ class BitmapCanvas extends EngineCanvas {
         restore();
       }
     }
-    _closeCurrentCanvas();
+    _closeCanvas();
   }
 
   void _applyTargetSize(
@@ -882,8 +882,8 @@ class BitmapCanvas extends EngineCanvas {
   //   |--- <img>
   // Any drawing operations after these tags should allocate a new canvas,
   // instead of drawing into earlier canvas.
-  void _closeCurrentCanvas() {
-    _canvasPool.closeCurrentCanvas();
+  void _closeCanvas() {
+    _canvasPool.closeCanvas();
     _childOverdraw = true;
     _cachedLastCssFont = null;
   }
@@ -939,16 +939,24 @@ class BitmapCanvas extends EngineCanvas {
   void drawParagraph(CanvasParagraph paragraph, ui.Offset offset) {
     assert(paragraph.isLaidOut);
 
-    /// - paragraph.drawOnCanvas checks that the text styling doesn't include
-    /// features that prevent text from being rendered correctly using canvas.
-    /// - _childOverdraw check prevents sandwitching multiple canvas elements
-    /// when we have alternating paragraphs and other drawing commands that are
-    /// suitable for canvas.
-    /// - To make sure an svg filter is applied correctly to paragraph we
-    /// check isInsideSvgFilterTree to make sure dom node doesn't have any
-    /// parents that apply one.
-    if (paragraph.drawOnCanvas && _childOverdraw == false &&
-        !_renderStrategy.isInsideSvgFilterTree) {
+    // Normally, text is composited as a plain HTML <p> tag. However, if a
+    // bitmap canvas was used for a preceding drawing command, then it's more
+    // efficient to continue compositing into the existing canvas, if possible.
+    // Whether it's possible to composite a paragraph into a 2D canvas depends
+    // on the following:
+    final bool canCompositeIntoBitmapCanvas =
+        // Cannot composite if the paragraph cannot be drawn into bitmap canvas
+        // in the first place.
+        paragraph.canDrawOnCanvas &&
+        // Cannot composite if there's no bitmap canvas to composite into.
+        // Creating a new bitmap canvas just to draw text doesn't make sense.
+        _canvasPool.hasCanvas &&
+        !_childOverdraw &&
+        // Bitmap canvas introduces correctness issues in the presence of SVG
+        // filters, so prefer plain HTML in this case.
+        !_renderStrategy.isInsideSvgFilterTree;
+
+    if (canCompositeIntoBitmapCanvas) {
       paragraph.paint(this, offset);
       return;
     }
@@ -977,7 +985,7 @@ class BitmapCanvas extends EngineCanvas {
     paragraphElement.style
       ..left = '0px'
       ..top = '0px';
-    _closeCurrentCanvas();
+    _closeCanvas();
   }
 
   /// Draws vertices on a gl context.
