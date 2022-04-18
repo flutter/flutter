@@ -136,7 +136,7 @@ class PaintingContext extends ClipContext {
     child._needsLayerUpdate = false;
 
     assert(identical(childLayer, child._layerHandle.layer));
-    assert(child._layerHandle.layer != null);
+    assert(child._layerHandle.layer is OffsetLayer);
     assert(() {
       childLayer!.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
@@ -227,7 +227,7 @@ class PaintingContext extends ClipContext {
     assert(child._layerHandle.layer is OffsetLayer);
     final OffsetLayer childOffsetLayer = child._layerHandle.layer! as OffsetLayer;
     childOffsetLayer.offset = offset;
-    appendLayer(child._layerHandle.layer!);
+    appendLayer(childOffsetLayer);
   }
 
   /// Adds a layer to the recording requiring that the recording is already
@@ -1007,7 +1007,7 @@ class PipelineOwner {
       _nodesNeedingPaint = <RenderObject>[];
       // Sort the dirty nodes in reverse order (deepest first).
       for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
-        assert(node._layerHandle.layer != null, node.toStringShallow());
+        assert(node._layerHandle.layer != null);
         if ((node._needsPaint || node._needsLayerUpdate) && node.owner == this) {
           if (node._layerHandle.layer!.attached) {
             if (node._needsPaint) {
@@ -2170,7 +2170,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// field.
   @protected
   ContainerLayer? get layer {
-    assert(!isRepaintBoundary || _layerHandle.layer == null || _layerHandle.layer is ContainerLayer);
+    assert(!isRepaintBoundary || _layerHandle.layer == null || _layerHandle.layer is OffsetLayer);
     return _layerHandle.layer;
   }
 

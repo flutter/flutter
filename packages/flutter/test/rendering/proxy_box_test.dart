@@ -752,7 +752,6 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
 }
 
 class TestOffsetLayerA extends OffsetLayer {}
-class TestOffsetLayerB extends OffsetLayer {}
 
 void expectAssertionError() {
   final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
