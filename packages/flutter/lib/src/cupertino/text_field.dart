@@ -207,7 +207,7 @@ class CupertinoTextField extends StatefulWidget {
   ///  * [maxLength], which discusses the precise meaning of "number of
   ///    characters" and how it may differ from the intuitive meaning.
   const CupertinoTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.focusNode,
     this.decoration = _kDefaultRoundedBorderDecoration,
@@ -331,8 +331,7 @@ class CupertinoTextField extends StatefulWidget {
                        cut: true,
                        selectAll: true,
                        paste: true,
-                     ))),
-       super(key: key);
+                     )));
 
   /// Creates a borderless iOS-style text field.
   ///
@@ -371,7 +370,7 @@ class CupertinoTextField extends StatefulWidget {
   ///  * [maxLength], which discusses the precise meaning of "number of
   ///    characters" and how it may differ from the intuitive meaning.
   const CupertinoTextField.borderless({
-    Key? key,
+    super.key,
     this.controller,
     this.focusNode,
     this.decoration,
@@ -493,8 +492,7 @@ class CupertinoTextField extends StatefulWidget {
                        cut: true,
                        selectAll: true,
                        paste: true,
-                     ))),
-       super(key: key);
+                     )));
 
   /// Controls the text being edited.
   ///

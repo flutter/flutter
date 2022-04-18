@@ -464,7 +464,7 @@ class EditableText extends StatefulWidget {
   /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer],
   /// [readOnly], and [enableIMEPersonalizedLearning] arguments must not be null.
   EditableText({
-    Key? key,
+    super.key,
     required this.controller,
     required this.focusNode,
     this.readOnly = false,
@@ -598,8 +598,7 @@ class EditableText extends StatefulWidget {
                ...inputFormatters ?? const Iterable<TextInputFormatter>.empty(),
              ]
            : inputFormatters,
-       showCursor = showCursor ?? !readOnly,
-       super(key: key);
+       showCursor = showCursor ?? !readOnly;
 
   /// Controls the text being edited.
   final TextEditingController controller;
@@ -3404,7 +3403,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
 class _Editable extends MultiChildRenderObjectWidget {
   _Editable({
-    Key? key,
+    super.key,
     required this.inlineSpan,
     required this.value,
     required this.startHandleLayerLink,
@@ -3446,7 +3445,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     required this.clipBehavior,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
-       super(key: key, children: _extractChildren(inlineSpan));
+       super(children: _extractChildren(inlineSpan));
 
   // Traverses the InlineSpan tree and depth-first collects the list of
   // child widgets that are created in WidgetSpans.
@@ -3592,13 +3591,12 @@ class _Editable extends MultiChildRenderObjectWidget {
 
 class _ScribbleFocusable extends StatefulWidget {
   const _ScribbleFocusable({
-    Key? key,
     required this.child,
     required this.focusNode,
     required this.editableKey,
     required this.updateSelectionRects,
     required this.enabled,
-  }): super(key: key);
+  });
 
   final Widget child;
   final FocusNode focusNode;
@@ -3686,23 +3684,16 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
 
 class _ScribblePlaceholder extends WidgetSpan {
   const _ScribblePlaceholder({
-    required Widget child,
-    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
-    TextBaseline? baseline,
-    TextStyle? style,
+    required super.child,
+    super.alignment,
+    super.baseline,
     required this.size,
   }) : assert(child != null),
        assert(baseline != null || !(
          identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
          identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
          identical(alignment, ui.PlaceholderAlignment.baseline)
-       )),
-       super(
-         alignment: alignment,
-         baseline: baseline,
-         style: style,
-         child: child,
-       );
+       ));
 
   /// The size of the span, used in place of adding a placeholder size to the [TextPainter].
   final Size size;
@@ -4338,11 +4329,10 @@ typedef TextEditingValueCallback = void Function(TextEditingValue value);
 class _TextEditingHistory extends StatefulWidget {
   /// Creates an instance of [_TextEditingHistory].
   const _TextEditingHistory({
-    Key? key,
     required this.child,
     required this.controller,
     required this.onTriggered,
-  }) : super(key: key);
+  });
 
   /// The child widget of [_TextEditingHistory].
   final Widget child;

@@ -710,12 +710,11 @@ class MediaQuery extends InheritedWidget {
   ///
   /// The [data] and [child] arguments must not be null.
   const MediaQuery({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+       assert(data != null);
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified padding.
@@ -1032,9 +1031,9 @@ class _MediaQueryFromWindow extends StatefulWidget {
   ///
   /// The [child] must not be null.
   const _MediaQueryFromWindow({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;

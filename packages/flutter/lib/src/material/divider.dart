@@ -46,7 +46,7 @@ class Divider extends StatelessWidget {
   /// The [height], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
   const Divider({
-    Key? key,
+    super.key,
     this.height,
     this.thickness,
     this.indent,
@@ -55,8 +55,7 @@ class Divider extends StatelessWidget {
   }) : assert(height == null || height >= 0.0),
        assert(thickness == null || thickness >= 0.0),
        assert(indent == null || indent >= 0.0),
-       assert(endIndent == null || endIndent >= 0.0),
-       super(key: key);
+       assert(endIndent == null || endIndent >= 0.0);
 
 
   /// The divider's height extent.
@@ -207,7 +206,7 @@ class VerticalDivider extends StatelessWidget {
   /// The [width], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
   const VerticalDivider({
-    Key? key,
+    super.key,
     this.width,
     this.thickness,
     this.indent,
@@ -216,8 +215,7 @@ class VerticalDivider extends StatelessWidget {
   }) : assert(width == null || width >= 0.0),
        assert(thickness == null || thickness >= 0.0),
        assert(indent == null || indent >= 0.0),
-       assert(endIndent == null || endIndent >= 0.0),
-       super(key: key);
+       assert(endIndent == null || endIndent >= 0.0);
 
   /// The divider's width.
   ///

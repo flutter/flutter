@@ -882,13 +882,13 @@ void main() {
 
 class TestHomePage extends StatelessWidget {
   const TestHomePage({
-    Key? key,
+    super.key,
     this.results,
     required this.delegate,
     this.passInInitialQuery = false,
     this.initialQuery,
     this.themeData,
-  }) : super(key: key);
+  });
 
   final List<String?>? results;
   final SearchDelegate<String> delegate;
@@ -940,15 +940,12 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.result = 'Result',
     this.actions = const <Widget>[],
     this.defaultAppBarTheme = false,
-    InputDecorationTheme? searchFieldDecorationTheme,
-    TextStyle? searchFieldStyle,
+    super.searchFieldDecorationTheme,
+    super.searchFieldStyle,
     String? searchHint,
-    TextInputAction textInputAction = TextInputAction.search,
+    super.textInputAction,
   }) : super(
           searchFieldLabel: searchHint,
-          textInputAction: textInputAction,
-          searchFieldStyle: searchFieldStyle,
-          searchFieldDecorationTheme: searchFieldDecorationTheme,
         );
 
   final bool defaultAppBarTheme;

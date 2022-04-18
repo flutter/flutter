@@ -31,13 +31,13 @@ import 'transitions.dart';
 class ModalBarrier extends StatelessWidget {
   /// Creates a widget that blocks user interaction.
   const ModalBarrier({
-    Key? key,
+    super.key,
     this.color,
     this.dismissible = true,
     this.onDismiss,
     this.semanticsLabel,
     this.barrierSemanticsDismissible = true,
-  }) : super(key: key);
+  });
 
   /// If non-null, fill the barrier with this color.
   ///
@@ -169,13 +169,13 @@ class ModalBarrier extends StatelessWidget {
 class AnimatedModalBarrier extends AnimatedWidget {
   /// Creates a widget that blocks user interaction.
   const AnimatedModalBarrier({
-    Key? key,
+    super.key,
     required Animation<Color?> color,
     this.dismissible = true,
     this.semanticsLabel,
     this.barrierSemanticsDismissible,
     this.onDismiss,
-  }) : super(key: key, listenable: color);
+  }) : super(listenable: color);
 
   /// If non-null, fill the barrier with this color.
   ///
@@ -231,8 +231,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
 // It is similar to [TapGestureRecognizer.onTapDown], but accepts any single
 // button, which means the gesture also takes parts in gesture arenas.
 class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
-  _AnyTapGestureRecognizer({ Object? debugOwner })
-    : super(debugOwner: debugOwner);
+  _AnyTapGestureRecognizer();
 
   VoidCallback? onAnyTapUp;
 
@@ -296,12 +295,10 @@ class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGe
 // [onAnyTapDown], which recognizes tap down unconditionally.
 class _ModalBarrierGestureDetector extends StatelessWidget {
   const _ModalBarrierGestureDetector({
-    Key? key,
     required this.child,
     required this.onDismiss,
   }) : assert(child != null),
-       assert(onDismiss != null),
-       super(key: key);
+       assert(onDismiss != null);
 
   /// The widget below this widget in the tree.
   /// See [RawGestureDetector.child].

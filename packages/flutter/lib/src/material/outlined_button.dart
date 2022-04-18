@@ -67,28 +67,17 @@ class OutlinedButton extends ButtonStyleButton {
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
   const OutlinedButton({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
-    required Widget child,
-  }) : super(
-    key: key,
-    onPressed: onPressed,
-    onLongPress: onLongPress,
-    onHover: onHover,
-    onFocusChange: onFocusChange,
-    style: style,
-    focusNode: focusNode,
-    autofocus: autofocus,
-    clipBehavior: clipBehavior,
-    child: child,
-  );
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
+    super.autofocus = false,
+    super.clipBehavior = Clip.none,
+    required Widget super.child,
+  });
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -386,11 +375,11 @@ class _OutlinedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCurso
 
 class _OutlinedButtonWithIcon extends OutlinedButton {
   _OutlinedButtonWithIcon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ButtonStyle? style,
-    FocusNode? focusNode,
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.style,
+    super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
     required Widget icon,
@@ -398,11 +387,6 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
   }) : assert(icon != null),
        assert(label != null),
        super(
-         key: key,
-         onPressed: onPressed,
-         onLongPress: onLongPress,
-         style: style,
-         focusNode: focusNode,
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _OutlinedButtonWithIconChild(icon: icon, label: label),
@@ -411,10 +395,9 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
 
 class _OutlinedButtonWithIconChild extends StatelessWidget {
   const _OutlinedButtonWithIconChild({
-    Key? key,
     required this.label,
     required this.icon,
-  }) : super(key: key);
+  });
 
   final Widget label;
   final Widget icon;

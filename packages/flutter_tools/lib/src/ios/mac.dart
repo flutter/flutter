@@ -581,16 +581,6 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
     // Fallback to use stdout to detect and print issues.
     _parseIssueInStdout(xcodeBuildExecution, logger, result);
   }
-
-  if (xcodeBuildExecution != null
-      && xcodeBuildExecution.environmentType == EnvironmentType.physical
-      && (xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') ?? false)) {
-    logger.printError('');
-    logger.printError('It appears that your application still contains the default signing identifier.');
-    logger.printError("Try replacing 'com.example' with your signing id in Xcode:");
-    logger.printError('  open ios/Runner.xcworkspace');
-    return;
-  }
 }
 
 /// xcodebuild <buildaction> parameter (see man xcodebuild for details).
@@ -757,6 +747,14 @@ bool _handleIssues(XCResult? xcResult, Logger logger, XcodeBuildExecution? xcode
     logger.printError('');
     logger.printError("Also try selecting 'Product > Build' to fix the problem.");
   }
+
+  if (!issueDetected && _needUpdateSigningIdentifier(xcodeBuildExecution)) {
+    issueDetected = true;
+    logger.printError('');
+    logger.printError('It appears that your application still contains the default signing identifier.');
+    logger.printError("Try replacing 'com.example' with your signing id in Xcode:");
+    logger.printError('  open ios/Runner.xcworkspace');
+  }
   return issueDetected;
 }
 
@@ -769,6 +767,14 @@ bool _missingDevelopmentTeam(XcodeBuildExecution? xcodeBuildExecution) {
       !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
         xcodeBuildExecution.buildSettings.containsKey);
 }
+
+// Return `true` if the signing identifier needs to be updated.
+bool _needUpdateSigningIdentifier(XcodeBuildExecution? xcodeBuildExecution) {
+  return xcodeBuildExecution != null
+      && xcodeBuildExecution.environmentType == EnvironmentType.physical
+      && (xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') ?? false);
+}
+
 // Detects and handles errors from stdout.
 //
 // As detecting issues in stdout is not usually accurate, this should be used as a fallback when other issue detecting methods failed.

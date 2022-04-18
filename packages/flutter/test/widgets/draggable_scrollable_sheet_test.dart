@@ -1195,4 +1195,18 @@ void main() {
     // Can't use animateTo with a zero duration.
     expect(() => controller.animateTo(.5, duration: Duration.zero, curve: Curves.linear), throwsAssertionError);
   });
+
+  testWidgets('DraggableScrollableController must be attached before using any of its paramters', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    expect(controller.isAttached, false);
+    expect(()=>controller.size, throwsAssertionError);
+    final Widget boilerplate = _boilerplate(
+        null,
+        minChildSize: 0.4,
+        controller: controller,
+      );
+    await tester.pumpWidget(boilerplate);
+    expect(controller.isAttached, true);
+    expect(controller.size, isNotNull);
+    });
 }

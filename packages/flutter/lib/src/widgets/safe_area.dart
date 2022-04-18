@@ -39,7 +39,7 @@ class SafeArea extends StatelessWidget {
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be
   /// null.
   const SafeArea({
-    Key? key,
+    super.key,
     this.left = true,
     this.top = true,
     this.right = true,
@@ -50,8 +50,7 @@ class SafeArea extends StatelessWidget {
   }) : assert(left != null),
        assert(top != null),
        assert(right != null),
-       assert(bottom != null),
-       super(key: key);
+       assert(bottom != null);
 
   /// Whether to avoid system intrusions on the left.
   final bool left;
@@ -153,7 +152,7 @@ class SliverSafeArea extends StatelessWidget {
   ///
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be null.
   const SliverSafeArea({
-    Key? key,
+    super.key,
     this.left = true,
     this.top = true,
     this.right = true,
@@ -163,8 +162,7 @@ class SliverSafeArea extends StatelessWidget {
   }) : assert(left != null),
        assert(top != null),
        assert(right != null),
-       assert(bottom != null),
-       super(key: key);
+       assert(bottom != null);
 
   /// Whether to avoid system intrusions on the left.
   final bool left;

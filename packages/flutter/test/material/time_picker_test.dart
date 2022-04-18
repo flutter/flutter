@@ -18,11 +18,10 @@ final Finder _timePickerDialog = find.byWidgetPredicate((Widget widget) => '${wi
 
 class _TimePickerLauncher extends StatefulWidget {
   const _TimePickerLauncher({
-    Key? key,
     required this.onChanged,
     this.entryMode = TimePickerEntryMode.dial,
     this.restorationId,
-  }) : super(key: key);
+  });
 
   final ValueChanged<TimeOfDay?> onChanged;
   final TimePickerEntryMode entryMode;

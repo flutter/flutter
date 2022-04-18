@@ -83,7 +83,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// The [showLeading], [showTrailing], [axisDirection], [color], and
   /// [notificationPredicate] arguments must not be null.
   const GlowingOverscrollIndicator({
-    Key? key,
+    super.key,
     this.showLeading = true,
     this.showTrailing = true,
     required this.axisDirection,
@@ -94,8 +94,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
        assert(showTrailing != null),
        assert(axisDirection != null),
        assert(color != null),
-       assert(notificationPredicate != null),
-       super(key: key);
+       assert(notificationPredicate != null);
 
   /// Whether to show the overscroll glow on the side with negative scroll
   /// offsets.
@@ -538,10 +537,8 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
     this.leadingController,
     this.trailingController,
     required this.axisDirection,
-    Listenable? repaint,
-  }) : super(
-    repaint: repaint,
-  );
+    super.repaint,
+  });
 
   /// The controller for the overscroll glow on the side with negative scroll offsets.
   ///
@@ -645,13 +642,12 @@ class StretchingOverscrollIndicator extends StatefulWidget {
   ///
   /// The [axisDirection] and [notificationPredicate] arguments must not be null.
   const StretchingOverscrollIndicator({
-    Key? key,
+    super.key,
     required this.axisDirection,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.child,
   }) : assert(axisDirection != null),
-       assert(notificationPredicate != null),
-       super(key: key);
+       assert(notificationPredicate != null);
 
   /// {@macro flutter.overscroll.axisDirection}
   final AxisDirection axisDirection;

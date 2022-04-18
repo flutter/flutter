@@ -373,16 +373,15 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
 class RenderPositionedBox extends RenderAligningShiftedBox {
   /// Creates a render object that positions its child.
   RenderPositionedBox({
-    RenderBox? child,
+    super.child,
     double? widthFactor,
     double? heightFactor,
-    AlignmentGeometry alignment = Alignment.center,
-    TextDirection? textDirection,
+    super.alignment,
+    super.textDirection,
   }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0),
        _widthFactor = widthFactor,
-       _heightFactor = heightFactor,
-       super(child: child, alignment: alignment, textDirection: textDirection);
+       _heightFactor = heightFactor;
 
   /// If non-null, sets its width to the child's width multiplied by this factor.
   ///
@@ -547,18 +546,17 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render object that lets its child overflow itself.
   RenderConstrainedOverflowBox({
-    RenderBox? child,
+    super.child,
     double? minWidth,
     double? maxWidth,
     double? minHeight,
     double? maxHeight,
-    AlignmentGeometry alignment = Alignment.center,
-    TextDirection? textDirection,
+    super.alignment,
+    super.textDirection,
   }) : _minWidth = minWidth,
        _maxWidth = maxWidth,
        _minHeight = minHeight,
-       _maxHeight = maxHeight,
-       super(child: child, alignment: alignment, textDirection: textDirection);
+       _maxHeight = maxHeight;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -888,19 +886,15 @@ class RenderUnconstrainedBox extends RenderConstraintsTransformBox {
     'This feature was deprecated after v2.1.0-11.0.pre.',
   )
   RenderUnconstrainedBox({
-    required AlignmentGeometry alignment,
-    required TextDirection? textDirection,
+    required super.alignment,
+    required super.textDirection,
     Axis? constrainedAxis,
-    RenderBox? child,
-    Clip clipBehavior = Clip.none,
+    super.child,
+    super.clipBehavior,
   }) : assert(alignment != null),
        assert(clipBehavior != null),
        _constrainedAxis = constrainedAxis,
        super(
-         alignment: alignment,
-         textDirection: textDirection,
-         child: child,
-         clipBehavior: clipBehavior,
          constraintsTransform: _convertAxis(constrainedAxis),
        );
 
@@ -957,13 +951,12 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   /// The [textDirection] argument must not be null if the [alignment] is
   /// direction-sensitive.
   RenderSizedOverflowBox({
-    RenderBox? child,
+    super.child,
     required Size requestedSize,
-    AlignmentGeometry alignment = Alignment.center,
-    TextDirection? textDirection,
+    super.alignment,
+    super.textDirection,
   }) : assert(requestedSize != null),
-       _requestedSize = requestedSize,
-       super(child: child, alignment: alignment, textDirection: textDirection);
+       _requestedSize = requestedSize;
 
   /// The size this render box should attempt to be.
   Size get requestedSize => _requestedSize;
@@ -1040,14 +1033,13 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// The [textDirection] must be non-null if the [alignment] is
   /// direction-sensitive.
   RenderFractionallySizedOverflowBox({
-    RenderBox? child,
+    super.child,
     double? widthFactor,
     double? heightFactor,
-    AlignmentGeometry alignment = Alignment.center,
-    TextDirection? textDirection,
+    super.alignment,
+    super.textDirection,
   }) : _widthFactor = widthFactor,
-       _heightFactor = heightFactor,
-       super(child: child, alignment: alignment, textDirection: textDirection) {
+       _heightFactor = heightFactor {
     assert(_widthFactor == null || _widthFactor! >= 0.0);
     assert(_heightFactor == null || _heightFactor! >= 0.0);
   }

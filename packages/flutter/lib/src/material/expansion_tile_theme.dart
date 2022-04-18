@@ -180,12 +180,11 @@ class ExpansionTileTheme extends InheritedTheme {
   ///
   /// The [data] and [child] arguments must not be null.
   const ExpansionTileTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+       assert(data != null);
 
   /// Specifies color, alignment, and text style values for
   /// descendant [ExpansionTile] widgets.

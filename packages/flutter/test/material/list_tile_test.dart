@@ -15,7 +15,7 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 class TestIcon extends StatefulWidget {
-  const TestIcon({ Key? key }) : super(key: key);
+  const TestIcon({ super.key });
 
   @override
   TestIconState createState() => TestIconState();
@@ -32,7 +32,7 @@ class TestIconState extends State<TestIcon> {
 }
 
 class TestText extends StatefulWidget {
-  const TestText(this.text, { Key? key }) : super(key: key);
+  const TestText(this.text, { super.key });
 
   final String text;
 

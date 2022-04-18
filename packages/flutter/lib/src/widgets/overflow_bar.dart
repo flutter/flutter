@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -61,7 +60,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   /// null. The [children] argument must not be null and must not contain
   /// any null objects.
   OverflowBar({
-    Key? key,
+    super.key,
     this.spacing = 0.0,
     this.alignment,
     this.overflowSpacing = 0.0,
@@ -69,13 +68,12 @@ class OverflowBar extends MultiChildRenderObjectWidget {
     this.overflowDirection = VerticalDirection.down,
     this.textDirection,
     this.clipBehavior = Clip.none,
-    List<Widget> children = const <Widget>[],
+    super.children,
   }) : assert(spacing != null),
        assert(overflowSpacing != null),
        assert(overflowAlignment != null),
        assert(overflowDirection != null),
-       assert(clipBehavior != null),
-       super(key: key, children: children);
+       assert(clipBehavior != null);
 
   /// The width of the gap between [children] for the default
   /// horizontal layout.
