@@ -579,12 +579,20 @@ class Border extends BoxBorder {
     assert(() {
       if (shape != BoxShape.rectangle) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('A Border can only be drawn as a circle if it is uniform'),
+          ErrorSummary('A Border can only be drawn as a circle if it is uniform.'),
           ErrorDescription('The following is not uniform:'),
           if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
           if (!_widthIsUniform) ErrorDescription('BorderSide.width'),
           if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
           if (!_strokeAlignIsUniform) ErrorDescription('BorderSide.strokeAlign'),
+        ]);
+      }
+      return true;
+    }());
+    assert(() {
+      if (!_strokeAlignIsUniform || top.strokeAlign != StrokeAlign.inside) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A Border can only draw strokeAlign different than StrokeAlign.inside on uniform borders.'),
         ]);
       }
       return true;
@@ -735,6 +743,18 @@ class BorderDirectional extends BoxBorder {
         bottom.style != topStyle)
       return false;
 
+    if (_isUniformStrokeAlign() == false)
+      return false;
+
+    return true;
+  }
+
+  bool _isUniformStrokeAlign() {
+    final StrokeAlign topAlign = top.strokeAlign;
+    if (start.strokeAlign != topAlign ||
+        end.strokeAlign != topAlign ||
+        bottom.strokeAlign != topAlign)
+      return false;
     return true;
   }
 
@@ -881,8 +901,9 @@ class BorderDirectional extends BoxBorder {
 
     assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
     assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.');
+    assert(_isUniformStrokeAlign() && top.strokeAlign == StrokeAlign.inside, 'A Border can only draw strokeAlign different than StrokeAlign.inside on uniform borders.');
 
-    BorderSide left, right;
+    final BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');
     switch (textDirection!) {
       case TextDirection.rtl:
