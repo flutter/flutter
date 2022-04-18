@@ -2093,6 +2093,92 @@ void main() {
     expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  testWidgets('In directional nav, Slider can be navigated out of by using up and down arrows', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    double topSliderValue = 0.5;
+    double bottomSliderValue = 0.5;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return MediaQuery(
+                  data: MediaQueryData(navigationMode: NavigationMode.directional),
+                  child: Column(
+                      children: [
+                        Slider(
+                          value: topSliderValue,
+                          onChanged: (double newValue) {
+                            setState(() {
+                              topSliderValue = newValue;
+                            });
+                          },
+                          autofocus: true,
+                        ),
+                        Slider(
+                          value: bottomSliderValue,
+                          onChanged: (double newValue) {
+                            setState(() {
+                              bottomSliderValue = newValue;
+                            });
+                          },
+                        ),
+                      ]
+                  ),
+                );
+              }),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The top slider is auto-focused and can be adjusted with left and right arrow keys.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.55);
+    expect(bottomSliderValue, 0.5);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5);
+    expect(bottomSliderValue, 0.5);
+
+    // Pressing the down-arrow key moves focus down to the bottom slider
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5);
+    expect(bottomSliderValue, 0.5);
+
+    // The bottom slider is now focused and can be adjusted with left and right arrow keys.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5);
+    expect(bottomSliderValue, 0.55);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5);
+    expect(bottomSliderValue, 0.5);
+
+    // Pressing the up-arrow key moves focus back up to the top slider
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5);
+    expect(bottomSliderValue, 0.5);
+
+    // The top slider is now focused again and can be adjusted with left and right arrow keys.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.55);
+    expect(bottomSliderValue, 0.5);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(topSliderValue, 0.5);
+    expect(bottomSliderValue, 0.5);
+  });
+
   testWidgets('Slider gains keyboard focus when it gains semantics focus on Windows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;

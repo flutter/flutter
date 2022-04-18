@@ -474,13 +474,22 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   Timer? interactionTimer;
 
   final GlobalKey _renderObjectKey = GlobalKey();
+
   // Keyboard mapping for a focused slider.
-  final Map<ShortcutActivator, Intent> _shortcutMap = const <ShortcutActivator, Intent>{
+  final Map<ShortcutActivator, Intent> _traditionalNavShortcutMap = const <ShortcutActivator, Intent>{
       SingleActivator(LogicalKeyboardKey.arrowUp): _AdjustSliderIntent.up(),
       SingleActivator(LogicalKeyboardKey.arrowDown): _AdjustSliderIntent.down(),
       SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
       SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
     };
+
+  // Keyboard mapping for a focused slider when using directional navigation.
+  // The vertical inputs are not handled to allow navigating out of the slider.
+  final Map<ShortcutActivator, Intent> _directionalNavShortcutMap = const <ShortcutActivator, Intent>{
+      SingleActivator(LogicalKeyboardKey.arrowLeft): _AdjustSliderIntent.left(),
+      SingleActivator(LogicalKeyboardKey.arrowRight): _AdjustSliderIntent.right(),
+    };
+
   // Action mapping for a focused slider.
   late Map<Type, Action<Intent>> _actionMap;
 
@@ -716,6 +725,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // in range_slider.dart.
     Size _screenSize() => MediaQuery.of(context).size;
 
+    Map<ShortcutActivator, Intent> _shortcutMap() =>
+        MediaQuery.of(context).navigationMode == NavigationMode.directional
+            ? _directionalNavShortcutMap
+            : _traditionalNavShortcutMap;
+
     VoidCallback? handleDidGainAccessibilityFocus;
     switch (theme.platform) {
       case TargetPlatform.android:
@@ -740,7 +754,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: FocusableActionDetector(
         actions: _actionMap,
-        shortcuts: _shortcutMap,
+        shortcuts: _shortcutMap(),
         focusNode: focusNode,
         autofocus: widget.autofocus,
         enabled: _enabled,
