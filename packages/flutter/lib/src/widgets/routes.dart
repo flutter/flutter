@@ -455,6 +455,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 /// An entry in the history of a [LocalHistoryRoute].
 class LocalHistoryEntry {
   /// Creates an entry in the history of a [LocalHistoryRoute].
+  ///
+  /// The [impliesAppBarDismissal] defaults to true if not provided.
   LocalHistoryEntry({ this.onRemove, this.impliesAppBarDismissal = true });
 
   /// Called when this entry is removed from the history of its associated [LocalHistoryRoute].
@@ -464,6 +466,8 @@ class LocalHistoryEntry {
 
   /// Whether an [AppBar] in the route this entry belongs to should
   /// automatically add a back button or close button.
+  ///
+  /// Defaults to true.
   final bool impliesAppBarDismissal;
 
   /// Remove this entry from the history of its associated [LocalHistoryRoute].
@@ -1573,6 +1577,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Whether an [AppBar] in the route should automatically add a back button or
   /// close button.
+  ///
+  /// This getter returns true if there is at least one active route below it,
+  /// or there is at least one [LocalHistoryEntry] with `impliesAppBarDismissal`
+  /// set to true
   bool get impliesAppBarDismissal => hasActiveRouteBelow || _entriesImpliesAppBarDismissal > 0;
 
   // Internals
