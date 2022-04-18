@@ -29,8 +29,7 @@ static Font ToFont(const SkFont& font, Scalar scale) {
   return Font{std::move(typeface), std::move(metrics)};
 }
 
-TextFrame TextFrameFromTextBlob(sk_sp<SkTextBlob> blob,
-                                Scalar scale) {
+TextFrame TextFrameFromTextBlob(sk_sp<SkTextBlob> blob, Scalar scale) {
   if (!blob) {
     return {};
   }
