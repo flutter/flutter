@@ -633,7 +633,7 @@ void main() {
     renderBox.markNeedsCompositedLayerUpdate();
 
     pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
-  }, skip: kIsWeb); // Expect assertion error doesn't work on the web
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102086
 
   test('RenderObject with repaint boundary asserts when a composited layer is replaced during painting', () {
     final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
@@ -651,7 +651,7 @@ void main() {
     renderBox.markNeedsPaint();
 
     pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
-  }, skip: kIsWeb); // Expect assertion error doesn't work on the web
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102086
 
   test('RenderObject with repaint boundary asserts when a composited layer tries to update its own offset', () {
     final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
@@ -669,7 +669,7 @@ void main() {
     renderBox.markNeedsPaint();
 
     pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
-  }, skip: kIsWeb); // Expect assertion error doesn't work on the web
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102086
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
