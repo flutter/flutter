@@ -238,17 +238,28 @@ class BorderSide {
     if (t == 1.0)
       return b;
     final double width = ui.lerpDouble(a.width, b.width, t)!;
+    final StrokeAlign strokeAlign = t > 0.5 ? b.strokeAlign : a.strokeAlign;
     if (width < 0.0)
       return BorderSide.none;
+    if (a.strokeAlign != b.strokeAlign) {
+      // When strokeAlign changes, lerp to 0, then from 0 to the target width.
+      // All StrokeAlign values share a common zero width state.
+      return BorderSide(
+        color: Color.lerp(a.color, b.color, t)!,
+        width: t < 0.5 ? ui.lerpDouble(a.width, 0, t * 2)! : ui.lerpDouble(0, b.width, t * 2 - 1)!,
+        style: b.style,
+        strokeAlign: strokeAlign,
+      );
+    }
     if (a.style == b.style) {
       return BorderSide(
         color: Color.lerp(a.color, b.color, t)!,
         width: width,
         style: a.style, // == b.style
-        strokeAlign: a.strokeAlign,
+        strokeAlign: strokeAlign,
       );
     }
-    Color colorA, colorB;
+    final Color colorA, colorB;
     switch (a.style) {
       case BorderStyle.solid:
         colorA = a.color;
@@ -268,7 +279,7 @@ class BorderSide {
     return BorderSide(
       color: Color.lerp(colorA, colorB, t)!,
       width: width,
-      strokeAlign: a.strokeAlign,
+      strokeAlign: strokeAlign,
     );
   }
 
