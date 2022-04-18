@@ -37,9 +37,13 @@ import 'window.dart';
 /// - [semanticsHostElement], hosts the ARIA-annotated semantics tree.
 class FlutterViewEmbedder {
   FlutterViewEmbedder() {
-    reset();
     assert(() {
       _setupHotRestart();
+      return true;
+    }());
+    reset();
+    assert(() {
+      _registerHotRestartCleanUp();
       return true;
     }());
   }
@@ -83,7 +87,7 @@ class FlutterViewEmbedder {
   /// This element is created and inserted in the HTML DOM once. It is never
   /// removed or moved.
   ///
-  /// We render semantics inside the glasspane for proper focus and event
+  /// Render semantics inside the glasspane for proper focus and event
   /// handling. If semantics is behind the glasspane, the phone will disable
   /// focusing by touch, only by tabbing around the UI. If semantics is in
   /// front of glasspane, then DOM event won't bubble up to the glasspane so
@@ -99,11 +103,15 @@ class FlutterViewEmbedder {
   html.Element? _sceneElement;
 
   /// This is state persistent across hot restarts that indicates what
-  /// to clear.  We delay removal of old visible state to make the
+  /// to clear.  Delay removal of old visible state to make the
   /// transition appear smooth.
   static const String _staleHotRestartStore = '__flutter_state';
   List<html.Element?>? _staleHotRestartState;
 
+  /// Creates a container for DOM elements that need to be cleaned up between
+  /// hot restarts.
+  ///
+  /// If a contains already exists, reuses the existing one.
   void _setupHotRestart() {
     // This persists across hot restarts to clear stale DOM.
     _staleHotRestartState = getJsProperty<List<html.Element?>?>(html.window, _staleHotRestartStore);
@@ -112,7 +120,12 @@ class FlutterViewEmbedder {
       setJsProperty(
           html.window, _staleHotRestartStore, _staleHotRestartState);
     }
+  }
 
+  /// Registers DOM elements that need to be cleaned up before hot restarting.
+  ///
+  /// [_setupHotRestart] must have been called prior to calling this method.
+  void _registerHotRestartCleanUp() {
     registerHotRestartListener(() {
       _resizeSubscription?.cancel();
       _localeSubscription?.cancel();
@@ -133,11 +146,11 @@ class FlutterViewEmbedder {
     }
   }
 
-  /// We don't want to unnecessarily move DOM nodes around. If a DOM node is
+  /// Don't unnecessarily move DOM nodes around. If a DOM node is
   /// already in the right place, skip DOM mutation. This is both faster and
   /// more correct, because moving DOM nodes loses internal state, such as
   /// text selection.
-  void renderScene(html.Element? sceneElement) {
+  void addSceneToSceneHost(html.Element? sceneElement) {
     if (sceneElement != _sceneElement) {
       _sceneElement?.remove();
       _sceneElement = sceneElement;
@@ -203,7 +216,7 @@ class FlutterViewEmbedder {
     setElementStyle(bodyElement, 'padding', '0');
     setElementStyle(bodyElement, 'margin', '0');
 
-    // TODO(yjbanov): fix this when we support KVM I/O. Currently we scroll
+    // TODO(yjbanov): fix this when KVM I/O support is added. Currently scroll
     //                using drag, and text selection interferes.
     setElementStyle(bodyElement, 'user-select', 'none');
     setElementStyle(bodyElement, '-webkit-user-select', 'none');
@@ -211,7 +224,7 @@ class FlutterViewEmbedder {
     setElementStyle(bodyElement, '-moz-user-select', 'none');
 
     // This is required to prevent the browser from doing any native touch
-    // handling. If we don't do this, the browser doesn't report 'pointermove'
+    // handling. If this is not done, the browser doesn't report 'pointermove'
     // events properly.
     setElementStyle(bodyElement, 'touch-action', 'none');
 
@@ -227,7 +240,7 @@ class FlutterViewEmbedder {
     for (final html.Element viewportMeta
         in html.document.head!.querySelectorAll('meta[name="viewport"]')) {
       if (assertionsEnabled) {
-        // Filter out the meta tag that we ourselves placed on the page. This is
+        // Filter out the meta tag that the engine placed on the page. This is
         // to avoid UI flicker during hot restart. Hot restart will clean up the
         // old meta tag synchronously with the first post-restart frame.
         if (!viewportMeta.hasAttribute('flt-viewport')) {
@@ -265,7 +278,8 @@ class FlutterViewEmbedder {
       ..bottom = '0'
       ..left = '0';
 
-    // This must be appended to the body, so we can create a host node properly.
+    // This must be appended to the body, so the engine can create a host node
+    // properly.
     bodyElement.append(glassPaneElement);
 
     // Create a [HostNode] under the glass pane element, and attach everything
@@ -276,6 +290,14 @@ class FlutterViewEmbedder {
     // Don't allow the scene to receive pointer events.
     _sceneHostElement = html.document.createElement('flt-scene-host')
       ..style.pointerEvents = 'none';
+
+    /// CanvasKit uses a static scene element that never gets replaced, so it's
+    /// added eagerly during initialization here and never touched, unless the
+    /// system is reset due to hot restart or in a test.
+    if (useCanvasKit) {
+      skiaSceneHost = html.Element.tag('flt-scene');
+      addSceneToSceneHost(skiaSceneHost);
+    }
 
     final html.Element semanticsHostElement =
         html.document.createElement('flt-semantics-host');
@@ -290,24 +312,30 @@ class FlutterViewEmbedder {
         .prepareAccessibilityPlaceholder();
 
     glassPaneElementHostNode.nodes.addAll(<html.Node>[
-      semanticsHostElement,
       _accessibilityPlaceholder,
       _sceneHostElement!,
+
+      // The semantic host goes last because hit-test order-wise it must be
+      // first. If semantics goes under the scene host, platform views will
+      // obscure semantic elements.
+      //
+      // You may be wondering: wouldn't semantics obscure platform views and
+      // make then not accessible? At least with some careful planning, that
+      // should not be the case. The semantics tree makes all of its non-leaf
+      // elements transparent. This way, if a platform view appears among other
+      // interactive Flutter widgets, as long as those widgets do not intersect
+      // with the platform view, the platform view will be reachable.
+      semanticsHostElement,
     ]);
 
     // When debugging semantics, make the scene semi-transparent so that the
-    // semantics tree is visible.
+    // semantics tree is more prominent.
     if (configuration.debugShowSemanticsNodes) {
       _sceneHostElement!.style.opacity = '0.3';
     }
 
     PointerBinding.initInstance(glassPaneElement);
     KeyboardBinding.initInstance(glassPaneElement);
-
-    // Hide the DOM nodes used to render the scene from accessibility, because
-    // the accessibility tree is built from the SemanticsNode tree as a parallel
-    // DOM tree.
-    _sceneHostElement!.setAttribute('aria-hidden', 'true');
 
     if (html.window.visualViewport == null && isWebKit) {
       // Older Safari versions sometimes give us bogus innerWidth/innerHeight
@@ -321,10 +349,11 @@ class FlutterViewEmbedder {
       //
       // VisualViewport API is not enabled in Firefox as well. On the other hand
       // Firefox returns correct values for innerHeight, innerWidth.
-      // Firefox also triggers html.window.onResize therefore we don't need this
-      // timer to be set up for Firefox.
+      // Firefox also triggers html.window.onResize therefore this timer does
+      // not need to be set up for Firefox.
       final int initialInnerWidth = html.window.innerWidth!;
-      // Counts how many times we checked screen size. We check up to 5 times.
+      // Counts how many times screen size was checked. It is checked up to 5
+      // times.
       int checkCount = 0;
       Timer.periodic(const Duration(milliseconds: 100), (Timer t) {
         checkCount += 1;
@@ -361,7 +390,7 @@ class FlutterViewEmbedder {
   }
 
   /// The framework specifies semantics in physical pixels, but CSS uses
-  /// logical pixels. To compensate, we inject an inverse scale at the root
+  /// logical pixels. To compensate, an inverse scale is injected at the root
   /// level.
   void updateSemanticsScreenProperties() {
     _semanticsHostElement!.style.transform =
