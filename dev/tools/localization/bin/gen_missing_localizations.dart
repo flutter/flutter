@@ -27,15 +27,15 @@ import '../localizations_utils.dart';
 import '../localizations_validator.dart';
 
 Future<void> main(List<String> rawArgs) async {
-  bool removeUnused = false;
-  if (rawArgs.contains('--remove-unused')) {
-    removeUnused = true;
+  bool removeUndefined = false;
+  if (rawArgs.contains('--remove-undefined')) {
+    removeUndefined = true;
   }
   checkCwdIsRepoRoot('gen_missing_localizations');
 
   final String localizationPath = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n');
-  updateMissingResources(localizationPath, 'material', removeUnused: removeUnused);
-  updateMissingResources(localizationPath, 'cupertino', removeUnused: removeUnused);
+  updateMissingResources(localizationPath, 'material', removeUndefineremoveUndefinedsed);
+  updateMissingResources(localizationPath, 'cupertino', removeUndefremoveUndefinedUnused);
 }
 
 Map<String, dynamic> loadBundle(File file) {
@@ -77,7 +77,7 @@ bool isPluralVariation(String key, Map<String, dynamic> bundle) {
   return bundle.containsKey('${prefix}Other');
 }
 
-void updateMissingResources(String localizationPath, String groupPrefix, {bool removeUnused = false}) {
+void updateMissingResources(String localizationPath, String groupPrefix, {bool removeUndefined = false}) {
   final Directory localizationDir = Directory(localizationPath);
   final RegExp filenamePattern = RegExp('${groupPrefix}_(\\w+)\\.arb');
 
@@ -96,7 +96,7 @@ void updateMissingResources(String localizationPath, String groupPrefix, {bool r
         final Map<String, dynamic> localeBundle = loadBundle(arbFile);
         final Set<String> localeResources = resourceKeys(localeBundle);
         bool shouldWrite = false;
-        if (removeUnused) {
+        if (removeUndefined) {
           final Set<String> extraResources = localeResources.difference(
               requiredKeys).where(
                   (String key) =>

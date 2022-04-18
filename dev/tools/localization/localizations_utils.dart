@@ -241,7 +241,7 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
     )
     ..addFlag(
       'remove-undefined',
-      help: 'Force the overwriting of existing localizations, even if they have values that are missing in the canonical locales.',
+      help: 'Remove any localizations that are not defined in the canonical locale.',
     )
     ..addFlag(
       'material',
