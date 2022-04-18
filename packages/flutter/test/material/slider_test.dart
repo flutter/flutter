@@ -2136,47 +2136,47 @@ void main() {
     // The top slider is auto-focused and can be adjusted with left and right arrow keys.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
-    expect(topSliderValue, 0.55);
-    expect(bottomSliderValue, 0.5);
+    expect(topSliderValue, 0.55, reason: 'focused top Slider increased after first arrowRight');
+    expect(bottomSliderValue, 0.5, reason: 'unfocused bottom Slider unaffected by first arrowRight');
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
-    expect(topSliderValue, 0.5);
-    expect(bottomSliderValue, 0.5);
+    expect(topSliderValue, 0.5, reason: 'focused top Slider decreased after first arrowLeft');
+    expect(bottomSliderValue, 0.5, reason: 'unfocused bottom Slider unaffected by first arrowLeft');
 
     // Pressing the down-arrow key moves focus down to the bottom slider
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
-    expect(topSliderValue, 0.5);
-    expect(bottomSliderValue, 0.5);
+    expect(topSliderValue, 0.5, reason: 'arrowDown unfocuses top Slider, does not alter its value');
+    expect(bottomSliderValue, 0.5, reason: 'arrowDown focuses bottom Slider, does not alter its value');
 
     // The bottom slider is now focused and can be adjusted with left and right arrow keys.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
-    expect(topSliderValue, 0.5);
-    expect(bottomSliderValue, 0.55);
+    expect(topSliderValue, 0.5, reason: 'unfocused top Slider unaffected by second arrowRight');
+    expect(bottomSliderValue, 0.55, reason: 'focused bottom Slider increased by second arrowRight');
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
-    expect(topSliderValue, 0.5);
-    expect(bottomSliderValue, 0.5);
+    expect(topSliderValue, 0.5, reason: 'unfocused top Slider unaffected by second arrowLeft');
+    expect(bottomSliderValue, 0.5, reason: 'focused bottom Slider decreased by second arrowLeft');
 
     // Pressing the up-arrow key moves focus back up to the top slider
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
-    expect(topSliderValue, 0.5);
-    expect(bottomSliderValue, 0.5);
+    expect(topSliderValue, 0.5, reason: 'arrowUp focuses top Slider, does not alter its value');
+    expect(bottomSliderValue, 0.5, reason: 'arrowUp unfocuses bottom Slider, does not alter its value');
 
     // The top slider is now focused again and can be adjusted with left and right arrow keys.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
-    expect(topSliderValue, 0.55);
-    expect(bottomSliderValue, 0.5);
+    expect(topSliderValue, 0.55, reason: 'focused top Slider increased after third arrowRight');
+    expect(bottomSliderValue, 0.5, reason: 'unfocused bottom Slider unaffected by third arrowRight');
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
-    expect(topSliderValue, 0.5);
-    expect(bottomSliderValue, 0.5);
+    expect(topSliderValue, 0.5, reason: 'focused top Slider decreased after third arrowRight');
+    expect(bottomSliderValue, 0.5, reason: 'unfocused bottom Slider unaffected by third arrowRight');
   });
 
   testWidgets('Slider gains keyboard focus when it gains semantics focus on Windows', (WidgetTester tester) async {
