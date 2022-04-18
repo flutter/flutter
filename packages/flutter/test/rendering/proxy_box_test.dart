@@ -632,8 +632,7 @@ void main() {
 
     renderBox.markNeedsLayerPropertyUpdate();
 
-    expect(() => PaintingContext.updateLayerProperties(childBox), throwsAssertionError);
-    TestRenderingFlutterBinding.instance.takeFlutterErrorDetails(); // clear error state.
+    pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
   });
 
   test('RenderObject with repaint boundary asserts when a composited layer is replaced during painting', () {
