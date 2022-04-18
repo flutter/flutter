@@ -35,6 +35,9 @@ class TextContents final : public Contents {
   void SetColor(Color color);
 
   // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
+
+  // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
