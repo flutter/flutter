@@ -847,7 +847,7 @@ void _testCullRectComputation() {
         final RecordingCanvas canvas = recorder.beginRecording(outerClip);
         canvas.drawParagraph(paragraph, const ui.Offset(8.5, 8.5));
         final ui.Picture picture = recorder.endRecording();
-        expect(paragraph.drawOnCanvas, isFalse);
+        expect(paragraph.canDrawOnCanvas, isFalse);
 
         builder.addPicture(
           ui.Offset.zero,
@@ -861,7 +861,7 @@ void _testCullRectComputation() {
         final RecordingCanvas canvas = recorder.beginRecording(innerClip);
         canvas.drawParagraph(paragraph, ui.Offset(8.5, 8.5 + innerClip.top));
         final ui.Picture picture = recorder.endRecording();
-        expect(paragraph.drawOnCanvas, isFalse);
+        expect(paragraph.canDrawOnCanvas, isFalse);
 
         builder.addPicture(
           ui.Offset.zero,

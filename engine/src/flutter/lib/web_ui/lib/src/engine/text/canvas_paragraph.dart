@@ -31,7 +31,7 @@ class CanvasParagraph implements ui.Paragraph {
     required this.paragraphStyle,
     required this.plainText,
     required this.placeholderCount,
-    required this.drawOnCanvas,
+    required this.canDrawOnCanvas,
   });
 
   /// The flat list of spans that make up this paragraph.
@@ -47,7 +47,10 @@ class CanvasParagraph implements ui.Paragraph {
   final int placeholderCount;
 
   /// Whether this paragraph can be drawn on a bitmap canvas.
-  final bool drawOnCanvas;
+  ///
+  /// Some text features cannot be rendered into a 2D canvas and must use HTML,
+  /// such as font features and text decorations.
+  final bool canDrawOnCanvas;
 
   @override
   double get width => _layoutService.width;
@@ -623,7 +626,7 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
     }
   }
 
-  bool _drawOnCanvas = true;
+  bool _canDrawOnCanvas = true;
 
   @override
   void addText(String text) {
@@ -632,24 +635,24 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
     _plainTextBuffer.write(text);
     final int end = _plainTextBuffer.length;
 
-    if (_drawOnCanvas) {
+    if (_canDrawOnCanvas) {
       final ui.TextDecoration? decoration = style.decoration;
       if (decoration != null && decoration != ui.TextDecoration.none) {
-        _drawOnCanvas = false;
+        _canDrawOnCanvas = false;
       }
     }
 
-    if (_drawOnCanvas) {
+    if (_canDrawOnCanvas) {
       final List<ui.FontFeature>? fontFeatures = style.fontFeatures;
       if (fontFeatures != null && fontFeatures.isNotEmpty) {
-        _drawOnCanvas = false;
+        _canDrawOnCanvas = false;
       }
     }
 
-    if (_drawOnCanvas) {
+    if (_canDrawOnCanvas) {
       final List<ui.FontVariation>? fontVariations = style.fontVariations;
       if (fontVariations != null && fontVariations.isNotEmpty) {
-        _drawOnCanvas = false;
+        _canDrawOnCanvas = false;
       }
     }
 
@@ -663,7 +666,7 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
       paragraphStyle: _paragraphStyle,
       plainText: _plainTextBuffer.toString(),
       placeholderCount: _placeholderCount,
-      drawOnCanvas: _drawOnCanvas,
+      canDrawOnCanvas: _canDrawOnCanvas,
     );
   }
 }
