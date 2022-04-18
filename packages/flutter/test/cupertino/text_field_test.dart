@@ -3581,7 +3581,7 @@ void main() {
       final double lineHeight = state.renderEditable.preferredLineHeight;
 
       state.renderEditable.selectPositionAt(from: textOffsetToPosition(tester, 0), cause: SelectionChangedCause.tap);
-      expect(state.showToolbar(), true);
+      expect(state.showToolbar(ToolbarType.copyPasteControls), true);
       await tester.pumpAndSettle();
 
       bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, 0);
@@ -3769,7 +3769,7 @@ void main() {
         to: textOffsetToPosition(tester, 4),
         cause: SelectionChangedCause.tap,
       );
-      expect(state.showToolbar(), true);
+      expect(state.showToolbar(ToolbarType.copyPasteControls), true);
       await tester.pumpAndSettle();
 
       final Offset selectionPosition = (textOffsetToBottomLeftPosition(tester, 0) + textOffsetToBottomLeftPosition(tester, 4)) / 2;
@@ -3839,7 +3839,7 @@ void main() {
         to: textOffsetToPosition(tester, 10),
         cause: SelectionChangedCause.tap,
       );
-      expect(state.showToolbar(), true);
+      expect(state.showToolbar(ToolbarType.copyPasteControls), true);
       await tester.pumpAndSettle();
 
       final Offset selectionPosition = Offset(

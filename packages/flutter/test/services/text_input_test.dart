@@ -711,7 +711,7 @@ class FakeTextInputClient implements TextInputClient {
   }
 
   @override
-  void showToolbar() {
+  void showToolbar(ToolbarType toolbarType) {
     latestMethodCall = 'showToolbar';
   }
 

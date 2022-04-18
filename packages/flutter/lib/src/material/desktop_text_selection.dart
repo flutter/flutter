@@ -78,7 +78,7 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
   @override
   void handleSelectAll(TextSelectionDelegate delegate) {
     super.handleSelectAll(delegate);
-    delegate.hideToolbar();
+    delegate.hideToolbar(ToolbarType.copyPasteControls);
   }
 }
 

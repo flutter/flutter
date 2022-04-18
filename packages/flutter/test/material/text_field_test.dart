@@ -867,7 +867,7 @@ void main() {
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     state.renderEditable.selectWordsInRange(from: Offset.zero, cause: SelectionChangedCause.tap);
 
-    expect(state.showToolbar(), true);
+    expect(state.showToolbar(ToolbarType.copyPasteControls), true);
 
     // This is needed for the AnimatedOpacity to turn from 0 to 1 so the toolbar is visible.
     await tester.pumpAndSettle();
@@ -10612,7 +10612,7 @@ void main() {
     await tester.pump();
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     state.renderEditable.selectWordsInRange(from: Offset.zero, cause: SelectionChangedCause.tap);
-    expect(state.showToolbar(), true);
+    expect(state.showToolbar(ToolbarType.copyPasteControls), true);
     await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Copy'), findsOneWidget); // Toolbar is visible

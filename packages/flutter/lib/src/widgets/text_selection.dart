@@ -368,9 +368,9 @@ class TextSelectionOverlay {
   void hideHandles() => _selectionOverlay.hideHandles();
 
   /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
-  void showToolbar() {
+  void showToolbar(ToolbarType toolbarType, SpellCheckConfiguration? spellCheckConfiguration) {
     _updateSelectionOverlay();
-    _selectionOverlay.showToolbar();
+    _selectionOverlay.showToolbar(toolbarType, spellCheckConfiguration);
   }
 
   /// Updates the overlay after the selection has changed.
@@ -422,10 +422,10 @@ class TextSelectionOverlay {
   bool get toolbarIsVisible => _selectionOverlay._toolbar != null;
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
-  void hide() => _selectionOverlay.hide();
+  void hide(ToolbarType toolbarType) => _selectionOverlay.hide(toolbarType);
 
   /// {@macro flutter.widgets.SelectionOverlay.hideToolbar}
-  void hideToolbar() => _selectionOverlay.hideToolbar();
+  void hideToolbar(ToolbarType toolbarType) => _selectionOverlay.hideToolbar(toolbarType);
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}
   void dispose() {
@@ -841,10 +841,11 @@ class SelectionOverlay {
     }
   }
 
-<<<<<<< HEAD
   ToolbarType? visibleToolbarType;
 
+  /// {@template flutter.widgets.SelectionOverlay.showToolbar}
   /// Shows the toolbar by inserting it into the [context]'s overlay.
+  /// {@endtemplate}
   void showToolbar(ToolbarType toolbarType, SpellCheckConfiguration? spellCheckConfiguration) {
     if (visibleToolbarType != null && _toolbar != null) {
       hideToolbar(visibleToolbarType!);
@@ -852,16 +853,6 @@ class SelectionOverlay {
     assert(_toolbar == null);
     visibleToolbarType = toolbarType;
     _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(context, toolbarType, spellCheckConfiguration));
-=======
-  /// {@template flutter.widgets.SelectionOverlay.showToolbar}
-  /// Shows the toolbar by inserting it into the [context]'s overlay.
-  /// {@endtemplate}
-  void showToolbar() {
-    if (_toolbar != null) {
-      return;
-    }
-    _toolbar = OverlayEntry(builder: _buildToolbar);
->>>>>>> upstream/master
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
   }
 
@@ -894,13 +885,10 @@ class SelectionOverlay {
 
   /// {@template flutter.widgets.SelectionOverlay.hide}
   /// Hides the entire overlay including the toolbar and the handles.
-<<<<<<< HEAD
-  void hide(ToolbarType toolbarType) {
-=======
   /// {@endtemplate}
-  void hide() {
->>>>>>> upstream/master
-    if (_handles != null) {
+
+  void hide(ToolbarType toolbarType) {
+  if (_handles != null) {
       _handles![0].remove();
       _handles![1].remove();
       _handles = null;
@@ -914,17 +902,11 @@ class SelectionOverlay {
   /// Hides the toolbar part of the overlay.
   ///
   /// To hide the whole overlay, see [hide].
-<<<<<<< HEAD
+    /// {@endtemplate}
+
   void hideToolbar(ToolbarType toolbarType) {
     assert(_toolbar != null);
     visibleToolbarType = null;
-    _toolbarController.stop();
-=======
-  /// {@endtemplate}
-  void hideToolbar() {
-    if (_toolbar == null)
-      return;
->>>>>>> upstream/master
     _toolbar?.remove();
     _toolbar = null;
   }
@@ -933,14 +915,9 @@ class SelectionOverlay {
   /// Disposes this object and release resources.
   /// {@endtemplate}
   void dispose() {
-<<<<<<< HEAD
     if (visibleToolbarType != null){
       hide(visibleToolbarType!);
     }
-    _toolbarController.dispose();
-=======
-    hide();
->>>>>>> upstream/master
   }
 
   Widget _buildStartHandle(BuildContext context) {
@@ -1020,30 +997,6 @@ class SelectionOverlay {
 
     return Directionality(
       textDirection: Directionality.of(this.context),
-<<<<<<< HEAD
-      child: FadeTransition(
-        opacity: _toolbarOpacity,
-        child: CompositedTransformFollower(
-          link: toolbarLayerLink,
-          showWhenUnlinked: false,
-          offset: -editingRegion.topLeft,
-          child: Builder(
-            builder: (BuildContext context) {
-              return selectionControls!.buildToolbar(
-                context,
-                editingRegion,
-                renderObject.preferredLineHeight,
-                midpoint,
-                endpoints,
-                selectionDelegate!,
-                clipboardStatus!,
-                renderObject.lastSecondaryTapDownPosition,
-                toolbarType,
-                spellCheckConfiguration,
-              );
-            },
-          ),
-=======
       child: _SelectionToolbarOverlay(
         preferredLineHeight: lineHeightAtStart,
         toolbarLocation: toolbarLocation,
@@ -1055,6 +1008,8 @@ class SelectionOverlay {
         visibility: toolbarVisible,
         selectionDelegate: selectionDelegate,
         clipboardStatus: clipboardStatus,
+        toolbarType: toolbarType,
+        spellCheckConfiguration: spellCheckConfiguration,
       ),
     );
   }
@@ -1074,6 +1029,8 @@ class _SelectionToolbarOverlay extends StatefulWidget {
     required this.selectionEndpoints,
     required this.selectionDelegate,
     required this.clipboardStatus,
+    required this.toolbarType,
+    required this.spellCheckConfiguration,
   });
 
   final double preferredLineHeight;
@@ -1086,6 +1043,8 @@ class _SelectionToolbarOverlay extends StatefulWidget {
   final List<TextSelectionPoint> selectionEndpoints;
   final TextSelectionDelegate? selectionDelegate;
   final ClipboardStatusNotifier? clipboardStatus;
+  final ToolbarType toolbarType;
+  final SpellCheckConfiguration? spellCheckConfiguration;
 
   @override
   _SelectionToolbarOverlayState createState() => _SelectionToolbarOverlayState();
@@ -1150,9 +1109,10 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
               widget.selectionDelegate!,
               widget.clipboardStatus,
               widget.toolbarLocation,
+              widget.toolbarType,
+              widget.spellCheckConfiguration,
             );
           },
->>>>>>> upstream/master
         ),
       ),
     );

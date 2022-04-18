@@ -145,7 +145,7 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   void autofill(TextEditingValue newEditingValue) => updateEditingValue(newEditingValue);
 
   @override
-  void showToolbar() {
+  void showToolbar(ToolbarType toolbarType) {
     latestMethodCall = 'showToolbar';
   }
 

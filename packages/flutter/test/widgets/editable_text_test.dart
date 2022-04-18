@@ -1424,7 +1424,7 @@ void main() {
     expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
 
     // Hide the menu again.
-    state.hideToolbar();
+    state.hideToolbar(ToolbarType.copyPasteControls);
     await tester.pump();
     expect(find.text('Paste'), findsNothing);
 
@@ -1506,7 +1506,7 @@ void main() {
     expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
 
     // Hide the menu again.
-    state.hideToolbar();
+    state.hideToolbar(ToolbarType.copyPasteControls);
     await tester.pump();
     expect(find.text('Paste'), findsNothing);
 

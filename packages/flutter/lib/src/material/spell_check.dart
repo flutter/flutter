@@ -36,7 +36,8 @@ class MaterialSpellCheckService implements SpellCheckService {
         results.forEach((String result) {
           List<String> resultParsed = result.split(".");
           print('RAW SPELLCHECK RESULTS: ${resultParsed}');
-          spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
+          print(resultParsed[2].split("/n"));
+          spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split("/n")));
         });
         print("---------------------------------------------------------------");
 

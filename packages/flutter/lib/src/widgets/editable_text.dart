@@ -1400,7 +1400,6 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
-<<<<<<< HEAD
   /// Whether or not spell check is enabled.
   final bool spellCheckEnabled;
 
@@ -1409,9 +1408,8 @@ class EditableText extends StatefulWidget {
 
   // Spell check handler used if spell check is enabled.
   final SpellCheckSuggestionsHandler? spellCheckSuggestionsHandler;
-=======
+
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
->>>>>>> upstream/master
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
@@ -1620,7 +1618,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   SpellCheckConfiguration? _spellCheckConfiguration;
 
-  bool? get _spellCheckEnabled => (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance?.platformDispatcher.nativeSpellCheckServiceDefined : widget.spellCheckEnabled;
+  bool? get _spellCheckEnabled => (widget.spellCheckEnabled == true && widget.spellCheckService == null) ? WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined : widget.spellCheckEnabled;
 
 
   /// Whether to create an input connection with the platform for text editing
@@ -1730,18 +1728,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     Clipboard.setData(ClipboardData(text: selection.textInside(text)));
     _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
-<<<<<<< HEAD
-      bringIntoView(textEditingValue.selection.extent);
-      hideToolbar(ToolbarType.copyPasteControls);
-=======
       // Schedule a call to bringIntoView() after renderEditable updates.
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
       });
-      hideToolbar();
->>>>>>> upstream/master
+      hideToolbar(ToolbarType.copyPasteControls);
     }
     _clipboardStatus?.update();
   }
@@ -1776,18 +1769,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       cause,
     );
     if (cause == SelectionChangedCause.toolbar) {
-<<<<<<< HEAD
-      bringIntoView(textEditingValue.selection.extent);
-      hideToolbar(ToolbarType.copyPasteControls);
-=======
       // Schedule a call to bringIntoView() after renderEditable updates.
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
       });
-      hideToolbar();
->>>>>>> upstream/master
+      hideToolbar(ToolbarType.copyPasteControls);
     }
   }
 
@@ -3031,7 +3019,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         return false;
       }
 
-      _selectionOverlay!.showToolbar(toolbarType, 
+      _selectionOverlay!.showToolbar(toolbarType,  
       _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration);
       return true;
     }
@@ -3302,7 +3290,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   Object? _hideToolbarIfVisible(DismissIntent intent) {
     if (_selectionOverlay?.toolbarIsVisible ?? false) {
-      hideToolbar(false);
+      hideToolbar(ToolbarType.copyPasteControls, false);
       return null;
     }
     return Actions.invoke(context, intent);

@@ -865,7 +865,7 @@ void main() {
       await tester.pump();
       expect(find.byKey(spy.toolBarKey), findsOneWidget);
 
-      selectionOverlay.hideToolbar();
+      selectionOverlay.hideToolbar(ToolbarType.copyPasteControls);
       await tester.pump();
       expect(find.byKey(spy.toolBarKey), findsNothing);
 

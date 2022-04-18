@@ -126,7 +126,7 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   @override
-  void showToolbar() {
+  void showToolbar(ToolbarType toolbarType) {
     latestMethodCall = 'showToolbar';
   }
 
