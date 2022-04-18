@@ -9,8 +9,8 @@
 #include <memory>
 #include <vector>
 
-#include "imgui_raster.frag.h"
-#include "imgui_raster.vert.h"
+#include "impeller/playground/imgui/mtl/imgui_raster.frag.h"
+#include "impeller/playground/imgui/mtl/imgui_raster.vert.h"
 #include "third_party/imgui/imgui.h"
 
 #include "impeller/geometry/matrix.h"

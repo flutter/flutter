@@ -19,7 +19,7 @@ Renderer::Renderer(std::shared_ptr<Context> context,
     : frames_in_flight_sema_(std::make_shared<fml::Semaphore>(
           std::max<std::size_t>(1u, max_frames_in_flight))),
       context_(std::move(context)) {
-  if (!context_->IsValid()) {
+  if (!context_ || !context_->IsValid()) {
     return;
   }
 
