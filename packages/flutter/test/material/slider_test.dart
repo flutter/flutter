@@ -2099,8 +2099,15 @@ void main() {
     double bottomSliderValue = 0.5;
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(
-          child: Center(
+        home: Shortcuts(
+          shortcuts: <ShortcutActivator, Intent>{
+            const SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
+            const SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
+            const SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
+            const SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
+          },
+          child: Material(
+            child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return MediaQuery(
                   data: const MediaQueryData(navigationMode: NavigationMode.directional),
@@ -2127,6 +2134,7 @@ void main() {
                   ),
                 );
               }),
+            ),
           ),
         ),
       ),
