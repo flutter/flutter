@@ -108,7 +108,7 @@ class PaintingContext extends ClipContext {
     bool debugAlsoPaintedParent = false,
     PaintingContext? childContext,
   }) {
-    assert(child.isRepaintBoundary || child._wasRepaintBoundary);
+    assert(child.isRepaintBoundary);
     assert(() {
       // register the call for RepaintBoundary metrics
       child.debugRegisterRepaintBoundaryPaint(
@@ -118,6 +118,7 @@ class PaintingContext extends ClipContext {
       return true;
     }());
     OffsetLayer? childLayer = child._layerHandle.layer as OffsetLayer?;
+    final Offset? oldOffset = childLayer?.offset;
     if (childLayer == null) {
       assert(debugAlsoPaintedParent);
       assert(child._layerHandle.layer == null);
@@ -126,14 +127,16 @@ class PaintingContext extends ClipContext {
       // replace the layer for repaint boundaries. That assertion does not
       // apply here because this is exactly the place designed to create a
       // layer for repaint boundaries.
-      final OffsetLayer layer = child.updateCompositedLayer(null);
+      final OffsetLayer layer = child.updateCompositedLayer(oldLayer: null);
       child._layerHandle.layer = childLayer = layer;
     } else {
       assert(debugAlsoPaintedParent || childLayer.attached);
       childLayer.removeAllChildren();
-      childLayer = child.updateCompositedLayer(childLayer);
+      final OffsetLayer updatedLayer = child.updateCompositedLayer(oldLayer: childLayer);
+      assert(identical(updatedLayer, childLayer), '$childLayer -> $updatedLayer');
+      assert(oldOffset == updatedLayer.offset);
     }
-    child._needsLayerUpdate = false;
+    child._needsCompositedLayerUpdate = false;
 
     assert(identical(childLayer, child._layerHandle.layer));
     assert(child._layerHandle.layer is OffsetLayer);
@@ -160,9 +163,11 @@ class PaintingContext extends ClipContext {
     assert(child._layerHandle.layer != null);
 
     final OffsetLayer childLayer = child._layerHandle.layer! as OffsetLayer;
-    final OffsetLayer newLayer = child.updateCompositedLayer(childLayer);
-    assert(identical(newLayer, childLayer));
-    child._needsLayerUpdate = false;
+    final Offset oldOffset = childLayer.offset;
+    final OffsetLayer updatedLayer = child.updateCompositedLayer(oldLayer: childLayer);
+    assert(identical(updatedLayer, childLayer));
+    assert(oldOffset == updatedLayer.offset);
+    child._needsCompositedLayerUpdate = false;
   }
 
   /// In debug mode, repaint the given render object using a custom painting
@@ -202,6 +207,10 @@ class PaintingContext extends ClipContext {
     if (child.isRepaintBoundary) {
       stopRecordingIfNeeded();
       _compositeChild(child, offset);
+    } else if (child._wasRepaintBoundary) {
+      assert(child._layerHandle.layer is OffsetLayer);
+      child._layerHandle.layer = null;
+      child._paintWithContext(this, offset);
     } else {
       child._paintWithContext(this, offset);
     }
@@ -998,17 +1007,38 @@ class PipelineOwner {
         arguments: debugTimelineArguments,
       );
     }
-    assert(() {
-      _debugDoingPaint = true;
-      return true;
-    }());
     try {
-      final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
+      List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       _nodesNeedingPaint = <RenderObject>[];
+      // It is possible that one or more render objects in the paint list, decided
+      // to stop being repaint boundaries between the last time they marked as needing
+      // to be painted/composited and now. To handle this case, we need to walk the list
+      // flagging any nodes that are not repaint boundaries, and mark their parents as
+      // needing to be painted and locate a new repaint boundary to being painting from.
+      bool updated = false;
+      for (final RenderObject object in dirtyNodes) {
+        if (!object.isRepaintBoundary) {
+          updated = true;
+          object.markNeedsPaint();
+        } else {
+          _nodesNeedingPaint.add(object);
+        }
+      }
+
+      assert(() {
+        _debugDoingPaint = true;
+        return true;
+      }());
+
+      if (updated) {
+        dirtyNodes = _nodesNeedingPaint;
+      }
+      _nodesNeedingPaint = <RenderObject>[];
+
       // Sort the dirty nodes in reverse order (deepest first).
       for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
         assert(node._layerHandle.layer != null);
-        if ((node._needsPaint || node._needsLayerUpdate) && node.owner == this) {
+        if ((node._needsPaint || node._needsCompositedLayerUpdate) && node.owner == this) {
           if (node._layerHandle.layer!.attached) {
             if (node._needsPaint) {
               PaintingContext.repaintCompositedChild(node);
@@ -2100,7 +2130,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// themselves as repaint boundaries must not replace the layer created by
   /// the framework.
   ///
-  /// Warning: This getter must not change value over the lifetime of this object.
+  /// If the value of this getter changes, [markNeedsCompositingBitsUpdate] must
+  /// be called.
   ///
   /// See [RepaintBoundary] for more information about how repaint boundaries function.
   bool get isRepaintBoundary => false;
@@ -2138,7 +2169,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// The [OffsetLayer.offset] property will be managed by the framework and
   /// does not need to be updated.
-  OffsetLayer updateCompositedLayer(covariant OffsetLayer? oldLayer) {
+  ///
+  /// If a property of the composited layer needs to be updated, the render object
+  /// should call [markNeedsCompositedLayerUpdate] which will schedule this method
+  /// to be called without repainting children. If this widget was marked as
+  /// needing to paint and needing a composited layer update, this method is only
+  /// called once.
+  OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
     assert(isRepaintBoundary);
     return oldLayer ?? OffsetLayer();
   }
@@ -2307,15 +2344,15 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// out and painted. (In release builds, this throws.)
   ///
   /// It is intended to be used by tests and asserts.
-  bool get debugNeedsLayerUpdate {
+  bool get debugNeedsCompositedLayerUpdate {
     late bool result;
     assert(() {
-      result = _needsLayerUpdate;
+      result = _needsCompositedLayerUpdate;
       return true;
     }());
     return result;
   }
-  bool _needsLayerUpdate = false;
+  bool _needsCompositedLayerUpdate = false;
 
   /// Mark this render object as having changed its visual appearance.
   ///
@@ -2394,13 +2431,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   ///  * [RenderOpacity], which uses this method when its opacity is updated to
   ///    update the layer opacity without repainting children.
-  void markNeedsLayerPropertyUpdate() {
+  void markNeedsCompositedLayerUpdate() {
     assert(!_debugDisposed);
     assert(owner == null || !owner!.debugDoingPaint);
-    if (_needsLayerUpdate) {
+    if (_needsCompositedLayerUpdate) {
       return;
     }
-    _needsLayerUpdate = true;
+    _needsCompositedLayerUpdate = true;
     // If this was not previously a repaint boundary it will not have
     // a layer we can paint from.
     if (isRepaintBoundary && _wasRepaintBoundary) {
@@ -2424,7 +2461,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _skippedPaintingOnLayer() {
     assert(attached);
     assert(isRepaintBoundary);
-    assert(_needsPaint || _needsLayerUpdate);
+    assert(_needsPaint || _needsCompositedLayerUpdate);
     assert(_layerHandle.layer != null);
     assert(!_layerHandle.layer!.attached);
     AbstractNode? node = parent;
@@ -2579,7 +2616,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return true;
     }());
     _needsPaint = false;
-    _needsLayerUpdate = false;
+    _needsCompositedLayerUpdate = false;
     _wasRepaintBoundary = isRepaintBoundary;
     try {
       paint(context, offset);

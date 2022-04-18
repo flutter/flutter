@@ -849,7 +849,7 @@ class RenderOpacity extends RenderProxyBox {
   bool get isRepaintBoundary => alwaysNeedsCompositing;
 
   @override
-  OffsetLayer updateCompositedLayer(covariant OpacityLayer? oldLayer) {
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
     final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
     updatedLayer.alpha = _alpha;
     return updatedLayer;
@@ -880,7 +880,7 @@ class RenderOpacity extends RenderProxyBox {
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
     if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
-    markNeedsLayerPropertyUpdate();
+    markNeedsCompositedLayerUpdate();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
@@ -902,7 +902,6 @@ class RenderOpacity extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_alpha == 0) {
-      layer = null;
       return;
     }
     super.paint(context, offset);
@@ -938,7 +937,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   bool get isRepaintBoundary => alwaysNeedsCompositing;
 
   @override
-  OffsetLayer updateCompositedLayer(covariant OpacityLayer? oldLayer) {
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
     final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
     updatedLayer.alpha = _alpha;
     return updatedLayer;
@@ -1006,7 +1005,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
       _currentlyNeedsCompositing = _alpha! > 0;
       if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
         markNeedsCompositingBitsUpdate();
-      markNeedsLayerPropertyUpdate();
+      markNeedsCompositedLayerUpdate();
       if (oldAlpha == 0 || _alpha == 0)
         markNeedsSemanticsUpdate();
     }
@@ -1015,7 +1014,6 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_alpha == 0) {
-      layer = null;
       return;
     }
     super.paint(context, offset);

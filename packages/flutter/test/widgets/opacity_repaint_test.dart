@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('OpacityLayer acts as a repaint boundary for changes above the widget when partially opaque', (WidgetTester tester) async {
+  testWidgets('RenderOpacity acts as a repaint boundary for changes above the widget when partially opaque', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       Container(
@@ -34,7 +34,7 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
-  testWidgets('OpacityLayer acts as a repaint boundary for changes above the widget when fully opaque', (WidgetTester tester) async {
+  testWidgets('RenderOpacity acts as a repaint boundary for changes above the widget when fully opaque', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       Container(
@@ -61,7 +61,7 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
-  testWidgets('OpacityLayer can update its opacity without repainting its child - partially opaque to partially opaque', (WidgetTester tester) async {
+  testWidgets('RenderOpacity can update its opacity without repainting its child - partially opaque to partially opaque', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       Container(
@@ -88,7 +88,7 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
-  testWidgets('OpacityLayer can update its opacity without repainting its child - partially opaque to fully opaque', (WidgetTester tester) async {
+  testWidgets('RenderOpacity can update its opacity without repainting its child - partially opaque to fully opaque', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       Container(
@@ -115,7 +115,7 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
-  testWidgets('OpacityLayer can update its opacity without repainting its child - fully opaque to partially opaque', (WidgetTester tester) async {
+  testWidgets('RenderOpacity can update its opacity without repainting its child - fully opaque to partially opaque', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       Container(
@@ -142,7 +142,7 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
-  testWidgets('OpacityLayer can update its opacity without repainting its child - fully opaque to fully transparent', (WidgetTester tester) async {
+  testWidgets('RenderOpacity can update its opacity without repainting its child - fully opaque to fully transparent', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       Container(
@@ -169,7 +169,7 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
-  testWidgets('OpacityLayer must paint child - fully transparent to partially opaque', (WidgetTester tester) async {
+  testWidgets('RenderOpacity must paint child - fully transparent to partially opaque', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       Container(
@@ -196,7 +196,7 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
-  testWidgets('OpacityLayer allows child to update without updating parent', (WidgetTester tester) async {
+  testWidgets('RenderOpacity allows child to update without updating parent', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       TestWidget(
@@ -223,6 +223,35 @@ void main() {
     );
 
     expect(RenderTestObject.paintCount, 1);
+  });
+
+  testWidgets('RenderOpacity disposes of opacity layer when opacity is updated to 0', (WidgetTester tester) async {
+    RenderTestObject.paintCount = 0;
+    await tester.pumpWidget(
+      Container(
+        color: Colors.red,
+        child: const Opacity(
+          opacity: 0.5,
+          child: TestWidget(),
+        ),
+      )
+    );
+
+    expect(RenderTestObject.paintCount, 1);
+    expect(tester.layers, contains(isA<OpacityLayer>()));
+
+    await tester.pumpWidget(
+      Container(
+        color: Colors.blue,
+        child: const Opacity(
+          opacity: 0,
+          child: TestWidget(),
+        ),
+      )
+    );
+
+    expect(RenderTestObject.paintCount, 1);
+    expect(tester.layers, isNot(contains(isA<OpacityLayer>())));
   });
 }
 

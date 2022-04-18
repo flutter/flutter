@@ -573,7 +573,7 @@ void main() {
 
     renderBox.isRepaintBoundary = true;
     renderBox.markNeedsCompositingBitsUpdate();
-    renderBox.markNeedsLayerPropertyUpdate();
+    renderBox.markNeedsCompositedLayerUpdate();
 
     pumpFrame(phase: EnginePhase.composite);
 
@@ -584,9 +584,9 @@ void main() {
     expect(renderBox.paintCount, 2);
     expect(renderBox.debugLayer, isA<OffsetLayer>());
 
-    renderBox.markNeedsLayerPropertyUpdate();
+    renderBox.markNeedsCompositedLayerUpdate();
     expect(renderBox.debugNeedsPaint, false);
-    expect(renderBox.debugNeedsLayerUpdate, true);
+    expect(renderBox.debugNeedsCompositedLayerUpdate, true);
 
     pumpFrame(phase: EnginePhase.composite);
 
@@ -611,9 +611,9 @@ void main() {
     // markNeedsLayerPropertyUpdate is the same as calling
     // markNeedsPaint.
 
-    renderBox.markNeedsLayerPropertyUpdate();
+    renderBox.markNeedsCompositedLayerUpdate();
     expect(renderBox.debugNeedsPaint, true);
-    expect(renderBox.debugNeedsLayerUpdate, true);
+    expect(renderBox.debugNeedsCompositedLayerUpdate, true);
   });
 
   test('RenderObject with repaint boundary asserts when a composited layer is replaced during layer property update', () {
@@ -630,7 +630,7 @@ void main() {
     expect(childBox.paintCount, 1);
     expect(renderBox.paintCount, 1);
 
-    renderBox.markNeedsLayerPropertyUpdate();
+    renderBox.markNeedsCompositedLayerUpdate();
 
     pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
   }, skip: kIsWeb); // Expect assertion error doesn't work on the web
@@ -642,6 +642,24 @@ void main() {
     // Ignore old layer.
     childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
       return TestOffsetLayerA();
+    };
+
+    layout(renderBox, phase: EnginePhase.composite);
+
+    expect(childBox.paintCount, 1);
+    expect(renderBox.paintCount, 1);
+    renderBox.markNeedsPaint();
+
+    pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
+  }, skip: kIsWeb); // Expect assertion error doesn't work on the web
+
+  test('RenderObject with repaint boundary asserts when a composited layer tries to update its own offset', () {
+    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(childBox);
+    childBox.isRepaintBoundary = true;
+    // Ignore old layer.
+    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+      return (oldLayer ?? TestOffsetLayerA())..offset = const Offset(2133, 4422);
     };
 
     layout(renderBox, phase: EnginePhase.composite);
@@ -734,11 +752,11 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
   int paintCount = 0;
 
   @override
-  OffsetLayer updateCompositedLayer(covariant OffsetLayer? oldLayer) {
+  OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
     if (offsetLayerFactory != null) {
       return offsetLayerFactory!.call(oldLayer);
     }
-    return super.updateCompositedLayer(oldLayer);
+    return super.updateCompositedLayer(oldLayer: oldLayer);
   }
 
   @override
