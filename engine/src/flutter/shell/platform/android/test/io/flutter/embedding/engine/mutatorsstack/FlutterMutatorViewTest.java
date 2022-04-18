@@ -4,26 +4,27 @@ import static android.view.View.OnFocusChangeListener;
 import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.*;
 
+import android.content.Context;
 import android.graphics.Matrix;
 import android.view.MotionEvent;
 import android.view.ViewTreeObserver;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterMutatorViewTest {
+  private final Context ctx = ApplicationProvider.getApplicationContext();
 
   @Test
   public void canDragViews() {
     final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
-    final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext, 1.0f, touchProcessor);
+    final FlutterMutatorView view = new FlutterMutatorView(ctx, 1.0f, touchProcessor);
     final FlutterMutatorsStack mutatorStack = mock(FlutterMutatorsStack.class);
 
     assertTrue(view.onInterceptTouchEvent(mock(MotionEvent.class)));
@@ -85,7 +86,7 @@ public class FlutterMutatorViewTest {
     when(viewTreeObserver.isAlive()).thenReturn(true);
 
     final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+        new FlutterMutatorView(ctx) {
           @Override
           public ViewTreeObserver getViewTreeObserver() {
             return viewTreeObserver;
@@ -114,7 +115,7 @@ public class FlutterMutatorViewTest {
     when(viewTreeObserver.isAlive()).thenReturn(true);
 
     final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+        new FlutterMutatorView(ctx) {
           @Override
           public ViewTreeObserver getViewTreeObserver() {
             return viewTreeObserver;
@@ -140,7 +141,7 @@ public class FlutterMutatorViewTest {
   @Test
   public void focusChangeListener_viewTreeObserverIsAliveFalseDoesNotThrow() {
     final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+        new FlutterMutatorView(ctx) {
           @Override
           public ViewTreeObserver getViewTreeObserver() {
             final ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
@@ -157,7 +158,7 @@ public class FlutterMutatorViewTest {
     when(viewTreeObserver.isAlive()).thenReturn(true);
 
     final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+        new FlutterMutatorView(ctx) {
           @Override
           public ViewTreeObserver getViewTreeObserver() {
             return viewTreeObserver;
@@ -184,7 +185,7 @@ public class FlutterMutatorViewTest {
     when(viewTreeObserver.isAlive()).thenReturn(true);
 
     final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+        new FlutterMutatorView(ctx) {
           @Override
           public ViewTreeObserver getViewTreeObserver() {
             return viewTreeObserver;
