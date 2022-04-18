@@ -660,9 +660,9 @@ class ThemeData with Diagnosticable {
     );
   }
 
-  /// Create a [ThemeData] given a set of exact values. All the values must be
+  /// Create a [ThemeData] given a set of exact values. Most values must be
   /// specified. They all must also be non-null except for
-  /// [cupertinoOverrideTheme].
+  /// [cupertinoOverrideTheme], and deprecated members.
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes created with the
