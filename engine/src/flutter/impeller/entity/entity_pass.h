@@ -58,12 +58,15 @@ class EntityPass {
 
   void SetStencilDepth(size_t stencil_depth);
 
+  void SetBlendMode(Entity::BlendMode blend_mode);
+
  private:
   Entities entities_;
   Subpasses subpasses_;
   EntityPass* superpass_ = nullptr;
   Matrix xformation_;
   size_t stencil_depth_ = 0u;
+  Entity::BlendMode blend_mode_ = Entity::BlendMode::kSourceOver;
   std::unique_ptr<EntityPassDelegate> delegate_ =
       EntityPassDelegate::MakeDefault();
   std::shared_ptr<LazyGlyphAtlas> lazy_glyph_atlas_ =

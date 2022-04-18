@@ -22,6 +22,14 @@ class TextFrame {
   ~TextFrame();
 
   //----------------------------------------------------------------------------
+  /// @brief      The conservative bounding box for this text frame.
+  ///
+  /// @return     The bounds rectangle. If there are no glyphs in this text
+  ///             frame, std::nullopt is returned.
+  ///
+  std::optional<Rect> GetBounds() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      The number of runs in this text frame.
   ///
   /// @return     The run count.

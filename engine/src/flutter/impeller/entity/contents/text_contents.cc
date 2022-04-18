@@ -4,6 +4,8 @@
 
 #include "impeller/entity/contents/text_contents.h"
 
+#include <optional>
+
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
@@ -46,6 +48,14 @@ std::shared_ptr<GlyphAtlas> TextContents::ResolveAtlas(
 
 void TextContents::SetColor(Color color) {
   color_ = color;
+}
+
+std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
+  auto bounds = frame_.GetBounds();
+  if (!bounds.has_value()) {
+    return std::nullopt;
+  }
+  return bounds->TransformBounds(entity.GetTransformation());
 }
 
 bool TextContents::Render(const ContentContext& renderer,

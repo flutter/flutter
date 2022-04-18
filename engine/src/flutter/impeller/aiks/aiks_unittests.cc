@@ -418,6 +418,27 @@ TEST_F(AiksTest, CanRenderEmojiTextFrame) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_F(AiksTest, CanRenderTextInSaveLayer) {
+  Canvas canvas;
+  canvas.DrawPaint({.color = Color::White()});
+  canvas.Translate({100, 100});
+  canvas.Scale(Vector2{0.5, 0.5});
+
+  // Blend the layer with the parent pass using kClear to expose the coverage.
+  canvas.SaveLayer({.blend_mode = Entity::BlendMode::kClear});
+  ASSERT_TRUE(RenderTextInCanvas(
+      GetContext(), canvas, "the quick brown fox jumped over the lazy dog!.?",
+      "Roboto-Regular.ttf"));
+  canvas.Restore();
+
+  // Render the text again over the cleared coverage rect.
+  ASSERT_TRUE(RenderTextInCanvas(
+      GetContext(), canvas, "the quick brown fox jumped over the lazy dog!.?",
+      "Roboto-Regular.ttf"));
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_F(AiksTest, CanDrawPaint) {
   Paint paint;
   paint.color = Color::MediumTurquoise();

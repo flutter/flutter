@@ -22,12 +22,12 @@ std::optional<Rect> PaintPassDelegate::GetCoverageRect() {
 
 // |EntityPassDelgate|
 bool PaintPassDelegate::CanElide() {
-  return paint_.color.IsTransparent();
+  return paint_.blend_mode == Entity::BlendMode::kDestination;
 }
 
 // |EntityPassDelgate|
 bool PaintPassDelegate::CanCollapseIntoParentPass() {
-  return paint_.color.IsOpaque();
+  return false;
 }
 
 // |EntityPassDelgate|

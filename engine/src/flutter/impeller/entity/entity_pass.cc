@@ -210,6 +210,7 @@ bool EntityPass::Render(ContentContext& renderer,
                        .TakePath());
     entity.SetContents(std::move(offscreen_texture_contents));
     entity.SetStencilDepth(stencil_depth_);
+    entity.SetBlendMode(subpass->blend_mode_);
     // Once we have filters being applied for SaveLayer, some special sauce
     // may be needed here (or in PaintPassDelegate) to ensure the filter
     // parameters are transformed by the `xformation_` matrix, while continuing
@@ -255,6 +256,10 @@ void EntityPass::SetTransformation(Matrix xformation) {
 
 void EntityPass::SetStencilDepth(size_t stencil_depth) {
   stencil_depth_ = stencil_depth;
+}
+
+void EntityPass::SetBlendMode(Entity::BlendMode blend_mode) {
+  blend_mode_ = blend_mode;
 }
 
 }  // namespace impeller

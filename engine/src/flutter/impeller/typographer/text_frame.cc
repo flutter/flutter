@@ -10,6 +10,21 @@ TextFrame::TextFrame() = default;
 
 TextFrame::~TextFrame() = default;
 
+std::optional<Rect> TextFrame::GetBounds() const {
+  std::optional<Rect> result;
+
+  for (const auto& run : runs_) {
+    const auto glyph_bounds = run.GetFont().GetMetrics().GetBoundingBox();
+    for (const auto& glyph_position : run.GetGlyphPositions()) {
+      Vector2 position = glyph_position.position * Vector2();
+      Rect glyph_rect = Rect(position + glyph_bounds.origin, glyph_bounds.size);
+      result = result.has_value() ? result->Union(glyph_rect) : glyph_rect;
+    }
+  }
+
+  return result;
+}
+
 bool TextFrame::AddTextRun(TextRun run) {
   if (!run.IsValid()) {
     return false;
