@@ -6,7 +6,14 @@ import 'package:flutter/foundation.dart' show FlutterError;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'decoration_test.dart';
+class TestCanvas implements Canvas {
+  final List<Invocation> invocations = <Invocation>[];
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
+}
 
 void main() {
   test('Border.uniform constructor', () {
