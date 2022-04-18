@@ -799,7 +799,7 @@ class ThemeData with Diagnosticable {
       'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
+    this.androidOverscrollIndicator,
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
        _accentColor = accentColor,
@@ -809,7 +809,6 @@ class ThemeData with Diagnosticable {
        _buttonColor = buttonColor,
        _fixTextFieldOutlineLabel = fixTextFieldOutlineLabel,
        _primaryColorBrightness = primaryColorBrightness,
-       _androidOverscrollIndicator = androidOverscrollIndicator,
        // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(extensions != null),
@@ -1003,8 +1002,7 @@ class ThemeData with Diagnosticable {
     'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
     'This feature was deprecated after v2.13.0-0.0.pre.'
   )
-  AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator!;
-  final AndroidOverscrollIndicator? _androidOverscrollIndicator;
+  final AndroidOverscrollIndicator? androidOverscrollIndicator;
 
   /// Apply a semi-transparent overlay color on Material surfaces to indicate
   /// elevation for dark themes.
