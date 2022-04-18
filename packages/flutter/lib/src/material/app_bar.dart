@@ -947,9 +947,8 @@ class _AppBarState extends State<AppBar> {
           onPressed: _handleDrawerButton,
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
-      } else {
-        if (parentRoute?.impliesAppBarDismissal ?? false)
-          leading = useCloseButton ? const CloseButton() : const BackButton();
+      } else if (parentRoute?.impliesAppBarDismissal ?? false) {
+        leading = useCloseButton ? const CloseButton() : const BackButton();
       }
     }
     if (leading != null) {

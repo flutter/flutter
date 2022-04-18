@@ -628,10 +628,12 @@ mixin LocalHistoryRoute<T> on Route<T> {
     _localHistory ??= <LocalHistoryEntry>[];
     final bool wasEmpty = _localHistory!.isEmpty;
     _localHistory!.add(entry);
+    bool internalStateChanged = false;
     if (entry.impliesAppBarDismissal) {
+      internalStateChanged = _entriesImpliesAppBarDismissal == 0;
       _entriesImpliesAppBarDismissal += 1;
     }
-    if (wasEmpty)
+    if (wasEmpty || internalStateChanged)
       changedInternalState();
   }
 
@@ -643,12 +645,14 @@ mixin LocalHistoryRoute<T> on Route<T> {
     assert(entry != null);
     assert(entry._owner == this);
     assert(_localHistory!.contains(entry));
+    bool internalStateChanged = false;
     if (_localHistory!.remove(entry) && entry.impliesAppBarDismissal) {
       _entriesImpliesAppBarDismissal -= 1;
+      internalStateChanged = _entriesImpliesAppBarDismissal == 0;
     }
     entry._owner = null;
     entry._notifyRemoved();
-    if (_localHistory!.isEmpty) {
+    if (_localHistory!.isEmpty || internalStateChanged) {
       assert(_entriesImpliesAppBarDismissal == 0);
       if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
         // The local history might be removed as a result of disposing inactive
@@ -677,7 +681,12 @@ mixin LocalHistoryRoute<T> on Route<T> {
       assert(entry._owner == this);
       entry._owner = null;
       entry._notifyRemoved();
-      if (_localHistory!.isEmpty)
+      bool internalStateChanged = false;
+      if (entry.impliesAppBarDismissal) {
+        _entriesImpliesAppBarDismissal -= 1;
+        internalStateChanged = _entriesImpliesAppBarDismissal == 0;
+      }
+      if (_localHistory!.isEmpty || internalStateChanged)
         changedInternalState();
       return false;
     }
@@ -711,6 +720,7 @@ class _ModalScopeStatus extends InheritedWidget {
   const _ModalScopeStatus({
     required this.isCurrent,
     required this.canPop,
+    required this.impliesAppBarDismissal,
     required this.route,
     required super.child,
   }) : assert(isCurrent != null),
@@ -720,12 +730,14 @@ class _ModalScopeStatus extends InheritedWidget {
 
   final bool isCurrent;
   final bool canPop;
+  final bool impliesAppBarDismissal;
   final Route<dynamic> route;
 
   @override
   bool updateShouldNotify(_ModalScopeStatus old) {
     return isCurrent != old.isCurrent ||
            canPop != old.canPop ||
+           impliesAppBarDismissal != old.impliesAppBarDismissal ||
            route != old.route;
   }
 
@@ -734,6 +746,7 @@ class _ModalScopeStatus extends InheritedWidget {
     super.debugFillProperties(description);
     description.add(FlagProperty('isCurrent', value: isCurrent, ifTrue: 'active', ifFalse: 'inactive'));
     description.add(FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));
+    description.add(FlagProperty('impliesAppBarDismissal', value: impliesAppBarDismissal, ifTrue: 'implies app bar dismissal'));
   }
 }
 
@@ -836,6 +849,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
         route: widget.route,
         isCurrent: widget.route.isCurrent, // _routeSetState is called if this updates
         canPop: widget.route.canPop, // _routeSetState is called if this updates
+        impliesAppBarDismissal: widget.route.impliesAppBarDismissal,
         child: Offstage(
           offstage: widget.route.offstage, // _routeSetState is called if this updates
           child: PageStorage(
