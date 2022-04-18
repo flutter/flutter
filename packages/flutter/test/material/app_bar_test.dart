@@ -2926,4 +2926,54 @@ void main() {
     expect(preferredHeight, 64);
     expect(preferredSize.height, 64);
   });
+
+  group('AppBar passes touches to body', ()
+  {
+    testWidgets('does not pass touches to body by default', (
+        WidgetTester tester) async {
+      const Color backgroundColor = Color(0xff00ffff);
+      bool tapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+              appBar: AppBar(
+                backgroundColor: backgroundColor,
+                title: const Text('AppBar'),
+              ),
+              extendBodyBehindAppBar: true,
+              body: GestureDetector(onTap: () => tapped = true)
+          ),
+        ),
+      );
+
+      await tester.tapAt(const Offset(300.0, kToolbarHeight / 2));
+      await tester.pumpAndSettle();
+      expect(tapped, isFalse);
+    });
+
+    testWidgets('does pass touches to body when color is transparent and elevation is zero', (
+        WidgetTester tester) async {
+      const Color backgroundColor = Color(0x00000000);
+      bool tapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+              appBar: AppBar(
+                elevation: 0,
+                backgroundColor: backgroundColor,
+                title: const Text('AppBar'),
+              ),
+              extendBodyBehindAppBar: true,
+              body: GestureDetector(onTap: () => tapped = true)
+          ),
+        ),
+      );
+
+      await tester.tapAt(const Offset(300.0, kToolbarHeight / 2));
+      await tester.pumpAndSettle();
+      expect(tapped, isTrue);
+    });
+  });
 }
