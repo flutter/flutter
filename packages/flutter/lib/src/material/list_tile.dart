@@ -593,7 +593,10 @@ class ListTile extends StatelessWidget {
       return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
     }
 
-    final Color? color = iconColor ?? tileTheme.iconColor ?? theme.listTileTheme.iconColor;
+    final Color? color = iconColor
+      ?? tileTheme.iconColor
+      ?? theme.listTileTheme.iconColor
+      ?? (theme.useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : null);
     if (color != null) {
       return color;
     }
