@@ -2103,7 +2103,7 @@ void main() {
           child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return MediaQuery(
-                  data: MediaQueryData(navigationMode: NavigationMode.directional),
+                  data: const MediaQueryData(navigationMode: NavigationMode.directional),
                   child: Column(
                       children: [
                         Slider(
