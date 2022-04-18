@@ -2094,18 +2094,20 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('In directional nav, Slider can be navigated out of by using up and down arrows', (WidgetTester tester) async {
+    const Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
+      const SingleActivator(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+      const SingleActivator(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+      const SingleActivator(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+      const SingleActivator(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    };
+
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double topSliderValue = 0.5;
     double bottomSliderValue = 0.5;
     await tester.pumpWidget(
       MaterialApp(
         home: Shortcuts(
-          shortcuts: <ShortcutActivator, Intent>{
-            const SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
-            const SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
-            const SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
-            const SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
-          },
+          shortcuts: shortcuts,
           child: Material(
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
