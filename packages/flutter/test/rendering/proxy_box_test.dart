@@ -633,7 +633,7 @@ void main() {
     renderBox.markNeedsLayerPropertyUpdate();
 
     pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
-  });
+  }, skip: kIsWeb);
 
   test('RenderObject with repaint boundary asserts when a composited layer is replaced during painting', () {
     final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
@@ -651,7 +651,7 @@ void main() {
     renderBox.markNeedsPaint();
 
     pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
-  });
+  }, skip: kIsWeb);
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
