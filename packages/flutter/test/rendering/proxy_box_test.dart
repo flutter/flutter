@@ -616,24 +616,6 @@ void main() {
     expect(renderBox.debugNeedsLayerUpdate, true);
   });
 
-  test('RenderObject with repaint boundary asserts when a composited layer is replaced during painting', () {
-    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(childBox);
-    childBox.isRepaintBoundary = true;
-    // Ignore old layer.
-    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
-      return TestOffsetLayerA();
-    };
-
-    layout(renderBox, phase: EnginePhase.composite);
-
-    expect(childBox.paintCount, 1);
-    expect(renderBox.paintCount, 1);
-    renderBox.markNeedsPaint();
-
-    pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
-  });
-
   test('RenderObject with repaint boundary asserts when a composited layer is replaced during layer property update', () {
     final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
     final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(childBox);
@@ -651,6 +633,25 @@ void main() {
     renderBox.markNeedsLayerPropertyUpdate();
 
     expect(() => PaintingContext.updateLayerProperties(childBox), throwsAssertionError);
+    TestRenderingFlutterBinding.instance.takeFlutterErrorDetails(); // clear error state.
+  });
+
+  test('RenderObject with repaint boundary asserts when a composited layer is replaced during painting', () {
+    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(childBox);
+    childBox.isRepaintBoundary = true;
+    // Ignore old layer.
+    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+      return TestOffsetLayerA();
+    };
+
+    layout(renderBox, phase: EnginePhase.composite);
+
+    expect(childBox.paintCount, 1);
+    expect(renderBox.paintCount, 1);
+    renderBox.markNeedsPaint();
+
+    pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
   });
 }
 
