@@ -542,8 +542,8 @@ void main(List<String> rawArgs) {
   );
 
   try {
-    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes);
-    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes);
+    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes, allowMissing: options.forceOverwrite);
+    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes, allowMissing: options.forceOverwrite);
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }

@@ -230,8 +230,19 @@ void checkCwdIsRepoRoot(String commandName) {
 GeneratorOptions parseArgs(List<String> rawArgs) {
   final argslib.ArgParser argParser = argslib.ArgParser()
     ..addFlag(
+      'help',
+      abbr: 'h',
+      help: 'Print the usage message for this command',
+    )
+    ..addFlag(
       'overwrite',
       abbr: 'w',
+      help: 'Overwrite existing localizations',
+    )
+    ..addFlag(
+      'force',
+      abbr: 'f',
+      help: 'Force the overwriting of existing localizations, even if they have values that are missing in the canonical locales.',
     )
     ..addFlag(
       'material',
@@ -242,21 +253,28 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
       help: 'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
     );
   final argslib.ArgResults args = argParser.parse(rawArgs);
+  if (args.wasParsed('help') && args['help'] == true) {
+    stderr.writeln(argParser.usage);
+    exit(0);
+  }
   final bool writeToFile = args['overwrite'] as bool;
+  final bool forceOverwrite = args['force'] as bool;
   final bool materialOnly = args['material'] as bool;
   final bool cupertinoOnly = args['cupertino'] as bool;
 
-  return GeneratorOptions(writeToFile: writeToFile, materialOnly: materialOnly, cupertinoOnly: cupertinoOnly);
+  return GeneratorOptions(writeToFile: writeToFile, materialOnly: materialOnly, cupertinoOnly: cupertinoOnly, forceOverwrite: forceOverwrite);
 }
 
 class GeneratorOptions {
   GeneratorOptions({
     required this.writeToFile,
+    required this.forceOverwrite,
     required this.materialOnly,
     required this.cupertinoOnly,
   });
 
   final bool writeToFile;
+  final bool forceOverwrite;
   final bool materialOnly;
   final bool cupertinoOnly;
 }

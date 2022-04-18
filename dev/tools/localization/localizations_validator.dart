@@ -99,8 +99,9 @@ void validateEnglishLocalizations(File file) {
 /// If validation fails, throws an exception.
 void validateLocalizations(
   Map<LocaleInfo, Map<String, String>> localeToResources,
-  Map<LocaleInfo, Map<String, dynamic>> localeToAttributes,
-) {
+  Map<LocaleInfo, Map<String, dynamic>> localeToAttributes, {
+  bool allowMissing = false,
+}) {
   final Map<String, String> canonicalLocalizations = localeToResources[LocaleInfo.fromString('en')]!;
   final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
   final StringBuffer errorMessages = StringBuffer();
@@ -128,7 +129,7 @@ void validateLocalizations(
     // Make sure keys are valid (i.e. they also exist in the canonical
     // localizations)
     final Set<String> invalidKeys = keys.difference(canonicalKeys);
-    if (invalidKeys.isNotEmpty)
+    if (invalidKeys.isNotEmpty && !allowMissing)
       errorMessages.writeln('Locale "$locale" contains invalid resource keys: ${invalidKeys.join(', ')}');
     // For language-level locales only, check that they have a complete list of
     // keys, or opted out of using certain ones.
