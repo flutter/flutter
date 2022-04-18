@@ -122,7 +122,20 @@ class PersistedPicture extends PersistedLeafSurface {
 
   @override
   html.Element createElement() {
-    return defaultCreateElement('flt-picture');
+    final html.Element element = defaultCreateElement('flt-picture');
+
+    // The DOM elements used to render pictures are used purely to put pixels on
+    // the screen. They have no semantic information. If an assistive technology
+    // attempts to scan picture content it will look like garbage and confuse
+    // users. UI semantics are exported as a separate DOM tree rendered parallel
+    // to pictures.
+    //
+    // Why are layer and scene elements not hidden from ARIA? Because those
+    // elements may contain platform views, and platform views must be
+    // accessible.
+    element.setAttribute('aria-hidden', 'true');
+
+    return element;
   }
 
   @override

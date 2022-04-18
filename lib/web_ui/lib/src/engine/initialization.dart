@@ -256,12 +256,6 @@ Future<void> initializeEngineUi() async {
   Keyboard.initialize(onMacOs: operatingSystem == OperatingSystem.macOs);
   MouseCursor.initialize();
   ensureFlutterViewEmbedderInitialized();
-
-  if (useCanvasKit) {
-    /// Add a Skia scene host.
-    skiaSceneHost = html.Element.tag('flt-scene');
-    flutterViewEmbedder.renderScene(skiaSceneHost);
-  }
   _initializationState = DebugEngineInitializationState.initialized;
 }
 
