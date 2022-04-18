@@ -240,8 +240,7 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
       help: 'Overwrite existing localizations',
     )
     ..addFlag(
-      'force',
-      abbr: 'f',
+      'remove-undefined',
       help: 'Force the overwriting of existing localizations, even if they have values that are missing in the canonical locales.',
     )
     ..addFlag(
@@ -258,23 +257,28 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
     exit(0);
   }
   final bool writeToFile = args['overwrite'] as bool;
-  final bool forceOverwrite = args['force'] as bool;
+  final bool removeUndefined = args['remove-undefined'] as bool;
   final bool materialOnly = args['material'] as bool;
   final bool cupertinoOnly = args['cupertino'] as bool;
 
-  return GeneratorOptions(writeToFile: writeToFile, materialOnly: materialOnly, cupertinoOnly: cupertinoOnly, forceOverwrite: forceOverwrite);
+  return GeneratorOptions(
+    writeToFile: writeToFile,
+    materialOnly: materialOnly,
+    cupertinoOnly: cupertinoOnly,
+    removeUndefined: removeUndefined,
+  );
 }
 
 class GeneratorOptions {
   GeneratorOptions({
     required this.writeToFile,
-    required this.forceOverwrite,
+    required this.removeUndefined,
     required this.materialOnly,
     required this.cupertinoOnly,
   });
 
   final bool writeToFile;
-  final bool forceOverwrite;
+  final bool removeUndefined;
   final bool materialOnly;
   final bool cupertinoOnly;
 }

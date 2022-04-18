@@ -542,10 +542,15 @@ void main(List<String> rawArgs) {
   );
 
   try {
-    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes, allowMissing: options.forceOverwrite);
-    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes, allowMissing: options.forceOverwrite);
+    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes, allowMissing: options.removeUndefined);
+    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes, allowMissing: options.removeUndefined);
   } on ValidationError catch (exception) {
     exitWithError('$exception');
+  }
+
+  if (options.removeUndefined) {
+    removeUndefinedLocalizations(materialLocaleToResources);
+    removeUndefinedLocalizations(cupertinoLocaleToResources);
   }
 
   final String? materialLocalizations = options.writeToFile || !options.cupertinoOnly

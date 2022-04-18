@@ -27,11 +27,15 @@ import '../localizations_utils.dart';
 import '../localizations_validator.dart';
 
 Future<void> main(List<String> rawArgs) async {
+  bool removeUnused = false;
+  if (rawArgs.contains('--remove-unused')) {
+    removeUnused = true;
+  }
   checkCwdIsRepoRoot('gen_missing_localizations');
 
   final String localizationPath = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n');
-  updateMissingResources(localizationPath, 'material');
-  updateMissingResources(localizationPath, 'cupertino');
+  updateMissingResources(localizationPath, 'material', removeUnused: removeUnused);
+  updateMissingResources(localizationPath, 'cupertino', removeUnused: removeUnused);
 }
 
 Map<String, dynamic> loadBundle(File file) {
@@ -73,7 +77,7 @@ bool isPluralVariation(String key, Map<String, dynamic> bundle) {
   return bundle.containsKey('${prefix}Other');
 }
 
-void updateMissingResources(String localizationPath, String groupPrefix) {
+void updateMissingResources(String localizationPath, String groupPrefix, {bool removeUnused = false}) {
   final Directory localizationDir = Directory(localizationPath);
   final RegExp filenamePattern = RegExp('${groupPrefix}_(\\w+)\\.arb');
 
@@ -91,14 +95,36 @@ void updateMissingResources(String localizationPath, String groupPrefix) {
         final File arbFile = File(entityPath);
         final Map<String, dynamic> localeBundle = loadBundle(arbFile);
         final Set<String> localeResources = resourceKeys(localeBundle);
+        bool shouldWrite = false;
+        if (removeUnused) {
+          final Set<String> extraResources = localeResources.difference(
+              requiredKeys).where(
+                  (String key) =>
+              !isPluralVariation(key, localeBundle) &&
+                  !intentionallyOmitted(key, localeBundle)
+          ).toSet();
+          localeBundle.removeWhere((String key, dynamic value) {
+            final bool found = extraResources.contains(key);
+            if (found) {
+              shouldWrite = true;
+            }
+            return found;
+          });
+          if (shouldWrite) {
+            print('Updating $entityPath removing extra entries for $extraResources');
+          }
+        }
         final Set<String> missingResources = requiredKeys.difference(localeResources).where(
           (String key) => !isPluralVariation(key, localeBundle) && !intentionallyOmitted(key, localeBundle)
         ).toSet();
         if (missingResources.isNotEmpty) {
           localeBundle.addEntries(missingResources.map((String k) =>
             MapEntry<String, String>(k, englishBundle[k].toString())));
+          shouldWrite = true;
+          print('Updating $entityPath with missing entries for $missingResources');
+        }
+        if (shouldWrite) {
           writeBundle(arbFile, localeBundle);
-          print('Updated $entityPath with missing entries for $missingResources');
         }
       }
     }

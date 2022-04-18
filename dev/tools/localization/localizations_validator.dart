@@ -88,6 +88,32 @@ void validateEnglishLocalizations(File file) {
     throw ValidationError(errorMessages.toString());
 }
 
+void removeUndefinedLocalizations(
+  Map<LocaleInfo, Map<String, String>> localeToResources,
+) {
+  final Map<String, String> canonicalLocalizations = localeToResources[LocaleInfo.fromString('en')]!;
+  final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
+
+  for (final LocaleInfo locale in localeToResources.keys) {
+    final Map<String, String> resources = localeToResources[locale]!;
+    // final Map<LocaleInfo, Map<String, String>> updatedLocaleToResources = <LocaleInfo, Map<String, String>>{};
+    bool isPluralVariation(String key) {
+      final Match? pluralMatch = kPluralRegexp.firstMatch(key);
+      if (pluralMatch == null)
+        return false;
+      final String? prefix = pluralMatch[1];
+      return resources.containsKey('${prefix}Other');
+    }
+
+    final Set<String> keys = Set<String>.from(
+        resources.keys.where((String key) => !isPluralVariation(key))
+    );
+
+    final Set<String> invalidKeys = keys.difference(canonicalKeys);
+    resources.removeWhere((String key, String value) => invalidKeys.contains(key));
+  }
+}
+
 /// Enforces the following invariants in our localizations:
 ///
 /// - Resource keys are valid, i.e. they appear in the canonical list.
