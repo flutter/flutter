@@ -155,7 +155,7 @@ class PaintingContext extends ClipContext {
 
   /// Update the composited layer of [child] without repainting its children.
   static void updateLayerProperties(RenderObject child) {
-    assert(child.isRepaintBoundary);
+    assert(child.isRepaintBoundary && child._wasRepaintBoundary);
     assert(!child._needsPaint);
     assert(child._layerHandle.layer != null);
 
@@ -213,7 +213,7 @@ class PaintingContext extends ClipContext {
     assert(_canvas == null || _canvas!.getSaveCount() == 1);
 
     // Create a layer for our child, and paint the child into it.
-    if (child._needsPaint) {
+    if (child._needsPaint || !child._wasRepaintBoundary) {
       repaintCompositedChild(child, debugAlsoPaintedParent: true);
     } else {
       updateLayerProperties(child);
