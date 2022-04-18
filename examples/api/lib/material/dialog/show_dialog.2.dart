@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
+      restorationScopeId: 'app',
       home: DialogExample(),
     );
   }
@@ -25,18 +26,21 @@ class DialogExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('showDialog Sample')),
+      appBar: AppBar(title: const Text('AlertDialog Sample')),
       body: Center(
         child: OutlinedButton(
-          onPressed: () => _dialogBuilder(context),
+          onPressed: () {
+            Navigator.of(context).restorablePush(_dialogBuilder);
+          },
           child: const Text('Open Dialog'),
         ),
       ),
     );
   }
 
-  Future<void> _dialogBuilder(BuildContext context) {
-    return showDialog<void>(
+  static Route<Object?> _dialogBuilder(
+      BuildContext context, Object? arguments) {
+    return DialogRoute<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
