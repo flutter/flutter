@@ -2028,8 +2028,14 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
-        expect(focusScope.hasFocus, isTrue);
-        expect(focusNode.hasPrimaryFocus, isTrue);
+        if (kIsWeb) {
+          // Web is a desktop platform.
+          expect(focusScope.hasPrimaryFocus, isTrue);
+          expect(focusNode.hasFocus, isFalse);
+        } else {
+          expect(focusScope.hasFocus, isTrue);
+          expect(focusNode.hasPrimaryFocus, isTrue);
+        }
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
