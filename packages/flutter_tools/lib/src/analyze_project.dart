@@ -3,20 +3,6 @@
 // found in the LICENSE file.
 
 import 'base/common.dart';
-import 'base/logger.dart';
-
-class AnalyzeProject {
-  AnalyzeProject({
-    required Logger logger,
-  }) : _logger = logger;
-
-  final Logger _logger;
-
-  Future<bool> diagnose() async {
-    _logger.printStatus('test log');
-    return true;
-  }
-}
 
 enum Status {
   error,
