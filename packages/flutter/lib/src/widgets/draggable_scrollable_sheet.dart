@@ -669,7 +669,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       maxSize: widget.maxChildSize,
       snap: widget.snap,
       snapSizes: _impliedSnapSizes(),
-      initialSize: widget.initialChildSize,
+      initialSize: _extent.currentSize,
       onSizeChanged: _setExtent,
     );
     // Modify the existing scroll controller instead of replacing it so that
