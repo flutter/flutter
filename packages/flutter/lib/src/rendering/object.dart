@@ -118,7 +118,6 @@ class PaintingContext extends ClipContext {
       return true;
     }());
     OffsetLayer? childLayer = child._layerHandle.layer as OffsetLayer?;
-    final Offset? oldOffset = childLayer?.offset;
     if (childLayer == null) {
       assert(debugAlsoPaintedParent);
       assert(child._layerHandle.layer == null);
@@ -131,9 +130,14 @@ class PaintingContext extends ClipContext {
       child._layerHandle.layer = childLayer = layer;
     } else {
       assert(debugAlsoPaintedParent || childLayer.attached);
+      Offset? oldOffset;
+      assert(() {
+        oldOffset = childLayer!.offset;
+        return true;
+      }());
       childLayer.removeAllChildren();
       final OffsetLayer updatedLayer = child.updateCompositedLayer(oldLayer: childLayer);
-      assert(identical(updatedLayer, childLayer), '$childLayer -> $updatedLayer');
+      assert(identical(updatedLayer, childLayer));
       assert(oldOffset == updatedLayer.offset);
     }
     child._needsCompositedLayerUpdate = false;
@@ -155,13 +159,27 @@ class PaintingContext extends ClipContext {
   }
 
   /// Update the composited layer of [child] without repainting its children.
+  ///
+  /// The render object must be attached to a [PipelineOwner], must have a
+  /// composited layer, and must be in need of a composited layer update but
+  /// not in need of painting. The render object's layer is re-used, and none
+  /// of its children are repaint or their layers updated.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderObject.isRepaintBoundary], which determines if a [RenderObject]
+  ///    has a composited layer.
   static void updateLayerProperties(RenderObject child) {
     assert(child.isRepaintBoundary && child._wasRepaintBoundary);
     assert(!child._needsPaint);
     assert(child._layerHandle.layer != null);
 
     final OffsetLayer childLayer = child._layerHandle.layer! as OffsetLayer;
-    final Offset oldOffset = childLayer.offset;
+    Offset? oldOffset;
+    assert(() {
+      oldOffset = childLayer.offset;
+      return true;
+    }());
     final OffsetLayer updatedLayer = child.updateCompositedLayer(oldLayer: childLayer);
     assert(identical(updatedLayer, childLayer));
     assert(oldOffset == updatedLayer.offset);
@@ -1006,33 +1024,22 @@ class PipelineOwner {
       );
     }
     try {
-      List<RenderObject> dirtyNodes = _nodesNeedingPaint;
-      _nodesNeedingPaint = <RenderObject>[];
-      // It is possible that one or more render objects in the paint list are no
-      // longer repaint boundaries. Instead of painting from these nodes, the
-      // nearest parent render object repaint boundary should be used instead.
-      bool updated = false;
-      for (final RenderObject object in dirtyNodes) {
-        if (!object.isRepaintBoundary) {
-          updated = true;
-          object.markNeedsPaint();
-        } else {
-          _nodesNeedingPaint.add(object);
-        }
-      }
-
       assert(() {
         _debugDoingPaint = true;
         return true;
       }());
-
-      if (updated) {
-        dirtyNodes = _nodesNeedingPaint;
-      }
+      final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       _nodesNeedingPaint = <RenderObject>[];
 
       // Sort the dirty nodes in reverse order (deepest first).
       for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
+        // It is possible that one or more render objects in the paint list are no
+        // longer repaint boundaries. They would have been marked as needing a compositing
+        // bits update, which would mark their parents dirty to the nearest repaint boundary.
+        // Thus it should be safe to drop them from the list.
+        if (!node.isRepaintBoundary && node._wasRepaintBoundary) {
+          continue;
+        }
         assert(node._layerHandle.layer != null);
         if ((node._needsPaint || node._needsCompositedLayerUpdate) && node.owner == this) {
           if (node._layerHandle.layer!.attached) {
@@ -2121,10 +2128,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// to repaint.
   ///
   /// If this getter returns true, the [paintBounds] are applied to this object
-  /// and all descendants. The framework automatically creates an [OffsetLayer]
-  /// and assigns it to the [layer] field. Render objects that declare
-  /// themselves as repaint boundaries must not replace the layer created by
-  /// the framework.
+  /// and all descendants. The framework invokes [RenderObject.updateCompositedLayer]
+  /// to create an [OffsetLayer] and assigns it to the [layer] field.
+  /// Render objects that declare themselves as repaint boundaries must not replace
+  /// the layer created by the framework.
   ///
   /// If the value of this getter changes, [markNeedsCompositingBitsUpdate] must
   /// be called.
@@ -2156,8 +2163,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// This method is called by the framework when [isRepaintBoundary] is true.
   ///
-  /// If [oldLayer] is `null`, this method should return a new [OffsetLayer]
-  /// (or subtype thereof). If [oldLayer] is not `null`, then this method should
+  /// If [oldLayer] is `null`, this method must return a new [OffsetLayer]
+  /// (or subtype thereof). If [oldLayer] is not `null`, then this method must
   /// reuse the layer instance that is provided - it is an error to create a new
   /// layer in this instance.
   ///
