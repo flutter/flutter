@@ -200,7 +200,7 @@ abstract class MaterialLocalizations {
   String get popupMenuLabel;
 
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
-  /// [MenuBarMenu] widget is opened.
+  /// MenuBarMenu widget is opened.
   String get menuBarMenuLabel;
 
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a

@@ -34,8 +34,8 @@ Future<void> main(List<String> rawArgs) async {
   checkCwdIsRepoRoot('gen_missing_localizations');
 
   final String localizationPath = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n');
-  updateMissingResources(localizationPath, 'material', removeUndefineremoveUndefinedsed);
-  updateMissingResources(localizationPath, 'cupertino', removeUndefremoveUndefinedUnused);
+  updateMissingResources(localizationPath, 'material', removeUndefined: removeUndefined);
+  updateMissingResources(localizationPath, 'cupertino', removeUndefined: removeUndefined);
 }
 
 Map<String, dynamic> loadBundle(File file) {
