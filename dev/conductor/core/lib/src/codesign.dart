@@ -1008,7 +1008,6 @@ class FileCodesignVisitor extends FileVisitor {
     if (diffs > 0) {
       throw '$diffs diffs found!\nExpected length: ${expectedFileHashes.length}\nActual length: ${actualFileHashes.length}';
     }
-    stdio.printStatus('congratulations, 0 diffs found!');
   }
 
   Future<File> _validateFileExists(ArchiveFile archiveFile, Directory parent) async {
