@@ -1,4 +1,4 @@
-Signature: fcf15cb969bc3823b9ca660891871619
+Signature: 0c6a9d42e2b5436b1c4a9635dfba02e8
 
 UNUSED LICENSES:
 
@@ -2132,6 +2132,44 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: angle
+LIBRARY: jdk
+ORIGIN: ../../../third_party/angle/infra/config/main.star + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/angle/infra/config/main.star
+FILE: ../../../third_party/angle/third_party/jdk/3pp/3pp.pb
+FILE: ../../../third_party/angle/third_party/jdk/extras/3pp/3pp.pb
+----------------------------------------------------------------------------------------------------
+Copyright 2021 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: angle
 LIBRARY: khronos
 ORIGIN: ../../../third_party/angle/include/GLES/gl.h
 TYPE: LicenseType.unknown
@@ -2902,10 +2940,10 @@ FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/SeparateAr
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/SeparateArrayConstructorStatements.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/RewriteRepeatedAssignToSwizzled.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/RewriteRepeatedAssignToSwizzled.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/NameEmbeddedUniformStructs.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/NameEmbeddedUniformStructs.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteStructSamplers.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteStructSamplers.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/SeparateStructFromUniformDeclarations.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/SeparateStructFromUniformDeclarations.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceVariable.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceVariable.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/Visit.h
@@ -3002,7 +3040,6 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/Conver
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000005.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000006.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000007.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000008.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/FullScreenQuad.vert.00000000.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/GenerateMipmap.comp.00000000.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/GenerateMipmap.comp.00000001.inc
@@ -3175,7 +3212,7 @@ FILE: ../../../third_party/angle/include/GLES3/gl31ext_explicit_context_autogen.
 FILE: ../../../third_party/angle/include/GLES3/gl32ext_explicit_context_autogen.inc
 FILE: ../../../third_party/angle/include/GLES3/gl3ext_explicit_context_autogen.inc
 FILE: ../../../third_party/angle/include/platform/Platform.h
-FILE: ../../../third_party/angle/infra/gn_isolate_map.pyl
+FILE: ../../../third_party/angle/infra/specs/gn_isolate_map.pyl
 FILE: ../../../third_party/angle/samples/capture_replay/angle_trace_gl.h
 FILE: ../../../third_party/angle/scripts/entry_point_packed_egl_enums.json
 FILE: ../../../third_party/angle/src/common/apple/SoftLinking.h
@@ -3379,6 +3416,8 @@ FILE: ../../../third_party/angle/src/libGLESv2/egl_ext_stubs_autogen.h
 FILE: ../../../third_party/angle/src/libGLESv2/egl_get_labeled_object_data.json
 FILE: ../../../third_party/angle/src/libGLESv2/egl_stubs.cpp
 FILE: ../../../third_party/angle/src/libGLESv2/egl_stubs_autogen.h
+FILE: ../../../third_party/angle/src/libGLESv2/entry_points_cl_autogen.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/entry_points_cl_autogen.h
 FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_autogen.cpp
 FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_autogen.h
 FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_ext_autogen.cpp
@@ -3399,8 +3438,7 @@ FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_autogen.cpp
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_autogen.def
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_no_capture_autogen.def
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_with_capture_autogen.def
-FILE: ../../../third_party/angle/src/libOpenCL/entry_points_cl_autogen.cpp
-FILE: ../../../third_party/angle/src/libOpenCL/entry_points_cl_autogen.h
+FILE: ../../../third_party/angle/src/libOpenCL/libOpenCL_autogen.cpp
 FILE: ../../../third_party/angle/util/display/DisplayPixmap.cpp
 FILE: ../../../third_party/angle/util/display/DisplayWindow.cpp
 FILE: ../../../third_party/angle/util/display/DisplayWindow.h
@@ -3534,8 +3572,6 @@ FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneNoOps.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneNoOps.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveDynamicIndexing.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveDynamicIndexing.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemovePow.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemovePow.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ScalarizeVecAndMatConstructorArgs.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ScalarizeVecAndMatConstructorArgs.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateDeclarations.cpp
@@ -3771,6 +3807,80 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: angle
+ORIGIN: ../../../third_party/angle/include/angle_cl.h + ../../../third_party/angle/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/angle/include/angle_cl.h
+FILE: ../../../third_party/angle/infra/specs/angle_mb_config.pyl
+FILE: ../../../third_party/angle/infra/specs/mixins.pyl
+FILE: ../../../third_party/angle/infra/specs/test_suite_exceptions.pyl
+FILE: ../../../third_party/angle/infra/specs/test_suites.pyl
+FILE: ../../../third_party/angle/infra/specs/variants.pyl
+FILE: ../../../third_party/angle/infra/specs/waterfalls.pyl
+FILE: ../../../third_party/angle/src/common/spirv/angle_spirv_utils.cpp
+FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_builder_autogen.cpp
+FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_builder_autogen.h
+FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_parser_autogen.cpp
+FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_parser_autogen.h
+FILE: ../../../third_party/angle/src/common/spirv/spirv_types.h
+FILE: ../../../third_party/angle/src/compiler/translator/glslang_wrapper.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/glslang_wrapper.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/MonomorphizeUnsupportedFunctionsInVulkanGLSL.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/MonomorphizeUnsupportedFunctionsInVulkanGLSL.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteArrayOfArrayOfOpaqueUniforms.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteR32fImages.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteR32fImages.h
+FILE: ../../../third_party/angle/src/libANGLE/capture/frame_capture_utils_mock.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture/trace_fixture.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture/trace_fixture.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/DisplayGL_unittest.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/DeviceMtl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/DeviceMtl.mm
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/android/AHBFunctions.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/android/AHBFunctions.h
+FILE: ../../../third_party/angle/src/libANGLE/serializer/JsonSerializer.cpp
+FILE: ../../../third_party/angle/src/libANGLE/serializer/JsonSerializer.h
+FILE: ../../../third_party/angle/src/libANGLE/serializer/JsonSerializer_unittest.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/cl_stubs.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/cl_stubs_autogen.h
+FILE: ../../../third_party/angle/src/libGLESv2/entry_points_cl_utils.h
+FILE: ../../../third_party/angle/src/libOpenCL/cl_loader.h
+FILE: ../../../third_party/angle/src/libOpenCL/cl_loader_autogen.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2021 The ANGLE Project Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
+    Ltd., nor the names of their contributors may be used to endorse
+    or promote products derived from this software without specific
+    prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
@@ -4166,41 +4276,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: angle
-ORIGIN: ../../../third_party/angle/infra/config/main.star + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/infra/config/main.star
-----------------------------------------------------------------------------------------------------
-Copyright 2021 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
 ORIGIN: ../../../third_party/angle/src/common/Float16ToFloat32.cpp + ../../../third_party/angle/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/angle/src/common/Float16ToFloat32.cpp
@@ -4339,58 +4414,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/common/spirv/angle_spirv_utils.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/common/spirv/angle_spirv_utils.cpp
-FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_builder_autogen.cpp
-FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_builder_autogen.h
-FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_parser_autogen.cpp
-FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_parser_autogen.h
-FILE: ../../../third_party/angle/src/common/spirv/spirv_types.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/MonomorphizeUnsupportedFunctionsInVulkanGLSL.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/MonomorphizeUnsupportedFunctionsInVulkanGLSL.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteArrayOfArrayOfOpaqueUniforms.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteR32fImages.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteR32fImages.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/android/AHBFunctions.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/android/AHBFunctions.h
-FILE: ../../../third_party/angle/src/libOpenCL/entry_points_cl_utils.h
-----------------------------------------------------------------------------------------------------
-Copyright 2021 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
