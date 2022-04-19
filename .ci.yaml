@@ -483,7 +483,7 @@ targets:
     properties:
       caches: >-
         [
-          {"name":"gradle","path":"gradle"},
+          {"name": "gradle", "path": "gradle"},
           {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
