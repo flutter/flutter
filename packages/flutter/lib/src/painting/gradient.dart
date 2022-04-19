@@ -327,13 +327,13 @@ abstract class Gradient {
 /// A 2D linear gradient.
 ///
 /// This class is used by [BoxDecoration] to represent linear gradients. This
-/// abstracts out the arguments to the [new ui.Gradient.linear] constructor from
+/// abstracts out the arguments to the [ui.Gradient.linear] constructor from
 /// the `dart:ui` library.
 ///
 /// A gradient has two anchor points, [begin] and [end]. The [begin] point
 /// corresponds to 0.0, and the [end] point corresponds to 1.0. These points are
 /// expressed in fractions, so that the same gradient can be reused with varying
-/// sized boxes without changing the parameters. (This contrasts with [new
+/// sized boxes without changing the parameters. (This contrasts with [
 /// ui.Gradient.linear], whose arguments are expressed in logical pixels.)
 ///
 /// The [colors] are described by a list of [Color] objects. There must be at
@@ -372,14 +372,13 @@ class LinearGradient extends Gradient {
   const LinearGradient({
     this.begin = Alignment.centerLeft,
     this.end = Alignment.centerRight,
-    required List<Color> colors,
-    List<double>? stops,
+    required super.colors,
+    super.stops,
     this.tileMode = TileMode.clamp,
-    GradientTransform? transform,
+    super.transform,
   }) : assert(begin != null),
        assert(end != null),
-       assert(tileMode != null),
-       super(colors: colors, stops: stops, transform: transform);
+       assert(tileMode != null);
 
   /// The offset at which stop 0.0 of the gradient is placed.
   ///
@@ -546,14 +545,14 @@ class LinearGradient extends Gradient {
 /// A 2D radial gradient.
 ///
 /// This class is used by [BoxDecoration] to represent radial gradients. This
-/// abstracts out the arguments to the [new ui.Gradient.radial] constructor from
+/// abstracts out the arguments to the [ui.Gradient.radial] constructor from
 /// the `dart:ui` library.
 ///
 /// A normal radial gradient has a [center] and a [radius]. The [center] point
 /// corresponds to 0.0, and the ring at [radius] from the center corresponds
 /// to 1.0. These lengths are expressed in fractions, so that the same gradient
 /// can be reused with varying sized boxes without changing the parameters.
-/// (This contrasts with [new ui.Gradient.radial], whose arguments are expressed
+/// (This contrasts with [ui.Gradient.radial], whose arguments are expressed
 /// in logical pixels.)
 ///
 /// It is also possible to create a two-point (or focal pointed) radial gradient
@@ -620,17 +619,16 @@ class RadialGradient extends Gradient {
   const RadialGradient({
     this.center = Alignment.center,
     this.radius = 0.5,
-    required List<Color> colors,
-    List<double>? stops,
+    required super.colors,
+    super.stops,
     this.tileMode = TileMode.clamp,
     this.focal,
     this.focalRadius = 0.0,
-    GradientTransform? transform,
+    super.transform,
   }) : assert(center != null),
        assert(radius != null),
        assert(tileMode != null),
-       assert(focalRadius != null),
-       super(colors: colors, stops: stops, transform: transform);
+       assert(focalRadius != null);
 
   /// The center of the gradient, as an offset into the (-1.0, -1.0) x (1.0, 1.0)
   /// square describing the gradient which will be mapped onto the paint box.
@@ -831,7 +829,7 @@ class RadialGradient extends Gradient {
 /// A 2D sweep gradient.
 ///
 /// This class is used by [BoxDecoration] to represent sweep gradients. This
-/// abstracts out the arguments to the [new ui.Gradient.sweep] constructor from
+/// abstracts out the arguments to the [ui.Gradient.sweep] constructor from
 /// the `dart:ui` library.
 ///
 /// A gradient has a [center], a [startAngle], and an [endAngle]. The [startAngle]
@@ -919,15 +917,14 @@ class SweepGradient extends Gradient {
     this.center = Alignment.center,
     this.startAngle = 0.0,
     this.endAngle = math.pi * 2,
-    required List<Color> colors,
-    List<double>? stops,
+    required super.colors,
+    super.stops,
     this.tileMode = TileMode.clamp,
-    GradientTransform? transform,
+    super.transform,
   }) : assert(center != null),
        assert(startAngle != null),
        assert(endAngle != null),
-       assert(tileMode != null),
-       super(colors: colors, stops: stops, transform: transform);
+       assert(tileMode != null);
 
   /// The center of the gradient, as an offset into the (-1.0, -1.0) x (1.0, 1.0)
   /// square describing the gradient which will be mapped onto the paint box.

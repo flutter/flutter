@@ -319,17 +319,6 @@ void main() {
 
       expect(() => cache.storageBaseUrl, throwsToolExit());
     });
-
-    testWithoutContext('PubDependencies should be registered as web based', () async {
-      final BufferLogger logger = BufferLogger.test();
-      final PubDependencies pubDependencies = PubDependencies(
-        flutterRoot: () => '',
-        logger: logger,
-        pub: () => FakePub(),
-      );
-
-      expect(pubDependencies.developmentArtifact, DevelopmentArtifact.web);
-    });
   });
 
   testWithoutContext('flattenNameSubdirs', () {
@@ -1087,6 +1076,19 @@ class FakeSimpleArtifact extends CachedArtifact {
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
 }
 
+class FakeDownloadedArtifact extends CachedArtifact {
+  FakeDownloadedArtifact(this.downloadedFile, Cache cache) : super(
+    'fake',
+    cache,
+    DevelopmentArtifact.universal,
+  );
+
+  final File downloadedFile;
+
+  @override
+  Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
+}
+
 class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   bool upToDate = false;
   bool didUpdate = false;
@@ -1096,7 +1098,7 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
 
   @override
-  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async {
+  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils, {bool offline = false}) async {
     if (updateException != null) {
       throw updateException;
     }

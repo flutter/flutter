@@ -81,7 +81,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// The [axisDirection] and [viewportBuilder] arguments must not be null.
   const Scrollable({
-    Key? key,
+    super.key,
     this.axisDirection = AxisDirection.down,
     this.controller,
     this.physics,
@@ -96,8 +96,7 @@ class Scrollable extends StatefulWidget {
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
-       assert(semanticChildCount == null || semanticChildCount >= 0),
-       super (key: key);
+       assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// The direction in which this widget scrolls.
   ///
@@ -199,7 +198,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// Some subtypes of [ScrollView] can infer this value automatically. For
   /// example [ListView] will use the number of widgets in the child list,
-  /// while the [new ListView.separated] constructor will use half that amount.
+  /// while the [ListView.separated] constructor will use half that amount.
   ///
   /// For [CustomScrollView] and other types which do not receive a builder
   /// or list of widgets, the child count must be explicitly provided.
@@ -355,13 +354,11 @@ class Scrollable extends StatefulWidget {
 // ScrollableState.build() always rebuilds its _ScrollableScope.
 class _ScrollableScope extends InheritedWidget {
   const _ScrollableScope({
-    Key? key,
     required this.scrollable,
     required this.position,
-    required Widget child,
+    required super.child,
   }) : assert(scrollable != null),
-       assert(child != null),
-       super(key: key, child: child);
+       assert(child != null);
 
   final ScrollableState scrollable;
   final ScrollPosition position;
@@ -848,14 +845,13 @@ class ScrollableDetails {
 /// scrollable children.
 class _ScrollSemantics extends SingleChildRenderObjectWidget {
   const _ScrollSemantics({
-    Key? key,
+    super.key,
     required this.position,
     required this.allowImplicitScrolling,
     required this.semanticChildCount,
-    Widget? child,
+    super.child,
   }) : assert(position != null),
-       assert(semanticChildCount == null || semanticChildCount >= 0),
-       super(key: key, child: child);
+       assert(semanticChildCount == null || semanticChildCount >= 0);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;

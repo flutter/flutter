@@ -22,7 +22,7 @@ final Set<String> interestingLabels = <String>{
 };
 
 class TestRoot extends StatefulWidget {
-  const TestRoot({ Key? key }) : super(key: key);
+  const TestRoot({ super.key });
 
   static late final TestRootState state;
 
@@ -100,6 +100,7 @@ void main() {
     Map<String, String> args;
 
     debugProfileBuildsEnabled = true;
+    debugEnhanceBuildTimelineArguments = true;
     await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey(), color: const Color(0xFFFFFFFF))); });
     events = await fetchInterestingEvents(interestingLabels);
     expect(
@@ -109,8 +110,23 @@ void main() {
     args = (events.where((TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['color'], 'Color(0xffffffff)');
     debugProfileBuildsEnabled = false;
+    debugEnhanceBuildTimelineArguments = false;
+
+    debugProfileBuildsEnabledUserWidgets = true;
+    debugEnhanceBuildTimelineArguments = true;
+    await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey(), color: const Color(0xFFFFFFFF))); });
+    events = await fetchInterestingEvents(interestingLabels);
+    expect(
+      events.map<String>(eventToName),
+      <String>['BUILD', 'Placeholder', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
+    );
+    args = (events.where((TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
+    expect(args['color'], 'Color(0xffffffff)');
+    debugProfileBuildsEnabledUserWidgets = false;
+    debugEnhanceBuildTimelineArguments = false;
 
     debugProfileLayoutsEnabled = true;
+    debugEnhanceLayoutTimelineArguments = true;
     await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey())); });
     events = await fetchInterestingEvents(interestingLabels);
     expect(
@@ -120,10 +136,12 @@ void main() {
     args = (events.where((TimelineEvent event) => event.json!['name'] == '$RenderCustomPaint').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['creator'], startsWith('CustomPaint'));
     expect(args['creator'], contains('Placeholder'));
-    expect(args['foregroundPainter'], startsWith('_PlaceholderPainter#'));
+    expect(args['painter'], startsWith('_PlaceholderPainter#'));
     debugProfileLayoutsEnabled = false;
+    debugEnhanceLayoutTimelineArguments = false;
 
     debugProfilePaintsEnabled = true;
+    debugEnhancePaintTimelineArguments = true;
     await runFrame(() { TestRoot.state.updateWidget(Placeholder(key: UniqueKey())); });
     events = await fetchInterestingEvents(interestingLabels);
     expect(
@@ -133,8 +151,9 @@ void main() {
     args = (events.where((TimelineEvent event) => event.json!['name'] == '$RenderCustomPaint').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['creator'], startsWith('CustomPaint'));
     expect(args['creator'], contains('Placeholder'));
-    expect(args['foregroundPainter'], startsWith('_PlaceholderPainter#'));
+    expect(args['painter'], startsWith('_PlaceholderPainter#'));
     debugProfilePaintsEnabled = false;
+    debugEnhancePaintTimelineArguments = false;
 
   }, skip: isBrowser); // [intended] uses dart:isolate and io.
 }

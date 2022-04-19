@@ -40,10 +40,6 @@ void main() {
     // The version of TalkBack running on the device.
     Version talkbackVersion;
 
-    // The version of TalkBack where the actions on the first item were fixed.
-    final Version fixedTalkback = Version(9, 1, 0);
-
-
     Future<Version> getTalkbackVersion() async {
       final io.ProcessResult result = await io.Process.run(adbPath(), const <String>[
         'shell',
@@ -124,29 +120,7 @@ void main() {
         // Ideally this should test the case where there is nothing on the
         // clipboard as well, but there is no reliable way to clear the
         // clipboard on Android devices.
-        final SerializableFinder normalTextField = find.descendant(
-          of: find.byValueKey(normalTextFieldKeyValue),
-          matching: find.byType('Semantics'),
-          firstMatchOnly: true,
-        );
-        await driver.tap(normalTextField);
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.enterText('hello world');
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.tap(normalTextField);
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-        await driver.tap(normalTextField);
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.tap(find.text('Select all'));
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.tap(find.text('Copy'));
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-        await driver.enterText('');
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        // Go back to previous page and forward again to unfocus the field.
-        await driver.tap(find.byValueKey(backButtonKeyValue));
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.tap(find.text(textFieldRoute));
+        await driver.requestData('setClipboard#Hello World');
         await Future<void>.delayed(const Duration(milliseconds: 500));
       });
 
@@ -314,8 +288,8 @@ void main() {
             isCheckable: true,
             isEnabled: true,
             isFocusable: true,
+            ignoredActions: ignoredAccessibilityFocusActions,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
           ),
@@ -331,8 +305,8 @@ void main() {
             isCheckable: true,
             isEnabled: true,
             isFocusable: true,
+            ignoredActions: ignoredAccessibilityFocusActions,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
           ),
@@ -343,9 +317,8 @@ void main() {
             className: AndroidClassName.checkBox,
             isCheckable: true,
             isEnabled: false,
-            actions: const <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
-            ],
+            ignoredActions: ignoredAccessibilityFocusActions,
+            actions: const <AndroidSemanticsAction>[],
           ),
         );
       }, timeout: Timeout.none);
@@ -361,8 +334,8 @@ void main() {
             isCheckable: true,
             isEnabled: true,
             isFocusable: true,
+            ignoredActions: ignoredAccessibilityFocusActions,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
           ),
@@ -378,8 +351,8 @@ void main() {
             isCheckable: true,
             isEnabled: true,
             isFocusable: true,
+            ignoredActions: ignoredAccessibilityFocusActions,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
           ),
@@ -397,8 +370,8 @@ void main() {
             isCheckable: true,
             isEnabled: true,
             isFocusable: true,
+            ignoredActions: ignoredAccessibilityFocusActions,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
           ),
@@ -414,8 +387,8 @@ void main() {
             isCheckable: true,
             isEnabled: true,
             isFocusable: true,
+            ignoredActions: ignoredAccessibilityFocusActions,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
           ),
@@ -436,8 +409,8 @@ void main() {
             isEnabled: true,
             isFocusable: true,
             contentDescription: switchLabel,
+            ignoredActions: ignoredAccessibilityFocusActions,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
           ),
@@ -463,8 +436,8 @@ void main() {
             isCheckable: false,
             isEnabled: true,
             isFocusable: true,
+            ignoredActions: ignoredAccessibilityFocusActions,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
           ),
@@ -485,9 +458,8 @@ void main() {
                   isCheckable: false,
                   isEnabled: true,
                   isFocusable: true,
+                  ignoredActions: ignoredAccessibilityFocusActions,
                   actions: <AndroidSemanticsAction>[
-                    if (item == popupItems.first) AndroidSemanticsAction.clearAccessibilityFocus,
-                    if (item != popupItems.first) AndroidSemanticsAction.accessibilityFocus,
                     AndroidSemanticsAction.click,
                   ],
                 ),
@@ -509,10 +481,8 @@ void main() {
                   isCheckable: false,
                   isEnabled: true,
                   isFocusable: true,
+                  ignoredActions: ignoredAccessibilityFocusActions,
                   actions: <AndroidSemanticsAction>[
-                    if (talkbackVersion < fixedTalkback && item == popupItems.first) AndroidSemanticsAction.accessibilityFocus,
-                    if (talkbackVersion >= fixedTalkback && item == popupItems.first) AndroidSemanticsAction.clearAccessibilityFocus,
-                    if (item != popupItems.first) AndroidSemanticsAction.accessibilityFocus,
                     AndroidSemanticsAction.click,
                   ],
                 ),
@@ -532,8 +502,8 @@ void main() {
             isCheckable: false,
             isEnabled: true,
             isFocusable: true,
+            ignoredActions: ignoredAccessibilityFocusActions,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
           ),
@@ -557,10 +527,8 @@ void main() {
                   isCheckable: false,
                   isEnabled: true,
                   isFocusable: true,
+                  ignoredActions: ignoredAccessibilityFocusActions,
                   actions: <AndroidSemanticsAction>[
-                    if (talkbackVersion < fixedTalkback && item == popupItems.first) AndroidSemanticsAction.accessibilityFocus,
-                    if (talkbackVersion >= fixedTalkback && item == popupItems.first) AndroidSemanticsAction.clearAccessibilityFocus,
-                    if (item != popupItems.first) AndroidSemanticsAction.accessibilityFocus,
                     AndroidSemanticsAction.click,
                   ],
                 ),
@@ -592,10 +560,8 @@ void main() {
                   isCheckable: false,
                   isEnabled: true,
                   isFocusable: true,
+                  ignoredActions: ignoredAccessibilityFocusActions,
                   actions: <AndroidSemanticsAction>[
-                    if (talkbackVersion < fixedTalkback && item == popupItems.first) AndroidSemanticsAction.accessibilityFocus,
-                    if (talkbackVersion >= fixedTalkback && item == popupItems.first) AndroidSemanticsAction.clearAccessibilityFocus,
-                    if (item != popupItems.first) AndroidSemanticsAction.accessibilityFocus,
                     AndroidSemanticsAction.click,
                   ],
                 ),
@@ -620,8 +586,8 @@ void main() {
             isCheckable: false,
             isEnabled: true,
             isFocusable: true,
+            ignoredActions: ignoredAccessibilityFocusActions,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
           ),
@@ -639,8 +605,8 @@ void main() {
                 isCheckable: false,
                 isEnabled: true,
                 isFocusable: true,
+                ignoredActions: ignoredAccessibilityFocusActions,
                 actions: <AndroidSemanticsAction>[
-                  AndroidSemanticsAction.accessibilityFocus,
                   AndroidSemanticsAction.click,
                 ],
               ),
@@ -655,10 +621,8 @@ void main() {
                   isCheckable: false,
                   isEnabled: true,
                   isFocusable: true,
-                  actions: <AndroidSemanticsAction>[
-                    if (item == 'Title') AndroidSemanticsAction.clearAccessibilityFocus,
-                    if (item != 'Title') AndroidSemanticsAction.accessibilityFocus,
-                  ],
+                  ignoredActions: ignoredAccessibilityFocusActions,
+                  actions: <AndroidSemanticsAction>[],
                 ),
                 reason: "Alert $item button doesn't have the right semantics");
           }
@@ -678,8 +642,8 @@ void main() {
                 isCheckable: false,
                 isEnabled: true,
                 isFocusable: true,
+                ignoredActions: ignoredAccessibilityFocusActions,
                 actions: <AndroidSemanticsAction>[
-                  AndroidSemanticsAction.accessibilityFocus,
                   AndroidSemanticsAction.click,
                 ],
               ),
@@ -694,11 +658,8 @@ void main() {
                   isCheckable: false,
                   isEnabled: true,
                   isFocusable: true,
-                  actions: <AndroidSemanticsAction>[
-                    if (talkbackVersion < fixedTalkback && item == 'Title') AndroidSemanticsAction.accessibilityFocus,
-                    if (talkbackVersion >= fixedTalkback && item == 'Title') AndroidSemanticsAction.clearAccessibilityFocus,
-                    if (item != 'Title') AndroidSemanticsAction.accessibilityFocus,
-                  ],
+                  ignoredActions: ignoredAccessibilityFocusActions,
+                  actions: <AndroidSemanticsAction>[],
                 ),
                 reason: "Alert $item button doesn't have the right semantics");
           }

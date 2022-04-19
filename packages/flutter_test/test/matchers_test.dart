@@ -731,12 +731,12 @@ class _FakeSemanticsNode extends SemanticsNode {
 
 @immutable
 class _CustomColor extends Color {
-  const _CustomColor(int value, {this.isEqual}) : super(value);
+  const _CustomColor(super.value, {this.isEqual});
   final bool? isEqual;
 
   @override
   bool operator ==(Object other) => isEqual ?? super == other;
 
   @override
-  int get hashCode => hashValues(super.hashCode, isEqual);
+  int get hashCode => Object.hash(super.hashCode, isEqual);
 }

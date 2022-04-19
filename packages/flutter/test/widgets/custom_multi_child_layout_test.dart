@@ -150,10 +150,9 @@ class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
 
 class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
   const LayoutWithMissingId({
-    Key? key,
-    required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+    super.key,
+    required super.child,
+  }) : assert(child != null);
 
   @override
   void applyParentData(RenderObject renderObject) {}

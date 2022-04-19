@@ -227,8 +227,8 @@ class StartContext extends Context {
     required this.conductorVersion,
     required this.processManager,
     required this.releaseChannel,
-    required Checkouts checkouts,
-    required File stateFile,
+    required super.checkouts,
+    required super.stateFile,
     this.force = false,
     this.versionOverride,
   }) : git = Git(processManager),
@@ -254,10 +254,6 @@ class StartContext extends Context {
       name: RemoteName.mirror,
       url: frameworkMirror,
     ),
-  ),
-  super(
-    checkouts: checkouts,
-    stateFile: stateFile,
   );
 
   final String candidateBranch;
@@ -397,7 +393,10 @@ class StartContext extends Context {
     ));
 
     final String frameworkHead = await framework.reverseParse('HEAD');
-    final String branchPoint = await framework.branchPoint(candidateBranch, FrameworkRepository.defaultBranch);
+    final String branchPoint = await framework.branchPoint(
+      '${framework.upstreamRemote.name}/$candidateBranch',
+      '${framework.upstreamRemote.name}/${FrameworkRepository.defaultBranch}',
+    );
     final bool atBranchPoint = branchPoint == frameworkHead;
 
     final ReleaseType releaseType = computeReleaseType(lastVersion, atBranchPoint);

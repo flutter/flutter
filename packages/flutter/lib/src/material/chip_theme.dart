@@ -44,12 +44,11 @@ class ChipTheme extends InheritedTheme {
   ///
   /// The [data] and [child] arguments must not be null.
   const ChipTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+       assert(data != null);
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.

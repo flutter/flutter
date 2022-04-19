@@ -581,7 +581,7 @@ class FakeAccessibilityFeatures implements ui.AccessibilityFeatures {
   }
 
   @override
-  int get hashCode => ui.hashValues(accessibleNavigation, invertColors, disableAnimations, boldText, reduceMotion, highContrast);
+  int get hashCode => Object.hash(accessibleNavigation, invertColors, disableAnimations, boldText, reduceMotion, highContrast);
 
   /// This gives us some grace time when the dart:ui side adds something to
   /// [AccessibilityFeatures], and makes things easier when we do rolls to

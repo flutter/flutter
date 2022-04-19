@@ -89,6 +89,13 @@ void main() {
           .createSync(recursive: true);
       fileSystem
           .directory(xcframeworkPath)
+          .childDirectory('ios-arm64')
+          .childDirectory('Flutter.framework')
+          .createSync(recursive: true);
+
+      // TODO(jmagman): Remove ios-arm64_armv7 checks when armv7 engine artifacts are removed.
+      fileSystem
+          .directory(xcframeworkPath)
           .childDirectory('ios-arm64_armv7')
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
@@ -100,10 +107,27 @@ void main() {
         fileSystem.path
             .join(xcframeworkPath, 'ios-arm64_x86_64-simulator', 'Flutter.framework'),
       );
+      final String actualReleaseFrameworkArtifact = artifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.release,
+        environmentType: EnvironmentType.physical,
+      );
+      final String expectedArm64ReleaseFrameworkArtifact = fileSystem.path.join(
+        xcframeworkPath,
+        'ios-arm64',
+        'Flutter.framework',
+      );
+      final String expectedArmv7ReleaseFrameworkArtifact = fileSystem.path.join(
+        xcframeworkPath,
+        'ios-arm64_armv7',
+        'Flutter.framework',
+      );
+
+      // TODO(jmagman): Replace with expect(actualReleaseFrameworkArtifact, expectedArm64ReleaseFrameworkArtifact) when armv7 engine artifacts are removed.
       expect(
-        artifacts.getArtifactPath(Artifact.flutterFramework,
-            platform: TargetPlatform.ios, mode: BuildMode.release, environmentType: EnvironmentType.physical),
-        fileSystem.path.join(xcframeworkPath, 'ios-arm64_armv7', 'Flutter.framework'),
+        actualReleaseFrameworkArtifact,
+        anyOf(expectedArm64ReleaseFrameworkArtifact, expectedArmv7ReleaseFrameworkArtifact),
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: BuildMode.release),

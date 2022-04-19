@@ -15,7 +15,7 @@ import 'framework.dart' show BuildContext;
 /// widget subtree.
 ///
 /// To obtain the current icon theme, use [IconTheme.of]. To convert an icon
-/// theme to a version with all the fields filled in, use [new
+/// theme to a version with all the fields filled in, use [
 /// IconThemeData.fallback].
 @immutable
 class IconThemeData with Diagnosticable {

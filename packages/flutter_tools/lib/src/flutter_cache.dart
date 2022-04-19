@@ -26,10 +26,10 @@ class FlutterCache extends Cache {
   /// [artifacts] is configurable for testing.
   FlutterCache({
     required Logger logger,
-    required FileSystem fileSystem,
+    required super.fileSystem,
     required Platform platform,
-    required OperatingSystemUtils osUtils,
-  }) : super(logger: logger, fileSystem: fileSystem, platform: platform, osUtils: osUtils, artifacts: <ArtifactSet>[]) {
+    required super.osUtils,
+  }) : super(logger: logger, platform: platform, artifacts: <ArtifactSet>[]) {
     registerArtifact(MaterialFonts(this));
     registerArtifact(GradleWrapper(this));
     registerArtifact(AndroidGenSnapshotArtifacts(this, platform: platform));
@@ -74,7 +74,7 @@ class PubDependencies extends ArtifactSet {
   }) : _logger = logger,
        _flutterRoot = flutterRoot,
        _pub = pub,
-       super(DevelopmentArtifact.web);
+       super(DevelopmentArtifact.universal);
 
   final String Function() _flutterRoot;
   final Logger _logger;
@@ -115,10 +115,12 @@ class PubDependencies extends ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    {bool offline = false}
   ) async {
     await _pub().get(
       context: PubContext.pubGet,
       directory: fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
+      offline: offline
     );
   }
 }
@@ -418,6 +420,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    {bool offline = false}
   ) async {
     if (globals.androidSdk == null) {
       return;

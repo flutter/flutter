@@ -92,7 +92,7 @@ class DriveCommand extends RunCommandBase {
       )
       ..addFlag('build',
         defaultsTo: true,
-        help: '(deprecated) Build the app before running. To use an existing app, pass the "--use-application-binary" '
+        help: '(deprecated) Build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
               'flag with an existing APK.',
       )
       ..addOption('screenshot',
@@ -209,12 +209,13 @@ class DriveCommand extends RunCommandBase {
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
     }
-    final Device device = await findTargetDevice(includeUnsupportedDevices: stringArg('use-application-binary') == null);
+    final String applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
+    final Device device = await findTargetDevice(includeUnsupportedDevices: applicationBinaryPath == null);
     if (device == null) {
       throwToolExit(null);
     }
     if (screenshot != null && !device.supportsScreenshot) {
-      throwToolExit('Screenshot not supported for ${device.name}.');
+      _logger.printError('Screenshot not supported for ${device.name}.');
     }
 
     final bool web = device is WebServerDevice || device is ChromiumDevice;
@@ -233,9 +234,9 @@ class DriveCommand extends RunCommandBase {
     final DriverService driverService = _flutterDriverFactory.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(web);
-    final File applicationBinary = stringArg('use-application-binary') == null
+    final File applicationBinary = applicationBinaryPath == null
       ? null
-      : _fileSystem.file(stringArg('use-application-binary'));
+      : _fileSystem.file(applicationBinaryPath);
 
     bool screenshotTaken = false;
     try {
@@ -359,6 +360,9 @@ class DriveCommand extends RunCommandBase {
   }
 
   Future<void> _takeScreenshot(Device device) async {
+    if (!device.supportsScreenshot) {
+      return;
+    }
     try {
       final Directory outputDirectory = _fileSystem.directory(screenshot)
         ..createSync(recursive: true);

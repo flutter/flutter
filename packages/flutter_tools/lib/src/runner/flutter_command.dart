@@ -115,7 +115,9 @@ class FlutterOptions {
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
+  static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const String kFatalWarnings = 'fatal-warnings';
+  static const String kUseApplicationBinary = 'use-application-binary';
 }
 
 /// flutter command categories for usage.
@@ -605,6 +607,16 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesApplicationBinaryOption() {
+    argParser.addOption(
+      FlutterOptions.kUseApplicationBinary,
+      help: 'Specify a pre-built application binary to use when running. For Android applications, '
+        'this must be the path to an APK. For iOS applications, the path to an IPA. Other device types '
+        'do not yet support prebuilt application binaries.',
+      valueHelp: 'path/to/app.apk',
+    );
+  }
+
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
@@ -829,6 +841,11 @@ abstract class FlutterCommand extends Command<void> {
         'the default cached location.',
       hide: hide,
     );
+    argParser.addFlag(FlutterOptions.kAssumeInitializeFromDillUpToDate,
+      help: 'If set, assumes that the file passed in initialize-from-dill is up '
+        'to date and skip the check and potential invalidation of files.',
+      hide: hide,
+    );
   }
 
   void addMultidexOption({ bool hide = false }) {
@@ -939,6 +956,16 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kCodeSizeDirectory,
       help: 'The location to write code size analysis files. If this is not specified, files '
             'are written to a temporary directory under the build directory.'
+    );
+  }
+
+  void addEnableImpellerFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-impeller',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Whether to enable the experimental Impeller rendering engine. '
+              'Impeller is currently only supported on iOS. This flag will '
+              'be ignored when targeting other platforms.',
     );
   }
 
@@ -1113,6 +1140,8 @@ abstract class FlutterCommand extends Command<void> {
       initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
           ? stringArg(FlutterOptions.kInitializeFromDill)
           : null,
+      assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
+          && boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
     );
   }
 
@@ -1272,8 +1301,14 @@ abstract class FlutterCommand extends Command<void> {
     if (shouldUpdateCache) {
       // First always update universal artifacts, as some of these (e.g.
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
-      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
-      await globals.cache.updateAll(await requiredArtifacts);
+      final bool offline;
+      if (argParser.options.containsKey('offline')) {
+        offline = boolArg('offline');
+      } else {
+        offline = false;
+      }
+      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal}, offline: offline);
+      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
     }
     globals.cache.releaseLock();
 

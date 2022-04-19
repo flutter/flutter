@@ -115,7 +115,6 @@ class _MockHttpClient implements HttpClient {
   void addProxyCredentials(String host, int port, String realm, HttpClientCredentials credentials) { }
 
   @override
-  // ignore: override_on_non_overriding_member
   Future<ConnectionTask<Socket>> Function(Uri url, String? proxyHost, int? proxyPort)? connectionFactory;
 
   @override
@@ -128,7 +127,6 @@ class _MockHttpClient implements HttpClient {
   bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
 
   @override
-  // ignore: override_on_non_overriding_member
   Function(String line)? keyLog;
 
   @override

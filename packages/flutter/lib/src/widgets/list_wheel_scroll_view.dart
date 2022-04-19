@@ -307,19 +307,13 @@ class FixedExtentMetrics extends FixedScrollMetrics {
   /// Creates an immutable snapshot of values associated with a
   /// [ListWheelScrollView].
   FixedExtentMetrics({
-    required double? minScrollExtent,
-    required double? maxScrollExtent,
-    required double? pixels,
-    required double? viewportDimension,
-    required AxisDirection axisDirection,
+    required super.minScrollExtent,
+    required super.maxScrollExtent,
+    required super.pixels,
+    required super.viewportDimension,
+    required super.axisDirection,
     required this.itemIndex,
-  }) : super(
-         minScrollExtent: minScrollExtent,
-         maxScrollExtent: maxScrollExtent,
-         pixels: pixels,
-         viewportDimension: viewportDimension,
-         axisDirection: axisDirection,
-       );
+  });
 
   @override
   FixedExtentMetrics copyWith({
@@ -365,23 +359,16 @@ double _clipOffsetToScrollableRange(
 /// [_FixedExtentScrollable] and can access its `itemExtent` to derive [itemIndex].
 class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext implements FixedExtentMetrics {
   _FixedExtentScrollPosition({
-    required ScrollPhysics physics,
-    required ScrollContext context,
+    required super.physics,
+    required super.context,
     required int initialItem,
-    bool keepScrollOffset = true,
-    ScrollPosition? oldPosition,
-    String? debugLabel,
+    super.oldPosition,
   }) : assert(
          context is _FixedExtentScrollableState,
          'FixedExtentScrollController can only be used with ListWheelScrollViews',
        ),
        super(
-         physics: physics,
-         context: context,
          initialPixels: _getItemExtentFromScrollContext(context) * initialItem,
-         keepScrollOffset: keepScrollOffset,
-         oldPosition: oldPosition,
-         debugLabel: debugLabel,
        );
 
   static double _getItemExtentFromScrollContext(ScrollContext context) {
@@ -425,23 +412,13 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext impleme
 /// size so it can pass it on ultimately to the [FixedExtentScrollController].
 class _FixedExtentScrollable extends Scrollable {
   const _FixedExtentScrollable({
-    Key? key,
-    AxisDirection axisDirection = AxisDirection.down,
-    ScrollController? controller,
-    ScrollPhysics? physics,
+    super.controller,
+    super.physics,
     required this.itemExtent,
-    required ViewportBuilder viewportBuilder,
-    String? restorationId,
-    ScrollBehavior? scrollBehavior,
-  }) : super (
-    key: key,
-    axisDirection: axisDirection,
-    controller: controller,
-    physics: physics,
-    viewportBuilder: viewportBuilder,
-    restorationId: restorationId,
-    scrollBehavior: scrollBehavior,
-  );
+    required super.viewportBuilder,
+    super.restorationId,
+    super.scrollBehavior,
+  });
 
   final double itemExtent;
 
@@ -471,7 +448,7 @@ class _FixedExtentScrollableState extends ScrollableState {
 /// Defers back to the parent beyond the scroll extents.
 class FixedExtentScrollPhysics extends ScrollPhysics {
   /// Creates a scroll physics that always lands on items.
-  const FixedExtentScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const FixedExtentScrollPhysics({ super.parent });
 
   @override
   FixedExtentScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -572,7 +549,7 @@ class ListWheelScrollView extends StatefulWidget {
   /// Constructs a list in which children are scrolled a wheel. Its children
   /// are passed to a delegate and lazily built during layout.
   ListWheelScrollView({
-    Key? key,
+    super.key,
     this.controller,
     this.physics,
     this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
@@ -608,13 +585,12 @@ class ListWheelScrollView extends StatefulWidget {
          !renderChildrenOutsideViewport || clipBehavior == Clip.none,
          RenderListWheelViewport.clipBehaviorAndRenderChildrenOutsideViewportConflict,
        ),
-       childDelegate = ListWheelChildListDelegate(children: children),
-       super(key: key);
+       childDelegate = ListWheelChildListDelegate(children: children);
 
   /// Constructs a list in which children are scrolled a wheel. Its children
   /// are managed by a delegate and are lazily built during layout.
   const ListWheelScrollView.useDelegate({
-    Key? key,
+    super.key,
     this.controller,
     this.physics,
     this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
@@ -649,8 +625,7 @@ class ListWheelScrollView extends StatefulWidget {
        assert(
          !renderChildrenOutsideViewport || clipBehavior == Clip.none,
          RenderListWheelViewport.clipBehaviorAndRenderChildrenOutsideViewportConflict,
-       ),
-       super(key: key);
+       );
 
   /// Typically a [FixedExtentScrollController] used to control the current item.
   ///
@@ -816,7 +791,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
 /// Element that supports building children lazily for [ListWheelViewport].
 class ListWheelElement extends RenderObjectElement implements ListWheelChildManager {
   /// Creates an element that lazily builds children for the given widget.
-  ListWheelElement(ListWheelViewport widget) : super(widget);
+  ListWheelElement(ListWheelViewport super.widget);
 
   @override
   RenderListWheelViewport get renderObject => super.renderObject as RenderListWheelViewport;
@@ -989,7 +964,7 @@ class ListWheelViewport extends RenderObjectWidget {
   ///
   /// The [offset] argument must be provided and must not be null.
   const ListWheelViewport({
-    Key? key,
+    super.key,
     this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
     this.perspective = RenderListWheelViewport.defaultPerspective,
     this.offAxisFraction = 0.0,
@@ -1020,8 +995,7 @@ class ListWheelViewport extends RenderObjectWidget {
        assert(
          !renderChildrenOutsideViewport || clipBehavior == Clip.none,
          RenderListWheelViewport.clipBehaviorAndRenderChildrenOutsideViewportConflict,
-       ),
-       super(key: key);
+       );
 
   /// {@macro flutter.rendering.RenderListWheelViewport.diameterRatio}
   final double diameterRatio;

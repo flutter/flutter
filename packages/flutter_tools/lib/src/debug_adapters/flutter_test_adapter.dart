@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:dds/dap.dart' hide PidTracker, PackageConfigUtils;
+import 'package:dds/dap.dart' hide PidTracker;
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
@@ -19,24 +19,17 @@ import 'mixins.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter tests.
 class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
-    with PidTracker, PackageConfigUtils, TestAdapter {
+    with PidTracker, TestAdapter {
   FlutterTestDebugAdapter(
-    ByteStreamServerChannel channel, {
+    super.channel, {
     required this.fileSystem,
     required this.platform,
-    bool ipv6 = false,
-    bool enableDds = true,
-    bool enableAuthCodes = true,
-    Logger? logger,
-  }) : super(
-          channel,
-          ipv6: ipv6,
-          enableDds: enableDds,
-          enableAuthCodes: enableAuthCodes,
-          logger: logger,
-        );
+    super.ipv6,
+    super.enableDds,
+    super.enableAuthCodes,
+    super.logger,
+  });
 
-  @override
   FileSystem fileSystem;
   Platform platform;
   Process? _process;

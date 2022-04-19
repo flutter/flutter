@@ -17,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({ Key? key, this.child }) : super(key: key);
+  const StateMarker({ super.key, this.child });
 
   final Widget? child;
 
@@ -1097,6 +1097,24 @@ void main() {
           )
         ]
       )
+    ));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('ScrollBehavior stretch android overscroll indicator via useMaterial3 flag', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+        home: ListView(
+            children: const <Widget>[
+              SizedBox(
+                height: 1000.0,
+                width: 1000.0,
+                child: Text('Test'),
+              )
+            ]
+        )
     ));
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);

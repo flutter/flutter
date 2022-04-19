@@ -1546,6 +1546,21 @@ void main() {
       expect(data.logicalKey, equals(const LogicalKeyboardKey(0x1400000000)));
     });
 
+    test('Prioritize logical key from specifiedLogicalKey', () {
+      final RawKeyEvent digit1FromFrench = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x00000012,
+        'characters': '&',
+        'charactersIgnoringModifiers': '&',
+        'specifiedLogicalKey': 0x000000031,
+        'modifiers': 0,
+      });
+      final RawKeyEventDataMacOs data = digit1FromFrench.data as RawKeyEventDataMacOs;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.digit1));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.digit1));
+    });
+
     test('data.toString', () {
       expect(RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
@@ -2479,6 +2494,14 @@ void main() {
       RawKeyEventDataWeb.modifierScrollLock: ModifierKey.scrollLockModifier,
     };
 
+    const Map<String, LogicalKeyboardKey> modifierTestsWithNoLocation =
+        <String, LogicalKeyboardKey>{
+      'Alt': LogicalKeyboardKey.altLeft,
+      'Shift': LogicalKeyboardKey.shiftLeft,
+      'Control': LogicalKeyboardKey.controlLeft,
+      'Meta': LogicalKeyboardKey.metaLeft,
+    };
+
     test('modifier keys are recognized individually', () {
       for (final int modifier in modifierTests.keys) {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
@@ -2536,6 +2559,19 @@ void main() {
             );
           }
         }
+      }
+    });
+
+    test('modifier keys with no location are mapped to left', () {
+      for (final String modifierKey in modifierTestsWithNoLocation.keys) {
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
+          'type': 'keydown',
+          'keymap': 'web',
+          'key': modifierKey,
+          'location': 0,
+        });
+        final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
+        expect(data.logicalKey, modifierTestsWithNoLocation[modifierKey]);
       }
     });
 

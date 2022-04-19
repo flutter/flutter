@@ -13,18 +13,6 @@ import 'package:flutter_tools/src/proxied_devices/file_transfer.dart';
 import '../../src/common.dart';
 
 void main() {
-  // late BufferLogger bufferLogger;
-  // late FakeDaemonStreams daemonStreams;
-  // late DaemonConnection daemonConnection;
-  // setUp(() {
-  //   bufferLogger = BufferLogger.test();
-  //   daemonStreams = FakeDaemonStreams();
-  //   daemonConnection = DaemonConnection(
-  //     daemonStreams: daemonStreams,
-  //     logger: bufferLogger,
-  //   );
-  // });
-
   group('convertToChunks', () {
     test('works correctly', () async {
       final StreamController<Uint8List> controller = StreamController<Uint8List>();

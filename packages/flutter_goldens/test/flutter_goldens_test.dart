@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' hide Directory;
 import 'dart:typed_data';
-import 'dart:ui' show hashValues, hashList;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -873,7 +872,7 @@ class RunInvocation {
   final String? workingDirectory;
 
   @override
-  int get hashCode => hashValues(hashList(command), workingDirectory);
+  int get hashCode => Object.hash(Object.hashAll(command), workingDirectory);
 
   bool _commandEquals(List<String> other) {
     if (other == command) {

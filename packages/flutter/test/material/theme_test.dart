@@ -47,6 +47,46 @@ void main() {
     expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.dark));
   });
 
+  testWidgets('Theme overrides selection style', (WidgetTester tester) async {
+    const Color defaultSelectionColor = Color(0x11111111);
+    const Color defaultCursorColor = Color(0x22222222);
+    const Color themeSelectionColor = Color(0x33333333);
+    const Color themeCursorColor = Color(0x44444444);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(brightness: Brightness.dark),
+        home: Scaffold(
+          body: DefaultSelectionStyle(
+            selectionColor: defaultSelectionColor,
+            cursorColor: defaultCursorColor,
+            child: Theme(
+              data: ThemeData(
+                textSelectionTheme: const TextSelectionThemeData(
+                  selectionColor: themeSelectionColor,
+                  cursorColor: themeCursorColor,
+                ),
+              ),
+              child: const TextField(),
+            )
+          ),
+        ),
+      ),
+    );
+    // Finds RenderEditable.
+    final RenderObject root = tester.renderObject(find.byType(EditableText));
+    late RenderEditable renderEditable;
+    void recursiveFinder(RenderObject child) {
+      if (child is RenderEditable) {
+        renderEditable = child;
+        return;
+      }
+      child.visitChildren(recursiveFinder);
+    }
+    root.visitChildren(recursiveFinder);
+    expect(renderEditable.selectionColor, themeSelectionColor);
+    expect(tester.widget<EditableText>(find.byType(EditableText)).cursorColor, themeCursorColor);
+  });
+
   testWidgets('Fallback theme', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
@@ -680,7 +720,7 @@ void main() {
 
 int testBuildCalled = 0;
 class Test extends StatefulWidget {
-  const Test({ Key? key }) : super(key: key);
+  const Test({ super.key });
 
   @override
   State<Test> createState() => _TestState();
@@ -755,6 +795,8 @@ class _TextStyleProxy implements TextStyle {
   @override
   List<ui.FontFeature>? get fontFeatures => _delegate.fontFeatures;
   @override
+  List<ui.FontVariation>? get fontVariations => _delegate.fontVariations;
+  @override
   TextOverflow? get overflow => _delegate.overflow;
 
   @override
@@ -797,6 +839,7 @@ class _TextStyleProxy implements TextStyle {
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
     TextOverflow? overflow,
     String? package,
   }) {
@@ -828,6 +871,7 @@ class _TextStyleProxy implements TextStyle {
     ui.Paint? background,
     List<Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
     TextDecoration? decoration,
     Color? decorationColor,
     TextDecorationStyle? decorationStyle,

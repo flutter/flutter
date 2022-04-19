@@ -169,7 +169,7 @@ class KeyEventSimulator {
   static _WebKeyLocationPair _getWebKeyLocation(LogicalKeyboardKey key, String keyLabel) {
     String? result;
     for (final MapEntry<String, List<LogicalKeyboardKey?>> entry in kWebLocationMap.entries) {
-      final int foundIndex = entry.value.indexOf(key);
+      final int foundIndex = entry.value.lastIndexOf(key);
       // If foundIndex is -1, then the key is not defined in kWebLocationMap.
       // If foundIndex is 0, then the key is in the standard part of the keyboard,
       // but we have to check `keyLabel` to see if it's remapped or modified.

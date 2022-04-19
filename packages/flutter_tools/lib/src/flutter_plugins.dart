@@ -557,6 +557,7 @@ const String _dartPluginRegistryTemplate = '''
 
 // ignore_for_file: directives_ordering
 // ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: depend_on_referenced_packages
 
 {{#methodChannelPlugins}}
 import 'package:{{name}}/{{file}}';
@@ -565,7 +566,7 @@ import 'package:{{name}}/{{file}}';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 // ignore: public_member_api_docs
-void registerPlugins(Registrar registrar) {
+void registerPlugins(final Registrar registrar) {
 {{#methodChannelPlugins}}
   {{class}}.registerWith(registrar);
 {{/methodChannelPlugins}}
@@ -758,7 +759,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(methodChannelPlugins, IOSPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'ios',
-    'deploymentTarget': '9.0',
+    'deploymentTarget': '11.0',
     'framework': 'Flutter',
     'methodChannelPlugins': iosPlugins,
   };

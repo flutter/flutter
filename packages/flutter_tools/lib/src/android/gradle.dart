@@ -268,6 +268,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       _gradleUtils.getExecutable(project),
     ];
     if (_logger.isVerbose) {
+      command.add('--full-stacktrace');
+      command.add('--debug');
       command.add('-Pverbose=true');
     } else {
       command.add('-q');
@@ -590,6 +592,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       '-PbuildNumber=$buildNumber'
     ];
     if (_logger.isVerbose) {
+      command.add('--full-stacktrace');
+      command.add('--debug');
       command.add('-Pverbose=true');
     } else {
       command.add('-q');

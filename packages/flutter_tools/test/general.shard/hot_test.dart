@@ -709,6 +709,7 @@ class TestFlutterDevice extends FlutterDevice {
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,
+    bool cacheStartupProfile = false,
     bool ipv6 = false,
     int hostVmServicePort,
     int ddsPort,

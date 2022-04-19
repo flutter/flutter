@@ -23,13 +23,12 @@ import 'gradle.dart';
 /// An application package created from an already built Android APK.
 class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackage {
   AndroidApk({
-    required String id,
+    required super.id,
     required this.applicationPackage,
     required this.versionCode,
     required this.launchActivity,
   }) : assert(applicationPackage != null),
-       assert(launchActivity != null),
-       super(id: id);
+       assert(launchActivity != null);
 
   /// Creates a new AndroidApk from an existing APK.
   ///

@@ -256,7 +256,10 @@ void main() {
   });
 
   testUsingContext('WebRunner copies compiled app.dill to cache during startup', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+      const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
+    );
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, debuggingOptions: debuggingOptions);
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
 
@@ -268,6 +271,24 @@ void main() {
     await connectionInfoCompleter.future;
 
     expect(await fileSystem.file(fileSystem.path.join('build', 'cache.dill')).readAsString(), 'ABC');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('WebRunner copies compiled app.dill to cache during startup with track-widget-creation', () async {
+    final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+    fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+    _setupMocks();
+
+    residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    expect(await fileSystem.file(fileSystem.path.join('build', 'cache.dill.track.dill')).readAsString(), 'ABC');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -569,7 +590,7 @@ void main() {
     final String entrypointContents = fileSystem.file(webDevFS.mainUri).readAsStringSync();
     expect(entrypointContents, contains('// Flutter web bootstrap script'));
     expect(entrypointContents, contains("import 'dart:ui' as ui;"));
-    expect(entrypointContents, contains('await ui.webOnlyInitializePlatform();'));
+    expect(entrypointContents, contains('await ui.webOnlyWarmupEngine('));
 
     expect(logger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
@@ -1048,11 +1069,12 @@ void main() {
 ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice, {
   Logger logger,
   SystemClock systemClock,
+  DebuggingOptions debuggingOptions,
 }) {
   return ResidentWebRunner(
     flutterDevice,
     flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
-    debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    debuggingOptions: debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
     ipv6: true,
     urlTunneller: null,
     usage: globals.flutterUsage,
@@ -1348,6 +1370,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     int ddsPort,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,
+    bool cacheStartupProfile = false,
     @required bool allowExistingDdsInstance,
     bool ipv6 = false,
   }) async { }

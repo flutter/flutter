@@ -57,55 +57,6 @@ void main() {
     expect(await caughtError.future, true);
   });
 
-  test('resolve sync errors will be caught', () async {
-    bool uncaught = false;
-    final Zone testZone = Zone.current.fork(specification: ZoneSpecification(
-      handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
-        uncaught = true;
-      },
-    ));
-    await testZone.run(() async {
-      final ImageProvider imageProvider = LoadErrorImageProvider();
-      final Completer<bool> caughtError = Completer<bool>();
-      FlutterError.onError = (FlutterErrorDetails details) {
-        throw Error();
-      };
-      final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace? stackTrace) {
-        caughtError.complete(true);
-      }));
-      expect(await caughtError.future, true);
-    });
-    expect(uncaught, false);
-  });
-
-  test('resolve errors in the completer will be caught', () async {
-    bool uncaught = false;
-    final Zone testZone = Zone.current.fork(specification: ZoneSpecification(
-      handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
-        uncaught = true;
-      },
-    ));
-    await testZone.run(() async {
-      final ImageProvider imageProvider = LoadErrorCompleterImageProvider();
-      final Completer<bool> caughtError = Completer<bool>();
-      final Completer<bool> onErrorCompleter = Completer<bool>();
-      FlutterError.onError = (FlutterErrorDetails details) {
-        onErrorCompleter.complete(true);
-        throw Error();
-      };
-      final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace? stackTrace) {
-        caughtError.complete(true);
-      }));
-      expect(await caughtError.future, true);
-      expect(await onErrorCompleter.future, true);
-    });
-    expect(uncaught, false);
-  });
-
   test('File image with empty file throws expected error and evicts from cache', () async {
     final Completer<StateError> error = Completer<StateError>();
     FlutterError.onError = (FlutterErrorDetails details) {
