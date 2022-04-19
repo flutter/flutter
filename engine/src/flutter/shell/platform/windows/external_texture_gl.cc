@@ -36,7 +36,7 @@ bool ExternalTextureGL::PopulateTexture(size_t width,
   // Populate the texture object used by the engine.
   opengl_texture->target = GL_TEXTURE_2D;
   opengl_texture->name = state_->gl_texture;
-  opengl_texture->format = GL_RGBA8;
+  opengl_texture->format = GL_RGBA;
   opengl_texture->destruction_callback = nullptr;
   opengl_texture->user_data = nullptr;
   opengl_texture->width = width;
@@ -58,10 +58,8 @@ bool ExternalTextureGL::CopyPixelBuffer(size_t& width, size_t& height) {
     gl_.glGenTextures(1, &state_->gl_texture);
 
     gl_.glBindTexture(GL_TEXTURE_2D, state_->gl_texture);
-
-    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
+    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
