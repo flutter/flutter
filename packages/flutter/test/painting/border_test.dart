@@ -281,10 +281,10 @@ void main() {
   test('Border.dimension', () {
     final Border insideBorder = Border.all(width: 10);
     expect(insideBorder.dimensions, const EdgeInsets.all(10));
-    
+
     final Border centerBorder = Border.all(width: 10, strokeAlign: StrokeAlign.center);
     expect(centerBorder.dimensions, const EdgeInsets.all(5));
-    
+
     final Border outsideBorder = Border.all(width: 10, strokeAlign: StrokeAlign.outside);
     expect(outsideBorder.dimensions, EdgeInsets.zero);
 
