@@ -670,9 +670,6 @@ AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
 
 /// The inverse matcher of [meetsGuideline].
 ///
-/// This matcher is used for verifying accessibility guideline does flag the
-/// violations.
-///
 /// This is needed because the [isNot] matcher does not compose with an
 /// [AsyncMatcher].
 AsyncMatcher doesNotMeetGuideline(AccessibilityGuideline guideline) {
