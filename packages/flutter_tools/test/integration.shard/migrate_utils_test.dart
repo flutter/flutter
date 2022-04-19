@@ -7,6 +7,7 @@
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 import 'package:platform/platform.dart';
@@ -19,6 +20,7 @@ void main() {
   Directory projectRoot;
   String projectRootPath;
   MigrateUtils utils;
+  ProcessUtils processUtils;
 
   setUpAll(() async {
     fileSystem = const LocalFileSystem();
@@ -29,6 +31,7 @@ void main() {
       platform: FakePlatform(),
       processManager: globals.processManager,
     );
+    processUtils = ProcessUtils(processManager: globals.processManager, logger: logger);
   });
 
   group('git', () {
@@ -65,10 +68,29 @@ void main() {
       expect(await utils.isGitRepo(projectRootPath), false);
       await utils.gitInit(projectRootPath);
       expect(projectRoot.childDirectory('.git').existsSync(), true);
+
       expect(await utils.isGitRepo(projectRootPath), true);
+
+      expect(await utils.isGitRepo(projectRoot.parent.path), false);
     });
 
-    testWithoutContext('hasUncommitedChanges', () async {
+    testWithoutContext('hasUncommitedChanges false on clean repo', () async {
+      expect(projectRoot.existsSync(), true);
+      expect(projectRoot.childDirectory('.git').existsSync(), false);
+      await utils.gitInit(projectRootPath);
+      expect(projectRoot.childDirectory('.git').existsSync(), true);
+
+      projectRoot.childFile('.gitignore')
+        ..createSync()
+        ..writeAsStringSync('ignored_file.dart', flush: true);
+
+      await processUtils.run(<String>['git', 'add', '.'], workingDirectory: projectRootPath);
+      await processUtils.run(<String>['git', 'commit', '-m', 'Initial commit'], workingDirectory: projectRootPath);
+
+      expect(await utils.hasUncommitedChanges(projectRootPath), false);
+    });
+
+    testWithoutContext('hasUncommitedChanges true on dirty repo', () async {
       expect(projectRoot.existsSync(), true);
       expect(projectRoot.childDirectory('.git').existsSync(), false);
       await utils.gitInit(projectRootPath);
@@ -158,6 +180,18 @@ void main() {
       expect(result.mergedString, contains('line3.0\n=======\nline3.1\n>>>>>>>'));
       expect(result.hasConflict, true);
       expect(result.exitCode, 1);
+
+      // Two way merge
+      result = await utils.gitMergeFile(
+        base: file1.path,
+        current: file1.path,
+        target: file3.path,
+        localPath: 'some_file.dart',
+      ) as StringMergeResult;
+
+      expect(result.mergedString, 'void main() {}\n\nline1\nline2\nline3.1\nline3.5\nline4\nline5\n');
+      expect(result.hasConflict, false);
+      expect(result.exitCode, 0);
     });
   });
 
