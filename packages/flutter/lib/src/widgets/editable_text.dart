@@ -171,6 +171,10 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     // preserve the tree integrity, otherwise in release mode a RangeError will
     // be thrown and this EditableText will be built with a broken subtree.
     // composing.isValid && composing.isNormalized && composing.end <= text.length;
+    print("--------------------------------------");
+    print(!value.isComposingRangeValid);
+    print(!value.composing.isValid);
+    print("--------------------------------------");
     bool composingWithinCurrentTextRange = !value.isComposingRangeValid || !withComposing;
 
     if (spellCheckConfiguration != null && spellCheckConfiguration.spellCheckSuggestionsHandler != null && spellCheckConfiguration.spellCheckResults != null && spellCheckConfiguration.spellCheckResults!.length > 0) {
@@ -2665,6 +2669,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             //   print(result.replacementSuggestions);
             // });
             _effectiveAutofillClient.textInputConfiguration.spellCheckConfiguration!.spellCheckResults = results;
+            // print("${renderEditable.getWordBoundary(foo.length)}")
             renderEditable.text = buildTextSpan();
       });
         }

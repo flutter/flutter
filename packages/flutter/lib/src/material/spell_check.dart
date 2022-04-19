@@ -65,9 +65,9 @@ class MaterialSpellCheckService implements SpellCheckService {
       result.forEach((SpellCheckerSuggestionSpan span) {
         bool isWithinComposingRegion = composingRange.start == span.start && composingRange.end == span.end;
 
-        if (!isWithinComposingRegion) {
+        // if (!isWithinComposingRegion) {
             spellCheckResults.add(span);
-        }
+        // }
       });
 
       return spellCheckResults;
