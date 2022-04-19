@@ -2208,25 +2208,25 @@ void main() {
     // ListTile - ListTileStyle.list (default).
     await tester.pumpWidget(buildFrame());
     RenderParagraph leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
+    expect(leading.text.style!.color, theme.textTheme.bodyText2!.color);
     RenderParagraph title = _getTextRenderObject(tester, 'title');
-    expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
+    expect(title.text.style!.color, theme.textTheme.subtitle1!.color);
     RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
-    expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
+    expect(subtitle.text.style!.color, theme.textTheme.caption!.color);
     RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
+    expect(trailing.text.style!.color, theme.textTheme.bodyText2!.color);
 
     // ListTile - ListTileStyle.drawer.
     await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
     await tester.pumpAndSettle();
     leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
+    expect(leading.text.style!.color, theme.textTheme.bodyText2!.color);
     title = _getTextRenderObject(tester, 'title');
-    expect(title.text.style!.color, theme.textTheme.bodyLarge!.color);
+    expect(title.text.style!.color, theme.textTheme.bodyText1!.color);
     subtitle = _getTextRenderObject(tester, 'subtitle');
-    expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
+    expect(subtitle.text.style!.color, theme.textTheme.caption!.color);
     trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
+    expect(trailing.text.style!.color, theme.textTheme.bodyText2!.color);
   });
 
   testWidgets('Default ListTile debugFillProperties', (WidgetTester tester) async {
