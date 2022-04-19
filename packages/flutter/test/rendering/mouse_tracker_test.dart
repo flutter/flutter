@@ -648,7 +648,7 @@ class BaseEventMatcher extends Matcher {
 }
 
 class EventMatcher<T extends PointerEvent> extends BaseEventMatcher {
-  EventMatcher(T expected) : super(expected);
+  EventMatcher(T super.expected);
 
   @override
   bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {

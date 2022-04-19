@@ -20,11 +20,9 @@ typedef ScrollNotificationCallback = void Function(ScrollNotification notificati
 
 class _ScrollNotificationObserverScope extends InheritedWidget {
   const _ScrollNotificationObserverScope({
-    Key? key,
-    required Widget child,
+    required super.child,
     required ScrollNotificationObserverState scrollNotificationObserverState,
-  }) : _scrollNotificationObserverState = scrollNotificationObserverState,
-      super(key: key, child: child);
+  }) : _scrollNotificationObserverState = scrollNotificationObserverState;
 
   final ScrollNotificationObserverState  _scrollNotificationObserverState;
 
@@ -64,9 +62,9 @@ class ScrollNotificationObserver extends StatefulWidget {
   ///
   /// The [child] parameter must not be null.
   const ScrollNotificationObserver({
-    Key? key,
+    super.key,
     required this.child,
-  }) : assert(child != null), super(key: key);
+  }) : assert(child != null);
 
   /// The subtree below this widget.
   final Widget child;

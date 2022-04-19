@@ -110,9 +110,8 @@ class FlippedTweenSequence extends TweenSequence<double> {
   /// There's a small cost associated with building a `TweenSequence` so it's
   /// best to reuse one, rather than rebuilding it on every frame, when that's
   /// possible.
-  FlippedTweenSequence(List<TweenSequenceItem<double>> items)
-    : assert(items != null),
-      super(items);
+  FlippedTweenSequence(super.items)
+    : assert(items != null);
 
   @override
   double transform(double t) => 1 - super.transform(1 - t);

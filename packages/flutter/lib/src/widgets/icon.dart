@@ -70,13 +70,13 @@ class Icon extends StatelessWidget {
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const Icon(
     this.icon, {
-    Key? key,
+    super.key,
     this.size,
     this.color,
     this.semanticLabel,
     this.textDirection,
     this.shadows,
-  }) : super(key: key);
+  });
 
   /// The icon to display. The available icons are described in [Icons].
   ///

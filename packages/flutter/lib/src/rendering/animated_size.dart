@@ -79,17 +79,16 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     required Duration duration,
     Duration? reverseDuration,
     Curve curve = Curves.linear,
-    AlignmentGeometry alignment = Alignment.center,
-    TextDirection? textDirection,
-    RenderBox? child,
+    super.alignment,
+    super.textDirection,
+    super.child,
     Clip clipBehavior = Clip.hardEdge,
   }) : assert(vsync != null),
        assert(duration != null),
        assert(curve != null),
        assert(clipBehavior != null),
        _vsync = vsync,
-       _clipBehavior = clipBehavior,
-       super(child: child, alignment: alignment, textDirection: textDirection) {
+       _clipBehavior = clipBehavior {
     _controller = AnimationController(
       vsync: vsync,
       duration: duration,

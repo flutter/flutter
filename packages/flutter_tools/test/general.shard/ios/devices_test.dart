@@ -64,7 +64,7 @@ void main() {
     });
 
     testWithoutContext('successfully instantiates on Mac OS', () {
-      IOSDevice(
+      final IOSDevice device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -77,6 +77,23 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         interfaceType: IOSDeviceConnectionInterface.usb,
       );
+      expect(device.isSupported(), isTrue);
+    });
+
+    testWithoutContext('32-bit devices are unsupported', () {
+      final IOSDevice device = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.armv7,
+        interfaceType: IOSDeviceConnectionInterface.usb,
+      );
+      expect(device.isSupported(), isFalse);
     });
 
     testWithoutContext('parses major version', () {

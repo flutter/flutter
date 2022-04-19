@@ -177,7 +177,7 @@ class Material extends StatefulWidget {
   /// [MaterialType.circle]. In both cases, these restrictions are intended to
   /// catch likely errors.
   const Material({
-    Key? key,
+    super.key,
     this.type = MaterialType.canvas,
     this.elevation = 0.0,
     this.color,
@@ -196,8 +196,7 @@ class Material extends StatefulWidget {
        assert(animationDuration != null),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
        assert(borderOnForeground != null),
-       assert(clipBehavior != null),
-       super(key: key);
+       assert(clipBehavior != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -598,12 +597,12 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 
 class _InkFeatures extends SingleChildRenderObjectWidget {
   const _InkFeatures({
-    Key? key,
+    super.key,
     this.color,
     required this.vsync,
     required this.absorbHitTest,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.child,
+  });
 
   // This widget must be owned by a MaterialState, which must be provided as the vsync.
   // This relationship must be 1:1 and cannot change for the lifetime of the MaterialState.
@@ -710,7 +709,7 @@ class ShapeBorderTween extends Tween<ShapeBorder?> {
   ///
   /// the [begin] and [end] properties may be null; see [ShapeBorder.lerp] for
   /// the null handling semantics.
-  ShapeBorderTween({ShapeBorder? begin, ShapeBorder? end}) : super(begin: begin, end: end);
+  ShapeBorderTween({super.begin, super.end});
 
   /// Returns the value this tween has at the given animation clock value.
   @override
@@ -729,7 +728,6 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   /// must not be null. The [elevation] must be specified and greater than or
   /// equal to zero.
   const _MaterialInterior({
-    Key? key,
     required this.child,
     required this.shape,
     this.borderOnForeground = true,
@@ -738,15 +736,14 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     required this.color,
     required this.shadowColor,
     required this.surfaceTintColor,
-    Curve curve = Curves.linear,
-    required Duration duration,
+    super.curve,
+    required super.duration,
   }) : assert(child != null),
        assert(shape != null),
        assert(clipBehavior != null),
        assert(elevation != null && elevation >= 0.0),
        assert(color != null),
-       assert(shadowColor != null),
-       super(key: key, curve: curve, duration: duration);
+       assert(shadowColor != null);
 
   /// The widget below this widget in the tree.
   ///

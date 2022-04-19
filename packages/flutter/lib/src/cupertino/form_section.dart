@@ -99,7 +99,7 @@ class CupertinoFormSection extends StatelessWidget {
   ///
   /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoFormSection({
-    Key? key,
+    super.key,
     required this.children,
     this.header,
     this.footer,
@@ -108,8 +108,7 @@ class CupertinoFormSection extends StatelessWidget {
     this.decoration,
     this.clipBehavior = Clip.none,
   })  : _type = _CupertinoFormSectionType.base,
-        assert(children.length > 0),
-        super(key: key);
+        assert(children.length > 0);
 
   /// Creates a section that mimics standard "Inset Grouped" iOS forms.
   ///
@@ -146,7 +145,7 @@ class CupertinoFormSection extends StatelessWidget {
   ///
   /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoFormSection.insetGrouped({
-    Key? key,
+    super.key,
     required this.children,
     this.header,
     this.footer,
@@ -155,8 +154,7 @@ class CupertinoFormSection extends StatelessWidget {
     this.decoration,
     this.clipBehavior = Clip.none,
   })  : _type = _CupertinoFormSectionType.insetGrouped,
-        assert(children.length > 0),
-        super(key: key);
+        assert(children.length > 0);
 
   final _CupertinoFormSectionType _type;
 

@@ -70,7 +70,7 @@ class CupertinoPicker extends StatefulWidget {
   /// will loop the list back to the beginning.  If set to false, the list will
   /// stop scrolling when you reach the end or the beginning.
   CupertinoPicker({
-    Key? key,
+    super.key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor,
     this.offAxisFraction = 0.0,
@@ -93,8 +93,7 @@ class CupertinoPicker extends StatefulWidget {
        assert(squeeze > 0),
        childDelegate = looping
                        ? ListWheelChildLoopingListDelegate(children: children)
-                       : ListWheelChildListDelegate(children: children),
-       super(key: key);
+                       : ListWheelChildListDelegate(children: children);
 
   /// Creates a picker from an [IndexedWidgetBuilder] callback where the builder
   /// is dynamically invoked during layout.
@@ -114,7 +113,7 @@ class CupertinoPicker extends StatefulWidget {
   /// (i.e. the picker is going to have a completely transparent background), to match
   /// the native UIPicker and UIDatePicker.
   CupertinoPicker.builder({
-    Key? key,
+    super.key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor,
     this.offAxisFraction = 0.0,
@@ -135,8 +134,7 @@ class CupertinoPicker extends StatefulWidget {
        assert(itemExtent > 0),
        assert(squeeze != null),
        assert(squeeze > 0),
-       childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount),
-       super(key: key);
+       childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
   ///
@@ -352,14 +350,13 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
   /// rectangular overlay.
   /// Default to true and must not be null.
   const CupertinoPickerDefaultSelectionOverlay({
-    Key? key,
+    super.key,
     this.background = CupertinoColors.tertiarySystemFill,
     this.capStartEdge = true,
     this.capEndEdge = true,
   }) : assert(background != null),
        assert(capStartEdge != null),
-       assert(capEndEdge != null),
-       super(key: key);
+       assert(capEndEdge != null);
 
   /// Whether to use the default use rounded corners and margin on the start side.
   final bool capStartEdge;
@@ -409,10 +406,9 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
 // scroll controller.
 class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   const _CupertinoPickerSemantics({
-    Key? key,
-    Widget? child,
+    super.child,
     required this.scrollController,
-  }) : super(key: key, child: child);
+  });
 
   final FixedExtentScrollController scrollController;
 

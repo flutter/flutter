@@ -146,7 +146,7 @@ class Ink extends StatefulWidget {
   /// If there is no intention to render anything on this decoration, consider
   /// using a [Container] with a [BoxDecoration] instead.
   Ink({
-    Key? key,
+    super.key,
     this.padding,
     Color? color,
     Decoration? decoration,
@@ -159,8 +159,7 @@ class Ink extends StatefulWidget {
          'Cannot provide both a color and a decoration\n'
          'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
        ),
-       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
-       super(key: key);
+       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null);
 
   /// Creates a widget that shows an image (obtained from an [ImageProvider]) on
   /// a [Material].
@@ -180,7 +179,7 @@ class Ink extends StatefulWidget {
   ///
   /// See [paintImage] for a description of the meaning of these arguments.
   Ink.image({
-    Key? key,
+    super.key,
     this.padding,
     required ImageProvider image,
     ImageErrorListener? onImageError,
@@ -209,8 +208,7 @@ class Ink extends StatefulWidget {
            repeat: repeat,
            matchTextDirection: matchTextDirection,
          ),
-       ),
-       super(key: key);
+       );
 
   /// The [child] contained by the container.
   ///
@@ -335,11 +333,11 @@ class InkDecoration extends InkFeature {
     required Decoration? decoration,
     required ImageConfiguration configuration,
     required MaterialInkController controller,
-    required RenderBox referenceBox,
-    VoidCallback? onRemoved,
+    required super.referenceBox,
+    super.onRemoved,
   }) : assert(configuration != null),
        _configuration = configuration,
-       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
+       super(controller: controller) {
     this.decoration = decoration;
     controller.addInkFeature(this);
   }
