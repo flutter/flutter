@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/web/file_generators/flutter_js.dart' as flutter_js;
+import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
