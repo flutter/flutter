@@ -180,7 +180,15 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.PUBLISH_CHANNEL:
       return 'Issue `conductor next` to publish your release to the release branch.';
     case ReleasePhase.VERIFY_RELEASE:
-      return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}';
+      return <String>[
+        'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}',
+        '----------------------------------------------------------------------',
+        'Ensure the following post release steps are complete:',
+        '\t 1. Update hotfix to stable wiki following documentation best practices',
+        '\t 2. Post announcement to flutter-announce group',
+        '\t 3. Post announcement to discord',
+        '\t 4. Post announcement flutter release hotline chat room',
+      ].join('\n');
     case ReleasePhase.RELEASE_COMPLETED:
       return 'This release has been completed.';
   }
