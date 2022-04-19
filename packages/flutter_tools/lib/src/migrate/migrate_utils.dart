@@ -23,7 +23,7 @@ class MigrateUtils {
     required FileSystem fileSystem,
     required Platform platform,
     required ProcessManager processManager,
-  }) : 
+  }) :
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger,
        _fileSystem = fileSystem,
@@ -67,7 +67,7 @@ class MigrateUtils {
   }
 
   /// Calls `flutter create` as a re-entrant command.
-  Future<void> createFromTemplates(String flutterBinPath, {
+  Future<String> createFromTemplates(String flutterBinPath, {
     required String name,
     bool legacyNameParameter = false,
     required String androidLanguage,
@@ -80,7 +80,7 @@ class MigrateUtils {
     // Limit the number of iterations this command is allowed to attempt to prevent infinite looping.
     if (iterationsAllowed <= 0) {
       _logger.printError('Unable to `flutter create` with the version of flutter at $flutterBinPath');
-      return;
+      return outputDirectory;
     }
 
     final List<String> cmdArgs = <String>['$flutterBinPath/flutter', 'create'];
@@ -119,7 +119,7 @@ class MigrateUtils {
         androidLanguage: androidLanguage,
         iosLanguage: iosLanguage,
         outputDirectory: outputDirectory,
-        iterationsAllowed: iterationsAllowed--;
+        iterationsAllowed: iterationsAllowed--,
       );
     }
     // Old versions of the tool does not include the project-name option.
@@ -132,7 +132,7 @@ class MigrateUtils {
         iosLanguage: iosLanguage,
         outputDirectory: outputDirectory,
         platforms: platforms,
-        iterationsAllowed: iterationsAllowed--;
+        iterationsAllowed: iterationsAllowed--,
       );
     }
     if (error.contains('Multiple output directories specified.')) {
@@ -144,7 +144,7 @@ class MigrateUtils {
           androidLanguage: androidLanguage,
           iosLanguage: iosLanguage,
           outputDirectory: outputDirectory,
-          iterationsAllowed: iterationsAllowed--;
+          iterationsAllowed: iterationsAllowed--,
         );
       }
     }
@@ -226,7 +226,7 @@ class MigrateUtils {
   /// Verifies that the RunResult does not contain an error.
   ///
   /// If an error is detected, the error can be optionally logged or exit the tool.
-  /// 
+  ///
   /// Passing -1 in allowedExitCodes means all exit codes are valid.
   bool checkForErrors(
     RunResult result, {

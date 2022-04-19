@@ -5,8 +5,8 @@
 // @dart = 2.8
 
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/migrate/migrate_utils.dart';
@@ -23,7 +23,7 @@ void main() {
   ProcessUtils processUtils;
 
   setUpAll(() async {
-    fileSystem = const LocalFileSystem();
+    fileSystem = globals.localFileSystem;
     logger = BufferLogger.test();
     utils = MigrateUtils(
       logger: logger,
