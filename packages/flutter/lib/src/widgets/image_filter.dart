@@ -24,11 +24,10 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   ///
   /// The [imageFilter] must not be null.
   const ImageFiltered({
-    Key? key,
+    super.key,
     required this.imageFilter,
-    Widget? child,
-  }) : assert(imageFilter != null),
-       super(key: key, child: child);
+    super.child,
+  }) : assert(imageFilter != null);
 
   /// The image filter to apply to the child of this widget.
   final ImageFilter imageFilter;

@@ -56,15 +56,14 @@ class _GridPaperPainter extends CustomPainter {
 class GridPaper extends StatelessWidget {
   /// Creates a widget that draws a rectilinear grid of 1-pixel-wide lines.
   const GridPaper({
-    Key? key,
+    super.key,
     this.color = const Color(0x7FC3E8F3),
     this.interval = 100.0,
     this.divisions = 2,
     this.subdivisions = 5,
     this.child,
   }) : assert(divisions > 0, 'The "divisions" property must be greater than zero. If there were no divisions, the grid paper would not paint anything.'),
-       assert(subdivisions > 0, 'The "subdivisions" property must be greater than zero. If there were no subdivisions, the grid paper would not paint anything.'),
-       super(key: key);
+       assert(subdivisions > 0, 'The "subdivisions" property must be greater than zero. If there were no subdivisions, the grid paper would not paint anything.');
 
   /// The color to draw the lines in the grid.
   ///

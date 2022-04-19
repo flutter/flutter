@@ -370,7 +370,7 @@ void main() {
       FakeCommand(
         command: testConfig.runDebugCommand,
         completer: runDebugCompleter,
-        stdout: 'Observatory listening on http://127.0.0.1:12345/abcd/\n',
+        stdout: 'The Dart VM service is listening on http://127.0.0.1:12345/abcd/\n',
       ),
       FakeCommand(
         command: testConfig.forwardPortCommand,
@@ -411,7 +411,7 @@ void main() {
         FakeCommand(
           command: testConfigNonForwarding.runDebugCommand,
           completer: runDebugCompleter,
-          stdout: 'Observatory listening on http://192.168.178.123:12345/abcd/\n'
+          stdout: 'The Dart VM service is listening on http://192.168.178.123:12345/abcd/\n'
         ),
       ]
     );
@@ -456,7 +456,7 @@ void main() {
           FakeCommand(
             command: testConfig.runDebugCommand,
             completer: runDebugCompleter,
-            stdout: 'Observatory listening on http://127.0.0.1:12345/abcd/\n',
+            stdout: 'The Dart VM service is listening on http://127.0.0.1:12345/abcd/\n',
           ),
           FakeCommand(
             command: testConfig.forwardPortCommand,

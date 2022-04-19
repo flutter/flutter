@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1548,7 +1547,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: 2.0),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: 2.0),
                 child: Material(
                   child: Center(
                     child: Theme(

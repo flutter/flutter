@@ -81,7 +81,7 @@ void main() {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
-          stdout: 'Observatory listening on http://127.0.0.1/0\n',
+          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
           completer: completer,
         ),
       ]);
@@ -118,7 +118,7 @@ void main() {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
-          stdout: 'Observatory listening on http://127.0.0.1/0\n',
+          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
           completer: completer,
         ),
       ]);
@@ -140,7 +140,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['debug'],
-        stdout: 'Observatory listening on http://127.0.0.1/0\n',
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
         completer: completer,
         environment: const <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
@@ -202,7 +202,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['debug'],
-        stdout: 'Observatory listening on http://127.0.0.1/0\n',
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
         completer: completer,
         environment: const <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
@@ -251,7 +251,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['debug', 'arg1', 'arg2'],
-        stdout: 'Observatory listening on http://127.0.0.1/0\n',
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
         completer: completer,
       ),
     ]);

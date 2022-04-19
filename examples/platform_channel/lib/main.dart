@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PlatformChannel extends StatefulWidget {
-  const PlatformChannel({Key? key}) : super(key: key);
+  const PlatformChannel({super.key});
 
   @override
   State<PlatformChannel> createState() => _PlatformChannelState();

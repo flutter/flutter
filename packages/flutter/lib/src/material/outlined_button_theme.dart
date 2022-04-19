@@ -55,9 +55,7 @@ class OutlinedButtonThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return style.hashCode;
-  }
+  int get hashCode => style.hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -91,10 +89,10 @@ class OutlinedButtonTheme extends InheritedTheme {
   ///
   /// The [data] parameter must not be null.
   const OutlinedButtonTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The configuration of this theme.
   final OutlinedButtonThemeData data;
@@ -107,7 +105,7 @@ class OutlinedButtonTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// OutlinedButtonTheme theme = OutlinedButtonTheme.of(context);
+  /// OutlinedButtonThemeData theme = OutlinedButtonTheme.of(context);
   /// ```
   static OutlinedButtonThemeData of(BuildContext context) {
     final OutlinedButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<OutlinedButtonTheme>();

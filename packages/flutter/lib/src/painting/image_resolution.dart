@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -423,7 +422,7 @@ class AssetImage extends AssetBundleImageProvider {
   }
 
   @override
-  int get hashCode => hashValues(keyName, bundle);
+  int get hashCode => Object.hash(keyName, bundle);
 
   @override
   String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';

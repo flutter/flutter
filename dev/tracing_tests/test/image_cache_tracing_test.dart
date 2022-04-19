@@ -16,18 +16,18 @@ void main() {
   test('Image cache tracing', () async {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
-    PaintingBinding.instance!.imageCache!.putIfAbsent(
+    PaintingBinding.instance.imageCache.putIfAbsent(
       'Test',
       () => completer1,
     );
-    PaintingBinding.instance!.imageCache!.clear();
+    PaintingBinding.instance.imageCache.clear();
 
     completer2.testSetImage(ImageInfo(image: await createTestImage()));
-    PaintingBinding.instance!.imageCache!.putIfAbsent(
+    PaintingBinding.instance.imageCache.putIfAbsent(
       'Test2',
       () => completer2,
     );
-    PaintingBinding.instance!.imageCache!.evict('Test2');
+    PaintingBinding.instance.imageCache.evict('Test2');
 
     _expectTimelineEvents(
       await fetchTimelineEvents(),

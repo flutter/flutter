@@ -35,7 +35,7 @@ class AnimatedIcon extends StatelessWidget {
   /// The [progress] and [icon] arguments must not be null.
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const AnimatedIcon({
-    Key? key,
+    super.key,
     required this.icon,
     required this.progress,
     this.color,
@@ -43,8 +43,7 @@ class AnimatedIcon extends StatelessWidget {
     this.semanticLabel,
     this.textDirection,
   }) : assert(progress != null),
-       assert(icon != null),
-       super(key: key);
+       assert(icon != null);
 
   /// The animation progress for the animated icon.
   ///
@@ -156,11 +155,11 @@ class _AnimatedIconPainter extends CustomPainter {
   void paint(ui.Canvas canvas, Size size) {
     // The RenderCustomPaint render object performs canvas.save before invoking
     // this and canvas.restore after, so we don't need to do it here.
-    canvas.scale(scale, scale);
     if (shouldMirror) {
       canvas.rotate(math.pi);
       canvas.translate(-size.width, -size.height);
     }
+    canvas.scale(scale, scale);
 
     final double clampedProgress = progress.value.clamp(0.0, 1.0);
     for (final _PathFrames path in paths)

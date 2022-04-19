@@ -126,6 +126,7 @@ class FlutterDevice {
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
         ),
+        assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(globals.artifacts
@@ -168,6 +169,7 @@ class FlutterDevice {
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
         ),
+        assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
         processManager: globals.processManager,
@@ -222,6 +224,7 @@ class FlutterDevice {
     int hostVmServicePort,
     int ddsPort,
     bool disableServiceAuthCodes = false,
+    bool cacheStartupProfile = false,
     bool enableDds = true,
     @required bool allowExistingDdsInstance,
     bool ipv6 = false,
@@ -267,6 +270,7 @@ class FlutterDevice {
             ipv6: ipv6,
             disableServiceAuthCodes: disableServiceAuthCodes,
             logger: globals.logger,
+            cacheStartupProfile: cacheStartupProfile,
           );
         } on dds.DartDevelopmentServiceException catch (e, st) {
           if (!allowExistingDdsInstance ||
@@ -367,7 +371,7 @@ class FlutterDevice {
       return;
     }
     _loggingSubscription = logStream.listen((String line) {
-      if (!line.contains('Observatory listening on http')) {
+      if (!line.contains(globals.kVMServiceMessageRegExp)) {
         globals.printStatus(line, wrap: false);
       }
     });
@@ -633,7 +637,7 @@ abstract class ResidentHandlers {
   /// the value of [fullRestart].
   Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
     final String mode = isRunningProfile ? 'profile' :isRunningRelease ? 'release' : 'this';
-    throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
+    throw Exception('${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode');
   }
 
   /// Dump the application's current widget tree to the terminal.
@@ -665,6 +669,41 @@ abstract class ResidentHandlers {
           isolateId: view.uiIsolate.id,
         );
         logger.printStatus(data);
+      }
+    }
+    return true;
+  }
+
+  /// Dump frame rasterization metrics for the last rendered frame.
+  ///
+  /// The last frames gets re-painted while recording additional tracing info
+  /// pertaining to the various draw calls issued by the frame. The timings
+  /// recorded here are not indicative of production performance. The intended
+  /// use case is to look at the various layers in proportion to see what
+  /// contributes the most towards raster performance.
+  Future<bool> debugFrameJankMetrics() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
+        final Map<String, Object> rasterData =
+          await device.vmService.renderFrameWithRasterStats(
+            viewId: view.id,
+            uiIsolateId: view.uiIsolate.id,
+          );
+        if (rasterData != null) {
+          final File tempFile = globals.fsUtils.getUniqueFile(
+            globals.fs.currentDirectory,
+            'flutter_jank_metrics',
+            'json',
+          );
+          tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
+          logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
+        } else {
+          logger.printWarning('Unable to get jank metrics.');
+        }
       }
     }
     return true;
@@ -1280,7 +1319,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     @required bool allowExistingDdsInstance,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
-      throw 'The service protocol is not enabled.';
+      throw Exception('The service protocol is not enabled.');
     }
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
@@ -1296,7 +1335,8 @@ abstract class ResidentRunner extends ResidentHandlers {
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
         ipv6: ipv6,
-        disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes
+        disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
+        cacheStartupProfile: debuggingOptions.cacheStartupProfile,
       );
       await device.vmService.getFlutterViews();
 
@@ -1434,6 +1474,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       if (isRunningDebug) {
         commandHelp.g.print();
       }
+      commandHelp.j.print();
     }
   }
 
@@ -1600,6 +1641,9 @@ class TerminalHandler {
         return residentRunner.debugToggleWidgetInspector();
       case 'I':
         return residentRunner.debugToggleInvertOversizedImages();
+      case 'j':
+      case 'J':
+        return residentRunner.debugFrameJankMetrics();
       case 'L':
         return residentRunner.debugDumpLayerTree();
       case 'o':

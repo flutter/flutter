@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -29,7 +28,7 @@ class StadiumBorder extends OutlinedBorder {
   /// Create a stadium border.
   ///
   /// The [side] argument must not be null.
-  const StadiumBorder({ BorderSide side = BorderSide.none }) : assert(side != null), super(side: side);
+  const StadiumBorder({ super.side }) : assert(side != null);
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -134,11 +133,10 @@ class StadiumBorder extends OutlinedBorder {
 // Class to help with transitioning to/from a CircleBorder.
 class _StadiumToCircleBorder extends OutlinedBorder {
   const _StadiumToCircleBorder({
-    BorderSide side = BorderSide.none,
+    super.side,
     this.circleness = 0.0,
   }) : assert(side != null),
-       assert(circleness != null),
-       super(side: side);
+       assert(circleness != null);
 
   final double circleness;
 
@@ -278,7 +276,7 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   }
 
   @override
-  int get hashCode => hashValues(side, circleness);
+  int get hashCode => Object.hash(side, circleness);
 
   @override
   String toString() {
@@ -290,13 +288,12 @@ class _StadiumToCircleBorder extends OutlinedBorder {
 // Class to help with transitioning to/from a RoundedRectBorder.
 class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
   const _StadiumToRoundedRectangleBorder({
-    BorderSide side = BorderSide.none,
+    super.side,
     this.borderRadius = BorderRadius.zero,
     this.rectness = 0.0,
   }) : assert(side != null),
        assert(borderRadius != null),
-       assert(rectness != null),
-       super(side: side);
+       assert(rectness != null);
 
   final BorderRadius borderRadius;
 
@@ -429,7 +426,7 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  int get hashCode => hashValues(side, borderRadius, rectness);
+  int get hashCode => Object.hash(side, borderRadius, rectness);
 
   @override
   String toString() {

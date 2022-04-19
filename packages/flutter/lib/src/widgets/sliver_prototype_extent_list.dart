@@ -35,11 +35,10 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// constrains them to have the same extent as a prototype item along
   /// the main axis.
   const SliverPrototypeExtentList({
-    Key? key,
-    required SliverChildDelegate delegate,
+    super.key,
+    required super.delegate,
     required this.prototypeItem,
-  }) : assert(prototypeItem != null),
-       super(key: key, delegate: delegate);
+  }) : assert(prototypeItem != null);
 
   /// Defines the main axis extent of all of this sliver's children.
   ///
@@ -60,10 +59,7 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
 }
 
 class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
-  _SliverPrototypeExtentListElement(SliverPrototypeExtentList widget) : super(widget);
-
-  @override
-  SliverPrototypeExtentList get widget => super.widget as SliverPrototypeExtentList;
+  _SliverPrototypeExtentListElement(SliverPrototypeExtentList super.widget);
 
   @override
   _RenderSliverPrototypeExtentList get renderObject => super.renderObject as _RenderSliverPrototypeExtentList;
@@ -113,14 +109,14 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
-    _prototype = updateChild(_prototype, widget.prototypeItem, _prototypeSlot);
+    _prototype = updateChild(_prototype, (widget as SliverPrototypeExtentList).prototypeItem, _prototypeSlot);
   }
 
   @override
   void update(SliverPrototypeExtentList newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _prototype = updateChild(_prototype, widget.prototypeItem, _prototypeSlot);
+    _prototype = updateChild(_prototype, (widget as SliverPrototypeExtentList).prototypeItem, _prototypeSlot);
   }
 }
 

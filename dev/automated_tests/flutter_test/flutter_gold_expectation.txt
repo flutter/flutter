@@ -1,7 +1,7 @@
 [0-9]+:[0-9]+ [+]0: Local passes non-existent baseline for new test, null expectation *
- *No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1. This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.
+ *No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1.png. This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.
  *Validate image output found at flutter/test/library/
 [0-9]+:[0-9]+ [+]1: Local passes non-existent baseline for new test, empty expectation *
- *No expectations provided by Skia Gold for test: library.flutter.new_golden_test.2. This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.
+ *No expectations provided by Skia Gold for test: library.flutter.new_golden_test.2.png. This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.
  *Validate image output found at flutter/test/library/
 [0-9]+:[0-9]+ [+]2: All tests passed! *

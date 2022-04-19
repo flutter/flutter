@@ -8,6 +8,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
+import 'globals.dart' as globals;
 
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
@@ -104,8 +105,7 @@ class ProtocolDiscovery {
   }
 
   Match? _getPatternMatch(String line) {
-    final RegExp r = RegExp(RegExp.escape(serviceName) + r' listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
-    return r.firstMatch(line);
+    return globals.kVMServiceMessageRegExp.firstMatch(line);
   }
 
   Uri? _getObservatoryUri(String line) {

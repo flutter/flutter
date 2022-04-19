@@ -258,7 +258,8 @@ abstract class FakeProcessManager implements ProcessManager {
     _pid += 1;
     final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment, encoding);
     if (fakeCommand.exception != null) {
-      throw fakeCommand.exception!;
+      assert(fakeCommand.exception is Exception || fakeCommand.exception is Error);
+      throw fakeCommand.exception!; // ignore: only_throw_errors
     }
     if (fakeCommand.onRun != null) {
       fakeCommand.onRun!();

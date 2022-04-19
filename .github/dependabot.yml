@@ -10,7 +10,30 @@ updates:
     reviewers:
       - "jmagman"
       - "keyonghan"
-      - "yusufm"
+      - "yusuf-goog"
+    labels:
+      - "team"
+      - "team: infra"
+      - "waiting for tree to go green"
+  - package-ecosystem: "docker"
+    directory: "/dev/ci/docker_linux"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "keyonghan"
+      - "yusuf-goog"
+      - "christopherfujino"
+    labels:
+      - "team"
+      - "team: infra"
+      - "waiting for tree to go green"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "hixie"
+      - "godofredoc"
     labels:
       - "team"
       - "team: infra"

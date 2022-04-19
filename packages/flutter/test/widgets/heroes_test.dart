@@ -159,7 +159,7 @@ class MutatingRoute extends MaterialPageRoute<void> {
 }
 
 class _SimpleStatefulWidget extends StatefulWidget {
-  const _SimpleStatefulWidget({ Key? key }) : super(key: key);
+  const _SimpleStatefulWidget({ super.key });
   @override
   _SimpleState createState() => _SimpleState();
 }
@@ -172,7 +172,7 @@ class _SimpleState extends State<_SimpleStatefulWidget> {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({ Key? key, this.value = '123' }) : super(key: key);
+  const MyStatefulWidget({ super.key, this.value = '123' });
   final String value;
   @override
   MyStatefulWidgetState createState() => MyStatefulWidgetState();
@@ -728,7 +728,14 @@ Future<void> main() async {
 
   testWidgets('Hero pop transition interrupted by a push', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(routes: routes),
+      MaterialApp(
+        routes: routes,
+        theme: ThemeData(pageTransitionsTheme: const PageTransitionsTheme(
+          builders: <TargetPlatform, PageTransitionsBuilder>{
+            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          },
+        )),
+      ),
     );
 
     // Pushes MaterialPageRoute '/two'.

@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:io';
-import 'dart:ui' show Size, hashValues, Picture, Image;
+import 'dart:ui' show Size, Picture, Image;
 
 import 'package:flutter/foundation.dart';
 
@@ -107,7 +106,7 @@ class ImageSizeInfo {
   }
 
   @override
-  int get hashCode => hashValues(source, displaySize, imageSize);
+  int get hashCode => Object.hash(source, displaySize, imageSize);
 
   @override
   String toString() => 'ImageSizeInfo($source, imageSize: $imageSize, displaySize: $displaySize)';

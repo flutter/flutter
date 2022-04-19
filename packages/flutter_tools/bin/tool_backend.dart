@@ -6,7 +6,7 @@
 import 'dart:convert'; // flutter_ignore: dart_convert_import.
 import 'dart:io'; // flutter_ignore: dart_io_import.
 
-/// Executes the required flutter tasks for a desktop build.
+/// Executes the required Flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {
   final String targetPlatform = arguments[0];
   final String buildMode = arguments[1].toLowerCase();

@@ -22,7 +22,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
+    ClipboardStatusNotifier? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
@@ -53,7 +53,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
 }
 
 class TestBox extends SizedBox {
-  const TestBox({Key? key}) : super(key: key, width: itemWidth, height: itemHeight);
+  const TestBox({super.key}) : super(width: itemWidth, height: itemHeight);
 
   static const double itemHeight = 44.0;
   static const double itemWidth = 100.0;

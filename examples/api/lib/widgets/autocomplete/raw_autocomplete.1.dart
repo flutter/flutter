@@ -5,7 +5,6 @@
 // Flutter code sample for RawAutocomplete
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 void main() => runApp(const AutocompleteExampleApp());
 
@@ -52,7 +51,7 @@ class User {
   }
 
   @override
-  int get hashCode => hashValues(email, name);
+  int get hashCode => Object.hash(email, name);
 }
 
 class AutocompleteCustomTypeExample extends StatelessWidget {

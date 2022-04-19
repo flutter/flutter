@@ -170,25 +170,23 @@ class ToggleButtonsThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      textStyle,
-      constraints,
-      color,
-      selectedColor,
-      disabledColor,
-      fillColor,
-      focusColor,
-      highlightColor,
-      hoverColor,
-      splashColor,
-      borderColor,
-      selectedBorderColor,
-      disabledBorderColor,
-      borderRadius,
-      borderWidth,
-    );
-  }
+  int get hashCode => Object.hash(
+    textStyle,
+    constraints,
+    color,
+    selectedColor,
+    disabledColor,
+    fillColor,
+    focusColor,
+    highlightColor,
+    hoverColor,
+    splashColor,
+    borderColor,
+    selectedBorderColor,
+    disabledBorderColor,
+    borderRadius,
+    borderWidth,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -246,10 +244,10 @@ class ToggleButtonsTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const ToggleButtonsTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// Specifies the color and border values for descendant [ToggleButtons] widgets.
   final ToggleButtonsThemeData data;

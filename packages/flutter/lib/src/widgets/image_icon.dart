@@ -25,11 +25,11 @@ class ImageIcon extends StatelessWidget {
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const ImageIcon(
     this.image, {
-    Key? key,
+    super.key,
     this.size,
     this.color,
     this.semanticLabel,
-  }) : super(key: key);
+  });
 
   /// The image to display as the icon.
   ///

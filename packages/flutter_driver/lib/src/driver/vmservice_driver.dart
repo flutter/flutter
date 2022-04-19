@@ -321,7 +321,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
         stackTrace,
       );
     }
-    if ((response['isError'] as bool?) == true)
+    if ((response['isError'] as bool?) ?? false)
       throw DriverError('Error in Flutter application: ${response['response']}');
     return response['response'] as Map<String, dynamic>;
   }

@@ -14,6 +14,7 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -160,7 +161,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// [BottomNavigationBarType.fixed] and `false` when [type] is
   /// [BottomNavigationBarType.shifting].
   BottomNavigationBar({
-    Key? key,
+    super.key,
     required this.items,
     this.onTap,
     this.currentIndex = 0,
@@ -197,8 +198,7 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
-       selectedItemColor = selectedItemColor ?? fixedColor,
-       super(key: key);
+       selectedItemColor = selectedItemColor ?? fixedColor;
 
   /// Defines the appearance of the button items that are arrayed within the
   /// bottom navigation bar.
@@ -311,9 +311,20 @@ class BottomNavigationBar extends StatefulWidget {
   final bool? showSelectedLabels;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// tiles.
+  /// items.
   ///
-  /// If this property is null, [SystemMouseCursors.click] will be used.
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///
+  /// If null, then the value of [BottomNavigationBarThemeData.mouseCursor] is used. If
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -560,11 +571,10 @@ class _BottomNavigationTile extends StatelessWidget {
 // icon-label column.
 class _Tile extends StatelessWidget {
  const  _Tile({
-    Key? key,
     required this.layout,
     required this.icon,
     required this.label
-  }) : super(key: key);
+  });
 
   final BottomNavigationBarLandscapeLayout layout;
   final Widget icon;
@@ -592,7 +602,6 @@ class _Tile extends StatelessWidget {
 
 class _TileIcon extends StatelessWidget {
   const _TileIcon({
-    Key? key,
     required this.colorTween,
     required this.animation,
     required this.iconSize,
@@ -601,8 +610,7 @@ class _TileIcon extends StatelessWidget {
     required this.selectedIconTheme,
     required this.unselectedIconTheme,
   }) : assert(selected != null),
-       assert(item != null),
-       super(key: key);
+       assert(item != null);
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -638,7 +646,6 @@ class _TileIcon extends StatelessWidget {
 
 class _Label extends StatelessWidget {
   const _Label({
-    Key? key,
     required this.colorTween,
     required this.animation,
     required this.item,
@@ -652,8 +659,7 @@ class _Label extends StatelessWidget {
        assert(selectedLabelStyle != null),
        assert(unselectedLabelStyle != null),
        assert(showSelectedLabels != null),
-       assert(showUnselectedLabels != null),
-       super(key: key);
+       assert(showUnselectedLabels != null);
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -941,10 +947,17 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
         break;
     }
-    final MouseCursor effectiveMouseCursor = widget.mouseCursor ?? SystemMouseCursors.click;
 
     final List<Widget> tiles = <Widget>[];
     for (int i = 0; i < widget.items.length; i++) {
+      final Set<MaterialState> states = <MaterialState>{
+        if (i == widget.currentIndex) MaterialState.selected,
+      };
+
+      final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+        ?? bottomTheme.mouseCursor?.resolve(states)
+        ?? MaterialStateMouseCursor.clickable.resolve(states);
+
       tiles.add(_BottomNavigationTile(
         _effectiveType,
         widget.items[i],
@@ -1035,12 +1048,11 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 // BottomNavigationBarLandscapeLayout.centered
 class _Bar extends StatelessWidget {
   const _Bar({
-    Key? key,
     required this.child,
     required this.layout,
     required this.elevation,
     required this.color,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final BottomNavigationBarLandscapeLayout layout;

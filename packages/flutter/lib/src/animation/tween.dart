@@ -368,7 +368,7 @@ class ColorTween extends Tween<Color?> {
   /// or [end] if you want the effect of fading in or out of transparent.
   /// Instead prefer null. [Colors.transparent] refers to black transparent and
   /// thus will fade out of or into black which is likely unwanted.
-  ColorTween({ Color? begin, Color? end }) : super(begin: begin, end: end);
+  ColorTween({ super.begin, super.end });
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -388,7 +388,7 @@ class SizeTween extends Tween<Size?> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an empty size.
-  SizeTween({ Size? begin, Size? end }) : super(begin: begin, end: end);
+  SizeTween({ super.begin, super.end });
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -409,7 +409,7 @@ class RectTween extends Tween<Rect?> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as an empty rect at the top left corner.
-  RectTween({ Rect? begin, Rect? end }) : super(begin: begin, end: end);
+  RectTween({ super.begin, super.end });
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -436,7 +436,7 @@ class IntTween extends Tween<int> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  IntTween({ int? begin, int? end }) : super(begin: begin, end: end);
+  IntTween({ super.begin, super.end });
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
@@ -464,7 +464,7 @@ class StepTween extends Tween<int> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  StepTween({ int? begin, int? end }) : super(begin: begin, end: end);
+  StepTween({ super.begin, super.end });
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.

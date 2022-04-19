@@ -149,7 +149,7 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const MaterialStateColor(int defaultValue) : super(defaultValue);
+  const MaterialStateColor(super.defaultValue);
 
   /// Creates a [MaterialStateColor] from a [MaterialPropertyResolver<Color>]
   /// callback function.
