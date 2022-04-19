@@ -4,6 +4,8 @@
 
 #include "flutter/fml/synchronization/sync_switch.h"
 
+#include <thread>
+
 #include "gtest/gtest.h"
 
 using fml::SyncSwitch;
@@ -27,4 +29,31 @@ TEST(SyncSwitchTest, NoopIfUndefined) {
   bool switchValue = false;
   syncSwitch.Execute(SyncSwitch::Handlers());
   EXPECT_FALSE(switchValue);
+}
+
+TEST(SyncSwitchTest, SharedLock) {
+  SyncSwitch syncSwitch;
+  syncSwitch.SetSwitch(true);
+  bool switchValue1 = false;
+  bool switchValue2 = false;
+
+  std::thread thread1([&] {
+    syncSwitch.Execute(
+        SyncSwitch::Handlers()
+            .SetIfTrue([&] {
+              switchValue1 = true;
+
+              std::thread thread2([&]() {
+                syncSwitch.Execute(
+                    SyncSwitch::Handlers()
+                        .SetIfTrue([&] { switchValue2 = true; })
+                        .SetIfFalse([&] { switchValue2 = false; }));
+              });
+              thread2.join();
+            })
+            .SetIfFalse([&] { switchValue1 = false; }));
+  });
+  thread1.join();
+  EXPECT_TRUE(switchValue1);
+  EXPECT_TRUE(switchValue2);
 }
