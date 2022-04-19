@@ -620,7 +620,31 @@ TEST_P(AiksTest, DrawRectStrokesRenderCorrectly) {
 
   canvas.Translate({100, 100});
   canvas.DrawPath(PathBuilder{}.AddRect(Rect::MakeSize({100, 100})).TakePath(),
-                  paint);
+                  {paint});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, SaveLayerDrawsBehindSubsequentEntities) {
+  // Compare with https://fiddle.skia.org/c/9e03de8567ffb49e7e83f53b64bcf636
+  Canvas canvas;
+  Paint paint;
+
+  paint.color = Color::Black();
+  Rect rect(25, 25, 25, 25);
+  canvas.DrawRect(rect, paint);
+
+  canvas.Translate({10, 10});
+  canvas.SaveLayer({});
+
+  paint.color = Color::Green();
+  canvas.DrawRect(rect, paint);
+
+  canvas.Restore();
+
+  canvas.Translate({10, 10});
+  paint.color = Color::Red();
+  canvas.DrawRect(rect, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
