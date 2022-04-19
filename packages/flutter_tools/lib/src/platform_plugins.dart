@@ -16,6 +16,9 @@ const String kDartPluginClass = 'dartPluginClass';
 /// Constant for 'ffiPlugin' key in plugin maps.
 const String kFfiPlugin = 'ffiPlugin';
 
+/// Constant for 'methodChannelPlugin' key in plugin maps.
+const String kMethodChannelPlugin = 'methodChannelPlugin';
+
 // Constant for 'defaultPackage' key in plugin maps.
 const String kDefaultPackage = 'default_package';
 
@@ -537,27 +540,29 @@ class CustomEmbedderPlugin extends PluginPlatform implements NativeOrDartPlugin 
     required this.embedderName,
     required this.name,
     required this.pluginPath,
-    required FileSystem fileSystem,
     this.dartPluginClass,
     this.defaultPackage,
-  }) : configKey = 'x-$embedderName',
-       _fileSystem = fileSystem;
+    bool? ffiPlugin,
+    bool? methodChannelPlugin
+  }) : ffiPlugin = ffiPlugin ?? false,
+       methodChannelPlugin = methodChannelPlugin ?? false,
+       configKey = 'x-$embedderName';
 
   factory CustomEmbedderPlugin.fromYaml({
     required String embedderName,
     required String name,
     required YamlMap yaml,
     required String pluginPath,
-    required FileSystem fileSystem
   }) {
     assert(validate(yaml));
     return CustomEmbedderPlugin(
       embedderName: embedderName,
       name: name,
       pluginPath: pluginPath,
-      fileSystem: fileSystem,
       dartPluginClass: yaml[kDartPluginClass] as String?,
-      defaultPackage: yaml[kDefaultPackage] as String?
+      defaultPackage: yaml[kDefaultPackage] as String?,
+      ffiPlugin: yaml[kFfiPlugin] as bool?,
+      methodChannelPlugin: yaml[kMethodChannelPlugin] as bool?
     );
   }
 
@@ -567,19 +572,28 @@ class CustomEmbedderPlugin extends PluginPlatform implements NativeOrDartPlugin 
     }
 
     return (yaml[kDartPluginClass] is String?) &&
-      (yaml[kDefaultPackage] is String?);
+      (yaml[kDefaultPackage] is String?) &&
+      (yaml[kFfiPlugin] is bool?) &&
+      (yaml[kMethodChannelPlugin] is bool?);
   }
 
   final String configKey;
   final String embedderName;
   final String name;
   final String pluginPath;
-  final FileSystem _fileSystem;
   final String? dartPluginClass;
   final String? defaultPackage;
+  final bool ffiPlugin;
+  final bool methodChannelPlugin;
 
   @override
-  bool isNative() => _fileSystem.directory(pluginPath).childDirectory('x-$embedderName').existsSync();
+  bool hasDart() => dartPluginClass != null;
+
+  @override
+  bool hasFfi() => ffiPlugin;
+
+  @override
+  bool hasMethodChannel() => methodChannelPlugin;
 
   @override
   Map<String, dynamic> toMap() {
@@ -587,6 +601,8 @@ class CustomEmbedderPlugin extends PluginPlatform implements NativeOrDartPlugin 
       'name': name,
       if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
       if (defaultPackage != null) kDefaultPackage: defaultPackage!,
+      kFfiPlugin: ffiPlugin,
+      kMethodChannelPlugin: methodChannelPlugin,
     };
   }
 }

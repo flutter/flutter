@@ -1430,7 +1430,13 @@ Future<List<Map<String, Object?>>> findNativeCustomEmbedderPlugins(
   String platformKey, {
   FlutterProject? project
 }) async {
-  final List<Plugin> plugins = await findPlugins(project ?? FlutterProject.current());
+  project ??= FlutterProject.current();
+
+  List<Plugin> plugins = await findPlugins(project);
+
+  // filter plugins that support our `x-...` platform, sort them lexically
+  plugins = plugins.where((Plugin p) => p.platforms.containsKey(platformKey)).toList();
   plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
-  return _extractPlatformMaps(_filterNativePlugins(plugins, platformKey), platformKey);
+
+  return _extractPlatformMaps(plugins, platformKey);
 }
