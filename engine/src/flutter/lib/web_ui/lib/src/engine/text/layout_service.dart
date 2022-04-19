@@ -47,6 +47,10 @@ class TextLayoutService {
 
   final List<EngineLineMetrics> lines = <EngineLineMetrics>[];
 
+  /// The bounds that contain the text painted inside this paragraph.
+  ui.Rect get paintBounds => _paintBounds;
+  ui.Rect _paintBounds = ui.Rect.zero;
+
   // *** Convenient shortcuts used during layout *** //
 
   int? get maxLines => paragraph.paragraphStyle.maxLines;
@@ -204,10 +208,12 @@ class TextLayoutService {
       }
     }
 
-    // ************************************************** //
-    // *** PARAGRAPH BASELINE & HEIGHT & LONGEST LINE *** //
-    // ************************************************** //
+    // ***************************************************************** //
+    // *** PARAGRAPH BASELINE & HEIGHT & LONGEST LINE & PAINT BOUNDS *** //
+    // ***************************************************************** //
 
+    double boundsLeft = double.infinity;
+    double boundsRight = double.negativeInfinity;
     for (final EngineLineMetrics line in lines) {
       height += line.height;
       if (alphabeticBaseline == -1.0) {
@@ -218,7 +224,22 @@ class TextLayoutService {
       if (longestLineWidth < line.width) {
         longestLine = line;
       }
+
+      final double left = line.left;
+      if (left < boundsLeft) {
+        boundsLeft = left;
+      }
+      final double right = left + line.width;
+      if (right > boundsRight) {
+        boundsRight = right;
+      }
     }
+    _paintBounds = ui.Rect.fromLTRB(
+      boundsLeft,
+      0,
+      boundsRight,
+      height,
+    );
 
     // ********************** //
     // *** POSITION BOXES *** //

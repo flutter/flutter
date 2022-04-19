@@ -595,17 +595,18 @@ class RecordingCanvas {
       renderStrategy.hasArbitraryPaint = true;
     }
     renderStrategy.hasParagraphs = true;
-    final double left = offset.dx;
-    final double top = offset.dy;
     final PaintDrawParagraph command =
         PaintDrawParagraph(engineParagraph, offset);
+
+    final ui.Rect paragraphBounds = engineParagraph.paintBounds;
     _paintBounds.growLTRB(
-      left,
-      top,
-      left + engineParagraph.width,
-      top + engineParagraph.height,
+      offset.dx + paragraphBounds.left,
+      offset.dy + paragraphBounds.top,
+      offset.dx + paragraphBounds.right,
+      offset.dy + paragraphBounds.bottom,
       command,
     );
+
     _commands.add(command);
   }
 

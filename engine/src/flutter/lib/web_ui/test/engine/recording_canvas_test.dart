@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
+import '../html/paragraph/text_scuba.dart';
 import '../mock_engine_canvas.dart';
 
 void main() {
@@ -14,6 +15,9 @@ void main() {
 }
 
 void testMain() {
+  debugEmulateFlutterTesterEnvironment = true;
+  setUpStableTestFonts();
+
   late RecordingCanvas underTest;
   late MockEngineCanvas mockCanvas;
   const Rect screenRect = Rect.largest;
@@ -21,6 +25,55 @@ void testMain() {
   setUp(() {
     underTest = RecordingCanvas(screenRect);
     mockCanvas = MockEngineCanvas();
+  });
+
+  group('paragraph bounds', () {
+    Paragraph _paragraphForBoundsTest(TextAlign alignment) {
+      final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+        fontFamily: 'Ahem',
+        fontSize: 20,
+        textAlign: alignment,
+      ));
+      builder.addText('A AAAAA AAA');
+      return builder.build();
+    }
+
+    test('not laid out', () {
+      final Paragraph paragraph = _paragraphForBoundsTest(TextAlign.start);
+      underTest.drawParagraph(paragraph, Offset.zero);
+      underTest.endRecording();
+      expect(underTest.pictureBounds, Rect.zero);
+    });
+
+    test('finite width', () {
+      final Paragraph paragraph = _paragraphForBoundsTest(TextAlign.start);
+      paragraph.layout(const ParagraphConstraints(width: 110));
+      underTest.drawParagraph(paragraph, Offset.zero);
+      underTest.endRecording();
+      expect(paragraph.width, 110);
+      expect(paragraph.height, 60);
+      expect(underTest.pictureBounds, const Rect.fromLTRB(0, 0, 100, 60));
+    });
+
+    test('finite width center-aligned', () {
+      final Paragraph paragraph = _paragraphForBoundsTest(TextAlign.center);
+      paragraph.layout(const ParagraphConstraints(width: 110));
+      underTest.drawParagraph(paragraph, Offset.zero);
+      underTest.endRecording();
+      expect(paragraph.width, 110);
+      expect(paragraph.height, 60);
+      expect(underTest.pictureBounds, const Rect.fromLTRB(5, 0, 105, 60));
+    });
+
+    test('infinite width', () {
+      final Paragraph paragraph = _paragraphForBoundsTest(TextAlign.start);
+      paragraph.layout(const ParagraphConstraints(width: double.infinity));
+      underTest.drawParagraph(paragraph, Offset.zero);
+      underTest.endRecording();
+      expect(paragraph.width, double.infinity);
+      expect(paragraph.height, 20);
+      expect(underTest.pictureBounds, const Rect.fromLTRB(0, 0, 220, 20));
+    });
   });
 
   group('drawDRRect', () {
