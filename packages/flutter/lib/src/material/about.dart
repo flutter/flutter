@@ -1342,6 +1342,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
         Scaffold(
           floatingActionButtonLocation: floatingActionButtonLocation,
           appBar: AppBar(
+            systemOverlayStyle: Theme.of(context).brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
             title: widget.title,
             actions: widget.actionBuilder!(context, _ActionLevel.top),
             automaticallyImplyLeading: widget.automaticallyImplyLeading,
