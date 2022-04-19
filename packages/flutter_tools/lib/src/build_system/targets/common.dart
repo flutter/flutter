@@ -204,7 +204,6 @@ class KernelSnapshot extends Target {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_uwp_x64:
         forceLinkPlatform = false;
         break;
     }

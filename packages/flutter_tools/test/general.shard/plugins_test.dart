@@ -1682,9 +1682,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   WindowsProject windows;
-
-  @override
-  WindowsUwpProject windowsUwp;
 }
 
 class FakeMacOSProject extends Fake implements MacOSProject {
