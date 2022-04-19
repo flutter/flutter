@@ -564,7 +564,7 @@ void main() {
 
   test('RenderObject can become a repaint boundary', () {
     final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(childBox);
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
 
     layout(renderBox, phase: EnginePhase.composite);
 
@@ -617,9 +617,9 @@ void main() {
   });
 
   test('RenderObject with repaint boundary asserts when a composited layer is replaced during layer property update', () {
-    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(childBox);
-    childBox.isRepaintBoundary = true;
+    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+
     // Ignore old layer.
     childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
       return TestOffsetLayerA();
@@ -636,9 +636,9 @@ void main() {
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102086
 
   test('RenderObject with repaint boundary asserts when a composited layer is replaced during painting', () {
-    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(childBox);
-    childBox.isRepaintBoundary = true;
+    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+
     // Ignore old layer.
     childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
       return TestOffsetLayerA();
@@ -654,9 +654,9 @@ void main() {
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102086
 
   test('RenderObject with repaint boundary asserts when a composited layer tries to update its own offset', () {
-    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary();
-    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(childBox);
-    childBox.isRepaintBoundary = true;
+    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+
     // Ignore old layer.
     childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
       return (oldLayer ?? TestOffsetLayerA())..offset = const Offset(2133, 4422);
@@ -670,6 +670,69 @@ void main() {
 
     pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102086
+
+  test('RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
+    'calling markNeedsCompositingBitsUpdate 1', () {
+    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+    // Ignore old layer.
+    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+      return oldLayer ?? TestOffsetLayerA();
+    };
+
+    layout(renderBox, phase: EnginePhase.composite);
+
+    expect(childBox.paintCount, 1);
+    expect(renderBox.paintCount, 1);
+
+    childBox.markNeedsPaint();
+    childBox.isRepaintBoundary = false;
+    childBox.markNeedsCompositingBitsUpdate();
+
+    expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
+  });
+
+  test('RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
+    'calling markNeedsCompositingBitsUpdate 2', () {
+    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+    // Ignore old layer.
+    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+      return oldLayer ?? TestOffsetLayerA();
+    };
+
+    layout(renderBox, phase: EnginePhase.composite);
+
+    expect(childBox.paintCount, 1);
+    expect(renderBox.paintCount, 1);
+
+    childBox.isRepaintBoundary = false;
+    childBox.markNeedsCompositingBitsUpdate();
+    childBox.markNeedsPaint();
+
+    expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
+  });
+
+  test('RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
+    'calling markNeedsCompositingBitsUpdate 3', () {
+    final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
+    // Ignore old layer.
+    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+      return oldLayer ?? TestOffsetLayerA();
+    };
+
+    layout(renderBox, phase: EnginePhase.composite);
+
+    expect(childBox.paintCount, 1);
+    expect(renderBox.paintCount, 1);
+
+    childBox.isRepaintBoundary = false;
+    childBox.markNeedsCompositedLayerUpdate();
+    childBox.markNeedsCompositingBitsUpdate();
+
+    expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -742,7 +805,7 @@ class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTr
 }
 
 class ConditionalRepaintBoundary extends RenderProxyBox {
-  ConditionalRepaintBoundary([super.child]);
+  ConditionalRepaintBoundary({this.isRepaintBoundary = false, RenderBox? child}) : super(child);
 
   @override
   bool isRepaintBoundary = false;
@@ -761,9 +824,6 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (!isRepaintBoundary) {
-      layer = null;
-    }
     paintCount += 1;
     super.paint(context, offset);
   }

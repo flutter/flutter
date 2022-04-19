@@ -108,7 +108,7 @@ class PaintingContext extends ClipContext {
     bool debugAlsoPaintedParent = false,
     PaintingContext? childContext,
   }) {
-    assert(child.isRepaintBoundary);
+    assert(child.isRepaintBoundary || child._wasRepaintBoundary);
     assert(() {
       // register the call for RepaintBoundary metrics
       child.debugRegisterRepaintBoundaryPaint(
@@ -1045,13 +1045,6 @@ class PipelineOwner {
 
       // Sort the dirty nodes in reverse order (deepest first).
       for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
-        // It is possible that one or more render objects in the paint list are no
-        // longer repaint boundaries. They would have been marked as needing a compositing
-        // bits update, which would mark their parents dirty to the nearest repaint boundary.
-        // Thus it should be safe to drop them from the list.
-        if (!node.isRepaintBoundary && node._wasRepaintBoundary) {
-          continue;
-        }
         assert(node._layerHandle.layer != null);
         if ((node._needsPaint || node._needsCompositedLayerUpdate) && node.owner == this) {
           if (node._layerHandle.layer!.attached) {
@@ -2283,9 +2276,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       final RenderObject parent = this.parent! as RenderObject;
       if (parent._needsCompositingBitsUpdate)
         return;
-      if (!_wasRepaintBoundary && !parent.isRepaintBoundary) {
-        parent.markNeedsCompositingBitsUpdate();
-        return;
+      if (!isRepaintBoundary || !_wasRepaintBoundary) {
+        if (!parent.isRepaintBoundary) {
+          parent.markNeedsCompositingBitsUpdate();
+          return;
+        }
       }
     }
     assert(() {
