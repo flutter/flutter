@@ -67,8 +67,6 @@ class Evaluation {
 /// This sample demonstrates how to run an accessibility guideline in a unit
 /// test against a single screen.
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
-///
 /// ```dart
 /// testWidgets('HomePage meets androidTapTargetGuideline', (WidgetTester tester) async {
 ///   final SemanticsHandle handle = tester.ensureSemantics();
@@ -105,7 +103,7 @@ abstract class AccessibilityGuideline {
 /// Each platform defines its own guidelines for minimum tap areas.
 ///
 /// See also:
-///  * [AccessibilityGuideline]: which provides general overview of
+///  * [AccessibilityGuideline]: which provides a general overview of
 ///    accessibility guidelines and how to use them.
 ///  * [androidTapTargetGuideline]: which provides android specific guidance
 ///    for tappable widgets.
@@ -201,7 +199,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
 /// also have a label.
 ///
 /// See also:
-///  * [AccessibilityGuideline]: which provides general overview of
+///  * [AccessibilityGuideline]: which provides a general overview of
 ///    accessibility guidelines and how to use them.
 @visibleForTesting
 class LabeledTapTargetGuideline extends AccessibilityGuideline {
@@ -250,7 +248,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
 /// http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
 ///
 /// See also:
-///  * [AccessibilityGuideline]: which provides general overview of
+///  * [AccessibilityGuideline]: which provides a general overview of
 ///    accessibility guidelines and how to use them.
 @visibleForTesting
 class MinimumTextContrastGuideline extends AccessibilityGuideline {
@@ -449,7 +447,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 /// meet minimum contrast levels.
 ///
 /// See also:
-///  * [AccessibilityGuideline]: which provides general overview of
+///  * [AccessibilityGuideline]: which provides a general overview of
 ///    accessibility guidelines and how to use them.
 class CustomMinimumContrastGuideline extends AccessibilityGuideline {
   /// Creates a custom guideline which verifies that all elements specified
@@ -667,7 +665,7 @@ Map<Color, int> _colorsWithinRect(
 /// See also:
 ///
 ///  * [Android tap target guidelines](https://support.google.com/accessibility/android/answer/7101858?hl=en).
-///  * [AccessibilityGuideline]: which provides general overview of
+///  * [AccessibilityGuideline]: which provides a general overview of
 ///    accessibility guidelines and how to use them.
 ///  * [iOSTapTargetGuideline]: which provides ios specific guidance for
 ///    tappable widgets.
@@ -682,7 +680,7 @@ const AccessibilityGuideline androidTapTargetGuideline = MinimumTapTargetGuideli
 /// See also:
 ///
 ///  * [iOS human interface guidelines](https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/).
-///  * [AccessibilityGuideline]: which provides general overview of
+///  * [AccessibilityGuideline]: which provides a general overview of
 ///    accessibility guidelines and how to use them.
 ///  * [androidTapTargetGuideline]: which provides android specific guidance
 ///    for tappable widgets.
@@ -701,13 +699,13 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline(
 /// foreground and background colors. The contrast ratio is calculated from
 /// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
 ///
-///  * [AccessibilityGuideline]: which provides general overview of
+///  * [AccessibilityGuideline]: which provides a general overview of
 ///    accessibility guidelines and how to use them.
 const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline();
 
 /// A guideline which enforces that all nodes with a tap or long press action
 /// also have a label.
 ///
-///  * [AccessibilityGuideline]: which provides general overview of
+///  * [AccessibilityGuideline]: which provides a general overview of
 ///    accessibility guidelines and how to use them.
 const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();
