@@ -35,7 +35,7 @@ FlatlandExternalViewEmbedder::~FlatlandExternalViewEmbedder() = default;
 SkCanvas* FlatlandExternalViewEmbedder::GetRootCanvas() {
   auto found = frame_layers_.find(kRootLayerId);
   if (found == frame_layers_.end()) {
-    FML_DLOG(WARNING)
+    FML_LOG(WARNING)
         << "No root canvas could be found. This is extremely unlikely and "
            "indicates that the external view embedder did not receive the "
            "notification to begin the frame.";

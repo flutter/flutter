@@ -84,7 +84,7 @@ void GfxPlatformView::OnScenicEvent(
                 event.gfx().metrics().metrics;
             const float new_view_pixel_ratio = metrics.scale_x;
             if (new_view_pixel_ratio <= 0.f) {
-              FML_DLOG(ERROR)
+              FML_LOG(ERROR)
                   << "Got an invalid pixel ratio from Scenic; ignoring: "
                   << new_view_pixel_ratio;
               break;
@@ -94,9 +94,6 @@ void GfxPlatformView::OnScenicEvent(
             // expensive.
             if (view_pixel_ratio_.has_value() &&
                 *view_pixel_ratio_ == new_view_pixel_ratio) {
-              FML_DLOG(ERROR)
-                  << "Got an identical pixel ratio from Scenic; ignoring: "
-                  << new_view_pixel_ratio;
               break;
             }
 
@@ -111,7 +108,7 @@ void GfxPlatformView::OnScenicEvent(
                 std::max(bounding_box.max.x - bounding_box.min.x, 0.0f),
                 std::max(bounding_box.max.y - bounding_box.min.y, 0.0f)};
             if (new_view_size[0] <= 0.f || new_view_size[1] <= 0.f) {
-              FML_DLOG(ERROR)
+              FML_LOG(ERROR)
                   << "Got an invalid view size from Scenic; ignoring: "
                   << new_view_size[0] << " " << new_view_size[1];
               break;
@@ -121,9 +118,6 @@ void GfxPlatformView::OnScenicEvent(
             // expensive.
             if (view_logical_size_.has_value() &&
                 *view_logical_size_ == new_view_size) {
-              FML_DLOG(ERROR)
-                  << "Got an identical view size from Scenic; ignoring: "
-                  << new_view_size[0] << " " << new_view_size[1];
               break;
             }
 
