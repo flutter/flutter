@@ -4,22 +4,14 @@
 
 // @dart = 2.8
 
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 import 'package:platform/platform.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 void main() {
   BufferLogger logger;
@@ -29,7 +21,7 @@ void main() {
   MigrateUtils utils;
 
   setUpAll(() async {
-    fileSystem = LocalFileSystem();
+    fileSystem = const LocalFileSystem();
     logger = BufferLogger.test();
     utils = MigrateUtils(
       logger: logger,
@@ -41,7 +33,7 @@ void main() {
 
   group('git', () {
     setUp(() async {
-      projectRoot = fileSystem.systemTempDirectory.createTempSync('flutter_migrate_utils_test');;
+      projectRoot = fileSystem.systemTempDirectory.createTempSync('flutter_migrate_utils_test');
       projectRoot.createSync(recursive: true);
       projectRootPath = projectRoot.path;
     });
@@ -172,7 +164,7 @@ void main() {
   group('legacy app creation', () {
     testWithoutContext('clone and create', () async {
       projectRoot = fileSystem.systemTempDirectory.createTempSync('flutter_sdk_test');
-      final String revision = '5391447fae6209bb21a89e6a5a6583cac1af9b4b';
+      const String revision = '5391447fae6209bb21a89e6a5a6583cac1af9b4b';
 
       expect(await utils.cloneFlutter(revision, projectRoot.path), true);
       expect(projectRoot.childFile('README.md').existsSync(), true);

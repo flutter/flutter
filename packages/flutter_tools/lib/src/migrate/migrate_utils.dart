@@ -5,12 +5,11 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:process/process.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 
@@ -48,7 +47,7 @@ class MigrateUtils {
 
     // diff exits with 1 if diffs are found.
     checkForErrors(result, allowedExitCodes: <int>[1], commandDescription: 'git ${cmdArgs.join(' ')}');
-    return DiffResult(diffType: DiffType.modification, diff: result.stdout as String, exitCode: result.exitCode);
+    return DiffResult(diffType: DiffType.modification, diff: result.stdout, exitCode: result.exitCode);
   }
 
   /// Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
@@ -100,7 +99,7 @@ class MigrateUtils {
       cmdArgs.add(outputDirectory);
     }
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: outputDirectory, allowReentrantFlutter: true);
-    final String error = result.stderr as String;
+    final String error = result.stderr;
 
     // Catch errors due to parameters not existing.
 
@@ -116,7 +115,7 @@ class MigrateUtils {
       );
     }
     // Old versions of the tool does not include the project-name option.
-    if ((result.stderr as String).contains('Could not find an option named "project-name".')) {
+    if ((result.stderr).contains('Could not find an option named "project-name".')) {
       return createFromTemplates(
         flutterBinPath,
         name: name,
@@ -234,9 +233,9 @@ class MigrateUtils {
           _logger.printError(commandDescription, indent: 2);
         }
         _logger.printError('Stdout:');
-        _logger.printError(result.stdout as String, indent: 2);
+        _logger.printError(result.stdout, indent: 2);
         _logger.printError('Stderr:');
-        _logger.printError(result.stderr as String, indent: 2);
+        _logger.printError(result.stderr, indent: 2);
       }
       if (exit) {
         throwToolExit('Command failed with exit code ${result.exitCode}', exitCode: result.exitCode);
@@ -306,40 +305,30 @@ abstract class MergeResult {
 
 class StringMergeResult extends MergeResult {
   /// Initializes a BinaryMergeResult based off of a RunResult.
-  StringMergeResult(RunResult result, String localPath) :
-    mergedString = result.stdout as String,
-    super(result, localPath);
+  StringMergeResult(super.result, super.localPath) :
+    mergedString = result.stdout;
 
   StringMergeResult.explicit({
     required this.mergedString,
-    required bool hasConflict,
-    required int exitCode,
-    required String localPath,
-  }) : super.explicit(
-         hasConflict: hasConflict,
-         exitCode: exitCode,
-         localPath: localPath,
-       );
+    required super.hasConflict,
+    required super.exitCode,
+    required super.localPath,
+  }) : super.explicit();
   /// The final merged string.
   String mergedString;
 }
 
 class BinaryMergeResult extends MergeResult {
   /// Initializes a BinaryMergeResult based off of a RunResult.
-  BinaryMergeResult(RunResult result, String localPath) :
-    mergedBytes = result.stdout as Uint8List,
-    super(result, localPath);
+  BinaryMergeResult(super.result, super.localPath) :
+    mergedBytes = result.stdout as Uint8List;
 
   BinaryMergeResult.explicit({
     required this.mergedBytes,
-    required bool hasConflict,
-    required int exitCode,
-    required String localPath,
-  }) : super.explicit(
-         hasConflict: hasConflict,
-         exitCode: exitCode,
-         localPath: localPath,
-       );
+    required super.hasConflict,
+    required super.exitCode,
+    required super.localPath,
+  }) : super.explicit();
   /// The final merged bytes.
   Uint8List mergedBytes;
 }
