@@ -112,7 +112,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '2c4c3a6c47a238fe9b24f4ebe2633905299edc76',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '2c41cfc742586b44984595960fc161c30252d8d6',
 
   'src/flutter/impeller':
    Var('github_git') + '/flutter/impeller' + '@' + 'deab73b33a15261852c380eaa3c843bb5918e5f8',
