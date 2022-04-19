@@ -51,7 +51,7 @@ class DataColumn {
   /// sort indicator (if applicable). By default, [label] only occupy minimal
   /// space. It is recommended to place the label content in an [Expanded] or
   /// [Flexible] as [label] to control how the content flexes. Otherwise,
-  /// an exception will occur when the the available space is insufficient.
+  /// an exception will occur when the available space is insufficient.
   ///
   /// By default, [DefaultTextStyle.softWrap] of this subtree will be set to false.
   /// Use [DefaultTextStyle.merge] to override it if needed.
