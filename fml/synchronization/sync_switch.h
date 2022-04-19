@@ -7,9 +7,10 @@
 
 #include <forward_list>
 #include <functional>
-#include <mutex>
+#include <memory>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/synchronization/shared_mutex.h"
 
 namespace fml {
 
@@ -53,7 +54,7 @@ class SyncSwitch {
   void SetSwitch(bool value);
 
  private:
-  mutable std::mutex mutex_;
+  mutable std::unique_ptr<fml::SharedMutex> mutex_;
   bool value_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SyncSwitch);
