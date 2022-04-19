@@ -1083,10 +1083,14 @@ void main() {
       home: buildTable(source),
     ));
 
-    expect(scrollController.offset, 0.0);
+    // DataTable uses provided ScrollController
+    final Scrollable bodyScrollView = tester.widget(find.byType(Scrollable).first);
+    expect(bodyScrollView.controller, scrollController);
 
+    expect(scrollController.offset, 0.0);
     scrollController.jumpTo(50.0);
     await tester.pumpAndSettle();
+
     expect(scrollController.offset, 50.0);
   });
 
