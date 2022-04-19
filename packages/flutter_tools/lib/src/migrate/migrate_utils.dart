@@ -53,14 +53,14 @@ class MigrateUtils {
   /// Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
   Future<bool> cloneFlutter(String revision, String destination) async {
     // Use https url instead of ssh to avoid need to setup ssh on git.
-    List<String> cmdArgs = <String>['git', 'clone', '--single-branch', '--filter=blob:none', '--shallow-exclude=v1.0.0', 'https://github.com/flutter/flutter.git', destination];
+    List<String> cmdArgs = <String>['git', 'clone', '--filter=blob:none', 'https://github.com/flutter/flutter.git', destination];
     RunResult result = await _processUtils.run(cmdArgs);
-    checkForErrors(result, commandDescription: '${cmdArgs.join(' ')}');
+    checkForErrors(result, commandDescription: cmdArgs.join(' '));
 
     cmdArgs.clear();
     cmdArgs = <String>['git', 'reset', '--hard', revision];
     result = await _processUtils.run(cmdArgs, workingDirectory: destination);
-    if (!checkForErrors(result, commandDescription: '${cmdArgs.join(' ')}', exit: false)) {
+    if (!checkForErrors(result, commandDescription: cmdArgs.join(' '), exit: false)) {
       return false;
     }
     return true;
@@ -148,7 +148,7 @@ class MigrateUtils {
         );
       }
     }
-    checkForErrors(result, commandDescription: '${cmdArgs.join(' ')}', silent: true);
+    checkForErrors(result, commandDescription: cmdArgs.join(' '), silent: true);
 
     if (legacyNameParameter) {
       return _fileSystem.path.join(outputDirectory, name);
@@ -167,7 +167,7 @@ class MigrateUtils {
   }) async {
     final List<String> cmdArgs = <String>['git', 'merge-file', '-p', current, base, target];
     final RunResult result = await _processUtils.run(cmdArgs);
-    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
+    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: cmdArgs.join(' '));
     return StringMergeResult(result, localPath);
   }
 
@@ -175,14 +175,14 @@ class MigrateUtils {
   Future<void> gitInit(String workingDirectory) async {
     final List<String> cmdArgs = <String>['git', 'init'];
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
+    checkForErrors(result, commandDescription: cmdArgs.join(' '));
   }
 
   /// Returns true if the workingDirectory git repo has any uncommited changes.
   Future<bool> hasUncommitedChanges(String workingDirectory) async {
     final List<String> cmdArgs = <String>['git', 'diff', '--quiet', 'HEAD', '--', '.', "':(exclude)$kDefaultMigrateWorkingDirectoryName'"];
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: '${cmdArgs.join(' ')}');
+    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: cmdArgs.join(' '));
     if (result.exitCode == 0) {
       return false;
     }
@@ -193,7 +193,7 @@ class MigrateUtils {
   Future<bool> isGitRepo(String workingDirectory) async {
     final List<String> cmdArgs = <String>['git', 'rev-parse', '--is-inside-work-tree'];
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: '${cmdArgs.join(' ')}');
+    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: cmdArgs.join(' '));
     if (result.exitCode == 0) {
       return true;
     }
@@ -204,7 +204,7 @@ class MigrateUtils {
   Future<bool> isGitIgnored(String filePath, String workingDirectory) async {
     final List<String> cmdArgs = <String>['git', 'check-ignore', filePath];
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[0, 1, 128], commandDescription: '${cmdArgs.join(' ')}');
+    checkForErrors(result, allowedExitCodes: <int>[0, 1, 128], commandDescription: cmdArgs.join(' '));
     return result.exitCode == 0;
   }
 
@@ -212,7 +212,7 @@ class MigrateUtils {
   Future<void> flutterPubUpgrade(String workingDirectory) async {
     final List<String> cmdArgs = <String>['flutter', 'pub', 'upgrade', '--major-versions'];
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory, allowReentrantFlutter: true);
-    checkForErrors(result, commandDescription: 'flutter ${cmdArgs.join(' ')}');
+    checkForErrors(result, commandDescription: cmdArgs.join(' '));
   }
 
   /// Runs `./gradlew tasks` in the android directory of a flutter project.
@@ -220,7 +220,7 @@ class MigrateUtils {
     final String baseCommand = _platform.isWindows ? 'gradlew.bat' : './gradlew';
     final List<String> cmdArgs = <String>[baseCommand, 'tasks'];
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, commandDescription: '$baseCommand ${cmdArgs.join(' ')}');
+    checkForErrors(result, commandDescription: cmdArgs.join(' '));
   }
 
   /// Verifies that the RunResult does not contain an error.
