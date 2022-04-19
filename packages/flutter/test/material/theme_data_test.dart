@@ -687,7 +687,6 @@ void main() {
       drawerTheme: const DrawerThemeData(),
       listTileTheme: const ListTileThemeData(),
       fixTextFieldOutlineLabel: false,
-      androidOverscrollIndicator: null,
       extensions: const <Object, ThemeExtension<dynamic>>{},
     );
 
