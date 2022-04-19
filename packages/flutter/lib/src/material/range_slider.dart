@@ -285,7 +285,9 @@ class RangeSlider extends StatefulWidget {
   /// If null, the slider is continuous.
   final int? divisions;
 
-  /// Labels to show as text in the [SliderThemeData.rangeValueIndicatorShape].
+  /// Labels to show as text in the [SliderThemeData.rangeValueIndicatorShape]
+  /// when the slider is active and the [SliderThemeData.showValueIndicator]
+  /// is satisfied.
   ///
   /// There are two labels: one for the start thumb and one for the end thumb.
   ///
@@ -1503,7 +1505,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;
     }
-    config.label = label ?? '';
+
     if (semanticFormatterCallback != null) {
       config.value = semanticFormatterCallback!(_state._lerp(value));
       config.increasedValue = semanticFormatterCallback!(_state._lerp(increasedValue));
