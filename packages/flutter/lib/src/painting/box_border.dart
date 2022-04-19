@@ -430,7 +430,7 @@ class Border extends BoxBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    if (_strokeAlignIsUniform) {
+    if (isUniform) {
       switch (top.strokeAlign) {
         case StrokeAlign.inside:
           return EdgeInsets.all(top.width);
@@ -730,7 +730,7 @@ class BorderDirectional extends BoxBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    if (_strokeAlignIsUniform) {
+    if (isUniform) {
       switch (top.strokeAlign) {
         case StrokeAlign.inside:
           return EdgeInsetsDirectional.all(top.width);
