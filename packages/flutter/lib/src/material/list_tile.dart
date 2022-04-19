@@ -20,8 +20,8 @@ import 'theme_data.dart';
 
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
-/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyMedium]
-/// text style, which is a little smaller than the theme's [TextTheme.titleMedium]
+/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyText1]
+/// text style, which is a little smaller than the theme's [TextTheme.subtitle1]
 /// text style, which is used by default.
 enum ListTileStyle {
   /// Use a title font that's appropriate for a [ListTile] in a list.
@@ -356,14 +356,14 @@ class ListTile extends StatelessWidget {
   /// two lines. For example, you can use [Text.maxLines] to enforce the number
   /// of lines.
   ///
-  /// The subtitle's default [TextStyle] depends on [TextTheme.bodyMedium] except
+  /// The subtitle's default [TextStyle] depends on [TextTheme.bodyText2] except
   /// [TextStyle.color]. The [TextStyle.color] depends on the value of [enabled]
   /// and [selected].
   ///
   /// When [enabled] is false, the text color is set to [ThemeData.disabledColor].
   ///
   /// When [selected] is false, the text color is set to [ListTileTheme.textColor]
-  /// if it's not null and to [TextTheme.bodySmall]'s color if [ListTileTheme.textColor]
+  /// if it's not null and to [TextTheme.caption]'s color if [ListTileTheme.textColor]
   /// is null.
   final Widget? subtitle;
 
@@ -654,10 +654,10 @@ class ListTile extends StatelessWidget {
     final TextStyle textStyle;
     switch(style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list) {
       case ListTileStyle.drawer:
-        textStyle = theme.textTheme.bodyMedium!;
+        textStyle = theme.textTheme.bodyText1!;
         break;
       case ListTileStyle.list:
-        textStyle = theme.textTheme.titleMedium!;
+        textStyle = theme.textTheme.subtitle1!;
         break;
     }
     final Color? color = _textColor(theme, tileTheme, textStyle.color);
@@ -667,15 +667,15 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _subtitleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle = theme.textTheme.bodyMedium!;
-    final Color? color = _textColor(theme, tileTheme, theme.textTheme.bodySmall!.color);
+    final TextStyle textStyle = theme.textTheme.bodyText2!;
+    final Color? color = _textColor(theme, tileTheme, theme.textTheme.caption!.color);
     return _isDenseLayout(theme, tileTheme)
       ? textStyle.copyWith(color: color, fontSize: 12.0)
       : textStyle.copyWith(color: color);
   }
 
   TextStyle _trailingAndLeadingTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle = theme.textTheme.bodyMedium!;
+    final TextStyle textStyle = theme.textTheme.bodyText2!;
     final Color? color = _textColor(theme, tileTheme, textStyle.color);
     return textStyle.copyWith(color: color);
   }
