@@ -101,7 +101,7 @@ void main() {
             debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
             bundleBuilder: FakeBundleBuilder()
           ),
-          throwsToolExit(message: 'No testembedder project configured. See (...) to learn about adding custom embedder support to a project.'),
+          throwsToolExit(message: 'No testembedder project configured. See (https://github.com/flutter/flutter/wiki/Using-custom-embedders-with-the-Flutter-CLI) to learn about adding custom embedder support to a project.'),
         );
       },
       overrides: <Type, dynamic Function()>{
