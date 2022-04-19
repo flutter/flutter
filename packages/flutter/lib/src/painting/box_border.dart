@@ -431,11 +431,13 @@ class Border extends BoxBorder {
   @override
   EdgeInsetsGeometry get dimensions {
     if (_strokeAlignIsUniform) {
-      if (top.strokeAlign == StrokeAlign.outside) {
-        return EdgeInsets.zero;
-      } else if (top.strokeAlign == StrokeAlign.center) {
-        final double centerStrokeAlignWidth = top.width / 2;
-        return EdgeInsets.all(centerStrokeAlignWidth);
+      switch (top.strokeAlign) {
+        case StrokeAlign.inside:
+          return EdgeInsets.all(top.width);
+        case StrokeAlign.center:
+          return EdgeInsets.all(top.width / 2);
+        case StrokeAlign.outside:
+          return EdgeInsets.zero;
       }
     }
     return EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
@@ -729,11 +731,13 @@ class BorderDirectional extends BoxBorder {
   @override
   EdgeInsetsGeometry get dimensions {
     if (_strokeAlignIsUniform) {
-      if (top.strokeAlign == StrokeAlign.outside) {
-        return EdgeInsetsDirectional.zero;
-      } else if (top.strokeAlign == StrokeAlign.center) {
-        final double centerStrokeAlignWidth = top.width / 2;
-        return EdgeInsetsDirectional.all(centerStrokeAlignWidth);
+      switch (top.strokeAlign) {
+        case StrokeAlign.inside:
+          return EdgeInsetsDirectional.all(top.width);
+        case StrokeAlign.center:
+          return EdgeInsetsDirectional.all(top.width / 2);
+        case StrokeAlign.outside:
+          return EdgeInsetsDirectional.zero;
       }
     }
     return EdgeInsetsDirectional.fromSTEB(start.width, top.width, end.width, bottom.width);
