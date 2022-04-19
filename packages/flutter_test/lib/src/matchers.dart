@@ -663,11 +663,15 @@ Matcher matchesSemantics({
 ///   * [androidTapTargetGuideline], for Android minimum tappable area guidelines.
 ///   * [iOSTapTargetGuideline], for iOS minimum tappable area guidelines.
 ///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
+///   * [labeledTapTargetGuideline], for enforcing label on tappable area guidelines.
 AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
   return _MatchesAccessibilityGuideline(guideline);
 }
 
 /// The inverse matcher of [meetsGuideline].
+///
+/// This matcher is used for verifying accessibility guideline does flag the
+/// violations.
 ///
 /// This is needed because the [isNot] matcher does not compose with an
 /// [AsyncMatcher].

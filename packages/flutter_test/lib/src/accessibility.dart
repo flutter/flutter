@@ -58,6 +58,36 @@ class Evaluation {
 
 /// An accessibility guideline describes a recommendation an application should
 /// meet to be considered accessible.
+///
+/// Use [meetsGuideline] matcher to test whether a screen meets the
+/// accessibility guideline.
+///
+/// {@tool snippet}
+///
+/// This sample demonstrates how to run an accessibility guideline in a unit
+/// test against a single screen.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
+///
+/// ```dart
+/// testWidgets('HomePage meets androidTapTargetGuideline', (WidgetTester tester) async {
+///   final SemanticsHandle handle = tester.ensureSemantics();
+///   await tester.pumpWidget(const MaterialApp(home: HomePage()));
+///   await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+///   handle.dispose();
+/// });
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///  * [androidTapTargetGuideline]: which provides android specific guidance
+///    for tappable widgets.
+///  * [iOSTapTargetGuideline]: which provides ios specific guidance for
+///    tappable widgets.
+///  * [textContrastGuideline]: which provides guidance for text contrast
+///    requirements specified by [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
+///  * [labeledTapTargetGuideline]: which enforces that all nodes with a tap or
+///    long press action also have a label.
 abstract class AccessibilityGuideline {
   /// A const constructor allows subclasses to be const.
   const AccessibilityGuideline();
@@ -73,6 +103,14 @@ abstract class AccessibilityGuideline {
 /// size.
 ///
 /// Each platform defines its own guidelines for minimum tap areas.
+///
+/// See also:
+///  * [AccessibilityGuideline]: which provides general overview of
+///    accessibility guidelines and how to use them.
+///  * [androidTapTargetGuideline]: which provides android specific guidance
+///    for tappable widgets.
+///  * [iOSTapTargetGuideline]: which provides ios specific guidance for
+///    tappable widgets.
 @visibleForTesting
 class MinimumTapTargetGuideline extends AccessibilityGuideline {
   /// Create a new [MinimumTapTargetGuideline].
@@ -161,6 +199,10 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
 
 /// A guideline which enforces that all nodes with a tap or long press action
 /// also have a label.
+///
+/// See also:
+///  * [AccessibilityGuideline]: which provides general overview of
+///    accessibility guidelines and how to use them.
 @visibleForTesting
 class LabeledTapTargetGuideline extends AccessibilityGuideline {
   const LabeledTapTargetGuideline._();
@@ -206,6 +248,10 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
 ///
 /// The guidelines are defined by the Web Content Accessibility Guidelines,
 /// http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
+///
+/// See also:
+///  * [AccessibilityGuideline]: which provides general overview of
+///    accessibility guidelines and how to use them.
 @visibleForTesting
 class MinimumTextContrastGuideline extends AccessibilityGuideline {
   /// Create a new [MinimumTextContrastGuideline].
@@ -401,6 +447,10 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
 /// A guideline which verifies that all elements specified by [finder]
 /// meet minimum contrast levels.
+///
+/// See also:
+///  * [AccessibilityGuideline]: which provides general overview of
+///    accessibility guidelines and how to use them.
 class CustomMinimumContrastGuideline extends AccessibilityGuideline {
   /// Creates a custom guideline which verifies that all elements specified
   /// by [finder] meet minimum contrast levels.
@@ -617,6 +667,10 @@ Map<Color, int> _colorsWithinRect(
 /// See also:
 ///
 ///  * [Android tap target guidelines](https://support.google.com/accessibility/android/answer/7101858?hl=en).
+///  * [AccessibilityGuideline]: which provides general overview of
+///    accessibility guidelines and how to use them.
+///  * [iOSTapTargetGuideline]: which provides ios specific guidance for
+///    tappable widgets.
 const AccessibilityGuideline androidTapTargetGuideline = MinimumTapTargetGuideline(
   size: Size(48.0, 48.0),
   link: 'https://support.google.com/accessibility/android/answer/7101858?hl=en',
@@ -627,7 +681,11 @@ const AccessibilityGuideline androidTapTargetGuideline = MinimumTapTargetGuideli
 ///
 /// See also:
 ///
-///   * [iOS human interface guidelines](https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/).
+///  * [iOS human interface guidelines](https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/).
+///  * [AccessibilityGuideline]: which provides general overview of
+///    accessibility guidelines and how to use them.
+///  * [androidTapTargetGuideline]: which provides android specific guidance
+///    for tappable widgets.
 const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline(
   size: Size(44.0, 44.0),
   link: 'https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/',
@@ -642,8 +700,14 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline(
 /// frequently occurring color in each partition as a representative of the
 /// foreground and background colors. The contrast ratio is calculated from
 /// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
+///
+///  * [AccessibilityGuideline]: which provides general overview of
+///    accessibility guidelines and how to use them.
 const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline();
 
 /// A guideline which enforces that all nodes with a tap or long press action
 /// also have a label.
+///
+///  * [AccessibilityGuideline]: which provides general overview of
+///    accessibility guidelines and how to use them.
 const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();
