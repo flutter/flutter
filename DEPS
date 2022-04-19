@@ -438,7 +438,7 @@ deps = {
    Var('swiftshader_git') + '/SwiftShader.git' + '@' + 'd4130e9ac3675dadbec8442dc2310a80ea4ddfb2',
 
    'src/third_party/angle':
-   Var('github_git') + '/google/angle.git' + '@' + '06d194e2ae7b1d7e0eda0c0c911eff92dec7d3d1',
+   Var('github_git') + '/google/angle.git' + '@' + '90d18b0391065b7ecc556ccfce1201aa6392e22d',
 
    'src/third_party/angle/third_party/vulkan-deps/vulkan-headers/src':
    Var('fuchsia_git') + '/third_party/Vulkan-Headers.git' + '@' + '5de4e8fab88ef0bd6994d9ddbcc864e3179b9e79',
