@@ -18,6 +18,7 @@ import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../../web/file_generators/flutter_js.dart' as flutter_js;
+import '../../web/file_generators/main_dart.dart' as main_dart;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -135,39 +136,10 @@ class WebEntrypointTarget extends Target {
         ?? generatedUri.toString();
     }
 
-    final String contents = <String>[
-        '// @dart=${languageVersion.major}.${languageVersion.minor}',
-        '// Flutter web bootstrap script for $importedEntrypoint.',
-        '',
-        "import 'dart:ui' as ui;",
-        "import 'dart:async';",
-        '',
-        "import '$importedEntrypoint' as entrypoint;",
-        if (hasWebPlugins)
-          "import 'package:flutter_web_plugins/flutter_web_plugins.dart';",
-        if (hasWebPlugins)
-          "import '$generatedImport';",
-        '',
-        'typedef _UnaryFunction = dynamic Function(List<String> args);',
-        'typedef _NullaryFunction = dynamic Function();',
-        '',
-        'Future<void> main() async {',
-        '  await ui.webOnlyWarmupEngine(',
-        '    runApp: () {',
-        '      if (entrypoint.main is _UnaryFunction) {',
-        '        return (entrypoint.main as _UnaryFunction)(<String>[]);',
-        '      }',
-        '      return (entrypoint.main as _NullaryFunction)();',
-        '    },',
-        if (hasWebPlugins) ...<String>[
-        '    registerPlugins: () {',
-        '      registerPlugins(webPluginRegistrar);',
-        '    },',
-        ],
-        '  );',
-        '}',
-        '',
-      ].join('\n');
+    final String contents = main_dart.generateMainDartFile(importedEntrypoint,
+      languageVersion: languageVersion,
+      pluginRegistrantEntrypoint: generatedImport,
+    );
 
     environment.buildDir.childFile('main.dart')
       .writeAsStringSync(contents);
