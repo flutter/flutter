@@ -10,7 +10,6 @@ declare_args() {
 }
 
 wasm_toolchain = "//build/toolchain/wasm"
-is_wasm = target_cpu == "wasm"
 
 em_config_path = "$emsdk_dir/.emscripten"
 
@@ -65,8 +64,8 @@ template("wasm_lib") {
   }
 
   group("$_lib_name") {
-    deps = [
-      ":${_lib_name}.js($wasm_toolchain)",
+    public_deps = [
+      ":${_lib_name}.js",
     ]
   }
 }

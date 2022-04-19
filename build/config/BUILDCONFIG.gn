@@ -2,9 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# define is_wasm
-import("//build/toolchain/wasm.gni")
-
 # =============================================================================
 # PLATFORM SELECTION
 # =============================================================================
@@ -196,6 +193,7 @@ if (current_os == "win") {
   is_mac = false
   is_posix = false
   is_win = true
+  is_wasm = false
 } else if (current_os == "mac") {
   is_android = false
   is_chromeos = false
@@ -206,6 +204,7 @@ if (current_os == "win") {
   is_mac = true
   is_posix = true
   is_win = false
+  is_wasm = false
 } else if (current_os == "android") {
   is_android = true
   is_chromeos = false
@@ -216,6 +215,7 @@ if (current_os == "win") {
   is_mac = false
   is_posix = true
   is_win = false
+  is_wasm = false
 } else if (current_os == "chromeos") {
   is_android = false
   is_chromeos = true
@@ -226,6 +226,7 @@ if (current_os == "win") {
   is_mac = false
   is_posix = true
   is_win = false
+  is_wasm = false
 } else if (current_os == "nacl") {
   # current_os == "nacl" will be passed by the nacl toolchain definition.
   # It is not set by default or on the command line. We treat is as a
@@ -239,6 +240,7 @@ if (current_os == "win") {
   is_mac = false
   is_posix = true
   is_win = false
+  is_wasm = false
 } else if (current_os == "ios") {
   is_android = false
   is_chromeos = false
@@ -249,6 +251,7 @@ if (current_os == "win") {
   is_mac = false
   is_posix = true
   is_win = false
+  is_wasm = false
 } else if (current_os == "linux") {
   is_android = false
   is_chromeos = false
@@ -259,6 +262,7 @@ if (current_os == "win") {
   is_mac = false
   is_posix = true
   is_win = false
+  is_wasm = false
 } else if (current_os == "fuchsia" || target_os == "fuchsia") {
   is_android = false
   is_chromeos = false
@@ -269,7 +273,8 @@ if (current_os == "win") {
   is_mac = false
   is_posix = true
   is_win = false
-} else if (target_os == "wasm") {
+  is_wasm = false
+} else if (current_os == "wasm") {
   is_android = false
   is_chromeos = false
   is_fuchsia = false
@@ -279,6 +284,7 @@ if (current_os == "win") {
   is_mac = false
   is_posix = false
   is_win = false
+  is_wasm = true
 }
 
 is_apple = is_ios || is_mac

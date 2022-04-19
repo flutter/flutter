@@ -30,4 +30,6 @@ gcc_toolchain("wasm") {
   toolchain_os = "wasm"
 
   is_clang = true
+
+  link_outputs = [ "{{root_out_dir}}/{{target_output_name}}.wasm" ]
 }

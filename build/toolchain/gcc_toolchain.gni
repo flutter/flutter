@@ -238,7 +238,7 @@ template("gcc_toolchain") {
       }
 
       build_id = "-Wl,--build-id=sha1"
-      if (is_wasm) {
+      if (invoker.toolchain_cpu == "wasm") {
         build_id = ""
       }
       command = "$ld {{ldflags}} $coverage_flags -o $unstripped_outfile $build_id -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group $libs_section_prefix {{libs}} $libs_section_postfix"
