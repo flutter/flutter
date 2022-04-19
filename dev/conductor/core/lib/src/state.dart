@@ -197,8 +197,8 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.RELEASE_COMPLETED:
       return <String>[
         'Ensure the following post release steps are complete:',
-        '\t 1. Update hotfix to stable wiki following documentation best practices',
-        '\t 2. Post announcement to flutter-announce group',
+        '\t 1. [STABLE ONLY] Update hotfix to stable wiki following documentation best practices',
+        '\t 2. [STABLE ONLY] Post announcement to flutter-announce group',
         '\t 3. Post announcement to discord',
         '\t 4. Post announcement flutter release hotline chat room',
         '-----------------------------------------------------------------------',
