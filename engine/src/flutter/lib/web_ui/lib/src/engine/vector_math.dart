@@ -1395,3 +1395,66 @@ class Vector3 {
   double get y => _v3storage[1];
   double get z => _v3storage[2];
 }
+
+/// Converts a matrix represented using [Float64List] to one represented using
+/// [Float32List].
+///
+/// 32-bit precision is sufficient because Flutter Engine itself (as well as
+/// Skia) use 32-bit precision under the hood anyway.
+///
+/// 32-bit matrices require 2x less memory and in V8 they are allocated on the
+/// JavaScript heap, thus avoiding a malloc.
+///
+/// See also:
+/// * https://bugs.chromium.org/p/v8/issues/detail?id=9199
+/// * https://bugs.chromium.org/p/v8/issues/detail?id=2022
+Float32List toMatrix32(Float64List matrix64) {
+  final Float32List matrix32 = Float32List(16);
+  matrix32[15] = matrix64[15];
+  matrix32[14] = matrix64[14];
+  matrix32[13] = matrix64[13];
+  matrix32[12] = matrix64[12];
+  matrix32[11] = matrix64[11];
+  matrix32[10] = matrix64[10];
+  matrix32[9] = matrix64[9];
+  matrix32[8] = matrix64[8];
+  matrix32[7] = matrix64[7];
+  matrix32[6] = matrix64[6];
+  matrix32[5] = matrix64[5];
+  matrix32[4] = matrix64[4];
+  matrix32[3] = matrix64[3];
+  matrix32[2] = matrix64[2];
+  matrix32[1] = matrix64[1];
+  matrix32[0] = matrix64[0];
+  return matrix32;
+}
+
+// Stores matrix in a form that allows zero allocation transforms.
+// TODO(yjbanov): re-evaluate the need for this class. It may be an
+//                over-optimization. It is only used by `GradientLinear` in the
+//                HTML renderer. However that class creates a whole new WebGL
+//                context to render the gradient, then copies the resulting
+//                bitmap back into the destination canvas. This is multiple
+//                orders of magnitude more computation and data copying. Saving
+//                an allocation of one point is unlikely to save anything, but
+//                is guaranteed to add complexity (e.g. it's stateful).
+class FastMatrix32 {
+  FastMatrix32(this.matrix);
+
+  final Float32List matrix;
+  double transformedX = 0;
+  double transformedY = 0;
+
+  /// Transforms the point defined by [x] and [y] using the [matrix] and stores
+  /// the results in [transformedX] and [transformedY].
+  void transform(double x, double y) {
+    transformedX = matrix[12] + (matrix[0] * x) + (matrix[4] * y);
+    transformedY = matrix[13] + (matrix[1] * x) + (matrix[5] * y);
+  }
+
+  String debugToString() =>
+      '${matrix[0].toStringAsFixed(3)}, ${matrix[4].toStringAsFixed(3)}, ${matrix[8].toStringAsFixed(3)}, ${matrix[12].toStringAsFixed(3)}\n'
+      '${matrix[1].toStringAsFixed(3)}, ${matrix[5].toStringAsFixed(3)}, ${matrix[9].toStringAsFixed(3)}, ${matrix[13].toStringAsFixed(3)}\n'
+      '${matrix[2].toStringAsFixed(3)}, ${matrix[6].toStringAsFixed(3)}, ${matrix[10].toStringAsFixed(3)}, ${matrix[14].toStringAsFixed(3)}\n'
+      '${matrix[3].toStringAsFixed(3)}, ${matrix[7].toStringAsFixed(3)}, ${matrix[11].toStringAsFixed(3)}, ${matrix[15].toStringAsFixed(3)}\n';
+}
