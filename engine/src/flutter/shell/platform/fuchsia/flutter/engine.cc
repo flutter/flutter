@@ -715,13 +715,9 @@ void Engine::OnMainIsolateStart() {
     FML_LOG(ERROR) << "Could not configure some native embedder bindings for a "
                       "new root isolate.";
   }
-  FML_DLOG(INFO) << "Main isolate for engine '" << thread_label_
-                 << "' was started.";
 }
 
 void Engine::OnMainIsolateShutdown() {
-  FML_DLOG(INFO) << "Main isolate for engine '" << thread_label_
-                 << "' shutting down.";
   Terminate();
 }
 
