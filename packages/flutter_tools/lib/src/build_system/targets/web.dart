@@ -17,7 +17,7 @@ import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
-import '../../web/flutter_js.dart' as flutter_js;
+import '../../web/file_generators/flutter_js.dart' as flutter_js;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
