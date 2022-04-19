@@ -277,4 +277,27 @@ void main() {
       'A Border can only draw strokeAlign different than\nStrokeAlign.inside on uniform borders.\n',
     );
   });
+
+  test('Border.dimension', () {
+    final Border insideBorder = Border.all(width: 10);
+    expect(insideBorder.dimensions, const EdgeInsets.all(10));
+    
+    final Border centerBorder = Border.all(width: 10, strokeAlign: StrokeAlign.center);
+    expect(centerBorder.dimensions, const EdgeInsets.all(5));
+    
+    final Border outsideBorder = Border.all(width: 10, strokeAlign: StrokeAlign.outside);
+    expect(outsideBorder.dimensions, EdgeInsets.zero);
+
+    const BorderSide insideSide = BorderSide(width: 10);
+    const BorderDirectional insideBorderDirectional = BorderDirectional(top: insideSide, bottom: insideSide, start: insideSide, end: insideSide);
+    expect(insideBorderDirectional.dimensions, const EdgeInsets.all(10));
+
+    const BorderSide centerSide = BorderSide(width: 10, strokeAlign: StrokeAlign.center);
+    const BorderDirectional centerBorderDirectional = BorderDirectional(top: centerSide, bottom: centerSide, start: centerSide, end: centerSide);
+    expect(centerBorderDirectional.dimensions, const EdgeInsets.all(5));
+
+    const BorderSide outsideSide = BorderSide(width: 10, strokeAlign: StrokeAlign.outside);
+    const BorderDirectional outsideBorderDirectional = BorderDirectional(top: outsideSide, bottom: outsideSide, start: outsideSide, end: outsideSide);
+    expect(outsideBorderDirectional.dimensions, EdgeInsets.zero);
+  });
 }
