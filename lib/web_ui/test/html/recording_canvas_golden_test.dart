@@ -14,12 +14,19 @@ import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common.dart';
 import '../matchers.dart';
+import 'paragraph/text_scuba.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
+  setUpAll(() async {
+    debugEmulateFlutterTesterEnvironment = true;
+  });
+
+  setUpStableTestFonts();
+
   const double screenWidth = 600.0;
   const double screenHeight = 800.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
@@ -66,13 +73,6 @@ Future<void> testMain() async {
       sceneElement.remove();
     }
   }
-
-  setUpAll(() async {
-    debugEmulateFlutterTesterEnvironment = true;
-    await webOnlyInitializePlatform();
-    fontCollection.debugRegisterTestFonts();
-    await fontCollection.ensureFontsLoaded();
-  });
 
   test('Empty canvas reports correct paint bounds', () async {
     final RecordingCanvas rc =
@@ -316,8 +316,15 @@ Future<void> testMain() async {
     rc.drawParagraph(paragraph, const Offset(textLeft, textTop));
     rc.endRecording();
     expect(
+      rc.pictureBounds!.width,
+      lessThan(widthConstraint),
+      reason: 'The given width constraint $widthConstraint is more than the '
+              'test string needs, so the width of the visible text is actually '
+              'smaller than the given width.',
+    );
+    expect(
       rc.pictureBounds,
-      const Rect.fromLTRB(textLeft, textTop, textLeft + widthConstraint, 21.0),
+      Rect.fromLTRB(textLeft, textTop, textLeft + paragraph.maxIntrinsicWidth, 21.0),
     );
     await _checkScreenshot(rc, 'draw_paragraph');
   },  // TODO(mdebbar): https://github.com/flutter/flutter/issues/65789
@@ -334,9 +341,22 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: widthConstraint));
     rc.drawParagraph(paragraph, const Offset(textLeft, textTop));
     rc.endRecording();
+
+    const double fontWidth = 14;
+    const int lettersInLongestWord = 9;
+    const double longestLineWidth = lettersInLongestWord * fontWidth;
+    expect(
+      rc.pictureBounds!.width,
+      lessThan(widthConstraint),
+      reason: 'The test string "A short sentence." is broken up into two lines, '
+              '"A short" and "sentence.". The longest line contains '
+              '$lettersInLongestWord characters, each  ${fontWidth}px wide. '
+              'That line is ${longestLineWidth}px wide, which is less than '
+              '$widthConstraint.',
+    );
     expect(
       rc.pictureBounds,
-      const Rect.fromLTRB(textLeft, textTop, textLeft + widthConstraint, 35.0),
+      const Rect.fromLTRB(textLeft, textTop, textLeft + longestLineWidth, 35.0),
     );
     await _checkScreenshot(rc, 'draw_paragraph_multi_line');
   },  // TODO(mdebbar): https://github.com/flutter/flutter/issues/65789

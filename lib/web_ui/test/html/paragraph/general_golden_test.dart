@@ -583,4 +583,61 @@ Future<void> testMain() async {
     testForegroundStyle(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_foreground_style_dom');
   });
+
+  test('paragraph bounds hug the text inside the paragraph', () async {
+    const Rect bounds = Rect.fromLTWH(0, 0, 150, 100);
+
+    final CanvasParagraphBuilder builder = CanvasParagraphBuilder(EngineParagraphStyle(
+      fontFamily: 'Ahem',
+      fontSize: 20,
+      textAlign: TextAlign.center,
+    ));
+
+    // Expected layout with center-alignment is something like this:
+    //
+    // _________________
+    // |       A       |
+    // |    |AAAAA|    |
+    // |    | AAA |    |
+    // |----|-----|----|
+    // |    |<--->|    |
+    // |      100      |
+    // |               |
+    // |<------------->|
+    //        110
+    //
+    // The width of the paragraph is bigger than the actual content because the
+    // longest line "AAAAA" is 100px, which is smaller than 110px specified in
+    // the constraint. After the layout and centering the paint bounds would
+    // "hug" the text inside the paragraph more tightly than the box allocated
+    // for the paragraph.
+    builder.addText('A AAAAA AAA');
+
+    final CanvasParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 110));
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
+    canvas.translate(20, 20);
+    canvas.drawParagraph(paragraph, Offset.zero);
+    canvas.drawRect(
+      Rect.fromLTRB(
+        0,
+        0,
+        paragraph.width,
+        paragraph.height,
+      ),
+      SurfacePaintData()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+
+    canvas.drawRect(
+      paragraph.paintBounds,
+      SurfacePaintData()
+        ..color = const Color(0xFF00FF00)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+
+    await takeScreenshot(canvas, bounds, 'canvas_paragraph_bounds');
+  });
 }
