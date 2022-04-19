@@ -1193,7 +1193,6 @@ void main() {
         child: boilerplate(
           child: ToggleButtons(
             isSelected: const <bool>[false, true, false],
-            expandChildren: true,
             children: children,
           ),
         ),

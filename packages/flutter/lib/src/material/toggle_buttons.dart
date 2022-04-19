@@ -193,7 +193,6 @@ class ToggleButtons extends StatelessWidget {
     this.borderWidth,
     this.direction = Axis.horizontal,
     this.verticalDirection = VerticalDirection.down,
-    this.expandChildren = false,
   }) :
     assert(children != null),
     assert(isSelected != null),
@@ -417,11 +416,6 @@ class ToggleButtons extends StatelessWidget {
   /// If [direction] is [Axis.vertical], this parameter determines whether to lay out
   /// the buttons starting from the first or last child from top to bottom.
   final VerticalDirection verticalDirection;
-
-  /// Whether to expand the children to take height of the tallest widget.
-  ///
-  /// Defaults to false.
-  final bool expandChildren;
 
   // Determines if this is the first child that is being laid out
   // by the render object, _not_ the order of the children in its list.
@@ -698,32 +692,33 @@ class ToggleButtons extends StatelessWidget {
       final TextStyle currentTextStyle = textStyle
         ?? toggleButtonsTheme.textStyle
         ?? theme.textTheme.bodyText2!;
-      final BoxConstraints currentConstraints = constraints
-        ?? toggleButtonsTheme.constraints
-        ?? const BoxConstraints(
-             minWidth: kMinInteractiveDimension,
-             minHeight: kMinInteractiveDimension,
-           );
-
-      final Size minSize;
+      final BoxConstraints? currentConstraints = constraints
+        ?? toggleButtonsTheme.constraints;
+      final Size minimumSize = currentConstraints == null
+        ? const Size.square(kMinInteractiveDimension)
+        : Size(currentConstraints.minWidth, currentConstraints.minHeight);
+      final Size? maximumSize = currentConstraints == null
+        ? null
+        : Size(currentConstraints.maxWidth, currentConstraints.maxHeight);
+      final Size minPaddingSize;
       switch (tapTargetSize ?? theme.materialTapTargetSize) {
         case MaterialTapTargetSize.padded:
           if (direction == Axis.horizontal) {
-            minSize = const Size(
+            minPaddingSize = const Size(
               kMinInteractiveDimension,
               kMinInteractiveDimension,
             );
           } else {
-            minSize = const Size(
+            minPaddingSize = const Size(
               kMinInteractiveDimension,
               0.0,
             );
           }
-          assert(minSize.width >= 0.0);
-          assert(minSize.height >= 0.0);
+          assert(minPaddingSize.width >= 0.0);
+          assert(minPaddingSize.height >= 0.0);
           break;
         case MaterialTapTargetSize.shrinkWrap:
-          minSize = Size.zero;
+          minPaddingSize = Size.zero;
           break;
       }
 
@@ -758,10 +753,8 @@ class ToggleButtons extends StatelessWidget {
                 color: currentColor,
               )),
               padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero),
-              minimumSize: MaterialStateProperty.all<Size?>(
-                Size(currentConstraints.minWidth, currentConstraints.minHeight)),
-              maximumSize: MaterialStateProperty.all<Size?>(
-                Size(currentConstraints.maxWidth, currentConstraints.maxHeight)),
+              minimumSize: MaterialStateProperty.all<Size?>(minimumSize),
+              maximumSize: MaterialStateProperty.all<Size?>(maximumSize),
               shape: MaterialStateProperty.all<OutlinedBorder>(const RoundedRectangleBorder()),
               mouseCursor: MaterialStateProperty.all<MouseCursor?>(mouseCursor),
               visualDensity: VisualDensity.standard,
@@ -779,7 +772,7 @@ class ToggleButtons extends StatelessWidget {
         ),
       );
 
-      if (!expandChildren) {
+      if (currentConstraints != null) {
         button = Center(child: button);
       }
 
@@ -788,7 +781,7 @@ class ToggleButtons extends StatelessWidget {
         button: true,
         enabled: onPressed != null,
         child: _InputPadding(
-          minSize: minSize,
+          minSize: minPaddingSize,
           direction: direction,
           child: Semantics(
             excludeSemantics: true,
@@ -798,15 +791,8 @@ class ToggleButtons extends StatelessWidget {
       );
     });
 
-    final Widget result = direction == Axis.horizontal
-      ? IntrinsicHeight(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: buttons,
-        ),
-      )
-      : IntrinsicWidth(
+    if (direction == Axis.vertical) {
+      return IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -814,8 +800,15 @@ class ToggleButtons extends StatelessWidget {
           children: buttons,
         ),
       );
+    }
 
-    return result;
+    return IntrinsicHeight(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: buttons,
+      ),
+    );
   }
 
   @override
