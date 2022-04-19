@@ -21,8 +21,7 @@ class ContentContext;
 
 class EntityPass {
  public:
-  using Entities = std::vector<Entity>;
-  using Subpasses = std::vector<std::unique_ptr<EntityPass>>;
+  using Element = std::variant<Entity, std::unique_ptr<EntityPass>>;
 
   EntityPass();
 
@@ -36,11 +35,7 @@ class EntityPass {
 
   void AddEntity(Entity entity);
 
-  void SetEntities(Entities entities);
-
-  const std::vector<Entity>& GetEntities() const;
-
-  const Subpasses& GetSubpasses() const;
+  void SetElements(std::vector<Element> elements);
 
   const std::shared_ptr<LazyGlyphAtlas>& GetLazyGlyphAtlas() const;
 
@@ -61,8 +56,8 @@ class EntityPass {
   void SetBlendMode(Entity::BlendMode blend_mode);
 
  private:
-  Entities entities_;
-  Subpasses subpasses_;
+  std::vector<Element> elements_;
+
   EntityPass* superpass_ = nullptr;
   Matrix xformation_;
   size_t stencil_depth_ = 0u;
@@ -74,7 +69,7 @@ class EntityPass {
 
   std::optional<Rect> GetSubpassCoverage(const EntityPass& subpass) const;
 
-  std::optional<Rect> GetEntitiesCoverage() const;
+  std::optional<Rect> GetElementsCoverage() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EntityPass);
 };
