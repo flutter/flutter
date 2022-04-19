@@ -65,10 +65,10 @@ def CheckPackage(package):
 
 def Main():
   leading = os.path.join("src", "third_party", "dart", "tools", "sdks", "dart-sdk", "bin")
-  pub = "pub"
+  dart = "dart"
   if os.name == "nt":
-    pub = "pub.bat"
-  pubcmd = [os.path.abspath(os.path.join(leading, pub)), "get", "--offline"]
+    dart = "dart.exe"
+  pubcmd = [os.path.abspath(os.path.join(leading, dart)), "pub", "get", "--offline"]
 
   pub_count = 0
   for package in ALL_PACKAGES:
