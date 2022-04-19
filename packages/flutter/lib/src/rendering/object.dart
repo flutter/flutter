@@ -138,7 +138,7 @@ class PaintingContext extends ClipContext {
       childLayer.removeAllChildren();
       final OffsetLayer updatedLayer = child.updateCompositedLayer(oldLayer: childLayer);
       assert(identical(updatedLayer, childLayer),
-        '$child created a new layer instance $updatedLayer instread of reusing the '
+        '$child created a new layer instance $updatedLayer instead of reusing the '
         'existing layer $childLayer. See the documentation of RenderObject.updateCompositedLayer '
         'for more information on how to correctly implement this method.'
       );
@@ -186,7 +186,7 @@ class PaintingContext extends ClipContext {
     }());
     final OffsetLayer updatedLayer = child.updateCompositedLayer(oldLayer: childLayer);
     assert(identical(updatedLayer, childLayer),
-      '$child created a new layer instance $updatedLayer instread of reusing the '
+      '$child created a new layer instance $updatedLayer instead of reusing the '
       'existing layer $childLayer. See the documentation of RenderObject.updateCompositedLayer '
       'for more information on how to correctly implement this method.'
     );
@@ -250,7 +250,7 @@ class PaintingContext extends ClipContext {
     // Create a layer for our child, and paint the child into it.
     if (child._needsPaint || !child._wasRepaintBoundary) {
       repaintCompositedChild(child, debugAlsoPaintedParent: true);
-    } else {
+    } else if (child._needsCompositedLayerUpdate) {
       updateLayerProperties(child);
       assert(() {
         // register the call for RepaintBoundary metrics
@@ -2176,13 +2176,15 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// If [oldLayer] is `null`, this method must return a new [OffsetLayer]
   /// (or subtype thereof). If [oldLayer] is not `null`, then this method must
   /// reuse the layer instance that is provided - it is an error to create a new
-  /// layer in this instance.
+  /// layer in this instance. The layer will be disposed by the framework when
+  /// either the render object is disposed or if it is no longer a repaint
+  /// boundary.
   ///
   /// The [OffsetLayer.offset] property will be managed by the framework and
   /// must not be updated by this method.
   ///
   /// If a property of the composited layer needs to be updated, the render object
-  /// should call [markNeedsCompositedLayerUpdate] which will schedule this method
+  /// must call [markNeedsCompositedLayerUpdate] which will schedule this method
   /// to be called without repainting children. If this widget was marked as
   /// needing to paint and needing a composited layer update, this method is only
   /// called once.
