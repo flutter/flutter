@@ -250,8 +250,10 @@ class PaintingContext extends ClipContext {
     // Create a layer for our child, and paint the child into it.
     if (child._needsPaint || !child._wasRepaintBoundary) {
       repaintCompositedChild(child, debugAlsoPaintedParent: true);
-    } else if (child._needsCompositedLayerUpdate) {
-      updateLayerProperties(child);
+    } else {
+      if (child._needsCompositedLayerUpdate) {
+        updateLayerProperties(child);
+      }
       assert(() {
         // register the call for RepaintBoundary metrics
         child.debugRegisterRepaintBoundaryPaint();

@@ -843,10 +843,7 @@ class RenderOpacity extends RenderProxyBox {
        super(child);
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
-
-  @override
-  bool get isRepaintBoundary => alwaysNeedsCompositing;
+  bool get isRepaintBoundary => child != null && (_alpha > 0);
 
   @override
   OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
@@ -874,11 +871,11 @@ class RenderOpacity extends RenderProxyBox {
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
-    final bool didNeedCompositing = alwaysNeedsCompositing;
+    final bool wasRepaintBoundary = isRepaintBoundary;
     final bool wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
-    if (didNeedCompositing != alwaysNeedsCompositing)
+    if (wasRepaintBoundary != isRepaintBoundary)
       markNeedsCompositingBitsUpdate();
     markNeedsCompositedLayerUpdate();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
@@ -930,11 +927,8 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   int? _alpha;
 
   @override
-  bool get alwaysNeedsCompositing => child != null && _currentlyNeedsCompositing!;
-  bool? _currentlyNeedsCompositing;
-
-  @override
-  bool get isRepaintBoundary => alwaysNeedsCompositing;
+  bool get isRepaintBoundary => child != null && _currentlyIsRepaintBoundary!;
+  bool? _currentlyIsRepaintBoundary;
 
   @override
   OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
@@ -1001,9 +995,9 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     final int? oldAlpha = _alpha;
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
-      final bool? didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha! > 0;
-      if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
+      final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
+      _currentlyIsRepaintBoundary = _alpha! > 0;
+      if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary)
         markNeedsCompositingBitsUpdate();
       markNeedsCompositedLayerUpdate();
       if (oldAlpha == 0 || _alpha == 0)
