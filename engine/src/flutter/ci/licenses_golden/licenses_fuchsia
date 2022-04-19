@@ -1,4 +1,4 @@
-Signature: df3a0942d93b3d6cef1e8dc8ba142c7b
+Signature: 2f63ec28cfdc46d3ccc1cda6a9201625
 
 UNUSED LICENSES:
 
@@ -429,7 +429,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/meta.json
@@ -1183,7 +1182,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/meta.json
@@ -1834,7 +1832,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/meta.json
@@ -2354,6 +2351,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/cstddef.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/functional.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/algorithm.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/atomic.h
+FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/erase.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/exception.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/functional.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/span.h
@@ -2644,6 +2642,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_token_pair.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/optional.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/type_traits.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/variant.h
+FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/vector.h
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/include/lib/svc/dir.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/include/lib/sync/condition.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/include/lib/sync/internal/condition-template.h
@@ -3257,11 +3256,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/composed_pseudo_dir.da
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/internal/_flags.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/pseudo_vmo_file.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/vmo_file.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/lib/src/fuchsia_web_services.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/lib/src/fuchsia_webview.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/lib/src/fuchsia_webview_platform_controller.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/lib/src/utils.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/lib/webview.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/sl4f.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/audio.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device_log.dart
