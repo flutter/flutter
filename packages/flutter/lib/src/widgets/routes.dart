@@ -2266,6 +2266,10 @@ class _RenderFocusTrap extends RenderProxyBoxWithHitTestBehavior {
       }
     }
     if (!hitCurrentFocus) {
+      if (event.kind == PointerDeviceKind.touch) {
+        focusNode.unfocus();
+        return;
+      }
       _previousFocus = focusNode;
       // Check post-frame to see that the focus hasn't changed before
       // unfocusing. This also allows a button tap to capture the previously
