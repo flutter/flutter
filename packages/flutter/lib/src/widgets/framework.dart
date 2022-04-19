@@ -382,24 +382,24 @@ abstract class Widget extends DiagnosticableTree {
 ///
 /// When looking up an inherited element, this will look through parent
 /// caches until the element is found or the end is reached. When an element
-/// is found, it is cached at the first element where the search began.
+/// is found, it is cached at all elements along the search path.
 ///
 /// The intention of this cache is to speed up the initial build of widget
 /// trees that contain a significant number of inherited widgets by deferring
 /// expensive map allocations until they are needed, and by only allocating
 /// in the "closest" hash map.
 ///
-/// This will not cache `null` results if an inherited element is not found.
+/// This will cache `null` results if an inherited element is not found.
 @visibleForTesting
 class InheritedTreeCache {
   /// Create a new [InheritedTreeCache] with an optional parent.
   InheritedTreeCache([this._parent]);
 
   final InheritedTreeCache? _parent;
-  final HashMap<Type, InheritedElement> _current = HashMap<Type, InheritedElement>();
+  final HashMap<Type, InheritedElement?> _current = HashMap<Type, InheritedElement?>();
 
   /// Place the [element] in the cache under [type].
-  void operator []=(Type type, InheritedElement element) {
+  void operator []=(Type type, InheritedElement? element) {
     _current[type] = element;
   }
 
@@ -409,19 +409,12 @@ class InheritedTreeCache {
   /// This operation will also cache the inherited element to improve the
   /// speed of future lookups.
   InheritedElement? operator[](Type type) {
-    InheritedElement? potential = _current[type];
-    if (potential != null) {
-      return potential;
+    if (_current.containsKey(type)) {
+      return _current[type];
     }
-    potential =  _parent?._lookupWithoutCaching(type);
-    if (potential != null) {
-      _current[type] = potential;
-    }
+    final InheritedElement? potential =  _parent?[type];
+    _current[type] = potential;
     return potential;
-  }
-
-  InheritedElement? _lookupWithoutCaching(Type type) {
-    return _current[type] ?? _parent?._lookupWithoutCaching(type);
   }
 }
 

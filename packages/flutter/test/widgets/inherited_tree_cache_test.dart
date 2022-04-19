@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -36,7 +35,7 @@ void main() {
     expect(child[InheritedElementB], elementB);
   });
 
-  testWidgets('InheritedTreeCache does not cache nulls', (WidgetTester tester) async {
+  testWidgets('InheritedTreeCache does cache nulls', (WidgetTester tester) async {
     final InheritedTreeCache parent = InheritedTreeCache();
     final InheritedTreeCache child = InheritedTreeCache(parent);
     final InheritedElementA elementA = InheritedElementA(const InheritedWidgetA());
@@ -47,17 +46,17 @@ void main() {
     // Then manually add element to parent.
     parent[InheritedElementA] = elementA;
 
-    // Then the child should be able to find it.
-    expect(child[InheritedElementA], elementA);
+    // Then the child should not be able to find it.
+    expect(child[InheritedElementA], null);
   });
 }
 
 class InheritedElementA extends InheritedElement {
-  InheritedElementA(InheritedWidget widget) : super(widget);
+  InheritedElementA(super.widget);
 }
 
 class InheritedWidgetA extends InheritedWidget {
-  const InheritedWidgetA({ Key? key }) : super(child: const SizedBox(), key: key);
+  const InheritedWidgetA({ super.key }) : super(child: const SizedBox());
 
   @override
   bool updateShouldNotify(covariant InheritedWidget oldWidget) {
@@ -66,11 +65,11 @@ class InheritedWidgetA extends InheritedWidget {
 }
 
 class InheritedElementB extends InheritedElement {
-  InheritedElementB(InheritedWidget widget) : super(widget);
+  InheritedElementB(super.widget);
 }
 
 class InheritedWidgetB extends InheritedWidget {
-  const InheritedWidgetB({ Key? key }) : super(child: const SizedBox(), key: key);
+  const InheritedWidgetB({ super.key }) : super(child: const SizedBox());
 
   @override
   bool updateShouldNotify(covariant InheritedWidget oldWidget) {
