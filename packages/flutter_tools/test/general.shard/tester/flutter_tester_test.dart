@@ -161,6 +161,39 @@ Hello!
 
       final LaunchResult result = await device.startApp(app,
         mainPath: mainPath,
+        debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
+      );
+
+      expect(result.started, isTrue);
+      expect(result.observatoryUri, observatoryUri);
+      expect(logLines.last, 'Hello!');
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    }, overrides: startOverrides);
+
+    testUsingContext('performs a build and starts in debug mode with track-widget-creation', () async {
+      final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
+      final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
+      final Completer<void> completer = Completer<void>();
+      fakeProcessManager.addCommand(FakeCommand(
+        command: const <String>[
+          'Artifact.flutterTester',
+          '--run-forever',
+          '--non-interactive',
+          '--enable-dart-profiling',
+          '--packages=.dart_tool/package_config.json',
+          '--flutter-assets-dir=/.tmp_rand0/flutter_tester.rand0',
+          '/.tmp_rand0/flutter_tester.rand0/flutter-tester-app.dill.track.dill',
+        ],
+        completer: completer,
+        stdout:
+        '''
+The Dart VM service is listening on $observatoryUri
+Hello!
+''',
+      ));
+
+      final LaunchResult result = await device.startApp(app,
+        mainPath: mainPath,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
 

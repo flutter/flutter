@@ -2205,11 +2205,10 @@ class WidgetInspector extends StatefulWidget {
   ///
   /// The [child] argument must not be null.
   const WidgetInspector({
-    Key? key,
+    super.key,
     required this.child,
     required this.selectButtonBuilder,
-  }) : assert(child != null),
-       super(key: key);
+  }) : assert(child != null);
 
   /// The widget that is being inspected.
   final Widget child;
@@ -2513,9 +2512,8 @@ class InspectorSelection {
 
 class _InspectorOverlay extends LeafRenderObjectWidget {
   const _InspectorOverlay({
-    Key? key,
     required this.selection,
-  }) : super(key: key);
+  });
 
   final InspectorSelection selection;
 

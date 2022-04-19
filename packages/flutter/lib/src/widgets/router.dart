@@ -280,7 +280,7 @@ class Router<T> extends StatefulWidget {
   ///
   /// The [routerDelegate] must not be null.
   const Router({
-    Key? key,
+    super.key,
     this.routeInformationProvider,
     this.routeInformationParser,
     required this.routerDelegate,
@@ -290,8 +290,7 @@ class Router<T> extends StatefulWidget {
           (routeInformationProvider == null && restorationScopeId == null) || routeInformationParser != null,
           'A routeInformationParser must be provided when a routeInformationProvider or a restorationId is specified.'
         ),
-        assert(routerDelegate != null),
-        super(key: key);
+        assert(routerDelegate != null);
 
   /// The route information provider for the router.
   ///
@@ -697,17 +696,15 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
 
 class _RouterScope extends InheritedWidget {
   const _RouterScope({
-    Key? key,
     required this.routeInformationProvider,
     required this.backButtonDispatcher,
     required this.routeInformationParser,
     required this.routerDelegate,
     required this.routerState,
-    required Widget child,
+    required super.child,
   })  : assert(routeInformationProvider == null || routeInformationParser != null),
         assert(routerDelegate != null),
-        assert(routerState != null),
-        super(key: key, child: child);
+        assert(routerState != null);
 
   final ValueListenable<RouteInformation?>? routeInformationProvider;
   final BackButtonDispatcher? backButtonDispatcher;
@@ -1021,10 +1018,10 @@ class BackButtonListener extends StatefulWidget {
   ///
   /// The [child] and [onBackButtonPressed] arguments must not be null.
   const BackButtonListener({
-    Key? key,
+    super.key,
     required this.child,
     required this.onBackButtonPressed,
-  }) : super(key: key);
+  });
 
   /// The widget below this widget in the tree.
   final Widget child;

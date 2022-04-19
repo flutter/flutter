@@ -160,7 +160,7 @@ void main() {
           'git', 'fetch', '--tags'
         ]),
         const FakeCommand(command: <String>[
-          'git', 'rev-parse', '--verify', '@{u}',
+          'git', 'rev-parse', '--verify', '@{upstream}',
         ],
         stdout: revision),
         const FakeCommand(command: <String>[
@@ -188,10 +188,10 @@ void main() {
           'git', 'fetch', '--tags'
         ]),
         FakeCommand(
-          command: <String>['git', 'rev-parse', '--verify', '@{u}'],
+          command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
           exception: ProcessException(
             'git',
-            <String>['rev-parse', '--verify', '@{u}'],
+            <String>['rev-parse', '--verify', '@{upstream}'],
             'fatal: HEAD does not point to a branch',
           ),
         ),
@@ -217,10 +217,10 @@ void main() {
           'git', 'fetch', '--tags'
         ]),
         FakeCommand(
-          command: <String>['git', 'rev-parse', '--verify', '@{u}'],
+          command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
           exception: ProcessException(
             'git',
-            <String>['rev-parse', '--verify', '@{u}'],
+            <String>['rev-parse', '--verify', '@{upstream}'],
             'fatal: no upstream configured for branch',
           ),
         ),

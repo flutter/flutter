@@ -81,7 +81,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// The [axisDirection] and [viewportBuilder] arguments must not be null.
   const Scrollable({
-    Key? key,
+    super.key,
     this.axisDirection = AxisDirection.down,
     this.controller,
     this.physics,
@@ -96,8 +96,7 @@ class Scrollable extends StatefulWidget {
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
-       assert(semanticChildCount == null || semanticChildCount >= 0),
-       super (key: key);
+       assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// The direction in which this widget scrolls.
   ///
@@ -311,19 +310,9 @@ class Scrollable extends StatefulWidget {
 
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
-  ///
-  /// The [padding] is used to add extra space around the [context]'s
-  /// associated widget when revealing it. For example, `EdgeInsets.only(bottom: 16.0)`
-  /// will ensure an additional 16 pixels of space are visible below the widget.
-  ///
-  /// See also:
-  ///
-  ///  * [FocusNode.ensureVisiblePadding] which specifies the [padding] used when
-  ///    a widget is focused via focus traversal.
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
-    EdgeInsets padding = EdgeInsets.zero,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
@@ -342,7 +331,6 @@ class Scrollable extends StatefulWidget {
       futures.add(scrollable.position.ensureVisible(
         context.findRenderObject()!,
         alignment: alignment,
-        padding: padding,
         duration: duration,
         curve: curve,
         alignmentPolicy: alignmentPolicy,
@@ -366,13 +354,11 @@ class Scrollable extends StatefulWidget {
 // ScrollableState.build() always rebuilds its _ScrollableScope.
 class _ScrollableScope extends InheritedWidget {
   const _ScrollableScope({
-    Key? key,
     required this.scrollable,
     required this.position,
-    required Widget child,
+    required super.child,
   }) : assert(scrollable != null),
-       assert(child != null),
-       super(key: key, child: child);
+       assert(child != null);
 
   final ScrollableState scrollable;
   final ScrollPosition position;
@@ -859,14 +845,13 @@ class ScrollableDetails {
 /// scrollable children.
 class _ScrollSemantics extends SingleChildRenderObjectWidget {
   const _ScrollSemantics({
-    Key? key,
+    super.key,
     required this.position,
     required this.allowImplicitScrolling,
     required this.semanticChildCount,
-    Widget? child,
+    super.child,
   }) : assert(position != null),
-       assert(semanticChildCount == null || semanticChildCount >= 0),
-       super(key: key, child: child);
+       assert(semanticChildCount == null || semanticChildCount >= 0);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;

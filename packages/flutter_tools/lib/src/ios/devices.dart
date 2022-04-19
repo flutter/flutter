@@ -302,7 +302,8 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool isSupported() => true;
+  // 32-bit devices are not supported.
+  bool isSupported() => cpuArchitecture == DarwinArch.arm64;
 
   @override
   Future<LaunchResult> startApp(
@@ -434,6 +435,7 @@ class IOSDevice extends Device {
       _logger.printTrace('Application launched on the device. Waiting for observatory url.');
       final Timer timer = Timer(discoveryTimeout ?? const Duration(seconds: 30), () {
         _logger.printError('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...');
+        iosDeployDebugger?.pauseDumpBacktraceResume();
       });
       final Uri? localUri = await observatoryDiscovery?.uri;
       timer.cancel();

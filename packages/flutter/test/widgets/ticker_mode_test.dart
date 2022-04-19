@@ -223,7 +223,7 @@ void main() {
 }
 
 class _TickingWidget extends StatefulWidget {
-  const _TickingWidget({Key? key, this.onTick}) : super(key: key);
+  const _TickingWidget({super.key, this.onTick});
 
   final VoidCallback? onTick;
 
@@ -257,7 +257,7 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
 }
 
 class _MultiTickingWidget extends StatefulWidget {
-  const _MultiTickingWidget({Key? key}) : super(key: key);
+  const _MultiTickingWidget({super.key});
 
   @override
   State<_MultiTickingWidget> createState() => _MultiTickingWidgetState();

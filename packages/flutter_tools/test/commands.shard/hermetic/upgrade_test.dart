@@ -63,7 +63,7 @@ void main() {
         command: <String>['git', 'fetch', '--tags'],
       ),
       const FakeCommand(
-        command: <String>['git', 'rev-parse', '--verify', '@{u}'],
+        command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
         stdout: upstreamHeadRevision,
       ),
       const FakeCommand(

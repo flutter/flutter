@@ -56,7 +56,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// The [value] parameter must not be null.
   /// The [dragStartBehavior] parameter defaults to [DragStartBehavior.start] and must not be null.
   const CupertinoSwitch({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -64,8 +64,7 @@ class CupertinoSwitch extends StatefulWidget {
     this.thumbColor,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
-       assert(dragStartBehavior != null),
-       super(key: key);
+       assert(dragStartBehavior != null);
 
   /// Whether this switch is on or off.
   ///
@@ -331,7 +330,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
 class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   const _CupertinoSwitchRenderObjectWidget({
-    Key? key,
     required this.value,
     required this.activeColor,
     required this.trackColor,
@@ -339,7 +337,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.onChanged,
     required this.textDirection,
     required this.state,
-  }) : super(key: key);
+  });
 
   final bool value;
   final Color activeColor;

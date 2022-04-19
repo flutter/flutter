@@ -438,11 +438,7 @@ class MediaQueryData {
   }) {
     if (!(removeLeft || removeTop || removeRight || removeBottom))
       return this;
-    return MediaQueryData(
-      size: size,
-      devicePixelRatio: devicePixelRatio,
-      textScaleFactor: textScaleFactor,
-      platformBrightness: platformBrightness,
+    return copyWith(
       padding: padding.copyWith(
         left: removeLeft ? 0.0 : null,
         top: removeTop ? 0.0 : null,
@@ -455,15 +451,6 @@ class MediaQueryData {
         right: removeRight ? math.max(0.0, viewPadding.right - padding.right) : null,
         bottom: removeBottom ? math.max(0.0, viewPadding.bottom - padding.bottom) : null,
       ),
-      viewInsets: viewInsets,
-      alwaysUse24HourFormat: alwaysUse24HourFormat,
-      highContrast: highContrast,
-      disableAnimations: disableAnimations,
-      invertColors: invertColors,
-      accessibleNavigation: accessibleNavigation,
-      boldText: boldText,
-      gestureSettings: gestureSettings,
-      displayFeatures: displayFeatures,
     );
   }
 
@@ -488,12 +475,7 @@ class MediaQueryData {
   }) {
     if (!(removeLeft || removeTop || removeRight || removeBottom))
       return this;
-    return MediaQueryData(
-      size: size,
-      devicePixelRatio: devicePixelRatio,
-      textScaleFactor: textScaleFactor,
-      platformBrightness: platformBrightness,
-      padding: padding,
+    return copyWith(
       viewPadding: viewPadding.copyWith(
         left: removeLeft ? math.max(0.0, viewPadding.left - viewInsets.left) : null,
         top: removeTop ? math.max(0.0, viewPadding.top - viewInsets.top) : null,
@@ -506,14 +488,6 @@ class MediaQueryData {
         right: removeRight ? 0.0 : null,
         bottom: removeBottom ? 0.0 : null,
       ),
-      alwaysUse24HourFormat: alwaysUse24HourFormat,
-      highContrast: highContrast,
-      disableAnimations: disableAnimations,
-      invertColors: invertColors,
-      accessibleNavigation: accessibleNavigation,
-      boldText: boldText,
-      gestureSettings: gestureSettings,
-      displayFeatures: displayFeatures,
     );
   }
 
@@ -538,32 +512,19 @@ class MediaQueryData {
   }) {
     if (!(removeLeft || removeTop || removeRight || removeBottom))
       return this;
-    return MediaQueryData(
-      size: size,
-      devicePixelRatio: devicePixelRatio,
-      textScaleFactor: textScaleFactor,
-      platformBrightness: platformBrightness,
+    return copyWith(
       padding: padding.copyWith(
         left: removeLeft ? 0.0 : null,
         top: removeTop ? 0.0 : null,
         right: removeRight ? 0.0 : null,
         bottom: removeBottom ? 0.0 : null,
       ),
-      viewInsets: viewInsets,
       viewPadding: viewPadding.copyWith(
         left: removeLeft ? 0.0 : null,
         top: removeTop ? 0.0 : null,
         right: removeRight ? 0.0 : null,
         bottom: removeBottom ? 0.0 : null,
       ),
-      alwaysUse24HourFormat: alwaysUse24HourFormat,
-      highContrast: highContrast,
-      disableAnimations: disableAnimations,
-      invertColors: invertColors,
-      accessibleNavigation: accessibleNavigation,
-      boldText: boldText,
-      gestureSettings: gestureSettings,
-      displayFeatures: displayFeatures,
     );
   }
 
@@ -710,12 +671,11 @@ class MediaQuery extends InheritedWidget {
   ///
   /// The [data] and [child] arguments must not be null.
   const MediaQuery({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+       assert(data != null);
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified padding.
@@ -1032,9 +992,9 @@ class _MediaQueryFromWindow extends StatefulWidget {
   ///
   /// The [child] must not be null.
   const _MediaQueryFromWindow({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;

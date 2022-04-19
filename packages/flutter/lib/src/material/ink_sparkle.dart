@@ -102,7 +102,7 @@ class InkSparkle extends InteractiveInkFeature {
   InkSparkle({
     required MaterialInkController controller,
     required RenderBox referenceBox,
-    required Color color,
+    required super.color,
     required Offset position,
     required TextDirection textDirection,
     bool containedInkWell = true,
@@ -110,7 +110,7 @@ class InkSparkle extends InteractiveInkFeature {
     BorderRadius? borderRadius,
     ShapeBorder? customBorder,
     double? radius,
-    VoidCallback? onRemoved,
+    super.onRemoved,
     double? turbulenceSeed,
   }) : assert(containedInkWell || rectCallback == null),
        _color = color,
@@ -120,7 +120,7 @@ class InkSparkle extends InteractiveInkFeature {
        _textDirection = textDirection,
        _targetRadius = (radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position)) * _targetRadiusMultiplier,
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
-       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
+       super(controller: controller, referenceBox: referenceBox) {
     // InkSparkle will not be painted until the async compilation completes.
     _InkSparkleFactory.compileShaderIfNeccessary();
     controller.addInkFeature(this);
@@ -674,7 +674,7 @@ class FragmentShaderManager {
   /// In general, this is not needed, but may be useful for debugging or edge cases.
   ui.FragmentProgram get program => _program;
 
-  /// Direct access to the the SPIR-V bytecode that was used to generate this class.
+  /// Direct access to the SPIR-V bytecode that was used to generate this class.
   ///
   /// In general, this is not needed, but may be useful for debugging or edge cases.
   ///

@@ -620,9 +620,8 @@ class _TestPathClipper extends CustomClipper<Path> {
 
 class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTranslation {
   _TestSemanticsUpdateRenderFractionalTranslation({
-    required Offset translation,
-    RenderBox? child,
-  }) : super(translation: translation, child: child);
+    required super.translation,
+  });
 
   int markNeedsSemanticsUpdateCallCount = 0;
 

@@ -51,12 +51,11 @@ class SliderTheme extends InheritedTheme {
   ///
   /// The [data] and [child] arguments must not be null.
   const SliderTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+       assert(data != null);
 
   /// Specifies the color and shape values for descendant slider widgets.
   final SliderThemeData data;

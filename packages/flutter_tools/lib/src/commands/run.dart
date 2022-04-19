@@ -551,6 +551,21 @@ class RunCommand extends RunCommandBase {
     );
   }
 
+  @visibleForTesting
+  Daemon createMachineDaemon() {
+    final Daemon daemon = Daemon(
+      DaemonConnection(
+        daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
+        logger: globals.logger,
+      ),
+      notifyingLogger: (globals.logger is NotifyingLogger)
+        ? globals.logger as NotifyingLogger
+        : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
+      logToStdout: true,
+    );
+    return daemon;
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
@@ -563,16 +578,7 @@ class RunCommand extends RunCommandBase {
       if (devices.length > 1) {
         throwToolExit('"--machine" does not support "-d all".');
       }
-      final Daemon daemon = Daemon(
-        DaemonConnection(
-          daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
-          logger: globals.logger,
-        ),
-        notifyingLogger: (globals.logger is NotifyingLogger)
-          ? globals.logger as NotifyingLogger
-          : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
-        logToStdout: true,
-      );
+      final Daemon daemon = createMachineDaemon();
       AppInstance app;
       try {
         app = await daemon.appDomain.startApp(
@@ -586,6 +592,7 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults['packages'] as String,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
+          multidexEnabled: boolArg('multidex'),
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

@@ -212,10 +212,10 @@ class NavigationBarTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const NavigationBarTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// Specifies the background color, label text style, icon theme, and label
   /// type values for descendant [NavigationBar] widgets.

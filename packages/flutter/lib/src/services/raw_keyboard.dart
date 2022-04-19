@@ -343,6 +343,7 @@ abstract class RawKeyEvent with Diagnosticable {
             charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String? ?? '',
             keyCode: message['keyCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0,
+            specifiedLogicalKey: message['specifiedLogicalKey'] as int?,
           );
           character = message['characters'] as String?;
           break;
@@ -538,10 +539,10 @@ abstract class RawKeyEvent with Diagnosticable {
 class RawKeyDownEvent extends RawKeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const RawKeyDownEvent({
-    required RawKeyEventData data,
-    String? character,
-    bool repeat = false,
-  }) : super(data: data, character: character, repeat: repeat);
+    required super.data,
+    super.character,
+    super.repeat,
+  });
 }
 
 /// The user has released a key on the keyboard.
@@ -552,9 +553,9 @@ class RawKeyDownEvent extends RawKeyEvent {
 class RawKeyUpEvent extends RawKeyEvent {
   /// Creates a key event that represents the user releasing a key.
   const RawKeyUpEvent({
-    required RawKeyEventData data,
-    String? character,
-  }) : super(data: data, character: character, repeat: false);
+    required super.data,
+    super.character,
+  }) : super(repeat: false);
 }
 
 /// A callback type used by [RawKeyboard.keyEventHandler] to send key events to
