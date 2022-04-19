@@ -164,7 +164,6 @@ class Plugin {
           name: name,
           yaml: platformsYaml[platformKey] as YamlMap,
           pluginPath: path,
-          fileSystem: fileSystem,
         );
       }
     }
