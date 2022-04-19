@@ -286,6 +286,13 @@ is_apple = is_ios || is_mac
 # Needed for some third_party build files from Chromium.
 is_nacl = false
 
+# Needed for //third_party/angle.
+is_chromecast = false
+is_chromeos_lacros = false
+ozone_platform_headless = false
+ozone_platform_x11 = false
+ozone_platform_wayland = false
+
 default_library_type = "static_library"
 
 # =============================================================================
@@ -294,7 +301,8 @@ default_library_type = "static_library"
 
 # These Sanitizers all imply using the Clang compiler. On Windows they either
 # don't work or work differently.
-if (!is_clang && (is_asan || is_lsan || is_tsan || is_msan)) {
+using_sanitizer = !is_win && (is_asan || is_lsan || is_tsan || is_msan)
+if (!is_clang && using_sanitizer) {
   is_clang = true
 }
 

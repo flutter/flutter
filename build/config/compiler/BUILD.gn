@@ -47,10 +47,6 @@ config("default_include_dirs") {
   ]
 }
 
-if (!is_win) {
-  using_sanitizer = is_asan || is_lsan || is_tsan || is_msan
-}
-
 # compiler ---------------------------------------------------------------------
 #
 # Base compiler configuration.
