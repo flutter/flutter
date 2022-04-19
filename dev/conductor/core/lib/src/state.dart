@@ -195,10 +195,19 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.VERIFY_RELEASE:
       return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}';
     case ReleasePhase.RELEASE_COMPLETED:
+      if (state.releaseChannel == 'beta') {
+        return <String>[
+          'Ensure the following post release steps are complete:',
+          '\t 1. Post announcement to discord',
+          '\t 2. Post announcement flutter release hotline chat room',
+          '-----------------------------------------------------------------------',
+          'This release has been completed.'
+        ].join('\n');
+      }
       return <String>[
         'Ensure the following post release steps are complete:',
-        '\t 1. [STABLE ONLY] Update hotfix to stable wiki following documentation best practices',
-        '\t 2. [STABLE ONLY] Post announcement to flutter-announce group',
+        '\t 1. Update hotfix to stable wiki following documentation best practices',
+        '\t 2. Post announcement to flutter-announce group',
         '\t 3. Post announcement to discord',
         '\t 4. Post announcement flutter release hotline chat room',
         '-----------------------------------------------------------------------',
