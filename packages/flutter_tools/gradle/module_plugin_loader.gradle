@@ -42,9 +42,9 @@ gradle.getGradle().projectsLoaded { g ->
             if (object != null && object.plugins != null && object.plugins.android != null
                     && object.plugins.android.name.contains(sanitizedPluginName)) {
                 String sanitizedPluginName = sp.name.replace(":", "");
-                File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator + File.separator
+                File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator
                         + "plugins_build_output" + File.separator + sanitizedPluginName);
-                if (!androidPluginBuildOutputDir.exists()){
+                if (!androidPluginBuildOutputDir.exists()) {
                     androidPluginBuildOutputDir.mkdirs()
                 }
                 sp.buildDir = androidPluginBuildOutputDir
