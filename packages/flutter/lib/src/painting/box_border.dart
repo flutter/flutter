@@ -430,11 +430,13 @@ class Border extends BoxBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    if (top.strokeAlign == StrokeAlign.outside) {
-      return EdgeInsets.zero;
-    } else if (top.strokeAlign == StrokeAlign.center) {
-      final double centerStrokeAlignWidth = top.width / 2;
-      return EdgeInsets.all(centerStrokeAlignWidth);
+    if (_strokeAlignIsUniform) {
+      if (top.strokeAlign == StrokeAlign.outside) {
+        return EdgeInsets.zero;
+      } else if (top.strokeAlign == StrokeAlign.center) {
+        final double centerStrokeAlignWidth = top.width / 2;
+        return EdgeInsets.all(centerStrokeAlignWidth);
+      }
     }
     return EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
   }
@@ -726,11 +728,13 @@ class BorderDirectional extends BoxBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    if (top.strokeAlign == StrokeAlign.outside) {
-      return EdgeInsets.zero;
-    } else if (top.strokeAlign == StrokeAlign.center) {
-      final double centerStrokeAlignWidth = top.width / 2;
-      return EdgeInsets.all(centerStrokeAlignWidth);
+    if (_strokeAlignIsUniform) {
+      if (top.strokeAlign == StrokeAlign.outside) {
+        return EdgeInsetsDirectional.zero;
+      } else if (top.strokeAlign == StrokeAlign.center) {
+        final double centerStrokeAlignWidth = top.width / 2;
+        return EdgeInsetsDirectional.all(centerStrokeAlignWidth);
+      }
     }
     return EdgeInsetsDirectional.fromSTEB(start.width, top.width, end.width, bottom.width);
   }
@@ -755,19 +759,15 @@ class BorderDirectional extends BoxBorder {
         bottom.style != topStyle)
       return false;
 
-    if (_isUniformStrokeAlign() == false)
+    if (_strokeAlignIsUniform == false)
       return false;
 
     return true;
   }
 
-  bool _isUniformStrokeAlign() {
-    final StrokeAlign topAlign = top.strokeAlign;
-    if (start.strokeAlign != topAlign ||
-        end.strokeAlign != topAlign ||
-        bottom.strokeAlign != topAlign)
-      return false;
-    return true;
+  bool get _strokeAlignIsUniform {
+    final StrokeAlign topStrokeAlign = top.strokeAlign;
+    return start.strokeAlign == topStrokeAlign && bottom.strokeAlign == topStrokeAlign && end.strokeAlign == topStrokeAlign;
   }
 
   @override
@@ -913,7 +913,7 @@ class BorderDirectional extends BoxBorder {
 
     assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
     assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.');
-    assert(_isUniformStrokeAlign() && top.strokeAlign == StrokeAlign.inside, 'A Border can only draw strokeAlign different than StrokeAlign.inside on uniform borders.');
+    assert(_strokeAlignIsUniform && top.strokeAlign == StrokeAlign.inside, 'A Border can only draw strokeAlign different than StrokeAlign.inside on uniform borders.');
 
     final BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');

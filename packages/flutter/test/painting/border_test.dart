@@ -290,14 +290,14 @@ void main() {
 
     const BorderSide insideSide = BorderSide(width: 10);
     const BorderDirectional insideBorderDirectional = BorderDirectional(top: insideSide, bottom: insideSide, start: insideSide, end: insideSide);
-    expect(insideBorderDirectional.dimensions, const EdgeInsets.all(10));
+    expect(insideBorderDirectional.dimensions, const EdgeInsetsDirectional.all(10));
 
     const BorderSide centerSide = BorderSide(width: 10, strokeAlign: StrokeAlign.center);
     const BorderDirectional centerBorderDirectional = BorderDirectional(top: centerSide, bottom: centerSide, start: centerSide, end: centerSide);
-    expect(centerBorderDirectional.dimensions, const EdgeInsets.all(5));
+    expect(centerBorderDirectional.dimensions, const EdgeInsetsDirectional.all(5));
 
     const BorderSide outsideSide = BorderSide(width: 10, strokeAlign: StrokeAlign.outside);
     const BorderDirectional outsideBorderDirectional = BorderDirectional(top: outsideSide, bottom: outsideSide, start: outsideSide, end: outsideSide);
-    expect(outsideBorderDirectional.dimensions, EdgeInsets.zero);
+    expect(outsideBorderDirectional.dimensions, EdgeInsetsDirectional.zero);
   });
 }
