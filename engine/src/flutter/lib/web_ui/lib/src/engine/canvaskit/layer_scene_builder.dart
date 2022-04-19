@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show toMatrix32;
 import '../vector_math.dart';
 import 'layer.dart';
 import 'layer_tree.dart';

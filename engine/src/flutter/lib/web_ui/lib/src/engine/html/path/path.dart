@@ -7,9 +7,9 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../../engine.dart' show toMatrix32;
 import '../../util.dart';
 import '../../validators.dart';
+import '../../vector_math.dart';
 import 'conic.dart';
 import 'cubic.dart';
 import 'path_iterator.dart';
