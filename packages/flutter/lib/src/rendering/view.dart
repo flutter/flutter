@@ -101,8 +101,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       return;
     final ViewConfiguration oldConfiguration = _configuration;
     _configuration = value;
+    _updateMatrices();
     if (_configuration.shouldReplaceRootLayer(oldConfiguration)) {
-      replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
+      replaceRootLayer(_createNewRootLayer());
     }
     assert(_rootTransform != null);
     markNeedsLayout();
@@ -143,17 +144,18 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(owner != null);
     assert(_rootTransform == null);
     scheduleInitialLayout();
-    scheduleInitialPaint(_updateMatricesAndCreateNewRootLayer());
+    _updateMatrices();
+    scheduleInitialPaint(_createNewRootLayer());
     assert(_rootTransform != null);
   }
 
   Matrix4? _rootTransform;
+  void _updateMatrices() => _rootTransform = configuration.toMatrix();
 
-  TransformLayer _updateMatricesAndCreateNewRootLayer() {
-    _rootTransform = configuration.toMatrix();
+  TransformLayer _createNewRootLayer() {
+    assert(_rootTransform != null);
     final TransformLayer rootLayer = TransformLayer(transform: _rootTransform);
     rootLayer.attach(this);
-    assert(_rootTransform != null);
     return rootLayer;
   }
 
