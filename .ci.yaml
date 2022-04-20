@@ -26,7 +26,7 @@ platform_properties:
         [
           {"dependency": "curl"}
         ]
-      os: Linux
+      os: Debian
       device_type: none
   linux_android:
     properties:
