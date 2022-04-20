@@ -67,7 +67,7 @@ class ValidateProjectCommand extends FlutterCommand {
 
   void addToBufferResult(ProjectValidatorResult result, StringBuffer buffer) {
     String icon;
-    switch(result.currentStatus()) {
+    switch(result.status) {
       case Status.error:
         icon = '[X]';
         break;
@@ -76,9 +76,6 @@ class ValidateProjectCommand extends FlutterCommand {
         break;
       case Status.warning:
         icon = '[!]';
-        break;
-      case Status.notReady:
-        icon = '[?]';
         break;
     }
 

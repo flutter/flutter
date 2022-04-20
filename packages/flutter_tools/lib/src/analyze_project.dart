@@ -8,53 +8,32 @@ enum Status {
   error,
   warning,
   success,
-  notReady,
 }
 
 class ProjectValidatorResult {
-  ProjectValidatorResult(this.name);
+
+  ProjectValidatorResult(this.name, this.value, this._status, {this.warning});
+
   final String name;
+  final String value;
+  final String? warning;
+  final Status _status;
 
-  String _error = '';
-  Status _status = Status.notReady;
-  String _value = '';
-  String _warning = '';
-
-  Status currentStatus(){
+  Status get status{
     return _status;
-  }
-
-  void setSuccess(String value, {String? warning}) {
-    _status = Status.success;
-    _value = value;
-    if (warning != null) {
-      _warning = warning;
-    }
-  }
-
-  void setError(String error) {
-    _status = Status.error;
-    _error = error;
   }
 
   @override
   String toString() {
-    // ensure toString is not called before a value or error is set
-    if (_status == Status.notReady) {
-      throwToolExit('ProjectValidatorResult status not ready');
-    }
-
-    String s;
     if (_status == Status.error) {
-      s = 'Error: $_error';
+      return 'Error: $value';
     } else {
-      s = '$name: $_value';
-      if (_warning.isNotEmpty) {
-        s = '$s. Warning: $_warning';
+      String resultString = '$name: $value';
+      if (warning != null) {
+        resultString = '$resultString. Warning: $warning';
       }
+      return resultString;
     }
-
-    return s;
   }
 
 }

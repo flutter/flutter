@@ -13,12 +13,24 @@ class ProjectValidatorTaskImpl extends ProjectValidatorTask {
 
   @override
   List<ProjectValidatorResult> start(FlutterProject project) {
-    final ProjectValidatorResult error = ProjectValidatorResult('result_1');
-    error.setError('this is an error');
-    final ProjectValidatorResult success = ProjectValidatorResult('result_2');
-    success.setSuccess('correct');
-    final ProjectValidatorResult warning = ProjectValidatorResult('result_3');
-    warning.setSuccess('this passed', warning: 'with a warning');
+    final ProjectValidatorResult error = ProjectValidatorResult(
+      'result_1',
+      'this is an error',
+      Status.error,
+    );
+
+    final ProjectValidatorResult success = ProjectValidatorResult(
+      'result_2',
+      'correct',
+      Status.success,
+    );
+
+    final ProjectValidatorResult warning = ProjectValidatorResult(
+      'result_3',
+      'this passed',
+      Status.success,
+      warning: 'with a warning'
+    );
 
     return [
       error,
@@ -38,36 +50,36 @@ class ProjectValidatorTaskImpl extends ProjectValidatorTask {
 
 void main() {
   group('ProjectValidatorResult', () {
-    late ProjectValidatorResult result;
-
-    setUp(() {
-      result = ProjectValidatorResult('name');
-    });
-
-    testWithoutContext('fail toString', () {
-      expect(
-        () => result.toString(),
-        throwsToolExit(message: 'ProjectValidatorResult status not ready')
-      );
-      expect(result.currentStatus(), Status.notReady);
-    });
 
     testWithoutContext('success status', () {
-      result.setSuccess('value');
+      final ProjectValidatorResult result = ProjectValidatorResult(
+        'name',
+        'value',
+        Status.success,
+      );
       expect(result.toString(), 'name: value');
-      expect(result.currentStatus(), Status.success);
+      expect(result.status, Status.success);
     });
 
     testWithoutContext('success status with warning', () {
-      result.setSuccess('value', warning: 'my warning');
+      final ProjectValidatorResult result = ProjectValidatorResult(
+        'name',
+        'value',
+        Status.success,
+        warning: 'my warning'
+      );
       expect(result.toString(), 'name: value. Warning: my warning');
-      expect(result.currentStatus(), Status.success);
+      expect(result.status, Status.success);
     });
 
     testWithoutContext('error status', () {
-      result.setError('my error');
+      final ProjectValidatorResult result = ProjectValidatorResult(
+        'name',
+        'my error',
+        Status.error,
+      );
       expect(result.toString(), 'Error: my error');
-      expect(result.currentStatus(), Status.error);
+      expect(result.status, Status.error);
     });
   });
 
