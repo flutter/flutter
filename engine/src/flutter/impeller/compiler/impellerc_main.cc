@@ -52,9 +52,9 @@ bool Main(const fml::CommandLine& command_line) {
   reflector_options.shader_name =
       InferShaderNameFromPath(switches.source_file_name);
   reflector_options.header_file_name =
-      std::filesystem::path{switches.reflection_header_name}
-          .filename()
-          .native();
+      ToUtf8(std::filesystem::path{switches.reflection_header_name}
+                 .filename()
+                 .native());
 
   Compiler compiler(*source_file_mapping, options, reflector_options);
   if (!compiler.IsValid()) {

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <codecvt>
+#include <locale>
 #include <string>
 
 #include "flutter/fml/macros.h"
@@ -53,6 +55,10 @@ spv::ExecutionModel ToExecutionModel(SourceType type);
 
 spirv_cross::CompilerMSL::Options::Platform TargetPlatformToMSLPlatform(
     TargetPlatform platform);
+
+std::string ToUtf8(const std::wstring& wstring);
+
+std::string ToUtf8(const std::string& string);
 
 }  // namespace compiler
 }  // namespace impeller

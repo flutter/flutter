@@ -62,10 +62,10 @@ static TargetPlatform TargetPlatformFromCommandLine(
 
 Switches::Switches(const fml::CommandLine& command_line)
     : target_platform(TargetPlatformFromCommandLine(command_line)),
-      working_directory(std::make_shared<fml::UniqueFD>(
-          fml::OpenDirectory(std::filesystem::current_path().native().c_str(),
-                             false,  // create if necessary,
-                             fml::FilePermission::kRead))),
+      working_directory(std::make_shared<fml::UniqueFD>(fml::OpenDirectory(
+          ToUtf8(std::filesystem::current_path().native()).c_str(),
+          false,  // create if necessary,
+          fml::FilePermission::kRead))),
       source_file_name(command_line.GetOptionValueWithDefault("input", "")),
       sl_file_name(command_line.GetOptionValueWithDefault("sl", "")),
       spirv_file_name(command_line.GetOptionValueWithDefault("spirv", "")),

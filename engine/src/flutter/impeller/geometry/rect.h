@@ -147,7 +147,7 @@ struct TRect {
   constexpr std::array<TPoint<T>, 4> GetTransformedPoints(
       const Matrix& transform) const {
     auto points = GetPoints();
-    for (uint i = 0; i < points.size(); i++) {
+    for (int i = 0; i < points.size(); i++) {
       points[i] = transform * points[i];
     }
     return points;

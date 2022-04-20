@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <thread>
 
 #include "flutter/fml/macros.h"
