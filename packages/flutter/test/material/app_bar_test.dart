@@ -2927,8 +2927,7 @@ void main() {
     expect(preferredSize.height, 64);
   });
 
-  group('AppBar passes touches to body', ()
-  {
+  group('AppBar passes touches to body', () {
     testWidgets('does not pass touches to body by default', (
         WidgetTester tester) async {
       const Color backgroundColor = Color(0xff00ffff);
@@ -2937,12 +2936,12 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-              appBar: AppBar(
-                backgroundColor: backgroundColor,
-                title: const Text('AppBar'),
-              ),
-              extendBodyBehindAppBar: true,
-              body: GestureDetector(onTap: () => tapped = true)
+            appBar: AppBar(
+              backgroundColor: backgroundColor,
+              title: const Text('AppBar'),
+            ),
+            extendBodyBehindAppBar: true,
+            body: GestureDetector(onTap: () { tapped = true; })
           ),
         ),
       );
@@ -2960,13 +2959,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-              appBar: AppBar(
-                elevation: 0,
-                backgroundColor: backgroundColor,
-                title: const Text('AppBar'),
-              ),
-              extendBodyBehindAppBar: true,
-              body: GestureDetector(onTap: () => tapped = true)
+            appBar: AppBar(
+              elevation: 0,
+              backgroundColor: backgroundColor,
+              title: const Text('AppBar'),
+            ),
+            extendBodyBehindAppBar: true,
+            body: GestureDetector(onTap: () { tapped = true; })
           ),
         ),
       );

@@ -1053,12 +1053,11 @@ class _AppBarState extends State<AppBar> {
         ?? _systemOverlayStyleForBrightness(ThemeData.estimateBrightnessForColor(backgroundColor));
 
     final double elevation = widget.elevation
-        ?? appBarTheme.elevation
-        ?? _defaultElevation;
+      ?? appBarTheme.elevation
+      ?? _defaultElevation;
     // Sets MaterialType to 'transparency' if background color is transparent
     // and elevation is zero.
-    final MaterialType materialType =
-        (backgroundColor == const Color(0x00000000) && elevation == 0.0)
+    final MaterialType materialType = backgroundColor == const Color(0x00000000) && elevation == 0.0
         ? MaterialType.transparency
         : MaterialType.canvas;
 
