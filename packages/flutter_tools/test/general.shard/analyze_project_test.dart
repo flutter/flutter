@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
 
-class ProjectValidatorTaskImpl extends ProjectValidatorTask {
+class ProjectValidatorTaskImpl extends ProjectValidator {
 
   @override
   List<ProjectValidatorResult> start(FlutterProject project) {

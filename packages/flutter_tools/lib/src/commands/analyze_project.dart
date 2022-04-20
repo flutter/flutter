@@ -40,10 +40,10 @@ class ValidateProjectCommand extends FlutterCommand {
     final List<ProjectValidatorResult> results = <ProjectValidatorResult>[];
 
     final AvailableProjectValidators availableProjectValidators = AvailableProjectValidators();
-    final Set<ProjectValidatorTask> ranValidators = <ProjectValidatorTask>{};
+    final Set<ProjectValidator> ranValidators = <ProjectValidator>{};
 
     for (final SupportedPlatform platform in project.getSupportedPlatforms()){
-      for (final ProjectValidatorTask validatorTask in availableProjectValidators.getValidatorTasks(platform)) {
+      for (final ProjectValidator validatorTask in availableProjectValidators.getValidatorTasks(platform)) {
         if (!ranValidators.contains(validatorTask)) {
           results.addAll(validatorTask.start(project));
           ranValidators.add(validatorTask);
