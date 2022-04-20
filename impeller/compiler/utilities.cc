@@ -6,6 +6,7 @@
 
 #include <filesystem>
 #include <sstream>
+#include <string>
 
 namespace impeller {
 namespace compiler {

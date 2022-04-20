@@ -4,6 +4,8 @@
 
 #include "impeller/base/comparable.h"
 
+#include <atomic>
+
 namespace impeller {
 
 static std::atomic_size_t sLastID;
