@@ -17,7 +17,7 @@ class ValidateProjectCommand extends FlutterCommand {
   final bool verbose;
 
   @override
-  final String name = 'analyze-project';
+  final String name = 'validate-project';
 
   @override
   final String description = 'Show information about the current project.';
@@ -27,14 +27,9 @@ class ValidateProjectCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Directory workingDirectory;
     final String userPath = getUserPath();
+    final Directory workingDirectory = userPath.isEmpty ? fileSystem.currentDirectory : fileSystem.directory(userPath);
 
-    if (userPath.isEmpty) {
-      workingDirectory = fileSystem.currentDirectory;
-    } else {
-      workingDirectory = fileSystem.directory(userPath);
-    }
     final FlutterProject project =  FlutterProject.fromDirectory(workingDirectory);
     final List<ProjectValidatorResult> results = <ProjectValidatorResult>[];
     final Set<ProjectValidator> ranValidators = <ProjectValidator>{};
