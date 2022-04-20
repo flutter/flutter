@@ -45,7 +45,7 @@ const String defaultConfigLinux1 = r'''
       "ping": [
         "ping",
         "-w",
-        "1",
+        "3",
         "-c",
         "1",
         "raspberrypi"
@@ -71,6 +71,7 @@ const String defaultConfigLinux1 = r'''
         "ssh",
         "-o",
         "BatchMode=yes",
+        "-tt",
         "pi@raspberrypi",
         "flutter-pi \"/tmp/${appName}\""
       ],
@@ -92,6 +93,38 @@ const String defaultConfigLinux1 = r'''
         "BatchMode=yes",
         "pi@raspberrypi",
         "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
+      ],
+      "embedder": "sony-embedder",
+      "configureNativeProject": [
+        "rm",
+        "-rf",
+        "build",
+        "&&",
+        "mkdir",
+        "build",
+        "&&",
+        "cd",
+        "build",
+        "&&",
+        "cmake",
+        "-DCMAKE_SYSTEM_NAME=Linux",
+        "-DCMAKE_SYSTEM_PROCESSOR=arm",
+        "-DCMAKE_C_COMPILER=clang",
+        "-DCMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf",
+        "-DCMAKE_CXX_COMPILER=clang",
+        "-DCMAKE_CXX_COMPILER_TARGET=arm-linux-gnueabihf",
+        "-DCMAKE_SYSROOT=/home/hannes/devel/debian_sid_arm-sysroot",
+        "-DCMAKE_BUILD_MODE=${buildType}",
+        "-DPLUGINS=${pluginList}",
+        "-DCMAKE_INSTALL_PREFIX=${assetBundleDirectory}",
+        "-GNinja",
+        ".."
+      ],
+      "buildNativeProject": [
+        "ninja",
+        "-C",
+        "build",
+        "install"
       ]
     }
   ]
@@ -109,7 +142,7 @@ const String defaultConfigLinux2 = r'''
       "ping": [
         "ping",
         "-w",
-        "1",
+        "3",
         "-c",
         "1",
         "raspberrypi"
@@ -135,6 +168,7 @@ const String defaultConfigLinux2 = r'''
         "ssh",
         "-o",
         "BatchMode=yes",
+        "-tt",
         "pi@raspberrypi",
         "flutter-pi \"/tmp/${appName}\""
       ],
@@ -156,6 +190,38 @@ const String defaultConfigLinux2 = r'''
         "BatchMode=yes",
         "pi@raspberrypi",
         "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
+      ],
+      "embedder": "sony-embedder",
+      "configureNativeProject": [
+        "rm",
+        "-rf",
+        "build",
+        "&&",
+        "mkdir",
+        "build",
+        "&&",
+        "cd",
+        "build",
+        "&&",
+        "cmake",
+        "-DCMAKE_SYSTEM_NAME=Linux",
+        "-DCMAKE_SYSTEM_PROCESSOR=arm",
+        "-DCMAKE_C_COMPILER=clang",
+        "-DCMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf",
+        "-DCMAKE_CXX_COMPILER=clang",
+        "-DCMAKE_CXX_COMPILER_TARGET=arm-linux-gnueabihf",
+        "-DCMAKE_SYSROOT=/home/hannes/devel/debian_sid_arm-sysroot",
+        "-DCMAKE_BUILD_MODE=${buildType}",
+        "-DPLUGINS=${pluginList}",
+        "-DCMAKE_INSTALL_PREFIX=${assetBundleDirectory}",
+        "-GNinja",
+        ".."
+      ],
+      "buildNativeProject": [
+        "ninja",
+        "-C",
+        "build",
+        "install"
       ]
     }
   ],
@@ -1142,7 +1208,7 @@ void main() {
         expect(contentsBefore, equals(backupContents));
         expect(
           fs.file('.flutter_custom_devices.json').readAsStringSync(),
-          anyOf(equals(defaultConfigLinux1), equals(defaultConfigLinux2))
+          anyOf(defaultConfigLinux1, defaultConfigLinux2)
         );
       }
     );
