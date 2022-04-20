@@ -21,17 +21,12 @@ sk_sp<DisplayList> DisplayListCanvasRecorder::Build() {
 
 // clang-format off
 void DisplayListCanvasRecorder::didConcat44(const SkM44& m44) {
-  // transform4x4 takes a full 4x4 transform in row major order
-  builder_->transformFullPerspective(
-      m44.rc(0, 0), m44.rc(0, 1), m44.rc(0, 2), m44.rc(0, 3),
-      m44.rc(1, 0), m44.rc(1, 1), m44.rc(1, 2), m44.rc(1, 3),
-      m44.rc(2, 0), m44.rc(2, 1), m44.rc(2, 2), m44.rc(2, 3),
-      m44.rc(3, 0), m44.rc(3, 1), m44.rc(3, 2), m44.rc(3, 3));
+  builder_->transform(m44);
 }
 // clang-format on
 void DisplayListCanvasRecorder::didSetM44(const SkM44& matrix) {
   builder_->transformReset();
-  didConcat44(matrix);
+  builder_->transform(matrix);
 }
 void DisplayListCanvasRecorder::didTranslate(SkScalar tx, SkScalar ty) {
   builder_->translate(tx, ty);

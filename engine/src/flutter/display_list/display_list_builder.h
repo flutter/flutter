@@ -182,6 +182,10 @@ class DisplayListBuilder final : public virtual Dispatcher,
       SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override;
   // clang-format on
   void transformReset() override;
+  void transform(const SkMatrix* matrix);
+  void transform(const SkM44* matrix44);
+  void transform(const SkMatrix& matrix) { transform(&matrix); }
+  void transform(const SkM44& matrix44) { transform(&matrix44); }
 
   void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) override;
   void clipRRect(const SkRRect& rrect, SkClipOp clip_op, bool is_aa) override;
