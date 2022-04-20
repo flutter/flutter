@@ -7,6 +7,7 @@
 #include <optional>
 
 #include "flutter/fml/trace_event.h"
+#include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"
@@ -253,15 +254,33 @@ void DisplayListDispatcher::setPathEffect(sk_sp<SkPathEffect> effect) {
   UNIMPLEMENTED;
 }
 
+static FilterContents::BlurStyle ToBlurStyle(SkBlurStyle blur_style) {
+  switch (blur_style) {
+    case kNormal_SkBlurStyle:
+      return FilterContents::BlurStyle::kNormal;
+    case kSolid_SkBlurStyle:
+      return FilterContents::BlurStyle::kSolid;
+    case kOuter_SkBlurStyle:
+      return FilterContents::BlurStyle::kOuter;
+    case kInner_SkBlurStyle:
+      return FilterContents::BlurStyle::kInner;
+  }
+}
+
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
   // Needs https://github.com/flutter/flutter/issues/95434
   if (filter == nullptr) {
-    // Reset everything
+    paint_.mask_blur = std::nullopt;
     return;
   }
   switch (filter->type()) {
-    case flutter::DlMaskFilterType::kBlur:
+    case flutter::DlMaskFilterType::kBlur: {
+      auto blur = filter->asBlur();
+      paint_.mask_blur = {.blur_style = ToBlurStyle(blur->style()),
+                          .sigma = FilterContents::Sigma(blur->sigma())};
+      break;
+    }
     case flutter::DlMaskFilterType::kUnknown:
       UNIMPLEMENTED;
       break;
