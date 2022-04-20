@@ -81,8 +81,8 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
-    expect(generated, contains('registerPlugins(webPluginRegistrar);'));
+    expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
+    expect(generated, contains('pluginRegistrant.registerPlugins();'));
 
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
@@ -211,7 +211,7 @@ void main() {
 
     // Import.
     expect(generated, contains("import 'file:///other/lib/main.dart' as entrypoint;"));
-    expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
+    expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
   }));
 
 
@@ -227,8 +227,8 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
-    expect(generated, contains('registerPlugins(webPluginRegistrar);'));
+    expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
+    expect(generated, contains('pluginRegistrant.registerPlugins();'));
 
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
@@ -251,8 +251,8 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
-    expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
+    expect(generated, isNot(contains("import 'web_plugin_registrant.dart' as pluginRegistrant;")));
+    expect(generated, isNot(contains('pluginRegistrant.registerPlugins();')));
 
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
@@ -302,8 +302,8 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
-    expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
+    expect(generated, isNot(contains("import 'web_plugin_registrant.dart' as pluginRegistrant;")));
+    expect(generated, isNot(contains('pluginRegistrant.registerPlugins();')));
 
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
@@ -677,9 +677,9 @@ void main() {
     // Depends on resource file.
     expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(),
       contains('a/a.txt'));
-    // Contains NOTICES
+    // Does NOT contain NOTICES
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-      contains('NOTICES'));
+      isNot(contains('NOTICES')));
   }));
 
   test('WebServiceWorker contains baseUrl cache', () => testbed.run(() async {
