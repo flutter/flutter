@@ -131,7 +131,7 @@ class FontFallbackData {
         List<bool>.filled(codeUnits.length, false);
     final String testString = String.fromCharCodes(codeUnits);
     for (final SkFont font in fonts) {
-      final Uint8List glyphs = font.getGlyphIDs(testString);
+      final Uint16List glyphs = font.getGlyphIDs(testString);
       assert(glyphs.length == codeUnitsSupported.length);
       for (int i = 0; i < glyphs.length; i++) {
         codeUnitsSupported[i] |= glyphs[i] != 0 || _isControlCode(codeUnits[i]);
@@ -182,7 +182,7 @@ class FontFallbackData {
         continue;
       }
       for (final SkFont font in fontsForFamily) {
-        final Uint8List glyphs = font.getGlyphIDs(testString);
+        final Uint16List glyphs = font.getGlyphIDs(testString);
         assert(glyphs.length == codeUnitsSupported.length);
         for (int i = 0; i < glyphs.length; i++) {
           final bool codeUnitSupported = glyphs[i] != 0;

@@ -2071,9 +2071,13 @@ extension SkFontFeatureExtension on SkFontFeature {
 class SkTypeface {}
 
 @JS('window.flutterCanvasKit.Font')
+@staticInterop
 class SkFont {
   external factory SkFont(SkTypeface typeface);
-  external Uint8List getGlyphIDs(String text);
+}
+
+extension SkFontExtension on SkFont {
+  external Uint16List getGlyphIDs(String text);
   external void getGlyphBounds(
       List<int> glyphs, SkPaint? paint, Uint8List? output);
 }
