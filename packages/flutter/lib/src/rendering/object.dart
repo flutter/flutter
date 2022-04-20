@@ -108,7 +108,7 @@ class PaintingContext extends ClipContext {
     bool debugAlsoPaintedParent = false,
     PaintingContext? childContext,
   }) {
-    assert(child.isRepaintBoundary || child._wasRepaintBoundary);
+    assert(child.isRepaintBoundary);
     assert(() {
       // register the call for RepaintBoundary metrics
       child.debugRegisterRepaintBoundaryPaint(
@@ -1048,6 +1048,7 @@ class PipelineOwner {
         assert(node._layerHandle.layer != null);
         if ((node._needsPaint || node._needsCompositedLayerUpdate) && node.owner == this) {
           if (node._layerHandle.layer!.attached) {
+            assert(node.isRepaintBoundary);
             if (node._needsPaint) {
               PaintingContext.repaintCompositedChild(node);
             } else {
@@ -2319,7 +2320,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     });
     if (isRepaintBoundary || alwaysNeedsCompositing)
       _needsCompositing = true;
-    if (oldNeedsCompositing != _needsCompositing)
+    // If a node was previously a repaint boundary, but no longer is one, then
+    // regardless of its compositing state we need to find a new parent to
+    // paint from. To do this, we mark it clean again so that the traversal
+    // in markNeedsPaint is not short-circuited. It is removed from _nodesNeedingPaint
+    // so that we do not attempt to paint from it after locating a parent.
+    if (!isRepaintBoundary && _wasRepaintBoundary) {
+      _needsPaint = false;
+      _needsCompositedLayerUpdate = false;
+      owner?._nodesNeedingPaint.remove(this);
+      markNeedsPaint();
+    } else if (oldNeedsCompositing != _needsCompositing)
       markNeedsPaint();
     _needsCompositingBitsUpdate = false;
   }
