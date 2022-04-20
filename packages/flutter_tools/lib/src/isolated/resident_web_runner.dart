@@ -436,13 +436,16 @@ class ResidentWebRunner extends ResidentRunner {
 
       final bool hasWebPlugins = (await findPlugins(flutterProject))
         .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+
+      // Generates the generated_plugin_registrar
+      flutterProject.web.buildDir = _generatedEntrypointDirectory;
       await injectPlugins(flutterProject, webPlatform: true);
 
-      final Uri generatedUri = _fileSystem.currentDirectory
-        .childDirectory('lib')
-        .childFile('generated_plugin_registrant.dart')
-        .absolute.uri;
-      final Uri generatedImport = packageConfig.toPackageUri(generatedUri);
+      // The below works because `injectPlugins` is being configured to write the
+      // web_plugin_registrant.dart file alongside the generated main.dart (through
+      // the flutterProject.web.buildDir directory)
+      final String/*?*/ generatedImport = hasWebPlugins ? 'web_plugin_registrant.dart' : null;
+
       Uri importedEntrypoint = packageConfig.toPackageUri(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
@@ -462,7 +465,7 @@ class ResidentWebRunner extends ResidentRunner {
 
       final String entrypoint = main_dart.generateMainDartFile(importedEntrypoint.toString(),
         languageVersion: languageVersion,
-        pluginRegistrantEntrypoint: hasWebPlugins ? generatedImport.toString() : null,
+        pluginRegistrantEntrypoint: generatedImport,
       );
 
       result.writeAsStringSync(entrypoint);

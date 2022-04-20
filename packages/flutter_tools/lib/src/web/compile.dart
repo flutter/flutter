@@ -32,7 +32,6 @@ Future<void> buildWeb(
   final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
   outputDirectory.createSync(recursive: true);
 
-  await injectPlugins(flutterProject, webPlatform: true);
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
   try {

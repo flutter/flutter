@@ -942,9 +942,14 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
   final Map<String, Object> context = <String, Object>{
     'methodChannelPlugins': webPlugins,
   };
-  final File pluginFile = project.web.libDirectory.childFile('generated_plugin_registrant.dart');
+
+  assert(project.web.buildDir != null, 'project.web.buildDir must be set before calling _writeWebPluginRegistrant');
+  final File pluginFile = project.web.buildDir!
+    .childFile('web_plugin_registrant.dart');
+
   if (webPlugins.isEmpty) {
     ErrorHandlingFileSystem.deleteIfExists(pluginFile);
+    // Render noop plugin registrant file
   } else {
     _renderTemplateToFile(
       _dartPluginRegistryTemplate,
@@ -1115,6 +1120,7 @@ Future<void> injectPlugins(
     }
   }
   if (webPlatform) {
+    assert(project.web.buildDir != null, 'project.web.buildDir must be set before calling injectPlugins');
     await _writeWebPluginRegistrant(project, plugins);
   }
 }

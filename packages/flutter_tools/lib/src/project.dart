@@ -328,7 +328,9 @@ class FlutterProject {
       linuxPlatform: featureFlags.isLinuxEnabled && linux.existsSync(),
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
-      webPlatform: featureFlags.isWebEnabled && web.existsSync(),
+      // Web only needs the platform-specific tooling when doing flutter run or
+      // flutter build, not at compile-time, so we disable the webPlatform entry.
+      // webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
     );
   }
@@ -734,6 +736,12 @@ class WebProject extends FlutterProjectPlatform {
   File get indexFile => parent.directory
       .childDirectory('web')
       .childFile('index.html');
+
+  /// The directory where the build is writing files.
+  ///
+  /// This needs to be set by the build scripts, because it depends of what
+  /// type of build is happening: flutter build (to-disk) or flutter run (in-memory)
+  Directory? buildDir;
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }

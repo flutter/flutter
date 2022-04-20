@@ -15,6 +15,7 @@ import '../../cache.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
+import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../../web/file_generators/flutter_js.dart' as flutter_js;
@@ -119,13 +120,13 @@ class WebEntrypointTarget extends Target {
 
     String? generatedImport;
     if (hasWebPlugins) {
-      final Uri generatedUri = environment.projectDir
-        .childDirectory('lib')
-        .childFile('generated_plugin_registrant.dart')
-        .absolute
-        .uri;
-      generatedImport = packageConfig.toPackageUri(generatedUri)?.toString()
-        ?? generatedUri.toString();
+      flutterProject.web.buildDir = environment.buildDir;
+      await injectPlugins(flutterProject, webPlatform: true);
+
+      // The below works because `injectPlugins` is being configured to write the
+      // web_plugin_registrant.dart file alongside the generated main.dart (through
+      // the flutterProject.web.buildDir directory)
+      generatedImport = 'web_plugin_registrant.dart';
     }
 
     final String contents = main_dart.generateMainDartFile(importedEntrypoint,
