@@ -134,8 +134,8 @@ class NavigationBar extends StatelessWidget {
 
   VoidCallback _handleTap(int index) {
     return onDestinationSelected != null
-        ? () => onDestinationSelected!(index)
-        : () {};
+      ? () => onDestinationSelected!(index)
+      : () {};
   }
 
   @override

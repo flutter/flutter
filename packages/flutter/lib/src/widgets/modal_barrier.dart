@@ -276,7 +276,6 @@ class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
   }
 }
 
-
 class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
   const _AnyTapGestureRecognizerFactory({this.onAnyTapUp});
 
