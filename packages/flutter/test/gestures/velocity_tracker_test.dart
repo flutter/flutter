@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'velocity_tracker_data.dart';
@@ -142,5 +143,32 @@ void main() {
         expect(tracker.getVelocity().pixelsPerSecond, positionDelta);
       }
     }
+  });
+
+  group('Velocity', () {
+    group('clampMagnitude', () {
+      const double minValue = 20.0;
+      const double maxValue = 8000.0;
+      test('Clamp the magnitude of infinite velocity with the given max value',
+          () {
+        expect(
+          const Velocity(pixelsPerSecond: Offset(35.0, double.infinity))
+              .clampMagnitude(minValue, maxValue),
+          equals(const Velocity(pixelsPerSecond: Offset(0.0, maxValue))),
+        );
+        expect(
+          const Velocity(pixelsPerSecond: Offset(double.infinity, 653.0))
+              .clampMagnitude(minValue, maxValue),
+          equals(const Velocity(pixelsPerSecond: Offset(maxValue, 0.0))),
+        );
+        expect(
+          const Velocity(pixelsPerSecond: Offset.infinite)
+              .clampMagnitude(minValue, maxValue),
+          equals(
+            Velocity(pixelsPerSecond: Offset.fromDirection(pi / 4, maxValue)),
+          ),
+        );
+      });
+    });
   });
 }
