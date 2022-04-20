@@ -16,19 +16,19 @@ class ProjectValidatorTaskImpl extends ProjectValidator {
     final ProjectValidatorResult error = ProjectValidatorResult(
       'result_1',
       'this is an error',
-      Status.error,
+      StatusProjectValidator.error,
     );
 
     final ProjectValidatorResult success = ProjectValidatorResult(
       'result_2',
       'correct',
-      Status.success,
+      StatusProjectValidator.success,
     );
 
     final ProjectValidatorResult warning = ProjectValidatorResult(
       'result_3',
       'this passed',
-      Status.success,
+      StatusProjectValidator.success,
       warning: 'with a warning'
     );
 
@@ -48,31 +48,31 @@ void main() {
       final ProjectValidatorResult result = ProjectValidatorResult(
         'name',
         'value',
-        Status.success,
+        StatusProjectValidator.success,
       );
       expect(result.toString(), 'name: value');
-      expect(result.status, Status.success);
+      expect(result.status, StatusProjectValidator.success);
     });
 
     testWithoutContext('success status with warning', () {
       final ProjectValidatorResult result = ProjectValidatorResult(
         'name',
         'value',
-        Status.success,
+        StatusProjectValidator.success,
         warning: 'my warning'
       );
       expect(result.toString(), 'name: value. Warning: my warning');
-      expect(result.status, Status.success);
+      expect(result.status, StatusProjectValidator.success);
     });
 
     testWithoutContext('error status', () {
       final ProjectValidatorResult result = ProjectValidatorResult(
         'name',
         'my error',
-        Status.error,
+        StatusProjectValidator.error,
       );
       expect(result.toString(), 'Error: my error');
-      expect(result.status, Status.error);
+      expect(result.status, StatusProjectValidator.error);
     });
   });
 

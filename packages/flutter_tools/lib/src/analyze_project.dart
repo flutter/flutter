@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'base/common.dart';
-
-enum Status {
+enum StatusProjectValidator {
   error,
   warning,
   success,
@@ -17,15 +15,15 @@ class ProjectValidatorResult {
   final String name;
   final String value;
   final String? warning;
-  final Status _status;
+  final StatusProjectValidator _status;
 
-  Status get status{
+  StatusProjectValidator get status{
     return _status;
   }
 
   @override
   String toString() {
-    if (_status == Status.error) {
+    if (_status == StatusProjectValidator.error) {
       return 'Error: $value';
     } else {
       String resultString = '$name: $value';

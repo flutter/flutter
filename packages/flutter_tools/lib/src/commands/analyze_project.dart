@@ -5,13 +5,15 @@
 import '../analyze_project.dart';
 import '../analyze_project_validator.dart';
 import '../base/file_system.dart';
-import '../globals.dart' as globals;
+import '../base/logger.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class ValidateProjectCommand extends FlutterCommand {
-  ValidateProjectCommand({this.verbose = false});
+  ValidateProjectCommand(this.fileSystem, this.logger, {this.verbose = false});
 
+  final FileSystem fileSystem;
+  final Logger logger;
   final bool verbose;
 
   @override
@@ -29,9 +31,9 @@ class ValidateProjectCommand extends FlutterCommand {
     final String userPath = getUserPath();
 
     if (userPath.isEmpty) {
-      workingDirectory = globals.fs.currentDirectory;
+      workingDirectory = fileSystem.currentDirectory;
     } else {
-      workingDirectory = globals.fs.directory(userPath);
+      workingDirectory = fileSystem.directory(userPath);
     }
     final FlutterProject project =  FlutterProject.fromDirectory(workingDirectory);
     final List<ProjectValidatorResult> results = <ProjectValidatorResult>[];
@@ -55,19 +57,19 @@ class ValidateProjectCommand extends FlutterCommand {
       addToBufferResult(result, buffer);
       buffer.write('\n');
     }
-    globals.logger.printBox(buffer.toString());
+    logger.printBox(buffer.toString());
   }
 
   void addToBufferResult(ProjectValidatorResult result, StringBuffer buffer) {
     String icon;
     switch(result.status) {
-      case Status.error:
+      case StatusProjectValidator.error:
         icon = '[X]';
         break;
-      case Status.success:
+      case StatusProjectValidator.success:
         icon = '[✓]';
         break;
-      case Status.warning:
+      case StatusProjectValidator.warning:
         icon = '[!]';
         break;
     }
