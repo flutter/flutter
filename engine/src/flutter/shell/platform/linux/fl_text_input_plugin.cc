@@ -274,10 +274,13 @@ static void im_preedit_changed_cb(FlTextInputPlugin* self) {
   gint cursor_offset = 0;
   gtk_im_context_get_preedit_string(priv->im_context, &buf, nullptr,
                                     &cursor_offset);
-  cursor_offset += priv->text_model->composing_range().base();
+  if (priv->text_model->composing()) {
+    cursor_offset += priv->text_model->composing_range().start();
+  } else {
+    cursor_offset += priv->text_model->selection().start();
+  }
   priv->text_model->UpdateComposingText(buf);
-  priv->text_model->SetSelection(
-      flutter::TextRange(cursor_offset, cursor_offset));
+  priv->text_model->SetSelection(flutter::TextRange(cursor_offset));
 
   if (priv->enable_delta_model) {
     std::string text(buf);
