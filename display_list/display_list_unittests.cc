@@ -7,6 +7,7 @@
 #include "flutter/display_list/display_list_canvas_recorder.h"
 #include "flutter/display_list/display_list_utils.h"
 #include "flutter/fml/math.h"
+#include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -860,10 +861,10 @@ TEST(DisplayList, SingleOpDisplayListsNotEqualEmpty) {
       auto desc =
           group.op_name + "(variant " + std::to_string(i + 1) + " != empty)";
       if (group.variants[i].is_empty()) {
-        ASSERT_TRUE(dl->Equals(*empty)) << desc;
+        ASSERT_TRUE(DisplayListsEQ_Verbose(dl, empty));
         ASSERT_TRUE(empty->Equals(*dl)) << desc;
       } else {
-        ASSERT_FALSE(dl->Equals(*empty)) << desc;
+        ASSERT_TRUE(DisplayListsNE_Verbose(dl, empty));
         ASSERT_FALSE(empty->Equals(*dl)) << desc;
       }
     }
