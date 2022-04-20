@@ -37,7 +37,7 @@ std::string PlaygroundBackendToString(PlaygroundBackend backend) {
 Playground::Playground()
     : impl_(PlaygroundImpl::Create(GetParam())),
       renderer_(impl_->CreateContext()),
-      is_valid_(Playground::is_enabled() && renderer_.IsValid()) {}
+      is_valid_(renderer_.IsValid()) {}
 
 Playground::~Playground() = default;
 

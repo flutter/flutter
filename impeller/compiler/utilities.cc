@@ -4,9 +4,9 @@
 
 #include "impeller/compiler/utilities.h"
 
+#include <cctype>
 #include <filesystem>
 #include <sstream>
-#include <string>
 
 namespace impeller {
 namespace compiler {
