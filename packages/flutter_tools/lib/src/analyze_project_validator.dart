@@ -12,6 +12,6 @@ abstract class ProjectValidator {
   Future<List<ProjectValidatorResult>> start(FlutterProject project);
 }
 
-List <ProjectValidator> allProjectValidators = [
+const List <ProjectValidator> allProjectValidators = [
   // add validators
 ];

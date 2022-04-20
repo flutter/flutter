@@ -25,8 +25,6 @@ class ValidateProjectCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    globals.flutterVersion.fetchTagsAndUpdate();
-
     Directory workingDirectory;
     final String userPath = getUserPath();
 
@@ -35,11 +33,8 @@ class ValidateProjectCommand extends FlutterCommand {
     } else {
       workingDirectory = globals.fs.directory(userPath);
     }
-    
     final FlutterProject project =  FlutterProject.fromDirectory(workingDirectory);
     final List<ProjectValidatorResult> results = <ProjectValidatorResult>[];
-
-    //final AvailableProjectValidators availableProjectValidators = AvailableProjectValidators();
     final Set<ProjectValidator> ranValidators = <ProjectValidator>{};
 
     for (final ProjectValidator validator in allProjectValidators) {
@@ -56,11 +51,11 @@ class ValidateProjectCommand extends FlutterCommand {
   void presentResults(final List<ProjectValidatorResult> results) {
     final StringBuffer buffer = StringBuffer();
 
-    for (ProjectValidatorResult result in results) {
+    for (final ProjectValidatorResult result in results) {
       addToBufferResult(result, buffer);
       buffer.write('\n');
-      globals.logger.printBox(buffer.toString());
     }
+    globals.logger.printBox(buffer.toString());
   }
 
   void addToBufferResult(ProjectValidatorResult result, StringBuffer buffer) {
@@ -77,7 +72,7 @@ class ValidateProjectCommand extends FlutterCommand {
         break;
     }
 
-    buffer.write('$icon ${result.toString()}');
+    buffer.write('$icon $result');
   }
 
   String getUserPath(){
