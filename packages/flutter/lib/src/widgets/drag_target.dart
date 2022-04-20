@@ -154,6 +154,11 @@ enum DragAnchor {
 /// user lifts their finger while on top of a [DragTarget], that target is given
 /// the opportunity to accept the [data] carried by the draggable.
 ///
+/// The [ignoringFeedbackPointer] defaults to true, which means that
+/// the [feedback] widget ignores the pointer during hit testing. Similarly,
+/// [ignoringFeedbackSemantics] defaults to true, and the [feedback] also ignores
+/// semantics when building the semantics tree.
+///
 /// On multitouch devices, multiple drags can occur simultaneously because there
 /// can be multiple pointers in contact with the device at once. To limit the
 /// number of simultaneous drags, use the [maxSimultaneousDrags] property. The
@@ -207,11 +212,13 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.onDragEnd,
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
+    this.ignoringFeedbackPointer = true,
     this.rootOverlay = false,
     this.hitTestBehavior = HitTestBehavior.deferToChild,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
+       assert(ignoringFeedbackPointer != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
 
   /// The data that will be dropped by this draggable.
@@ -309,6 +316,14 @@ class Draggable<T extends Object> extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool ignoringFeedbackSemantics;
+
+  /// Whether the [feedback] widget is ignored during hit testing.
+  ///
+  /// Regardless of whether this widget is ignored during hit testing, it will
+  /// still consume space during layout and be visible during painting.
+  ///
+  /// Defaults to true.
+  final bool ignoringFeedbackPointer;
 
   /// Controls how this widget competes with other gestures to initiate a drag.
   ///
@@ -447,6 +462,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.onDragCompleted,
     this.hapticFeedbackOnStart = true,
     super.ignoringFeedbackSemantics,
+    super.ignoringFeedbackPointer,
     this.delay = kLongPressTimeout,
   });
 
@@ -542,6 +558,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
       ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
+      ignoringFeedbackPointer: widget.ignoringFeedbackPointer,
       onDragUpdate: (DragUpdateDetails details) {
         if (mounted && widget.onDragUpdate != null) {
           widget.onDragUpdate!(details);
@@ -796,8 +813,10 @@ class _DragAvatar<T extends Object> extends Drag {
     this.onDragUpdate,
     this.onDragEnd,
     required this.ignoringFeedbackSemantics,
+    required this.ignoringFeedbackPointer,
   }) : assert(overlayState != null),
        assert(ignoringFeedbackSemantics != null),
+       assert(ignoringFeedbackPointer != null),
        assert(dragStartPoint != null),
        assert(feedbackOffset != null),
        _position = initialPosition {
@@ -815,6 +834,7 @@ class _DragAvatar<T extends Object> extends Drag {
   final _OnDragEnd? onDragEnd;
   final OverlayState overlayState;
   final bool ignoringFeedbackSemantics;
+  final bool ignoringFeedbackPointer;
 
   _DragTargetState<Object>? _activeTarget;
   final List<_DragTargetState<Object>> _enteredTargets = <_DragTargetState<Object>>[];
@@ -937,6 +957,7 @@ class _DragAvatar<T extends Object> extends Drag {
       left: _lastOffset!.dx - overlayTopLeft.dx,
       top: _lastOffset!.dy - overlayTopLeft.dy,
       child: IgnorePointer(
+        ignoring: ignoringFeedbackPointer,
         ignoringSemantics: ignoringFeedbackSemantics,
         child: feedback,
       ),
