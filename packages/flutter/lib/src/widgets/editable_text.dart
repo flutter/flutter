@@ -1591,6 +1591,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
   final GlobalKey _editableKey = GlobalKey();
 
+  // TODO(justinmc): Could this be moved out of EditableText and into the
+  // toolbar widgets somewhere? I think it would have to be after the deprecated
+  // buildToolbar is removed.
   /// Detects whether the clipboard can paste.
   final ClipboardStatusNotifier? clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
 
