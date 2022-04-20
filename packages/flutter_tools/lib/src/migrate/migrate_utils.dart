@@ -183,6 +183,8 @@ class MigrateUtils {
     final List<String> cmdArgs = <String>['git', 'diff', '--quiet', 'HEAD', '--', '.', "':(exclude)$kDefaultMigrateWorkingDirectoryName'"];
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: cmdArgs.join(' '));
+    print(result.stdout);
+    print(result.stderr);
     if (result.exitCode == 0) {
       return false;
     }
