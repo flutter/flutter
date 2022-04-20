@@ -474,6 +474,20 @@ void DisplayListBuilder::transformFullPerspective(
 void DisplayListBuilder::transformReset() {
   Push<TransformResetOp>(0, 0);
 }
+void DisplayListBuilder::transform(const SkMatrix* matrix) {
+  if (matrix != nullptr) {
+    transform(SkM44(*matrix));
+  }
+}
+void DisplayListBuilder::transform(const SkM44* m44) {
+  if (m44 != nullptr) {
+    transformFullPerspective(
+        m44->rc(0, 0), m44->rc(0, 1), m44->rc(0, 2), m44->rc(0, 3),
+        m44->rc(1, 0), m44->rc(1, 1), m44->rc(1, 2), m44->rc(1, 3),
+        m44->rc(2, 0), m44->rc(2, 1), m44->rc(2, 2), m44->rc(2, 3),
+        m44->rc(3, 0), m44->rc(3, 1), m44->rc(3, 2), m44->rc(3, 3));
+  }
+}
 
 void DisplayListBuilder::clipRect(const SkRect& rect,
                                   SkClipOp clip_op,

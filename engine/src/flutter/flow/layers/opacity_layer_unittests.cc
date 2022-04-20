@@ -9,6 +9,7 @@
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
+#include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/mock_canvas.h"
 
 namespace flutter {
@@ -302,23 +303,24 @@ TEST_F(OpacityLayerTest, HalfTransparent) {
   SkRect opacity_bounds;
   expected_layer_bounds.makeOffset(-layer_offset.fX, -layer_offset.fY)
       .roundOut(&opacity_bounds);
-  auto expected_draw_calls = std::vector(
-      {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-       MockCanvas::DrawCall{
-           1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
+
+  auto expected_builder = DisplayListBuilder();
+  expected_builder.save();
+  expected_builder.translate(layer_offset.fX, layer_offset.fY);
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
-       MockCanvas::DrawCall{
-           1, MockCanvas::SetMatrixData{SkM44(integral_layer_transform)}},
+  expected_builder.transformReset();
+  expected_builder.transform(SkM44(integral_layer_transform));
 #endif
-       MockCanvas::DrawCall{
-           1, MockCanvas::SaveLayerData{opacity_bounds, opacity_paint, nullptr,
-                                        2}},
-       MockCanvas::DrawCall{2,
-                            MockCanvas::DrawPathData{child_path, child_paint}},
-       MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-       MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
-  layer->Paint(paint_context());
-  EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
+  expected_builder.setColor(alpha_half << 24);
+  expected_builder.saveLayer(&opacity_bounds, true);
+  expected_builder.setColor(SkColors::kGreen.toSkColor());
+  expected_builder.drawPath(child_path);
+  expected_builder.restore();
+  expected_builder.restore();
+  sk_sp<DisplayList> expected_display_list = expected_builder.Build();
+
+  layer->Paint(display_list_paint_context());
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_display_list));
 }
 
 TEST_F(OpacityLayerTest, Nested) {

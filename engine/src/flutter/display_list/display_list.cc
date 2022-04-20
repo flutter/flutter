@@ -196,16 +196,19 @@ void DisplayList::RenderTo(SkCanvas* canvas, SkScalar opacity) const {
   Dispatch(dispatcher);
 }
 
-bool DisplayList::Equals(const DisplayList& other) const {
-  if (byte_count_ != other.byte_count_ || op_count_ != other.op_count_) {
+bool DisplayList::Equals(const DisplayList* other) const {
+  if (this == other) {
+    return true;
+  }
+  if (byte_count_ != other->byte_count_ || op_count_ != other->op_count_) {
     return false;
   }
   uint8_t* ptr = storage_.get();
-  uint8_t* o_ptr = other.storage_.get();
+  uint8_t* o_ptr = other->storage_.get();
   if (ptr == o_ptr) {
     return true;
   }
-  return CompareOps(ptr, ptr + byte_count_, o_ptr, o_ptr + other.byte_count_);
+  return CompareOps(ptr, ptr + byte_count_, o_ptr, o_ptr + other->byte_count_);
 }
 
 }  // namespace flutter
