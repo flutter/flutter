@@ -531,7 +531,7 @@ class RemoteZip extends ZipArchive {
           BinaryFile(path: 'gen_snapshot_arm64', entitlements: true),
           BinaryFile(path: 'gen_snapshot_armv7', entitlements: true),
           BinaryFile(path: 'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter'),
-          BinaryFile(path: 'Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter'),
+          BinaryFile(path: 'Flutter.xcframework/ios-arm64/Flutter.framework/Flutter'),
         ],
       ),
   ];
@@ -627,8 +627,6 @@ class FileCodesignVisitor extends FileVisitor {
   /// downloaded binary files.
   final Map<String, String> actualFileHashes = <String, String>{};
 
-  final List<String> validationFailures = <String>[]; // TODO use
-
   int _nextId = 0;
   int get nextId {
     final int currentKey = _nextId;
@@ -645,10 +643,8 @@ class FileCodesignVisitor extends FileVisitor {
       futures,
       eagerError: true,
     );
-    //_validateFileHashes(); // TODO maybe we don't need this anymore?
-    if (validationFailures.isNotEmpty) {
-      throw Exception('Codesigning failed!\n${validationFailures.join('\n\n')}');
-    }
+    _validateFileHashes();
+    // TODO messaging?
   }
 
   /// Unzip an [EmbeddedZip] and visit its children.
@@ -695,14 +691,14 @@ class FileCodesignVisitor extends FileVisitor {
 
     final package_arch.Archive? archive = await _unzip(originalFile, parent);
 
+    if (archive != null) {
+      await _hashActualFiles(archive, parent);
+    }
+
     final Iterable<Future<void>> childFutures = file.files.map<Future<void>>((ArchiveFile childFile) {
       return childFile.visit(this, parent);
     });
     await Future.wait(childFutures);
-
-    if (archive != null) {
-      await _hashActualFiles(archive, parent);
-    }
 
     final File codesignedFile = codesignedZipsDir.childFile(localFilePath);
 
@@ -928,14 +924,12 @@ class FileCodesignVisitor extends FileVisitor {
   @visibleForOverriding
   Future<void> upload(String localPath, String remotePath) async {
     final String fullRemotePath = '$gsCloudBaseUrl/flutter/$engineHash/$remotePath';
-    // TODO
-    print('STUB: upload from $localPath to $fullRemotePath');
-    //final io.ProcessResult result = await processManager.run(
-    //  <String>['gsutil', 'cp', localPath, fullRemotePath],
-    //);
-    //if (result.exitCode != 0) {
-    //  throw Exception('Failed to upload $localPath to $fullRemotePath');
-    //}
+    final io.ProcessResult result = await processManager.run(
+      <String>['gsutil', 'cp', localPath, fullRemotePath],
+    );
+    if (result.exitCode != 0) {
+      throw Exception('Failed to upload $localPath to $fullRemotePath');
+    }
   }
 
   Future<package_arch.Archive?> _unzip(File inputZip, Directory outDir) async {
@@ -954,13 +948,11 @@ class FileCodesignVisitor extends FileVisitor {
       stdio.printError('unzip binary not found on path, falling back to package:archive implementation');
       final Uint8List bytes = await inputZip.readAsBytes();
       final package_arch.Archive archive = package_arch.ZipDecoder().decodeBytes(bytes);
-      // TODO ensure the archive.files at the end are the same
       package_arch.extractArchiveToDisk(archive, outDir.path);
       return archive;
     }
   }
 
-  // TODO should this just return void?
   Future<package_arch.Archive?> _zip(Directory inDir, File outputZip) async {
     // zip is faster
     if (processManager.canRun('zip')) {
@@ -980,7 +972,7 @@ class FileCodesignVisitor extends FileVisitor {
       return null;
     } else {
       stdio.printError('zip binary not found on path, falling back to package:archive implementation');
-      final package_arch.Archive archive = package_arch.createArchiveFromDirectory(inDir); // TODO do we need to include dir name?
+      final package_arch.Archive archive = package_arch.createArchiveFromDirectory(inDir);
       package_arch.ZipFileEncoder().zipDirectory(
           inDir,
           filename: outputZip.absolute.path,
@@ -1026,9 +1018,9 @@ class FileCodesignVisitor extends FileVisitor {
 
 class EmbeddedZip extends ZipArchive {
   const EmbeddedZip({
-    required List<ArchiveFile> files,
-    required String path,
-  }) : super(path: path, files: files);
+    required super.files,
+    required super.path,
+  });
 
   @override
   Future<void> visit(FileVisitor visitor, Directory parent) {
@@ -1049,8 +1041,8 @@ abstract class ArchiveFile {
 class BinaryFile extends ArchiveFile {
   const BinaryFile({
     this.entitlements = false,
-    required String path,
-  }) : super(path: path);
+    required super.path,
+  });
 
   final bool entitlements;
 
@@ -1062,21 +1054,16 @@ class BinaryFile extends ArchiveFile {
 
 class CodesignContext extends _Context {
   CodesignContext({
-    required FrameworkRepository framework,
-    required Checkouts checkouts,
-    required List<String> binariesWithEntitlements,
-    required List<String> binariesWithoutEntitlements,
+    required super.framework,
+    required super.checkouts,
+    required super.binariesWithEntitlements,
+    required super.binariesWithoutEntitlements,
     required this.localFlutterRoot,
     required this.codesignCertName,
     required this.codesignPrimaryBundleId,
     required this.codesignUserName,
     required this.appSpecificPassword,
-  }) : super(
-          framework: framework,
-          checkouts: checkouts,
-          binariesWithEntitlements: binariesWithEntitlements,
-          binariesWithoutEntitlements: binariesWithoutEntitlements,
-        );
+  });
 
   final Directory localFlutterRoot;
   final String codesignCertName;
