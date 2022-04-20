@@ -5,7 +5,7 @@
 import("//flutter/impeller/tools/impeller.gni")
 
 impeller_shaders("imgui_shaders") {
-  name = "imgui_shaders"
+  name = "imgui"
   shaders = [
     "imgui_raster.vert",
     "imgui_raster.frag",

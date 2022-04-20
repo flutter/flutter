@@ -1,0 +1,49 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../tools/impeller.gni")
+
+impeller_component("blobcat_lib") {
+  sources = [
+    "blob.cc",
+    "blob.h",
+    "blob_library.cc",
+    "blob_library.h",
+    "blob_writer.cc",
+    "blob_writer.h",
+  ]
+
+  deps = [
+    "../base",
+    "//flutter/fml",
+  ]
+}
+
+impeller_component("blobcat") {
+  target_type = "executable"
+
+  sources = [ "blobcat_main.cc" ]
+
+  deps = [
+    ":blobcat_lib",
+    "../base",
+    "//flutter/fml",
+
+    # FML depends on the Dart VM for tracing and getting the current
+    # timepoint.
+    "//flutter/runtime:libdart",
+  ]
+}
+
+impeller_component("blobcat_unittests") {
+  testonly = true
+
+  sources = [ "blobcat_unittests.cc" ]
+
+  deps = [
+    ":blobcat_lib",
+    "//flutter/fml",
+    "//flutter/testing",
+  ]
+}

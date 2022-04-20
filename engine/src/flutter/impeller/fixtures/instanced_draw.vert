@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
+#ifdef IMPELLER_TARGET_OPENGLES
+
+void main() {
+  // Instancing is not supported on legacy targets and test will be disabled.
+}
+
+#else  // IMPELLER_TARGET_OPENGLES
+
 uniform FrameInfo {
   mat4 mvp;
 } frame_info;
@@ -22,3 +31,5 @@ void main () {
          1.0);
   v_color = instance_info.colors[gl_InstanceIndex];
 }
+
+#endif  // IMPELLER_TARGET_OPENGLES

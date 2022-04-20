@@ -129,6 +129,13 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
       return;
   }
 
+  // Implicit definition that indicates that this compilation is for the device
+  // (instead of the host).
+  spirv_options.AddMacroDefinition("IMPELLER_DEVICE");
+  for (const auto& define : source_options.defines) {
+    spirv_options.AddMacroDefinition(define);
+  }
+
   spirv_options.SetAutoBindUniforms(true);
   spirv_options.SetAutoMapLocations(true);
 

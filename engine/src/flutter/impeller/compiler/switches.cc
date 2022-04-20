@@ -35,6 +35,7 @@ void Switches::PrintHelp(std::ostream& stream) {
          << std::endl;
   stream << "[optional] --reflection-cc=<reflection_cc_file>" << std::endl;
   stream << "[optional,multiple] --include=<include_directory>" << std::endl;
+  stream << "[optional,multiple] --define=<define>" << std::endl;
   stream << "[optional] --depfile=<depfile_path>" << std::endl;
 }
 
@@ -95,6 +96,10 @@ Switches::Switches(const fml::CommandLine& command_line)
     dir_entry.dir = std::move(dir);
 
     include_directories.emplace_back(std::move(dir_entry));
+  }
+
+  for (const auto& define : command_line.GetOptionValues("define")) {
+    defines.emplace_back(define);
   }
 }
 

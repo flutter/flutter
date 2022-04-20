@@ -146,44 +146,88 @@ template("metal_library") {
   }
 }
 
-# ------------------------------------------------------------------------------
-# @brief           Build and reflect shader information. Reflected shader
-#                  information will be added to a generated source set along
-#                  with the shader contents.
-#
-# @param[required] name     The name of the shader library.
-#
-# @param[required] sources  The GLSL (4.60) sources to compiled into the shader
-#                           library.
-#
-template("impeller_shaders_real") {
-  assert(defined(invoker.shaders), "Impeller shaders must be specified.")
-  assert(defined(invoker.name), "Name of the shader library must be specified.")
+template("embed_blob") {
+  assert(defined(invoker.symbol_name), "The symbol name must be specified.")
+  assert(defined(invoker.blob), "The blob file to embed must be specified")
+  assert(defined(invoker.hdr),
+         "The header file containing the symbol name must be specified.")
+  assert(defined(invoker.cc),
+         "The CC file containing the symbol data must be specified.")
+  assert(defined(invoker.deps), "The target dependencies must be specified")
 
-  base_target_name = target_name
-  impellerc_target_name = "impellerc_mtl_$target_name"
-  compiled_action_foreach(impellerc_target_name) {
+  gen_blob_target_name = "gen_blob_$target_name"
+  action(gen_blob_target_name) {
+    inputs = [ invoker.blob ]
+    outputs = [
+      invoker.hdr,
+      invoker.cc,
+    ]
+    args = [
+      "--symbol-name",
+      invoker.symbol_name,
+      "--output-header",
+      rebase_path(invoker.hdr),
+      "--output-source",
+      rebase_path(invoker.cc),
+      "--source",
+      rebase_path(invoker.blob),
+    ]
+    script = "//flutter/impeller/tools/xxd.py"
+    deps = invoker.deps
+  }
+
+  embed_config = "embed_$target_name"
+  config(embed_config) {
+    include_dirs = [ get_path_info(
+            get_label_info("//flutter/impeller:impeller", "target_gen_dir"),
+            "dir") ]
+  }
+
+  source_set(target_name) {
+    public_configs = [ ":$embed_config" ]
+    sources = get_target_outputs(":$gen_blob_target_name")
+    deps = [ ":$gen_blob_target_name" ]
+  }
+}
+
+template("impellerc") {
+  # Optional: invoker.defines specifies a list of valueless macro definitions.
+  assert(defined(invoker.shaders), "Impeller shaders must be specified.")
+  assert(defined(invoker.sl_file_extension),
+         "The extension of the SL file must be specified (metal, glsl, etc..).")
+  assert(defined(invoker.intermediates_subdir),
+         "The subdirectory in which to put intermediates must be specified.")
+  assert(defined(invoker.shader_target_flag),
+         "The flag to impellerc for target selection must be specified.")
+
+  sl_file_extension = invoker.sl_file_extension
+
+  compiled_action_foreach(target_name) {
     tool = "//flutter/impeller/compiler:impellerc"
 
     sources = invoker.shaders
+    subdir = invoker.intermediates_subdir
+    shader_target_flag = invoker.shader_target_flag
 
-    metal_intermediate = "$target_gen_dir/mtl/{{source_file_part}}.metal"
-    spirv_intermediate = "$target_gen_dir/mtl/{{source_file_part}}.spirv"
+    sl_intermediate =
+        "$target_gen_dir/$subdir/{{source_file_part}}.$sl_file_extension"
+    spirv_intermediate = "$target_gen_dir/$subdir/{{source_file_part}}.spirv"
     reflection_json_intermediate =
-        "$target_gen_dir/mtl/{{source_file_part}}.json"
+        "$target_gen_dir/$subdir/{{source_file_part}}.json"
     reflection_header_intermediate =
-        "$target_gen_dir/mtl/{{source_file_part}}.h"
-    reflection_cc_intermediate = "$target_gen_dir/mtl/{{source_file_part}}.cc"
+        "$target_gen_dir/$subdir/{{source_file_part}}.h"
+    reflection_cc_intermediate =
+        "$target_gen_dir/$subdir/{{source_file_part}}.cc"
 
     outputs = [
-      metal_intermediate,
+      sl_intermediate,
       reflection_header_intermediate,
       reflection_cc_intermediate,
     ]
 
-    depfile_path = "$target_gen_dir/mtl/{{source_file_part}}.d"
+    depfile_path = "$target_gen_dir/$subdir/{{source_file_part}}.d"
 
-    metal_intermediate_path = rebase_path(metal_intermediate, root_build_dir)
+    sl_intermediate_path = rebase_path(sl_intermediate, root_build_dir)
     spirv_intermediate_path = rebase_path(spirv_intermediate, root_build_dir)
     depfile_intermediate_path = rebase_path(depfile_path, root_build_dir)
 
@@ -197,60 +241,41 @@ template("impeller_shaders_real") {
 
     args = [
       "--input={{source}}",
-      "--sl=$metal_intermediate_path",
+      "--sl=$sl_intermediate_path",
       "--spirv=$spirv_intermediate_path",
       "--reflection-json=$reflection_json_path",
       "--reflection-header=$reflection_header_path",
       "--reflection-cc=$reflection_cc_path",
       "--include={{source_dir}}",
       "--depfile=$depfile_intermediate_path",
+      "$shader_target_flag",
     ]
-
-    if (is_mac) {
-      args += [ "--metal-desktop" ]
-    }
-    if (is_ios) {
-      args += [ "--metal-ios" ]
+    if (defined(invoker.defines)) {
+      foreach(def, invoker.defines) {
+        args += [ "--define=$def" ]
+      }
     }
   }
+}
 
-  metal_library_target_name = "metal_library_$target_name"
-  metal_library(metal_library_target_name) {
-    name = invoker.name
-    sources = filter_include(get_target_outputs(":$impellerc_target_name"),
-                             [ "*.metal" ])
-    deps = [ ":$impellerc_target_name" ]
-  }
+template("impellerc_reflect") {
+  assert(
+      defined(invoker.impellerc_invocation),
+      "The target that specifies the ImpellerC invocation to reflect must be defined.")
 
-  shader_glue_target_name = "glue_$target_name"
-  shader_glue_config_name = "glue_config_$target_name"
-
-  config(shader_glue_config_name) {
-    impeller_root_gen_dir = get_path_info(
+  reflect_config = "reflect_$target_name"
+  config(reflect_config) {
+    include_dirs = [ get_path_info(
             get_label_info("//flutter/impeller:impeller", "target_gen_dir"),
-            "dir")
-
-    # Contains the generated header headers.
-    include_dirs = [
-      target_gen_dir,
-      impeller_root_gen_dir,
-    ]
-
-    if (impeller_enable_metal) {
-      include_dirs += [ "$impeller_root_gen_dir/mtl" ]
-    }
-
-    if (impeller_enable_opengles) {
-      include_dirs += [ "$impeller_root_gen_dir/gles" ]
-    }
+            "dir") ]
   }
 
-  source_set(shader_glue_target_name) {
-    public_configs = [ ":$shader_glue_config_name" ]
+  impellerc_invocation = invoker.impellerc_invocation
 
-    public =
-        filter_include(get_target_outputs(":$impellerc_target_name"), [ "*.h" ])
-    sources = filter_include(get_target_outputs(":$impellerc_target_name"),
+  source_set(target_name) {
+    public_configs = [ ":$reflect_config" ]
+    public = filter_include(get_target_outputs(impellerc_invocation), [ "*.h" ])
+    sources = filter_include(get_target_outputs(impellerc_invocation),
                              [
                                "*.h",
                                "*.cc",
@@ -258,70 +283,159 @@ template("impeller_shaders_real") {
                              ])
 
     deps = [
-      ":$impellerc_target_name",
       "//flutter/impeller/renderer",
-    ]
-  }
-
-  generate_embedder_data_sources = "embedded_data_gen_sources_$target_name"
-  action(generate_embedder_data_sources) {
-    metal_library_files = get_target_outputs(":$metal_library_target_name")
-    metal_library_file = metal_library_files[0]
-    inputs = [ metal_library_file ]
-    output_header = "$target_gen_dir/mtl/$base_target_name.h"
-    output_source = "$target_gen_dir/mtl/$base_target_name.c"
-    outputs = [
-      output_header,
-      output_source,
-    ]
-    args = [
-      "--symbol-name",
-      base_target_name,
-      "--output-header",
-      rebase_path(output_header),
-      "--output-source",
-      rebase_path(output_source),
-      "--source",
-      rebase_path(metal_library_file),
-    ]
-    script = "//flutter/impeller/tools/xxd.py"
-    deps = [ ":$metal_library_target_name" ]
-  }
-
-  shader_embedded_data_target_name = "embedded_data_$target_name"
-  source_set(shader_embedded_data_target_name) {
-    sources = get_target_outputs(":$generate_embedder_data_sources")
-    deps = [ ":$generate_embedder_data_sources" ]
-  }
-
-  group(target_name) {
-    public_deps = [
-      ":$shader_embedded_data_target_name",
-      ":$shader_glue_target_name",
+      impellerc_invocation,
     ]
   }
 }
 
-# ------------------------------------------------------------------------------
-# @brief           Builds the shader library from shader sources, generates
-#                  reflected shader information as source set, and, generates a
-#                  translation unit added as a source set that allows embedding
-#                  shaders into the final binary. On platforms where Impeller is
-#                  not supported, this is a no-op.
-#
-# @note            For additional information about parameters, see
-#                  `impeller_shaders_real`
-#
-# @see             impeller_shaders_real
-#
-template("impeller_shaders") {
-  if (impeller_shaders_supports_platform) {
-    impeller_shaders_real(target_name) {
-      forward_variables_from(invoker, "*")
+template("impeller_shaders_metal") {
+  assert(defined(invoker.shaders), "Impeller shaders must be specified.")
+  assert(defined(invoker.name), "Name of the shader library must be specified.")
+
+  shaders_base_name = string_join("",
+                                  [
+                                    invoker.name,
+                                    "_shaders",
+                                  ])
+  impellerc_mtl = "impellerc_$target_name"
+  impellerc(impellerc_mtl) {
+    shaders = invoker.shaders
+    sl_file_extension = "metal"
+    intermediates_subdir = "mtl"
+    shader_target_flag = ""
+    defines = [ "IMPELLER_TARGET_METAL" ]
+    if (is_ios) {
+      shader_target_flag = "--metal-ios"
+      defines += [ "IMPELLER_TARGET_METAL_IOS" ]
+    } else if (is_mac) {
+      shader_target_flag = "--metal-desktop"
+      defines += [ "IMPELLER_TARGET_METAL_DESKTOP" ]
+    } else {
+      assert(false, "Metal not supported on this platform.")
     }
-  } else {
-    group(target_name) {
-      not_needed(invoker, "*")
+  }
+
+  mtl_lib = "genlib_$target_name"
+  metal_library(mtl_lib) {
+    name = invoker.name
+    sources =
+        filter_include(get_target_outputs(":$impellerc_mtl"), [ "*.metal" ])
+    deps = [ ":$impellerc_mtl" ]
+  }
+
+  reflect_mtl = "reflect_$target_name"
+  impellerc_reflect(reflect_mtl) {
+    impellerc_invocation = ":$impellerc_mtl"
+  }
+
+  embed_mtl_lib = "embed_$target_name"
+  embed_blob(embed_mtl_lib) {
+    metal_library_files = get_target_outputs(":$mtl_lib")
+    symbol_name = shaders_base_name
+    blob = metal_library_files[0]
+    hdr = "$target_gen_dir/mtl/$shaders_base_name.h"
+    cc = "$target_gen_dir/mtl/$shaders_base_name.c"
+    deps = [ ":$mtl_lib" ]
+  }
+
+  group(target_name) {
+    public_deps = [
+      ":$embed_mtl_lib",
+      ":$reflect_mtl",
+    ]
+  }
+}
+
+template("blobcat_library") {
+  assert(defined(invoker.shaders),
+         "The shaders to build the library from must be specified.")
+  assert(defined(invoker.deps), "Target dependencies must be specified.")
+
+  output_file = "$target_gen_dir/$target_name.shaderblob"
+  compiled_action(target_name) {
+    tool = "//flutter/impeller/blobcat"
+    inputs = invoker.shaders
+    outputs = [ output_file ]
+    output_path_rebased = rebase_path(output_file, root_build_dir)
+    args = [ "--output=$output_path_rebased" ]
+    foreach(shader, invoker.shaders) {
+      shader_path = rebase_path(shader, root_out_dir)
+      args += [ "--input=$shader_path" ]
+    }
+    deps = invoker.deps
+  }
+}
+
+template("impeller_shaders_gles") {
+  assert(defined(invoker.shaders), "Impeller shaders must be specified.")
+  assert(defined(invoker.name), "Name of the shader library must be specified.")
+
+  shaders_base_name = string_join("",
+                                  [
+                                    invoker.name,
+                                    "_shaders_gles",
+                                  ])
+  impellerc_gles = "impellerc_$target_name"
+  impellerc(impellerc_gles) {
+    shaders = invoker.shaders
+    sl_file_extension = "gles"
+    intermediates_subdir = "gles"
+    shader_target_flag = "--opengl-es"
+    defines = [ "IMPELLER_TARGET_OPENGLES" ]
+  }
+
+  gles_lib = "genlib_$target_name"
+  blobcat_library(gles_lib) {
+    shaders =
+        filter_include(get_target_outputs(":$impellerc_gles"), [ "*.gles" ])
+    deps = [ ":$impellerc_gles" ]
+  }
+
+  reflect_gles = "reflect_$target_name"
+  impellerc_reflect(reflect_gles) {
+    impellerc_invocation = ":$impellerc_gles"
+  }
+
+  embed_gles_lib = "embed_$target_name"
+  embed_blob(embed_gles_lib) {
+    gles_library_files = get_target_outputs(":$gles_lib")
+    symbol_name = shaders_base_name
+    blob = gles_library_files[0]
+    hdr = "$target_gen_dir/gles/$shaders_base_name.h"
+    cc = "$target_gen_dir/gles/$shaders_base_name.c"
+    deps = [ ":$gles_lib" ]
+  }
+
+  group(target_name) {
+    public_deps = [
+      ":$embed_gles_lib",
+      ":$reflect_gles",
+    ]
+  }
+}
+
+template("impeller_shaders") {
+  mtl_shaders = "mtl_$target_name"
+  impeller_shaders_metal(mtl_shaders) {
+    name = invoker.name
+    shaders = invoker.shaders
+  }
+
+  gles_shaders = "gles_$target_name"
+  impeller_shaders_gles(gles_shaders) {
+    name = invoker.name
+    shaders = invoker.shaders
+  }
+
+  group(target_name) {
+    public_deps = []
+    if (impeller_enable_metal) {
+      public_deps += [ ":$mtl_shaders" ]
+    }
+
+    if (impeller_enable_opengles) {
+      public_deps += [ ":$gles_shaders" ]
     }
   }
 }

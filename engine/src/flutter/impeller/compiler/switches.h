@@ -28,6 +28,7 @@ struct Switches {
   std::string reflection_header_name;
   std::string reflection_cc_name;
   std::string depfile_path;
+  std::vector<std::string> defines;
 
   Switches();
 

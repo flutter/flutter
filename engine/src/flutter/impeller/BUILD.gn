@@ -48,6 +48,7 @@ executable("impeller_unittests") {
   deps = [
     "archivist:archivist_unittests",
     "base:base_unittests",
+    "blobcat:blobcat_unittests",
     "compiler:compiler_unittests",
     "fixtures",
     "geometry:geometry_unittests",
