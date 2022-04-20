@@ -3793,33 +3793,35 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       );
     }
 
-    final Key? key = newWidget.key;
-    if (key is GlobalKey) {
-      final Element? newChild = _retakeInactiveElement(key, newWidget);
-      if (newChild != null) {
-        assert(newChild._parent == null);
-        assert(() {
-          _debugCheckForCycles(newChild);
-          return true;
-        }());
-        newChild._activateWithParent(this, newSlot);
-        final Element? updatedChild = updateChild(newChild, newWidget, newSlot);
-        assert(newChild == updatedChild);
-        return updatedChild!;
+    try {
+      final Key? key = newWidget.key;
+      if (key is GlobalKey) {
+        final Element? newChild = _retakeInactiveElement(key, newWidget);
+        if (newChild != null) {
+          assert(newChild._parent == null);
+          assert(() {
+            _debugCheckForCycles(newChild);
+            return true;
+          }());
+          newChild._activateWithParent(this, newSlot);
+          final Element? updatedChild = updateChild(newChild, newWidget, newSlot);
+          assert(newChild == updatedChild);
+          return updatedChild!;
+        }
       }
+      final Element newChild = newWidget.createElement();
+      assert(() {
+        _debugCheckForCycles(newChild);
+        return true;
+      }());
+      newChild.mount(this, newSlot);
+      assert(newChild._lifecycleState == _ElementLifecycle.active);
+
+      return newChild;
+    } finally {
+      if (isTimelineTracked)
+        Timeline.finishSync();
     }
-    final Element newChild = newWidget.createElement();
-    assert(() {
-      _debugCheckForCycles(newChild);
-      return true;
-    }());
-    newChild.mount(this, newSlot);
-    assert(newChild._lifecycleState == _ElementLifecycle.active);
-
-    if (isTimelineTracked)
-      Timeline.finishSync();
-
-    return newChild;
   }
 
   void _debugCheckForCycles(Element newChild) {
