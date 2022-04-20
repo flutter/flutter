@@ -30,6 +30,7 @@ String generateMainDartFile(String appEntrypoint, {
     ],
     '',
     'typedef _UnaryFunction = dynamic Function(List<String> args);',
+    'typedef _NullaryFunction = dynamic Function();',
     '',
     'Future<void> main() async {',
     '  await ui.webOnlyWarmupEngine(',
@@ -37,7 +38,7 @@ String generateMainDartFile(String appEntrypoint, {
     '      if (entrypoint.main is _UnaryFunction) {',
     '        return (entrypoint.main as _UnaryFunction)(<String>[]);',
     '      }',
-    '      return entrypoint.main();',
+    '      return (entrypoint.main as _NullaryFunction)();',
     '    },',
     if (hasWebPlugins) ...<String>[
     '    registerPlugins: () {',
