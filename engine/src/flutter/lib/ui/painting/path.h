@@ -24,7 +24,7 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
 
  public:
   ~CanvasPath() override;
-  static fml::RefPtr<CanvasPath> CreateNew(Dart_Handle path_handle) {
+  static fml::RefPtr<CanvasPath> CreateNew() {
     return fml::MakeRefCounted<CanvasPath>();
   }
 
