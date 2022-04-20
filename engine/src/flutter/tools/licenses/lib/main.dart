@@ -1321,7 +1321,8 @@ class _RepositoryAngleDirectory extends _RepositoryDirectory {
 
   @override
   bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'tools' // These are build-time tools, and aren't shipped.
+    return entry.name != 'tools'       // These are build-time tools, and aren't shipped.
+        && entry.name != 'third_party' // Unused by Flutter: BUILD files with forwarding targets (but no code).
         && super.shouldRecurse(entry);
   }
 }
