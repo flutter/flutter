@@ -12,7 +12,7 @@ import '../src/common.dart';
 class ProjectValidatorTaskImpl extends ProjectValidator {
 
   @override
-  List<ProjectValidatorResult> start(FlutterProject project) {
+  Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
     final ProjectValidatorResult error = ProjectValidatorResult(
       'result_1',
       'this is an error',
@@ -32,19 +32,12 @@ class ProjectValidatorTaskImpl extends ProjectValidator {
       warning: 'with a warning'
     );
 
-    return [
-      error,
-      success,
-      warning,
-    ];
+    return <ProjectValidatorResult>[error, success, warning];
   }
 
   @override
-  List<SupportedPlatform> get supportedPlatforms {
-    return [
-      SupportedPlatform.ios,
-      SupportedPlatform.android,
-    ];
+  bool supportsProject(FlutterProject project) {
+    return true;
   }
 }
 
@@ -90,10 +83,10 @@ void main() {
       task = ProjectValidatorTaskImpl();
     });
 
-    testWithoutContext('error status', () {
+    testWithoutContext('error status', () async {
       MemoryFileSystem fs = MemoryFileSystem.test();
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
-      final List<ProjectValidatorResult> results = task.start(project);
+      final List<ProjectValidatorResult> results = await task.start(project);
       expect(results.length, 3);
       expect(results[0].toString(), 'Error: this is an error');
       expect(results[1].toString(), 'result_2: correct');

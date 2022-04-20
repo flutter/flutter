@@ -6,40 +6,12 @@ import 'analyze_project.dart';
 import 'project.dart';
 
 abstract class ProjectValidator {
-  List<SupportedPlatform> get supportedPlatforms;
-  List<ProjectValidatorResult> start(FlutterProject project);
+  bool supportsProject(FlutterProject project);
 
+  /// Can return more than one result in case a file/command have a lot of info to share to the user
+  Future<List<ProjectValidatorResult>> start(FlutterProject project);
 }
 
-class AvailableProjectValidators {
-
-  AvailableProjectValidators() {
-    allProjectValidatorsMap = <SupportedPlatform, List<ProjectValidator>>{};
-    buildValidatorsByPlatformMap();
-  }
-
-  late Map<SupportedPlatform, List<ProjectValidator>> allProjectValidatorsMap;
-
-  List<ProjectValidator> availableValidatorsList = [
-    // add validators
-  ];
-
-  void buildValidatorsByPlatformMap(){
-    for (final ProjectValidator validator in availableValidatorsList) {
-      for (final SupportedPlatform supportedPlatform in validator.supportedPlatforms) {
-        if (!allProjectValidatorsMap.containsKey(supportedPlatform)) {
-          allProjectValidatorsMap[supportedPlatform] = <ProjectValidator>[];
-        }
-        allProjectValidatorsMap[supportedPlatform]!.add(validator);
-      }
-    }
-  }
-
-  List<ProjectValidator> getValidatorTasks(SupportedPlatform platform){
-    if (allProjectValidatorsMap.containsKey(platform)) {
-      return allProjectValidatorsMap[platform]!;
-    } else {
-      return [];
-    }
-  }
-}
+List <ProjectValidator> allProjectValidators = [
+  // add validators
+];

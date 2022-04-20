@@ -39,15 +39,13 @@ class ValidateProjectCommand extends FlutterCommand {
     final FlutterProject project =  FlutterProject.fromDirectory(workingDirectory);
     final List<ProjectValidatorResult> results = <ProjectValidatorResult>[];
 
-    final AvailableProjectValidators availableProjectValidators = AvailableProjectValidators();
+    //final AvailableProjectValidators availableProjectValidators = AvailableProjectValidators();
     final Set<ProjectValidator> ranValidators = <ProjectValidator>{};
 
-    for (final SupportedPlatform platform in project.getSupportedPlatforms()){
-      for (final ProjectValidator validatorTask in availableProjectValidators.getValidatorTasks(platform)) {
-        if (!ranValidators.contains(validatorTask)) {
-          results.addAll(validatorTask.start(project));
-          ranValidators.add(validatorTask);
-        }
+    for (final ProjectValidator validator in allProjectValidators) {
+      if (!ranValidators.contains(validator) && validator.supportsProject(project)) {
+        results.addAll(await validator.start(project));
+        ranValidators.add(validator);
       }
     }
 
@@ -56,7 +54,7 @@ class ValidateProjectCommand extends FlutterCommand {
   }
 
   void presentResults(final List<ProjectValidatorResult> results) {
-    StringBuffer buffer = StringBuffer();
+    final StringBuffer buffer = StringBuffer();
 
     for (ProjectValidatorResult result in results) {
       addToBufferResult(result, buffer);
