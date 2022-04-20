@@ -12,6 +12,7 @@
 
 // Channel constants
 static NSString* const kChannelName = @"flutter/menu";
+static NSString* const kIsPluginAvailableMethod = @"Menu.isPluginAvailable";
 static NSString* const kMenuSetMenusMethod = @"Menu.setMenus";
 static NSString* const kMenuSelectedCallbackMethod = @"Menu.selectedCallback";
 static NSString* const kMenuOpenedMethod = @"Menu.opened";
@@ -377,7 +378,9 @@ static NSEventModifierFlags KeyEquivalentModifierMaskForModifiers(NSNumber* modi
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if ([call.method isEqualToString:kMenuSetMenusMethod]) {
+  if ([call.method isEqualToString:kIsPluginAvailableMethod]) {
+    result(@YES);
+  } else if ([call.method isEqualToString:kMenuSetMenusMethod]) {
     NSDictionary* menus = call.arguments;
     [self setMenus:menus];
     result(nil);

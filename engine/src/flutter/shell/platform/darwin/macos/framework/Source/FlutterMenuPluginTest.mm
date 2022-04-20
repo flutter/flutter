@@ -106,6 +106,15 @@
     ],
   };
 
+  __block id available = @NO;
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"Menu.isPluginAvailable"
+                                                             arguments:nil]
+                    result:^(id _Nullable result) {
+                      available = result;
+                    }];
+
+  EXPECT_TRUE(available);
+
   [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"Menu.setMenus"
                                                              arguments:testMenus]
                     result:^(id _Nullable result){
