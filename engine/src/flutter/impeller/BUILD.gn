@@ -18,7 +18,11 @@ config("impeller_public_config") {
   }
 
   if (is_win) {
-    defines += [ "_USE_MATH_DEFINES" ]
+    defines += [
+      "_USE_MATH_DEFINES",
+      # TODO(dnfield): https://github.com/flutter/flutter/issues/50053
+      "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
+    ]
   }
 }
 
@@ -50,7 +54,6 @@ executable("impeller_unittests") {
     "base:base_unittests",
     "blobcat:blobcat_unittests",
     "compiler:compiler_unittests",
-    "fixtures",
     "geometry:geometry_unittests",
 
     # FML depends on the Dart VM for tracing and getting the current
@@ -63,6 +66,7 @@ executable("impeller_unittests") {
       "aiks:aiks_unittests",
       "display_list:display_list_unittests",
       "entity:entity_unittests",
+      "fixtures",
       "image:image_unittests",
       "playground",
       "renderer:renderer_unittests",

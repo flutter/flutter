@@ -176,7 +176,7 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_F(DisplayListTest, CanDrawWithMaskBlur) {
+TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
   auto texture = CreateTextureForFixture("embarcadero.jpg");
   flutter::DisplayListBuilder builder;
 
