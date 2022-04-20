@@ -1079,11 +1079,12 @@ dependencies:
 web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri}
 ''');
 
+        flutterProject.web.buildDir = flutterProject.directory.childDirectory('lib');
         await injectPlugins(flutterProject, webPlatform: true);
 
         final File registrant = flutterProject.directory
             .childDirectory('lib')
-            .childFile('generated_plugin_registrant.dart');
+            .childFile('web_plugin_registrant.dart');
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
@@ -1768,6 +1769,9 @@ class FakeWebProject extends Fake implements WebProject {
 
   @override
   Directory libDirectory;
+
+  @override
+  Directory buildDir;
 
   bool exists = false;
 
