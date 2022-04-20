@@ -767,6 +767,7 @@ class _AppBarState extends State<AppBar> {
   }
 
   void _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
+    print('notified: ${notification.metrics}');
     final bool oldScrolledUnder = _scrolledUnder;
     final ScrollMetrics metrics = notification.metrics;
 
