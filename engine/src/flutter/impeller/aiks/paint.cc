@@ -33,4 +33,24 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity() const {
   return nullptr;
 }
 
+std::shared_ptr<Contents> Paint::WithFilters(
+    std::shared_ptr<Contents> input,
+    std::optional<bool> is_solid_color) const {
+  bool is_solid_color_val = is_solid_color.value_or(!contents);
+
+  if (mask_blur.has_value()) {
+    if (is_solid_color_val) {
+      input = FilterContents::MakeGaussianBlur(
+          FilterInput::Make(input), mask_blur->sigma, mask_blur->sigma,
+          mask_blur->blur_style);
+    } else {
+      input = FilterContents::MakeBorderMaskBlur(
+          FilterInput::Make(input), mask_blur->sigma, mask_blur->sigma,
+          mask_blur->blur_style);
+    }
+  }
+
+  return input;
+}
+
 }  // namespace impeller

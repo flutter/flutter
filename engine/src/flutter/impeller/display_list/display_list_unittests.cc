@@ -8,6 +8,8 @@
 #include "third_party/skia/include/core/SkPathBuilder.h"
 
 #include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/display_list_mask_filter.h"
+#include "flutter/display_list/types.h"
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/display_list_image_impeller.h"
 #include "impeller/display_list/display_list_playground.h"
@@ -169,6 +171,37 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
     path.lineTo({100, 0});
     path.lineTo({100, 0});
     builder.drawPath(path);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_F(DisplayListTest, CanDrawWithMaskBlur) {
+  auto texture = CreateTextureForFixture("embarcadero.jpg");
+  flutter::DisplayListBuilder builder;
+
+  // Mask blurred image.
+  {
+    auto filter = flutter::DlBlurMaskFilter(kNormal_SkBlurStyle, 10.0f);
+    builder.setMaskFilter(&filter);
+    builder.drawImage(DlImageImpeller::Make(texture), SkPoint::Make(100, 100),
+                      SkSamplingOptions{}, true);
+  }
+
+  // Mask blurred filled path.
+  {
+    builder.setColor(SK_ColorYELLOW);
+    auto filter = flutter::DlBlurMaskFilter(kOuter_SkBlurStyle, 10.0f);
+    builder.setMaskFilter(&filter);
+    builder.drawArc(SkRect::MakeXYWH(410, 110, 100, 100), 45, 270, true);
+  }
+
+  // Mask blurred text.
+  {
+    auto filter = flutter::DlBlurMaskFilter(kSolid_SkBlurStyle, 10.0f);
+    builder.setMaskFilter(&filter);
+    builder.drawTextBlob(
+        SkTextBlob::MakeFromString("Testing", CreateTestFont()), 220, 170);
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));

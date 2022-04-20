@@ -47,7 +47,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
                                             RenderPass& pass) -> bool {
         Entity sub_entity;
         sub_entity.SetPath(entity.GetPath());
-        sub_entity.SetBlendMode(Entity::BlendMode::kSource);
+        sub_entity.SetBlendMode(Entity::BlendMode::kSourceOver);
         sub_entity.SetTransformation(
             Matrix::MakeTranslation(Vector3(-bounds->origin)) *
             entity.GetTransformation());
