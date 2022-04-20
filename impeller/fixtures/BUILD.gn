@@ -8,7 +8,7 @@ import("//flutter/testing/testing.gni")
 import("//flutter/impeller/tools/impeller.gni")
 
 impeller_shaders("shader_fixtures") {
-  name = "shader_fixtures"
+  name = "fixtures"
   shaders = [
     "box_fade.vert",
     "box_fade.frag",

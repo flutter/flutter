@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifdef IMPELLER_TARGET_OPENGLES
+
+void main() {
+  // Unimplemented because the implementation uses instancing and SSBOs.
+}
+
+#else  // IMPELLER_TARGET_OPENGLES
+
 uniform FrameInfo {
   mat4 mvp;
   vec2 atlas_size;
@@ -53,3 +61,6 @@ void main() {
   v_atlas_size = frame_info.atlas_size;
   v_text_color = frame_info.text_color;
 }
+
+#endif  // IMPELLER_TARGET_OPENGLES
+
