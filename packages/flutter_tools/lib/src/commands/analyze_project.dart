@@ -9,8 +9,8 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
-class AnalyzeProjectCommand extends FlutterCommand {
-  AnalyzeProjectCommand({this.verbose = false});
+class ValidateProjectCommand extends FlutterCommand {
+  ValidateProjectCommand({this.verbose = false});
 
   final bool verbose;
 
