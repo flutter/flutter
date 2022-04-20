@@ -560,7 +560,9 @@ struct DartConverter<Dart_Handle> {
   static NativeType FromArguments(Dart_NativeArguments args,
                                   int index,
                                   Dart_Handle& exception) {
-    return Dart_GetNativeArgument(args, index);
+    Dart_Handle result = Dart_GetNativeArgument(args, index);
+    TONIC_DCHECK(!Dart_IsError(result));
+    return result;
   }
 
   static NativeType FromFfi(FfiType val) { return val; }
