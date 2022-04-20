@@ -375,7 +375,10 @@ class FlutterProject {
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
-      webPlatform: webPlatform,
+      // Web plugin registrar is an artifact that gets injected only as needed
+      // (when doing flutter run or flutter build), so we disable the webPlatform
+      // from here. Web calls `injectPlugins` at the right time.
+      // webPlatform: webPlatform,
     );
   }
 
