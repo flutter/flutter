@@ -121,7 +121,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
       _haveTriggeredAction = true;
     });
     widget.onPressed();
-    Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
+    ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
   @override
@@ -581,14 +581,14 @@ class _SnackBarState extends State<SnackBar> {
       container: true,
       liveRegion: true,
       onDismiss: () {
-        Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
+        ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
       child: Dismissible(
         key: const Key('dismissible'),
         direction: widget.dismissDirection,
         resizeDuration: null,
         onDismissed: (DismissDirection direction) {
-          Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+          ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
         child: snackBar,
       ),
