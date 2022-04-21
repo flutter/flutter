@@ -868,6 +868,12 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 /// means [SliverList] cannot learn their main axis extent. Instead, newly
 /// materialized children are placed adjacent to existing children.
 ///
+/// If there exists some specific rules that the main axis extent of children
+/// can be calculated or reckoned out ahead of time, one can offer a
+/// [SliverCustomExtentListAssistant] to help [SliverList] to perform layout on
+/// its children. This gifts developer the abilit and responsibility to engage
+/// in promoting the efficiency of [SliverList].
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ORiTTaVY6mM}
 ///
 /// If the children have a fixed extent in the main axis, consider using
@@ -892,15 +898,33 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   const SliverList({
     super.key,
     required super.delegate,
+    this.extentAssistant,
   });
+
+  /// Assist to determine the main axis extent of every children of this sliver.
+  ///
+  /// The [extentAssistant] mainly helps to carculate the child index based on
+  /// the scroll offset, facilitating the layout process by locating children
+  /// derectly without adjacent items.
+  final SliverCustomExtentListAssistant? extentAssistant;
 
   @override
   SliverMultiBoxAdaptorElement createElement() => SliverMultiBoxAdaptorElement(this, replaceMovedChildren: true);
 
   @override
-  RenderSliverList createRenderObject(BuildContext context) {
+  RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
+    if (extentAssistant != null) {
+      return RenderSliverCustomExtentList(childManager: element, extentAssistant: extentAssistant!);
+    }
     return RenderSliverList(childManager: element);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    if (extentAssistant != null) {
+      (renderObject as RenderSliverCustomExtentList).extentAssistant = extentAssistant!;
+    }
   }
 }
 

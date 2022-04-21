@@ -94,6 +94,9 @@ bool debugPrintLayouts = false;
 /// this on in your unit tests for additional validations.
 bool debugCheckIntrinsicSizes = false;
 
+/// Adds [dart:developer.Timeline] events for [SliverCustomExtentListAssistant].
+bool debugProfileSliverCustomExtentListAssistantEnabled = false;
+
 /// Adds [dart:developer.Timeline] events for every [RenderObject] layout.
 ///
 /// The timing information this flag exposes is not representative of the actual

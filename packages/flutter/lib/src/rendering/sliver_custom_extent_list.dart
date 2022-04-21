@@ -6,13 +6,13 @@ import 'dart:developer' show Timeline;
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 
+import 'box.dart';
 import 'debug.dart';
-import 'framework.dart';
 import 'sliver.dart';
+import 'sliver_multi_box_adaptor.dart';
 
-/// Assists [_RenderSliverCustomExtentList] to preform layout, offering the
+/// Assists [RenderSliverCustomExtentList] to preform layout, offering the
 /// correlative calculation about scroll offset and child index.
 abstract class SliverCustomExtentListAssistant {
   /// The layout offset for the child with the given index.
@@ -36,60 +36,32 @@ abstract class SliverCustomExtentListAssistant {
 /// A sliver that places its box children of diverse custom extent in a linear
 /// array along the main axis.
 ///
-/// [SliverCustomExtentList] arranges its children in a line along the main axis
-/// starting at offset zero and without gaps. Each child is constrained to the
-/// [SliverConstraints.crossAxisExtent] along the cross axis while may has
-/// different extent along the main axis.
+/// [RenderSliverCustomExtentList] arranges its children in a line along the
+/// main axis starting at offset zero and without gaps. Each child is
+/// constrained to the [SliverConstraints.crossAxisExtent] along the cross axis
+/// while may has different extent along the main axis.
 ///
-/// [SliverCustomExtentList] can be more efficient than [SliverList] because
-/// [SliverCustomExtentList] does not need to lay out its children to obtain
-/// their extent along the main axis. Instead, it uses an assistant which is
-/// implemented by the caller to calculate the children's position. It's a bit
-/// more flexible than [SliverFixedExtentList] and [SliverPrototypeExtentList]
-/// because there's no constraint on the item extent.
+/// [RenderSliverCustomExtentList] can be more efficient than [RenderSliverList]
+/// because [RenderSliverCustomExtentList] does not need to lay out its children
+/// to obtain their extent along the main axis. Instead, it uses an assistant
+/// which is implemented by developer to calculate the children's position. It's
+/// a bit more flexible than [RenderSliverFixedExtentList] because there's no
+/// constraint on the item extent.
 ///
 /// See also:
 ///
-///  * [SliverPrototypeExtentList], whose itemExtent is defined by a prototype.
-///  * [SliverFixedExtentList], whose itemExtent is a pixel value.
-///  * [SliverList], which shows a list of variable-sized children in a
-///    viewport.
-class SliverCustomExtentList extends SliverMultiBoxAdaptorWidget {
+///  * [RenderSliverList], which does not require its children to have the same
+///    extent in the main axis.
+///  * [RenderSliverFixedExtentList], which is more efficient for children with
+///    the same extent in the main axis.
+class RenderSliverCustomExtentList extends RenderSliverMultiBoxAdaptor {
   /// Creates a sliver that places its box children of diverse custom extent in
   /// a linear array along the main axis, with an assistant to calculate the
   /// children's position.
-  const SliverCustomExtentList({
-    Key? key,
-    required SliverChildDelegate delegate,
-    required this.extentAssistant,
-  }) : assert(extentAssistant != null),
-       super(key: key, delegate: delegate);
-
-  /// Assist to determine the main axis extent of every children of this sliver.
-  ///
-  /// The [extentAssistant] mainly helps to carculate the child index based on
-  /// the scroll offset, facilitating the layout process by locating children
-  /// derectly without adjacent items.
-  final SliverCustomExtentListAssistant extentAssistant;
-
-  @override
-  RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
-    return _RenderSliverCustomExtentList(childManager: element, extentAssistant: extentAssistant);
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    (renderObject as _RenderSliverCustomExtentList).extentAssistant = extentAssistant;
-  }
-}
-
-class _RenderSliverCustomExtentList extends RenderSliverMultiBoxAdaptor {
-  _RenderSliverCustomExtentList({
-    required SliverMultiBoxAdaptorElement childManager,
+  RenderSliverCustomExtentList({
+    required super.childManager,
     required SliverCustomExtentListAssistant extentAssistant,
-  }) : _extentAssistant = extentAssistant,
-       super(childManager: childManager);
+  }) : _extentAssistant = extentAssistant;
 
   SliverCustomExtentListAssistant _extentAssistant;
   SliverCustomExtentListAssistant get extentAssistant => _extentAssistant;
@@ -211,7 +183,7 @@ class _RenderSliverCustomExtentList extends RenderSliverMultiBoxAdaptor {
       childParentData.layoutOffset = layoutOffsetOfLeadingChildWithLayout == null ?
           _indexToLayoutOffset(index) : layoutOffsetOfLeadingChildWithLayout - paintExtentOf(firstChild!);
       assert((childParentData.layoutOffset! - _indexToLayoutOffset(index)).abs() < precisionErrorTolerance,
-          'Layout offset of child $index resolved by _RenderSliverCustomExtentList(${childParentData.layoutOffset}) '
+          'Layout offset of child $index resolved by RenderSliverCustomExtentList(${childParentData.layoutOffset}) '
           'is not equal to assistant`s calculating result(${_indexToLayoutOffset(index)}).');
       assert(childParentData.index == index);
       layoutOffsetOfLeadingChildWithLayout = childParentData.layoutOffset;
@@ -250,7 +222,7 @@ class _RenderSliverCustomExtentList extends RenderSliverMultiBoxAdaptor {
       assert(childParentData.index == index);
       childParentData.layoutOffset = layoutOffsetOfTrailingChildWithLayout! + paintExtentOf(trailingChildWithLayout);
       assert((childParentData.layoutOffset! - _indexToLayoutOffset(index)).abs() < precisionErrorTolerance,
-          'Layout offset of child $index resolved by _RenderSliverCustomExtentList(${childParentData.layoutOffset}) '
+          'Layout offset of child $index resolved by RenderSliverCustomExtentList(${childParentData.layoutOffset}) '
           'is not equal to assistant`s calculating result(${_indexToLayoutOffset(index)}).');
       layoutOffsetOfTrailingChildWithLayout = childParentData.layoutOffset;
       trailingChildWithLayout = child;
@@ -268,7 +240,7 @@ class _RenderSliverCustomExtentList extends RenderSliverMultiBoxAdaptor {
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = layoutOffsetOfLeadingChildWithLayout! - paintExtentOf(firstChild!);
       assert((childParentData.layoutOffset! - _indexToLayoutOffset(index)).abs() < precisionErrorTolerance,
-          'Layout offset of child $index resolved by _RenderSliverCustomExtentList(${childParentData.layoutOffset}) '
+          'Layout offset of child $index resolved by RenderSliverCustomExtentList(${childParentData.layoutOffset}) '
           'is not equal to assistant`s calculating result(${_indexToLayoutOffset(index)}).');
       assert(childParentData.index == index);
       layoutOffsetOfLeadingChildWithLayout = childParentData.layoutOffset;

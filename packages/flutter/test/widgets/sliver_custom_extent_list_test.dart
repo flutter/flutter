@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart' show SliverCustomExtentListAssistant;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,12 +28,7 @@ Widget buildFrame({ required double itemExtent, required double extentScale, req
     child: CustomScrollView(
       scrollDirection: scrollDirection ?? Axis.vertical,
       slivers: <Widget>[
-        SliverCustomExtentList(
-          extentAssistant: _TestSliverCustomExtentListAssistant(
-            basicExtent: itemExtent,
-            extentScale: extentScale,
-            itemCount: itemCount,
-          ),
+        SliverList(
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
               if (scrollDirection == Axis.horizontal) {
@@ -42,6 +38,11 @@ Widget buildFrame({ required double itemExtent, required double extentScale, req
               }
             },
             childCount: count,
+          ),
+          extentAssistant: _TestSliverCustomExtentListAssistant(
+            basicExtent: itemExtent,
+            extentScale: extentScale,
+            itemCount: itemCount,
           ),
         ),
       ],
