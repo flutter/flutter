@@ -17,7 +17,9 @@ TextureLayer::TextureLayer(const SkPoint& offset,
       size_(size),
       texture_id_(texture_id),
       freeze_(freeze),
-      sampling_(sampling) {}
+      sampling_(sampling) {
+  set_layer_can_inherit_opacity(true);
+}
 
 void TextureLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
@@ -46,7 +48,6 @@ void TextureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   set_paint_bounds(SkRect::MakeXYWH(offset_.x(), offset_.y(), size_.width(),
                                     size_.height()));
   context->has_texture_layer = true;
-  context->subtree_can_inherit_opacity = true;
 }
 
 void TextureLayer::Paint(PaintContext& context) const {
