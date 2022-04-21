@@ -63,23 +63,41 @@ struct PrerollContext {
   // prescence of a texture layer during Preroll.
   bool has_texture_layer = false;
 
-  // This value indicates that the entire subtree below the layer can inherit
-  // an opacity value and modulate its own visibility accordingly.
-  // For Layers which cannot either apply such an inherited opacity nor pass
-  // it along to their children, they can ignore this value as its default
-  // behavior is "opt-in".
-  // For Layers that support this condition, it can be recorded in their
-  // constructor using the |set_layer_can_inherit_opacity| method and the
-  // value will be accumulated and recorded by the |PrerollChidren| method
-  // automatically.
-  // If the property is more dynamic then the Layer can dynamically set this
-  // flag before returning from the |Preroll| method.
-  // For ContainerLayers that need to know if their children can inherit
-  // the value, the |PrerollChildren| method will have set this value in
-  // the context before it returns. If the container can support it as long
-  // as the subtree can support it, no further work needs to be done other
-  // than to remember the value so that it can choose the right strategy
-  // for its |Paint| method.
+  // This field indicates whether the subtree rooted at this layer can
+  // inherit an opacity value and modulate its visibility accordingly.
+  //
+  // Any layer is free to ignore this flag. Its value will be false upon
+  // entry into its Preroll method, it will remain false if it calls
+  // PrerollChildren on any children it might have, and it will remain
+  // false upon exit from the Preroll method unless it takes specific
+  // action compute if it should be true. Thus, this property is "opt-in".
+  //
+  // If the value is false when the Preroll method exits, then the
+  // |PaintContext::inherited_opacity| value should always be set to
+  // 1.0 when its |Paint| method is called.
+  //
+  // Leaf layers need only be concerned with their own rendering and
+  // can set the value according to whether they can apply the opacity.
+  //
+  // For containers, there are 3 ways to interact with this field:
+  //
+  // 1. If you need to know whether your children are compatible, then
+  //    set the field to true before you call PrerollChildren. That
+  //    method will then reset the field to false if it detects any
+  //    incompatible children.
+  //
+  // 2. If you need to do change any logic depending on the answer
+  //    from the children, then remember the value of the field when
+  //    PrerollChildren returns. (eg. OpacityLayer remembers this
+  //    value to control whether to set the opacity value into the
+  //    PaintContext::inherited_opacity field before recursing to
+  //    its children in Paint)
+  //
+  // 3. If you want to indicate to your parents that you can accept
+  //    inherited opacity regardless of whether your children were
+  //    compatible then set this field to true before returning
+  //    from your Preroll method. (eg. layers that always apply a
+  //    saveLayer when rendering anyway can apply the opacity there)
   bool subtree_can_inherit_opacity = false;
 };
 
@@ -196,6 +214,11 @@ class Layer {
 
     ~AutoCachePaint() { context_.inherited_opacity = paint_.getAlphaf(); }
 
+    void setImageFilter(sk_sp<SkImageFilter> filter) {
+      paint_.setImageFilter(filter);
+      needs_paint_ = filter != nullptr || paint_.getAlphaf() < SK_Scalar1;
+    }
+
     const SkPaint* paint() { return needs_paint_ ? &paint_ : nullptr; }
 
    private:
@@ -271,18 +294,6 @@ class Layer {
     subtree_has_platform_view_ = value;
   }
 
-  // Returns true if the layer can render with an added opacity value inherited
-  // from an OpacityLayer ancestor and delivered to its |Paint| method through
-  // the |PaintContext.inherited_opacity| field. This flag can be set either
-  // in the Layer's constructor if it is a lifetime constant value, or during
-  // the |Preroll| method if it must determine the capability based on data
-  // only available when it is part of a tree. It must set this value before
-  // recursing to its children if it is a |ContainerLayer|.
-  bool layer_can_inherit_opacity() const { return layer_can_inherit_opacity_; }
-  void set_layer_can_inherit_opacity(bool value) {
-    layer_can_inherit_opacity_ = value;
-  }
-
   // Returns the paint bounds in the layer's local coordinate system
   // as determined during Preroll().  The bounds should include any
   // transform, clip or distortions performed by the layer itself,
@@ -353,7 +364,6 @@ class Layer {
   uint64_t unique_id_;
   uint64_t original_layer_id_;
   bool subtree_has_platform_view_;
-  bool layer_can_inherit_opacity_;
 
   static uint64_t NextUniqueID();
 
