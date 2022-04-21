@@ -566,6 +566,7 @@ void main() {
         attributedValue: AttributedString('c'),
         attributedDecreasedValue: AttributedString('d'),
         attributedHint: AttributedString('e'),
+        tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         elevation: 3.0,

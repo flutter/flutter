@@ -6695,6 +6695,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     AttributedString? attributedDecreasedValue,
     String? hint,
     AttributedString? attributedHint,
+    String? tooltip,
     String? onTapHint,
     String? onLongPressHint,
     TextDirection? textDirection,
@@ -6759,6 +6760,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       attributedDecreasedValue: attributedDecreasedValue,
       hint: hint,
       attributedHint: attributedHint,
+      tooltip: tooltip,
       textDirection: textDirection,
       sortKey: sortKey,
       tagForChildren: tagForChildren,
@@ -6901,6 +6903,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       attributedIncreasedValue: _effectiveAttributedIncreasedValue,
       attributedDecreasedValue: _effectiveAttributedDecreasedValue,
       attributedHint: _effectiveAttributedHint,
+      tooltip: properties.tooltip,
       hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
@@ -6936,7 +6939,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     final bool containsText = properties.attributedLabel != null ||
                               properties.label != null ||
                               properties.value != null ||
-                              properties.hint != null;
+                              properties.hint != null ||
+                              properties.tooltip != null;
 
     if (!containsText)
       return null;
@@ -6977,6 +6981,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..attributedIncreasedValue = _effectiveAttributedIncreasedValue
       ..attributedDecreasedValue = _effectiveAttributedDecreasedValue
       ..attributedHint = _effectiveAttributedHint
+      ..tooltip = properties.tooltip
       ..hintOverrides = properties.hintOverrides
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
