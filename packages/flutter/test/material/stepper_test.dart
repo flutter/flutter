@@ -1209,7 +1209,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     late Text selectedLabelTextWidget;
     late Text nextLabelTextWidget;
 
-    // Tap to Step3 Label then, index become 2 from 0
+    // Tap to Step1 Label then, `index` become 0
     await tester.tap(find.text('Step 1 Label'));
     expect(index, 0);
 
@@ -1222,7 +1222,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(bodyText1Style, nextLabelTextWidget.style);
     
 
-    // Tap to Step2 Label then, index become 1 from 2
+    // Tap to Step2 Label then, `index` become 1
     await tester.tap(find.text('Step 2 Label'));
     expect(index, 1);
 
