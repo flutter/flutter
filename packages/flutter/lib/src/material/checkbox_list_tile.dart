@@ -127,6 +127,7 @@ class CheckboxListTile extends StatelessWidget {
     required this.onChanged,
     this.activeColor,
     this.checkColor,
+    this.enabled,
     this.tileColor,
     this.title,
     this.subtitle,
@@ -295,6 +296,10 @@ class CheckboxListTile extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// if enabled = false, the [CheckboxListTile] will be disabled and will not react to user input.
+  /// if enabled is not provided it will debpend on onChanged.
+  final bool? enabled;
+
   void _handleValueChange() {
     assert(onChanged != null);
     switch (value) {
@@ -314,7 +319,7 @@ class CheckboxListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget control = Checkbox(
       value: value,
-      onChanged: onChanged,
+      onChanged: (enabled != null && !enabled!) ? null : onChanged,
       activeColor: activeColor,
       checkColor: checkColor,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -345,7 +350,7 @@ class CheckboxListTile extends StatelessWidget {
           trailing: trailing,
           isThreeLine: isThreeLine,
           dense: dense,
-          enabled: onChanged != null,
+          enabled: enabled ?? onChanged != null,
           onTap: onChanged != null ? _handleValueChange : null,
           selected: selected,
           autofocus: autofocus,
