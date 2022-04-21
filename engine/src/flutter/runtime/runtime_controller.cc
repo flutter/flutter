@@ -227,8 +227,7 @@ bool RuntimeController::NotifyIdle(fml::TimePoint deadline) {
 bool RuntimeController::DispatchPlatformMessage(
     std::unique_ptr<PlatformMessage> message) {
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    TRACE_EVENT1("flutter", "RuntimeController::DispatchPlatformMessage",
-                 "mode", "basic");
+    TRACE_EVENT0("flutter", "RuntimeController::DispatchPlatformMessage");
     platform_configuration->DispatchPlatformMessage(std::move(message));
     return true;
   }
@@ -239,8 +238,7 @@ bool RuntimeController::DispatchPlatformMessage(
 bool RuntimeController::DispatchPointerDataPacket(
     const PointerDataPacket& packet) {
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    TRACE_EVENT1("flutter", "RuntimeController::DispatchPointerDataPacket",
-                 "mode", "basic");
+    TRACE_EVENT0("flutter", "RuntimeController::DispatchPointerDataPacket");
     platform_configuration->get_window(0)->DispatchPointerDataPacket(packet);
     return true;
   }

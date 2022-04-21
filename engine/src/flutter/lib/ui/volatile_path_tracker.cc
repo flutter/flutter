@@ -27,13 +27,6 @@ void VolatilePathTracker::OnFrame() {
   if (!enabled_) {
     return;
   }
-#if !FLUTTER_RELEASE
-  std::string total_count = std::to_string(paths_.size());
-  TRACE_EVENT1("flutter", "VolatilePathTracker::OnFrame", "total_count",
-               total_count.c_str());
-#else
-  TRACE_EVENT0("flutter", "VolatilePathTracker::OnFrame");
-#endif
 
   paths_.erase(std::remove_if(paths_.begin(), paths_.end(),
                               [](std::weak_ptr<TrackedPath> weak_path) {
@@ -50,12 +43,6 @@ void VolatilePathTracker::OnFrame() {
                                 return false;
                               }),
                paths_.end());
-
-#if !FLUTTER_RELEASE
-  std::string post_removal_count = std::to_string(paths_.size());
-  TRACE_EVENT_INSTANT1("flutter", "VolatilePathTracker::OnFrame",
-                       "remaining_count", post_removal_count.c_str());
-#endif
 }
 
 }  // namespace flutter

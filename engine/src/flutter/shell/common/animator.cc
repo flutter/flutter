@@ -57,16 +57,6 @@ void Animator::EnqueueTraceFlowId(uint64_t trace_flow_id) {
       });
 }
 
-// This Parity is used by the timeline component to correctly align
-// GPU Workloads events with their respective Framework Workload.
-const char* Animator::FrameParity() {
-  if (!frame_timings_recorder_) {
-    return "even";
-  }
-  uint64_t frame_number = frame_timings_recorder_->GetFrameNumber();
-  return (frame_number % 2) ? "even" : "odd";
-}
-
 static fml::TimePoint FxlToDartOrEarlier(fml::TimePoint time) {
   auto dart_now = fml::TimeDelta::FromMicroseconds(Dart_TimelineGetMicros());
   fml::TimePoint fxl_now = fml::TimePoint::Now();
@@ -121,12 +111,8 @@ void Animator::BeginFrame(
   const fml::TimePoint frame_target_time =
       frame_timings_recorder_->GetVsyncTargetTime();
   dart_frame_deadline_ = FxlToDartOrEarlier(frame_target_time);
-  {
-    TRACE_EVENT2("flutter", "Framework Workload", "mode", "basic", "frame",
-                 FrameParity());
-    uint64_t frame_number = frame_timings_recorder_->GetFrameNumber();
-    delegate_.OnAnimatorBeginFrame(frame_target_time, frame_number);
-  }
+  uint64_t frame_number = frame_timings_recorder_->GetFrameNumber();
+  delegate_.OnAnimatorBeginFrame(frame_target_time, frame_number);
 
   if (!frame_scheduled_ && has_rendered_) {
     // Under certain workloads (such as our parent view resizing us, which is

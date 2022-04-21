@@ -165,10 +165,7 @@ class Pipeline {
       items_count = queue_.size();
     }
 
-    {
-      TRACE_EVENT0("flutter", "PipelineConsume");
-      consumer(std::move(resource));
-    }
+    consumer(std::move(resource));
 
     empty_.Signal();
     --inflight_;
