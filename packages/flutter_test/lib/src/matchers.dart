@@ -494,6 +494,7 @@ Matcher matchesSemantics({
   String? increasedValue,
   AttributedString? attributedIncreasedValue,
   String? decreasedValue,
+  String? tooltip,
   AttributedString? attributedDecreasedValue,
   TextDirection? textDirection,
   Rect? rect,
@@ -625,6 +626,7 @@ Matcher matchesSemantics({
     value: value,
     attributedValue: attributedValue,
     increasedValue: increasedValue,
+    tooltip: tooltip,
     attributedIncreasedValue: attributedIncreasedValue,
     decreasedValue: decreasedValue,
     attributedDecreasedValue: attributedDecreasedValue,
@@ -1783,6 +1785,7 @@ class _MatchesSemanticsData extends Matcher {
     this.attributedIncreasedValue,
     this.decreasedValue,
     this.attributedDecreasedValue,
+    this.tooltip,
     this.flags,
     this.actions,
     this.textDirection,
@@ -1808,6 +1811,7 @@ class _MatchesSemanticsData extends Matcher {
   final AttributedString? attributedIncreasedValue;
   final String? decreasedValue;
   final AttributedString? attributedDecreasedValue;
+  final String? tooltip;
   final SemanticsHintOverrides? hintOverrides;
   final List<SemanticsAction>? actions;
   final List<CustomSemanticsAction>? customActions;
@@ -1845,6 +1849,8 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with decreasedValue: $decreasedValue ');
     if (attributedDecreasedValue != null)
       description.add(' with attributedDecreasedValue: $attributedDecreasedValue');
+    if (tooltip != null)
+      description.add(' with tooltip: $tooltip');
     if (actions != null)
       description.add(' with actions: ').addDescriptionOf(actions);
     if (flags != null)
@@ -1942,6 +1948,8 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(
           matchState, 'attributedDecreasedValue was: ${data.attributedDecreasedValue}');
     }
+    if (tooltip != null && tooltip != data.tooltip)
+      return failWithDescription(matchState, 'tooltip was: ${data.tooltip}');
     if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
     if (rect != null && rect != data.rect)
