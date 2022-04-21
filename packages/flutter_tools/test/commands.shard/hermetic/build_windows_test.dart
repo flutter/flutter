@@ -309,6 +309,142 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
+  testUsingContext('Windows build works around CMake generation bug', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(displayVersion: '17.1.0');
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release'),
+    ]);
+    fileSystem.file(fileSystem.path.join('lib', 'other.dart'))
+      .createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json'))
+      .createSync(recursive: true);
+
+    // Relevant portions of an incorrectly generated project, with some
+    // irrelevant details removed for length.
+    const String fakeBadProjectContent = r'''
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="somepath\build\windows\CMakeFiles\8b570225f626c250e12bc1ede88babae\flutter_windows.dll.rule">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating some files</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">Generating some files</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating some files</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating some files</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Profile
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">Generating some files</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Profile
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating some files</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Profile
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating some files</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Release
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">Generating some files</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Release
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating some files</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Release
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </CustomBuild>
+  </ItemGroup>
+</Project>
+''';
+    final File assembleProject = fileSystem.currentDirectory
+      .childDirectory('build')
+      .childDirectory('windows')
+      .childDirectory('flutter')
+      .childFile('flutter_assemble.vcxproj');
+    assembleProject.createSync(recursive: true);
+    assembleProject.writeAsStringSync(fakeBadProjectContent);
+
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub']
+    );
+
+    final List<String> projectLines = assembleProject.readAsLinesSync();
+
+    const String commandBase = r'"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" '
+      r'-E env FOO=bar C:/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64';
+    // The duplicate commands will still be present, but with the order matching
+    // the condition order (cycling through the configurations), rather than
+    // three copies of Debug, then three copies of Profile, then three copies
+    // of Release.
+    expect(projectLines, containsAllInOrder(<String>[
+      '$commandBase Debug\r',
+      '$commandBase Profile\r',
+      '$commandBase Release\r',
+      '$commandBase Debug\r',
+      '$commandBase Profile\r',
+      '$commandBase Release\r',
+      '$commandBase Debug\r',
+      '$commandBase Profile\r',
+      '$commandBase Release\r',
+    ]));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => windowsPlatform,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
   testUsingContext('Windows build invokes build and writes generated files', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
@@ -604,6 +740,7 @@ class FakeVisualStudio extends Fake implements VisualStudio {
   FakeVisualStudio({
     this.cmakePath = _cmakePath,
     this.cmakeGenerator = 'Visual Studio 16 2019',
+    this.displayVersion = '17.0.0'
   });
 
   @override
@@ -611,4 +748,7 @@ class FakeVisualStudio extends Fake implements VisualStudio {
 
   @override
   final String cmakeGenerator;
+
+  @override
+  final String displayVersion;
 }

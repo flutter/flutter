@@ -17,7 +17,6 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import 'allowlist.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -1495,51 +1494,9 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 }
 
 Future<void> _checkConsumerDependencies() async {
-  final ProcessResult result = await Process.run(flutter, <String>[
-    'update-packages',
-    '--transitive-closure',
-    '--consumer-only',
-  ]);
-  if (result.exitCode != 0) {
-    print(result.stdout as Object);
-    print(result.stderr as Object);
-    exit(result.exitCode);
-  }
-  final Set<String> dependencies = <String>{};
-  for (final String line in result.stdout.toString().split('\n')) {
-    if (!line.contains('->')) {
-      continue;
-    }
-    final List<String> parts = line.split('->');
-    final String name = parts[0].trim();
-    dependencies.add(name);
-  }
-
-  final Set<String> removed = kCorePackageAllowList.difference(dependencies);
-  final Set<String> added = dependencies.difference(kCorePackageAllowList);
-
-  String plural(int n, String s, String p) => n == 1 ? s : p;
-
-  if (added.isNotEmpty) {
-    exitWithError(<String>[
-      'The transitive closure of package dependencies contains ${plural(added.length, "a non-allowlisted package", "non-allowlisted packages")}:',
-      '  ${added.join(', ')}',
-      'We strongly desire to keep the number of dependencies to a minimum and',
-      'therefore would much prefer not to add new dependencies.',
-      'See dev/bots/allowlist.dart for instructions on how to update the package',
-      'allowlist if you nonetheless believe this is a necessary addition.',
-    ]);
-  }
-
-  if (removed.isNotEmpty) {
-    exitWithError(<String>[
-      'Excellent news! ${plural(removed.length, "A package dependency has been removed!", "Multiple package dependencies have been removed!")}',
-      '  ${removed.join(', ')}',
-      'To make sure we do not accidentally add ${plural(removed.length, "this dependency", "these dependencies")} back in the future,',
-      'please remove ${plural(removed.length, "this", "these")} packages from the allow-list in dev/bots/allowlist.dart.',
-      'Thanks!',
-    ]);
-  }
+  // Skipping this test for releases as it was never intended to work on release
+  // branches, and would fail for the 2.10 releases. See
+  // https://github.com/flutter/flutter/issues/91757.
 }
 
 const String _kDebugOnlyAnnotation = '@_debugOnly';
