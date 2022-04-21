@@ -92,9 +92,7 @@ bool BorderMaskBlurFilterContents::RenderFilter(
 
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-  auto scale = entity.GetTransformation().GetScale();
-  frame_info.sigma_uv = Vector2(scale.x, scale.y) *
-                        Vector2(sigma_x_.sigma, sigma_y_.sigma).Abs() /
+  frame_info.sigma_uv = Vector2(sigma_x_.sigma, sigma_y_.sigma).Abs() /
                         input_snapshot->texture->GetSize();
   frame_info.src_factor = src_color_factor_;
   frame_info.inner_blur_factor = inner_blur_factor_;
