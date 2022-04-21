@@ -27,7 +27,7 @@ void Log(const char* format, ...) {
   }
 
   int size = result + 1;
-  std::unique_ptr<char[]> message(new char[size]);
+  std::unique_ptr<char[]> message = std::make_unique<char[]>(size);
   va_start(ap, format);
   result = vsnprintf(message.get(), size, format, ap);
   va_end(ap);

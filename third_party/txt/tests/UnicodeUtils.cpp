@@ -95,7 +95,7 @@ void ParseUnicode(uint16_t* buf,
 
 std::vector<uint16_t> parseUnicodeStringWithOffset(const std::string& in,
                                                    size_t* offset) {
-  std::unique_ptr<uint16_t[]> buffer(new uint16_t[in.size()]);
+  std::unique_ptr<uint16_t[]> buffer = std::make_unique<uint16_t[]>(in.size());
   size_t result_size = 0;
   ParseUnicode(buffer.get(), in.size(), in.c_str(), &result_size, offset);
   return std::vector<uint16_t>(buffer.get(), buffer.get() + result_size);
