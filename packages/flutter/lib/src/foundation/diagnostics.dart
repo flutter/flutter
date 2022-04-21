@@ -3397,7 +3397,7 @@ abstract class DiagnosticableTree with Diagnosticable {
 /// A mixin that helps dump string and [DiagnosticsNode] representations of trees.
 ///
 /// This mixin is identical to class [DiagnosticableTree].
-mixin DiagnosticableTreeMixin implements DiagnosticableTree {
+mixin DiagnosticableTreeMixin on Diagnosticable implements DiagnosticableTree {
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
     return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
@@ -3450,7 +3450,9 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   List<DiagnosticsNode> debugDescribeChildren() => const <DiagnosticsNode>[];
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) { }
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) { 
+    super.debugFillProperties(properties);
+  }
 }
 
 
