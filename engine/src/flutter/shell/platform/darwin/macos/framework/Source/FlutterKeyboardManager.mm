@@ -283,7 +283,7 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
     //
     //  - Mandatory goal, if it matches any clue. This ensures that all alnum
     //    keys can be found somewhere.
-    //  - US layout, if neither clue of the key is EASCII.  This ensures that
+    //  - US layout, if neither clue of the key is EASCII. This ensures that
     //    there are no non-latin logical keys.
     //  - Derived on the fly from keyCode & characters.
     for (const LayoutClue& clue : thisKeyClues) {

@@ -194,8 +194,6 @@ TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
   invoke_record_callback_and_verify(record, TRUE, &user_data);
   g_ptr_array_clear(g_call_records);
 
-  // Skip testing key repeats, which is not present on GDK.
-
   // Key up
   fl_key_responder_handle_event(
       responder,
@@ -255,6 +253,41 @@ TEST(FlKeyEmbedderResponderTest, SendKeyEvent) {
   EXPECT_EQ(record->event->synthesized, false);
 
   invoke_record_callback_and_verify(record, FALSE, &user_data);
+  g_ptr_array_clear(g_call_records);
+
+  clear_g_call_records();
+  g_object_unref(responder);
+}
+
+// Basic key presses, but uses the specified logical key if it is not 0.
+TEST(FlKeyEmbedderResponderTest, UsesSpecifiedLogicalKey) {
+  EXPECT_EQ(g_call_records, nullptr);
+  g_call_records = g_ptr_array_new_with_free_func(g_object_unref);
+  FlKeyResponder* responder = FL_KEY_RESPONDER(
+      fl_key_embedder_responder_new(record_calls_in(g_call_records)));
+  int user_data = 123;  // Arbitrary user data
+
+  FlKeyEmbedderCallRecord* record;
+
+  // On an AZERTY keyboard, press physical key 1, and release.
+  // Key down
+  fl_key_responder_handle_event(
+      responder,
+      fl_key_event_new_by_mock(12345, kPress, GDK_KEY_ampersand, kKeyCodeDigit1,
+                               0, kIsNotModifier),
+      verify_response_handled, &user_data, kLogicalDigit1);
+
+  EXPECT_EQ(g_call_records->len, 1u);
+  record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(g_call_records, 0));
+  EXPECT_EQ(record->event->struct_size, sizeof(FlutterKeyEvent));
+  EXPECT_EQ(record->event->timestamp, 12345000);
+  EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(record->event->physical, kPhysicalDigit1);
+  EXPECT_EQ(record->event->logical, kLogicalDigit1);
+  EXPECT_STREQ(record->event->character, "&");
+  EXPECT_EQ(record->event->synthesized, false);
+
+  invoke_record_callback_and_verify(record, TRUE, &user_data);
   g_ptr_array_clear(g_call_records);
 
   clear_g_call_records();

@@ -53,6 +53,7 @@ struct _FlKeyResponderInterface {
    */
   void (*handle_event)(FlKeyResponder* responder,
                        FlKeyEvent* event,
+                       uint64_t specified_logical_key,
                        FlKeyResponderAsyncCallback callback,
                        gpointer user_data);
 };
@@ -74,7 +75,8 @@ struct _FlKeyResponderInterface {
 void fl_key_responder_handle_event(FlKeyResponder* responder,
                                    FlKeyEvent* event,
                                    FlKeyResponderAsyncCallback callback,
-                                   gpointer user_data);
+                                   gpointer user_data,
+                                   uint64_t specified_logical_key = 0);
 
 G_END_DECLS
 

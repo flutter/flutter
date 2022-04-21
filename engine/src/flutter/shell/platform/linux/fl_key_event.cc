@@ -33,6 +33,7 @@ FlKeyEvent* fl_key_event_new_from_gdk_event(GdkEvent* raw_event) {
   result->keyval = event->keyval;
   result->state = event->state;
   result->string = clone_string(event->string);
+  result->group = event->group;
   result->origin = event;
   result->dispose_origin = dispose_origin_from_gdk_event;
 

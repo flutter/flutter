@@ -35,6 +35,7 @@ constexpr uint64_t kPhysicalSuspend = 0x00000014;
 constexpr uint64_t kPhysicalResume = 0x00000015;
 constexpr uint64_t kPhysicalTurbo = 0x00000016;
 constexpr uint64_t kPhysicalPrivacyScreenToggle = 0x00000017;
+constexpr uint64_t kPhysicalMicrophoneMuteToggle = 0x00000018;
 constexpr uint64_t kPhysicalSleep = 0x00010082;
 constexpr uint64_t kPhysicalWakeUp = 0x00010083;
 constexpr uint64_t kPhysicalDisplayToggleIntExt = 0x000100b5;

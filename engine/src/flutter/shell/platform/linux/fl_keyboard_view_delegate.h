@@ -7,11 +7,14 @@
 
 #include <gdk/gdk.h>
 #include <cinttypes>
+#include <functional>
 #include <memory>
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
+
+typedef std::function<void()> KeyboardLayoutNotifier;
 
 G_BEGIN_DECLS
 
@@ -45,6 +48,12 @@ struct _FlKeyboardViewDelegateInterface {
 
   void (*redispatch_event)(FlKeyboardViewDelegate* delegate,
                            std::unique_ptr<FlKeyEvent> event);
+
+  void (*subscribe_to_layout_change)(FlKeyboardViewDelegate* delegate,
+                                     KeyboardLayoutNotifier notifier);
+
+  guint (*lookup_key)(FlKeyboardViewDelegate* view_delegate,
+                      const GdkKeymapKey* key);
 };
 
 /**
@@ -99,6 +108,13 @@ FlBinaryMessenger* fl_keyboard_view_delegate_get_messenger(
 void fl_keyboard_view_delegate_redispatch_event(
     FlKeyboardViewDelegate* delegate,
     std::unique_ptr<FlKeyEvent> event);
+
+void fl_keyboard_view_delegate_subscribe_to_layout_change(
+    FlKeyboardViewDelegate* delegate,
+    KeyboardLayoutNotifier notifier);
+
+guint fl_keyboard_view_delegate_lookup_key(FlKeyboardViewDelegate* delegate,
+                                           const GdkKeymapKey* key);
 
 G_END_DECLS
 

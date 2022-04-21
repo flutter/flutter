@@ -212,6 +212,7 @@ G_DEFINE_TYPE_WITH_CODE(
 static void fl_key_embedder_responder_handle_event(
     FlKeyResponder* responder,
     FlKeyEvent* event,
+    uint64_t specified_logical_key,
     FlKeyResponderAsyncCallback callback,
     gpointer user_data);
 
@@ -698,6 +699,7 @@ static void synchronize_lock_states_loop_body(gpointer key,
 static void fl_key_embedder_responder_handle_event_impl(
     FlKeyResponder* responder,
     FlKeyEvent* event,
+    uint64_t specified_logical_key,
     FlKeyResponderAsyncCallback callback,
     gpointer user_data) {
   FlKeyEmbedderResponder* self = FL_KEY_EMBEDDER_RESPONDER(responder);
@@ -706,7 +708,9 @@ static void fl_key_embedder_responder_handle_event_impl(
   g_return_if_fail(callback != nullptr);
 
   const uint64_t physical_key = event_to_physical_key(event);
-  const uint64_t logical_key = event_to_logical_key(event);
+  const uint64_t logical_key = specified_logical_key != 0
+                                   ? specified_logical_key
+                                   : event_to_logical_key(event);
   const double timestamp = event_to_timestamp(event);
   const bool is_down_event = event->is_press;
 
@@ -777,12 +781,13 @@ static void fl_key_embedder_responder_handle_event_impl(
 static void fl_key_embedder_responder_handle_event(
     FlKeyResponder* responder,
     FlKeyEvent* event,
+    uint64_t specified_logical_key,
     FlKeyResponderAsyncCallback callback,
     gpointer user_data) {
   FlKeyEmbedderResponder* self = FL_KEY_EMBEDDER_RESPONDER(responder);
   self->sent_any_events = false;
-  fl_key_embedder_responder_handle_event_impl(responder, event, callback,
-                                              user_data);
+  fl_key_embedder_responder_handle_event_impl(
+      responder, event, specified_logical_key, callback, user_data);
   if (!self->sent_any_events) {
     self->send_key_event(&empty_event, nullptr, nullptr);
   }

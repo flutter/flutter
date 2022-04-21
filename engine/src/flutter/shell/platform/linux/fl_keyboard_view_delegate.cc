@@ -48,3 +48,19 @@ void fl_keyboard_view_delegate_redispatch_event(
   return FL_KEYBOARD_VIEW_DELEGATE_GET_IFACE(self)->redispatch_event(
       self, std::move(event));
 }
+
+void fl_keyboard_view_delegate_subscribe_to_layout_change(
+    FlKeyboardViewDelegate* self,
+    KeyboardLayoutNotifier notifier) {
+  g_return_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(self));
+
+  return FL_KEYBOARD_VIEW_DELEGATE_GET_IFACE(self)->subscribe_to_layout_change(
+      self, std::move(notifier));
+}
+
+guint fl_keyboard_view_delegate_lookup_key(FlKeyboardViewDelegate* self,
+                                           const GdkKeymapKey* key) {
+  g_return_val_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(self), 0);
+
+  return FL_KEYBOARD_VIEW_DELEGATE_GET_IFACE(self)->lookup_key(self, key);
+}
