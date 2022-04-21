@@ -33,7 +33,10 @@ const float kHalfSqrtTwo = 0.70710678118;
 
 // Indefinite integral of the Gaussian function (with constant range 0->1).
 float GaussianIntegral(float x, float sigma) {
-  return 0.5 + 0.5 * erf(x * (kHalfSqrtTwo / sigma));
+  // ( 1 + erf( x * (sqrt(2) / (2 * sigma) ) ) / 2
+  // Because this sigmoid is always > 1, we remap it (n * 1.07 - 0.07)
+  // so that it always fades to zero before it reaches the blur radius.
+  return 0.535 * erf(x * (kHalfSqrtTwo / sigma)) + 0.465;
 }
 
 float BoxBlurMask(vec2 uv) {
