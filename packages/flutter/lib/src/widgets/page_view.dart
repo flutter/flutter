@@ -443,7 +443,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       page = _pageToUseOnStartup;
     } else if (oldViewportDimensions == 0.0) {
       // If resize from zero, we should use the _cachedPage to recover the state.
-      page = _cachedPage!;
+      page = _cachedPage ?? 0;
     } else {
       page = getPageFromPixels(oldPixels, oldViewportDimensions!);
     }
