@@ -6,6 +6,7 @@
 
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/texture_contents.h"
+#include "impeller/geometry/path_builder.h"
 
 namespace impeller {
 
@@ -34,6 +35,9 @@ bool PaintPassDelegate::CanCollapseIntoParentPass() {
 std::shared_ptr<Contents> PaintPassDelegate::CreateContentsForSubpassTarget(
     std::shared_ptr<Texture> target) {
   auto contents = std::make_shared<TextureContents>();
+  contents->SetPath(PathBuilder{}
+                        .AddRect(Rect::MakeSize(Size(target->GetSize())))
+                        .TakePath());
   contents->SetTexture(target);
   contents->SetSourceRect(Rect::MakeSize(Size(target->GetSize())));
   contents->SetOpacity(paint_.color.alpha);

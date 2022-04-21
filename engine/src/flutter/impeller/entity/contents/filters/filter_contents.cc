@@ -129,11 +129,12 @@ bool FilterContents::Render(const ContentContext& renderer,
   // Draw the result texture, respecting the transform and clip stack.
 
   auto contents = std::make_shared<TextureContents>();
+  contents->SetPath(
+      PathBuilder{}.AddRect(filter_coverage.value()).GetCurrentPath());
   contents->SetTexture(snapshot.texture);
   contents->SetSourceRect(Rect::MakeSize(Size(snapshot.texture->GetSize())));
 
   Entity e;
-  e.SetPath(PathBuilder{}.AddRect(filter_coverage.value()).GetCurrentPath());
   e.SetBlendMode(entity.GetBlendMode());
   e.SetStencilDepth(entity.GetStencilDepth());
   return contents->Render(renderer, e, pass);

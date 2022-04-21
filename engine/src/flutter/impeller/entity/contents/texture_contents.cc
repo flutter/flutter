@@ -18,6 +18,10 @@ TextureContents::TextureContents() = default;
 
 TextureContents::~TextureContents() = default;
 
+void TextureContents::SetPath(Path path) {
+  path_ = std::move(path);
+}
+
 void TextureContents::SetTexture(std::shared_ptr<Texture> texture) {
   texture_ = std::move(texture);
 }
@@ -30,6 +34,10 @@ void TextureContents::SetOpacity(Scalar opacity) {
   opacity_ = opacity;
 }
 
+std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
+  return path_.GetTransformedBoundingBox(entity.GetTransformation());
+};
+
 bool TextureContents::Render(const ContentContext& renderer,
                              const Entity& entity,
                              RenderPass& pass) const {
@@ -40,7 +48,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   using VS = TextureFillVertexShader;
   using FS = TextureFillFragmentShader;
 
-  const auto coverage_rect = entity.GetPath().GetBoundingBox();
+  const auto coverage_rect = path_.GetBoundingBox();
 
   if (!coverage_rect.has_value()) {
     return true;
@@ -62,7 +70,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   {
     const auto tess_result = Tessellator{}.Tessellate(
-        entity.GetPath().GetFillType(), entity.GetPath().CreatePolyline(),
+        path_.GetFillType(), path_.CreatePolyline(),
         [this, &vertex_builder, &coverage_rect, &texture_size](Point vtx) {
           VS::PerVertexData data;
           data.vertices = vtx;

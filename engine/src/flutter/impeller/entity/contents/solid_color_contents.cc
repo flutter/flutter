@@ -7,6 +7,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path.h"
+#include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/tessellator/tessellator.h"
 
@@ -23,6 +24,19 @@ void SolidColorContents::SetColor(Color color) {
 const Color& SolidColorContents::GetColor() const {
   return color_;
 }
+
+void SolidColorContents::SetPath(Path path) {
+  path_ = std::move(path);
+}
+
+void SolidColorContents::SetCover(bool cover) {
+  cover_ = cover;
+}
+
+std::optional<Rect> SolidColorContents::GetCoverage(
+    const Entity& entity) const {
+  return path_.GetTransformedBoundingBox(entity.GetTransformation());
+};
 
 VertexBuffer SolidColorContents::CreateSolidFillVertices(const Path& path,
                                                          HostBuffer& buffer) {
@@ -57,8 +71,12 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   cmd.pipeline =
       renderer.GetSolidFillPipeline(OptionsFromPassAndEntity(pass, entity));
   cmd.stencil_reference = entity.GetStencilDepth();
-  cmd.BindVertices(
-      CreateSolidFillVertices(entity.GetPath(), pass.GetTransientsBuffer()));
+
+  cmd.BindVertices(CreateSolidFillVertices(
+      cover_
+          ? PathBuilder{}.AddRect(Size(pass.GetRenderTargetSize())).TakePath()
+          : path_,
+      pass.GetTransientsBuffer()));
 
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
@@ -75,8 +93,10 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   return true;
 }
 
-std::unique_ptr<SolidColorContents> SolidColorContents::Make(Color color) {
+std::unique_ptr<SolidColorContents> SolidColorContents::Make(Path path,
+                                                             Color color) {
   auto contents = std::make_unique<SolidColorContents>();
+  contents->SetPath(std::move(path));
   contents->SetColor(color);
   return contents;
 }

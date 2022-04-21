@@ -36,8 +36,6 @@ struct Paint {
   std::optional<MaskBlur> mask_blur;
   std::shared_ptr<Contents> contents;
 
-  std::shared_ptr<Contents> CreateContentsForEntity() const;
-
   /// @brief      Wrap this paint's configured filters to the given contents.
   /// @param[in]  input           The contents to wrap with paint's filters.
   /// @param[in]  is_solid_color  Affects mask blurring behavior. If false, use
@@ -52,6 +50,9 @@ struct Paint {
   std::shared_ptr<Contents> WithFilters(
       std::shared_ptr<Contents> input,
       std::optional<bool> is_solid_color = std::nullopt) const;
+
+  std::shared_ptr<Contents> CreateContentsForEntity(Path path = {},
+                                                    bool cover = false) const;
 };
 
 }  // namespace impeller

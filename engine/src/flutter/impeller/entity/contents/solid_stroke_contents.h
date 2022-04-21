@@ -48,6 +48,8 @@ class SolidStrokeContents final : public Contents {
 
   ~SolidStrokeContents() override;
 
+  void SetPath(Path path);
+
   void SetColor(Color color);
 
   const Color& GetColor() const;
@@ -77,6 +79,8 @@ class SolidStrokeContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
+  Path path_;
+
   Color color_;
   Scalar stroke_size_ = 0.0;
   Scalar miter_limit_ = 4.0;

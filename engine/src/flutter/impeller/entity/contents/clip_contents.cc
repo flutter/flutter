@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <optional>
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
@@ -23,9 +24,17 @@ ClipContents::ClipContents() = default;
 
 ClipContents::~ClipContents() = default;
 
+void ClipContents::SetPath(Path path) {
+  path_ = std::move(path);
+}
+
 void ClipContents::SetClipOperation(Entity::ClipOperation clip_op) {
   clip_op_ = clip_op;
 }
+
+std::optional<Rect> ClipContents::GetCoverage(const Entity& entity) const {
+  return path_.GetTransformedBoundingBox(entity.GetTransformation());
+};
 
 bool ClipContents::Render(const ContentContext& renderer,
                           const Entity& entity,
@@ -77,7 +86,7 @@ bool ClipContents::Render(const ContentContext& renderer,
 
   cmd.pipeline = renderer.GetClipPipeline(options);
   cmd.BindVertices(SolidColorContents::CreateSolidFillVertices(
-      entity.GetPath(), pass.GetTransientsBuffer()));
+      path_, pass.GetTransientsBuffer()));
 
   info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
              entity.GetTransformation();
@@ -94,6 +103,11 @@ bool ClipContents::Render(const ContentContext& renderer,
 ClipRestoreContents::ClipRestoreContents() = default;
 
 ClipRestoreContents::~ClipRestoreContents() = default;
+
+std::optional<Rect> ClipRestoreContents::GetCoverage(
+    const Entity& entity) const {
+  return std::nullopt;
+};
 
 bool ClipRestoreContents::Render(const ContentContext& renderer,
                                  const Entity& entity,

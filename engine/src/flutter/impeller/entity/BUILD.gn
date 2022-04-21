@@ -31,8 +31,6 @@ impeller_shaders("entity_shaders") {
 
 impeller_component("entity") {
   sources = [
-    "contents/clear_contents.cc",
-    "contents/clear_contents.h",
     "contents/clip_contents.cc",
     "contents/clip_contents.h",
     "contents/content_context.cc",

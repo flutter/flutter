@@ -121,6 +121,8 @@ class Path {
 
   std::optional<Rect> GetBoundingBox() const;
 
+  std::optional<Rect> GetTransformedBoundingBox(const Matrix& transform) const;
+
   std::optional<std::pair<Point, Point>> GetMinMaxCoveragePoints() const;
 
  private:

@@ -29,12 +29,17 @@ const Color& SolidStrokeContents::GetColor() const {
   return color_;
 }
 
+void SolidStrokeContents::SetPath(Path path) {
+  path_ = std::move(path);
+}
+
 std::optional<Rect> SolidStrokeContents::GetCoverage(
     const Entity& entity) const {
-  auto path_coverage = entity.GetPathCoverage();
-  if (!path_coverage.has_value()) {
+  auto path_bounds = path_.GetBoundingBox();
+  if (!path_bounds.has_value()) {
     return std::nullopt;
   }
+  auto path_coverage = path_bounds->TransformBounds(entity.GetTransformation());
 
   Scalar max_radius = 0.5;
   if (cap_ == Cap::kSquare) {
@@ -46,9 +51,9 @@ std::optional<Rect> SolidStrokeContents::GetCoverage(
   Vector2 max_radius_xy = entity.GetTransformation().TransformDirection(
       Vector2(max_radius, max_radius) * stroke_size_);
 
-  return Rect(path_coverage->origin - max_radius_xy,
-              Size(path_coverage->size.width + max_radius_xy.x * 2,
-                   path_coverage->size.height + max_radius_xy.y * 2));
+  return Rect(path_coverage.origin - max_radius_xy,
+              Size(path_coverage.size.width + max_radius_xy.x * 2,
+                   path_coverage.size.height + max_radius_xy.y * 2));
 }
 
 static VertexBuffer CreateSolidStrokeVertices(
@@ -197,7 +202,7 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
       5.0 / (stroke_size_ * entity.GetTransformation().GetMaxBasisLength()),
       0.0, 0.0);
   cmd.BindVertices(CreateSolidStrokeVertices(
-      entity.GetPath(), pass.GetTransientsBuffer(), cap_proc_, join_proc_,
+      path_, pass.GetTransientsBuffer(), cap_proc_, join_proc_,
       miter_limit_, smoothing));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
   VS::BindStrokeInfo(cmd,

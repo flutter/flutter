@@ -11,6 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 
 namespace impeller {
@@ -20,6 +21,11 @@ class LinearGradientContents final : public Contents {
   LinearGradientContents();
 
   ~LinearGradientContents() override;
+
+  void SetPath(Path path);
+
+  // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -33,6 +39,7 @@ class LinearGradientContents final : public Contents {
   const std::vector<Color>& GetColors() const;
 
  private:
+  Path path_;
   Point start_point_;
   Point end_point_;
   std::vector<Color> colors_;

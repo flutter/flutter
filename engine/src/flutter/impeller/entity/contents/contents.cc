@@ -29,10 +29,6 @@ Contents::Contents() = default;
 
 Contents::~Contents() = default;
 
-std::optional<Rect> Contents::GetCoverage(const Entity& entity) const {
-  return entity.GetPathCoverage();
-}
-
 std::optional<Snapshot> Contents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity) const {
@@ -46,7 +42,6 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
       [&contents = *this, &entity, &bounds](const ContentContext& renderer,
                                             RenderPass& pass) -> bool {
         Entity sub_entity;
-        sub_entity.SetPath(entity.GetPath());
         sub_entity.SetBlendMode(Entity::BlendMode::kSourceOver);
         sub_entity.SetTransformation(
             Matrix::MakeTranslation(Vector3(-bounds->origin)) *

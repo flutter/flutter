@@ -37,7 +37,7 @@ class Contents {
                       RenderPass& pass) const = 0;
 
   /// @brief Get the screen space bounding rectangle that this contents affects.
-  virtual std::optional<Rect> GetCoverage(const Entity& entity) const;
+  virtual std::optional<Rect> GetCoverage(const Entity& entity) const = 0;
 
   /// @brief Render this contents to a snapshot, respecting the entity's
   ///        transform, path, stencil depth, and blend mode.

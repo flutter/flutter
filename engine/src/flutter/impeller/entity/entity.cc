@@ -24,22 +24,6 @@ void Entity::SetTransformation(const Matrix& transformation) {
   transformation_ = transformation;
 }
 
-const Path& Entity::GetPath() const {
-  return path_;
-}
-
-void Entity::SetPath(Path path) {
-  path_ = std::move(path);
-}
-
-std::optional<Rect> Entity::GetPathCoverage() const {
-  auto bounds = GetPath().GetBoundingBox();
-  if (!bounds.has_value()) {
-    return std::nullopt;
-  }
-  return bounds->TransformBounds(GetTransformation());
-}
-
 void Entity::SetAddsToCoverage(bool adds) {
   adds_to_coverage_ = adds;
 }

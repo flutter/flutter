@@ -11,6 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/path.h"
 
 namespace impeller {
 
@@ -24,14 +25,21 @@ class SolidColorContents final : public Contents {
 
   ~SolidColorContents() override;
 
-  static std::unique_ptr<SolidColorContents> Make(Color color);
+  static std::unique_ptr<SolidColorContents> Make(Path path, Color color);
 
   static VertexBuffer CreateSolidFillVertices(const Path& path,
                                               HostBuffer& buffer);
 
+  void SetPath(Path path);
+
+  void SetCover(bool cover);
+
   void SetColor(Color color);
 
   const Color& GetColor() const;
+
+  // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -39,6 +47,9 @@ class SolidColorContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
+  Path path_;
+  bool cover_ = false;
+
   Color color_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SolidColorContents);
