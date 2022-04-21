@@ -51,9 +51,10 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// When `isAlwaysShown` is true, the scrollbar thumb will remain visible without the
+/// When [thumbVisibility] is true, the scrollbar thumb will remain visible without the
 /// fade animation. This requires that a [ScrollController] is provided to controller,
-/// or that the [PrimaryScrollController] is available.
+/// or that the [PrimaryScrollController] is available. [isAlwaysShown] is
+/// deprecated in favor of `thumbVisibility`.
 ///
 /// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.1.dart **
 /// {@end-tool}
@@ -71,34 +72,38 @@ class CupertinoScrollbar extends RawScrollbar {
   /// The [child] should be a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
   const CupertinoScrollbar({
-    Key? key,
-    required Widget child,
-    ScrollController? controller,
-    bool isAlwaysShown = false,
-    double thickness = defaultThickness,
+    super.key,
+    required super.child,
+    super.controller,
+    bool? thumbVisibility,
+    double super.thickness = defaultThickness,
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
-    Radius radius = defaultRadius,
+    Radius super.radius = defaultRadius,
     this.radiusWhileDragging = defaultRadiusWhileDragging,
     ScrollNotificationPredicate? notificationPredicate,
-    ScrollbarOrientation? scrollbarOrientation,
+    super.scrollbarOrientation,
+    @Deprecated(
+      'Use thumbVisibility instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    bool? isAlwaysShown,
   }) : assert(thickness != null),
        assert(thickness < double.infinity),
        assert(thicknessWhileDragging != null),
        assert(thicknessWhileDragging < double.infinity),
        assert(radius != null),
        assert(radiusWhileDragging != null),
+       assert(
+         isAlwaysShown == null || thumbVisibility == null,
+         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
+         'isAlwaysShown is deprecated.'
+       ),
        super(
-         key: key,
-         child: child,
-         controller: controller,
-         isAlwaysShown: isAlwaysShown,
-         thickness: thickness,
-         radius: radius,
+         thumbVisibility: isAlwaysShown ?? thumbVisibility ?? false,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: const Duration(milliseconds: 100),
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
-         scrollbarOrientation: scrollbarOrientation,
        );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].

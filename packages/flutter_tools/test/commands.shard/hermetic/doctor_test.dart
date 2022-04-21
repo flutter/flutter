@@ -346,7 +346,7 @@ void main() {
               '[☠] Crashing validator (the doctor check crashed)\n'
               '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
               'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
-              '    ✗ fatal error\n'
+              '    ✗ Bad state: fatal error\n'
               '[✓] Validators are fun (with statusInfo)\n'
               '[✓] Four score and seven validators ago (with statusInfo)\n'
               '\n'
@@ -359,6 +359,16 @@ void main() {
       expect(logger.statusText, contains('#0      CrashingValidator.validate'));
     });
 
+    testUsingContext('validate tool exit when exceeding timeout', () async {
+      FakeAsync().run<void>((FakeAsync time) {
+        final Doctor doctor = FakeAsyncStuckDoctor(logger);
+        doctor.diagnose(verbose: false);
+        time.elapse(Doctor.doctorDuration + const Duration(seconds: 1));
+        time.flushMicrotasks();
+      });
+
+      expect(logger.statusText, contains('Stuck validator that never completes exceeded maximum allowed duration of '));
+    });
 
     testUsingContext('validate non-verbose output format for run with an async crash', () async {
       final Completer<void> completer = Completer<void>();
@@ -378,7 +388,7 @@ void main() {
               '[☠] Async crashing validator (the doctor check crashed)\n'
               '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
               'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
-              '    ✗ fatal error\n'
+              '    ✗ Bad state: fatal error\n'
               '[✓] Validators are fun (with statusInfo)\n'
               '[✓] Four score and seven validators ago (with statusInfo)\n'
               '\n'
@@ -816,6 +826,18 @@ class NotAvailableValidator extends DoctorValidator {
   }
 }
 
+class StuckValidator extends DoctorValidator {
+  StuckValidator() : super('Stuck validator that never completes');
+
+  @override
+  Future<ValidationResult> validate() {
+    final Completer<ValidationResult> completer = Completer<ValidationResult>();
+
+    // This future will never complete
+    return completer.future;
+  }
+}
+
 class PartialValidatorWithErrors extends DoctorValidator {
   PartialValidatorWithErrors() : super('Partial Validator with Errors');
 
@@ -848,7 +870,7 @@ class CrashingValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    throw 'fatal error';
+    throw StateError('fatal error');
   }
 }
 
@@ -862,7 +884,7 @@ class AsyncCrashingValidator extends DoctorValidator {
     const Duration delay = Duration(seconds: 1);
     final Future<ValidationResult> result = Future<ValidationResult>.delayed(delay)
       .then((_) {
-        throw 'fatal error';
+        throw StateError('fatal error');
       });
     _time.elapse(const Duration(seconds: 1));
     _time.flushMicrotasks();
@@ -959,6 +981,25 @@ class FakeCrashingDoctor extends Doctor {
       _validators.add(PassingValidator('Passing Validator'));
       _validators.add(PassingValidator('Another Passing Validator'));
       _validators.add(CrashingValidator());
+      _validators.add(PassingValidator('Validators are fun'));
+      _validators.add(PassingValidator('Four score and seven validators ago'));
+    }
+    return _validators;
+  }
+}
+
+/// A doctor with a validator that will never finish.
+class FakeAsyncStuckDoctor extends Doctor {
+  FakeAsyncStuckDoctor(Logger logger) : super(logger: logger);
+
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(PassingValidator('Another Passing Validator'));
+      _validators.add(StuckValidator());
       _validators.add(PassingValidator('Validators are fun'));
       _validators.add(PassingValidator('Four score and seven validators ago'));
     }

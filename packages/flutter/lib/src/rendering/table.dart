@@ -988,6 +988,7 @@ class RenderTable extends RenderBox {
   // cache the table geometry for painting purposes
   final List<double> _rowTops = <double>[];
   Iterable<double>? _columnLefts;
+  late double _tableWidth;
 
   /// Returns the position and dimensions of the box that the given
   /// row covers, in this render object's coordinate space (so the
@@ -1050,26 +1051,26 @@ class RenderTable extends RenderBox {
     if (rows * columns == 0) {
       // TODO(ianh): if columns is zero, this should be zero width
       // TODO(ianh): if columns is not zero, this should be based on the column width specifications
+      _tableWidth = 0.0;
       size = constraints.constrain(Size.zero);
       return;
     }
     final List<double> widths = _computeColumnWidths(constraints);
     final List<double> positions = List<double>.filled(columns, 0.0);
-    final double tableWidth;
     switch (textDirection) {
       case TextDirection.rtl:
         positions[columns - 1] = 0.0;
         for (int x = columns - 2; x >= 0; x -= 1)
           positions[x] = positions[x+1] + widths[x+1];
         _columnLefts = positions.reversed;
-        tableWidth = positions.first + widths.first;
+        _tableWidth = positions.first + widths.first;
         break;
       case TextDirection.ltr:
         positions[0] = 0.0;
         for (int x = 1; x < columns; x += 1)
           positions[x] = positions[x-1] + widths[x-1];
         _columnLefts = positions;
-        tableWidth = positions.last + widths.last;
+        _tableWidth = positions.last + widths.last;
         break;
     }
     _rowTops.clear();
@@ -1150,7 +1151,7 @@ class RenderTable extends RenderBox {
       rowTop += rowHeight;
     }
     _rowTops.add(rowTop);
-    size = constraints.constrain(Size(tableWidth, rowTop));
+    size = constraints.constrain(Size(_tableWidth, rowTop));
     assert(_rowTops.length == rows + 1);
   }
 
@@ -1181,7 +1182,7 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     if (rows * columns == 0) {
       if (border != null) {
-        final Rect borderRect = Rect.fromLTWH(offset.dx, offset.dy, size.width, 0.0);
+        final Rect borderRect = Rect.fromLTWH(offset.dx, offset.dy, _tableWidth, 0.0);
         border!.paint(context.canvas, borderRect, rows: const <double>[], columns: const <double>[]);
       }
       return;
@@ -1216,7 +1217,7 @@ class RenderTable extends RenderBox {
       // The border rect might not fill the entire height of this render object
       // if the rows underflow. We always force the columns to fill the width of
       // the render object, which means the columns cannot underflow.
-      final Rect borderRect = Rect.fromLTWH(offset.dx, offset.dy, size.width, _rowTops.last);
+      final Rect borderRect = Rect.fromLTWH(offset.dx, offset.dy, _tableWidth, _rowTops.last);
       final Iterable<double> rows = _rowTops.getRange(1, _rowTops.length - 1);
       final Iterable<double> columns = _columnLefts!.skip(1);
       border!.paint(context.canvas, borderRect, rows: rows, columns: columns);

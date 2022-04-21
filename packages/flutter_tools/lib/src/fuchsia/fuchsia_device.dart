@@ -227,8 +227,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 
 
 class FuchsiaDevice extends Device {
-  FuchsiaDevice(String id, {required this.name}) : super(
-      id,
+  FuchsiaDevice(super.id, {required this.name}) : super(
       platformType: PlatformType.fuchsia,
       category: null,
       ephemeral: true,
@@ -536,16 +535,16 @@ class FuchsiaDevice extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) async {
     if (outputFile.basename.split('.').last != 'ppm') {
-      throw '${outputFile.path} must be a .ppm file';
+      throw Exception('${outputFile.path} must be a .ppm file');
     }
     final RunResult screencapResult = await shell('screencap > /tmp/screenshot.ppm');
     if (screencapResult.exitCode != 0) {
-      throw 'Could not take a screenshot on device $name:\n$screencapResult';
+      throw Exception('Could not take a screenshot on device $name:\n$screencapResult');
     }
     try {
       final RunResult scpResult = await scp('/tmp/screenshot.ppm', outputFile.path);
       if (scpResult.exitCode != 0) {
-        throw 'Failed to copy screenshot from device:\n$scpResult';
+        throw Exception('Failed to copy screenshot from device:\n$scpResult');
       }
     } finally {
       try {
@@ -723,7 +722,7 @@ class FuchsiaDevice extends Device {
             continue;
           }
           final int? port = vmService.httpAddress?.port;
-          if (port != null && uiIsolate.name?.contains(isolateName) == true) {
+          if (port != null && (uiIsolate.name?.contains(isolateName) ?? false)) {
             return port;
           }
         }
@@ -821,7 +820,7 @@ class FuchsiaIsolateDiscoveryProtocol {
           continue;
         }
         final int? port = service?.httpAddress?.port;
-        if (port != null && uiIsolate.name?.contains(_isolateName) == true) {
+        if (port != null && (uiIsolate.name?.contains(_isolateName) ?? false)) {
           _foundUri.complete(_device.ipv6
               ? Uri.parse('http://[$_ipv6Loopback]:$port/')
               : Uri.parse('http://$_ipv4Loopback:$port/'));

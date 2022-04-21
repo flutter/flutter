@@ -35,6 +35,12 @@ import 'thumb_painter.dart';
 /// that use a slider will listen for the [onChanged] callback and rebuild the
 /// slider with a new [value] to update the visual appearance of the slider.
 ///
+/// {@tool dartpad}
+/// This example shows how to show the current slider value as it changes.
+///
+/// ** See code in examples/api/lib/cupertino/slider/cupertino_slider.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/sliders/>
@@ -53,7 +59,7 @@ class CupertinoSlider extends StatefulWidget {
   /// * [onChangeEnd] is called when the user is done selecting a new value for
   ///   the slider.
   const CupertinoSlider({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.onChangeStart,
@@ -68,8 +74,7 @@ class CupertinoSlider extends StatefulWidget {
        assert(max != null),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
-       assert(thumbColor != null),
-       super(key: key);
+       assert(thumbColor != null);
 
   /// The currently selected value for this slider.
   ///
@@ -255,7 +260,6 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
 
 class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _CupertinoSliderRenderObjectWidget({
-    Key? key,
     required this.value,
     this.divisions,
     required this.activeColor,
@@ -264,7 +268,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChangeStart,
     this.onChangeEnd,
     required this.vsync,
-  }) : super(key: key);
+  });
 
   final double value;
   final int? divisions;

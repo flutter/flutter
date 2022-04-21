@@ -13,11 +13,11 @@ import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
 
 void main() {
-  TestRenderingFlutterBinding();
+  TestRenderingFlutterBinding.ensureInitialized();
 
   tearDown(() {
-    PaintingBinding.instance!.imageCache!.clear();
-    PaintingBinding.instance!.imageCache!.clearLiveImages();
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
   });
 
   test('ResizeImage resizes to the correct dimensions (up)', () async {
@@ -103,7 +103,7 @@ void main() {
       expect(cacheWidth, 123);
       expect(cacheHeight, 321);
       expect(allowUpscaling, false);
-      return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
+      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
     }
 
     resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
@@ -156,7 +156,7 @@ Future<Size> _resolveAndGetSize(
 // This version of MemoryImage guarantees obtainKey returns a future that has not been
 // completed synchronously.
 class _AsyncKeyMemoryImage extends MemoryImage {
-  const _AsyncKeyMemoryImage(Uint8List bytes) : super(bytes);
+  const _AsyncKeyMemoryImage(super.bytes);
 
   @override
   Future<MemoryImage> obtainKey(ImageConfiguration configuration) {

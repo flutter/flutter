@@ -88,10 +88,9 @@ const Map<String, Set<String>> _materialActions = <String, Set<String>>{
 
 class _ChipsTile extends StatelessWidget {
   const _ChipsTile({
-    Key? key,
     this.label,
     this.children,
-  }) : super(key: key);
+  });
 
   final String? label;
   final List<Widget>? children;
@@ -135,7 +134,7 @@ class _ChipsTile extends StatelessWidget {
 }
 
 class ChipDemo extends StatefulWidget {
-  const ChipDemo({Key? key}) : super(key: key);
+  const ChipDemo({super.key});
 
   static const String routeName = '/material/chip';
 

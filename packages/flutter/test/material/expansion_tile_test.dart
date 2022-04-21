@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestIcon extends StatefulWidget {
-  const TestIcon({Key? key}) : super(key: key);
+  const TestIcon({super.key});
 
   @override
   TestIconState createState() => TestIconState();
@@ -23,7 +23,7 @@ class TestIconState extends State<TestIcon> {
 }
 
 class TestText extends StatefulWidget {
-  const TestText(this.text, {Key? key}) : super(key: key);
+  const TestText(this.text, {super.key});
 
   final String text;
 
@@ -42,10 +42,10 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
-  const Color _dividerColor = Color(0x1f333333);
-  const Color _foregroundColor = Colors.blueAccent;
-  const Color _unselectedWidgetColor = Colors.black54;
-  const Color _headerColor = Colors.black45;
+  const Color dividerColor = Color(0x1f333333);
+  const Color foregroundColor = Colors.blueAccent;
+  const Color unselectedWidgetColor = Colors.black54;
+  const Color headerColor = Colors.black45;
 
   testWidgets('ExpansionTile initial state', (WidgetTester tester) async {
     final Key topKey = UniqueKey();
@@ -57,7 +57,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        dividerColor: _dividerColor,
+        dividerColor: dividerColor,
       ),
       home: Material(
         child: SingleChildScrollView(
@@ -111,8 +111,8 @@ void main() {
 
     BoxDecoration expandedContainerDecoration = getContainer(expandedKey).decoration! as BoxDecoration;
     expect(expandedContainerDecoration.color, Colors.red);
-    expect(expandedContainerDecoration.border!.top.color, _dividerColor);
-    expect(expandedContainerDecoration.border!.bottom.color, _dividerColor);
+    expect(expandedContainerDecoration.border!.top.color, dividerColor);
+    expect(expandedContainerDecoration.border!.bottom.color, dividerColor);
 
     BoxDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
@@ -149,8 +149,8 @@ void main() {
     // Collapsed should be expanded now.
     collapsedContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
-    expect(collapsedContainerDecoration.border!.top.color, _dividerColor);
-    expect(collapsedContainerDecoration.border!.bottom.color, _dividerColor);
+    expect(collapsedContainerDecoration.border!.top.color, dividerColor);
+    expect(collapsedContainerDecoration.border!.bottom.color, dividerColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ExpansionTile Theme dependencies', (WidgetTester tester) async {
@@ -162,9 +162,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSwatch().copyWith(primary: _foregroundColor),
-          unselectedWidgetColor: _unselectedWidgetColor,
-          textTheme: const TextTheme(subtitle1: TextStyle(color: _headerColor)),
+          colorScheme: ColorScheme.fromSwatch().copyWith(primary: foregroundColor),
+          unselectedWidgetColor: unselectedWidgetColor,
+          textTheme: const TextTheme(subtitle1: TextStyle(color: headerColor)),
         ),
         home: Material(
           child: SingleChildScrollView(
@@ -193,10 +193,10 @@ void main() {
     Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
 
-    expect(textColor(expandedTitleKey), _foregroundColor);
-    expect(textColor(collapsedTitleKey), _headerColor);
-    expect(iconColor(expandedIconKey), _foregroundColor);
-    expect(iconColor(collapsedIconKey), _unselectedWidgetColor);
+    expect(textColor(expandedTitleKey), foregroundColor);
+    expect(textColor(collapsedTitleKey), headerColor);
+    expect(iconColor(expandedIconKey), foregroundColor);
+    expect(iconColor(collapsedIconKey), unselectedWidgetColor);
 
     // Tap both tiles to change their state: collapse and extend respectively
     await tester.tap(find.text('Expanded'));
@@ -205,10 +205,10 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
 
-    expect(textColor(expandedTitleKey), _headerColor);
-    expect(textColor(collapsedTitleKey), _foregroundColor);
-    expect(iconColor(expandedIconKey), _unselectedWidgetColor);
-    expect(iconColor(collapsedIconKey), _foregroundColor);
+    expect(textColor(expandedTitleKey), headerColor);
+    expect(textColor(collapsedTitleKey), foregroundColor);
+    expect(iconColor(expandedIconKey), unselectedWidgetColor);
+    expect(iconColor(collapsedIconKey), foregroundColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
@@ -232,7 +232,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           platform: TargetPlatform.iOS,
-          dividerColor: _dividerColor,
+          dividerColor: dividerColor,
         ),
         home: Material(
           child: SingleChildScrollView(

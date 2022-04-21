@@ -31,6 +31,9 @@ class MainActivity: FlutterActivity() {
             }
             reply.reply(byteBufferCache)
         } }
+        val taskQueue = flutterEngine.dartExecutor.getBinaryMessenger().makeBackgroundTaskQueue();
+        val backgroundStandard = BasicMessageChannel(flutterEngine.dartExecutor, "dev.flutter.echo.background.standard", StandardMessageCodec.INSTANCE, taskQueue)
+        backgroundStandard.setMessageHandler { message, reply -> reply.reply(message) }
         super.configureFlutterEngine(flutterEngine)
     }
 }

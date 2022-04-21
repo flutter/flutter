@@ -39,14 +39,14 @@ void main() {
     );
   }
 
-  const FakeCommand _kWhichSysctlCommand = FakeCommand(
+  const FakeCommand kWhichSysctlCommand = FakeCommand(
     command: <String>[
       'which',
       'sysctl',
     ],
   );
 
-  const FakeCommand _kx64CheckCommand = FakeCommand(
+  const FakeCommand kx64CheckCommand = FakeCommand(
     command: <String>[
       'sysctl',
       'hw.optional.arm64',
@@ -61,8 +61,8 @@ void main() {
   }) {
     final FakeProcessManager fakeProcessManager =
         FakeProcessManager.list(<FakeCommand>[
-      _kWhichSysctlCommand,
-      _kx64CheckCommand,
+      kWhichSysctlCommand,
+      kx64CheckCommand,
     ]);
     final Xcode xcode = Xcode.test(
       processManager: fakeProcessManager,

@@ -400,14 +400,13 @@ class ActionListener extends StatefulWidget {
   ///
   /// The [listener], [action], and [child] arguments must not be null.
   const ActionListener({
-    Key? key,
+    super.key,
     required this.listener,
     required this.action,
     required this.child,
   })  : assert(listener != null),
         assert(action != null),
-        assert(child != null),
-        super(key: key);
+        assert(child != null);
 
   /// The [ActionListenerCallback] callback to register with the [action].
   ///
@@ -613,13 +612,12 @@ class Actions extends StatefulWidget {
   ///
   /// The [child], [actions], and [dispatcher] arguments must not be null.
   const Actions({
-    Key? key,
+    super.key,
     this.dispatcher,
     required this.actions,
     required this.child,
   })  : assert(actions != null),
-        assert(child != null),
-        super(key: key);
+        assert(child != null);
 
   /// The [ActionDispatcher] object that invokes actions.
   ///
@@ -1007,11 +1005,9 @@ class _ActionsMarker extends InheritedWidget {
     required this.dispatcher,
     required this.actions,
     required this.rebuildKey,
-    Key? key,
-    required Widget child,
+    required super.child,
   })  : assert(child != null),
-        assert(actions != null),
-        super(key: key, child: child);
+        assert(actions != null);
 
   final ActionDispatcher? dispatcher;
   final Map<Type, Action<Intent>> actions;
@@ -1059,7 +1055,7 @@ class FocusableActionDetector extends StatefulWidget {
   ///
   /// The [enabled], [autofocus], [mouseCursor], and [child] arguments must not be null.
   const FocusableActionDetector({
-    Key? key,
+    super.key,
     this.enabled = true,
     this.focusNode,
     this.autofocus = false,
@@ -1075,8 +1071,7 @@ class FocusableActionDetector extends StatefulWidget {
   })  : assert(enabled != null),
         assert(autofocus != null),
         assert(mouseCursor != null),
-        assert(child != null),
-        super(key: key);
+        assert(child != null);
 
   /// Is this widget enabled or not.
   ///
@@ -1141,7 +1136,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       _updateHighlightMode(FocusManager.instance.highlightMode);
     });
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
@@ -1230,7 +1225,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       return _focused && _canShowHighlight && canRequestFocus(target);
     }
 
-    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
     final FocusableActionDetector oldTarget = oldWidget ?? widget;
     final bool didShowHoverHighlight = shouldShowHoverHighlight(oldTarget);
     final bool didShowFocusHighlight = shouldShowFocusHighlight(oldTarget);
@@ -1251,7 +1246,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   void didUpdateWidget(FocusableActionDetector oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.enabled != oldWidget.enabled) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         _mayTriggerCallback(oldWidget: oldWidget);
       });
     }

@@ -11,6 +11,8 @@ import '../rendering/rendering_tester.dart';
 const int kMaxFrameworkAccessibilityIdentifier = (1<<16) - 1;
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   setUp(() {
     debugResetSemanticsIdCounter();
   });
@@ -269,7 +271,7 @@ void main() {
     });
 
     test('after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations', () {
-      renderer.pipelineOwner.ensureSemantics();
+      TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
 
       TestRender middle;
       final TestRender root = TestRender(
@@ -854,5 +856,5 @@ class TestRender extends RenderProxyBox {
 }
 
 class CustomSortKey extends OrdinalSortKey {
-  const CustomSortKey(double order, {String? name}) : super(order, name: name);
+  const CustomSortKey(super.order, {super.name});
 }

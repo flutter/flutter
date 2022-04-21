@@ -26,7 +26,7 @@ void main() {
 }
 
 class Home extends StatefulWidget {
-  const Home({ Key? key }) : super(key: key);
+  const Home({ super.key });
 
   @override
   State<Home> createState() => _HomeState();
@@ -118,7 +118,7 @@ class _HomeState extends State<Home> {
 }
 
 class Fuzzer extends StatefulWidget {
-  const Fuzzer({ Key? key, required this.seed }) : super(key: key);
+  const Fuzzer({ super.key, required this.seed });
 
   final int seed;
 
@@ -337,7 +337,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   }
 
   int depthOf(TextSpan node) {
-    if (node.children == null || node.children?.isEmpty == true)
+    if (node.children == null || (node.children?.isEmpty ?? false))
       return 0;
     int result = 0;
     for (final TextSpan child in node.children!.cast<TextSpan>())
@@ -534,7 +534,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
 }
 
 class Underlines extends StatefulWidget {
-  const Underlines({ Key? key }) : super(key: key);
+  const Underlines({ super.key });
 
   @override
   State<Underlines> createState() => _UnderlinesState();
@@ -639,7 +639,7 @@ class _UnderlinesState extends State<Underlines> {
 }
 
 class Fallback extends StatefulWidget {
-  const Fallback({ Key? key }) : super(key: key);
+  const Fallback({ super.key });
 
   @override
   State<Fallback> createState() => _FallbackState();
@@ -734,7 +734,7 @@ class _FallbackState extends State<Fallback> {
 }
 
 class Bidi extends StatefulWidget {
-  const Bidi({ Key? key }) : super(key: key);
+  const Bidi({ super.key });
 
   @override
   State<Bidi> createState() => _BidiState();
@@ -809,7 +809,7 @@ class _BidiState extends State<Bidi> {
 }
 
 class Zalgo extends StatefulWidget {
-  const Zalgo({ Key? key, required this.seed }) : super(key: key);
+  const Zalgo({ super.key, required this.seed });
 
   final int seed;
 
@@ -915,7 +915,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
 }
 
 class Painting extends StatefulWidget {
-  const Painting({ Key? key, required this.seed }) : super(key: key);
+  const Painting({ super.key, required this.seed });
 
   final int seed;
 
@@ -959,7 +959,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
       }
       _text = buffer.toString();
     });
-    SchedulerBinding.instance?.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       if (mounted && intrinsicKey.currentContext?.size?.height != controlKey.currentContext?.size?.height) {
         debugPrint('Found some text that unexpectedly renders at different heights.');
         debugPrint('Text: $_text');

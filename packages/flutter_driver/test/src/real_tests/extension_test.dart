@@ -61,7 +61,7 @@ void main() {
     });
 
     testWidgets('waits until no transient callbacks', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
@@ -122,7 +122,7 @@ void main() {
     });
 
     testWidgets('waiting for NoTransientCallbacks returns until no transient callbacks', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
@@ -164,7 +164,7 @@ void main() {
     });
 
     testWidgets('waiting for NoPendingFrame returns until no pending scheduled frame', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrame();
 
       driverExtension.call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
@@ -207,8 +207,8 @@ void main() {
 
     testWidgets(
         'waiting for combined conditions returns until no transient callbacks', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrame();
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
@@ -236,8 +236,8 @@ void main() {
 
     testWidgets(
         'waiting for combined conditions returns until no pending scheduled frame', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrame();
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
@@ -472,7 +472,7 @@ void main() {
     });
 
     testWidgets('works when semantics are enabled', (WidgetTester tester) async {
-      final SemanticsHandle semantics = RendererBinding.instance!.pipelineOwner.ensureSemantics();
+      final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
@@ -496,7 +496,7 @@ void main() {
     }, semanticsEnabled: false);
 
     testWidgets('throws state error multiple matches are found', (WidgetTester tester) async {
-      final SemanticsHandle semantics = RendererBinding.instance!.pipelineOwner.ensureSemantics();
+      final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1199,7 +1199,7 @@ void main() {
 
     testWidgets(
         'waits until no transient callbacks', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
@@ -1225,7 +1225,7 @@ void main() {
 
     testWidgets(
         'waits until no pending scheduled frame', (WidgetTester tester) async {
-      SchedulerBinding.instance!.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrame();
 
       driverExtension.call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {

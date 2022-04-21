@@ -34,14 +34,13 @@ import 'theme.dart';
 class CupertinoPageScaffold extends StatefulWidget {
   /// Creates a layout for pages with a navigation bar at the top.
   const CupertinoPageScaffold({
-    Key? key,
+    super.key,
     this.navigationBar,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
     required this.child,
   }) : assert(child != null),
-       assert(resizeToAvoidBottomInset != null),
-       super(key: key);
+       assert(resizeToAvoidBottomInset != null);
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
   /// top of the screen.
@@ -91,10 +90,10 @@ class CupertinoPageScaffold extends StatefulWidget {
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
 
   void _handleStatusBarTap() {
-    final ScrollController? _primaryScrollController = PrimaryScrollController.of(context);
+    final ScrollController? primaryScrollController = PrimaryScrollController.of(context);
     // Only act on the scroll controller if it has any attached scroll positions.
-    if (_primaryScrollController != null && _primaryScrollController.hasClients) {
-      _primaryScrollController.animateTo(
+    if (primaryScrollController != null && primaryScrollController.hasClients) {
+      primaryScrollController.animateTo(
         0.0,
         // Eyeballed from iOS.
         duration: const Duration(milliseconds: 500),

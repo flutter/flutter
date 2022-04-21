@@ -219,7 +219,6 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// ```
 ///
 void enableFlutterDriverExtension({ DataHandler? handler, bool silenceErrors = false, bool enableTextEntryEmulation = true, List<FinderExtension>? finders, List<CommandExtension>? commands}) {
-  assert(WidgetsBinding.instance == null);
   _DriverBinding(handler, silenceErrors, enableTextEntryEmulation, finders ?? <FinderExtension>[], commands ?? <CommandExtension>[]);
   assert(WidgetsBinding.instance is _DriverBinding);
 }
@@ -334,7 +333,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
     }
   }
 
-  final WidgetController _prober = LiveWidgetController(WidgetsBinding.instance!);
+  final WidgetController _prober = LiveWidgetController(WidgetsBinding.instance);
 
   final DataHandler? _requestDataHandler;
 
@@ -364,7 +363,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
     final String commandKind = params['command']!;
     try {
       final Command command = deserializeCommand(params, this);
-      assert(WidgetsBinding.instance!.isRootWidgetAttached || !command.requiresRootWidgetAttached,
+      assert(WidgetsBinding.instance.isRootWidgetAttached || !command.requiresRootWidgetAttached,
           'No root widget is attached; have you remembered to call runApp()?');
       Future<Result> responseFuture = handleCommand(command, _prober, this);
       if (command.timeout != null) {

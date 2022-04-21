@@ -14,6 +14,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderFittedBox handles applying paint transform and hit-testing with empty size', () {
     final RenderFittedBox fittedBox = RenderFittedBox(
       child: RenderCustomPaint(
@@ -618,9 +620,8 @@ class _TestPathClipper extends CustomClipper<Path> {
 
 class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTranslation {
   _TestSemanticsUpdateRenderFractionalTranslation({
-    required Offset translation,
-    RenderBox? child,
-  }) : super(translation: translation, child: child);
+    required super.translation,
+  });
 
   int markNeedsSemanticsUpdateCallCount = 0;
 

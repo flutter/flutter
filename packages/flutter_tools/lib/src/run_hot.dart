@@ -219,7 +219,7 @@ class HotRunner extends ResidentRunner {
         }
       }
     }
-    throw 'Failed to compile $expression';
+    throw Exception('Failed to compile $expression');
   }
 
   // Returns the exit code of the flutter tool process, like [run].

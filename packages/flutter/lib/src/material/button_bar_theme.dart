@@ -160,19 +160,17 @@ class ButtonBarThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      alignment,
-      mainAxisSize,
-      buttonTextTheme,
-      buttonMinWidth,
-      buttonHeight,
-      buttonPadding,
-      buttonAlignedDropdown,
-      layoutBehavior,
-      overflowDirection,
-    );
-  }
+  int get hashCode => Object.hash(
+    alignment,
+    mainAxisSize,
+    buttonTextTheme,
+    buttonMinWidth,
+    buttonHeight,
+    buttonPadding,
+    buttonAlignedDropdown,
+    layoutBehavior,
+    overflowDirection,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -233,10 +231,10 @@ class ButtonBarTheme extends InheritedWidget {
   ///
   /// The [data] must not be null.
   const ButtonBarTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties used for all descendant [ButtonBar] widgets.
   final ButtonBarThemeData data;

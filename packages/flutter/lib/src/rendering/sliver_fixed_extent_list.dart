@@ -40,8 +40,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ///
   /// The [childManager] argument must not be null.
   RenderSliverFixedExtentBoxAdaptor({
-    required RenderSliverBoxChildManager childManager,
-  }) : super(childManager: childManager);
+    required super.childManager,
+  });
 
   /// The main-axis extent of each item.
   double get itemExtent;
@@ -342,10 +342,9 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   ///
   /// The [childManager] argument must not be null.
   RenderSliverFixedExtentList({
-    required RenderSliverBoxChildManager childManager,
+    required super.childManager,
     required double itemExtent,
-  }) : _itemExtent = itemExtent,
-       super(childManager: childManager);
+  }) : _itemExtent = itemExtent;
 
   @override
   double get itemExtent => _itemExtent;

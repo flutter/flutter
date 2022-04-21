@@ -45,6 +45,24 @@ enum CherrypickState {
   ABANDONED = 3;
 }
 
+// The type of release that is being created.
+//
+// This determines how the version will be calculated.
+enum ReleaseType {
+  // All pre-release metadata from previous beta releases will be discarded. The
+  // z must be 0.
+  STABLE_INITIAL = 0;
+
+  // Increment z.
+  STABLE_HOTFIX = 1;
+
+  // Compute x, y, and m from the candidate branch name. z and n should be 0.
+  BETA_INITIAL = 2;
+
+  // Increment n.
+  BETA_HOTFIX = 3;
+}
+
 message Cherrypick {
   // The revision on trunk to cherrypick.
   string trunkRevision = 1;
@@ -113,6 +131,5 @@ message ConductorState {
   // that created the [ConductorState] object.
   string conductorVersion = 10;
 
-  // One of x, y, z, m, or n.
-  string incrementLevel = 11;
+  ReleaseType releaseType = 11;
 }

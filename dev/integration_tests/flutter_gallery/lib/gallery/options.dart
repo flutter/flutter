@@ -71,7 +71,7 @@ class GalleryOptions {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
     themeMode,
     textScaleFactor,
     visualDensity,
@@ -93,7 +93,7 @@ const double _kItemHeight = 48.0;
 const EdgeInsetsDirectional _kItemPadding = EdgeInsetsDirectional.only(start: 56.0);
 
 class _OptionsItem extends StatelessWidget {
-  const _OptionsItem({ Key? key, this.child }) : super(key: key);
+  const _OptionsItem({ this.child });
 
   final Widget? child;
 
@@ -167,7 +167,7 @@ class _ActionItem extends StatelessWidget {
 }
 
 class _TextButton extends StatelessWidget {
-  const _TextButton({ Key? key, this.onPressed, this.child }) : super(key: key);
+  const _TextButton({ this.onPressed, this.child });
 
   final VoidCallback? onPressed;
   final Widget? child;
@@ -467,11 +467,11 @@ class _PlatformItem extends StatelessWidget {
 
 class GalleryOptionsPage extends StatelessWidget {
   const GalleryOptionsPage({
-    Key? key,
+    super.key,
     this.options,
     this.onOptionsChanged,
     this.onSendFeedback,
-  }) : super(key: key);
+  });
 
   final GalleryOptions? options;
   final ValueChanged<GalleryOptions>? onOptionsChanged;

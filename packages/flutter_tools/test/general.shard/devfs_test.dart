@@ -519,7 +519,7 @@ void main() {
           } else if (boundaryKey != null && stringData.startsWith(boundaryKey)) {
             yield utf8.encode('result abc2\nline1\nline2\nabc2\nabc2 lib/foo.txt.dill 0\n');
           } else {
-            throw 'Saw $data ($stringData)';
+            throw Exception('Saw $data ($stringData)');
           }
           processed++;
         }

@@ -17,7 +17,7 @@ void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex
 
 // Solid color, Widget version
 class Rectangle extends StatelessWidget {
-  const Rectangle(this.color, { Key? key }) : super(key: key);
+  const Rectangle(this.color, { super.key });
 
   final Color color;
 
@@ -73,7 +73,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
         ),
       ),
     ),
-  ).attachToRenderTree(WidgetsBinding.instance!.buildOwner!, element);
+  ).attachToRenderTree(WidgetsBinding.instance.buildOwner!, element);
 }
 
 Duration? timeBase;
@@ -86,7 +86,7 @@ void rotate(Duration timeStamp) {
   transformBox.setIdentity();
   transformBox.rotateZ(delta);
 
-  WidgetsBinding.instance!.buildOwner!.buildScope(element!);
+  WidgetsBinding.instance.buildOwner!.buildScope(element!);
 }
 
 void main() {
