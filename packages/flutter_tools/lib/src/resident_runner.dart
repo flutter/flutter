@@ -682,7 +682,7 @@ abstract class ResidentHandlers {
   /// use case is to look at the various layers in proportion to see what
   /// contributes the most towards raster performance.
   Future<bool> debugFrameJankMetrics() async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
+    if (!supportsServiceProtocol) {
       return false;
     }
     for (final FlutterDevice device in flutterDevices) {
