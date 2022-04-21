@@ -51,7 +51,7 @@ void main() {
         child: ImageFiltered(
           // Do not erode too much, otherwise we will see nothing left.
           imageFilter: ImageFilter.erode(radiusX: 1.0, radiusY: 1.0),
-          child: const Placeholder(),
+          child: const Placeholder(strokeWidth: 4),
         ),
       ),
     );
