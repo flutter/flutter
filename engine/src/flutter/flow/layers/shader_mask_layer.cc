@@ -12,7 +12,9 @@ ShaderMaskLayer::ShaderMaskLayer(sk_sp<SkShader> shader,
     : shader_(shader),
       mask_rect_(mask_rect),
       blend_mode_(blend_mode),
-      render_count_(1) {}
+      render_count_(1) {
+  set_layer_can_inherit_opacity(true);
+}
 
 void ShaderMaskLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
@@ -47,15 +49,13 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ShaderMaskLayer::Paint");
   FML_DCHECK(needs_painting(context));
 
-  AutoCachePaint cache_paint(context);
-
   if (context.raster_cache &&
       context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
-                                 RasterCacheLayerStrategy::kLayer,
-                                 cache_paint.paint())) {
+                                 RasterCacheLayerStrategy::kLayer)) {
     return;
   }
 
+  AutoCachePaint cache_paint(context);
   Layer::AutoSaveLayer save = Layer::AutoSaveLayer::Create(
       context, paint_bounds(), cache_paint.paint());
   PaintChildren(context);
