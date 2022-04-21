@@ -5,7 +5,7 @@
 #include "flutter/flow/frame_timings.h"
 
 #include <memory>
-#include <sstream>
+#include <string>
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/logging.h"
@@ -15,19 +15,13 @@ namespace flutter {
 
 std::atomic<uint64_t> FrameTimingsRecorder::frame_number_gen_ = {1};
 
-static std::string ToString(uint64_t val) {
-  std::stringstream stream;
-  stream << val;
-  return stream.str();
-}
-
 FrameTimingsRecorder::FrameTimingsRecorder()
     : frame_number_(frame_number_gen_++),
-      frame_number_trace_arg_val_(ToString(frame_number_)) {}
+      frame_number_trace_arg_val_(std::to_string(frame_number_)) {}
 
 FrameTimingsRecorder::FrameTimingsRecorder(uint64_t frame_number)
     : frame_number_(frame_number),
-      frame_number_trace_arg_val_(ToString(frame_number_)) {}
+      frame_number_trace_arg_val_(std::to_string(frame_number_)) {}
 
 FrameTimingsRecorder::~FrameTimingsRecorder() = default;
 
