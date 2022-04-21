@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
+import 'debug.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
@@ -894,9 +895,19 @@ class RenderOpacity extends RenderProxyBox {
       if (needsCompositing) {
         layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
       } else {
-        context.canvas.saveLayer(offset & size, Paint()..color = Color(_alpha << 24));
-        super.paint(context, offset);
-        context.canvas.restore();
+        bool skipSaveLayer = _alpha == 255;
+        assert(() {
+          skipSaveLayer = debugDisableOpacityLayers;
+          return true;
+        }());
+
+        if (skipSaveLayer) {
+          super.paint(context, offset);
+        } else {
+          context.canvas.saveLayer(offset & size, Paint()..color = Color(_alpha << 24));
+          super.paint(context, offset);
+          context.canvas.restore();
+        }
         layer = null;
       }
     }
@@ -1967,8 +1978,8 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     layer = context.pushClipRRect(
       needsCompositing,
       offset,
-      offsetBounds,
-      offsetRRect,
+      Offset.zero & size,
+      _clip!,
       super.paint,
       oldLayer: layer as ClipRRectLayer?,
       clipBehavior: clipBehavior,
@@ -2076,7 +2087,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
 
     canvas.drawPath(
       offsetPath,
-      Paint()..color = color..style = PaintingStyle.fill,
+      Paint()..color = color,
     );
     layer = context.pushClipPath(
       needsCompositing,

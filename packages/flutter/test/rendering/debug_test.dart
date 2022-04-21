@@ -222,7 +222,7 @@ void main() {
     );
     final RenderOpacity root = RenderOpacity(
       opacity: .5,
-      child: blackBox,
+      child: RenderRepaintBoundary(child: blackBox),
     );
     layout(root, phase: EnginePhase.compositingBits);
 
