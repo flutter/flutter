@@ -25,8 +25,9 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
 
   void SetSourceOverride(FilterInput::Ref alpha_mask);
 
-  // |Contents|
-  std::optional<Rect> GetCoverage(const Entity& entity) const override;
+  // |FilterContents|
+  std::optional<Rect> GetFilterCoverage(const FilterInput::Vector& inputs,
+                                        const Entity& entity) const override;
 
  private:
   // |FilterContents|

@@ -163,17 +163,22 @@ bool DirectionalGaussianBlurFilterContents::RenderFilter(
   return pass.AddCommand(cmd);
 }
 
-std::optional<Rect> DirectionalGaussianBlurFilterContents::GetCoverage(
+std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(
+    const FilterInput::Vector& inputs,
     const Entity& entity) const {
-  auto coverage = FilterContents::GetCoverage(entity);
+  if (inputs.empty()) {
+    return std::nullopt;
+  }
+
+  auto coverage = inputs[0]->GetCoverage(entity);
   if (!coverage.has_value()) {
     return std::nullopt;
   }
 
   auto transformed_blur_vector =
-      entity.GetTransformation()
-          .TransformDirection(blur_direction_ *
-                              ceil(Radius{blur_sigma_}.radius))
+      inputs[0]
+          ->GetTransform(entity)
+          .TransformDirection(blur_direction_ * Radius{blur_sigma_}.radius)
           .Abs();
   auto extent = coverage->size + transformed_blur_vector * 2;
   return Rect(coverage->origin - transformed_blur_vector,
