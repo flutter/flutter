@@ -235,11 +235,6 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
 
 - (void)dealloc {
   [_channel setMethodCallHandler:nil];
-  if (_textInputContext) {
-    [_textInputContext deactivate];
-    [_textInputContext discardMarkedText];
-    _textInputContext = nil;
-  }
 }
 
 #pragma mark - Private
