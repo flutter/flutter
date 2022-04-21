@@ -182,11 +182,9 @@ typedef ScrollMetricsNotificationCallback = void Function(ScrollMetricsNotificat
 
 class _ScrollMetricsNotificationObserverScope extends InheritedWidget {
   const _ScrollMetricsNotificationObserverScope({
-    Key? key,
-    required Widget child,
+    required super.child,
     required ScrollMetricsNotificationObserverState scrollMetricsNotificationObserverState,
-  }) : _scrollMetricsNotificationObserverState = scrollMetricsNotificationObserverState,
-        super(key: key, child: child);
+  }) : _scrollMetricsNotificationObserverState = scrollMetricsNotificationObserverState;
 
   final ScrollMetricsNotificationObserverState  _scrollMetricsNotificationObserverState;
 
@@ -229,9 +227,9 @@ class ScrollMetricsNotificationObserver extends StatefulWidget {
   ///
   /// The [child] parameter must not be null.
   const ScrollMetricsNotificationObserver({
-    Key? key,
+    super.key,
     required this.child,
-  }) : assert(child != null), super(key: key);
+  }) : assert(child != null);
 
   /// The subtree below this widget.
   final Widget child;

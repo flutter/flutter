@@ -396,8 +396,6 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   }
 
   void _hasScrolled() {
-    bool result = _offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
-    print('result: $result');
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -505,7 +503,6 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   void performLayout() {
-    print('performlayout');
     final BoxConstraints constraints = this.constraints;
     if (child == null) {
       size = constraints.smallest;
