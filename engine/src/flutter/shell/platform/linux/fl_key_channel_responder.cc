@@ -19,6 +19,7 @@ static constexpr char kKeyCodeKey[] = "keyCode";
 static constexpr char kScanCodeKey[] = "scanCode";
 static constexpr char kModifiersKey[] = "modifiers";
 static constexpr char kToolkitKey[] = "toolkit";
+static constexpr char kSpecifiedLogicalKey[] = "specifiedLogicalKey";
 static constexpr char kUnicodeScalarValuesKey[] = "unicodeScalarValues";
 
 static constexpr char kGtkToolkit[] = "gtk";
@@ -115,6 +116,7 @@ G_DEFINE_TYPE_WITH_CODE(
 static void fl_key_channel_responder_handle_event(
     FlKeyResponder* responder,
     FlKeyEvent* event,
+    uint64_t specified_logical_key,
     FlKeyResponderAsyncCallback callback,
     gpointer user_data);
 
@@ -203,6 +205,7 @@ FlKeyChannelResponder* fl_key_channel_responder_new(
 static void fl_key_channel_responder_handle_event(
     FlKeyResponder* responder,
     FlKeyEvent* event,
+    uint64_t specified_logical_key,
     FlKeyResponderAsyncCallback callback,
     gpointer user_data) {
   FlKeyChannelResponder* self = FL_KEY_CHANNEL_RESPONDER(responder);
@@ -271,6 +274,11 @@ static void fl_key_channel_responder_handle_event(
   if (unicode_scarlar_values != 0) {
     fl_value_set_string_take(message, kUnicodeScalarValuesKey,
                              fl_value_new_int(unicode_scarlar_values));
+  }
+
+  if (specified_logical_key != 0) {
+    fl_value_set_string_take(message, kSpecifiedLogicalKey,
+                             fl_value_new_int(specified_logical_key));
   }
 
   FlKeyChannelUserData* data =

@@ -6,7 +6,6 @@
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_KEYBOARD_MANAGER_H_
 
 #include <gdk/gdk.h>
-#include <functional>
 
 #include "flutter/shell/platform/linux/fl_keyboard_view_delegate.h"
 

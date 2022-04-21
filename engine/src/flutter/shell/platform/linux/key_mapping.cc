@@ -207,6 +207,7 @@ std::map<uint64_t, uint64_t> xkb_to_physical_key_map = {
     {0x000000f2, 0x000c0207},  // save
     {0x000000f3, 0x000c01a7},  // launchDocuments
     {0x000000fc, 0x000c0075},  // brightnessAuto
+    {0x00000100, 0x00000018},  // microphoneMuteToggle
     {0x0000016e, 0x000c0060},  // info
     {0x00000172, 0x000c008d},  // programGuide
     {0x0000017a, 0x000c0061},  // closedCaptionToggle
@@ -457,6 +458,57 @@ void initialize_lock_bit_to_checked_keys(GHashTable* table) {
   data->primary_physical_key = 0x000070053;   // numLock
   data->primary_logical_key = 0x0010000010a;  // numLock
 }
+
+const std::vector<LayoutGoal> layout_goals = {
+    LayoutGoal{0x30, 0x22, false},         // Quote
+    LayoutGoal{0x3b, 0x2c, false},         // Comma
+    LayoutGoal{0x14, 0x2d, false},         // Minus
+    LayoutGoal{0x3c, 0x2e, false},         // Period
+    LayoutGoal{0x3d, 0x2f, false},         // Slash
+    LayoutGoal{0x13, 0x30, true},          // Digit0
+    LayoutGoal{0x0a, 0x31, true},          // Digit1
+    LayoutGoal{0x0b, 0x32, true},          // Digit2
+    LayoutGoal{0x0c, 0x33, true},          // Digit3
+    LayoutGoal{0x0d, 0x34, true},          // Digit4
+    LayoutGoal{0x0e, 0x35, true},          // Digit5
+    LayoutGoal{0x0f, 0x36, true},          // Digit6
+    LayoutGoal{0x10, 0x37, true},          // Digit7
+    LayoutGoal{0x11, 0x38, true},          // Digit8
+    LayoutGoal{0x12, 0x39, true},          // Digit9
+    LayoutGoal{0x2f, 0x3b, false},         // Semicolon
+    LayoutGoal{0x15, 0x3d, false},         // Equal
+    LayoutGoal{0x22, 0x5b, false},         // BracketLeft
+    LayoutGoal{0x33, 0x5c, false},         // Backslash
+    LayoutGoal{0x23, 0x5d, false},         // BracketRight
+    LayoutGoal{0x31, 0x60, false},         // Backquote
+    LayoutGoal{0x26, 0x61, true},          // KeyA
+    LayoutGoal{0x38, 0x62, true},          // KeyB
+    LayoutGoal{0x36, 0x63, true},          // KeyC
+    LayoutGoal{0x28, 0x64, true},          // KeyD
+    LayoutGoal{0x1a, 0x65, true},          // KeyE
+    LayoutGoal{0x29, 0x66, true},          // KeyF
+    LayoutGoal{0x2a, 0x67, true},          // KeyG
+    LayoutGoal{0x2b, 0x68, true},          // KeyH
+    LayoutGoal{0x1f, 0x69, true},          // KeyI
+    LayoutGoal{0x2c, 0x6a, true},          // KeyJ
+    LayoutGoal{0x2d, 0x6b, true},          // KeyK
+    LayoutGoal{0x2e, 0x6c, true},          // KeyL
+    LayoutGoal{0x3a, 0x6d, true},          // KeyM
+    LayoutGoal{0x39, 0x6e, true},          // KeyN
+    LayoutGoal{0x20, 0x6f, true},          // KeyO
+    LayoutGoal{0x21, 0x70, true},          // KeyP
+    LayoutGoal{0x18, 0x71, true},          // KeyQ
+    LayoutGoal{0x1b, 0x72, true},          // KeyR
+    LayoutGoal{0x27, 0x73, true},          // KeyS
+    LayoutGoal{0x1c, 0x74, true},          // KeyT
+    LayoutGoal{0x1e, 0x75, true},          // KeyU
+    LayoutGoal{0x37, 0x76, true},          // KeyV
+    LayoutGoal{0x19, 0x77, true},          // KeyW
+    LayoutGoal{0x35, 0x78, true},          // KeyX
+    LayoutGoal{0x1d, 0x79, true},          // KeyY
+    LayoutGoal{0x34, 0x7a, true},          // KeyZ
+    LayoutGoal{0x5e, 0x200000020, false},  // IntlBackslash
+};
 
 const uint64_t kValueMask = 0x000ffffffff;
 const uint64_t kUnicodePlane = 0x00000000000;
