@@ -1,4 +1,4 @@
-Signature: 7f8c62d249d52cf96b02e6fa36c108c7
+Signature: 02ad2f5ff91759a282f70c9256555c49
 
 UNUSED LICENSES:
 
@@ -2045,6 +2045,8 @@ FILE: ../../../third_party/skia/src/core/SkVertState.cpp
 FILE: ../../../third_party/skia/src/core/SkVertState.h
 FILE: ../../../third_party/skia/src/fonts/SkFontMgr_indirect.cpp
 FILE: ../../../third_party/skia/src/fonts/SkRemotableFontMgr.cpp
+FILE: ../../../third_party/skia/src/gpu/RectanizerPow2.h
+FILE: ../../../third_party/skia/src/gpu/RectanizerSkyline.h
 FILE: ../../../third_party/skia/src/gpu/ResourceKey.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrDefaultGeoProcFactory.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrDefaultGeoProcFactory.h
@@ -2055,8 +2057,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/GrGpuResourceCacheAccess.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrProcessorAnalysis.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrProcessorAnalysis.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrProgramDesc.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrRectanizerPow2.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrRectanizerSkyline.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrResourceCache.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrResourceCache.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrTracing.h
@@ -3529,10 +3529,10 @@ FILE: ../../../third_party/skia/src/effects/imagefilters/SkDisplacementMapImageF
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkDropShadowImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkTileImageFilter.cpp
 FILE: ../../../third_party/skia/src/gpu/Blend.h
+FILE: ../../../third_party/skia/src/gpu/RectanizerSkyline.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrCaps.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrGeometryProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrPaint.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrRectanizerSkyline.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/effects/GrBezierEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/effects/GrBezierEffect.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/effects/GrBicubicEffect.h
@@ -7269,6 +7269,8 @@ FILE: ../../../third_party/skia/src/core/SkStrikeCache.h
 FILE: ../../../third_party/skia/src/core/SkTBlockList.h
 FILE: ../../../third_party/skia/src/gpu/BufferWriter.h
 FILE: ../../../third_party/skia/src/gpu/GrRectanizer.h
+FILE: ../../../third_party/skia/src/gpu/Rectanizer.h
+FILE: ../../../third_party/skia/src/gpu/RectanizerPow2.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrBufferAllocPool.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrBufferAllocPool.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrClip.h
@@ -7276,8 +7278,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/GrColor.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrFixedClip.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrGlyph.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrGpu.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrRectanizerPow2.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrRectanizer_impl.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/SkGr.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/geometry/GrRect.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/v1/Device_v1.h
