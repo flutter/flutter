@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'analyze_project.dart';
+import 'project_validator_result.dart';
 import 'project.dart';
 
 abstract class ProjectValidator {

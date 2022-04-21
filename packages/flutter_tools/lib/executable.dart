@@ -4,7 +4,7 @@
 
 // @dart = 2.8
 
-import 'package:flutter_tools/src/analyze_project_validator.dart';
+import 'package:flutter_tools/src/project_validator.dart';
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
@@ -18,7 +18,7 @@ import 'src/base/terminal.dart';
 import 'src/base/user_messages.dart';
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
-import 'src/commands/analyze_project.dart';
+import 'src/commands/validate_project.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
