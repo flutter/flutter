@@ -7,8 +7,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../rendering/mock_canvas.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -372,7 +372,8 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: tileColor));
+    final Material material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.color, tileColor);
   });
 
   testWidgets('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
@@ -392,7 +393,8 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    final Material material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.color, selectedTileColor);
   });
 
   testWidgets('SwitchListTile selected item text Color', (WidgetTester tester) async {
@@ -548,12 +550,12 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
     expect(
-      Material.of(tester.element(find.byKey(key))),
+      find.byType(Material).last,
       paints
         ..rect(
             color: Colors.orange[500],
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-          )
+            rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
+          ),
     );
   });
 }

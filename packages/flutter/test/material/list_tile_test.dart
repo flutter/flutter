@@ -1121,22 +1121,20 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Container(
-                width: 100,
-                height: 100,
-                color: Colors.white,
-                child: ListTile(
-                  onTap: enabled ? () {} : null,
-                  focusColor: Colors.orange[500],
-                  autofocus: true,
-                  focusNode: focusNode,
-                ),
-              );
-            }),
-          ),
+        home: Center(
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              width: 100,
+              height: 100,
+              color: Colors.white,
+              child: ListTile(
+                onTap: enabled ? () {} : null,
+                focusColor: Colors.orange[500],
+                autofocus: true,
+                focusNode: focusNode,
+              ),
+            );
+          }),
         ),
       );
     }
@@ -1144,52 +1142,42 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
+    // When the ListTile is focused, rect with the provided focus color is drawn on Material.
+    expect(find.byType(Material), paintsExactlyCountTimes(#drawRect, 1));
     expect(
       find.byType(Material),
       paints
         ..rect(
             color: Colors.orange[500],
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-          )
-        ..rect(
-            color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
           ),
     );
 
-    // Check when the list tile is disabled.
+    // Check when the ListTile is disabled.
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
-    expect(
-      find.byType(Material),
-      paints
-        ..rect(
-            color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-          ),
-    );
+    // When disabling the ListTile, focused rect is removed.
+    expect(find.byType(Material), paintsExactlyCountTimes(#drawRect, 0));
   });
 
   testWidgets('ListTile can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Container(
-                width: 100,
-                height: 100,
-                color: Colors.white,
-                child: ListTile(
-                  onTap: enabled ? () {} : null,
-                  hoverColor: Colors.orange[500],
-                  autofocus: true,
-                ),
-              );
-            }),
-          ),
+        home: Center(
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              width: 100,
+              height: 100,
+              color: Colors.white,
+              child: ListTile(
+                onTap: enabled ? () {} : null,
+                hoverColor: Colors.orange[500],
+                autofocus: true,
+              ),
+            );
+          }),
         ),
       );
     }
@@ -1197,16 +1185,14 @@ void main() {
 
     await tester.pump();
     await tester.pumpAndSettle();
+    // When ListTile is enabled, transparent rect is drawn on Material.
+    expect(find.byType(Material), paintsExactlyCountTimes(#drawRect, 1));
     expect(
       find.byType(Material),
       paints
         ..rect(
             color: const Color(0x1f000000),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-          )
-        ..rect(
-            color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
           ),
     );
 
@@ -1218,36 +1204,33 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await tester.pumpAndSettle();
+    // When the ListTile is enabled and hovered, two rects are drawn on Material.
+    // First rect is transparent and second rect has provided hover color.
+    expect(find.byType(Material), paintsExactlyCountTimes(#drawRect, 2));
     expect(
       find.byType(Material),
       paints
         ..rect(
             color: const Color(0x1f000000),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
           )
         ..rect(
             color: Colors.orange[500],
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-          )
-        ..rect(
-            color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
           ),
     );
 
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pump();
     await tester.pumpAndSettle();
+    // When disabling the ListTile, transparent rect is removed.
+    expect(find.byType(Material), paintsExactlyCountTimes(#drawRect, 1));
     expect(
       find.byType(Material),
       paints
         ..rect(
             color: Colors.orange[500],
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-          )
-        ..rect(
-            color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
           ),
     );
   });
@@ -1336,65 +1319,21 @@ void main() {
 
     Widget buildListTile(ShapeBorder shape) {
       return MaterialApp(
-        home: Material(
-          child: Center(
-            child: ListTile(shape: shape, tileColor: tileColor),
-          ),
+        home: Center(
+          child: ListTile(shape: shape, tileColor: tileColor),
         ),
       );
     }
 
     // Test rectangle shape
     await tester.pumpWidget(buildListTile(rectShape));
-    Rect rect = tester.getRect(find.byType(ListTile));
-
-    // Check if a path was painted with the correct color and shape
-    expect(
-      find.byType(Material),
-      paints..path(
-        color: tileColor,
-        // Corners should be included
-        includes: <Offset>[
-          Offset(rect.left, rect.top),
-          Offset(rect.right, rect.top),
-          Offset(rect.left, rect.bottom),
-          Offset(rect.right, rect.bottom),
-        ],
-        // Points outside rect should be excluded
-        excludes: <Offset>[
-          Offset(rect.left - 1, rect.top - 1),
-          Offset(rect.right + 1, rect.top - 1),
-          Offset(rect.left - 1, rect.bottom + 1),
-          Offset(rect.right + 1, rect.bottom + 1),
-        ],
-      ),
-    );
+    Material material = tester.widget<Material>(find.byType(Material));
+    expect(material.shape, rectShape);
 
     // Test stadium shape
     await tester.pumpWidget(buildListTile(stadiumShape));
-    rect = tester.getRect(find.byType(ListTile));
-
-    // Check if a path was painted with the correct color and shape
-    expect(
-      find.byType(Material),
-      paints..path(
-        color: tileColor,
-        // Center points of sides should be included
-        includes: <Offset>[
-          Offset(rect.left + rect.width / 2, rect.top),
-          Offset(rect.left, rect.top + rect.height / 2),
-          Offset(rect.right, rect.top + rect.height / 2),
-          Offset(rect.left + rect.width / 2, rect.bottom),
-        ],
-        // Corners should be excluded
-        excludes: <Offset>[
-          Offset(rect.left, rect.top),
-          Offset(rect.right, rect.top),
-          Offset(rect.left, rect.bottom),
-          Offset(rect.right, rect.bottom),
-        ],
-      ),
-    );
+    material = tester.widget<Material>(find.byType(Material));
+    expect(material.shape, stadiumShape);
   });
 
   testWidgets('ListTile changes mouse cursor when hovered', (WidgetTester tester) async {
@@ -1483,69 +1422,67 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return ListTile(
-                  selected: isSelected,
-                  selectedTileColor: selectedTileColor,
-                  tileColor: tileColor,
-                  onTap: () {
-                    setState(()=> isSelected = !isSelected);
-                  },
-                  title: const Text('Title'),
-                );
-              },
-            ),
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ListTile(
+                selected: isSelected,
+                selectedTileColor: selectedTileColor,
+                tileColor: tileColor,
+                onTap: () {
+                  setState(()=> isSelected = !isSelected);
+                },
+                title: const Text('Title'),
+              );
+            },
           ),
         ),
       ),
     );
 
+    Material material = tester.widget<Material>(find.byType(Material));
     // Initially, when isSelected is false, the ListTile should respect tileColor.
-    expect(find.byType(Material), paints..path(color: tileColor));
+    expect(material.color, tileColor);
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
+    material = tester.widget<Material>(find.byType(Material));
 
     // When isSelected is true, the ListTile should respect selectedTileColor.
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    expect(material.color, selectedTileColor);
   });
 
   testWidgets('ListTile shows Material ripple effects on top of tileColor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/73616
+    final ThemeData theme = ThemeData();
     final Color tileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(
-          child: Center(
-            child: ListTile(
-              tileColor: tileColor,
-              onTap: () {},
-              title: const Text('Title'),
-            ),
+        home: Center(
+          child: ListTile(
+            tileColor: tileColor,
+            onTap: () {},
+            title: const Text('Title'),
           ),
         ),
       ),
     );
 
+    Material material = tester.widget<Material>(find.byType(Material));
     // Before ListTile is tapped, it should be tileColor
-    expect(find.byType(Material), paints..path(color: tileColor));
+    expect(material.color, tileColor);
 
     // Tap on tile to trigger ink effect and wait for it to be underway.
     await tester.tap(find.byType(ListTile));
     await tester.pump(const Duration(milliseconds: 200));
+    material = tester.widget<Material>(find.byType(Material));
 
-    // After tap, the tile could be drawn in tileColor, with the ripple (circle) on top
-    expect(
-      find.byType(Material),
-      paints
-        ..path(color: tileColor)
-        ..circle(),
-    );
+    // After tap, the material is drawn with tileColor, with the ripple (circle) on top
+    expect(material.color, tileColor);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..circle(color: theme.splashColor));
   });
 
   testWidgets('ListTile default tile color', (WidgetTester tester) async {
@@ -1554,31 +1491,31 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return ListTile(
-                  selected: isSelected,
-                  onTap: () {
-                    setState(()=> isSelected = !isSelected);
-                  },
-                  title: const Text('Title'),
-                );
-              },
-            ),
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ListTile(
+                selected: isSelected,
+                onTap: () {
+                  setState(()=> isSelected = !isSelected);
+                },
+                title: const Text('Title'),
+              );
+            },
           ),
         ),
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: defaultColor));
+    Material material = tester.widget<Material>(find.byType(Material));
+    expect(material.color, defaultColor);
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..path(color: defaultColor));
+    material = tester.widget<Material>(find.byType(Material));
+    expect(material.color, defaultColor);
   });
 
   testWidgets('ListTile layout at zero size', (WidgetTester tester) async {

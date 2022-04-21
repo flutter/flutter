@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 class TestIcon extends StatefulWidget {
   const TestIcon({ super.key });
 
@@ -370,38 +368,38 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(
-          child: ListTileTheme(
-            data: ListTileThemeData(
-              tileColor: Colors.green.shade500,
-              selectedTileColor: Colors.red.shade500,
-            ),
-            child: Center(
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  theme = ListTileTheme.of(context);
-                  return ListTile(
-                    selected: isSelected,
-                    onTap: () {
-                      setState(()=> isSelected = !isSelected);
-                    },
-                    title: const Text('Title'),
-                  );
-                },
-              ),
+        home: ListTileTheme(
+          data: ListTileThemeData(
+            tileColor: Colors.green.shade500,
+            selectedTileColor: Colors.red.shade500,
+          ),
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                theme = ListTileTheme.of(context);
+                return ListTile(
+                  selected: isSelected,
+                  onTap: () {
+                    setState(()=> isSelected = !isSelected);
+                  },
+                  title: const Text('Title'),
+                );
+              },
             ),
           ),
         ),
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: theme.tileColor));
+    Material material = tester.widget<Material>(find.byType(Material));
+    expect(material.color, theme.tileColor);
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..path(color: theme.selectedTileColor));
+    material = tester.widget<Material>(find.byType(Material));
+    expect(material.color, theme.selectedTileColor);
   });
 
   testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
@@ -411,38 +409,38 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(
-          child: ListTileTheme(
-            data: const ListTileThemeData(
-              selectedTileColor: Colors.green,
-              tileColor: Colors.red,
-            ),
-            child: Center(
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  return ListTile(
-                    tileColor: tileColor,
-                    selectedTileColor: selectedTileColor,
-                    selected: isSelected,
-                    onTap: () {
-                      setState(()=> isSelected = !isSelected);
-                    },
-                    title: const Text('Title'),
-                  );
-                },
-              ),
+        home: ListTileTheme(
+          data: const ListTileThemeData(
+            selectedTileColor: Colors.green,
+            tileColor: Colors.red,
+          ),
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListTile(
+                  tileColor: tileColor,
+                  selectedTileColor: selectedTileColor,
+                  selected: isSelected,
+                  onTap: () {
+                    setState(()=> isSelected = !isSelected);
+                  },
+                  title: const Text('Title'),
+                );
+              },
             ),
           ),
         ),
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: tileColor));
+    Material material = tester.widget<Material>(find.byType(Material));
+    expect(material.color, tileColor);
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    material = tester.widget<Material>(find.byType(Material));
+    expect(material.color, selectedTileColor);
   });
 }

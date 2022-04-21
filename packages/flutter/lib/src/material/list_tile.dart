@@ -9,11 +9,11 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'constants.dart';
-import 'debug.dart';
 import 'divider.dart';
 import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'list_tile_theme.dart';
+import 'material.dart';
 import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -689,7 +689,6 @@ class ListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
     final ListTileThemeData tileTheme = ListTileTheme.of(context);
     final IconThemeData iconThemeData = IconThemeData(color: _iconColor(theme, tileTheme));
@@ -750,25 +749,23 @@ class ListTile extends StatelessWidget {
       ?? tileTheme.mouseCursor?.resolve(states)
       ?? MaterialStateMouseCursor.clickable.resolve(states);
 
-    return InkWell(
-      customBorder: shape ?? tileTheme.shape,
-      onTap: enabled ? onTap : null,
-      onLongPress: enabled ? onLongPress : null,
-      mouseCursor: effectiveMouseCursor,
-      canRequestFocus: enabled,
-      focusNode: focusNode,
-      focusColor: focusColor,
-      hoverColor: hoverColor,
-      autofocus: autofocus,
-      enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
-      child: Semantics(
-        selected: selected,
-        enabled: enabled,
-        child: Ink(
-          decoration: ShapeDecoration(
-            shape: shape ?? tileTheme.shape ?? const Border(),
-            color: _tileBackgroundColor(theme, tileTheme),
-          ),
+    return Material(
+      shape: shape ?? tileTheme.shape ?? const Border(),
+      color: _tileBackgroundColor(theme, tileTheme),
+      child: InkWell(
+        customBorder: shape ?? tileTheme.shape,
+        onTap: enabled ? onTap : null,
+        onLongPress: enabled ? onLongPress : null,
+        mouseCursor: effectiveMouseCursor,
+        canRequestFocus: enabled,
+        focusNode: focusNode,
+        focusColor: focusColor,
+        hoverColor: hoverColor,
+        autofocus: autofocus,
+        enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
+        child: Semantics(
+          selected: selected,
+          enabled: enabled,
           child: SafeArea(
             top: false,
             bottom: false,

@@ -263,7 +263,8 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: tileColor));
+    final Material material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.color, tileColor);
   });
 
   testWidgets('CheckboxListTile respects selectedTileColor', (WidgetTester tester) async {
@@ -283,7 +284,8 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    final Material material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.color, selectedTileColor);
   });
 
   testWidgets('CheckboxListTile selected item text Color', (WidgetTester tester) async {
