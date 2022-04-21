@@ -80,12 +80,59 @@ export 'package:flutter/services.dart' show
 
 // BIDIRECTIONAL TEXT SUPPORT
 
+/// An [InheritedElement] that has hundreds of dependencies but will
+/// infrequently change.  This provides a performance tradeoff where building
+/// the [Widget]s is faster but performing updates is slower.
+class _UbiquitousInheritedElement extends InheritedElement {
+  /// Creates an element that uses the given widget as its configuration.
+  _UbiquitousInheritedElement(InheritedWidget widget) : super(widget);
+
+  @override
+  void setDependencies(Element dependent, Object? value) {
+    if (value != null) {
+      throw Exception('Setting aspects on _UbiquitousInheritedElement is not supported.');
+    }
+  }
+
+  @override
+  Object? getDependencies(Element dependent) {
+    return null;
+  }
+
+  @override
+  void notifyClients(InheritedWidget oldWidget) {
+    _recurseChildren(this, (Element element) {
+      if (element.doesDependOnInheritedElement(this)) {
+        notifyDependent(oldWidget, element);
+      }
+    });
+  }
+
+  static void _recurseChildren(Element element, ElementVisitor visitor) {
+    element.visitChildren((Element child) {
+      _recurseChildren(child, visitor);
+    });
+    visitor(element);
+  }
+}
+
+/// See also:
+///
+///  * [_UbiquitousInheritedElement], the [Element] for [_UbiquitousInheritedWidget].
+abstract class _UbiquitousInheritedWidget extends InheritedWidget {
+  const _UbiquitousInheritedWidget({ Key? key, required Widget child })
+    : super(key: key, child: child);
+
+  @override
+  InheritedElement createElement() => _UbiquitousInheritedElement(this);
+}
+
 /// A widget that determines the ambient directionality of text and
 /// text-direction-sensitive render objects.
 ///
 /// For example, [Padding] depends on the [Directionality] to resolve
 /// [EdgeInsetsDirectional] objects into absolute [EdgeInsets] objects.
-class Directionality extends InheritedWidget {
+class Directionality extends _UbiquitousInheritedWidget {
   /// Creates a widget that determines the directionality of text and
   /// text-direction-sensitive render objects.
   ///
