@@ -2105,7 +2105,10 @@ extension TypefaceFontProviderExtension on SkFontMgr {
 
 @JS()
 @anonymous
-class SkLineMetrics {
+@staticInterop
+class SkLineMetrics {}
+
+extension SkLineMetricsExtension on SkLineMetrics {
   external int get startIndex;
   external int get endIndex;
   external int get endExcludingWhitespaces;
@@ -2149,48 +2152,70 @@ class SkParagraph {
 }
 
 @JS()
-class SkTextPosition {
+@staticInterop
+class SkTextPosition {}
+
+extension SkTextPositionExtnsion on SkTextPosition {
   external SkAffinity get affinity;
   external int get pos;
 }
 
 @JS()
-class SkTextRange {
+@staticInterop
+class SkTextRange {}
+
+extension SkTextRangeExtension on SkTextRange {
   external int get start;
   external int get end;
 }
 
 @JS()
 @anonymous
-class SkVertices {
+@staticInterop
+class SkVertices {}
+
+extension SkVerticesExtension on SkVertices {
   external void delete();
 }
 
 @JS()
 @anonymous
+@staticInterop
 class SkTonalColors {
   external factory SkTonalColors({
     required Float32List ambient,
     required Float32List spot,
   });
+}
+
+extension SkTonalColorsExtension on SkTonalColors {
   external Float32List get ambient;
   external Float32List get spot;
 }
 
 @JS()
-class SkFontMgrNamespace {
+@staticInterop
+class SkFontMgrNamespace {}
+
+extension SkFontMgrNamespaceExtension on SkFontMgrNamespace {
   // TODO(yjbanov): can this be made non-null? It returns null in our unit-tests right now.
   external SkFontMgr? FromData(List<Uint8List> fonts);
 }
 
 @JS()
-class TypefaceFontProviderNamespace {
+@staticInterop
+class TypefaceFontProviderNamespace {}
+
+extension TypefaceFontProviderNamespaceExtension on TypefaceFontProviderNamespace {
   external TypefaceFontProvider Make();
 }
 
 @JS()
 @anonymous
-class SkTypefaceFactory {
+@staticInterop
+class SkTypefaceFactory {}
+
+extension SkTypefaceFactoryExtension on SkTypefaceFactory {
   external SkTypeface? MakeFreeTypeFaceFromData(ByteBuffer fontData);
 }
 
@@ -2401,10 +2426,14 @@ class JsConstructor {
 /// 5. The finalizer function is called with the SkPaint as the sole argument.
 /// 6. We call `delete` on SkPaint.
 @JS('window.FinalizationRegistry')
+@staticInterop
 class SkObjectFinalizationRegistry {
   // TODO(hterkelsen): Add a type for the `cleanup` function when
   // native constructors support type parameters.
-  external SkObjectFinalizationRegistry(Function cleanup);
+  external factory SkObjectFinalizationRegistry(Function cleanup);
+}
+
+extension SkObjectFinalizationRegistryExtension on SkObjectFinalizationRegistry {
   external void register(Object ckObject, Object skObject);
 }
 
@@ -2422,7 +2451,10 @@ void debugResetBrowserSupportsFinalizationRegistry() {
 }
 
 @JS()
-class SkData {
+@staticInterop
+class SkData {}
+
+extension SkDataExtension on SkData {
   external int size();
   external bool isEmpty();
   external Uint8List bytes();
@@ -2431,6 +2463,7 @@ class SkData {
 
 @JS()
 @anonymous
+@staticInterop
 class SkImageInfo {
   external factory SkImageInfo({
     required int width,
@@ -2439,6 +2472,9 @@ class SkImageInfo {
     required SkAlphaType alphaType,
     required ColorSpace colorSpace,
   });
+}
+
+extension SkImageInfoExtension on SkImageInfo {
   external SkAlphaType get alphaType;
   external ColorSpace get colorSpace;
   external SkColorType get colorType;
@@ -2455,6 +2491,7 @@ class SkImageInfo {
 
 @JS()
 @anonymous
+@staticInterop
 class SkPartialImageInfo {
   external factory SkPartialImageInfo({
     required int width,
@@ -2463,6 +2500,9 @@ class SkPartialImageInfo {
     required SkAlphaType alphaType,
     required ColorSpace colorSpace,
   });
+}
+
+extension SkPartialImageInfoExtension on SkPartialImageInfo {
   external SkAlphaType get alphaType;
   external ColorSpace get colorSpace;
   external SkColorType get colorType;
