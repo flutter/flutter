@@ -146,23 +146,13 @@ std::optional<Snapshot> TextureFilterInput::GetSnapshot(
 
 std::optional<Rect> TextureFilterInput::GetCoverage(
     const Entity& entity) const {
-  auto path_bounds = entity.GetPath().GetBoundingBox();
-  if (!path_bounds.has_value()) {
-    return std::nullopt;
-  }
   return Rect::MakeSize(Size(texture_->GetSize()))
       .TransformBounds(GetTransform(entity));
 }
 
 Matrix TextureFilterInput::GetLocalTransform(const Entity& entity) const {
-  // Compute the local transform such that the texture will cover the entity
-  // path bounding box.
-  auto path_bounds = entity.GetPath().GetBoundingBox();
-  if (!path_bounds.has_value()) {
-    return Matrix();
-  }
-  return Matrix::MakeTranslation(path_bounds->origin) *
-         Matrix::MakeScale(Vector2(path_bounds->size) / texture_->GetSize());
+  // Compute the local transform such that the texture is centered.
+  return Matrix::MakeTranslation(-Point(texture_->GetSize()) / 2);
 }
 
 }  // namespace impeller

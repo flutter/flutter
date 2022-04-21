@@ -286,6 +286,14 @@ std::optional<Rect> Path::GetBoundingBox() const {
   return Rect{min.x, min.y, difference.x, difference.y};
 }
 
+std::optional<Rect> Path::GetTransformedBoundingBox(const Matrix& transform) const {
+  auto bounds = GetBoundingBox();
+  if (!bounds.has_value()) {
+    return std::nullopt;
+  }
+  return bounds->TransformBounds(transform);
+}
+
 std::optional<std::pair<Point, Point>> Path::GetMinMaxCoveragePoints() const {
   if (linears_.empty() && quads_.empty() && cubics_.empty()) {
     return std::nullopt;

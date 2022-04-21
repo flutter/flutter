@@ -20,7 +20,12 @@ class ClipContents final : public Contents {
 
   ~ClipContents();
 
+  void SetPath(Path path);
+
   void SetClipOperation(Entity::ClipOperation clip_op);
+
+  // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -28,6 +33,7 @@ class ClipContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
+  Path path_;
   Entity::ClipOperation clip_op_ = Entity::ClipOperation::kIntersect;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ClipContents);
@@ -38,6 +44,9 @@ class ClipRestoreContents final : public Contents {
   ClipRestoreContents();
 
   ~ClipRestoreContents();
+
+  // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
