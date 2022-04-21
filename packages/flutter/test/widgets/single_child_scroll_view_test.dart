@@ -965,4 +965,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(textField.focusNode!.hasFocus, isTrue);
   });
+
+  testWidgets('Dispatches ScrollMetricsNotifications correctly', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102181
+    int counter = 0;
+    late ScrollMetrics metrics;
+    await tester.pumpWidget(
+      NotificationListener<ScrollMetricsNotification>(
+        onNotification: (ScrollMetricsNotification notification){
+          counter++;
+          metrics = notification.metrics;
+          return false;
+        },
+        child: SingleChildScrollView(
+          child: Container(
+            height: 2000.0,
+            color: const Color(0xFF00FF00),
+          ),
+        ),
+      ),
+    );
+
+    // Notification from initialization
+    expect(counter, 1);
+    expect(metrics.hasContentDimensions, isTrue);
+    expect(metrics.extentAfter, 1400);
+    expect(metrics.extentBefore, 0);
+
+    // Scroll a bit
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -100.0));
+
+    // We should have received a ScrollMetricsNotification
+    expect(counter, 3);
+    expect(metrics.hasContentDimensions, isTrue);
+    expect(metrics.extentAfter, 1300);
+    expect(metrics.extentBefore, 100);
+  });
 }

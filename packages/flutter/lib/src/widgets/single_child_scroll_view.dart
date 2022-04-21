@@ -396,6 +396,10 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   }
 
   void _hasScrolled() {
+    // Content dimensions do not change as SingleChildScrollView only lays out
+    // once, but the metrics can change based on scrolling and we may want to
+    // dispatch a ScrollMetricsNotification.
+    offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
