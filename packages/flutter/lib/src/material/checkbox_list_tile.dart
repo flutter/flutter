@@ -297,7 +297,7 @@ class CheckboxListTile extends StatelessWidget {
   final bool? enableFeedback;
 
   /// if enabled = false, the [CheckboxListTile] will be disabled and will not react to user input.
-  /// if enabled is not provided it will debpend on onChanged.
+  /// if enabled is not provided it will depend on [onChanged] property.
   final bool? enabled;
 
   void _handleValueChange() {
