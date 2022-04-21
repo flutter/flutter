@@ -78,4 +78,15 @@ void main() {
     await sendEvent(<String, Object>{'type': 'DevtoolsEvent'});
     await warning;
   }, skip: true); // Skipping for 'https://github.com/dart-lang/webdev/issues/1562'
+
+
+  testWithoutContext('flutter run output skips DartUri warning messages from dwds', () async {
+    final Future<dynamic> info = expectLater(
+      flutter.stdout, emitsThrough(predicate((String msg) {
+        return !msg.contains('DartUri');
+      })));
+    await start();
+    await flutter.stop();
+    await info;
+  });
 }
