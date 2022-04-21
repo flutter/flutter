@@ -16,12 +16,7 @@ DisplayListLayer::DisplayListLayer(const SkPoint& offset,
     : offset_(offset),
       display_list_(std::move(display_list)),
       is_complex_(is_complex),
-      will_change_(will_change) {
-  if (display_list_.skia_object()) {
-    set_layer_can_inherit_opacity(
-        display_list_.skia_object()->can_apply_group_opacity());
-  }
-}
+      will_change_(will_change) {}
 
 bool DisplayListLayer::IsReplacing(DiffContext* context,
                                    const Layer* layer) const {
@@ -96,6 +91,10 @@ void DisplayListLayer::Preroll(PrerollContext* context,
   DisplayList* disp_list = display_list();
 
   SkRect bounds = disp_list->bounds().makeOffset(offset_.x(), offset_.y());
+
+  if (disp_list->can_apply_group_opacity()) {
+    context->subtree_can_inherit_opacity = true;
+  }
 
   if (auto* cache = context->raster_cache) {
     TRACE_EVENT0("flutter", "DisplayListLayer::RasterCache (Preroll)");

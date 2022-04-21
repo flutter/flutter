@@ -24,7 +24,6 @@ TransformLayer::TransformLayer(const SkMatrix& transform)
     FML_LOG(ERROR) << "TransformLayer is constructed with an invalid matrix.";
     transform_.setIdentity();
   }
-  set_layer_can_inherit_opacity(true);
 }
 
 void TransformLayer::Diff(DiffContext* context, const Layer* old_layer) {
