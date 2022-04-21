@@ -599,9 +599,15 @@ void main() {
           return child;
         }
         if (child is ContainerLayer) {
-          final PhysicalModelLayer? candidate = _dfsFindPhysicalLayer(child);
-          if (candidate != null) {
-            return candidate;
+          Layer? innerChild = child.firstChild;
+          while (innerChild != null) {
+            if (innerChild is ContainerLayer) {
+              final PhysicalModelLayer? candidate = _dfsFindPhysicalLayer(innerChild);
+                if (candidate != null) {
+                  return candidate;
+                }
+              }
+            innerChild = innerChild.nextSibling;
           }
         }
         child = child.nextSibling;
