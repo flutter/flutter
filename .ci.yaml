@@ -19,14 +19,14 @@ platform_properties:
           {"name":"android_sdk","path":"android"},
           {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
-          {"name":"openjdk","path":"java"},
+          {"name":"openjdk_11","path":"java"},
           {"name":"pub_cache","path":".pub-cache"}
         ]
       dependencies: >-
         [
           {"dependency": "curl"}
         ]
-      os: Linux
+      os: Debian
       device_type: none
   linux_android:
     properties:
@@ -37,7 +37,7 @@ platform_properties:
           {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"gradle","path":"gradle"},
-          {"name":"openjdk","path":"java11"},
+          {"name":"openjdk_11","path":"java"},
           {"name":"pub_cache","path":".pub-cache"}
         ]
       dependencies: >-
@@ -57,7 +57,7 @@ platform_properties:
           {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
           {"name":"gradle","path":"gradle"},
-          {"name":"openjdk","path":"java11"},
+          {"name":"openjdk_11","path":"java"},
           {"name":"pub_cache","path":".pub-cache"}
         ]
       dependencies: >-
@@ -76,7 +76,7 @@ platform_properties:
           {"name":"android_sdk","path":"android"},
           {"name":"chrome_and_driver_96","path":"chrome"},
           {"name":"flutter_sdk","path":"flutter sdk"},
-          {"name":"openjdk","path":"java11"},
+          {"name":"openjdk_11","path":"java"},
           {"name":"osx_sdk_13a233","path":"osx_sdk"},
           {"name":"pub_cache","path":".pub-cache"},
           {"name":"xcode_binary","path":"xcode_binary"}
@@ -96,7 +96,7 @@ platform_properties:
             {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
-            {"name":"openjdk","path":"java11"},
+            {"name":"openjdk_11","path":"java"},
             {"name":"pub_cache","path":".pub-cache"}
           ]
       dependencies: >-
@@ -116,7 +116,7 @@ platform_properties:
             {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
-            {"name":"openjdk","path":"java11"},
+            {"name":"openjdk_11","path":"java"},
             {"name":"pub_cache","path":".pub-cache"},
             {"name":"xcode_binary","path":"xcode_binary"},
             {"name":"osx_sdk_13a233","path":"osx_sdk"}
@@ -139,7 +139,7 @@ platform_properties:
             {"name":"android_sdk","path":"android"},
             {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
-            {"name":"openjdk","path":"java11"},
+            {"name":"openjdk_11","path":"java"},
             {"name":"pub_cache","path":".pub-cache"},
             {"name":"vsbuild","path":"vsbuild"}
           ]
@@ -158,7 +158,7 @@ platform_properties:
             {"name":"chrome_and_driver_96","path":"chrome"},
             {"name":"flutter_sdk","path":"flutter sdk"},
             {"name":"gradle","path":"gradle"},
-            {"name":"openjdk","path":"java11"},
+            {"name":"openjdk_11","path":"java"},
             {"name":"pub_cache","path":".pub-cache"}
           ]
       dependencies: >-
@@ -190,13 +190,13 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "open_jdk"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -462,7 +462,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -485,8 +485,8 @@ targets:
     properties:
       caches: >-
         [
-          {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "gradle", "path": "gradle"},
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -510,7 +510,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -534,7 +534,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -558,7 +558,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -582,7 +582,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -630,7 +630,7 @@ targets:
       caches: >-
         [
           {"name":"gradle", "path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -655,7 +655,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -680,7 +680,7 @@ targets:
       caches: >-
         [
           {"name":"gradle", "path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -1551,7 +1551,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -1569,7 +1569,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -1587,7 +1587,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -1605,7 +1605,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -1623,7 +1623,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -1641,7 +1641,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -1659,7 +1659,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -1677,7 +1677,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -2103,6 +2103,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android new_gallery__crane_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/102232
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2276,7 +2277,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -2436,12 +2437,12 @@ targets:
       caches: >-
         [
           {"name":"gradle", "path":"gradle"},
-          {"name": "openjdk", "path": "java"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -2696,28 +2697,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac gradle_plugin_fat_apk_test
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      caches: >-
-        [
-          {"name":"gradle","path":"gradle"}
-        ]
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"}
-        ]
-      tags: >
-        ["devicelab","hostonly"]
-      task_name: gradle_plugin_fat_apk_test
-    scheduler: luci
-    runIf:
-      - dev/**
-      - bin/**
-      - .ci.yaml
-
   - name: Mac module_custom_host_app_name_test
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2725,7 +2704,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -2772,7 +2751,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -2796,7 +2775,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -2822,7 +2801,7 @@ targets:
       caches: >-
         [
           {"name":"gradle", "path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -3120,7 +3099,6 @@ targets:
 
   - name: Mac_android entrypoint_dart_registrant
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3258,7 +3236,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -3276,7 +3254,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -3294,7 +3272,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 
@@ -3359,7 +3337,6 @@ targets:
     scheduler: luci
 
   - name: Mac_ios flutter_view_ios__start_up
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/98419
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3656,7 +3633,6 @@ targets:
     scheduler: luci
 
   - name: Mac_ios native_ui_tests_ios
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/101426
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3705,6 +3681,7 @@ targets:
     scheduler: luci
 
   - name: Windows build_aar_module_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/102226
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3712,13 +3689,13 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "open_jdk"}
+          {"dependency": "open_jdk", "version": "11"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -3902,27 +3879,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows gradle_plugin_fat_apk_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/101428
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      caches: >-
-        [
-          {"name":"gradle","path":"gradle"}
-        ]
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "open_jdk", "version": "11"}
-        ]
-      tags: >
-        ["devicelab","hostonly"]
-      task_name: gradle_plugin_fat_apk_test
-    scheduler: luci
-
   - name: Windows hot_mode_dev_cycle_win_target__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3953,7 +3909,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -3996,7 +3952,7 @@ targets:
       caches: >-
         [
           {"name":"gradle", "path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -4021,7 +3977,7 @@ targets:
       caches: >-
         [
           {"name":"gradle","path":"gradle"},
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
       dependencies: >-
         [
@@ -4324,7 +4280,7 @@ targets:
         ]
       caches: >-
         [
-          {"name": "openjdk", "path": "java11"}
+          {"name": "openjdk_11", "path": "java"}
         ]
     scheduler: luci
 

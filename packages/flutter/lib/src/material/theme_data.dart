@@ -660,9 +660,9 @@ class ThemeData with Diagnosticable {
     );
   }
 
-  /// Create a [ThemeData] given a set of exact values. All the values must be
+  /// Create a [ThemeData] given a set of exact values. Most values must be
   /// specified. They all must also be non-null except for
-  /// [cupertinoOverrideTheme].
+  /// [cupertinoOverrideTheme], and deprecated members.
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes created with the
@@ -758,49 +758,58 @@ class ThemeData with Diagnosticable {
       'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
-    required this.accentColor,
+    Color? accentColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
-    required this.accentColorBrightness,
+    Brightness? accentColorBrightness,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
-    required this.accentTextTheme,
+    TextTheme? accentTextTheme,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
-    required this.accentIconTheme,
+    IconThemeData? accentIconTheme,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v2.3.0-0.2.pre.',
     )
-    required this.buttonColor,
+    Color? buttonColor,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
-    required this.fixTextFieldOutlineLabel,
+    bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
-    required this.primaryColorBrightness,
+    Brightness? primaryColorBrightness,
     @Deprecated(
       'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
-    required this.androidOverscrollIndicator,
-  }) : // GENERAL CONFIGURATION
+    this.androidOverscrollIndicator,
+  }) : // DEPRECATED (newest deprecations at the bottom)
+       // should not be `required`, use getter pattern to avoid breakages.
+       _accentColor = accentColor,
+       _accentColorBrightness = accentColorBrightness,
+       _accentTextTheme = accentTextTheme,
+       _accentIconTheme = accentIconTheme,
+       _buttonColor = buttonColor,
+       _fixTextFieldOutlineLabel = fixTextFieldOutlineLabel,
+       _primaryColorBrightness = primaryColorBrightness,
+       // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(extensions != null),
        assert(inputDecorationTheme != null),
@@ -875,15 +884,7 @@ class ThemeData with Diagnosticable {
        assert(timePickerTheme != null),
        assert(toggleButtonsTheme != null),
        assert(tooltipTheme != null),
-       assert(expansionTileTheme != null),
-        // DEPRECATED (newest deprecations at the bottom)
-       assert(accentColor != null),
-       assert(accentColorBrightness != null),
-       assert(accentTextTheme != null),
-       assert(accentIconTheme != null),
-       assert(buttonColor != null),
-       assert(fixTextFieldOutlineLabel != null),
-       assert(primaryColorBrightness != null);
+       assert(expansionTileTheme != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1493,7 +1494,8 @@ class ThemeData with Diagnosticable {
     'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
-  final Color accentColor;
+  Color get accentColor => _accentColor!;
+  final Color? _accentColor;
 
   /// Obsolete property that was originally used to determine the color
   /// of text and icons placed on top of the accent color (e.g. the
@@ -1509,7 +1511,8 @@ class ThemeData with Diagnosticable {
     'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
-  final Brightness accentColorBrightness;
+  Brightness get accentColorBrightness => _accentColorBrightness!;
+  final Brightness? _accentColorBrightness;
 
   /// Obsolete property that was originally used when a [TextTheme]
   /// that contrasted well with the [accentColor] was needed.
@@ -1532,7 +1535,8 @@ class ThemeData with Diagnosticable {
     'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
-  final TextTheme accentTextTheme;
+  TextTheme get accentTextTheme => _accentTextTheme!;
+  final TextTheme? _accentTextTheme;
 
   /// Obsolete property that was originally used when an [IconTheme]
   /// that contrasted well with the [accentColor] was needed.
@@ -1546,14 +1550,16 @@ class ThemeData with Diagnosticable {
     'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
     'This feature was deprecated after v2.3.0-0.1.pre.',
   )
-  final IconThemeData accentIconTheme;
+  IconThemeData get accentIconTheme => _accentIconTheme!;
+  final IconThemeData? _accentIconTheme;
 
   /// The default fill color of the [Material].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
     'This feature was deprecated after v2.3.0-0.2.pre.',
   )
-  final Color buttonColor;
+  Color get buttonColor => _buttonColor!;
+  final Color? _buttonColor;
 
   /// An obsolete flag to allow apps to opt-out of a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
@@ -1567,7 +1573,8 @@ class ThemeData with Diagnosticable {
     'This "fix" is now enabled by default. '
     'This feature was deprecated after v2.5.0-1.0.pre.',
   )
-  final bool fixTextFieldOutlineLabel;
+  bool get fixTextFieldOutlineLabel => _fixTextFieldOutlineLabel!;
+  final bool? _fixTextFieldOutlineLabel;
 
   /// Obsolete property that was originally used to determine the color
   /// of text and icons placed on top of the primary color (e.g. toolbar text).
@@ -1582,7 +1589,8 @@ class ThemeData with Diagnosticable {
     'No longer used by the framework, please remove any reference to it. '
     'This feature was deprecated after v2.6.0-11.0.pre.',
   )
-  final Brightness primaryColorBrightness;
+  Brightness get primaryColorBrightness => _primaryColorBrightness!;
+  final Brightness? _primaryColorBrightness;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
@@ -1994,11 +2002,11 @@ class ThemeData with Diagnosticable {
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
       expansionTileTheme: ExpansionTileThemeData.lerp(a.expansionTileTheme, b.expansionTileTheme, t)!,
       // DEPRECATED (newest deprecations at the bottom)
-      accentColor: Color.lerp(a.accentColor, b.accentColor, t)!,
+      accentColor: Color.lerp(a.accentColor, b.accentColor, t),
       accentColorBrightness: t < 0.5 ? a.accentColorBrightness : b.accentColorBrightness,
       accentTextTheme: TextTheme.lerp(a.accentTextTheme, b.accentTextTheme, t),
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
-      buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t)!,
+      buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
