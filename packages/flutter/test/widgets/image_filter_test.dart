@@ -49,7 +49,8 @@ void main() {
     await tester.pumpWidget(
       RepaintBoundary(
         child: ImageFiltered(
-          imageFilter: ImageFilter.erode(radiusX: 10.0, radiusY: 10.0),
+          // Do not erode too much, otherwise we will see nothing left.
+          imageFilter: ImageFilter.erode(radiusX: 1.0, radiusY: 1.0),
           child: const Placeholder(),
         ),
       ),
