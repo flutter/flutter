@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/migrate/migrate_utils.dart';
-import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 
@@ -28,7 +27,7 @@ void main() {
     utils = MigrateUtils(
       logger: logger,
       fileSystem: fileSystem,
-      platform: FakePlatform(),
+      platform: globals.platform,
       processManager: globals.processManager,
     );
     processUtils = ProcessUtils(processManager: globals.processManager, logger: logger);

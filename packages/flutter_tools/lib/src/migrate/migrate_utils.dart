@@ -5,12 +5,12 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 
 /// The default name of the migrate working directory used to stage proposed changes.
@@ -180,7 +180,9 @@ class MigrateUtils {
 
   /// Returns true if the workingDirectory git repo has any uncommited changes.
   Future<bool> hasUncommitedChanges(String workingDirectory) async {
-    final List<String> cmdArgs = <String>['git', 'diff', '--quiet', 'HEAD', '--', '.', "':(exclude)$kDefaultMigrateWorkingDirectoryName'"];
+    final List<String> cmdArgs = <String>['git', 'diff', '--quiet', 'HEAD', '--', '.'];
+    // windows uses double quotes.
+    cmdArgs.add(_platform.isWindows ? '":(exclude)${kDefaultMigrateWorkingDirectoryName}"' : "':(exclude)${_fileSystem.path.join(workingDirectory, kDefaultMigrateWorkingDirectoryName)}'");
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: cmdArgs.join(' '));
     print(result.stdout);
@@ -266,6 +268,7 @@ class MigrateUtils {
   }
 }
 
+/// Defines the classification of difference between files.
 enum DiffType {
   modification,
   addition,
@@ -315,11 +318,13 @@ abstract class MergeResult {
   String localPath;
 }
 
+/// The results of a string merge.
 class StringMergeResult extends MergeResult {
   /// Initializes a BinaryMergeResult based off of a RunResult.
   StringMergeResult(super.result, super.localPath) :
     mergedString = result.stdout;
 
+  /// Manually initializes a StringMergeResult with explicit values.
   StringMergeResult.explicit({
     required this.mergedString,
     required super.hasConflict,
@@ -330,11 +335,13 @@ class StringMergeResult extends MergeResult {
   String mergedString;
 }
 
+/// The results of a binary merge.
 class BinaryMergeResult extends MergeResult {
   /// Initializes a BinaryMergeResult based off of a RunResult.
   BinaryMergeResult(super.result, super.localPath) :
     mergedBytes = result.stdout as Uint8List;
 
+  /// Manually initializes a BinaryMergeResult with explicit values.
   BinaryMergeResult.explicit({
     required this.mergedBytes,
     required super.hasConflict,
