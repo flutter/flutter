@@ -148,6 +148,8 @@ class NavigationBar extends StatelessWidget {
       ?? navigationBarTheme.labelBehavior
       ?? defaults.labelBehavior!;
     final double additionalBottomPadding = MediaQuery.of(context).padding.bottom;
+    final double additionalLeftPadding = MediaQuery.of(context).padding.left;
+    final double additionalRightPadding = MediaQuery.of(context).padding.right;
 
     return Material(
       color: backgroundColor
@@ -155,7 +157,8 @@ class NavigationBar extends StatelessWidget {
         ?? defaults.backgroundColor!,
       elevation: elevation ?? navigationBarTheme.elevation ?? defaults.elevation!,
       child: Padding(
-        padding: EdgeInsets.only(bottom: additionalBottomPadding),
+        padding: EdgeInsets.fromLTRB(additionalLeftPadding, 0,
+          additionalRightPadding, additionalBottomPadding),
         child: MediaQuery.removePadding(
           context: context,
           removeBottom: true,
