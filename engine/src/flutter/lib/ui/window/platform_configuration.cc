@@ -203,9 +203,8 @@ void PlatformConfiguration::DidCreateIsolate() {
                   Dart_GetField(library, tonic::ToDart("_drawFrame")));
   report_timings_.Set(tonic::DartState::Current(),
                       Dart_GetField(library, tonic::ToDart("_reportTimings")));
-  windows_.insert(
-      std::make_pair(0, std::unique_ptr<Window>(new Window{
-                            0, ViewportMetrics{1.0, 0.0, 0.0, -1}})));
+  windows_.insert(std::make_pair(
+      0, std::make_unique<Window>(0, ViewportMetrics{1.0, 0.0, 0.0, -1})));
 }
 
 void PlatformConfiguration::UpdateLocales(

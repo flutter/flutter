@@ -18,7 +18,7 @@ template <typename... Args>
 std::string StringPrintf(const std::string& format, Args... args) {
   // Calculate the buffer size.
   int size = snprintf(nullptr, 0, format.c_str(), args...) + 1;
-  std::unique_ptr<char[]> buf(new char[size]);
+  std::unique_ptr<char[]> buf = std::make_unique<char[]>(size);
   snprintf(buf.get(), size, format.c_str(), args...);
   return std::string(buf.get(), buf.get() + size - 1);
 }

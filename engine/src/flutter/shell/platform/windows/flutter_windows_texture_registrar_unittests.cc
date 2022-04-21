@@ -115,7 +115,8 @@ TEST(FlutterWindowsTextureRegistrarTest, PopulatePixelBufferTexture) {
   bool release_callback_called = false;
   size_t width = 100;
   size_t height = 100;
-  std::unique_ptr<uint8_t[]> pixels(new uint8_t[width * height * 4]);
+  std::unique_ptr<uint8_t[]> pixels =
+      std::make_unique<uint8_t[]>(width * height * 4);
   FlutterDesktopPixelBuffer pixel_buffer = {};
   pixel_buffer.width = width;
   pixel_buffer.height = height;
