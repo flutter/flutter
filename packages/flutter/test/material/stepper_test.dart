@@ -1148,13 +1148,16 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
   testWidgets('Stepper with Alternative Label', (WidgetTester tester) async {
     int index = 0;
     late TextStyle bodyText1Style;
+    late TextStyle bodyText2Style;
     late TextStyle captionStyle;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
             bodyText1Style = Theme.of(context).textTheme.bodyText1!;
+            bodyText2Style = Theme.of(context).textTheme.bodyText2!;
             captionStyle = Theme.of(context).textTheme.caption!;
             return Stepper(
               currentStep: index,
@@ -1164,27 +1167,28 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
                 });
               },
               steps: <Step>[
-                const Step(
-                  // label, subtitle are nullable arguments
-                  title: Text('Step 1 Title'),
-                  content: Text('Step 1 Content'),
+                Step(
+                  title: const Text('Step 1 Title'),
+                  content: const Text('Step 1 Content'),
+                  label: Text('Step 1 Label', style: Theme.of(context).textTheme.caption),
                 ),
-                const Step(
-                  title: Text('Step 2 Title'),
-                  content: Text('Step 2 Content'),
-                  label: Text('Step 2 Label'),
+                Step(
+                  title: const Text('Step 2 Title'),
+                  content: const Text('Step 2 Content'),
+                  label: Text('Step 2 Label', style: Theme.of(context).textTheme.bodyText1),
                 ),
                 Step(
                   title: const Text('Step 3 Title'),
                   content: const Text('Step 3 Content'),
                   subtitle: const Text('Step 3 Subtitle'),
-                  label: Text('Step 3 Label', style: Theme.of(context).textTheme.bodyText1),
+                  label: Text('Step 3 Label',
+                      style: Theme.of(context).textTheme.bodyText1),
                 ),
                 Step(
                   title: const Text('Step 4 Title'),
                   content: const Text('Step 4 Content'),
-                  subtitle: const Text('Step 4 Subtitle'),
-                  label: Text('Step 4 Label', style: Theme.of(context).textTheme.caption),
+                  label: Text('Step 4 Label',
+                      style: Theme.of(context).textTheme.bodyText2),
                 ),
               ],
             );
@@ -1192,18 +1196,44 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         ),
       ),
     );
+
+    // Check Styles of Label Text Widgets before tapping steps
+    final Text label1TextWidget =
+        tester.widget<Text>(find.text('Step 1 Label'));
+    final Text label4TextWidget =
+        tester.widget<Text>(find.text('Step 4 Label'));
+
+    expect(captionStyle, label1TextWidget.style);
+    expect(bodyText2Style, label4TextWidget.style);
+
+    late Text selectedLabelTextWidget;
+    late Text nextLabelTextWidget;
+
     // Tap to Step3 Label then, index become 2 from 0
-    await tester.tap(find.text('Step 3 Label'));
-    expect(index, 2);
+    await tester.tap(find.text('Step 1 Label'));
+    expect(index, 0);
+
+    // Check Styles of Selected Label Text Widgets and Another Label Text Widget
+    selectedLabelTextWidget =
+        tester.widget<Text>(find.text('Step ${index + 1} Label'));
+    expect(captionStyle, selectedLabelTextWidget.style);
+    nextLabelTextWidget =
+        tester.widget<Text>(find.text('Step ${index + 2} Label'));
+    expect(bodyText1Style, nextLabelTextWidget.style);
+    
+
     // Tap to Step2 Label then, index become 1 from 2
     await tester.tap(find.text('Step 2 Label'));
     expect(index, 1);
 
-    final Text label3TextWidget = tester.widget<Text>(find.text('Step 3 Label'));
-    final Text label4TextWidget = tester.widget<Text>(find.text('Step 4 Label'));
+    // Check Styles of Selected Label Text Widgets and Another Label Text Widget
+    selectedLabelTextWidget =
+        tester.widget<Text>(find.text('Step ${index + 1} Label'));
+    expect(bodyText1Style, selectedLabelTextWidget.style);
 
-    expect(bodyText1Style, label3TextWidget.style);
-    expect(captionStyle, label4TextWidget.style);
+    nextLabelTextWidget =
+        tester.widget<Text>(find.text('Step ${index + 2} Label'));
+    expect(bodyText1Style, nextLabelTextWidget.style);
   });
 }
 
