@@ -40,7 +40,7 @@ class Contents {
   virtual std::optional<Rect> GetCoverage(const Entity& entity) const;
 
   /// @brief Render this contents to a snapshot, respecting the entity's
-  ///        transform, path, stencil depth, blend mode, etc.
+  ///        transform, path, stencil depth, and blend mode.
   ///        The result texture size is always the size of
   ///        `GetCoverage(entity)`.
   virtual std::optional<Snapshot> RenderToSnapshot(

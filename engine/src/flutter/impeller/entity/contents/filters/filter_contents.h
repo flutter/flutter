@@ -122,23 +122,31 @@ class FilterContents : public Contents {
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
-  virtual std::optional<Snapshot> RenderToSnapshot(
-      const ContentContext& renderer,
-      const Entity& entity) const override;
+  std::optional<Snapshot> RenderToSnapshot(const ContentContext& renderer,
+                                           const Entity& entity) const override;
+
+  virtual Matrix GetLocalTransform() const;
+
+  Matrix GetTransform(const Matrix& parent_transform) const;
 
  private:
-  /// @brief Takes a set of zero or more input textures and writes to an output
-  ///        texture.
+  virtual std::optional<Rect> GetFilterCoverage(
+      const FilterInput::Vector& inputs,
+      const Entity& entity) const;
+
+  /// @brief  Takes a set of zero or more input textures and writes to an output
+  ///         texture.
   virtual bool RenderFilter(const FilterInput::Vector& inputs,
                             const ContentContext& renderer,
                             const Entity& entity,
                             RenderPass& pass,
-                            const Rect& bounds) const = 0;
+                            const Rect& coverage) const = 0;
 
   FilterInput::Vector inputs_;
-  Rect destination_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FilterContents);
+
+  friend FilterContentsFilterInput;
 };
 
 }  // namespace impeller
