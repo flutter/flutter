@@ -159,7 +159,6 @@ bool EntityPass::Render(ContentContext& renderer,
       }
 
       const auto subpass_coverage = GetSubpassCoverage(*subpass);
-
       if (!subpass_coverage.has_value()) {
         continue;
       }
@@ -227,9 +226,6 @@ bool EntityPass::Render(ContentContext& renderer,
       }
 
       Entity entity;
-      entity.SetPath(PathBuilder{}
-                         .AddRect(Rect::MakeSize(subpass_coverage->size))
-                         .TakePath());
       entity.SetContents(std::move(offscreen_texture_contents));
       entity.SetStencilDepth(stencil_depth_);
       entity.SetBlendMode(subpass->blend_mode_);

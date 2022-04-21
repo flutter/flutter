@@ -33,8 +33,8 @@ TEST_P(EntityTest, CanCreateEntity) {
 
 TEST_P(EntityTest, CanDrawRect) {
   Entity entity;
-  entity.SetPath(PathBuilder{}.AddRect({100, 100, 100, 100}).TakePath());
-  entity.SetContents(SolidColorContents::Make(Color::Red()));
+  entity.SetContents(SolidColorContents::Make(
+      PathBuilder{}.AddRect({100, 100, 100, 100}).TakePath(), Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
@@ -49,8 +49,8 @@ TEST_P(EntityTest, ThreeStrokesInOnePath) {
                   .TakePath();
 
   Entity entity;
-  entity.SetPath(path);
   auto contents = std::make_unique<SolidStrokeContents>();
+  contents->SetPath(std::move(path));
   contents->SetColor(Color::Red());
   contents->SetStrokeSize(5.0);
   entity.SetContents(std::move(contents));
@@ -79,8 +79,8 @@ TEST_P(EntityTest, TriangleInsideASquare) {
                     .TakePath();
 
     Entity entity;
-    entity.SetPath(path);
     auto contents = std::make_unique<SolidStrokeContents>();
+    contents->SetPath(std::move(path));
     contents->SetColor(Color::Red());
     contents->SetStrokeSize(20.0);
     entity.SetContents(std::move(contents));
@@ -124,6 +124,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
                            Path path, SolidStrokeContents::Cap cap,
                            SolidStrokeContents::Join join) {
       auto contents = std::make_unique<SolidStrokeContents>();
+      contents->SetPath(path);
       contents->SetColor(Color::Red());
       contents->SetStrokeSize(width);
       contents->SetStrokeCap(cap);
@@ -131,16 +132,15 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
       contents->SetStrokeMiter(miter_limit);
 
       Entity entity;
-      entity.SetPath(path);
       entity.SetContents(std::move(contents));
 
       auto coverage = entity.GetCoverage();
       if (coverage.has_value()) {
         auto bounds_contents = std::make_unique<SolidColorContents>();
+        bounds_contents->SetPath(
+            PathBuilder{}.AddRect(entity.GetCoverage().value()).TakePath());
         bounds_contents->SetColor(Color::Green().WithAlpha(0.5));
         Entity bounds_entity;
-        bounds_entity.SetPath(
-            PathBuilder{}.AddRect(entity.GetCoverage().value()).TakePath());
         bounds_entity.SetContents(std::move(bounds_contents));
         bounds_entity.Render(context, pass);
       }
@@ -242,8 +242,7 @@ TEST_P(EntityTest, CubicCurveTest) {
           .Close()
           .TakePath();
   Entity entity;
-  entity.SetPath(path);
-  entity.SetContents(SolidColorContents::Make(Color::Red()));
+  entity.SetContents(SolidColorContents::Make(path, Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
@@ -470,8 +469,7 @@ TEST_P(EntityTest, CubicCurveAndOverlapTest) {
           .Close()
           .TakePath();
   Entity entity;
-  entity.SetPath(path);
-  entity.SetContents(SolidColorContents::Make(Color::Red()));
+  entity.SetContents(SolidColorContents::Make(path, Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
@@ -656,10 +654,9 @@ TEST_P(EntityTest, BezierCircleScaled) {
                                 {97.32499434685802, 34.81799797758954})
                   .Close()
                   .TakePath();
-  entity.SetPath(path);
   entity.SetTransformation(
       Matrix::MakeScale({20.0, 20.0, 1.0}).Translate({-80, -15, 0}));
-  entity.SetContents(SolidColorContents::Make(Color::Red()));
+  entity.SetContents(SolidColorContents::Make(path, Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
@@ -682,7 +679,8 @@ TEST_P(EntityTest, Filters) {
         {fi_bridge, FilterInput::Make(blend0), fi_bridge, fi_bridge});
 
     Entity entity;
-    entity.SetPath(PathBuilder{}.AddRect({100, 100, 300, 300}).TakePath());
+    entity.SetTransformation(Matrix::MakeTranslation({500, 300}) *
+                             Matrix::MakeScale(Vector2{0.5, 0.5}));
     entity.SetContents(blend1);
     return entity.Render(context, pass);
   };
@@ -717,7 +715,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     static Color bounds_color(0, 1, 0, 0.1);
     static float offset[2] = {500, 400};
     static float rotation = 0;
-    static float scale[2] = {0.8, 0.8};
+    static float scale[2] = {0.5, 0.5};
     static float skew[2] = {0, 0};
 
     ImGui::Begin("Controls");
@@ -752,8 +750,6 @@ TEST_P(EntityTest, GaussianBlurFilter) {
         FilterContents::Sigma{blur_amount[1]},
         blur_styles[selected_blur_style]);
 
-    ISize input_size = boston->GetSize();
-    auto rect = Rect(-Point(input_size) / 2, Size(input_size));
     auto ctm = Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
                Matrix::MakeRotationZ(Radians(rotation)) *
                Matrix::MakeScale(Vector2(scale[0], scale[1])) *
@@ -762,7 +758,6 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     auto target_contents = selected_blur_type == 0 ? blur : mask_blur;
 
     Entity entity;
-    entity.SetPath(PathBuilder{}.AddRect(rect).TakePath());
     entity.SetContents(target_contents);
     entity.SetTransformation(ctm);
 
@@ -771,19 +766,23 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     // Renders a red "cover" rectangle that shows the original position of the
     // unfiltered input.
     Entity cover_entity;
-    cover_entity.SetPath(PathBuilder{}.AddRect(rect).TakePath());
-    cover_entity.SetContents(SolidColorContents::Make(cover_color));
+    cover_entity.SetContents(
+        SolidColorContents::Make(PathBuilder{}
+                                     .AddRect(Rect(-Point(bridge->GetSize()) / 2,
+                                                   Size(bridge->GetSize())))
+                                     .TakePath(),
+                                 cover_color));
     cover_entity.SetTransformation(ctm);
 
     cover_entity.Render(context, pass);
 
     // Renders a green bounding rect of the target filter.
     Entity bounds_entity;
-    bounds_entity.SetPath(
+    bounds_entity.SetContents(SolidColorContents::Make(
         PathBuilder{}
             .AddRect(target_contents->GetCoverage(entity).value())
-            .TakePath());
-    bounds_entity.SetContents(SolidColorContents::Make(bounds_color));
+            .TakePath(),
+        bounds_color));
     bounds_entity.SetTransformation(Matrix());
 
     bounds_entity.Render(context, pass);
@@ -803,19 +802,17 @@ TEST_P(EntityTest, SetBlendMode) {
 TEST_P(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
   Entity entity;
   entity.SetContents(std::make_shared<SolidColorContents>());
-  entity.SetPath({});
   ASSERT_FALSE(entity.GetCoverage().has_value());
-  ASSERT_FALSE(entity.GetPathCoverage().has_value());
 }
 
 TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
   {
     Entity entity;
     auto contents = std::make_unique<SolidStrokeContents>();
+    contents->SetPath(PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath());
     contents->SetStrokeCap(SolidStrokeContents::Cap::kButt);
     contents->SetStrokeJoin(SolidStrokeContents::Join::kBevel);
     contents->SetStrokeSize(4);
-    entity.SetPath(PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
     auto expected = Rect::MakeLTRB(-2, -2, 12, 12);
@@ -827,10 +824,10 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
   {
     Entity entity;
     auto contents = std::make_unique<SolidStrokeContents>();
+    contents->SetPath(PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath());
     contents->SetStrokeCap(SolidStrokeContents::Cap::kSquare);
     contents->SetStrokeJoin(SolidStrokeContents::Join::kBevel);
     contents->SetStrokeSize(4);
-    entity.SetPath(PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
     auto expected =
@@ -843,11 +840,11 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
   {
     Entity entity;
     auto contents = std::make_unique<SolidStrokeContents>();
+    contents->SetPath(PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath());
     contents->SetStrokeCap(SolidStrokeContents::Cap::kSquare);
     contents->SetStrokeJoin(SolidStrokeContents::Join::kMiter);
     contents->SetStrokeSize(4);
     contents->SetStrokeMiter(2);
-    entity.SetPath(PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
     auto expected = Rect::MakeLTRB(-4, -4, 14, 14);

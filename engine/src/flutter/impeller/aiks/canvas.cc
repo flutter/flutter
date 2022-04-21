@@ -8,7 +8,6 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/aiks/paint_pass_delegate.h"
-#include "impeller/entity/contents/clear_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
@@ -111,10 +110,9 @@ void Canvas::RestoreToCount(size_t count) {
 void Canvas::DrawPath(Path path, Paint paint) {
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
-  entity.SetPath(std::move(path));
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetBlendMode(paint.blend_mode);
-  entity.SetContents(paint.WithFilters(paint.CreateContentsForEntity()));
+  entity.SetContents(paint.WithFilters(paint.CreateContentsForEntity(std::move(path))));
 
   GetCurrentPass().AddEntity(std::move(entity));
 }
@@ -124,8 +122,7 @@ void Canvas::DrawPaint(Paint paint) {
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetBlendMode(paint.blend_mode);
-  entity.SetContents(
-      std::make_shared<ClearContents>(paint.CreateContentsForEntity()));
+  entity.SetContents(paint.CreateContentsForEntity({}, true));
 
   GetCurrentPass().AddEntity(std::move(entity));
 }
@@ -158,11 +155,11 @@ void Canvas::SaveLayer(Paint paint, std::optional<Rect> bounds) {
 
 void Canvas::ClipPath(Path path, Entity::ClipOperation clip_op) {
   auto contents = std::make_shared<ClipContents>();
+  contents->SetPath(std::move(path));
   contents->SetClipOperation(clip_op);
 
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
-  entity.SetPath(std::move(path));
   entity.SetContents(std::move(contents));
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetAddsToCoverage(false);
@@ -178,7 +175,6 @@ void Canvas::RestoreClip() {
   entity.SetTransformation(GetCurrentTransformation());
   // This path is empty because ClipRestoreContents just generates a quad that
   // takes up the full render target.
-  entity.SetPath({});
   entity.SetContents(std::make_shared<ClipRestoreContents>());
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetAddsToCoverage(false);
@@ -234,12 +230,12 @@ void Canvas::DrawImageRect(std::shared_ptr<Image> image,
   }
 
   auto contents = std::make_shared<TextureContents>();
+  contents->SetPath(PathBuilder{}.AddRect(dest).TakePath());
   contents->SetTexture(image->GetTexture());
   contents->SetSourceRect(source);
   contents->SetSamplerDescriptor(std::move(sampler));
 
   Entity entity;
-  entity.SetPath(PathBuilder{}.AddRect(dest).TakePath());
   entity.SetBlendMode(paint.blend_mode);
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetContents(paint.WithFilters(contents, false));
@@ -293,7 +289,6 @@ void Canvas::DrawTextFrame(TextFrame text_frame, Point position, Paint paint) {
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation() *
                            Matrix::MakeTranslation(position));
-  entity.SetPath({});
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetBlendMode(paint.blend_mode);
   entity.SetContents(paint.WithFilters(std::move(text_contents), true));

@@ -61,12 +61,6 @@ class Entity {
 
   void SetTransformation(const Matrix& transformation);
 
-  const Path& GetPath() const;
-
-  void SetPath(Path path);
-
-  std::optional<Rect> GetPathCoverage() const;
-
   void SetAddsToCoverage(bool adds);
 
   bool AddsToCoverage() const;
@@ -93,7 +87,6 @@ class Entity {
   Matrix transformation_;
   std::shared_ptr<Contents> contents_;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
-  Path path_;
   uint32_t stencil_depth_ = 0u;
   bool adds_to_coverage_ = true;
 };

@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
+#include "impeller/geometry/path.h"
 #include "impeller/renderer/sampler_descriptor.h"
 
 namespace impeller {
@@ -21,6 +22,8 @@ class TextureContents final : public Contents {
   TextureContents();
 
   ~TextureContents() override;
+
+  void SetPath(Path path);
 
   void SetTexture(std::shared_ptr<Texture> texture);
 
@@ -37,11 +40,16 @@ class TextureContents final : public Contents {
   void SetOpacity(Scalar opacity);
 
   // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
+
+  // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
 
  public:
+  Path path_;
+
   std::shared_ptr<Texture> texture_;
   SamplerDescriptor sampler_descriptor_ = {};
   Rect source_rect_;
