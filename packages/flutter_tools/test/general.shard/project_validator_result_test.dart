@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/project_validator_result.dart';
-import 'package:flutter_tools/src/project_validator.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/project_validator.dart';
+import 'package:flutter_tools/src/project_validator_result.dart';
 
 import '../src/common.dart';
 

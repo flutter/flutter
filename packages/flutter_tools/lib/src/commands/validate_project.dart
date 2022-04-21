@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../project_validator_result.dart';
-import '../project_validator.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../project.dart';
+import '../project_validator.dart';
+import '../project_validator_result.dart';
 import '../runner/flutter_command.dart';
 
 class ValidateProjectCommand extends FlutterCommand {

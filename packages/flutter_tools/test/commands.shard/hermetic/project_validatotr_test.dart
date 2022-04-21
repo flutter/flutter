@@ -6,12 +6,12 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/project_validator_result.dart';
-import 'package:flutter_tools/src/project_validator.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/validate_project.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/project_validator.dart';
+import 'package:flutter_tools/src/project_validator_result.dart';
 
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
