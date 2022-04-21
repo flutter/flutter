@@ -511,10 +511,7 @@ void RasterCache::SweepOneCacheAfterFrame(RasterCacheKey::Map<Entry>& cache,
 void RasterCache::CleanupAfterFrame() {
   picture_metrics_ = {};
   layer_metrics_ = {};
-  {
-    TRACE_EVENT0("flutter", "RasterCache::SweepCaches");
-    SweepOneCacheAfterFrame(cache_, picture_metrics_, layer_metrics_);
-  }
+  SweepOneCacheAfterFrame(cache_, picture_metrics_, layer_metrics_);
   TraceStatsToTimeline();
 }
 
