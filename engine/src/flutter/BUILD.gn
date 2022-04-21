@@ -31,14 +31,6 @@ config("export_dynamic_symbols") {
   }
 }
 
-# Flutter SDK artifacts should only be built when either doing host builds, or
-# for cross-compiled desktop targets.
-# TODO: We can't build the engine artifacts for arm (32-bit) right now;
-# see https://github.com/flutter/flutter/issues/74322
-_build_engine_artifacts =
-    current_toolchain == host_toolchain ||
-    (is_linux && !is_chromeos && current_cpu != "arm") || is_mac
-
 if (flutter_prebuilt_dart_sdk) {
   copy_trees("_copy_trees") {
     sources = [
@@ -85,7 +77,7 @@ group("flutter") {
   if (!is_fuchsia) {
     public_deps += [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
 
-    if (_build_engine_artifacts) {
+    if (build_engine_artifacts) {
       public_deps += [
         ":dart_sdk",
         "//flutter/flutter_frontend_server:frontend_server",
@@ -94,6 +86,10 @@ group("flutter") {
         # //flutter/lib/snapshot:generate_snapshot_bin will only build
         # gen_snapshot for the host and not the target.
         "//third_party/dart/runtime/bin:gen_snapshot",
+
+        # Impeller artifacts - compiler and libtessellator
+        "//flutter/impeller/compiler:impellerc",
+        "//flutter/impeller/tessellator:tessellator_shared",
       ]
 
       if (full_dart_sdk) {
@@ -102,7 +98,7 @@ group("flutter") {
     }
   }
 
-  if (_build_engine_artifacts) {
+  if (build_engine_artifacts) {
     public_deps += [
       "//flutter/shell/testing",
       "//flutter/tools/const_finder",

@@ -115,7 +115,7 @@ deps = {
   'src': 'https://github.com/flutter/buildroot.git' + '@' + '2c41cfc742586b44984595960fc161c30252d8d6',
 
   'src/flutter/impeller':
-   Var('github_git') + '/flutter/impeller' + '@' + 'deab73b33a15261852c380eaa3c843bb5918e5f8',
+   Var('github_git') + '/flutter/impeller' + '@' + 'c833f7de604f5c4298216494fb7b7ff378353601',
 
    # Fuchsia compatibility
    #
