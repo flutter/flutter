@@ -203,3 +203,30 @@ TEST(FlKeyChannelResponderTest, TestKeyEventHandledByFramework) {
   // Blocks here until echo_response_cb is called.
   g_main_loop_run(loop);
 }
+
+TEST(FlKeyChannelResponderTest, UseSpecifiedLogicalKey) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
+  FlKeyChannelResponderMock mock{
+      .value_converter = echo_response_cb,
+      .channel_name = "test/echo",
+  };
+  g_autoptr(FlKeyResponder) responder =
+      FL_KEY_RESPONDER(fl_key_channel_responder_new(messenger, &mock));
+
+  fl_key_responder_handle_event(
+      responder,
+      fl_key_event_new_by_mock(12345, true, GDK_KEY_A, 0x04, 0x0, nullptr,
+                               false),
+      responder_callback, loop, 888);
+  expected_handled = TRUE;
+  expected_value =
+      "{type: keydown, keymap: linux, scanCode: 4, toolkit: gtk, "
+      "keyCode: 65, modifiers: 0, unicodeScalarValues: 65, "
+      "specifiedLogicalKey: 888}";
+
+  // Blocks here until echo_response_cb is called.
+  g_main_loop_run(loop);
+}

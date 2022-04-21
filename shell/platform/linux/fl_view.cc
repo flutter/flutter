@@ -56,6 +56,10 @@ struct _FlView {
 
   // Tracks whether mouse pointer is inside the view.
   gboolean pointer_inside;
+
+  /* FlKeyboardViewDelegate related properties */
+  KeyboardLayoutNotifier keyboard_layout_notifier;
+  GdkKeymap* keymap;
 };
 
 typedef struct _FlViewChild {
@@ -250,15 +254,18 @@ static void fl_view_keyboard_delegate_iface_init(
           fl_engine_send_key_event(self->engine, event, callback, user_data);
         };
       };
+
   iface->text_filter_key_press = [](FlKeyboardViewDelegate* view_delegate,
                                     FlKeyEvent* event) {
     FlView* self = FL_VIEW(view_delegate);
     return fl_text_input_plugin_filter_keypress(self->text_input_plugin, event);
   };
+
   iface->get_messenger = [](FlKeyboardViewDelegate* view_delegate) {
     FlView* self = FL_VIEW(view_delegate);
     return fl_engine_get_binary_messenger(self->engine);
   };
+
   iface->redispatch_event = [](FlKeyboardViewDelegate* view_delegate,
                                std::unique_ptr<FlKeyEvent> in_event) {
     FlKeyEvent* event = in_event.release();
@@ -267,6 +274,18 @@ static void fl_view_keyboard_delegate_iface_init(
     g_return_if_fail(type == GDK_KEY_PRESS || type == GDK_KEY_RELEASE);
     gdk_event_put(gdk_event);
     fl_key_event_dispose(event);
+  };
+
+  iface->subscribe_to_layout_change = [](FlKeyboardViewDelegate* view_delegate,
+                                         KeyboardLayoutNotifier notifier) {
+    FlView* self = FL_VIEW(view_delegate);
+    self->keyboard_layout_notifier = std::move(notifier);
+  };
+
+  iface->lookup_key = [](FlKeyboardViewDelegate* view_delegate,
+                         const GdkKeymapKey* key) -> guint {
+    FlView* self = FL_VIEW(view_delegate);
+    return gdk_keymap_lookup_key(self->keymap, key);
   };
 }
 
@@ -386,6 +405,14 @@ static gboolean leave_notify_event_cb(GtkWidget* widget,
   return TRUE;
 }
 
+static void keymap_keys_changed_cb(GdkKeymap* self, FlView* view) {
+  if (view->keyboard_layout_notifier == nullptr) {
+    return;
+  }
+
+  view->keyboard_layout_notifier();
+}
+
 static void fl_view_constructed(GObject* object) {
   FlView* self = FL_VIEW(object);
 
@@ -395,6 +422,9 @@ static void fl_view_constructed(GObject* object) {
       self->engine, update_semantics_node_cb, self, nullptr);
   fl_engine_set_on_pre_engine_restart_handler(
       self->engine, on_pre_engine_restart_cb, self, nullptr);
+
+  // Must initialize the keymap before the keyboard.
+  self->keymap = gdk_keymap_get_for_display(gdk_display_get_default());
 
   // Create system channel handlers.
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
@@ -423,6 +453,8 @@ static void fl_view_constructed(GObject* object) {
                    G_CALLBACK(enter_notify_event_cb), self);
   g_signal_connect(self->event_box, "leave-notify-event",
                    G_CALLBACK(leave_notify_event_cb), self);
+  g_signal_connect(self->keymap, "keys-changed",
+                   G_CALLBACK(keymap_keys_changed_cb), self);
 }
 
 static void fl_view_set_property(GObject* object,
@@ -710,6 +742,8 @@ static void fl_view_remove(GtkContainer* container, GtkWidget* widget) {
   if (widget == GTK_WIDGET(self->event_box)) {
     g_clear_object(&self->event_box);
   }
+
+  g_clear_object(&self->keymap);
 }
 
 // Implements GtkContainer::forall

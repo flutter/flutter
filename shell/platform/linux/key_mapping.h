@@ -8,6 +8,7 @@
 #include <gdk/gdk.h>
 #include <cinttypes>
 #include <map>
+#include <vector>
 
 inline uint64_t gpointer_to_uint64(gpointer pointer) {
   return pointer == nullptr ? 0 : reinterpret_cast<uint64_t>(pointer);
@@ -35,5 +36,19 @@ extern const uint64_t kUnicodePlane;
 
 // The plane value for the private keys defined by the GTK embedding.
 extern const uint64_t kGtkPlane;
+
+typedef struct {
+  // The key code for a key that prints `keyChar` in the US keyboard layout.
+  uint16_t keycode;
+
+  // The logical key for this key.
+  uint64_t logical_key;
+
+  // If the goal is mandatory, the keyboard manager will make sure to find a
+  // logical key for this character, falling back to the US keyboard layout.
+  bool mandatory;
+} LayoutGoal;
+
+extern const std::vector<LayoutGoal> layout_goals;
 
 #endif  // KEYBOARD_MAP_H_
