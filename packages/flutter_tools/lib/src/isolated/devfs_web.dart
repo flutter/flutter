@@ -1010,7 +1010,7 @@ void _log(logging.LogRecord event) {
     globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
   } else if (event.level == logging.Level.WARNING) {
     // TODO(elliette) Remove the following message suppressions after DWDS is 
-    // >13.0.0. This is a temporary fix for: 
+    // >13.1.0. This is a temporary fix for: 
     // https://github.com/flutter/flutter/issues/101639
     const String dartUri = 'DartUri';
     if (event.loggerName == dartUri) {
