@@ -3120,7 +3120,6 @@ targets:
 
   - name: Mac_android entrypoint_dart_registrant
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
