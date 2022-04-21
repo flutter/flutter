@@ -40,35 +40,36 @@ class ValidateProjectCommand extends FlutterCommand {
     final Directory workingDirectory = userPath.isEmpty ? fileSystem.currentDirectory : fileSystem.directory(userPath);
 
     final FlutterProject project =  FlutterProject.fromDirectory(workingDirectory);
-    final List<ProjectValidatorResult> results = <ProjectValidatorResult>[];
+    final List<Future<List<ProjectValidatorResult>>> results = <Future<List<ProjectValidatorResult>>>[];
     final Set<ProjectValidator> ranValidators = <ProjectValidator>{};
 
     bool hasCrash = false;
     for (final ProjectValidator validator in allProjectValidators) {
       if (!ranValidators.contains(validator) && validator.supportsProject(project)) {
-        try {
-          results.addAll(await validator.start(project));
-        } on Exception catch (exception, stackTrace) {
-          results.add(ProjectValidatorResult.crash(exception, stackTrace));
-          hasCrash = true;
-        }
+          results.add(validator.start(project).catchError((Object exception, StackTrace trace) {
+            hasCrash = true;
+            return <ProjectValidatorResult>[ProjectValidatorResult.crash(exception, trace)];
+          }));
         ranValidators.add(validator);
       }
     }
 
-    printResults(results);
+    printResults(await Future.wait(results));
     if (hasCrash) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
     return const FlutterCommandResult(ExitStatus.success);
   }
 
-  void printResults(final List<ProjectValidatorResult> results) {
+  void printResults(final List<List<ProjectValidatorResult>> futureResults) {
     final StringBuffer buffer = StringBuffer();
 
-    for (final ProjectValidatorResult result in results) {
-      addToBufferResult(result, buffer);
+    for (final List<ProjectValidatorResult> resultList in futureResults) {
+      for (final ProjectValidatorResult result in resultList) {
+        addToBufferResult(result, buffer);
+      }
     }
+
     logger.printBox(buffer.toString());
   }
 
