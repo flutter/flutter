@@ -38,7 +38,7 @@ typedef Callbacker<T> = String? Function(Callback<T> callback);
 /// typedef IntCallback = void Function(int result);
 ///
 /// String _doSomethingAndCallback(IntCallback callback) {
-///   new Timer(new Duration(seconds: 1), () { callback(1); });
+///   Timer(const Duration(seconds: 1), () { callback(1); });
 /// }
 ///
 /// Future<int> doSomething() {
