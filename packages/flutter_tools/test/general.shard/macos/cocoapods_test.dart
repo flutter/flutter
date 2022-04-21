@@ -514,7 +514,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
               'LANG': 'en_US.UTF-8',
             },
             exitCode: 1,
-            stdout: cocoaPodsError,
+            stderr: cocoaPodsError,
           ),
           const FakeCommand(
             command: <String>['which', 'sysctl'],
