@@ -3388,6 +3388,7 @@ targets:
       task_name: hot_mode_dev_cycle_macos_target__benchmark
     runIf:
       - dev/**
+      - .ci.yaml
     scheduler: luci
 
   - name: Mac_ios integration_test_test_ios
