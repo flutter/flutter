@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <cassert>
+#include <memory>
 #include <optional>
 
 #include "flutter/fml/logging.h"
@@ -50,10 +51,9 @@ TestVulkanContext::TestVulkanContext() {
     return;
   }
 
-  application_ =
-      std::unique_ptr<vulkan::VulkanApplication>(new vulkan::VulkanApplication(
-          *vk_, "Flutter Unittests", {}, VK_MAKE_VERSION(1, 0, 0),
-          VK_MAKE_VERSION(1, 0, 0), true));
+  application_ = std::make_unique<vulkan::VulkanApplication>(
+      *vk_, "Flutter Unittests", std::vector<std::string>{},
+      VK_MAKE_VERSION(1, 0, 0), VK_MAKE_VERSION(1, 0, 0), true);
   if (!application_->IsValid()) {
     FML_LOG(ERROR) << "Failed to initialize basic Vulkan state.";
     return;

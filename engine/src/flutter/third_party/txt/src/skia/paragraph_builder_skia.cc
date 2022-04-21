@@ -195,7 +195,7 @@ void ParagraphBuilderSkia::AddPlaceholder(PlaceholderRun& span) {
 }
 
 std::unique_ptr<Paragraph> ParagraphBuilderSkia::Build() {
-  return std::unique_ptr<Paragraph>(new ParagraphSkia(builder_->Build()));
+  return std::make_unique<ParagraphSkia>(builder_->Build());
 }
 
 }  // namespace txt
