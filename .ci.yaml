@@ -125,7 +125,7 @@ platform_properties:
         [
           {"dependency": "xcode"},
           {"dependency": "gems"},
-          {"dependency": "ios_signing"}
+          {"dependency": "apple_signing"}
         ]
       os: Mac-12
       cpu: x86
@@ -3365,6 +3365,7 @@ targets:
       task_name: hot_mode_dev_cycle_macos_target__benchmark
     runIf:
       - dev/**
+      - .ci.yaml
     scheduler: luci
 
   - name: Mac_ios integration_test_test_ios
