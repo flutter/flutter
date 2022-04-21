@@ -471,7 +471,10 @@ class PaintingContext extends ClipContext {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
-    if (needsCompositing) {
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    } if (needsCompositing) {
       final ClipRRectLayer layer = oldLayer ?? ClipRRectLayer();
       layer
         ..clipRRect = offsetClipRRect
@@ -507,7 +510,10 @@ class PaintingContext extends ClipContext {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
-    if (needsCompositing) {
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    } else if (needsCompositing) {
       final ClipPathLayer layer = oldLayer ?? ClipPathLayer();
       layer
         ..clipPath = offsetClipPath

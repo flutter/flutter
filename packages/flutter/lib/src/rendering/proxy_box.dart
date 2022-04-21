@@ -842,9 +842,6 @@ class RenderOpacity extends RenderProxyBox {
        _alpha = ui.Color.getAlphaFromOpacity(opacity),
        super(child);
 
-  @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
-
   int _alpha;
 
   /// The fraction to scale the child's alpha value.
@@ -864,12 +861,9 @@ class RenderOpacity extends RenderProxyBox {
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
-    final bool didNeedCompositing = alwaysNeedsCompositing;
     final bool wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
-    if (didNeedCompositing != alwaysNeedsCompositing)
-      markNeedsCompositingBitsUpdate();
     markNeedsPaint();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
@@ -897,8 +891,14 @@ class RenderOpacity extends RenderProxyBox {
         layer = null;
         return;
       }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+      if (needsCompositing) {
+        layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+      } else {
+        context.canvas.saveLayer(offset & size, Paint()..color = Color(_alpha << 24));
+        super.paint(context, offset);
+        context.canvas.restore();
+        layer = null;
+      }
     }
   }
 
@@ -1816,9 +1816,6 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   }
 
   @override
-  bool get alwaysNeedsCompositing => true;
-
-  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.elevation = elevation;
@@ -1832,6 +1829,8 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     description.add(ColorProperty('shadowColor', color));
   }
 }
+
+final Paint _transparentPaint = Paint()..color = const Color(0x00000000);
 
 /// Creates a physical model layer that clips its child to a rounded
 /// rectangle.
@@ -1860,9 +1859,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
        assert(shadowColor != null),
        _shape = shape,
        _borderRadius = borderRadius;
-
-  @override
-  PhysicalModelLayer? get layer => super.layer as PhysicalModelLayer?;
 
   /// The shape of the layer.
   ///
@@ -1921,42 +1917,67 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      _updateClip();
-      final RRect offsetRRect = _clip!.shift(offset);
-      final Rect offsetBounds = offsetRRect.outerRect;
-      final Path offsetRRectAsPath = Path()..addRRect(offsetRRect);
-      bool paintShadows = true;
-      assert(() {
-        if (debugDisableShadows) {
-          if (elevation > 0.0) {
-            context.canvas.drawRRect(
-              offsetRRect,
-              Paint()
-                ..color = shadowColor
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = elevation * 2.0,
-            );
-          }
-          paintShadows = false;
-        }
-        return true;
-      }());
-      layer ??= PhysicalModelLayer();
-      layer!
-        ..clipPath = offsetRRectAsPath
-        ..clipBehavior = clipBehavior
-        ..elevation = paintShadows ? elevation : 0.0
-        ..color = color
-        ..shadowColor = shadowColor;
-      context.pushLayer(layer!, super.paint, offset, childPaintBounds: offsetBounds);
-      assert(() {
-        layer!.debugCreator = debugCreator;
-        return true;
-      }());
-    } else {
+    if (child == null) {
       layer = null;
+      return;
     }
+
+    _updateClip();
+    final RRect offsetRRect = _clip!.shift(offset);
+    final Rect offsetBounds = offsetRRect.outerRect;
+    final Path offsetRRectAsPath = Path()..addRRect(offsetRRect);
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        if (elevation > 0.0) {
+          context.canvas.drawRRect(
+            offsetRRect,
+            Paint()
+              ..color = shadowColor
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = elevation * 2.0,
+          );
+        }
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    final Canvas canvas = context.canvas;
+    if (elevation != 0.0 && paintShadows) {
+      // The drawShadow call doesn't add the region of the shadow to the
+      // picture's bounds, so we draw a hardcoded amount of extra space to
+      // account for the maximum potential area of the shadow.
+      // TODO(jsimmons): remove this when Skia does it for us.
+      canvas.drawRect(
+        offsetBounds.inflate(20.0),
+        _transparentPaint,
+      );
+      canvas.drawShadow(
+        offsetRRectAsPath,
+        shadowColor,
+        elevation,
+        color.alpha != 0xFF,
+      );
+    }
+    canvas.drawRRect(
+      offsetRRect,
+      Paint()..color = color
+    );
+    layer = context.pushClipRRect(
+      needsCompositing,
+      offset,
+      offsetBounds,
+      offsetRRect,
+      super.paint,
+      oldLayer: layer as ClipRRectLayer?,
+      clipBehavior: clipBehavior,
+    );
+
+    assert(() {
+      layer?.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -1995,9 +2016,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
        assert(shadowColor != null);
 
   @override
-  PhysicalModelLayer? get layer => super.layer as PhysicalModelLayer?;
-
-  @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
@@ -2013,41 +2031,67 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      _updateClip();
-      final Rect offsetBounds = offset & size;
-      final Path offsetPath = _clip!.shift(offset);
-      bool paintShadows = true;
-      assert(() {
-        if (debugDisableShadows) {
-          if (elevation > 0.0) {
-            context.canvas.drawPath(
-              offsetPath,
-              Paint()
-                ..color = shadowColor
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = elevation * 2.0,
-            );
-          }
-          paintShadows = false;
-        }
-        return true;
-      }());
-      layer ??= PhysicalModelLayer();
-      layer!
-        ..clipPath = offsetPath
-        ..clipBehavior = clipBehavior
-        ..elevation = paintShadows ? elevation : 0.0
-        ..color = color
-        ..shadowColor = shadowColor;
-      context.pushLayer(layer!, super.paint, offset, childPaintBounds: offsetBounds);
-      assert(() {
-        layer!.debugCreator = debugCreator;
-        return true;
-      }());
-    } else {
+    if (child == null) {
       layer = null;
+      return;
     }
+
+    _updateClip();
+    final Rect offsetBounds = offset & size;
+    final Path offsetPath = _clip!.shift(offset);
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        if (elevation > 0.0) {
+          context.canvas.drawPath(
+            offsetPath,
+            Paint()
+              ..color = shadowColor
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = elevation * 2.0,
+          );
+        }
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    final Canvas canvas = context.canvas;
+    if (elevation != 0.0 && paintShadows) {
+      // The drawShadow call doesn't add the region of the shadow to the
+      // picture's bounds, so we draw a hardcoded amount of extra space to
+      // account for the maximum potential area of the shadow.
+      // TODO(jsimmons): remove this when Skia does it for us.
+      canvas.drawRect(
+        offsetBounds.inflate(20.0),
+        _transparentPaint,
+      );
+      canvas.drawShadow(
+        offsetPath,
+        shadowColor,
+        elevation,
+        color.alpha != 0xFF,
+      );
+    }
+
+    canvas.drawPath(
+      offsetPath,
+      Paint()..color = color..style = PaintingStyle.fill,
+    );
+    layer = context.pushClipPath(
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      _clip!,
+      super.paint,
+      oldLayer: layer as ClipPathLayer?,
+      clipBehavior: clipBehavior,
+    );
+
+    assert(() {
+      layer?.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
