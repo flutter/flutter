@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter_tools/src/analyze_project_validator.dart';
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
@@ -147,7 +148,9 @@ List<FlutterCommand> generateCommands({
     terminal: globals.terminal,
     artifacts: globals.artifacts,
   ),
-  ValidateProjectCommand(globals.fs, globals.logger, verbose: verbose),
+  ValidateProjectCommand(
+      fileSystem: globals.fs, logger: globals.logger, allProjectValidators: ProjectValidator.allProjectValidators, verbose: verbose
+  ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(verboseHelp: verboseHelp),
   BuildCommand(verboseHelp: verboseHelp),

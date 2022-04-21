@@ -13,22 +13,22 @@ class ProjectValidatorTaskImpl extends ProjectValidator {
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    final ProjectValidatorResult error = ProjectValidatorResult(
-      'result_1',
-      'this is an error',
-      StatusProjectValidator.error,
+    const ProjectValidatorResult error = ProjectValidatorResult(
+      name: 'result_1',
+      value: 'this is an error',
+      status: StatusProjectValidator.error,
     );
 
-    final ProjectValidatorResult success = ProjectValidatorResult(
-      'result_2',
-      'correct',
-      StatusProjectValidator.success,
+    const ProjectValidatorResult success = ProjectValidatorResult(
+      name: 'result_2',
+      value: 'correct',
+      status: StatusProjectValidator.success,
     );
 
-    final ProjectValidatorResult warning = ProjectValidatorResult(
-      'result_3',
-      'this passed',
-      StatusProjectValidator.success,
+    const ProjectValidatorResult warning = ProjectValidatorResult(
+      name: 'result_3',
+      value: 'this passed',
+      status: StatusProjectValidator.success,
       warning: 'with a warning'
     );
 
@@ -45,31 +45,31 @@ void main() {
   group('ProjectValidatorResult', () {
 
     testWithoutContext('success status', () {
-      final ProjectValidatorResult result = ProjectValidatorResult(
-        'name',
-        'value',
-        StatusProjectValidator.success,
+      const ProjectValidatorResult result = ProjectValidatorResult(
+        name: 'name',
+        value: 'value',
+        status: StatusProjectValidator.success,
       );
       expect(result.toString(), 'name: value');
       expect(result.status, StatusProjectValidator.success);
     });
 
     testWithoutContext('success status with warning', () {
-      final ProjectValidatorResult result = ProjectValidatorResult(
-        'name',
-        'value',
-        StatusProjectValidator.success,
+      const ProjectValidatorResult result = ProjectValidatorResult(
+        name: 'name',
+        value: 'value',
+        status: StatusProjectValidator.success,
         warning: 'my warning'
       );
-      expect(result.toString(), 'name: value. Warning: my warning');
+      expect(result.toString(), 'name: value (warning: my warning)');
       expect(result.status, StatusProjectValidator.success);
     });
 
     testWithoutContext('error status', () {
-      final ProjectValidatorResult result = ProjectValidatorResult(
-        'name',
-        'my error',
-        StatusProjectValidator.error,
+      const ProjectValidatorResult result = ProjectValidatorResult(
+        name: 'name',
+        value: 'my error',
+        status: StatusProjectValidator.error,
       );
       expect(result.toString(), 'Error: my error');
       expect(result.status, StatusProjectValidator.error);
@@ -90,7 +90,7 @@ void main() {
       expect(results.length, 3);
       expect(results[0].toString(), 'Error: this is an error');
       expect(results[1].toString(), 'result_2: correct');
-      expect(results[2].toString(), 'result_3: this passed. Warning: with a warning');
+      expect(results[2].toString(), 'result_3: this passed (warning: with a warning)');
     });
   });
 }

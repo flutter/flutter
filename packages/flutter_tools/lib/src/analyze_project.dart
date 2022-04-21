@@ -6,32 +6,42 @@ enum StatusProjectValidator {
   error,
   warning,
   success,
+  crash,
 }
 
 class ProjectValidatorResult {
 
-  ProjectValidatorResult(this.name, this.value, this._status, {this.warning});
+  const ProjectValidatorResult({
+    required String name,
+    required String value,
+    required StatusProjectValidator status,
+    String? warning,
+  }) : name = name,
+       value = value,
+       warning = warning,
+       status = status;
 
   final String name;
   final String value;
   final String? warning;
-  final StatusProjectValidator _status;
-
-  StatusProjectValidator get status{
-    return _status;
-  }
+  final StatusProjectValidator status;
 
   @override
   String toString() {
-    if (_status == StatusProjectValidator.error) {
+    if (status == StatusProjectValidator.error) {
       return 'Error: $value';
-    } else {
-      String resultString = '$name: $value';
-      if (warning != null) {
-        resultString = '$resultString. Warning: $warning';
-      }
-      return resultString;
     }
+    if (warning != null) {
+      return '$name: $value (warning: $warning)';
+    }
+    return '$name: $value';
   }
 
+  static ProjectValidatorResult crash(Exception exception, StackTrace trace) {
+    return ProjectValidatorResult(
+        name: exception.toString(),
+        value: trace.toString(),
+        status: StatusProjectValidator.crash
+    );
+  }
 }
