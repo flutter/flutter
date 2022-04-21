@@ -514,15 +514,25 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   bool _haveScheduledUpdateNotification = false;
   Axis? _lastAxis;
 
-  bool _isMetricsChanged() {
+  void _maybeDispatchScrollMetricsNotification() {
     assert(haveDimensions);
     final ScrollMetrics currentMetrics = copyWith();
 
-    return _lastMetrics == null ||
+    final bool metricsChanged = _lastMetrics == null ||
       !(currentMetrics.extentBefore == _lastMetrics!.extentBefore
       && currentMetrics.extentInside == _lastMetrics!.extentInside
       && currentMetrics.extentAfter == _lastMetrics!.extentAfter
       && currentMetrics.axisDirection == _lastMetrics!.axisDirection);
+
+    if (metricsChanged) {
+      // It isn't safe to trigger the ScrollMetricsNotification if we are in
+      // the middle of rendering the frame, the developer is likely to schedule
+      // a new frame(build scheduled during frame is illegal).
+      if (!_haveScheduledUpdateNotification) {
+        scheduleMicrotask(didUpdateScrollMetrics);
+        _haveScheduledUpdateNotification = true;
+      }
+    }
   }
 
   @override
@@ -544,6 +554,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       _didChangeViewportDimensionOrReceiveCorrection = false;
       _pendingDimensions = true;
       if (haveDimensions && !correctForNewDimensions(_lastMetrics!, currentMetrics!)) {
+        _maybeDispatchScrollMetricsNotification();
         return false;
       }
       _haveDimensions = true;
@@ -554,17 +565,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       _pendingDimensions = false;
     }
     assert(!_didChangeViewportDimensionOrReceiveCorrection, 'Use correctForNewDimensions() (and return true) to change the scroll offset during applyContentDimensions().');
-
-    if (_isMetricsChanged()) {
-      // It isn't safe to trigger the ScrollMetricsNotification if we are in
-      // the middle of rendering the frame, the developer is likely to schedule
-      // a new frame(build scheduled during frame is illegal).
-      if (!_haveScheduledUpdateNotification) {
-        scheduleMicrotask(didUpdateScrollMetrics);
-        _haveScheduledUpdateNotification = true;
-      }
-      _lastMetrics = copyWith();
-    }
+    _maybeDispatchScrollMetricsNotification();
+    _lastMetrics = copyWith();
     return true;
   }
 

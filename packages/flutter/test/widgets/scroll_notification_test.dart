@@ -40,8 +40,7 @@ void main() {
 
     events.clear();
     await gesture.moveBy(const Offset(-10.0, -10.0));
-    expect(events.length, 2);
-    // User scroll do not trigger the ScrollContentMetricsNotification.
+    expect(events.length, 3);
     expect(events[0] is UserScrollNotification, true);
     expect(events[1] is ScrollUpdateNotification, true);
 
@@ -50,8 +49,8 @@ void main() {
     await tester.pumpWidget(buildFrame(500.0));
     expect(events.length, 1);
     event = events[0] as ScrollMetricsNotification;
-    expect(event.metrics.extentBefore, 10.0);
-    expect(event.metrics.extentInside, 590.0);
+    expect(event.metrics.extentBefore, 0.0);
+    expect(event.metrics.extentInside, 600.0);
     expect(event.metrics.extentAfter, 0.0);
 
     events.clear();
