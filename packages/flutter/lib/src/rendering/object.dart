@@ -474,7 +474,7 @@ class PaintingContext extends ClipContext {
     if (clipBehavior == Clip.none) {
       painter(this, offset);
       return null;
-    } if (needsCompositing) {
+    } else if (needsCompositing) {
       final ClipRRectLayer layer = oldLayer ?? ClipRRectLayer();
       layer
         ..clipRRect = offsetClipRRect
