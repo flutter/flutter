@@ -31,7 +31,14 @@ class CircleBorder extends OutlinedBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.all(side.width);
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        return EdgeInsets.all(side.width);
+      case StrokeAlign.center:
+        return EdgeInsets.all(side.width / 2);
+      case StrokeAlign.outside:
+        return EdgeInsets.zero;
+    }
   }
 
   @override
@@ -80,7 +87,19 @@ class CircleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        canvas.drawCircle(rect.center, (rect.shortestSide - side.width) / 2.0, side.toPaint());
+        final double radius;
+        switch (side.strokeAlign) {
+          case StrokeAlign.inside:
+            radius = (rect.shortestSide - side.width) / 2.0;
+            break;
+          case StrokeAlign.center:
+            radius = rect.shortestSide / 2.0;
+            break;
+          case StrokeAlign.outside:
+            radius = (rect.shortestSide + side.width) / 2.0;
+            break;
+        }
+        canvas.drawCircle(rect.center, radius, side.toPaint());
     }
   }
 

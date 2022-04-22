@@ -39,7 +39,14 @@ class RoundedRectangleBorder extends OutlinedBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.all(side.width);
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        return EdgeInsets.all(side.width);
+      case StrokeAlign.center:
+        return EdgeInsets.all(side.width / 2);
+      case StrokeAlign.outside:
+        return EdgeInsets.zero;
+    }
   }
 
   @override
@@ -120,8 +127,23 @@ class RoundedRectangleBorder extends OutlinedBorder {
         if (width == 0.0) {
           canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), side.toPaint());
         } else {
-          final RRect outer = borderRadius.resolve(textDirection).toRRect(rect);
-          final RRect inner = outer.deflate(width);
+          final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
+          final RRect inner;
+          final RRect outer;
+          switch (side.strokeAlign) {
+            case StrokeAlign.inside:
+              inner = borderRect.deflate(width);
+              outer = borderRect;
+              break;
+            case StrokeAlign.center:
+              inner = borderRect.deflate(width / 2);
+              outer = borderRect.inflate(width / 2);
+              break;
+            case StrokeAlign.outside:
+              inner = borderRect;
+              outer = borderRect.inflate(width);
+              break;
+          }
           final Paint paint = Paint()
             ..color = side.color;
           canvas.drawDRRect(outer, inner, paint);
