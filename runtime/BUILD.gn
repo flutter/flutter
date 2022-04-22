@@ -57,6 +57,8 @@ source_set("runtime") {
     "dart_service_isolate.h",
     "dart_snapshot.cc",
     "dart_snapshot.h",
+    "dart_timestamp_provider.cc",
+    "dart_timestamp_provider.h",
     "dart_vm.cc",
     "dart_vm.h",
     "dart_vm_data.cc",

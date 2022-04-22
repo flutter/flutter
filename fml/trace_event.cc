@@ -18,8 +18,14 @@ namespace tracing {
 #if FLUTTER_TIMELINE_ENABLED
 
 namespace {
+
+int64_t DefaultMicrosSource() {
+  return -1;
+}
+
 AsciiTrie gAllowlist;
 std::atomic<TimelineEventHandler> gTimelineEventHandler;
+std::atomic<TimelineMicrosSource> gTimelineMicrosSource = DefaultMicrosSource;
 
 inline void FlutterTimelineEvent(const char* label,
                                  int64_t timestamp0,
@@ -43,6 +49,10 @@ void TraceSetAllowlist(const std::vector<std::string>& allowlist) {
 
 void TraceSetTimelineEventHandler(TimelineEventHandler handler) {
   gTimelineEventHandler = handler;
+}
+
+void TraceSetTimelineMicrosSource(TimelineMicrosSource source) {
+  gTimelineMicrosSource = source;
 }
 
 size_t TraceNonce() {
@@ -83,19 +93,19 @@ void TraceTimelineEvent(TraceArg category_group,
                         Dart_Timeline_Event_Type type,
                         const std::vector<const char*>& c_names,
                         const std::vector<std::string>& values) {
-  TraceTimelineEvent(category_group,            // group
-                     name,                      // name
-                     Dart_TimelineGetMicros(),  // timestamp_micros
-                     identifier,                // identifier
-                     type,                      // type
-                     c_names,                   // names
-                     values                     // values
+  TraceTimelineEvent(category_group,                  // group
+                     name,                            // name
+                     gTimelineMicrosSource.load()(),  // timestamp_micros
+                     identifier,                      // identifier
+                     type,                            // type
+                     c_names,                         // names
+                     values                           // values
   );
 }
 
 void TraceEvent0(TraceArg category_group, TraceArg name) {
-  FlutterTimelineEvent(name,                       // label
-                       Dart_TimelineGetMicros(),   // timestamp0
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
                        0,                          // timestamp1_or_async_id
                        Dart_Timeline_Event_Begin,  // event type
                        0,                          // argument_count
@@ -110,8 +120,8 @@ void TraceEvent1(TraceArg category_group,
                  TraceArg arg1_val) {
   const char* arg_names[] = {arg1_name};
   const char* arg_values[] = {arg1_val};
-  FlutterTimelineEvent(name,                       // label
-                       Dart_TimelineGetMicros(),   // timestamp0
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
                        0,                          // timestamp1_or_async_id
                        Dart_Timeline_Event_Begin,  // event type
                        1,                          // argument_count
@@ -128,8 +138,8 @@ void TraceEvent2(TraceArg category_group,
                  TraceArg arg2_val) {
   const char* arg_names[] = {arg1_name, arg2_name};
   const char* arg_values[] = {arg1_val, arg2_val};
-  FlutterTimelineEvent(name,                       // label
-                       Dart_TimelineGetMicros(),   // timestamp0
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
                        0,                          // timestamp1_or_async_id
                        Dart_Timeline_Event_Begin,  // event type
                        2,                          // argument_count
@@ -139,22 +149,22 @@ void TraceEvent2(TraceArg category_group,
 }
 
 void TraceEventEnd(TraceArg name) {
-  FlutterTimelineEvent(name,                      // label
-                       Dart_TimelineGetMicros(),  // timestamp0
-                       0,                         // timestamp1_or_async_id
-                       Dart_Timeline_Event_End,   // event type
-                       0,                         // argument_count
-                       nullptr,                   // argument_names
-                       nullptr                    // argument_values
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
+                       0,                        // timestamp1_or_async_id
+                       Dart_Timeline_Event_End,  // event type
+                       0,                        // argument_count
+                       nullptr,                  // argument_names
+                       nullptr                   // argument_values
   );
 }
 
 void TraceEventAsyncBegin0(TraceArg category_group,
                            TraceArg name,
                            TraceIDArg id) {
-  FlutterTimelineEvent(name,                      // label
-                       Dart_TimelineGetMicros(),  // timestamp0
-                       id,                        // timestamp1_or_async_id
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
+                       id,  // timestamp1_or_async_id
                        Dart_Timeline_Event_Async_Begin,  // event type
                        0,                                // argument_count
                        nullptr,                          // argument_names
@@ -165,8 +175,8 @@ void TraceEventAsyncBegin0(TraceArg category_group,
 void TraceEventAsyncEnd0(TraceArg category_group,
                          TraceArg name,
                          TraceIDArg id) {
-  FlutterTimelineEvent(name,                           // label
-                       Dart_TimelineGetMicros(),       // timestamp0
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
                        id,                             // timestamp1_or_async_id
                        Dart_Timeline_Event_Async_End,  // event type
                        0,                              // argument_count
@@ -182,9 +192,9 @@ void TraceEventAsyncBegin1(TraceArg category_group,
                            TraceArg arg1_val) {
   const char* arg_names[] = {arg1_name};
   const char* arg_values[] = {arg1_val};
-  FlutterTimelineEvent(name,                      // label
-                       Dart_TimelineGetMicros(),  // timestamp0
-                       id,                        // timestamp1_or_async_id
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
+                       id,  // timestamp1_or_async_id
                        Dart_Timeline_Event_Async_Begin,  // event type
                        1,                                // argument_count
                        arg_names,                        // argument_names
@@ -199,8 +209,8 @@ void TraceEventAsyncEnd1(TraceArg category_group,
                          TraceArg arg1_val) {
   const char* arg_names[] = {arg1_name};
   const char* arg_values[] = {arg1_val};
-  FlutterTimelineEvent(name,                           // label
-                       Dart_TimelineGetMicros(),       // timestamp0
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
                        id,                             // timestamp1_or_async_id
                        Dart_Timeline_Event_Async_End,  // event type
                        1,                              // argument_count
@@ -210,8 +220,8 @@ void TraceEventAsyncEnd1(TraceArg category_group,
 }
 
 void TraceEventInstant0(TraceArg category_group, TraceArg name) {
-  FlutterTimelineEvent(name,                         // label
-                       Dart_TimelineGetMicros(),     // timestamp0
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
                        0,                            // timestamp1_or_async_id
                        Dart_Timeline_Event_Instant,  // event type
                        0,                            // argument_count
@@ -226,8 +236,8 @@ void TraceEventInstant1(TraceArg category_group,
                         TraceArg arg1_val) {
   const char* arg_names[] = {arg1_name};
   const char* arg_values[] = {arg1_val};
-  FlutterTimelineEvent(name,                         // label
-                       Dart_TimelineGetMicros(),     // timestamp0
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
                        0,                            // timestamp1_or_async_id
                        Dart_Timeline_Event_Instant,  // event type
                        1,                            // argument_count
@@ -244,8 +254,8 @@ void TraceEventInstant2(TraceArg category_group,
                         TraceArg arg2_val) {
   const char* arg_names[] = {arg1_name, arg2_name};
   const char* arg_values[] = {arg1_val, arg2_val};
-  FlutterTimelineEvent(name,                         // label
-                       Dart_TimelineGetMicros(),     // timestamp0
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
                        0,                            // timestamp1_or_async_id
                        Dart_Timeline_Event_Instant,  // event type
                        2,                            // argument_count
@@ -257,9 +267,9 @@ void TraceEventInstant2(TraceArg category_group,
 void TraceEventFlowBegin0(TraceArg category_group,
                           TraceArg name,
                           TraceIDArg id) {
-  FlutterTimelineEvent(name,                      // label
-                       Dart_TimelineGetMicros(),  // timestamp0
-                       id,                        // timestamp1_or_async_id
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
+                       id,  // timestamp1_or_async_id
                        Dart_Timeline_Event_Flow_Begin,  // event type
                        0,                               // argument_count
                        nullptr,                         // argument_names
@@ -270,8 +280,8 @@ void TraceEventFlowBegin0(TraceArg category_group,
 void TraceEventFlowStep0(TraceArg category_group,
                          TraceArg name,
                          TraceIDArg id) {
-  FlutterTimelineEvent(name,                           // label
-                       Dart_TimelineGetMicros(),       // timestamp0
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
                        id,                             // timestamp1_or_async_id
                        Dart_Timeline_Event_Flow_Step,  // event type
                        0,                              // argument_count
@@ -281,8 +291,8 @@ void TraceEventFlowStep0(TraceArg category_group,
 }
 
 void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
-  FlutterTimelineEvent(name,                          // label
-                       Dart_TimelineGetMicros(),      // timestamp0
+  FlutterTimelineEvent(name,                            // label
+                       gTimelineMicrosSource.load()(),  // timestamp0
                        id,                            // timestamp1_or_async_id
                        Dart_Timeline_Event_Flow_End,  // event type
                        0,                             // argument_count
@@ -296,6 +306,8 @@ void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
 void TraceSetAllowlist(const std::vector<std::string>& allowlist) {}
 
 void TraceSetTimelineEventHandler(TimelineEventHandler handler) {}
+
+void TraceSetTimelineMicrosSource(TimelineMicrosSource source) {}
 
 size_t TraceNonce() {
   return 0;
