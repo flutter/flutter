@@ -703,7 +703,12 @@ void DisplayListDispatcher::drawPicture(const sk_sp<SkPicture> picture,
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawDisplayList(
     const sk_sp<flutter::DisplayList> display_list) {
-  UNIMPLEMENTED;
+  int saveCount = canvas_.GetSaveCount();
+  Paint savePaint = paint_;
+  paint_ = Paint();
+  display_list->Dispatch(*this);
+  paint_ = savePaint;
+  canvas_.RestoreToCount(saveCount);
 }
 
 // |flutter::Dispatcher|
