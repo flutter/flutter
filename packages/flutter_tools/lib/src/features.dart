@@ -216,6 +216,7 @@ const Feature singleWidgetReload = Feature(
 const Feature windowsUwpEmbedding = Feature(
   name: 'Flutter for Windows UWP',
   configSetting: 'enable-windows-uwp-desktop',
+  extraHelpText: 'Warning: Windows UWP support is obsolete and will be removed.',
   master: FeatureChannelSetting(
     available: true,
   ),

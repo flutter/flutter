@@ -541,12 +541,12 @@ class TestDeviceManager extends DeviceManager {
   TestDeviceManager(
     List<Device> allDevices, {
     List<DeviceDiscovery>? deviceDiscoveryOverrides,
-    required Logger logger,
-    required Terminal terminal,
+    required super.logger,
+    required super.terminal,
     String? wellKnownId,
   }) : _fakeDeviceDiscoverer = FakePollingDeviceDiscovery(),
        _deviceDiscoverers = <DeviceDiscovery>[],
-       super(logger: logger, terminal: terminal, userMessages: UserMessages()) {
+       super(userMessages: UserMessages()) {
     if (wellKnownId != null) {
       _fakeDeviceDiscoverer.wellKnownIds.add(wellKnownId);
     }

@@ -69,7 +69,7 @@ class BottomSheet extends StatefulWidget {
   /// [ScaffoldState.showBottomSheet], for persistent bottom sheets, or by
   /// [showModalBottomSheet], for modal bottom sheets.
   const BottomSheet({
-    Key? key,
+    super.key,
     this.animationController,
     this.enableDrag = true,
     this.onDragStart,
@@ -84,8 +84,7 @@ class BottomSheet extends StatefulWidget {
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(builder != null),
-       assert(elevation == null || elevation >= 0.0),
-       super(key: key);
+       assert(elevation == null || elevation >= 0.0);
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -345,7 +344,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 
 class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
-    Key? key,
+    super.key,
     this.route,
     this.backgroundColor,
     this.elevation,
@@ -355,8 +354,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.isScrollControlled = false,
     this.enableDrag = true,
   }) : assert(isScrollControlled != null),
-       assert(enableDrag != null),
-       super(key: key);
+       assert(enableDrag != null);
 
   final _ModalBottomSheetRoute<T>? route;
   final bool isScrollControlled;
@@ -464,13 +462,12 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.isDismissible = true,
     this.enableDrag = true,
     required this.isScrollControlled,
-    RouteSettings? settings,
+    super.settings,
     this.transitionAnimationController,
     this.anchorPoint,
   }) : assert(isScrollControlled != null),
        assert(isDismissible != null),
-       assert(enableDrag != null),
-       super(settings: settings);
+       assert(enableDrag != null);
 
   final WidgetBuilder? builder;
   final CapturedThemes capturedThemes;

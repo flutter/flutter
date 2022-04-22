@@ -952,7 +952,7 @@ void main() {
 
 class TestList extends StatefulWidget {
   const TestList({
-    Key? key,
+    super.key,
     this.textColor,
     this.iconColor,
     this.proxyDecorator,
@@ -960,7 +960,7 @@ class TestList extends StatefulWidget {
     this.reverse = false,
     this.onReorderStart,
     this.onReorderEnd,
-  }) : super(key: key);
+  });
 
   final List<int> items;
   final Color? textColor;

@@ -21,7 +21,7 @@ import 'build.dart';
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({ required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
+  BuildIOSCommand({ required super.verboseHelp }) {
     argParser
       ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
@@ -31,10 +31,6 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device. This changes '
           'the default build mode to debug if otherwise unspecified.',
-      )
-      ..addFlag('codesign',
-        defaultsTo: true,
-        help: 'Codesign the application bundle (only available on device builds).',
       );
   }
 
@@ -42,7 +38,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final String name = 'ios';
 
   @override
-  final String description = 'Build an iOS application bundle (Mac OS X host only).';
+  final String description = 'Build an iOS application bundle (macOS host only).';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
@@ -54,9 +50,6 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   bool get configOnly => boolArg('config-only');
 
   @override
-  bool get shouldCodesign => boolArg('codesign');
-
-  @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
 }
 
@@ -65,8 +58,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 ///
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({required bool verboseHelp})
-      : super(verboseHelp: verboseHelp) {
+  BuildIOSArchiveCommand({required super.verboseHelp}) {
     argParser.addOption(
       'export-method',
       defaultsTo: 'app-store',
@@ -95,7 +87,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final List<String> aliases = <String>['xcarchive'];
 
   @override
-  final String description = 'Build an iOS archive bundle and IPA for distribution (Mac OS X host only).';
+  final String description = 'Build an iOS archive bundle and IPA for distribution (macOS host only).';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;
@@ -105,9 +97,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   @override
   final bool configOnly = false;
-
-  @override
-  final bool shouldCodesign = true;
 
   String? get exportOptionsPlist => stringArg('export-options-plist');
 
@@ -142,13 +131,18 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterCommandResult xcarchiveResult = await super.runCommand();
-    final BuildInfo buildInfo = await getBuildInfo();
+    final BuildInfo buildInfo = await cachedBuildInfo;
     displayNullSafetyMode(buildInfo);
+    final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
-      globals.printStatus('Skipping IPA');
+      globals.printStatus('Skipping IPA.');
+      return xcarchiveResult;
+    }
+
+    if (!shouldCodesign) {
+      globals.printStatus('Codesigning disabled with --no-codesign, skipping IPA.');
       return xcarchiveResult;
     }
 
@@ -292,6 +286,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     addBundleSkSLPathOption(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
+    argParser.addFlag('codesign',
+      defaultsTo: true,
+      help: 'Codesign the application bundle (only available on device builds).',
+    );
   }
 
   @override
@@ -306,7 +304,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   XcodeBuildResult? xcodeBuildResult;
   EnvironmentType get environmentType;
   bool get configOnly;
-  bool get shouldCodesign;
+
+  bool get shouldCodesign => boolArg('codesign');
 
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 

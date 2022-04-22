@@ -61,6 +61,8 @@ TaskFunction createMicrobenchmarkTask() {
       ...await _runMicrobench('lib/language/sync_star_semantics_bench.dart'),
       ...await _runMicrobench('lib/foundation/all_elements_bench.dart'),
       ...await _runMicrobench('lib/foundation/change_notifier_bench.dart'),
+      ...await _runMicrobench('lib/foundation/standard_method_codec_bench.dart'),
+      ...await _runMicrobench('lib/foundation/standard_message_codec_bench.dart'),
       ...await _runMicrobench('lib/foundation/timeline_bench.dart'),
     };
 

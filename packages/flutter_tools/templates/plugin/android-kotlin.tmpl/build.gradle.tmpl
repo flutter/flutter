@@ -14,7 +14,7 @@ buildscript {
     }
 }
 
-rootProject.allprojects {
+allprojects {
     repositories {
         google()
         mavenCentral()
@@ -41,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion {{minSdkVersion}}
     }
 }
 

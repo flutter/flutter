@@ -489,10 +489,10 @@ abstract class FlutterTestDriver {
 
 class FlutterRunTestDriver extends FlutterTestDriver {
   FlutterRunTestDriver(
-    Directory projectFolder, {
-    String? logPrefix,
+    super.projectFolder, {
+    super.logPrefix,
     this.spawnDdsInstance = true,
-  }) : super(projectFolder, logPrefix: logPrefix);
+  });
 
   String? _currentRunningAppId;
 
@@ -760,8 +760,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 }
 
 class FlutterTestTestDriver extends FlutterTestDriver {
-  FlutterTestTestDriver(Directory projectFolder, {String? logPrefix})
-    : super(projectFolder, logPrefix: logPrefix);
+  FlutterTestTestDriver(super.projectFolder, {super.logPrefix});
 
   Future<void> test({
     String testFile = 'test/test.dart',

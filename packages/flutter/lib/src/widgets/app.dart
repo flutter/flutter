@@ -302,7 +302,7 @@ class WidgetsApp extends StatefulWidget {
   /// The `supportedLocales` argument must be a list of one or more elements.
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
   WidgetsApp({ // can't be const because the asserts use methods on Iterable :-(
-    Key? key,
+    super.key,
     this.navigatorKey,
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
@@ -399,12 +399,11 @@ class WidgetsApp extends StatefulWidget {
        routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
-       backButtonDispatcher = null,
-       super(key: key);
+       backButtonDispatcher = null;
 
   /// Creates a [WidgetsApp] that uses the [Router] instead of a [Navigator].
   WidgetsApp.router({
-    Key? key,
+    super.key,
     this.routeInformationProvider,
     required RouteInformationParser<Object> this.routeInformationParser,
     required RouterDelegate<Object> this.routerDelegate,
@@ -453,8 +452,7 @@ class WidgetsApp extends StatefulWidget {
        onGenerateInitialRoutes = null,
        onUnknownRoute = null,
        routes = null,
-       initialRoute = null,
-       super(key: key);
+       initialRoute = null;
 
   /// {@template flutter.widgets.widgetsApp.navigatorKey}
   /// A key to use when building the [Navigator].

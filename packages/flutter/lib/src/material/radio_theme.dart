@@ -200,10 +200,10 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
 class RadioTheme extends InheritedWidget {
   /// Constructs a radio theme that configures all descendant [Radio] widgets.
   const RadioTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// The properties used for all descendant [Radio] widgets.
   final RadioThemeData data;

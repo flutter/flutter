@@ -589,6 +589,11 @@ class AndroidProject extends FlutterProjectPlatform {
         'agpVersion': gradle.templateAndroidGradlePluginVersion,
         'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
         'gradleVersion': gradle.templateDefaultGradleVersion,
+        'gradleVersionForModule': gradle.templateDefaultGradleVersionForModule,
+        'compileSdkVersion': gradle.compileSdkVersion,
+        'minSdkVersion': gradle.minSdkVersion,
+        'ndkVersion': gradle.ndkVersion,
+        'targetSdkVersion': gradle.targetSdkVersion,
       },
       printStatusWhenWriting: false,
     );

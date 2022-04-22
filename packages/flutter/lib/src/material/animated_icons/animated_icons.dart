@@ -35,7 +35,7 @@ class AnimatedIcon extends StatelessWidget {
   /// The [progress] and [icon] arguments must not be null.
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const AnimatedIcon({
-    Key? key,
+    super.key,
     required this.icon,
     required this.progress,
     this.color,
@@ -43,8 +43,7 @@ class AnimatedIcon extends StatelessWidget {
     this.semanticLabel,
     this.textDirection,
   }) : assert(progress != null),
-       assert(icon != null),
-       super(key: key);
+       assert(icon != null);
 
   /// The animation progress for the animated icon.
   ///
