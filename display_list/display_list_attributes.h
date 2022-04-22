@@ -101,11 +101,11 @@ class DlAttribute {
   // Return an equivalent sk_sp<Skia> version of this object.
   virtual sk_sp<S> skia_object() const = 0;
 
-  // Perform a content aware |==| comparison of the ColorFilter.
+  // Perform a content aware |==| comparison of the Attribute.
   bool operator==(D const& other) const {
     return type() == other.type() && equals_(other);
   }
-  // Perform a content aware |!=| comparison of the ColorFilter.
+  // Perform a content aware |!=| comparison of the Attribute.
   bool operator!=(D const& other) const { return !(*this == other); }
 
   virtual ~DlAttribute() = default;

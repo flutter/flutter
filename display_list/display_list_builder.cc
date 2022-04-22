@@ -291,6 +291,49 @@ void DisplayListBuilder::onSetMaskFilter(const DlMaskFilter* filter) {
   }
 }
 
+void DisplayListBuilder::setAttributesFromDlPaint(
+    const DlPaint& paint,
+    const DisplayListAttributeFlags flags) {
+  if (flags.applies_anti_alias()) {
+    setAntiAlias(paint.isAntiAlias());
+  }
+  if (flags.applies_dither()) {
+    setDither(paint.isDither());
+  }
+  if (flags.applies_alpha_or_color()) {
+    setColor(paint.getColor().argb);
+  }
+  if (flags.applies_blend()) {
+    setBlendMode(paint.getBlendMode());
+  }
+  if (flags.applies_style()) {
+    setStyle(ToSk(paint.getDrawStyle()));
+  }
+  if (flags.is_stroked(ToSk(paint.getDrawStyle()))) {
+    setStrokeWidth(paint.getStrokeWidth());
+    setStrokeMiter(paint.getStrokeMiter());
+    setStrokeCap(ToSk(paint.getStrokeCap()));
+    setStrokeJoin(ToSk(paint.getStrokeJoin()));
+  }
+  if (flags.applies_shader()) {
+    setColorSource(paint.getColorSource().get());
+  }
+  if (flags.applies_color_filter()) {
+    setInvertColors(paint.isInvertColors());
+    setColorFilter(paint.getColorFilter().get());
+  }
+  if (flags.applies_image_filter()) {
+    setImageFilter(paint.getImageFilter().get());
+  }
+  // Waiting for https://github.com/flutter/engine/pull/32159
+  // if (flags.applies_path_effect()) {
+  //   setPathEffect(sk_ref_sp(paint.getPathEffect()));
+  // }
+  if (flags.applies_mask_filter()) {
+    setMaskFilter(paint.getMaskFilter().get());
+  }
+}
+
 void DisplayListBuilder::setAttributesFromPaint(
     const SkPaint& paint,
     const DisplayListAttributeFlags flags) {
@@ -404,6 +447,15 @@ void DisplayListBuilder::saveLayer(const SkRect* bounds,
     if (!current_opacity_compatibility_ || current_image_filter_ != nullptr) {
       UpdateLayerOpacityCompatibility(false);
     }
+  }
+}
+void DisplayListBuilder::saveLayer(const SkRect* bounds, const DlPaint* paint) {
+  if (paint != nullptr) {
+    setAttributesFromDlPaint(*paint,
+                             DisplayListOpFlags::kSaveLayerWithPaintFlags);
+    saveLayer(bounds, true);
+  } else {
+    saveLayer(bounds, false);
   }
 }
 
@@ -536,6 +588,10 @@ void DisplayListBuilder::drawPaint() {
   Push<DrawPaintOp>(0, 1);
   CheckLayerOpacityCompatibility();
 }
+void DisplayListBuilder::drawPaint(const DlPaint& paint) {
+  setAttributesFromDlPaint(paint, DisplayListOpFlags::kDrawPaintFlags);
+  drawPaint();
+}
 void DisplayListBuilder::drawColor(SkColor color, DlBlendMode mode) {
   Push<DrawColorOp>(0, 1, color, mode);
   CheckLayerOpacityCompatibility(mode);
@@ -544,17 +600,37 @@ void DisplayListBuilder::drawLine(const SkPoint& p0, const SkPoint& p1) {
   Push<DrawLineOp>(0, 1, p0, p1);
   CheckLayerOpacityCompatibility();
 }
+void DisplayListBuilder::drawLine(const SkPoint& p0,
+                                  const SkPoint& p1,
+                                  const DlPaint& paint) {
+  setAttributesFromDlPaint(paint, DisplayListOpFlags::kDrawLineFlags);
+  drawLine(p0, p1);
+}
 void DisplayListBuilder::drawRect(const SkRect& rect) {
   Push<DrawRectOp>(0, 1, rect);
   CheckLayerOpacityCompatibility();
+}
+void DisplayListBuilder::drawRect(const SkRect& rect, const DlPaint& paint) {
+  setAttributesFromDlPaint(paint, DisplayListOpFlags::kDrawRectFlags);
+  drawRect(rect);
 }
 void DisplayListBuilder::drawOval(const SkRect& bounds) {
   Push<DrawOvalOp>(0, 1, bounds);
   CheckLayerOpacityCompatibility();
 }
+void DisplayListBuilder::drawOval(const SkRect& bounds, const DlPaint& paint) {
+  setAttributesFromDlPaint(paint, DisplayListOpFlags::kDrawOvalFlags);
+  drawOval(bounds);
+}
 void DisplayListBuilder::drawCircle(const SkPoint& center, SkScalar radius) {
   Push<DrawCircleOp>(0, 1, center, radius);
   CheckLayerOpacityCompatibility();
+}
+void DisplayListBuilder::drawCircle(const SkPoint& center,
+                                    SkScalar radius,
+                                    const DlPaint& paint) {
+  setAttributesFromDlPaint(paint, DisplayListOpFlags::kDrawCircleFlags);
+  drawCircle(center, radius);
 }
 void DisplayListBuilder::drawRRect(const SkRRect& rrect) {
   if (rrect.isRect()) {
@@ -566,14 +642,28 @@ void DisplayListBuilder::drawRRect(const SkRRect& rrect) {
     CheckLayerOpacityCompatibility();
   }
 }
+void DisplayListBuilder::drawRRect(const SkRRect& rrect, const DlPaint& paint) {
+  setAttributesFromDlPaint(paint, DisplayListOpFlags::kDrawRRectFlags);
+  drawRRect(rrect);
+}
 void DisplayListBuilder::drawDRRect(const SkRRect& outer,
                                     const SkRRect& inner) {
   Push<DrawDRRectOp>(0, 1, outer, inner);
   CheckLayerOpacityCompatibility();
 }
+void DisplayListBuilder::drawDRRect(const SkRRect& outer,
+                                    const SkRRect& inner,
+                                    const DlPaint& paint) {
+  setAttributesFromDlPaint(paint, DisplayListOpFlags::kDrawDRRectFlags);
+  drawDRRect(outer, inner);
+}
 void DisplayListBuilder::drawPath(const SkPath& path) {
   Push<DrawPathOp>(0, 1, path);
   CheckLayerOpacityHairlineCompatibility();
+}
+void DisplayListBuilder::drawPath(const SkPath& path, const DlPaint& paint) {
+  setAttributesFromDlPaint(paint, DisplayListOpFlags::kDrawPathFlags);
+  drawPath(path);
 }
 
 void DisplayListBuilder::drawArc(const SkRect& bounds,
@@ -586,6 +676,15 @@ void DisplayListBuilder::drawArc(const SkRect& bounds,
   } else {
     CheckLayerOpacityCompatibility();
   }
+}
+void DisplayListBuilder::drawArc(const SkRect& bounds,
+                                 SkScalar start,
+                                 SkScalar sweep,
+                                 bool useCenter,
+                                 const DlPaint& paint) {
+  setAttributesFromDlPaint(
+      paint, useCenter ? kDrawArcWithCenterFlags : kDrawArcNoCenterFlags);
+  drawArc(bounds, start, sweep, useCenter);
 }
 void DisplayListBuilder::drawPoints(SkCanvas::PointMode mode,
                                     uint32_t count,
@@ -615,6 +714,28 @@ void DisplayListBuilder::drawPoints(SkCanvas::PointMode mode,
   // See: https://fiddle.skia.org/c/228459001d2de8db117ce25ef5cedb0c
   UpdateLayerOpacityCompatibility(false);
 }
+void DisplayListBuilder::drawPoints(SkCanvas::PointMode mode,
+                                    uint32_t count,
+                                    const SkPoint pts[],
+                                    const DlPaint& paint) {
+  const DisplayListAttributeFlags* flags;
+  switch (mode) {
+    case SkCanvas::PointMode::kPoints_PointMode:
+      flags = &DisplayListOpFlags::kDrawPointsAsPointsFlags;
+      break;
+    case SkCanvas::PointMode::kLines_PointMode:
+      flags = &DisplayListOpFlags::kDrawPointsAsLinesFlags;
+      break;
+    case SkCanvas::PointMode::kPolygon_PointMode:
+      flags = &DisplayListOpFlags::kDrawPointsAsPolygonFlags;
+      break;
+    default:
+      FML_DCHECK(false);
+      return;
+  }
+  setAttributesFromDlPaint(paint, *flags);
+  drawPoints(mode, count, pts);
+}
 void DisplayListBuilder::drawSkVertices(const sk_sp<SkVertices> vertices,
                                         SkBlendMode mode) {
   Push<DrawSkVerticesOp>(0, 1, std::move(vertices), mode);
@@ -634,6 +755,12 @@ void DisplayListBuilder::drawVertices(const DlVertices* vertices,
   // cases.
   UpdateLayerOpacityCompatibility(false);
 }
+void DisplayListBuilder::drawVertices(const DlVertices* vertices,
+                                      DlBlendMode mode,
+                                      const DlPaint& paint) {
+  setAttributesFromDlPaint(paint, DisplayListOpFlags::kDrawVerticesFlags);
+  drawVertices(vertices, mode);
+}
 
 void DisplayListBuilder::drawImage(const sk_sp<DlImage> image,
                                    const SkPoint point,
@@ -643,6 +770,18 @@ void DisplayListBuilder::drawImage(const sk_sp<DlImage> image,
       ? Push<DrawImageWithAttrOp>(0, 1, std::move(image), point, sampling)
       : Push<DrawImageOp>(0, 1, std::move(image), point, sampling);
   CheckLayerOpacityCompatibility(render_with_attributes);
+}
+void DisplayListBuilder::drawImage(const sk_sp<DlImage> image,
+                                   const SkPoint point,
+                                   const SkSamplingOptions& sampling,
+                                   const DlPaint* paint) {
+  if (paint != nullptr) {
+    setAttributesFromDlPaint(*paint,
+                             DisplayListOpFlags::kDrawImageWithPaintFlags);
+    drawImage(image, point, sampling, true);
+  } else {
+    drawImage(image, point, sampling, false);
+  }
 }
 void DisplayListBuilder::drawImageRect(const sk_sp<DlImage> image,
                                        const SkRect& src,
@@ -654,6 +793,20 @@ void DisplayListBuilder::drawImageRect(const sk_sp<DlImage> image,
                         render_with_attributes, constraint);
   CheckLayerOpacityCompatibility(render_with_attributes);
 }
+void DisplayListBuilder::drawImageRect(const sk_sp<DlImage> image,
+                                       const SkRect& src,
+                                       const SkRect& dst,
+                                       const SkSamplingOptions& sampling,
+                                       const DlPaint* paint,
+                                       SkCanvas::SrcRectConstraint constraint) {
+  if (paint != nullptr) {
+    setAttributesFromDlPaint(*paint,
+                             DisplayListOpFlags::kDrawImageRectWithPaintFlags);
+    drawImageRect(image, src, dst, sampling, true, constraint);
+  } else {
+    drawImageRect(image, src, dst, sampling, false, constraint);
+  }
+}
 void DisplayListBuilder::drawImageNine(const sk_sp<DlImage> image,
                                        const SkIRect& center,
                                        const SkRect& dst,
@@ -664,6 +817,19 @@ void DisplayListBuilder::drawImageNine(const sk_sp<DlImage> image,
                                       filter)
       : Push<DrawImageNineOp>(0, 1, std::move(image), center, dst, filter);
   CheckLayerOpacityCompatibility(render_with_attributes);
+}
+void DisplayListBuilder::drawImageNine(const sk_sp<DlImage> image,
+                                       const SkIRect& center,
+                                       const SkRect& dst,
+                                       SkFilterMode filter,
+                                       const DlPaint* paint) {
+  if (paint != nullptr) {
+    setAttributesFromDlPaint(*paint,
+                             DisplayListOpFlags::kDrawImageNineWithPaintFlags);
+    drawImageNine(image, center, dst, filter, true);
+  } else {
+    drawImageNine(image, center, dst, filter, false);
+  }
 }
 void DisplayListBuilder::drawImageLattice(const sk_sp<DlImage> image,
                                           const SkCanvas::Lattice& lattice,
@@ -724,6 +890,25 @@ void DisplayListBuilder::drawAtlas(const sk_sp<DlImage> atlas,
   // on it to distribute the opacity without overlap without checking all
   // of the transforms and texture rectangles.
   UpdateLayerOpacityCompatibility(false);
+}
+void DisplayListBuilder::drawAtlas(const sk_sp<DlImage> atlas,
+                                   const SkRSXform xform[],
+                                   const SkRect tex[],
+                                   const SkColor colors[],
+                                   int count,
+                                   DlBlendMode mode,
+                                   const SkSamplingOptions& sampling,
+                                   const SkRect* cull_rect,
+                                   const DlPaint* paint) {
+  if (paint != nullptr) {
+    setAttributesFromDlPaint(*paint,
+                             DisplayListOpFlags::kDrawAtlasWithPaintFlags);
+    drawAtlas(atlas, xform, tex, colors, count, mode, sampling, cull_rect,
+              true);
+  } else {
+    drawAtlas(atlas, xform, tex, colors, count, mode, sampling, cull_rect,
+              false);
+  }
 }
 
 void DisplayListBuilder::drawPicture(const sk_sp<SkPicture> picture,
