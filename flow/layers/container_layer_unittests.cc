@@ -192,6 +192,61 @@ TEST_F(ContainerLayerTest, NeedsSystemComposite) {
                                                child_path2, child_paint2}}}));
 }
 
+TEST_F(ContainerLayerTest, OpacityInheritance) {
+  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  auto mock1 = MockLayer::MakeOpacityCompatible(path1);
+  auto container1 = std::make_shared<ContainerLayer>();
+  container1->Add(mock1);
+
+  // ContainerLayer will not pass through compatibility on its own
+  // Subclasses must explicitly enable this in their own Preroll
+  PrerollContext* context = preroll_context();
+  context->subtree_can_inherit_opacity = false;
+  container1->Preroll(context, SkMatrix::I());
+  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+
+  auto path2 = SkPath().addRect({40, 40, 50, 50});
+  auto mock2 = MockLayer::MakeOpacityCompatible(path2);
+  container1->Add(mock2);
+
+  // ContainerLayer will pass through compatibility from multiple
+  // non-overlapping compatible children if the caller enables it
+  context->subtree_can_inherit_opacity = true;
+  container1->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+
+  auto path3 = SkPath().addRect({20, 20, 40, 40});
+  auto mock3 = MockLayer::MakeOpacityCompatible(path3);
+  container1->Add(mock3);
+
+  // ContainerLayer will not pass through compatibility from multiple
+  // overlapping children even if they are individually compatible
+  // and the caller requests it
+  context->subtree_can_inherit_opacity = true;
+  container1->Preroll(context, SkMatrix::I());
+  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+
+  auto container2 = std::make_shared<ContainerLayer>();
+  container2->Add(mock1);
+  container2->Add(mock2);
+
+  // Double check first two children are compatible and non-overlapping
+  // if the caller requests it
+  context->subtree_can_inherit_opacity = true;
+  container2->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+
+  auto path4 = SkPath().addRect({60, 60, 70, 70});
+  auto mock4 = MockLayer::Make(path4);
+  container2->Add(mock4);
+
+  // The third child is non-overlapping, but not compatible so the
+  // TransformLayer should end up incompatible
+  context->subtree_can_inherit_opacity = true;
+  container2->Preroll(context, SkMatrix::I());
+  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+}
+
 using ContainerLayerDiffTest = DiffContextTest;
 
 // Insert PictureLayer amongst container layers

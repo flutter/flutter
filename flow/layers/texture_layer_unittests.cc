@@ -116,5 +116,29 @@ TEST_F(TextureLayerDiffTest, TextureInRetainedLayer) {
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 100, 100));
 }
 
+TEST_F(TextureLayerTest, OpacityInheritance) {
+  const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
+  const SkSize layer_size = SkSize::Make(8.0f, 8.0f);
+  const int64_t texture_id = 0;
+  auto mock_texture = std::make_shared<MockTexture>(texture_id);
+  auto layer = std::make_shared<TextureLayer>(
+      layer_offset, layer_size, texture_id, false,
+      SkSamplingOptions(SkFilterMode::kLinear));
+
+  // Ensure the texture is located by the Layer.
+  preroll_context()->texture_registry.RegisterTexture(mock_texture);
+
+  // The texture layer always reports opacity compatibility.
+  PrerollContext* context = preroll_context();
+  context->subtree_can_inherit_opacity = false;
+  context->texture_registry.RegisterTexture(mock_texture);
+  layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+
+  // MockTexture has no actual textur to render into the
+  // PaintContext canvas so we have no way to verify its
+  // rendering.
+}
+
 }  // namespace testing
 }  // namespace flutter

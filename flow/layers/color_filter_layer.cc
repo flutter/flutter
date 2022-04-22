@@ -30,6 +30,10 @@ void ColorFilterLayer::Preroll(PrerollContext* context,
       Layer::AutoPrerollSaveLayerState::Create(context);
   ContainerLayer::Preroll(context, matrix);
 
+  // We always use a saveLayer (or a cached rendering), so we
+  // can always apply opacity in those cases.
+  context->subtree_can_inherit_opacity = true;
+
   if (render_count_ >= kMinimumRendersBeforeCachingFilterLayer) {
     TryToPrepareRasterCache(context, this, matrix,
                             RasterCacheLayerStrategy::kLayer);
@@ -44,26 +48,27 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ColorFilterLayer::Paint");
   FML_DCHECK(needs_painting(context));
 
+  AutoCachePaint cache_paint(context);
+
   if (context.raster_cache) {
     if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
-                                   RasterCacheLayerStrategy::kLayer)) {
+                                   RasterCacheLayerStrategy::kLayer,
+                                   cache_paint.paint())) {
       return;
     }
-    SkPaint paint;
-    paint.setColorFilter(filter_);
 
+    cache_paint.setColorFilter(filter_);
     if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
                                    RasterCacheLayerStrategy::kLayerChildren,
-                                   &paint)) {
+                                   cache_paint.paint())) {
       return;
     }
   }
 
-  SkPaint paint;
-  paint.setColorFilter(filter_);
+  cache_paint.setColorFilter(filter_);
 
-  Layer::AutoSaveLayer save =
-      Layer::AutoSaveLayer::Create(context, paint_bounds(), &paint);
+  Layer::AutoSaveLayer save = Layer::AutoSaveLayer::Create(
+      context, paint_bounds(), cache_paint.paint());
   PaintChildren(context);
 }
 

@@ -10,7 +10,6 @@ namespace flutter {
 ClipPathLayer::ClipPathLayer(const SkPath& clip_path, Clip clip_behavior)
     : clip_path_(clip_path), clip_behavior_(clip_behavior) {
   FML_DCHECK(clip_behavior != Clip::none);
-  set_layer_can_inherit_opacity(true);
 }
 
 void ClipPathLayer::Diff(DiffContext* context, const Layer* old_layer) {
@@ -41,10 +40,20 @@ void ClipPathLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
       Layer::AutoPrerollSaveLayerState::Create(context, UsesSaveLayer());
   context->mutators_stack.PushClipPath(clip_path_);
 
+  // Collect inheritance information on our children in Preroll so that
+  // we can pass it along by default.
+  context->subtree_can_inherit_opacity = true;
+
   SkRect child_paint_bounds = SkRect::MakeEmpty();
   PrerollChildren(context, matrix, &child_paint_bounds);
   if (child_paint_bounds.intersect(clip_path_bounds)) {
     set_paint_bounds(child_paint_bounds);
+  }
+
+  // If we use a SaveLayer then we can accept opacity on behalf
+  // of our children and apply it in the saveLayer.
+  if (UsesSaveLayer()) {
+    context->subtree_can_inherit_opacity = true;
   }
 
   context->mutators_stack.Pop();

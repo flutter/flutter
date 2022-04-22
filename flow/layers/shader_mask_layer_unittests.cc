@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/shader_mask_layer.h"
 
+#include "flutter/flow/layers/opacity_layer.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
@@ -317,6 +318,62 @@ TEST_F(ShaderMaskLayerTest, LayerCached) {
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
   EXPECT_TRUE(raster_cache()->Draw(layer.get(), cache_canvas,
                                    RasterCacheLayerStrategy::kLayer));
+}
+
+TEST_F(ShaderMaskLayerTest, OpacityInheritance) {
+  const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  const SkPath child_path = SkPath().addRect(child_bounds);
+  auto mock_layer = MockLayer::Make(child_path);
+  const SkRect mask_rect = SkRect::MakeLTRB(10, 10, 20, 20);
+  auto shader_mask_layer =
+      std::make_shared<ShaderMaskLayer>(nullptr, mask_rect, SkBlendMode::kSrc);
+  shader_mask_layer->Add(mock_layer);
+
+  // ShaderMaskLayers can always support opacity despite incompatible children
+  PrerollContext* context = preroll_context();
+  context->subtree_can_inherit_opacity = false;
+  shader_mask_layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+
+  int opacity_alpha = 0x7F;
+  SkPoint offset = SkPoint::Make(10, 10);
+  auto opacity_layer = std::make_shared<OpacityLayer>(opacity_alpha, offset);
+  opacity_layer->Add(shader_mask_layer);
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
+
+  auto opacity_integer_transform = SkM44::Translate(offset.fX, offset.fY);
+  DisplayListBuilder expected_builder;
+  /* OpacityLayer::Paint() */ {
+    expected_builder.save();
+    {
+      expected_builder.translate(offset.fX, offset.fY);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+      expected_builder.transformReset();
+      expected_builder.transform(opacity_integer_transform);
+#endif
+      /* ShaderMaskLayer::Paint() */ {
+        expected_builder.setColor(opacity_alpha << 24);
+        expected_builder.saveLayer(&child_path.getBounds(), true);
+        {
+          /* child layer paint */ {
+            expected_builder.setColor(0xFF000000);
+            expected_builder.drawPath(child_path);
+          }
+          expected_builder.translate(mask_rect.fLeft, mask_rect.fTop);
+          expected_builder.setBlendMode(DlBlendMode::kSrc);
+          expected_builder.drawRect(
+              SkRect::MakeWH(mask_rect.width(), mask_rect.height()));
+        }
+        expected_builder.restore();
+      }
+    }
+    expected_builder.restore();
+  }
+
+  opacity_layer->Paint(display_list_paint_context());
+  EXPECT_TRUE(DisplayListsEQ_Verbose(expected_builder.Build(), display_list()));
 }
 
 }  // namespace testing

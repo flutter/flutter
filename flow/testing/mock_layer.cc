@@ -10,11 +10,13 @@ namespace testing {
 MockLayer::MockLayer(SkPath path,
                      SkPaint paint,
                      bool fake_has_platform_view,
-                     bool fake_reads_surface)
+                     bool fake_reads_surface,
+                     bool fake_opacity_compatible)
     : fake_paint_path_(path),
       fake_paint_(paint),
       fake_has_platform_view_(fake_has_platform_view),
-      fake_reads_surface_(fake_reads_surface) {}
+      fake_reads_surface_(fake_reads_surface),
+      fake_opacity_compatible_(fake_opacity_compatible) {}
 
 bool MockLayer::IsReplacing(DiffContext* context, const Layer* layer) const {
   // Similar to PictureLayer, only return true for identical mock layers;
@@ -42,12 +44,23 @@ void MockLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   if (fake_reads_surface_) {
     context->surface_needs_readback = true;
   }
+  if (fake_opacity_compatible_) {
+    context->subtree_can_inherit_opacity = true;
+  }
 }
 
 void MockLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
+  if (context.inherited_opacity < SK_Scalar1) {
+    SkPaint p;
+    p.setAlphaf(context.inherited_opacity);
+    context.leaf_nodes_canvas->saveLayer(fake_paint_path_.getBounds(), &p);
+  }
   context.leaf_nodes_canvas->drawPath(fake_paint_path_, fake_paint_);
+  if (context.inherited_opacity < SK_Scalar1) {
+    context.leaf_nodes_canvas->restore();
+  }
 }
 
 }  // namespace testing

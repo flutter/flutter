@@ -15,6 +15,7 @@
 #include "third_party/skia/include/core/SkCanvasVirtualEnforcer.h"
 #include "third_party/skia/include/core/SkClipOp.h"
 #include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
 #include "third_party/skia/include/core/SkM44.h"
 #include "third_party/skia/include/core/SkPath.h"
@@ -76,6 +77,21 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
     SkPoint offset;
   };
 
+  struct DrawImageDataNoPaint {
+    sk_sp<SkImage> image;
+    SkScalar x;
+    SkScalar y;
+    SkSamplingOptions options;
+  };
+
+  struct DrawImageData {
+    sk_sp<SkImage> image;
+    SkScalar x;
+    SkScalar y;
+    SkSamplingOptions options;
+    SkPaint paint;
+  };
+
   struct DrawPictureData {
     sk_sp<SkData> serialized_picture;
     SkPaint paint;
@@ -118,6 +134,8 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
                                     DrawRectData,
                                     DrawPathData,
                                     DrawTextData,
+                                    DrawImageDataNoPaint,
+                                    DrawImageData,
                                     DrawPictureData,
                                     DrawShadowData,
                                     ClipRectData,
@@ -268,6 +286,14 @@ extern bool operator==(const MockCanvas::DrawTextData& a,
                        const MockCanvas::DrawTextData& b);
 extern std::ostream& operator<<(std::ostream& os,
                                 const MockCanvas::DrawTextData& data);
+extern bool operator==(const MockCanvas::DrawImageData& a,
+                       const MockCanvas::DrawImageData& b);
+extern std::ostream& operator<<(std::ostream& os,
+                                const MockCanvas::DrawImageData& data);
+extern bool operator==(const MockCanvas::DrawImageDataNoPaint& a,
+                       const MockCanvas::DrawImageDataNoPaint& b);
+extern std::ostream& operator<<(std::ostream& os,
+                                const MockCanvas::DrawImageDataNoPaint& data);
 extern bool operator==(const MockCanvas::DrawPictureData& a,
                        const MockCanvas::DrawPictureData& b);
 extern std::ostream& operator<<(std::ostream& os,
