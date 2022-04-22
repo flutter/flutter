@@ -22,9 +22,14 @@ enum BorderStyle {
 }
 
 /// The direction of the stroke to be painted for a [BorderSide] in a [Border].
-/// When set to [StrokeAlign.inside], the stroke is drawn completely inside the widget.
-/// For [StrokeAlign.center] and [StrokeAlign.outside], a property such as [Container.ClipBehavior] can be
-/// used in an outside widget to clip it.
+/// When set to [inside], the stroke is drawn completely inside the widget.
+/// For [center] and [outside], a property such as [Container.clipBehavior]
+/// can be used in an outside widget to clip it.
+/// If [Container.decoration] has a border, the container may incorporate
+/// [BorderSide.width] as additional padding:
+/// - [inside] provides padding with full [BorderSide.width].
+/// - [center] provides padding with half [BorderSide.width].
+/// - [outside] provides zero padding, as stroke is drawn entirely outside.
 enum StrokeAlign {
   /// Border is drawn inside.
   inside,
