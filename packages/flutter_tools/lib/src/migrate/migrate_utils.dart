@@ -182,7 +182,16 @@ class MigrateUtils {
   Future<bool> hasUncommitedChanges(String workingDirectory) async {
     final List<String> cmdArgs = <String>['git', 'diff', '--quiet', 'HEAD', '--', '.'];
     // windows uses double quotes.
-    cmdArgs.add(_platform.isWindows ? '":(exclude)${kDefaultMigrateWorkingDirectoryName}"' : "':(exclude)${_fileSystem.path.join(workingDirectory, kDefaultMigrateWorkingDirectoryName)}'");
+    if (_platform.isWindows) {
+      final String path = _fileSystem.path.join(workingDirectory, kDefaultMigrateWorkingDirectoryName);
+      // Trim off any drive labels such as 'C:'
+      if (path.contains(':')) {
+        path = path.substring(path.indexOf(':') + 1);
+      }
+      cmdArgs.add('":(exclude)$path"');
+    } else {
+      cmdArgs.add("':(exclude)${_fileSystem.path.join(workingDirectory, kDefaultMigrateWorkingDirectoryName)}'");
+    }
     final RunResult result = await _processUtils.run(cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: cmdArgs.join(' '));
     print(result.stdout);
