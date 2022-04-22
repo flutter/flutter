@@ -132,22 +132,22 @@ void main() {
   });
 
   test('RoundedRectangleBorder.dimensions and CircleBorder.dimensions', () {
-    final RoundedRectangleBorder insideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10));
+    const RoundedRectangleBorder insideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10));
     expect(insideRoundedRectangleBorder.dimensions, const EdgeInsets.all(10));
 
-    final RoundedRectangleBorder centerRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.center));
+    const RoundedRectangleBorder centerRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.center));
     expect(centerRoundedRectangleBorder.dimensions, const EdgeInsets.all(5));
 
-    final RoundedRectangleBorder outsideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.outside));
+    const RoundedRectangleBorder outsideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.outside));
     expect(outsideRoundedRectangleBorder.dimensions, EdgeInsets.zero);
 
-    final CircleBorder insideCircleBorder = CircleBorder(side: BorderSide(width: 10));
+    const CircleBorder insideCircleBorder = CircleBorder(side: BorderSide(width: 10));
     expect(insideCircleBorder.dimensions, const EdgeInsets.all(10));
 
-    final CircleBorder centerCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.center));
+    const CircleBorder centerCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.center));
     expect(centerCircleBorder.dimensions, const EdgeInsets.all(5));
 
-    final CircleBorder outsideCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.outside));
+    const CircleBorder outsideCircleBorder = CircleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.outside));
     expect(outsideCircleBorder.dimensions, EdgeInsets.zero);
   });
 }
