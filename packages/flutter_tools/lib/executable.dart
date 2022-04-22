@@ -4,7 +4,7 @@
 
 // @dart = 2.8
 
-import 'package:flutter_tools/src/project_validator.dart';
+import 'src/project_validator.dart';
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;

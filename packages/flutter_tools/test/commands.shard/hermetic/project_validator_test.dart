@@ -19,7 +19,7 @@ import '../../src/test_flutter_command_runner.dart';
 class ProjectValidatorDummy extends ProjectValidator {
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async{
-    return [
+    return <ProjectValidatorResult>[
       const ProjectValidatorResult(name: 'pass', value: 'value', status: StatusProjectValidator.success),
       const ProjectValidatorResult(name: 'fail', value: 'my error', status: StatusProjectValidator.error),
       const ProjectValidatorResult(name: 'pass two', value: 'pass', warning: 'my warning', status: StatusProjectValidator.warning),
