@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FML_TIME_DART_TIMESTAMP_PROVIDER_H_
-#define FLUTTER_FML_TIME_DART_TIMESTAMP_PROVIDER_H_
+#ifndef FLUTTER_RUNTIME_DART_TIMESTAMP_PROVIDER_H_
+#define FLUTTER_RUNTIME_DART_TIMESTAMP_PROVIDER_H_
 
 #include "flutter/fml/time/timestamp_provider.h"
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_point.h"
 
-namespace fml {
+namespace flutter {
 
 fml::TimePoint DartTimelineTicksSinceEpoch();
 
 /// TimestampProvider implementation that is backed by Dart_TimelineGetTicks
-class DartTimestampProvider : TimestampProvider {
+class DartTimestampProvider : fml::TimestampProvider {
  public:
   static DartTimestampProvider& Instance() {
     static DartTimestampProvider instance;
@@ -36,6 +36,6 @@ class DartTimestampProvider : TimestampProvider {
   FML_DISALLOW_COPY_AND_ASSIGN(DartTimestampProvider);
 };
 
-}  // namespace fml
+}  // namespace flutter
 
-#endif  // FLUTTER_FML_TIME_DART_TIMESTAMP_PROVIDER_H_
+#endif  // FLUTTER_RUNTIME_DART_TIMESTAMP_PROVIDER_H_

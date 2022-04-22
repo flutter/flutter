@@ -4,7 +4,7 @@
 
 #include "flutter/fml/time/chrono_timestamp_provider.h"
 
-#include "flutter/fml/time/dart_timestamp_provider.h"
+#include "flutter/runtime/dart_timestamp_provider.h"
 
 #include <thread>
 
@@ -20,11 +20,11 @@ TEST(TimePoint, Control) {
 
 TEST(TimePoint, DartClockIsMonotonic) {
   using namespace std::chrono_literals;
-  const auto t1 = DartTimelineTicksSinceEpoch();
+  const auto t1 = flutter::DartTimelineTicksSinceEpoch();
   std::this_thread::sleep_for(1us);
-  const auto t2 = DartTimelineTicksSinceEpoch();
+  const auto t2 = flutter::DartTimelineTicksSinceEpoch();
   std::this_thread::sleep_for(1us);
-  const auto t3 = DartTimelineTicksSinceEpoch();
+  const auto t3 = flutter::DartTimelineTicksSinceEpoch();
   EXPECT_LT(TimePoint::Min(), t1);
   EXPECT_LE(t1, t2);
   EXPECT_LE(t2, t3);

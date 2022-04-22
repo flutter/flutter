@@ -14,6 +14,8 @@
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/logging/dart_error.h"
 
+#include "dart_timestamp_provider.h"
+
 namespace {
 // Tracks whether Dart has been initialized and if it is safe to call Dart
 // APIs.
@@ -88,7 +90,9 @@ void DartVMInitializer::Initialize(Dart_InitializeParams* params) {
     gDartInitialized = true;
   }
 
+  fml::TimePoint::SetClockSource(flutter::DartTimelineTicksSinceEpoch);
   fml::tracing::TraceSetTimelineEventHandler(LogDartTimelineEvent);
+  fml::tracing::TraceSetTimelineMicrosSource(Dart_TimelineGetMicros);
   tonic::SetUnhandledExceptionReporter(&ReportUnhandledException);
 }
 

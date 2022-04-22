@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/fml/time/dart_timestamp_provider.h"
+#include "dart_timestamp_provider.h"
 
 #include "dart_tools_api.h"
 
-namespace fml {
+namespace flutter {
 
 DartTimestampProvider::DartTimestampProvider() = default;
 
@@ -35,4 +35,4 @@ fml::TimePoint DartTimelineTicksSinceEpoch() {
   return DartTimestampProvider::Instance().Now();
 }
 
-}  // namespace fml
+}  // namespace flutter
