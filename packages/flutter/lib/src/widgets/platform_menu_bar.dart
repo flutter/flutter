@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
@@ -15,7 +12,7 @@ import 'framework.dart';
 import 'shortcuts.dart';
 
 // "flutter/menu" Method channel methods.
-const String _kMenuSetMethod = 'Menu.setMenu';
+const String _kMenuSetMethod = 'Menu.setMenus';
 const String _kMenuSelectedCallbackMethod = 'Menu.selectedCallback';
 const String _kMenuItemOpenedMethod = 'Menu.opened';
 const String _kMenuItemClosedMethod = 'Menu.closed';
@@ -27,6 +24,9 @@ const String _kEnabledKey = 'enabled';
 const String _kChildrenKey = 'children';
 const String _kIsDividerKey = 'isDivider';
 const String _kPlatformDefaultMenuKey = 'platformProvidedMenu';
+const String _kShortcutCharacter = 'shortcutCharacter';
+const String _kShortcutTrigger = 'shortcutTrigger';
+const String _kShortcutModifiers = 'shortcutModifiers';
 
 /// A class used by [MenuSerializableShortcut] to describe the shortcut for
 /// serialization to send to the platform for rendering a [PlatformMenuBar].
@@ -43,7 +43,7 @@ class ShortcutSerialization {
   ///
   /// This is used by a [CharacterActivator] to serialize itself.
   ShortcutSerialization.character(String character)
-      : _internal = <String, Object?>{_shortcutCharacter: character},
+      : _internal = <String, Object?>{_kShortcutCharacter: character},
         assert(character.length == 1);
 
   /// Creates a [ShortcutSerialization] representing a specific
@@ -71,8 +71,8 @@ class ShortcutSerialization {
                'Specifying a modifier key as a trigger is not allowed. '
                'Use provided boolean parameters instead.'),
         _internal = <String, Object?>{
-          _shortcutTrigger: trigger.keyId,
-          _shortcutModifiers: (control ? _shortcutModifierControl : 0) |
+          _kShortcutTrigger: trigger.keyId,
+          _kShortcutModifiers: (control ? _shortcutModifierControl : 0) |
               (alt ? _shortcutModifierAlt : 0) |
               (shift ? _shortcutModifierShift : 0) |
               (meta ? _shortcutModifierMeta : 0),
@@ -95,30 +95,6 @@ class ShortcutSerialization {
   /// The bit mask for the [LogicalKeyboardKey.alt] key (or it's left/right
   /// equivalents) being down.
   static const int _shortcutModifierControl = 1 << 3;
-
-  /// The key for a string map field returned from [serializeForMenu] containing
-  /// a string that represents the character that, when typed, will trigger the
-  /// shortcut.
-  ///
-  /// All platforms are limited to a single trigger key that can be represented,
-  /// so this string should only contain a character that can be typed with a
-  /// single keystroke.
-  static const String _shortcutCharacter = 'shortcutEquivalent';
-
-  /// The key for the integer map field returned from [serializeForMenu]
-  /// containing the logical key ID for the trigger key on this shortcut.
-  ///
-  /// All platforms are limited to a single trigger key that can be represented.
-  static const String _shortcutTrigger = 'shortcutTrigger';
-
-  /// The key for the integer map field returned from [serializeForMenu]
-  /// containing a bitfield combination of [shortcutModifierControl],
-  /// [shortcutModifierAlt], [shortcutModifierShift], and/or
-  /// [shortcutModifierMeta].
-  ///
-  /// If the shortcut responds to one of those modifiers, it should be
-  /// represented in the bitfield tagged with this key.
-  static const String _shortcutModifiers = 'shortcutModifiers';
 
   /// Converts the internal representation to the format needed for a [MenuItem]
   /// to include it in its serialized form for sending to the platform.
@@ -173,8 +149,6 @@ abstract class MenuItem with Diagnosticable {
   /// "id" field of the menu item data.
   Iterable<Map<String, Object?>> toChannelRepresentation(
     PlatformMenuDelegate delegate, {
-    required int index,
-    required int count,
     required MenuItemSerializableIdGenerator getId,
   });
 
@@ -340,11 +314,8 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
     _idMap.clear();
     final List<Map<String, Object?>> representation = <Map<String, Object?>>[];
     if (topLevelMenus.isNotEmpty) {
-      int index = 0;
       for (final MenuItem childItem in topLevelMenus) {
-        representation
-            .addAll(childItem.toChannelRepresentation(this, index: index, count: topLevelMenus.length, getId: _getId));
-        index += 1;
+        representation.addAll(childItem.toChannelRepresentation(this, getId: _getId));
       }
     }
     // Currently there's only ever one window, but the channel's format allows
@@ -460,10 +431,10 @@ class PlatformMenuBar extends StatefulWidget with DiagnosticableTreeMixin {
   ///
   /// The [body] and [menus] attributes are required.
   const PlatformMenuBar({
-    Key? key,
+    super.key,
     required this.body,
     required this.menus,
-  }) : super(key: key);
+  });
 
   /// The widget to be rendered in the Flutter window that these platform menus
   /// are associated with.
@@ -598,8 +569,6 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin {
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
     PlatformMenuDelegate delegate, {
-    required int index,
-    required int count,
     required MenuItemSerializableIdGenerator getId,
   }) {
     return <Map<String, Object?>>[serialize(this, delegate, getId)];
@@ -616,15 +585,31 @@ class PlatformMenu extends MenuItem with DiagnosticableTreeMixin {
     MenuItemSerializableIdGenerator getId,
   ) {
     final List<Map<String, Object?>> result = <Map<String, Object?>>[];
-    int index = 0;
     for (final MenuItem childItem in item.menus) {
       result.addAll(childItem.toChannelRepresentation(
         delegate,
-        index: index,
-        count: item.menus.length,
         getId: getId,
       ));
-      index += 1;
+    }
+    // To avoid doing type checking for groups, just filter out when there are
+    // multiple sequential dividers, or when they are first or last, since
+    // groups may be interleaved with non-groups, and non-groups may also add
+    // dividers.
+    Map<String, Object?>? previousItem;
+    result.removeWhere((Map<String, Object?> item) {
+      if (previousItem == null && item[_kIsDividerKey] == true) {
+        // Strip any leading dividers.
+        return true;
+      }
+      if (previousItem != null && previousItem![_kIsDividerKey] == true && item[_kIsDividerKey] == true) {
+        // Strip any duplicate dividers.
+        return true;
+      }
+      previousItem = item;
+      return false;
+    });
+    if (result.isNotEmpty && result.last[_kIsDividerKey] == true) {
+      result.removeLast();
     }
     return <String, Object?>{
       _kIdKey: getId(item),
@@ -666,32 +651,24 @@ class PlatformMenuItemGroup extends MenuItem {
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
     PlatformMenuDelegate delegate, {
-    required int index,
-    required int count,
     required MenuItemSerializableIdGenerator getId,
   }) {
     assert(members.isNotEmpty, 'There must be at least one member in a PlatformMenuItemGroup');
     final List<Map<String, Object?>> result = <Map<String, Object?>>[];
-    if (index != 0) {
-      result.add(<String, Object?>{
-        _kIdKey: getId(this),
-        _kIsDividerKey: true,
-      });
-    }
+    result.add(<String, Object?>{
+      _kIdKey: getId(this),
+      _kIsDividerKey: true,
+    });
     for (final MenuItem item in members) {
       result.addAll(item.toChannelRepresentation(
         delegate,
-        index: index,
-        count: count,
         getId: getId,
       ));
     }
-    if (index != count - 1) {
-      result.add(<String, Object?>{
-        _kIdKey: getId(this),
-        _kIsDividerKey: true,
-      });
-    }
+    result.add(<String, Object?>{
+      _kIdKey: getId(this),
+      _kIsDividerKey: true,
+    });
     return result;
   }
 
@@ -740,8 +717,6 @@ class PlatformMenuItem extends MenuItem {
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
     PlatformMenuDelegate delegate, {
-    required int index,
-    required int count,
     required MenuItemSerializableIdGenerator getId,
   }) {
     return <Map<String, Object?>>[PlatformMenuItem.serialize(this, delegate, getId)];
@@ -852,8 +827,6 @@ class PlatformProvidedMenuItem extends PlatformMenuItem {
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
     PlatformMenuDelegate delegate, {
-    required int index,
-    required int count,
     required MenuItemSerializableIdGenerator getId,
   }) {
     assert(() {

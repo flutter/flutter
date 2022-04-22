@@ -160,7 +160,7 @@ class Hero extends StatefulWidget {
   /// The [tag] and [child] parameters must not be null.
   /// The [child] parameter and all of the its descendants must not be [Hero]es.
   const Hero({
-    Key? key,
+    super.key,
     required this.tag,
     this.createRectTween,
     this.flightShuttleBuilder,
@@ -169,8 +169,7 @@ class Hero extends StatefulWidget {
     required this.child,
   }) : assert(tag != null),
        assert(transitionOnUserGestures != null),
-       assert(child != null),
-       super(key: key);
+       assert(child != null);
 
   /// The identifier for this particular hero. If the tag of this hero matches
   /// the tag of a hero on a [PageRoute] that we're navigating to or from, then
@@ -1004,12 +1003,11 @@ class HeroMode extends StatelessWidget {
   ///
   /// The [child] and [enabled] arguments must not be null.
   const HeroMode({
-    Key? key,
+    super.key,
     required this.child,
     this.enabled = true,
   }) : assert(child != null),
-       assert(enabled != null),
-       super(key: key);
+       assert(enabled != null);
 
   /// The subtree to place inside the [HeroMode].
   final Widget child;

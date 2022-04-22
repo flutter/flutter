@@ -36,9 +36,9 @@ class MaterialPointArcTween extends Tween<Offset> {
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
   MaterialPointArcTween({
-    Offset? begin,
-    Offset? end,
-  }) : super(begin: begin, end: end);
+    super.begin,
+    super.end,
+  });
 
   bool _dirty = true;
 
@@ -239,9 +239,9 @@ class MaterialRectArcTween extends RectTween {
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
   MaterialRectArcTween({
-    Rect? begin,
-    Rect? end,
-  }) : super(begin: begin, end: end);
+    super.begin,
+    super.end,
+  });
 
   bool _dirty = true;
 
@@ -354,9 +354,9 @@ class MaterialRectCenterArcTween extends RectTween {
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
   MaterialRectCenterArcTween({
-    Rect? begin,
-    Rect? end,
-  }) : super(begin: begin, end: end);
+    super.begin,
+    super.end,
+  });
 
   bool _dirty = true;
 

@@ -58,6 +58,19 @@ const Map<String, dynamic> macStudioInfoPlist2020_3 = <String, dynamic>{
   },
 };
 
+const Map<String, dynamic> macStudioInfoPlistEAP = <String, dynamic>{
+  'CFBundleGetInfoString': 'Android Studio EAP AI-212.5712.43.2112.8233820, build AI-212.5712.43.2112.8233820. Copyright JetBrains s.r.o., (c) 2000-2022',
+  'CFBundleShortVersionString': 'EAP AI-212.5712.43.2112.8233820',
+  'CFBundleVersion': 'AI-212.5712.43.2112.8233820',
+  'JVMOptions': <String, dynamic>{
+    'Properties': <String, dynamic>{
+      'idea.vendor.name' : 'Google',
+      'idea.paths.selector': 'AndroidStudio2021.2',
+      'idea.platform.prefix': 'AndroidStudio',
+    },
+  },
+};
+
 final Platform linuxPlatform = FakePlatform(
   environment: <String, String>{'HOME': homeLinux},
 );
@@ -135,6 +148,14 @@ void main() {
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
+      processManager.addCommand(FakeCommand(
+          command: <String>[
+            globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java'),
+            '-version',
+          ],
+          stderr: '123',
+        )
+      );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
@@ -147,10 +168,11 @@ void main() {
         'Google',
         'AndroidStudio4.1',
       )));
+      expect(studio.validationMessages, <String>['Java version 123']);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       // Custom home paths are not supported on macOS nor Windows yet,
       // so we force the platform to fake Linux here.
       Platform: () => platform,
@@ -168,6 +190,14 @@ void main() {
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
+      processManager.addCommand(FakeCommand(
+          command: <String>[
+            globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java'),
+            '-version',
+          ],
+          stderr: '123',
+        )
+      );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
@@ -180,10 +210,11 @@ void main() {
         'Google',
         'AndroidStudio2020.3',
       )));
+      expect(studio.validationMessages, <String>['Java version 123']);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       // Custom home paths are not supported on macOS nor Windows yet,
       // so we force the platform to fake Linux here.
       Platform: () => platform,
@@ -201,6 +232,14 @@ void main() {
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist;
+      processManager.addCommand(FakeCommand(
+          command: <String>[
+            globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java'),
+            '-version',
+          ],
+          stderr: '123',
+        )
+      );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
       );
@@ -212,10 +251,52 @@ void main() {
         'Application Support',
         'AndroidStudio3.3',
       )));
+      expect(studio.validationMessages, <String>['Java version 123']);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
+
+    testUsingContext('Can discover Android Studio EAP location on Mac', () {
+      final String studioInApplicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Application',
+        'Android Studio with suffix.app',
+        'Contents',
+      );
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlistEAP;
+      processManager.addCommand(FakeCommand(
+          command: <String>[
+            globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java'),
+            '-version',
+          ],
+          stderr: '123',
+        )
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
+      );
+
+      expect(studio, isNotNull);
+      expect(studio.pluginsPath, equals(globals.fs.path.join(
+        homeMac,
+        'Library',
+        'Application Support',
+        'AndroidStudio2021.2',
+      )));
+      expect(studio.validationMessages, <String>['Java version 123']);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => processManager,
       // Custom home paths are not supported on macOS nor Windows yet,
       // so we force the platform to fake Linux here.
       Platform: () => platform,

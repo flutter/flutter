@@ -135,10 +135,10 @@ class DrawerTheme extends InheritedTheme {
   /// Creates a theme that defines the [DrawerThemeData] properties for a
   /// [Drawer].
   const DrawerTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// Specifies the background color, scrim color, elevation, and shape for
   /// descendant [Drawer] widgets.

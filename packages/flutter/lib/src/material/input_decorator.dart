@@ -63,7 +63,7 @@ class _InputBorderGap extends ChangeNotifier {
 
 // Used to interpolate between two InputBorders.
 class _InputBorderTween extends Tween<InputBorder> {
-  _InputBorderTween({InputBorder? begin, InputBorder? end}) : super(begin: begin, end: end);
+  _InputBorderTween({super.begin, super.end});
 
   @override
   InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t)! as InputBorder;
@@ -138,7 +138,6 @@ class _InputBorderPainter extends CustomPainter {
 // _InputBorder's paint method.
 class _BorderContainer extends StatefulWidget {
   const _BorderContainer({
-    Key? key,
     required this.border,
     required this.gap,
     required this.gapAnimation,
@@ -147,8 +146,7 @@ class _BorderContainer extends StatefulWidget {
     required this.isHovering,
   }) : assert(border != null),
        assert(gap != null),
-       assert(fillColor != null),
-       super(key: key);
+       assert(fillColor != null);
 
   final InputBorder border;
   final _InputBorderGap gap;
@@ -255,10 +253,9 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
 // when the errorText first appears.
 class _Shaker extends AnimatedWidget {
   const _Shaker({
-    Key? key,
     required Animation<double> animation,
     this.child,
-  }) : super(key: key, listenable: animation);
+  }) : super(listenable: animation);
 
   final Widget? child;
 
@@ -289,7 +286,6 @@ class _Shaker extends AnimatedWidget {
 // slides upwards a little when it first appears.
 class _HelperError extends StatefulWidget {
   const _HelperError({
-    Key? key,
     this.textAlign,
     this.helperText,
     this.helperStyle,
@@ -297,7 +293,7 @@ class _HelperError extends StatefulWidget {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
-  }) : super(key: key);
+  });
 
   final TextAlign? textAlign;
   final String? helperText;
@@ -1561,7 +1557,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
 class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DecorationSlot> {
   const _Decorator({
-    Key? key,
     required this.textAlignVertical,
     required this.decoration,
     required this.textDirection,
@@ -1571,8 +1566,7 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
-       assert(expands != null),
-       super(key: key);
+       assert(expands != null);
 
   final _Decoration decoration;
   final TextDirection textDirection;
@@ -1692,7 +1686,7 @@ class InputDecorator extends StatefulWidget {
   /// The [isFocused], [isHovering], [expands], and [isEmpty] arguments must not
   /// be null.
   const InputDecorator({
-    Key? key,
+    super.key,
     required this.decoration,
     this.baseStyle,
     this.textAlign,
@@ -1706,8 +1700,7 @@ class InputDecorator extends StatefulWidget {
        assert(isFocused != null),
        assert(isHovering != null),
        assert(expands != null),
-       assert(isEmpty != null),
-       super(key: key);
+       assert(isEmpty != null);
 
   /// The text and styles to use when decorating the child.
   ///

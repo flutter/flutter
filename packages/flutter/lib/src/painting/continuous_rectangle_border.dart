@@ -35,11 +35,10 @@ import 'edge_insets.dart';
 class ContinuousRectangleBorder extends OutlinedBorder {
   /// The arguments must not be null.
   const ContinuousRectangleBorder({
-    BorderSide side = BorderSide.none,
+    super.side,
     this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
-       assert(borderRadius != null),
-       super(side: side);
+       assert(borderRadius != null);
 
   /// The radius for each corner.
   ///

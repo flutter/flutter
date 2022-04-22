@@ -455,7 +455,7 @@ void main() {
     expect(renderEditable.selectPositionAtCalled, isTrue);
   });
 
-  testWidgets('TextSelectionGestureDetectorBuilder right click', (WidgetTester tester) async {
+  testWidgets('TextSelectionGestureDetectorBuilder right click Apple platforms', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80119
     await pumpTextSelectionGestureDetectorBuilder(tester);
 
@@ -496,7 +496,60 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(renderEditable.selectWordCalled, isFalse);
-  });
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+  );
+
+  testWidgets('TextSelectionGestureDetectorBuilder right click non-Apple platforms', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/80119
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    renderEditable.text = const TextSpan(text: 'one two three four five six seven');
+    await tester.pump();
+
+    final TestGesture gesture = await tester.createGesture(
+      pointer: 0,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryButton,
+    );
+    addTearDown(gesture.removePointer);
+
+    // Get the location of the 10th character
+    final Offset charLocation = renderEditable
+        .getLocalRectForCaret(const TextPosition(offset: 10)).center;
+    final Offset globalCharLocation = charLocation + tester.getTopLeft(find.byType(FakeEditable));
+
+    // Right clicking on an unfocused field should place the cursor, not select
+    // the word.
+    await gesture.down(globalCharLocation);
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isFalse);
+    expect(renderEditable.selectPositionCalled, isTrue);
+
+    // Right clicking on a focused field with selection shouldn't change the
+    // selection.
+    renderEditable.selectPositionCalled = false;
+    renderEditable.selection = const TextSelection(baseOffset: 3, extentOffset: 20);
+    renderEditable.hasFocus = true;
+    await gesture.down(globalCharLocation);
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isFalse);
+    expect(renderEditable.selectPositionCalled, isFalse);
+
+    // Right clicking on a focused field with a reverse (right to left)
+    // selection shouldn't change the selection.
+    renderEditable.selection = const TextSelection(baseOffset: 20, extentOffset: 3);
+    await gesture.down(globalCharLocation);
+    await gesture.up();
+    await tester.pump();
+    expect(renderEditable.selectWordCalled, isFalse);
+    expect(renderEditable.selectPositionCalled, isFalse);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }),
+  );
 
   testWidgets('test TextSelectionGestureDetectorBuilder tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
@@ -1058,8 +1111,7 @@ class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGe
 }
 
 class FakeEditableText extends EditableText {
-  FakeEditableText({Key? key}): super(
-    key: key,
+  FakeEditableText({super.key}): super(
     controller: TextEditingController(),
     focusNode: FocusNode(),
     backgroundCursorColor: Colors.white,
@@ -1085,6 +1137,11 @@ class FakeEditableTextState extends EditableTextState {
   }
 
   @override
+  void toggleToolbar() {
+    return;
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     return FakeEditable(this, key: _editableKey);
@@ -1094,8 +1151,8 @@ class FakeEditableTextState extends EditableTextState {
 class FakeEditable extends LeafRenderObjectWidget {
   const FakeEditable(
     this.delegate, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   final EditableTextState delegate;
 
   @override
@@ -1145,11 +1202,21 @@ class FakeRenderEditable extends RenderEditable {
     selectPositionAtTo = to;
   }
 
+  bool selectPositionCalled = false;
+  @override
+  void selectPosition({ required SelectionChangedCause cause }) {
+    selectPositionCalled = true;
+    return super.selectPosition(cause: cause);
+  }
+
   bool selectWordCalled = false;
   @override
   void selectWord({ required SelectionChangedCause cause }) {
     selectWordCalled = true;
   }
+
+  @override
+  bool hasFocus = false;
 }
 
 class CustomTextSelectionControls extends TextSelectionControls {

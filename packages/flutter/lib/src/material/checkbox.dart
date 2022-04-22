@@ -63,7 +63,7 @@ class Checkbox extends StatefulWidget {
   ///
   /// The values of [tristate] and [autofocus] must not be null.
   const Checkbox({
-    Key? key,
+    super.key,
     required this.value,
     this.tristate = false,
     required this.onChanged,
@@ -83,8 +83,7 @@ class Checkbox extends StatefulWidget {
     this.side,
   }) : assert(tristate != null),
        assert(tristate || value != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(autofocus != null);
 
   /// Whether this checkbox is checked.
   ///

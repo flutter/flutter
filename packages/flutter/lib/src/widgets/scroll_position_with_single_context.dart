@@ -47,19 +47,13 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// saved with [PageStorage] and restored it if this scroll position's scrollable
   /// is recreated.
   ScrollPositionWithSingleContext({
-    required ScrollPhysics physics,
-    required ScrollContext context,
+    required super.physics,
+    required super.context,
     double? initialPixels = 0.0,
-    bool keepScrollOffset = true,
-    ScrollPosition? oldPosition,
-    String? debugLabel,
-  }) : super(
-         physics: physics,
-         context: context,
-         keepScrollOffset: keepScrollOffset,
-         oldPosition: oldPosition,
-         debugLabel: debugLabel,
-       ) {
+    super.keepScrollOffset,
+    super.oldPosition,
+    super.debugLabel,
+  }) {
     // If oldPosition is not null, the superclass will first call absorb(),
     // which may set _pixels and _activity.
     if (!hasPixels && initialPixels != null)

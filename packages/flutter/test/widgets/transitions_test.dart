@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show Rect;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -445,6 +444,112 @@ void main() {
       controller.value = 1.0;
       await tester.pump();
       expect(_getOpacity(tester, 'Fade In'), 1.0);
+    });
+  });
+
+  group('ScaleTransition', () {
+    testWidgets('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Widget widget =  Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScaleTransition(
+          scale: animation,
+          filterQuality: FilterQuality.none,
+          child: const Text('Scale Transition'),
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      // Validate that expensive layer is not left in tree before animation has started.
+      expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+
+      controller.value = 0.25;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 0.5;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 0.75;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 1;
+      await tester.pump();
+
+      // Validate that expensive layer is not left in tree after animation has finished.
+      expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+    });
+  });
+
+  group('RotationTransition', () {
+    testWidgets('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Widget widget =  Directionality(
+        textDirection: TextDirection.ltr,
+        child: RotationTransition(
+          turns: animation,
+          filterQuality: FilterQuality.none,
+          child: const Text('Scale Transition'),
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      // Validate that expensive layer is not left in tree before animation has started.
+      expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+
+      controller.value = 0.25;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 0.5;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 0.75;
+      await tester.pump();
+
+      expect(tester.layers, contains(isA<ImageFilterLayer>().having(
+        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        'image filter',
+        startsWith('ImageFilter.matrix('),
+      )));
+
+      controller.value = 1;
+      await tester.pump();
+
+      // Validate that expensive layer is not left in tree after animation has finished.
+      expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
     });
   });
 }

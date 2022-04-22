@@ -69,6 +69,21 @@ enum _FloatingActionButtonType {
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.1.dart **
 /// {@end-tool}
 ///
+/// Material Design 3 introduced new types of floating action buttons.
+/// {@tool dartpad}
+/// This sample shows the creation of [FloatingActionButton] widget in the typical location in a Scaffold,
+/// as described in: https://m3.material.io/components/floating-action-button/overview
+///
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.2.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of all the variants of [FloatingActionButton] widget as
+/// described in: https://m3.material.io/components/floating-action-button/overview
+///
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], in which floating action buttons typically live.
@@ -81,7 +96,7 @@ class FloatingActionButton extends StatelessWidget {
   /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
   /// must be non-negative.
   const FloatingActionButton({
-    Key? key,
+    super.key,
     this.child,
     this.tooltip,
     this.foregroundColor,
@@ -118,8 +133,7 @@ class FloatingActionButton extends StatelessWidget {
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
-       extendedTextStyle = null,
-       super(key: key);
+       extendedTextStyle = null;
 
   /// Creates a small circular floating action button.
   ///
@@ -131,7 +145,7 @@ class FloatingActionButton extends StatelessWidget {
   /// [highlightElevation], and [disabledElevation] (if specified) must be
   /// non-negative.
   const FloatingActionButton.small({
-    Key? key,
+    super.key,
     this.child,
     this.tooltip,
     this.foregroundColor,
@@ -166,8 +180,7 @@ class FloatingActionButton extends StatelessWidget {
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
-       extendedTextStyle = null,
-       super(key: key);
+       extendedTextStyle = null;
 
   /// Creates a large circular floating action button.
   ///
@@ -179,7 +192,7 @@ class FloatingActionButton extends StatelessWidget {
   /// [highlightElevation], and [disabledElevation] (if specified) must be
   /// non-negative.
   const FloatingActionButton.large({
-    Key? key,
+    super.key,
     this.child,
     this.tooltip,
     this.foregroundColor,
@@ -214,8 +227,7 @@ class FloatingActionButton extends StatelessWidget {
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
-       extendedTextStyle = null,
-       super(key: key);
+       extendedTextStyle = null;
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with
   /// an optional [icon] and a [label].
@@ -224,7 +236,7 @@ class FloatingActionButton extends StatelessWidget {
   /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
   /// (if specified) must be non-negative.
   const FloatingActionButton.extended({
-    Key? key,
+    super.key,
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
@@ -262,8 +274,7 @@ class FloatingActionButton extends StatelessWidget {
        mini = false,
        _floatingActionButtonType = _FloatingActionButtonType.extended,
        child = icon,
-       _extendedLabel = label,
-       super(key: key);
+       _extendedLabel = label;
 
   /// The widget below this widget in the tree.
   ///
@@ -656,9 +667,8 @@ class FloatingActionButton extends StatelessWidget {
 // and MainAxisSize.min, to be as wide as their label and icon.
 class _ChildOverflowBox extends SingleChildRenderObjectWidget {
   const _ChildOverflowBox({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.child,
+  });
 
   @override
   _RenderChildOverflowBox createRenderObject(BuildContext context) {
@@ -675,9 +685,8 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
 
 class _RenderChildOverflowBox extends RenderAligningShiftedBox {
   _RenderChildOverflowBox({
-    RenderBox? child,
-    TextDirection? textDirection,
-  }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
+    super.textDirection,
+  }) : super(alignment: Alignment.center);
 
   @override
   double computeMinIntrinsicWidth(double height) => 0.0;

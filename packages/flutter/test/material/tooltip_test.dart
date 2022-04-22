@@ -1263,7 +1263,7 @@ void main() {
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: 1,
-          label: 'TIP',
+          tooltip: 'TIP',
           textDirection: TextDirection.ltr,
         ),
       ],
@@ -1462,7 +1462,8 @@ void main() {
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Foo\nBar',
+                      tooltip: 'Foo',
+                      label: 'Bar',
                       textDirection: TextDirection.ltr,
                     ),
                   ],
