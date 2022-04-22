@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/display_list_blend_mode.h"
+#include "flutter/display_list/display_list_paint.h"
 #include "flutter/display_list/display_list_tile_mode.h"
 #include "flutter/display_list/display_list_vertices.h"
 #include "flutter/display_list/types.h"
@@ -23,6 +24,44 @@ TEST(DisplayListEnum, ToSkTileMode) {
   ASSERT_EQ(ToSk(DlTileMode::kRepeat), SkTileMode::kRepeat);
   ASSERT_EQ(ToSk(DlTileMode::kMirror), SkTileMode::kMirror);
   ASSERT_EQ(ToSk(DlTileMode::kDecal), SkTileMode::kDecal);
+}
+
+TEST(DisplayListEnum, ToDlDrawStyle) {
+  ASSERT_EQ(ToDl(SkPaint::Style::kFill_Style), DlDrawStyle::kFill);
+  ASSERT_EQ(ToDl(SkPaint::Style::kStroke_Style), DlDrawStyle::kStroke);
+  ASSERT_EQ(ToDl(SkPaint::Style::kStrokeAndFill_Style),
+            DlDrawStyle::kStrokeAndFill);
+}
+
+TEST(DisplayListEnum, ToSkDrawStyle) {
+  ASSERT_EQ(ToSk(DlDrawStyle::kFill), SkPaint::Style::kFill_Style);
+  ASSERT_EQ(ToSk(DlDrawStyle::kStroke), SkPaint::Style::kStroke_Style);
+  ASSERT_EQ(ToSk(DlDrawStyle::kStrokeAndFill),
+            SkPaint::Style::kStrokeAndFill_Style);
+}
+
+TEST(DisplayListEnum, ToDlStrokeCap) {
+  ASSERT_EQ(ToDl(SkPaint::Cap::kButt_Cap), DlStrokeCap::kButt);
+  ASSERT_EQ(ToDl(SkPaint::Cap::kRound_Cap), DlStrokeCap::kRound);
+  ASSERT_EQ(ToDl(SkPaint::Cap::kSquare_Cap), DlStrokeCap::kSquare);
+}
+
+TEST(DisplayListEnum, ToSkStrokeCap) {
+  ASSERT_EQ(ToSk(DlStrokeCap::kButt), SkPaint::Cap::kButt_Cap);
+  ASSERT_EQ(ToSk(DlStrokeCap::kRound), SkPaint::Cap::kRound_Cap);
+  ASSERT_EQ(ToSk(DlStrokeCap::kSquare), SkPaint::Cap::kSquare_Cap);
+}
+
+TEST(DisplayListEnum, ToDlStrokeJoin) {
+  ASSERT_EQ(ToDl(SkPaint::Join::kMiter_Join), DlStrokeJoin::kMiter);
+  ASSERT_EQ(ToDl(SkPaint::Join::kRound_Join), DlStrokeJoin::kRound);
+  ASSERT_EQ(ToDl(SkPaint::Join::kBevel_Join), DlStrokeJoin::kBevel);
+}
+
+TEST(DisplayListEnum, ToSkStrokeJoin) {
+  ASSERT_EQ(ToSk(DlStrokeJoin::kMiter), SkPaint::Join::kMiter_Join);
+  ASSERT_EQ(ToSk(DlStrokeJoin::kRound), SkPaint::Join::kRound_Join);
+  ASSERT_EQ(ToSk(DlStrokeJoin::kBevel), SkPaint::Join::kBevel_Join);
 }
 
 TEST(DisplayListEnum, ToDlVertexMode) {
