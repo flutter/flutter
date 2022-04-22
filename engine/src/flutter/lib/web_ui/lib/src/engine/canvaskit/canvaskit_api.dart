@@ -2388,7 +2388,10 @@ class SkiaObjectCollectionError implements Error {
 /// Any Skia object that has a `delete` method.
 @JS()
 @anonymous
-class SkDeletable {
+@staticInterop
+class SkDeletable {}
+
+extension SkDeletableExtension on SkDeletable {
   /// Deletes the C++ side object.
   external void delete();
 
@@ -2403,7 +2406,10 @@ class SkDeletable {
 
 @JS()
 @anonymous
-class JsConstructor {
+@staticInterop
+class JsConstructor {}
+
+extension JsConstructorExtension on JsConstructor {
   /// The name of the "constructor", typically the function name called with
   /// the `new` keyword, or the ES6 class name.
   ///
