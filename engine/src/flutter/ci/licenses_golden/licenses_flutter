@@ -88,6 +88,9 @@ FILE: ../../../flutter/display_list/display_list_mask_filter.h
 FILE: ../../../flutter/display_list/display_list_mask_filter_unittests.cc
 FILE: ../../../flutter/display_list/display_list_ops.cc
 FILE: ../../../flutter/display_list/display_list_ops.h
+FILE: ../../../flutter/display_list/display_list_paint.cc
+FILE: ../../../flutter/display_list/display_list_paint.h
+FILE: ../../../flutter/display_list/display_list_paint_unittests.cc
 FILE: ../../../flutter/display_list/display_list_test_utils.cc
 FILE: ../../../flutter/display_list/display_list_test_utils.h
 FILE: ../../../flutter/display_list/display_list_tile_mode.h

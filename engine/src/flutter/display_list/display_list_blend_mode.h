@@ -63,6 +63,7 @@ enum class DlBlendMode {
   kLastSeparableMode =
       kMultiply,  //!< last blend mode operating separately on components
   kLastMode = kLuminosity,  //!< last valid value
+  kDefaultMode = kSrcOver,
 };
 
 inline DlBlendMode ToDl(SkBlendMode mode) {

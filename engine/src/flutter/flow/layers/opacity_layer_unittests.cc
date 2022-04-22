@@ -298,11 +298,11 @@ TEST_F(OpacityLayerTest, HalfTransparent) {
   EXPECT_EQ(mock_layer->parent_mutators(),
             std::vector({Mutator(layer_transform), Mutator(alpha_half)}));
 
-  SkPaint opacity_paint;
-  opacity_paint.setAlphaf(alpha_half * (1.0 / SK_AlphaOPAQUE));
   SkRect opacity_bounds;
   expected_layer_bounds.makeOffset(-layer_offset.fX, -layer_offset.fY)
       .roundOut(&opacity_bounds);
+  DlPaint save_paint = DlPaint().setColor(DlColor(alpha_half << 24));
+  DlPaint child_dl_paint = DlPaint().setColor(DlColor(SK_ColorGREEN));
 
   auto expected_builder = DisplayListBuilder();
   expected_builder.save();
@@ -311,10 +311,8 @@ TEST_F(OpacityLayerTest, HalfTransparent) {
   expected_builder.transformReset();
   expected_builder.transform(SkM44(integral_layer_transform));
 #endif
-  expected_builder.setColor(alpha_half << 24);
-  expected_builder.saveLayer(&opacity_bounds, true);
-  expected_builder.setColor(SkColors::kGreen.toSkColor());
-  expected_builder.drawPath(child_path);
+  expected_builder.saveLayer(&opacity_bounds, &save_paint);
+  expected_builder.drawPath(child_path, child_dl_paint);
   expected_builder.restore();
   expected_builder.restore();
   sk_sp<DisplayList> expected_display_list = expected_builder.Build();
