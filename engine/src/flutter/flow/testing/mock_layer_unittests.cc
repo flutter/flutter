@@ -78,5 +78,20 @@ TEST_F(MockLayerTest, SaveLayerOnLeafNodesCanvas) {
   EXPECT_EQ(preroll_context()->has_platform_view, true);
 }
 
+TEST_F(MockLayerTest, OpacityInheritance) {
+  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  PrerollContext* context = preroll_context();
+
+  auto mock1 = std::make_shared<MockLayer>(path1);
+  context->subtree_can_inherit_opacity = false;
+  mock1->Preroll(context, SkMatrix::I());
+  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+
+  auto mock2 = MockLayer::MakeOpacityCompatible(path1);
+  context->subtree_can_inherit_opacity = false;
+  mock2->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+}
+
 }  // namespace testing
 }  // namespace flutter

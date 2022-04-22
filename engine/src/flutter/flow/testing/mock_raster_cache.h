@@ -63,6 +63,13 @@ class MockRasterCache : public RasterCache {
       SkColorSpace* dst_color_space,
       bool checkerboard) const override;
 
+  std::unique_ptr<RasterCacheResult> RasterizeDisplayList(
+      DisplayList* display_list,
+      GrDirectContext* context,
+      const SkMatrix& ctm,
+      SkColorSpace* dst_color_space,
+      bool checkerboard) const override;
+
   std::unique_ptr<RasterCacheResult> RasterizeLayer(
       PrerollContext* context,
       Layer* layer,
