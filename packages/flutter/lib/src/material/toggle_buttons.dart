@@ -705,8 +705,8 @@ class ToggleButtons extends StatelessWidget {
         case MaterialTapTargetSize.padded:
           if (direction == Axis.horizontal) {
             minPaddingSize = const Size(
-              kMinInteractiveDimension,
               0.0,
+              kMinInteractiveDimension,
             );
           } else {
             minPaddingSize = const Size(
