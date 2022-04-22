@@ -56,7 +56,7 @@ void main() {
       final ValidateProjectCommand command = ValidateProjectCommand(
           fileSystem: fileSystem,
           logger: loggerTest,
-          allProjectValidators: [ProjectValidatorDummy()]
+          allProjectValidators: <ProjectValidator>[ProjectValidatorDummy()]
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -68,7 +68,7 @@ void main() {
           '│ [✗] Error: my error                      │\n'
           '│ [!] pass two: pass (warning: my warning) │\n'
           '│                                          │\n'
-          '└──────────────────────────────────────────┘\n''';
+          '└──────────────────────────────────────────┘\n';
 
       expect(loggerTest.statusText, contains(expected));
     });
@@ -78,7 +78,7 @@ void main() {
       final ValidateProjectCommand command = ValidateProjectCommand(
           fileSystem: fileSystem,
           logger: loggerTest,
-          allProjectValidators: [ProjectValidatorCrash()]
+          allProjectValidators: <ProjectValidator>[ProjectValidatorCrash()]
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 

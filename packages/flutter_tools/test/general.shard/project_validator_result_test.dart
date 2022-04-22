@@ -84,7 +84,7 @@ void main() {
     });
 
     testWithoutContext('error status', () async {
-      MemoryFileSystem fs = MemoryFileSystem.test();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       final List<ProjectValidatorResult> results = await task.start(project);
       expect(results.length, 3);

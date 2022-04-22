@@ -11,14 +11,11 @@ import '../runner/flutter_command.dart';
 
 class ValidateProjectCommand extends FlutterCommand {
   ValidateProjectCommand({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required List<ProjectValidator> allProjectValidators,
-    bool verbose = false
-  }): fileSystem = fileSystem,
-      logger = logger,
-      allProjectValidators = allProjectValidators,
-      verbose = verbose;
+    required this.fileSystem,
+    required this.logger,
+    required this.allProjectValidators,
+    this.verbose = false
+  });
 
   final FileSystem fileSystem;
   final Logger logger;

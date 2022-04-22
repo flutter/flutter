@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'src/project_validator.dart';
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
@@ -18,7 +17,6 @@ import 'src/base/terminal.dart';
 import 'src/base/user_messages.dart';
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
-import 'src/commands/validate_project.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
@@ -50,6 +48,7 @@ import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/commands/validate_project.dart';
 import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
@@ -57,6 +56,7 @@ import 'src/globals.dart' as globals;
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/pre_run_validator.dart';
+import 'src/project_validator.dart';
 import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/web/web_runner.dart';
@@ -149,7 +149,10 @@ List<FlutterCommand> generateCommands({
     artifacts: globals.artifacts,
   ),
   ValidateProjectCommand(
-      fileSystem: globals.fs, logger: globals.logger, allProjectValidators: ProjectValidator.allProjectValidators, verbose: verbose
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    allProjectValidators: ProjectValidator.allProjectValidators,
+    verbose: verbose,
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(verboseHelp: verboseHelp),
