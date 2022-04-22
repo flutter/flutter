@@ -228,7 +228,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
           !data.hasAction(ui.SemanticsAction.tap)) {
         return result;
       }
-      if (data.label == null || data.label.isEmpty) {
+      if ((data.label == null || data.label.isEmpty) && (data.tooltip == null || data.tooltip.isEmpty)) {
         result += Evaluation.fail(
           '$node: expected tappable node to have semantic label, '
           'but none was found.\n',

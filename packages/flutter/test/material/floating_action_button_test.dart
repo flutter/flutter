@@ -670,7 +670,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Tooltip is used as semantics label', (WidgetTester tester) async {
+  testWidgets('Tooltip is used as semantics tooltip', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -697,7 +697,7 @@ void main() {
                   ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Add Photo',
+                      tooltip: 'Add Photo',
                       actions: <SemanticsAction>[
                         SemanticsAction.tap,
                       ],

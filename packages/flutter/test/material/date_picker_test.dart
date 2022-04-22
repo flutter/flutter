@@ -817,7 +817,7 @@ void main() {
 
         // Input mode toggle button
         expect(tester.getSemantics(switchToInputIcon), matchesSemantics(
-          label: 'Switch to input',
+          tooltip: 'Switch to input',
           isButton: true,
           hasTapAction: true,
           isEnabled: true,
@@ -860,7 +860,7 @@ void main() {
 
         // Input mode toggle button
         expect(tester.getSemantics(switchToCalendarIcon), matchesSemantics(
-          label: 'Switch to calendar',
+          tooltip: 'Switch to calendar',
           isButton: true,
           hasTapAction: true,
           isEnabled: true,
