@@ -26,6 +26,17 @@ String camelCase(String str) {
   return str;
 }
 
+/// Converts `FooBar` to `fooBar`
+String uncapitalize(String str) {
+  if (str.isEmpty) {
+    return str;
+  }
+  else if (str.length < 2) {
+    return str.toLowerCase();
+  }
+  return str.substring(0, 1).toLowerCase() + str.substring(1);
+}
+
 final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.

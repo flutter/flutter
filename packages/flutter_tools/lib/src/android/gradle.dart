@@ -894,6 +894,12 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo, Logger logger, 
     fileCandidates.add(getBundleDirectory(project)
         .childDirectory('${buildInfo.uncapitalizedFlavor}${camelCase('_${buildInfo.modeName}')}')
         .childFile('app-${buildInfo.uncapitalizedFlavor}-${buildInfo.modeName}.aab'));
+
+    // The Android Gradle plugin 4.1.0 uses hyphens for multi-dimensional flavor names.
+    // For example: flavor `fooBar` becomes `app-foo-bar-release.aab
+    fileCandidates.add(getBundleDirectory(project)
+        .childDirectory('${buildInfo.uncapitalizedFlavor}${camelCase('_${buildInfo.modeName}')}')
+        .childFile('app-${buildInfo.paramCaseFlavor}-${buildInfo.modeName}.aab'));
   }
   for (final File bundleFile in fileCandidates) {
     if (bundleFile.existsSync()) {

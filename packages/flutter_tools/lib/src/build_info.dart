@@ -204,7 +204,11 @@ class BuildInfo {
 
   /// the flavor name in the output bundle files has the first character lower-cased,
   /// so the uncapitalized flavor name is used to compute the output file name
-  String? get uncapitalizedFlavor => _uncapitalize(flavor);
+  String get uncapitalizedFlavor => uncapitalize(flavor ?? '');
+
+  /// the flavor name in the output bundle files is lower-cased but uses hyphens
+  /// to separate multiple dimensions in the flavor name in the output file name
+  String get paramCaseFlavor => snakeCase(flavor ?? '', '-');
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -1048,11 +1052,4 @@ String getNameForHostPlatformArch(HostPlatform platform) {
     case HostPlatform.windows_x64:
       return 'x64';
   }
-}
-
-String? _uncapitalize(String? s) {
-  if (s == null || s.isEmpty) {
-    return s;
-  }
-  return s.substring(0, 1).toLowerCase() + s.substring(1);
 }
