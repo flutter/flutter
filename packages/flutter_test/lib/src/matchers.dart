@@ -37,6 +37,7 @@ import 'widget_tester.dart' show WidgetTester;
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 const Matcher findsNothing = _FindsWidgetMatcher(null, 0);
 
 /// Asserts that the [Finder] locates at least one widget in the widget tree.
@@ -52,6 +53,7 @@ const Matcher findsNothing = _FindsWidgetMatcher(null, 0);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 const Matcher findsWidgets = _FindsWidgetMatcher(1, null);
 
 /// Asserts that the [Finder] locates at exactly one widget in the widget tree.
@@ -67,6 +69,7 @@ const Matcher findsWidgets = _FindsWidgetMatcher(1, null);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 
 /// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
@@ -82,7 +85,24 @@ const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
+///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
 Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
+
+/// Asserts that the [Finder] locates at least a number of widgets in the widget tree.
+///
+/// ## Sample code
+///
+/// ```dart
+/// expect(find.text('Save'), findsAtLeastNWidgets(2));
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsWidgets], when you want the finder to find one or more widgets.
+///  * [findsOneWidget], when you want the finder to find exactly one widget.
+///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
+Matcher findsAtLeastNWidgets(int n) => _FindsWidgetMatcher(n, null);
 
 /// Asserts that the [Finder] locates a single widget that has at
 /// least one [Offstage] widget ancestor.
