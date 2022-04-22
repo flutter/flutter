@@ -4,6 +4,7 @@
 
 #include <filesystem>
 
+#include "flutter/fml/backtrace.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/macros.h"
@@ -18,6 +19,7 @@ namespace impeller {
 namespace compiler {
 
 bool Main(const fml::CommandLine& command_line) {
+  fml::InstallCrashHandler();
   if (command_line.HasOption("help")) {
     Switches::PrintHelp(std::cout);
     return true;

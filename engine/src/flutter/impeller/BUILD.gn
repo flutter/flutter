@@ -55,10 +55,6 @@ executable("impeller_unittests") {
     "blobcat:blobcat_unittests",
     "compiler:compiler_unittests",
     "geometry:geometry_unittests",
-
-    # FML depends on the Dart VM for tracing and getting the current
-    # timepoint.
-    "//flutter/runtime:libdart",
   ]
 
   if (impeller_supports_rendering) {
