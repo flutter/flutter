@@ -706,7 +706,7 @@ class ToggleButtons extends StatelessWidget {
           if (direction == Axis.horizontal) {
             minPaddingSize = const Size(
               kMinInteractiveDimension,
-              kMinInteractiveDimension,
+              0.0,
             );
           } else {
             minPaddingSize = const Size(
@@ -776,16 +776,18 @@ class ToggleButtons extends StatelessWidget {
         button = Center(child: button);
       }
 
-      return Semantics(
-        container: true,
-        button: true,
-        enabled: onPressed != null,
-        child: _InputPadding(
-          minSize: minPaddingSize,
-          direction: direction,
-          child: Semantics(
-            excludeSemantics: true,
-            child: button,
+      return MergeSemantics(
+        child: Semantics(
+          container: true,
+          button: true,
+          enabled: onPressed != null,
+          child: _InputPadding(
+            minSize: minPaddingSize,
+            direction: direction,
+            child: Semantics(
+              excludeSemantics: true,
+              child: button,
+            ),
           ),
         ),
       );
