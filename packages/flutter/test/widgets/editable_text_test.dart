@@ -5183,6 +5183,53 @@ void main() {
     // toolbar. Until we change that, this test should remain skipped.
   }, skip: kIsWeb); // [intended]
 
+
+  testWidgets('text selection handle visibility for long text', (WidgetTester tester) async {
+    // long text which is scrollable based on given box size
+    const String testText =
+        'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.';
+    final TextEditingController controller =
+        TextEditingController(text: testText);
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: EditableText(
+              controller: controller,
+              showSelectionHandles: true,
+              focusNode: FocusNode(),
+              style: Typography.material2018().black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // scroll to a text that is outside of the inital visible rect
+    scrollController.jumpTo(151);
+    await tester.pump();
+
+    // long press on a word to trigger a select
+    await tester.longPressAt(const Offset(20, 15));
+    // wait for adjustments of scroll area
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // assert not jumped to top
+    expect(scrollController.offset, equals(151));
+  });
+
   const String testText = 'Now is the time for\n' // 20
       'all good people\n'                         // 20 + 16 => 36
       'to come to the aid\n'                      // 36 + 19 => 55
