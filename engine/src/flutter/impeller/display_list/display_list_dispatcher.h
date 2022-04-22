@@ -61,7 +61,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void setBlender(sk_sp<SkBlender> blender) override;
 
   // |flutter::Dispatcher|
-  void setPathEffect(sk_sp<SkPathEffect> effect) override;
+  void setPathEffect(const flutter::DlPathEffect* effect) override;
 
   // |flutter::Dispatcher|
   void setMaskFilter(const flutter::DlMaskFilter* filter) override;
