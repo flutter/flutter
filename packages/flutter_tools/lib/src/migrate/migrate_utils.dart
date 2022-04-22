@@ -183,7 +183,7 @@ class MigrateUtils {
     final List<String> cmdArgs = <String>['git', 'diff', '--quiet', 'HEAD', '--', '.'];
     // windows uses double quotes.
     if (_platform.isWindows) {
-      final String path = _fileSystem.path.join(workingDirectory, kDefaultMigrateWorkingDirectoryName);
+      String path = _fileSystem.path.join(workingDirectory, kDefaultMigrateWorkingDirectoryName);
       // Trim off any drive labels such as 'C:'
       if (path.contains(':')) {
         path = path.substring(path.indexOf(':') + 1);
