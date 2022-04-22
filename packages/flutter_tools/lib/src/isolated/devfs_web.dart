@@ -275,7 +275,7 @@ class WebAssetServer implements AssetReader {
     }
 
     logging.Logger.root.level = logging.Level.ALL;
-    logging.Logger.root.onRecord.listen(_log);
+    logging.Logger.root.onRecord.listen(log);
 
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
@@ -1004,7 +1004,8 @@ class ReleaseAssetServer {
   }
 }
 
-void _log(logging.LogRecord event) {
+@visibleForTesting
+void log(logging.LogRecord event) {
   final String error = event.error == null? '': 'Error: ${event.error}';
   if (event.level >= logging.Level.SEVERE) {
     globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);

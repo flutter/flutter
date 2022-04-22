@@ -8,6 +8,7 @@ import 'dart:io' hide Directory, File;
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
@@ -39,6 +41,7 @@ void main() {
   PackageConfig packages;
   Platform windows;
   FakeHttpServer httpServer;
+  BufferLogger logger;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -50,6 +53,7 @@ void main() {
     httpServer = FakeHttpServer();
     linux = FakePlatform(environment: <String, String>{});
     windows = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
+    logger = BufferLogger.test();
     testbed = Testbed(setup: () {
       webAssetServer = WebAssetServer(
         httpServer,
@@ -67,8 +71,34 @@ void main() {
         webBuildDirectory: null,
         basePath: null,
       );
+    }, overrides: <Type, Generator>{
+      Logger: () => logger,
     });
   });
+
+  test('.log() filters events', () => testbed.run(() {
+    // harmless warning that should be filtered out
+    const String harmlessMessage = 'Unresolved uri: dart:ui';
+    // serious warning
+    const String seriousMessage = 'Something bad happened';
+
+    final List<logging.LogRecord> events = <logging.LogRecord>[
+      logging.LogRecord(
+        logging.Level.WARNING,
+        harmlessMessage,
+        'DartUri',
+      ),
+      logging.LogRecord(
+        logging.Level.WARNING,
+        seriousMessage,
+        'DartUri',
+      ),
+    ];
+
+    events.forEach(log);
+    expect(logger.warningText, contains(seriousMessage));
+    expect(logger.warningText, isNot(contains(harmlessMessage)));
+  }));
 
   test('Handles against malformed manifest', () => testbed.run(() async {
     final File source = globals.fs.file('source')
