@@ -29,10 +29,6 @@ impeller_component("blobcat") {
     ":blobcat_lib",
     "../base",
     "//flutter/fml",
-
-    # FML depends on the Dart VM for tracing and getting the current
-    # timepoint.
-    "//flutter/runtime:libdart",
   ]
 }
 

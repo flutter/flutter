@@ -44,10 +44,6 @@ impeller_component("impellerc") {
 
   deps = [
     ":compiler_lib",
-
-    # FML depends on the Dart VM for tracing and getting the current
-    # timepoint.
-    "//flutter/runtime:libdart",
   ]
 }
 
