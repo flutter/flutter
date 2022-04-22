@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:js/js.dart';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
@@ -116,7 +118,7 @@ void _tests() {
       final ZoneSpy spy = ZoneSpy();
       spy.run(() {
         Instrumentation.enabled = true;
-        TestSkDeletable.deleteCount = 0;
+        TestSkDeletableMock.deleteCount = 0;
         TestBoxWrapper.resurrectCount = 0;
         final TestBoxWrapper original = TestBoxWrapper();
 
@@ -135,7 +137,7 @@ void _tests() {
         original.dispose();
 
         testCollector.collectNow();
-        expect(TestSkDeletable.deleteCount, 0);
+        expect(TestSkDeletableMock.deleteCount, 0);
 
         spy.fakeAsync.elapse(const Duration(seconds: 2));
         expect(
@@ -158,7 +160,7 @@ void _tests() {
         expect(original.box.isDeletedPermanently, isTrue);
 
         testCollector.collectNow();
-        expect(TestSkDeletable.deleteCount, 1);
+        expect(TestSkDeletableMock.deleteCount, 1);
         expect(TestBoxWrapper.resurrectCount, 0);
 
         expect(() => clone.box.unref(clone), throwsAssertionError);
@@ -175,23 +177,23 @@ void _tests() {
     });
 
     test('Can resurrect Skia objects', () async {
-      TestSkDeletable.deleteCount = 0;
+      TestSkDeletableMock.deleteCount = 0;
       TestBoxWrapper.resurrectCount = 0;
       final TestBoxWrapper object = TestBoxWrapper();
-      expect(TestSkDeletable.deleteCount, 0);
+      expect(TestSkDeletableMock.deleteCount, 0);
       expect(TestBoxWrapper.resurrectCount, 0);
 
       // Test 3 cycles of delete/resurrect.
       for (int i = 0; i < 3; i++) {
         object.box.delete();
         object.box.didDelete();
-        expect(TestSkDeletable.deleteCount, i + 1);
+        expect(TestSkDeletableMock.deleteCount, i + 1);
         expect(TestBoxWrapper.resurrectCount, i);
         expect(object.box.isDeletedTemporarily, isTrue);
         expect(object.box.isDeletedPermanently, isFalse);
 
         expect(object.box.skiaObject, isNotNull);
-        expect(TestSkDeletable.deleteCount, i + 1);
+        expect(TestSkDeletableMock.deleteCount, i + 1);
         expect(TestBoxWrapper.resurrectCount, i + 1);
         expect(object.box.isDeletedTemporarily, isFalse);
         expect(object.box.isDeletedPermanently, isFalse);
@@ -202,15 +204,15 @@ void _tests() {
     });
 
     test('Can dispose temporarily deleted object', () async {
-      TestSkDeletable.deleteCount = 0;
+      TestSkDeletableMock.deleteCount = 0;
       TestBoxWrapper.resurrectCount = 0;
       final TestBoxWrapper object = TestBoxWrapper();
-      expect(TestSkDeletable.deleteCount, 0);
+      expect(TestSkDeletableMock.deleteCount, 0);
       expect(TestBoxWrapper.resurrectCount, 0);
 
       object.box.delete();
       object.box.didDelete();
-      expect(TestSkDeletable.deleteCount, 1);
+      expect(TestSkDeletableMock.deleteCount, 1);
       expect(TestBoxWrapper.resurrectCount, 0);
       expect(object.box.isDeletedTemporarily, isTrue);
       expect(object.box.isDeletedPermanently, isFalse);
@@ -348,14 +350,12 @@ class TestBoxWrapper implements StackTraceDebugger {
   TestBoxWrapper clone() => TestBoxWrapper.cloneOf(box);
 }
 
-class TestSkDeletable implements SkDeletable {
+class TestSkDeletableMock {
   static int deleteCount = 0;
 
-  @override
   bool isDeleted() => _isDeleted;
   bool _isDeleted = false;
 
-  @override
   void delete() {
     expect(_isDeleted, isFalse,
         reason:
@@ -364,15 +364,32 @@ class TestSkDeletable implements SkDeletable {
     deleteCount++;
   }
 
-  @override
-  JsConstructor get constructor => TestJsConstructor('TestSkDeletable');
+  JsConstructor get constructor => TestJsConstructor(name: 'TestSkDeletable');
 }
 
-class TestJsConstructor implements JsConstructor {
-  TestJsConstructor(this.name);
+@JS()
+@anonymous
+@staticInterop
+class TestSkDeletable implements SkDeletable {
+  factory TestSkDeletable() {
+    final TestSkDeletableMock mock = TestSkDeletableMock();
+    return TestSkDeletable._(
+        isDeleted: allowInterop(() => mock.isDeleted()),
+        delete: allowInterop(() => mock.delete()),
+        constructor: mock.constructor);
+  }
 
-  @override
-  final String name;
+  external factory TestSkDeletable._({
+    bool Function() isDeleted,
+    void Function() delete,
+    JsConstructor constructor});
+}
+
+@JS()
+@anonymous
+@staticInterop
+class TestJsConstructor implements JsConstructor {
+  external factory TestJsConstructor({String name});
 }
 
 class TestSkiaObject extends ManagedSkiaObject<SkPaint> {
