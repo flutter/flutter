@@ -5223,6 +5223,7 @@ void main() {
     // long press on a word to trigger a select
     await tester.longPressAt(const Offset(20, 15));
     // wait for adjustments of scroll area
+    await tester.pump();
     await tester.pumpAndSettle();
 
     // assert not jumped to top
