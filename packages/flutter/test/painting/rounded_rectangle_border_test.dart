@@ -141,7 +141,6 @@ void main() {
     final RoundedRectangleBorder outsideRoundedRectangleBorder = RoundedRectangleBorder(side: BorderSide(width: 10, strokeAlign: StrokeAlign.outside));
     expect(outsideRoundedRectangleBorder.dimensions, EdgeInsets.zero);
 
-    
     final CircleBorder insideCircleBorder = CircleBorder(side: BorderSide(width: 10));
     expect(insideCircleBorder.dimensions, const EdgeInsets.all(10));
 
