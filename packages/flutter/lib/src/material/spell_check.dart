@@ -32,14 +32,16 @@ class MaterialSpellCheckService implements SpellCheckService {
       case 'SpellCheck.updateSpellCheckResults':
         List<String> results = args.cast<String>();
         List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
+        
+        // print("************************************************************* [FRAMEWORK][_handleSpellCheckInvocation] Raw spell check results received: *************************************************************");
 
         results.forEach((String result) {
           List<String> resultParsed = result.split(".");
-          print('RAW SPELLCHECK RESULTS: ${resultParsed}');
-          print(resultParsed[2].split("/n"));
-          spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split("/n")));
+
+          // print("************************************************************************* [FRAMEWORK][_handleSpellCheckInvocation] ${resultParsed} *************************************************************************");
+
+          spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split("\n")));
         });
-        print("---------------------------------------------------------------");
 
         controller.sink.add(spellCheckerSuggestionSpans);
         break;
@@ -53,6 +55,12 @@ class MaterialSpellCheckService implements SpellCheckService {
     assert(locale != null);
     assert(value.text != null);
 
+    if (value.isComposingRangeValid) {
+      // print("************************************************************* [FRAMEWORK][fetchSpellCheckSuggestions] Spell check requested for |${value.text}| with composing region |${value.composing.textInside(value.text)}| *************************************************************");
+    } else {
+      // print("************************************************************* [FRAMEWORK][fetchSpellCheckSuggestions] Spell check requested for |${value.text}| with no valid composing region *************************************************************");
+    }
+
     List<SpellCheckerSuggestionSpan> spellCheckResults = <SpellCheckerSuggestionSpan>[];
 
     spellCheckChannel.invokeMethod<void>(
@@ -62,13 +70,24 @@ class MaterialSpellCheckService implements SpellCheckService {
     
     await for (final result in controller.stream) {
       TextRange composingRange = value.composing;
+
+      if (value.isComposingRangeValid) {
+        // print("************************************************************* [FRAMEWORK][fetchSpellCheckSuggestions] Modified spell check results for |${value.text}| with composing region |${value.composing.textInside(value.text)}| *************************************************************");
+      } else {
+        // print("************************************************************* [FRAMEWORK][fetchSpellCheckSuggestions] Modified spell check results for |${value.text}| with no valid composing region *************************************************************");
+      }
+        
+
       result.forEach((SpellCheckerSuggestionSpan span) {
         bool isWithinComposingRegion = composingRange.start == span.start && composingRange.end == span.end;
 
         // if (!isWithinComposingRegion) {
-            spellCheckResults.add(span);
+          // print("************************************************************************* [FRAMEWORK][fetchSpellCheckSuggestions] Span start: ${span.start}, Span end: ${span.end}, Span suggestions: ${span.replacementSuggestions} *************************************************************************");
+
+          spellCheckResults.add(span);
         // }
       });
+
 
       return spellCheckResults;
     }
