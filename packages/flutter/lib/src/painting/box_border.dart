@@ -248,7 +248,7 @@ abstract class BoxBorder extends ShapeBorder {
         radius = (rect.shortestSide - width) / 2.0;
         break;
       case StrokeAlign.center:
-        radius = rect.shortestSide / 2;
+        radius = rect.shortestSide / 2.0;
         break;
       case StrokeAlign.outside:
         radius = (rect.shortestSide + width) / 2.0;
