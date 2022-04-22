@@ -802,6 +802,11 @@ TEST_F(AccessibilityBridgeTest, BatchesLargeMessages) {
   }
 
   update.insert(std::make_pair(0, std::move(node0)));
+
+  // Make the semantics manager hold answering to this commit to test the flow
+  // control. This means the second update will not be pushed until the first
+  // one has processed.
+  semantics_manager_.SetShouldHoldCommitResponse(true);
   accessibility_bridge_->AddSemanticsNodeUpdate(update, 1.f);
   RunLoopUntilIdle();
 
@@ -822,6 +827,12 @@ TEST_F(AccessibilityBridgeTest, BatchesLargeMessages) {
           {0, node0},
       },
       1.f);
+  RunLoopUntilIdle();
+
+  // Should still be 0, because the commit was not answered yet.
+  EXPECT_EQ(0, semantics_manager_.DeleteCount());
+
+  semantics_manager_.InvokeCommitCallback();
   RunLoopUntilIdle();
 
   EXPECT_EQ(1, semantics_manager_.DeleteCount());

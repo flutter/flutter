@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <optional>
+#include <queue>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -26,6 +27,7 @@
 #include "flutter/lib/ui/semantics/semantics_node.h"
 
 namespace flutter_runner {
+
 // Accessibility bridge.
 //
 // This class intermediates accessibility-related calls between Fuchsia and
@@ -62,6 +64,10 @@ class AccessibilityBridge
           sizeof(fuchsia::accessibility::semantics::Node().node_id()),
       "flutter::SemanticsNode::id and "
       "fuchsia::accessibility::semantics::Node::node_id differ in size.");
+
+  // Maximum number of node ids to be deleted through the Semantics API.
+  static constexpr size_t kMaxDeletionsPerUpdate =
+      kMaxMessageSize / kNodeIdSize;
 
   AccessibilityBridge(
       SetSemanticsEnabledCallback set_semantics_enabled_callback,
@@ -107,6 +113,30 @@ class AccessibilityBridge
  private:
   // Fuchsia's default root semantic node id.
   static constexpr int32_t kRootNodeId = 0;
+
+  // Represents an atomic semantic update to Fuchsia, which can contain deletes
+  // and updates of semantic nodes.
+  //
+  // An atomic update is a set of operations that take a semantic tree in a
+  // valid state to another valid state. Please check the semantics FIDL
+  // documentation for details.
+  struct FuchsiaAtomicUpdate {
+    FuchsiaAtomicUpdate() = default;
+    ~FuchsiaAtomicUpdate() = default;
+    FuchsiaAtomicUpdate(FuchsiaAtomicUpdate&&) = default;
+
+    // Adds a node to be updated. |size| contains the
+    // size in bytes of the node to be updated.
+    void AddNodeUpdate(fuchsia::accessibility::semantics::Node node,
+                       size_t size);
+
+    // Adds a node to be deleted.
+    void AddNodeDeletion(uint32_t id);
+
+    std::vector<std::pair<fuchsia::accessibility::semantics::Node, size_t>>
+        updates;
+    std::vector<uint32_t> deletions;
+  };
 
   // Holds a flutter semantic node and some extra info.
   // In particular, it adds a screen_rect field to flutter::SemanticsNode.
@@ -157,10 +187,11 @@ class AccessibilityBridge
   std::unordered_set<int32_t> GetDescendants(int32_t node_id) const;
 
   // Removes internal references to any dangling nodes from previous
-  // updates, and updates the Accessibility service.
+  // updates, and adds the nodes to be deleted to the current |atomic_update|.
   //
-  // May result in a call to FuchsiaAccessibility::Commit().
-  void PruneUnreachableNodes();
+  // The node ids to be deleted are only collected at this point, and will be
+  // committed in the next call to |Apply()|.
+  void PruneUnreachableNodes(FuchsiaAtomicUpdate* atomic_update);
 
   // Updates the on-screen positions of accessibility elements,
   // starting from the root element with an identity matrix.
@@ -194,6 +225,10 @@ class AccessibilityBridge
       fuchsia::accessibility::semantics::Action fuchsia_action,
       uint32_t node_id);
 
+  // Applies the updates and deletions in |atomic_update|, sending them via
+  // |tree_ptr|.
+  void Apply(FuchsiaAtomicUpdate* atomic_update);
+
   // |fuchsia::accessibility::semantics::SemanticListener|
   void OnSemanticsModeChanged(bool enabled,
                               OnSemanticsModeChangedCallback callback) override;
@@ -220,6 +255,9 @@ class AccessibilityBridge
   // Assists with pruning unreachable nodes and hit testing.
   std::unordered_map<int32_t, SemanticsNode> nodes_;
   bool semantics_enabled_;
+
+  // Queue of atomic updates to be sent to Fuchsia.
+  std::shared_ptr<std::queue<FuchsiaAtomicUpdate>> atomic_updates_;
 
   // Node to publish inspect data.
   inspect::Node inspect_node_;

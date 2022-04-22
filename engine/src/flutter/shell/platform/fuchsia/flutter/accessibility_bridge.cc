@@ -9,6 +9,7 @@
 #include <zircon/status.h>
 #include <zircon/types.h>
 
+#include <algorithm>
 #include <deque>
 
 #include "flutter/fml/logging.h"
@@ -226,6 +227,7 @@ AccessibilityBridge::AccessibilityBridge(
           std::move(dispatch_semantics_action_callback)),
       binding_(this),
       fuchsia_semantics_manager_(semantics_manager.Bind()),
+      atomic_updates_(std::make_shared<std::queue<FuchsiaAtomicUpdate>>()),
       inspect_node_(std::move(inspect_node)) {
   fuchsia_semantics_manager_.set_error_handler([](zx_status_t status) {
     FML_LOG(ERROR) << "Flutter cannot connect to SemanticsManager with status: "
@@ -487,27 +489,18 @@ static uint32_t FlutterIdToFuchsiaId(int32_t flutter_node_id) {
   return static_cast<uint32_t>(flutter_node_id);
 }
 
-void AccessibilityBridge::PruneUnreachableNodes() {
+void AccessibilityBridge::PruneUnreachableNodes(
+    FuchsiaAtomicUpdate* atomic_update) {
   const auto& reachable_nodes = GetDescendants(kRootNodeId);
-  std::vector<uint32_t> nodes_to_remove;
   auto iter = nodes_.begin();
   while (iter != nodes_.end()) {
     int32_t id = iter->first;
     if (reachable_nodes.find(id) == reachable_nodes.end()) {
-      // TODO(MI4-2531): This shouldn't be strictly necessary at this level.
-      if (sizeof(nodes_to_remove) + (nodes_to_remove.size() * kNodeIdSize) >=
-          kMaxMessageSize) {
-        tree_ptr_->DeleteSemanticNodes(std::move(nodes_to_remove));
-        nodes_to_remove.clear();
-      }
-      nodes_to_remove.push_back(FlutterIdToFuchsiaId(id));
+      atomic_update->AddNodeDeletion(FlutterIdToFuchsiaId(id));
       iter = nodes_.erase(iter);
     } else {
       iter++;
     }
-  }
-  if (!nodes_to_remove.empty()) {
-    tree_ptr_->DeleteSemanticNodes(std::move(nodes_to_remove));
   }
 }
 
@@ -530,8 +523,7 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
       << "AccessibilityBridge received an update with out ever getting a root "
          "node.";
 
-  std::vector<fuchsia::accessibility::semantics::Node> fuchsia_nodes;
-  size_t current_size = 0;
+  FuchsiaAtomicUpdate atomic_update;
   bool has_root_node_update = false;
   // TODO(MI4-2498): Actions, Roles, hit test children, additional
   // flags/states/attr
@@ -574,27 +566,7 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
     this_node_size +=
         kNodeIdSize * flutter_node.childrenInTraversalOrder.size();
 
-    // TODO(MI4-2531, FIDL-718): Remove this
-    // This is defensive. If, despite our best efforts, we ended up with a node
-    // that is larger than the max fidl size, we send no updates.
-    if (this_node_size >= kMaxMessageSize) {
-      PrintNodeSizeError(flutter_node.id);
-      return;
-    }
-    current_size += this_node_size;
-
-    // If we would exceed the max FIDL message size by appending this node,
-    // we should delete/update/commit now.
-    if (current_size >= kMaxMessageSize) {
-      tree_ptr_->UpdateSemanticNodes(std::move(fuchsia_nodes));
-      fuchsia_nodes.clear();
-      current_size = this_node_size;
-    }
-    fuchsia_nodes.push_back(std::move(fuchsia_node));
-  }
-
-  if (current_size > kMaxMessageSize) {
-    PrintNodeSizeError(fuchsia_nodes.back().node_id());
+    atomic_update.AddNodeUpdate(std::move(fuchsia_node), this_node_size);
   }
 
   // Handles root node update.
@@ -603,30 +575,17 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
     size_t root_node_size;
     fuchsia::accessibility::semantics::Node root_update =
         GetRootNodeUpdate(root_node_size);
-    // TODO(MI4-2531, FIDL-718): Remove this
-    // This is defensive. If, despite our best efforts, we ended up with a node
-    // that is larger than the max fidl size, we send no updates.
-    if (root_node_size >= kMaxMessageSize) {
-      PrintNodeSizeError(kRootNodeId);
-      return;
-    }
-    current_size += root_node_size;
-    // If we would exceed the max FIDL message size by appending this node,
-    // we should delete/update/commit now.
-    if (current_size >= kMaxMessageSize) {
-      tree_ptr_->UpdateSemanticNodes(std::move(fuchsia_nodes));
-      fuchsia_nodes.clear();
-    }
-    fuchsia_nodes.push_back(std::move(root_update));
+    atomic_update.AddNodeUpdate(std::move(root_update), root_node_size);
   }
 
-  PruneUnreachableNodes();
+  PruneUnreachableNodes(&atomic_update);
   UpdateScreenRects();
 
-  tree_ptr_->UpdateSemanticNodes(std::move(fuchsia_nodes));
-  // TODO(dnfield): Implement the callback here
-  // https://bugs.fuchsia.dev/p/fuchsia/issues/detail?id=35718.
-  tree_ptr_->CommitUpdates([]() {});
+  atomic_updates_->push(std::move(atomic_update));
+  if (atomic_updates_->size() == 1) {
+    // There were no commits in the queue, so send this one.
+    Apply(&atomic_updates_->front());
+  }
 }
 
 fuchsia::accessibility::semantics::Node AccessibilityBridge::GetRootNodeUpdate(
@@ -927,4 +886,73 @@ void AccessibilityBridge::FillInspectTree(int32_t flutter_node_id,
 }
 #endif  // !FLUTTER_RELEASE
 
+void AccessibilityBridge::Apply(FuchsiaAtomicUpdate* atomic_update) {
+  size_t begin = 0;
+  auto it = atomic_update->deletions.begin();
+
+  // Process up to kMaxDeletionsPerUpdate deletions at a time.
+  while (it != atomic_update->deletions.end()) {
+    std::vector<uint32_t> to_delete;
+    size_t end = std::min(atomic_update->deletions.size() - begin,
+                          kMaxDeletionsPerUpdate);
+    std::copy(std::make_move_iterator(it), std::make_move_iterator(it + end),
+              std::back_inserter(to_delete));
+    tree_ptr_->DeleteSemanticNodes(std::move(to_delete));
+    begin = end;
+    it += end;
+  }
+
+  std::vector<fuchsia::accessibility::semantics::Node> to_update;
+  size_t current_size = 0;
+  for (auto& node_and_size : atomic_update->updates) {
+    if (current_size + node_and_size.second > kMaxMessageSize) {
+      tree_ptr_->UpdateSemanticNodes(std::move(to_update));
+      current_size = 0;
+      to_update.clear();
+    }
+    current_size += node_and_size.second;
+    to_update.push_back(std::move(node_and_size.first));
+  }
+  if (!to_update.empty()) {
+    tree_ptr_->UpdateSemanticNodes(std::move(to_update));
+  }
+
+  // Commit this update and subsequent ones; for flow control wait for a
+  // response between each commit.
+  tree_ptr_->CommitUpdates(
+      [this, atomic_updates = std::weak_ptr<std::queue<FuchsiaAtomicUpdate>>(
+                 atomic_updates_)]() {
+        auto atomic_updates_ptr = atomic_updates.lock();
+        if (!atomic_updates_ptr) {
+          // The queue no longer exists, which means that is no longer
+          // necessary.
+          return;
+        }
+        // Removes the update that just went through.
+        atomic_updates_ptr->pop();
+        if (!atomic_updates_ptr->empty()) {
+          Apply(&atomic_updates_ptr->front());
+        }
+      });
+
+  atomic_update->deletions.clear();
+  atomic_update->updates.clear();
+}
+
+void AccessibilityBridge::FuchsiaAtomicUpdate::AddNodeUpdate(
+    fuchsia::accessibility::semantics::Node node,
+    size_t size) {
+  if (size > kMaxMessageSize) {
+    // TODO(MI4-2531, FIDL-718): Remove this
+    // This is defensive. If, despite our best efforts, we ended up with a node
+    // that is larger than the max fidl size, we send no updates.
+    PrintNodeSizeError(node.node_id());
+    return;
+  }
+  updates.emplace_back(std::move(node), size);
+}
+
+void AccessibilityBridge::FuchsiaAtomicUpdate::AddNodeDeletion(uint32_t id) {
+  deletions.push_back(id);
+}
 }  // namespace flutter_runner
