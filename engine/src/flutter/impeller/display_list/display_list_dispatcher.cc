@@ -249,7 +249,7 @@ void DisplayListDispatcher::setBlender(sk_sp<SkBlender> blender) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setPathEffect(const flutter::DlPathEffect* effect) {
+void DisplayListDispatcher::setPathEffect(sk_sp<SkPathEffect> effect) {
   // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
