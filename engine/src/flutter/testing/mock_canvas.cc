@@ -108,6 +108,21 @@ void MockCanvas::onDrawShadowRec(const SkPath& path,
   draw_calls_.emplace_back(DrawCall{current_layer_, DrawShadowData{path}});
 }
 
+void MockCanvas::onDrawImage2(const SkImage* image,
+                              SkScalar x,
+                              SkScalar y,
+                              const SkSamplingOptions& options,
+                              const SkPaint* paint) {
+  if (paint) {
+    draw_calls_.emplace_back(
+        DrawCall{current_layer_,
+                 DrawImageData{sk_ref_sp(image), x, y, options, *paint}});
+  } else {
+    draw_calls_.emplace_back(DrawCall{
+        current_layer_, DrawImageDataNoPaint{sk_ref_sp(image), x, y, options}});
+  }
+}
+
 void MockCanvas::onDrawPicture(const SkPicture* picture,
                                const SkMatrix* matrix,
                                const SkPaint* paint) {
@@ -217,14 +232,6 @@ void MockCanvas::onDrawArc(const SkRect&,
 }
 
 void MockCanvas::onDrawRRect(const SkRRect&, const SkPaint&) {
-  FML_DCHECK(false);
-}
-
-void MockCanvas::onDrawImage2(const SkImage*,
-                              SkScalar,
-                              SkScalar,
-                              const SkSamplingOptions&,
-                              const SkPaint*) {
   FML_DCHECK(false);
 }
 
@@ -355,6 +362,30 @@ bool operator==(const MockCanvas::DrawTextData& a,
 std::ostream& operator<<(std::ostream& os,
                          const MockCanvas::DrawTextData& data) {
   return os << data.serialized_text << " " << data.paint << " " << data.offset;
+}
+
+bool operator==(const MockCanvas::DrawImageData& a,
+                const MockCanvas::DrawImageData& b) {
+  return a.image == b.image && a.x == b.x && a.y == b.y &&
+         a.options == b.options && a.paint == b.paint;
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const MockCanvas::DrawImageData& data) {
+  return os << data.image << " " << data.x << " " << data.y << " "
+            << data.options << " " << data.paint;
+}
+
+bool operator==(const MockCanvas::DrawImageDataNoPaint& a,
+                const MockCanvas::DrawImageDataNoPaint& b) {
+  return a.image == b.image && a.x == b.x && a.y == b.y &&
+         a.options == b.options;
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const MockCanvas::DrawImageDataNoPaint& data) {
+  return os << data.image << " " << data.x << " " << data.y << " "
+            << data.options;
 }
 
 bool operator==(const MockCanvas::DrawPictureData& a,

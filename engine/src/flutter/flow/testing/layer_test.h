@@ -39,6 +39,8 @@ template <typename BaseT>
 class LayerTestBase : public CanvasTestBase<BaseT> {
   using TestT = CanvasTestBase<BaseT>;
 
+  const SkRect kDlBounds = SkRect::MakeWH(500, 500);
+
  public:
   LayerTestBase()
       : preroll_context_{
@@ -72,8 +74,8 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             .frame_device_pixel_ratio      = 1.0f,
             // clang-format on
         },
-        display_list_recorder_(kGiantRect),
-        internal_display_list_canvas_(kGiantRect.width(), kGiantRect.height()),
+        display_list_recorder_(kDlBounds),
+        internal_display_list_canvas_(kDlBounds.width(), kDlBounds.height()),
         display_list_paint_context_{
             // clang-format off
             .internal_nodes_canvas         = &internal_display_list_canvas_,
@@ -193,6 +195,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     raster_cache_ = std::move(raster_cache);
     preroll_context_.raster_cache = raster_cache_.get();
     paint_context_.raster_cache = raster_cache_.get();
+    display_list_paint_context_.raster_cache = raster_cache_.get();
   }
 
   FixedRefreshRateStopwatch raster_time_;

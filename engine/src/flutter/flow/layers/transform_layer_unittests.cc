@@ -234,6 +234,124 @@ TEST_F(TransformLayerTest, NestedSeparated) {
                  MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
+TEST_F(TransformLayerTest, OpacityInheritance) {
+  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  auto mock1 = MockLayer::MakeOpacityCompatible(path1);
+  auto transform1 = std::make_shared<TransformLayer>(SkMatrix::Scale(2, 2));
+  transform1->Add(mock1);
+
+  // TransformLayer will pass through compatibility from a compatible child
+  PrerollContext* context = preroll_context();
+  context->subtree_can_inherit_opacity = false;
+  transform1->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+
+  auto path2 = SkPath().addRect({40, 40, 50, 50});
+  auto mock2 = MockLayer::MakeOpacityCompatible(path2);
+  transform1->Add(mock2);
+
+  // TransformLayer will pass through compatibility from multiple
+  // non-overlapping compatible children
+  context->subtree_can_inherit_opacity = false;
+  transform1->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+
+  auto path3 = SkPath().addRect({20, 20, 40, 40});
+  auto mock3 = MockLayer::MakeOpacityCompatible(path3);
+  transform1->Add(mock3);
+
+  // TransformLayer will not pass through compatibility from multiple
+  // overlapping children even if they are individually compatible
+  context->subtree_can_inherit_opacity = false;
+  transform1->Preroll(context, SkMatrix::I());
+  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+
+  auto transform2 = std::make_shared<TransformLayer>(SkMatrix::Scale(2, 2));
+  transform2->Add(mock1);
+  transform2->Add(mock2);
+
+  // Double check first two children are compatible and non-overlapping
+  context->subtree_can_inherit_opacity = false;
+  transform2->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+
+  auto path4 = SkPath().addRect({60, 60, 70, 70});
+  auto mock4 = MockLayer::Make(path4);
+  transform2->Add(mock4);
+
+  // The third child is non-overlapping, but not compatible so the
+  // TransformLayer should end up incompatible
+  context->subtree_can_inherit_opacity = false;
+  transform2->Preroll(context, SkMatrix::I());
+  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+}
+
+TEST_F(TransformLayerTest, OpacityInheritancePainting) {
+  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  auto mock1 = MockLayer::MakeOpacityCompatible(path1);
+  auto path2 = SkPath().addRect({40, 40, 50, 50});
+  auto mock2 = MockLayer::MakeOpacityCompatible(path2);
+  auto transform = SkMatrix::Scale(2, 2);
+  auto transform_layer = std::make_shared<TransformLayer>(transform);
+  transform_layer->Add(mock1);
+  transform_layer->Add(mock2);
+
+  // TransformLayer will pass through compatibility from multiple
+  // non-overlapping compatible children
+  PrerollContext* context = preroll_context();
+  context->subtree_can_inherit_opacity = false;
+  transform_layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+
+  int opacity_alpha = 0x7F;
+  SkPoint offset = SkPoint::Make(10, 10);
+  auto opacity_layer = std::make_shared<OpacityLayer>(opacity_alpha, offset);
+  opacity_layer->Add(transform_layer);
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
+
+  auto opacity_integer_transform = SkM44::Translate(offset.fX, offset.fY);
+  DisplayListBuilder expected_builder;
+  /* opacity_layer paint */ {
+    expected_builder.save();
+    {
+      expected_builder.translate(offset.fX, offset.fY);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+      expected_builder.transformReset();
+      expected_builder.transform(opacity_integer_transform);
+#endif
+      /* transform_layer paint */ {
+        expected_builder.save();
+        expected_builder.transform(transform);
+        /* child layer1 paint */ {
+          expected_builder.setColor(opacity_alpha << 24);
+          expected_builder.saveLayer(&path1.getBounds(), true);
+          {
+            expected_builder.setColor(0xFF000000);
+            expected_builder.drawPath(path1);
+          }
+          expected_builder.restore();
+        }
+        /* child layer2 paint */ {
+          expected_builder.setColor(opacity_alpha << 24);
+          expected_builder.saveLayer(&path2.getBounds(), true);
+          {
+            expected_builder.setColor(0xFF000000);
+            expected_builder.drawPath(path2);
+          }
+          expected_builder.restore();
+        }
+        expected_builder.restore();
+      }
+    }
+    expected_builder.restore();
+  }
+
+  opacity_layer->Paint(display_list_paint_context());
+  EXPECT_TRUE(DisplayListsEQ_Verbose(expected_builder.Build(), display_list()));
+}
+
 using TransformLayerLayerDiffTest = DiffContextTest;
 
 TEST_F(TransformLayerLayerDiffTest, Transform) {

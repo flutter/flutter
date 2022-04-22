@@ -24,7 +24,6 @@ TransformLayer::TransformLayer(const SkMatrix& transform)
     FML_LOG(ERROR) << "TransformLayer is constructed with an invalid matrix.";
     transform_.setIdentity();
   }
-  set_layer_can_inherit_opacity(true);
 }
 
 void TransformLayer::Diff(DiffContext* context, const Layer* old_layer) {
@@ -56,6 +55,10 @@ void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   } else {
     context->cull_rect = kGiantRect;
   }
+
+  // Collect inheritance information on our children in Preroll so that
+  // we can pass it along by default.
+  context->subtree_can_inherit_opacity = true;
 
   SkRect child_paint_bounds = SkRect::MakeEmpty();
   PrerollChildren(context, child_matrix, &child_paint_bounds);

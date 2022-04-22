@@ -4,6 +4,8 @@
 
 #include "flutter/flow/layers/color_filter_layer.h"
 
+#include "flutter/display_list/display_list_color_filter.h"
+#include "flutter/flow/layers/opacity_layer.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
@@ -315,6 +317,68 @@ TEST_F(ColorFilterLayerTest, CacheChildren) {
                                     RasterCacheLayerStrategy::kLayerChildren));
   EXPECT_TRUE(raster_cache()->Draw(layer.get(), cache_canvas,
                                    RasterCacheLayerStrategy::kLayerChildren));
+}
+
+TEST_F(ColorFilterLayerTest, OpacityInheritance) {
+  // clang-format off
+  float matrix[20] = {
+    0, 1, 0, 0, 0,
+    0, 0, 1, 0, 0,
+    1, 0, 0, 0, 0,
+    0, 0, 0, 1, 0,
+  };
+  // clang-format on
+  auto layer_filter = DlMatrixColorFilter(matrix);
+  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
+  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto mock_layer = std::make_shared<MockLayer>(child_path);
+  auto color_filter_layer =
+      std::make_shared<ColorFilterLayer>(layer_filter.skia_object());
+  color_filter_layer->Add(mock_layer);
+
+  PrerollContext* context = preroll_context();
+  context->subtree_can_inherit_opacity = false;
+  color_filter_layer->Preroll(preroll_context(), initial_transform);
+  // ImageFilterLayers can always inherit opacity whether or not their
+  // children are compatible.
+  EXPECT_TRUE(context->subtree_can_inherit_opacity);
+
+  int opacity_alpha = 0x7F;
+  SkPoint offset = SkPoint::Make(10, 10);
+  auto opacity_layer = std::make_shared<OpacityLayer>(opacity_alpha, offset);
+  opacity_layer->Add(color_filter_layer);
+  context->subtree_can_inherit_opacity = false;
+  opacity_layer->Preroll(context, SkMatrix::I());
+  EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
+
+  auto opacity_integer_transform = RasterCache::GetIntegralTransCTM(
+      SkMatrix::Translate(offset.fX, offset.fY));
+  DisplayListBuilder expected_builder;
+  /* opacity_layer::Paint() */ {
+    expected_builder.save();
+    {
+      expected_builder.translate(offset.fX, offset.fY);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+      expected_builder.transformReset();
+      expected_builder.transform(opacity_integer_transform);
+#endif
+      /* image_filter_layer::Paint() */ {
+        expected_builder.setColor(opacity_alpha << 24);
+        expected_builder.setColorFilter(&layer_filter);
+        expected_builder.saveLayer(&child_path.getBounds(), true);
+        /* mock_layer::Paint() */ {
+          expected_builder.setColor(0xFF000000);
+          expected_builder.setColorFilter(nullptr);
+          expected_builder.drawPath(child_path);
+        }
+        expected_builder.restore();
+      }
+    }
+    expected_builder.restore();
+  }
+
+  opacity_layer->Paint(display_list_paint_context());
+  EXPECT_TRUE(DisplayListsEQ_Verbose(expected_builder.Build(), display_list()));
 }
 
 }  // namespace testing

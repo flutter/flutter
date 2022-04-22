@@ -83,5 +83,18 @@ TEST_F(PlatformViewLayerTest, ClippedPlatformViewPrerollsAndPaintsNothing) {
            MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
+TEST_F(PlatformViewLayerTest, OpacityInheritance) {
+  const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
+  const SkSize layer_size = SkSize::Make(8.0f, 8.0f);
+  const int64_t view_id = 0;
+  auto layer =
+      std::make_shared<PlatformViewLayer>(layer_offset, layer_size, view_id);
+
+  PrerollContext* context = preroll_context();
+  context->subtree_can_inherit_opacity = false;
+  layer->Preroll(preroll_context(), SkMatrix());
+  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+}
+
 }  // namespace testing
 }  // namespace flutter

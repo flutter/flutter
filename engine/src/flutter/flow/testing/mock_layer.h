@@ -19,7 +19,17 @@ class MockLayer : public Layer {
   explicit MockLayer(SkPath path,
                      SkPaint paint = SkPaint(),
                      bool fake_has_platform_view = false,
-                     bool fake_reads_surface = false);
+                     bool fake_reads_surface = false,
+                     bool fake_opacity_compatible_ = false);
+
+  static std::shared_ptr<MockLayer> Make(SkPath path,
+                                         SkPaint paint = SkPaint()) {
+    return std::make_shared<MockLayer>(path, paint, false, false, false);
+  }
+
+  static std::shared_ptr<MockLayer> MakeOpacityCompatible(SkPath path) {
+    return std::make_shared<MockLayer>(path, SkPaint(), false, false, true);
+  }
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;
@@ -42,6 +52,7 @@ class MockLayer : public Layer {
   bool parent_has_platform_view_ = false;
   bool fake_has_platform_view_ = false;
   bool fake_reads_surface_ = false;
+  bool fake_opacity_compatible_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(MockLayer);
 };

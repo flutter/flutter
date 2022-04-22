@@ -593,9 +593,9 @@ void DisplayListStreamDispatcher::saveLayer(const SkRect* bounds,
   indent();
 }
 void DisplayListStreamDispatcher::restore() {
-  startl() << "restore();" << std::endl;
   outdent();
   startl() << "}" << std::endl;
+  startl() << "restore();" << std::endl;
 }
 
 void DisplayListStreamDispatcher::translate(SkScalar tx, SkScalar ty) {
@@ -651,7 +651,7 @@ void DisplayListStreamDispatcher::transformFullPerspective(
   startl() << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::transformReset() {
-  startl() << "tranformReset();" << std::endl;
+  startl() << "transformReset();" << std::endl;
 }
 
 void DisplayListStreamDispatcher::clipRect(const SkRect& rect, SkClipOp clip_op,

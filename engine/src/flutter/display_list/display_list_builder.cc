@@ -429,6 +429,12 @@ void DisplayListBuilder::restore() {
     }
   }
 }
+void DisplayListBuilder::restoreToCount(int restore_count) {
+  FML_DCHECK(restore_count <= getSaveCount());
+  while (restore_count < getSaveCount()) {
+    restore();
+  }
+}
 void DisplayListBuilder::saveLayer(const SkRect* bounds,
                                    const SaveLayerOptions in_options) {
   SaveLayerOptions options = in_options.without_optimizations();

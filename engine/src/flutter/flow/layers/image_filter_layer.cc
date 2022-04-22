@@ -44,6 +44,11 @@ void ImageFilterLayer::Preroll(PrerollContext* context,
 
   SkRect child_bounds = SkRect::MakeEmpty();
   PrerollChildren(context, matrix, &child_bounds);
+  context->subtree_can_inherit_opacity = true;
+
+  // We always paint with a saveLayer (or a cached rendering),
+  // so we can always apply opacity in any of those cases.
+  context->subtree_can_inherit_opacity = true;
 
   if (!filter_) {
     set_paint_bounds(child_bounds);
@@ -95,31 +100,32 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ImageFilterLayer::Paint");
   FML_DCHECK(needs_painting(context));
 
+  AutoCachePaint cache_paint(context);
+
   if (context.raster_cache) {
     if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
-                                   RasterCacheLayerStrategy::kLayer)) {
+                                   RasterCacheLayerStrategy::kLayer,
+                                   cache_paint.paint())) {
       return;
     }
     if (transformed_filter_) {
-      SkPaint paint;
-      paint.setImageFilter(transformed_filter_);
+      cache_paint.setImageFilter(transformed_filter_);
       if (context.raster_cache->Draw(this, *context.leaf_nodes_canvas,
                                      RasterCacheLayerStrategy::kLayerChildren,
-                                     &paint)) {
+                                     cache_paint.paint())) {
         return;
       }
     }
   }
 
-  SkPaint paint;
-  paint.setImageFilter(filter_);
+  cache_paint.setImageFilter(filter_);
 
   // Normally a save_layer is sized to the current layer bounds, but in this
   // case the bounds of the child may not be the same as the filtered version
   // so we use the bounds of the child container which do not include any
   // modifications that the filter might apply.
-  Layer::AutoSaveLayer save_layer =
-      Layer::AutoSaveLayer::Create(context, child_paint_bounds(), &paint);
+  Layer::AutoSaveLayer save_layer = Layer::AutoSaveLayer::Create(
+      context, child_paint_bounds(), cache_paint.paint());
   PaintChildren(context);
 }
 

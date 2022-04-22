@@ -25,6 +25,18 @@ std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizePicture(
   return std::make_unique<MockRasterCacheResult>(cache_rect);
 }
 
+std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizeDisplayList(
+    DisplayList* display_list,
+    GrDirectContext* context,
+    const SkMatrix& ctm,
+    SkColorSpace* dst_color_space,
+    bool checkerboard) const {
+  SkRect logical_rect = display_list->bounds();
+  SkIRect cache_rect = RasterCache::GetDeviceBounds(logical_rect, ctm);
+
+  return std::make_unique<MockRasterCacheResult>(cache_rect);
+}
+
 std::unique_ptr<RasterCacheResult> MockRasterCache::RasterizeLayer(
     PrerollContext* context,
     Layer* layer,

@@ -416,6 +416,20 @@ TEST_F(PhysicalShapeLayerTest, Readback) {
   EXPECT_TRUE(ReadbackResult(context, save_layer, reader, true));
 }
 
+TEST_F(PhysicalShapeLayerTest, OpacityInheritance) {
+  SkPath layer_path;
+  layer_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
+  auto layer =
+      std::make_shared<PhysicalShapeLayer>(SK_ColorGREEN, SK_ColorBLACK,
+                                           0.0f,  // elevation
+                                           layer_path, Clip::none);
+
+  PrerollContext* context = preroll_context();
+  context->subtree_can_inherit_opacity = false;
+  layer->Preroll(context, SkMatrix());
+  EXPECT_FALSE(context->subtree_can_inherit_opacity);
+}
+
 using PhysicalShapeLayerDiffTest = DiffContextTest;
 
 TEST_F(PhysicalShapeLayerDiffTest, NoClipPaintRegion) {
