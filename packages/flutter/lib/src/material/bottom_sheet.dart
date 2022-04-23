@@ -298,6 +298,13 @@ class _BottomSheetState extends State<BottomSheet> {
       );
     }
 
+    bottomSheet = ModalRoute.of(context)?.barrierDismissible != true
+        ? bottomSheet
+        : GestureDetector(
+            onTap: () => Navigator.maybePop(context),
+            child: bottomSheet,
+          );
+
     return !widget.enableDrag ? bottomSheet : GestureDetector(
       onVerticalDragStart: _handleDragStart,
       onVerticalDragUpdate: _handleDragUpdate,
