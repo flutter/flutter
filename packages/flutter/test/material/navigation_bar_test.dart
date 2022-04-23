@@ -140,31 +140,28 @@ void main() {
 
   testWidgets('NavigationBar respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
     const double safeAreaPadding = 40.0;
-    final NavigationBar navigationBar = NavigationBar(
-      destinations: const <Widget>[
-        NavigationDestination(
-          icon: Icon(Icons.ac_unit),
-          label: 'AC',
-        ),
-        NavigationDestination(
-          key: Key('Center'),
-          icon: Icon(Icons.center_focus_strong),
-          label: 'Center',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.access_alarm),
-          label: 'Alarm',
-        ),
-      ],
-      onDestinationSelected: (int i) {},
-    );
+    Widget _navigationBar() {
+      return NavigationBar(
+        destinations: const <Widget>[
+          NavigationDestination(
+            icon: Icon(Icons.ac_unit),
+            label: 'AC',
+          ),
+          NavigationDestination(
+            key: Key('Center'),
+            icon: Icon(Icons.center_focus_strong),
+            label: 'Center',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.access_alarm),
+            label: 'Alarm',
+          ),
+        ],
+        onDestinationSelected: (int i) {},
+      );
+    }
 
-    await tester.pumpWidget(
-      _buildWidget(
-        navigationBar,
-      ),
-    );
-
+    await tester.pumpWidget(_buildWidget(_navigationBar(),));
     final double defaultWidth = tester.getSize(find.byType(NavigationBar)).width;
     final Finder defaultCenterItem = find.byKey(const Key('Center'));
     final Offset center = tester.getCenter(defaultCenterItem);
@@ -174,13 +171,13 @@ void main() {
       _buildWidget(
         MediaQuery(
           data: const MediaQueryData(padding: EdgeInsets.only(left: safeAreaPadding)),
-          child: navigationBar,
+          child: _navigationBar(),
         ),
       ),
     );
 
     // The position of center item of navigation bar should indicate whether
-    // the safe area is sufficiently respected, if safe area is on the left side.
+    // the safe area is sufficiently respected, when safe area is on the left side.
     // e.g. Android device with system navigation bar in landscape mode.
     final Finder leftPaddedCenterItem = find.byKey(const Key('Center'));
     final Offset leftPaddedCenter = tester.getCenter(leftPaddedCenterItem);
@@ -190,13 +187,13 @@ void main() {
       _buildWidget(
         MediaQuery(
           data: const MediaQueryData(padding: EdgeInsets.only(right: safeAreaPadding)),
-          child: navigationBar,
+          child: _navigationBar(),
         ),
       ),
     );
 
     // The position of center item of navigation bar should indicate whether
-    // the safe area is sufficiently respected, if safe area is on the right side.
+    // the safe area is sufficiently respected, when safe area is on the right side.
     // e.g. Android device with system navigation bar in landscape mode.
     final Finder rightPaddedCenterItem = find.byKey(const Key('Center'));
     final Offset rightPaddedCenter = tester.getCenter(rightPaddedCenterItem);
@@ -208,13 +205,13 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(padding: EdgeInsets.fromLTRB(
               safeAreaPadding, 0, safeAreaPadding, safeAreaPadding)),
-          child: navigationBar,
+          child: _navigationBar(),
         ),
       ),
     );
 
     // The position of center item of navigation bar should indicate whether
-    // the safe area is sufficiently respected, if safe area is on both sides.
+    // the safe area is sufficiently respected, when safe areas are on both sides.
     // e.g. iOS device with both sides of round corner.
     final Finder paddedCenterItem = find.byKey(const Key('Center'));
     final Offset paddedCenter = tester.getCenter(paddedCenterItem);
