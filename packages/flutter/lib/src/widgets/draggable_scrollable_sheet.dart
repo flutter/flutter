@@ -423,7 +423,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   }
 
   //flag to prevent unnecessary calls
-  bool _poped = false;
+  bool _popHappened = false;
 
   @override
   Widget build(BuildContext context) {
@@ -436,10 +436,10 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
             onNotification: (ScrollNotification notification) {
               final double offset = notification.metrics.pixels;
               if (offset <= 0.0) {
-                if (_extent.currentSize > _extent.minSize) {
-                  _extent._currentSize.value = _extent.maxSize;
-                } else if (_extent.currentSize <= 0 && !_poped) {
-                  _poped = true;
+                if (_extent.currentExtent > _extent.minExtent) {
+                  _extent._currentExtent.value = _extent.maxExtent;
+                } else if (_extent.currentExtent <= 0 && !_popHappened) {
+                  _popHappened = true;
                   Navigator.of(context).maybePop();
                 }
               }
@@ -447,19 +447,19 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
             },
             child: AnimatedSize(
               clipBehavior: Clip.none,
-              duration: (_extent.currentExtent == _extent.maxSize)
+              duration: (_extent.currentExtent == _extent.maxExtent)
                   ? const Duration(milliseconds: 50)
                   : Duration.zero,
               alignment: Alignment.bottomCenter,
               child: SizedBox(
-                height: _extent.currentSize * constraints.biggest.height,
+                height: _extent.currentExtent * constraints.biggest.height,
                 child: widget.builder(context, _scrollController),
               ),
             ),
           );
         } else {
           sheet = FractionallySizedBox(
-            heightFactor: _extent.currentSize,
+            heightFactor: _extent.currentExtent,
             alignment: Alignment.bottomCenter,
             child: widget.builder(context, _scrollController),
           );
