@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -611,7 +613,8 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
         _minIntrinsicWidth = paragraph.getMinIntrinsicWidth();
         _width = paragraph.getMaxWidth();
         _boxesForPlaceholders =
-            skRectsToTextBoxes(paragraph.getRectsForPlaceholders());
+            skRectsToTextBoxes(
+                paragraph.getRectsForPlaceholders().cast<Float32List>());
       } catch (e) {
         printWarning('CanvasKit threw an exception while laying '
             'out the paragraph. The font was "${_paragraphStyle._fontFamily}". '
@@ -711,21 +714,21 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
     }
 
     final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
-    final List<List<double>> skRects = paragraph.getRectsForRange(
+    final List<Float32List> skRects = paragraph.getRectsForRange(
       start,
       end,
       toSkRectHeightStyle(boxHeightStyle),
       toSkRectWidthStyle(boxWidthStyle),
-    );
+    ).cast<Float32List>();
 
     return skRectsToTextBoxes(skRects);
   }
 
-  List<ui.TextBox> skRectsToTextBoxes(List<dynamic> skRects) {
+  List<ui.TextBox> skRectsToTextBoxes(List<Float32List> skRects) {
     final List<ui.TextBox> result = <ui.TextBox>[];
 
     for (int i = 0; i < skRects.length; i++) {
-      final List<double> rect = skRects[i] as List<double>;
+      final Float32List rect = skRects[i];
       result.add(ui.TextBox.fromLTRBD(
         rect[0],
         rect[1],
@@ -771,7 +774,8 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
     final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
-    final List<SkLineMetrics> metrics = paragraph.getLineMetrics();
+    final List<SkLineMetrics> metrics =
+        paragraph.getLineMetrics().cast<SkLineMetrics>();
     final int offset = position.offset;
     for (final SkLineMetrics metric in metrics) {
       if (offset >= metric.startIndex && offset <= metric.endIndex) {
@@ -784,7 +788,8 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   @override
   List<ui.LineMetrics> computeLineMetrics() {
     final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
-    final List<SkLineMetrics> skLineMetrics = paragraph.getLineMetrics();
+    final List<SkLineMetrics> skLineMetrics =
+        paragraph.getLineMetrics().cast<SkLineMetrics>();
     final List<ui.LineMetrics> result = <ui.LineMetrics>[];
     for (final SkLineMetrics metric in skLineMetrics) {
       result.add(CkLineMetrics._(metric));

@@ -2125,23 +2125,26 @@ extension SkLineMetricsExtension on SkLineMetrics {
 
 @JS()
 @anonymous
-class SkParagraph {
+@staticInterop
+class SkParagraph {}
+
+extension SkParagraphExtension on SkParagraph {
   external double getAlphabeticBaseline();
   external bool didExceedMaxLines();
   external double getHeight();
   external double getIdeographicBaseline();
-  external List<SkLineMetrics> getLineMetrics();
+  external /* List<SkLineMetrics> */ List<Object?> getLineMetrics();
   external double getLongestLine();
   external double getMaxIntrinsicWidth();
   external double getMinIntrinsicWidth();
   external double getMaxWidth();
-  external List<Float32List> getRectsForRange(
+  external /* List<Float32List> */ List<Object?> getRectsForRange(
     int start,
     int end,
     SkRectHeightStyle heightStyle,
     SkRectWidthStyle widthStyle,
   );
-  external List<dynamic> getRectsForPlaceholders();
+  external /* List<Float32List> */ List<Object?> getRectsForPlaceholders();
   external SkTextPosition getGlyphPositionAtCoordinate(
     double x,
     double y,
