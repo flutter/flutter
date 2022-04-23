@@ -1917,19 +1917,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   /// Whether this scaffold has a non-null [Scaffold.appBar].
   bool get hasAppBar => widget.appBar != null;
-
   /// Whether this scaffold has a non-null [Scaffold.drawer].
   bool get hasDrawer => widget.drawer != null;
-
   /// Whether this scaffold has a non-null [Scaffold.endDrawer].
   bool get hasEndDrawer => widget.endDrawer != null;
-
   /// Whether this scaffold has a non-null [Scaffold.floatingActionButton].
   bool get hasFloatingActionButton => widget.floatingActionButton != null;
-
-  /// Whether this scaffold requires [Scaffold.appBar] to automatically add
-  /// dismiss button.
-  bool get requiresAppBarDismiss => _persistentSheetHistoryEntry != null;
 
   double? _appBarMaxHeight;
   /// The max height the [Scaffold.appBar] uses.
@@ -2058,28 +2051,28 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   PersistentBottomSheetController<dynamic>? _currentBottomSheet;
   final GlobalKey _currentBottomSheetKey = GlobalKey();
 
-  LocalHistoryEntry? _persistentSheetHistoryEntry;
   void _maybeBuildPersistentBottomSheet() {
     if (widget.bottomSheet != null && _currentBottomSheet == null) {
       // The new _currentBottomSheet is not a local history entry so a "back" button
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
       final AnimationController animationController = BottomSheet.createAnimationController(this)..value = 1.0;
+      LocalHistoryEntry? persistentSheetHistoryEntry;
       bool _persistentBottomSheetExtentChanged(DraggableScrollableNotification notification) {
         if (notification.extent > notification.initialExtent) {
-          if (_persistentSheetHistoryEntry == null) {
-            _persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
+          if (persistentSheetHistoryEntry == null) {
+            persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
               if (notification.extent > notification.initialExtent) {
                 DraggableScrollableActuator.reset(notification.context);
               }
               showBodyScrim(false, 0.0);
               _floatingActionButtonVisibilityValue = 1.0;
-              _persistentSheetHistoryEntry = null;
+              persistentSheetHistoryEntry = null;
             });
-            ModalRoute.of(context)!.addLocalHistoryEntry(_persistentSheetHistoryEntry!);
+            ModalRoute.of(context)!.addLocalHistoryEntry(persistentSheetHistoryEntry!);
           }
-        } else if (_persistentSheetHistoryEntry != null) {
-          ModalRoute.of(context)!.removeLocalHistoryEntry(_persistentSheetHistoryEntry!);
+        } else if (persistentSheetHistoryEntry != null) {
+          ModalRoute.of(context)!.removeLocalHistoryEntry(persistentSheetHistoryEntry!);
         }
         return false;
       }
