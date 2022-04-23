@@ -470,7 +470,7 @@ class FlutterPlugin implements Plugin<Project> {
                 pluginProject.afterEvaluate {
                     int pluginCompileSdkVersion = pluginProject.android.compileSdkVersion.substring(8) as int
                     maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
-                    String pluginNdkVersion = pluginProject.android.ndkVersion ?: ndkVersionIfUnspecified
+                    String pluginNdkVersion = pluginProject.android.hasProperty('ndkVersion') ? pluginProject.android.ndkVersion : ndkVersionIfUnspecified
                     maxPluginNdkVersion = mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
 
                     numProcessedPlugins--
