@@ -461,7 +461,7 @@ class FlutterPlugin implements Plugin<Project> {
             int projectCompileSdkVersion = project.android.compileSdkVersion.substring(8) as int
             int maxPluginCompileSdkVersion = projectCompileSdkVersion
             String ndkVersionIfUnspecified = "21.1.6352462" /* The default for AGP 4.1.0 used in old templates. */
-            String projectNdkVersion = project.android.ndkVersion ?: ndkVersionIfUnspecified
+            String projectNdkVersion = project.android.hasProperty('ndkVersion') ? project.android.ndkVersion : ndkVersionIfUnspecified
             String maxPluginNdkVersion = projectNdkVersion
             int numProcessedPlugins = getPluginList().size()
 
