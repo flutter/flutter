@@ -1463,6 +1463,7 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButtonLocation,
     this.floatingActionButtonAnimator,
     this.persistentFooterButtons,
+    this.persistentFooterAlignment = AlignmentDirectional.centerEnd,
     this.drawer,
     this.onDrawerChanged,
     this.endDrawer,
@@ -1568,6 +1569,11 @@ class Scaffold extends StatefulWidget {
   /// The [persistentFooterButtons] are rendered above the
   /// [bottomNavigationBar] but below the [body].
   final List<Widget>? persistentFooterButtons;
+
+  /// The alignment of the [persistentFooterButtons] inside the [OverflowBar].
+  ///
+  /// Defaults to [AlignmentDirectional.centerEnd].
+  final AlignmentDirectional persistentFooterAlignment;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from either left-to-right ([TextDirection.ltr]) or
@@ -2725,7 +2731,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             top: false,
             child: IntrinsicHeight(
               child: Container(
-                alignment: AlignmentDirectional.centerEnd,
+                alignment: widget.persistentFooterAlignment,
                 padding: const EdgeInsets.all(8),
                 child: OverflowBar(
                   spacing: 8,
@@ -2824,7 +2830,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
-      child: ScrollMetricsNotificationObserver(
+      child: ScrollNotificationObserver(
         child: Material(
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
           child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {

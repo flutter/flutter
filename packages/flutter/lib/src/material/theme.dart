@@ -112,6 +112,21 @@ class Theme extends StatelessWidget {
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
+  // The inherited themes in widgets library can not infer their values from
+  // Theme in material library. Wraps the child with these inherited themes to
+  // overrides their values directly.
+  Widget _wrapsWidgetThemes(BuildContext context, Widget child) {
+    final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
+    return IconTheme(
+      data: data.iconTheme,
+      child: DefaultSelectionStyle(
+        selectionColor: data.textSelectionTheme.selectionColor ?? selectionStyle.selectionColor,
+        cursorColor: data.textSelectionTheme.cursorColor ?? selectionStyle.cursorColor,
+        child: child,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return _InheritedTheme(
@@ -123,10 +138,7 @@ class Theme extends StatelessWidget {
         data: MaterialBasedCupertinoThemeData(
           materialTheme: data,
         ),
-        child: IconTheme(
-          data: data.iconTheme,
-          child: child,
-        ),
+        child: _wrapsWidgetThemes(context, child),
       ),
     );
   }

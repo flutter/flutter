@@ -90,7 +90,7 @@ void main() {
     final BuildCommand buildCommand = BuildCommand();
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
-    await runner.run(<String>['build', 'web', '--no-pub', '--dart-define=foo=a']);
+    await runner.run(<String>['build', 'web', '--no-pub', '--dart-define=foo=a', '--dart2js-optimization=O3']);
 
     expect(fileSystem.file(fileSystem.path.join('lib', 'generated_plugin_registrant.dart')).existsSync(), true);
   }, overrides: <Type, Generator>{
@@ -106,6 +106,7 @@ void main() {
         'SourceMaps': 'false',
         'NativeNullAssertions': 'true',
         'ServiceWorkerStrategy': 'offline-first',
+        'Dart2jsOptimization': 'O3',
         'BuildMode': 'release',
         'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
         'DartObfuscation': 'false',

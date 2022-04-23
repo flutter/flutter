@@ -4634,8 +4634,8 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(newSelection!.baseOffset, 4);
-    expect(newSelection!.extentOffset, 7);
+    expect(newSelection!.isCollapsed, isTrue);
+    expect(newSelection!.baseOffset, 5);
     newSelection = null;
 
     await tester.tap(find.text('Select all'));

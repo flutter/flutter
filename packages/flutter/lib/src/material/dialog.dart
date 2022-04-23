@@ -233,6 +233,13 @@ class Dialog extends StatelessWidget {
 /// displays a Material dialog above the current contents of the app and returns
 /// a [Future] that completes when the dialog is dismissed.
 ///
+/// ** See code in examples/api/lib/material/dialog/alert_dialog.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of [AlertDialog], as described in:
+/// https://m3.material.io/components/dialogs/overview
+///
 /// ** See code in examples/api/lib/material/dialog/alert_dialog.1.dart **
 /// {@end-tool}
 ///
@@ -1013,6 +1020,19 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how to use [showDialog] to display a dialog box.
+///
+/// ** See code in examples/api/lib/material/dialog/show_dialog.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of [showDialog], as described in:
+/// https://m3.material.io/components/dialogs/overview
+///
+/// ** See code in examples/api/lib/material/dialog/show_dialog.1.dart **
+/// {@end-tool}
+///
 /// ### State Restoration in Dialogs
 ///
 /// Using this method will not enable state restoration for the dialog. In order
@@ -1021,7 +1041,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This sample demonstrates how to create a restorable Material dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
@@ -1029,7 +1049,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// ** See code in examples/api/lib/material/dialog/show_dialog.0.dart **
+/// ** See code in examples/api/lib/material/dialog/show_dialog.2.dart **
 /// {@end-tool}
 ///
 /// See also:

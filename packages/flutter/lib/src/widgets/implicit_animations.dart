@@ -429,6 +429,8 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
         tween ??= constructor(targetValue);
         if (_shouldAnimateTween(tween, targetValue))
           shouldStartAnimation = true;
+        else
+          tween.end ??= tween.begin;
       } else {
         tween = null;
       }

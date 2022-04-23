@@ -769,12 +769,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   bool get _anyChildInkResponsePressed => _activeChildren.isNotEmpty;
 
   void _simulateTap([Intent? intent]) {
-    _startSplash(context: context);
+    _startNewSplash(context: context);
     _handleTap();
   }
 
   void _simulateLongPress() {
-    _startSplash(context: context);
+    _startNewSplash(context: context);
     _handleLongPress();
   }
 
@@ -966,7 +966,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void _handleTapDown(TapDownDetails details) {
     if (_anyChildInkResponsePressed)
       return;
-    _startSplash(details: details);
+    _startNewSplash(details: details);
     widget.onTapDown?.call(details);
   }
 
@@ -974,7 +974,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     widget.onTapUp?.call(details);
   }
 
-  void _startSplash({TapDownDetails? details, BuildContext? context}) {
+  void _startNewSplash({TapDownDetails? details, BuildContext? context}) {
     assert(details != null || context != null);
 
     final Offset globalPosition;
@@ -988,6 +988,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     final InteractiveInkFeature splash = _createInkFeature(globalPosition);
     _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes!.add(splash);
+    _currentSplash?.cancel();
     _currentSplash = splash;
     updateKeepAlive();
     updateHighlight(_HighlightType.pressed, value: true);
@@ -1014,6 +1015,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void _handleDoubleTap() {
     _currentSplash?.confirm();
     _currentSplash = null;
+    updateHighlight(_HighlightType.pressed, value: false);
     widget.onDoubleTap?.call();
   }
 
