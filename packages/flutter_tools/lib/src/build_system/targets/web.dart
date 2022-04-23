@@ -91,7 +91,6 @@ class WebEntrypointTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final String? targetFile = environment.defines[kTargetFile];
-    final bool hasWebPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
     // TODO(zanderso): support configuration of this file.
     const String packageFile = '.packages';
@@ -118,16 +117,10 @@ class WebEntrypointTarget extends Target {
     final String importedEntrypoint = packageConfig.toPackageUri(importUri)?.toString()
       ?? importUri.toString();
 
-    String? generatedImport;
-    if (hasWebPlugins) {
-      flutterProject.web.buildDir = environment.buildDir;
-      await injectPlugins(flutterProject, webPlatform: true);
-
-      // The below works because `injectPlugins` is being configured to write the
-      // web_plugin_registrant.dart file alongside the generated main.dart (through
-      // the flutterProject.web.buildDir directory)
-      generatedImport = 'web_plugin_registrant.dart';
-    }
+    await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: environment.buildDir);
+    // The below works because `injectBuildTimePluginFiles` is configured to write
+    // the web_plugin_registrant.dart file alongside the generated main.dart
+    const String generatedImport = 'web_plugin_registrant.dart';
 
     final String contents = main_dart.generateMainDartFile(importedEntrypoint,
       languageVersion: languageVersion,

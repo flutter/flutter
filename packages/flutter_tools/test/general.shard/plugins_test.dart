@@ -1079,8 +1079,8 @@ dependencies:
 web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri}
 ''');
 
-        flutterProject.web.buildDir = flutterProject.directory.childDirectory('lib');
-        await injectPlugins(flutterProject, webPlatform: true);
+        final Directory destination = flutterProject.directory.childDirectory('lib');
+        await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
 
         final File registrant = flutterProject.directory
             .childDirectory('lib')
@@ -1769,9 +1769,6 @@ class FakeWebProject extends Fake implements WebProject {
 
   @override
   Directory libDirectory;
-
-  @override
-  Directory buildDir;
 
   bool exists = false;
 

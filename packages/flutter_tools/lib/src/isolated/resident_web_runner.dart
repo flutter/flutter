@@ -30,8 +30,6 @@ import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
-import '../platform_plugins.dart';
-import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_devtools_handler.dart';
@@ -434,17 +432,11 @@ class ResidentWebRunner extends ResidentRunner {
         ..createSync();
       result = _generatedEntrypointDirectory.childFile('web_entrypoint.dart');
 
-      final bool hasWebPlugins = (await findPlugins(flutterProject))
-        .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-
       // Generates the generated_plugin_registrar
-      flutterProject.web.buildDir = _generatedEntrypointDirectory;
-      await injectPlugins(flutterProject, webPlatform: true);
-
-      // The below works because `injectPlugins` is being configured to write the
-      // web_plugin_registrant.dart file alongside the generated main.dart (through
-      // the flutterProject.web.buildDir directory)
-      final String/*?*/ generatedImport = hasWebPlugins ? 'web_plugin_registrant.dart' : null;
+      await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: _generatedEntrypointDirectory);
+      // The below works because `injectBuildTimePluginFiles` is configured to write
+      // the web_plugin_registrant.dart file alongside the generated main.dart
+      const String/*?*/ generatedImport = 'web_plugin_registrant.dart';
 
       Uri importedEntrypoint = packageConfig.toPackageUri(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.

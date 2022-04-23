@@ -6,11 +6,9 @@ import 'package:package_config/package_config.dart';
 
 /// Generates the main.dart file.
 String generateMainDartFile(String appEntrypoint, {
+  required String pluginRegistrantEntrypoint,
   LanguageVersion? languageVersion,
-  String? pluginRegistrantEntrypoint,
 }) {
-  final bool hasWebPlugins = pluginRegistrantEntrypoint != null;
-
   return <String>[
     if (languageVersion != null)
       '// @dart=${languageVersion.major}.${languageVersion.minor}',
@@ -25,9 +23,7 @@ String generateMainDartFile(String appEntrypoint, {
     "import 'dart:async';",
     '',
     "import '$appEntrypoint' as entrypoint;",
-    if (hasWebPlugins) ...<String>[
-      "import '$pluginRegistrantEntrypoint' as pluginRegistrant;",
-    ],
+    "import '$pluginRegistrantEntrypoint' as pluginRegistrant;",
     '',
     'typedef _UnaryFunction = dynamic Function(List<String> args);',
     'typedef _NullaryFunction = dynamic Function();',
@@ -40,11 +36,9 @@ String generateMainDartFile(String appEntrypoint, {
     '      }',
     '      return (entrypoint.main as _NullaryFunction)();',
     '    },',
-    if (hasWebPlugins) ...<String>[
     '    registerPlugins: () {',
     '      pluginRegistrant.registerPlugins();',
     '    },',
-    ],
     '  );',
     '}',
     '',

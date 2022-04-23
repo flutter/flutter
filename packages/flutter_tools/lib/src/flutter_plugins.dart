@@ -550,6 +550,17 @@ Depends on all your plugins, and provides a function to register them.
 end
 ''';
 
+const String _noopDartPluginRegistryTemplate = '''
+// Flutter web plugin registrant file.
+//
+// Generated file. Do not edit.
+//
+
+// ignore_for_file: type=lint
+
+void registerPlugins() {}
+''';
+
 const String _dartPluginRegistryTemplate = '''
 // Flutter web plugin registrant file.
 //
@@ -935,27 +946,22 @@ Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, Object
   );
 }
 
-Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins, Directory destination) async {
   final List<Map<String, Object?>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'methodChannelPlugins': webPlugins,
   };
 
-  assert(project.web.buildDir != null, 'project.web.buildDir must be set before calling _writeWebPluginRegistrant');
-  final File pluginFile = project.web.buildDir!
-    .childFile('web_plugin_registrant.dart');
+  final File pluginFile = destination.childFile('web_plugin_registrant.dart');
 
-  if (webPlugins.isEmpty) {
-    ErrorHandlingFileSystem.deleteIfExists(pluginFile);
-    // Render noop plugin registrant file
-  } else {
-    _renderTemplateToFile(
-      _dartPluginRegistryTemplate,
-      context,
-      pluginFile,
-      globals.templateRenderer,
-    );
-  }
+  final String template = webPlugins.isEmpty ? _noopDartPluginRegistryTemplate : _dartPluginRegistryTemplate;
+
+  _renderTemplateToFile(
+    template,
+    context,
+    pluginFile,
+    globals.templateRenderer,
+  );
 }
 
 /// For each platform that uses them, creates symlinks within the platform
@@ -1071,7 +1077,30 @@ Future<void> refreshPluginsList(
   }
 }
 
+/// Injects plugins found in `pubspec.yaml` into the platform-specific projects
+/// only at build-time.
+///
+/// This method is similar to [injectPlugins], but used only for platforms where
+/// the plugin files are not required at compile-time (currently: Web).
+///
+/// It requires a `destination` parameter to specify the root directory (in the
+/// filesystem or memory-fs) of current build output.
+Future<void> injectBuildTimePluginFiles(
+  FlutterProject project, {
+  required Directory destination,
+  bool webPlatform = false,
+}) async {
+  final List<Plugin> plugins = await findPlugins(project);
+  // Sort the plugins by name to keep ordering stable in generated files.
+  plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
+  if (webPlatform) {
+    await _writeWebPluginRegistrant(project, plugins, destination);
+  }
+}
+
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
+///
+/// These files are required at compile-time.
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 Future<void> injectPlugins(
@@ -1081,7 +1110,6 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
-  bool webPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
@@ -1116,10 +1144,6 @@ Future<void> injectPlugins(
         globals.cocoaPods?.addPodsDependencyToFlutterXcconfig(subproject);
       }
     }
-  }
-  if (webPlatform) {
-    assert(project.web.buildDir != null, 'project.web.buildDir must be set before calling injectPlugins');
-    await _writeWebPluginRegistrant(project, plugins);
   }
 }
 

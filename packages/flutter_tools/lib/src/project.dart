@@ -740,12 +740,6 @@ class WebProject extends FlutterProjectPlatform {
       .childDirectory('web')
       .childFile('index.html');
 
-  /// The directory where the build is writing files.
-  ///
-  /// This needs to be set by the build scripts, because it depends of what
-  /// type of build is happening: flutter build (to-disk) or flutter run (in-memory)
-  Directory? buildDir;
-
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
