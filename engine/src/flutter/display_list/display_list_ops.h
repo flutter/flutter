@@ -894,6 +894,12 @@ struct DrawDisplayListOp final : DLOp {
   void dispatch(Dispatcher& dispatcher) const {
     dispatcher.drawDisplayList(display_list);
   }
+
+  DisplayListCompare equals(const DrawDisplayListOp* other) const {
+    return display_list->Equals(other->display_list)
+               ? DisplayListCompare::kEqual
+               : DisplayListCompare::kNotEqual;
+  }
 };
 
 // 4 byte header + 8 payload bytes + an aligned pointer take 24 bytes
