@@ -943,7 +943,6 @@ A problem occurred evaluating project ':app'.
           '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
           '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
           '│     + https://services.gradle.org/distributions/gradle-7.4-all.zip               │\n'
-          '│                                                                                  │\n'
           '└──────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
