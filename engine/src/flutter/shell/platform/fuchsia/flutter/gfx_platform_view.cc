@@ -33,7 +33,8 @@ GfxPlatformView::GfxPlatformView(
     AwaitVsyncCallback await_vsync_callback,
     AwaitVsyncForSecondaryCallbackCallback
         await_vsync_for_secondary_callback_callback)
-    : PlatformView(delegate,
+    : PlatformView(false /* is_flatland */,
+                   delegate,
                    std::move(task_runners),
                    std::move(view_ref),
                    std::move(external_view_embedder),
