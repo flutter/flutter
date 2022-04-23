@@ -7,6 +7,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
+import 'navigator.dart';
+import 'animated_size.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
@@ -118,6 +120,7 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.snap = false,
     this.snapSizes,
     required this.builder,
+    this.bounceBack = false,
   })  : assert(initialChildSize != null),
         assert(minChildSize != null),
         assert(maxChildSize != null),
@@ -127,6 +130,9 @@ class DraggableScrollableSheet extends StatefulWidget {
         assert(initialChildSize <= maxChildSize),
         assert(expand != null),
         assert(builder != null),
+        assert(!bounceBack || !expand),
+        assert(!bounceBack || minChildSize == 0.0),
+        assert(!bounceBack || maxChildSize == initialChildSize),
         super(key: key);
 
   /// The initial fractional value of the parent container's height to use when
@@ -181,6 +187,11 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// use the provided [ScrollController] to enable dragging and scrolling
   /// of the contents.
   final ScrollableWidgetBuilder builder;
+
+  /// bounce back property
+  /// Useful if user wants state only 1 state between closed and opened.
+  /// min should be 0, initial and max should be equal
+  final bool bounceBack;
 
   @override
   State<DraggableScrollableSheet> createState() => _DraggableScrollableSheetState();
@@ -411,16 +422,48 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 
   }
 
+  //flag to prevent unnecessary calls
+  bool _poped = false;
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
-        final Widget sheet = FractionallySizedBox(
-          heightFactor: _extent.currentExtent,
-          alignment: Alignment.bottomCenter,
-          child: widget.builder(context, _scrollController),
-        );
+        late final Widget sheet;
+        if (widget.bounceBack) {
+          sheet = NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              final double offset = notification.metrics.pixels;
+              if (offset <= 0.0) {
+                if (_extent.currentSize > _extent.minSize) {
+                  _extent._currentSize.value = _extent.maxSize;
+                } else if (_extent.currentSize <= 0 && !_poped) {
+                  _poped = true;
+                  Navigator.of(context).maybePop();
+                }
+              }
+              return true;
+            },
+            child: AnimatedSize(
+              clipBehavior: Clip.none,
+              duration: (_extent.currentExtent == _extent.maxSize)
+                  ? const Duration(milliseconds: 50)
+                  : Duration.zero,
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                height: _extent.currentSize * constraints.biggest.height,
+                child: widget.builder(context, _scrollController),
+              ),
+            ),
+          );
+        } else {
+          sheet = FractionallySizedBox(
+            heightFactor: _extent.currentSize,
+            alignment: Alignment.bottomCenter,
+            child: widget.builder(context, _scrollController),
+          );
+        }
         return widget.expand ? SizedBox.expand(child: sheet) : sheet;
       },
     );
