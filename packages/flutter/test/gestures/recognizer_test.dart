@@ -42,7 +42,7 @@ const PointerUpEvent up2 = PointerUpEvent(
 );
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   test('GestureRecognizer smoketest', () {
     final TestGestureRecognizer recognizer = TestGestureRecognizer(debugOwner: 0);
@@ -213,7 +213,7 @@ class TestGestureRecognizer extends GestureRecognizer {
 class IndefiniteGestureRecognizer extends GestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    GestureBinding.instance!.gestureArena.add(event.pointer, this);
+    GestureBinding.instance.gestureArena.add(event.pointer, this);
   }
 
   @override

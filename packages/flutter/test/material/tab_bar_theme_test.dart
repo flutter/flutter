@@ -6,6 +6,7 @@
 // machines.
 @Tags(<String>['reduced-test-set'])
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,6 +55,22 @@ RenderParagraph _iconRenderObject(WidgetTester tester, IconData icon) {
 }
 
 void main() {
+  test('TabBarTheme copyWith, ==, hashCode, defaults', () {
+    expect(const TabBarTheme(), const TabBarTheme().copyWith());
+    expect(const TabBarTheme().hashCode, const TabBarTheme().copyWith().hashCode);
+
+    expect(const TabBarTheme().indicator, null);
+    expect(const TabBarTheme().indicatorSize, null);
+    expect(const TabBarTheme().labelColor, null);
+    expect(const TabBarTheme().labelPadding, null);
+    expect(const TabBarTheme().labelStyle, null);
+    expect(const TabBarTheme().unselectedLabelColor, null);
+    expect(const TabBarTheme().unselectedLabelStyle, null);
+    expect(const TabBarTheme().overlayColor, null);
+    expect(const TabBarTheme().splashFactory, null);
+    expect(const TabBarTheme().mouseCursor, null);
+  });
+
   testWidgets('Tab bar defaults - label style and selected/unselected label colors', (WidgetTester tester) async {
     // tests for the default label color and label styles when tabBarTheme and tabBar do not provide any
     await tester.pumpWidget(_withTheme(null));
@@ -287,11 +304,26 @@ void main() {
     );
   });
 
+  testWidgets('Tab bar theme overrides tab mouse cursor', (WidgetTester tester) async {
+    const TabBarTheme tabBarTheme = TabBarTheme(mouseCursor: MaterialStateMouseCursor.textable);
+
+    await tester.pumpWidget(_withTheme(tabBarTheme));
+
+    final Offset tabBar = tester.getCenter(
+      find.ancestor(of: find.text('tab 1'),matching: find.byType(TabBar)),
+    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tabBar);
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
+
   testWidgets('Tab bar theme - custom tab indicator', (WidgetTester tester) async {
     final TabBarTheme tabBarTheme = TabBarTheme(
       indicator: BoxDecoration(
-        border: Border.all(color: Colors.black),
-        shape: BoxShape.rectangle,
+        border: Border.all(),
       ),
     );
 
@@ -304,9 +336,9 @@ void main() {
   });
 
   testWidgets('Tab bar theme - beveled rect indicator', (WidgetTester tester) async {
-    final TabBarTheme tabBarTheme = TabBarTheme(
+    const TabBarTheme tabBarTheme = TabBarTheme(
       indicator: ShapeDecoration(
-        shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.0))),
         color: Colors.black,
       ),
     );

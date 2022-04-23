@@ -28,7 +28,7 @@ void main() {
 
       expect(
         decoration.borderRadius,
-        BorderRadius.circular(9),
+        const BorderRadius.all(Radius.circular(9)),
       );
     },
   );

@@ -154,16 +154,15 @@ void main() {
   group('FractionalTranslation', () {
     testWidgets('hit test - entirely inside the bounding box', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey();
-      bool _pointerDown = false;
+      bool pointerDown = false;
 
       await tester.pumpWidget(
         Center(
           child: FractionalTranslation(
             translation: Offset.zero,
-            transformHitTests: true,
             child: Listener(
               onPointerDown: (PointerDownEvent event) {
-                _pointerDown = true;
+                pointerDown = true;
               },
               child: SizedBox(
                 key: key1,
@@ -177,23 +176,22 @@ void main() {
           ),
         ),
       );
-      expect(_pointerDown, isFalse);
+      expect(pointerDown, isFalse);
       await tester.tap(find.byKey(key1));
-      expect(_pointerDown, isTrue);
+      expect(pointerDown, isTrue);
     });
 
     testWidgets('hit test - partially inside the bounding box', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey();
-      bool _pointerDown = false;
+      bool pointerDown = false;
 
       await tester.pumpWidget(
         Center(
           child: FractionalTranslation(
             translation: const Offset(0.5, 0.5),
-            transformHitTests: true,
             child: Listener(
               onPointerDown: (PointerDownEvent event) {
-                _pointerDown = true;
+                pointerDown = true;
               },
               child: SizedBox(
                 key: key1,
@@ -207,23 +205,22 @@ void main() {
           ),
         ),
       );
-      expect(_pointerDown, isFalse);
+      expect(pointerDown, isFalse);
       await tester.tap(find.byKey(key1));
-      expect(_pointerDown, isTrue);
+      expect(pointerDown, isTrue);
     });
 
     testWidgets('hit test - completely outside the bounding box', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey();
-      bool _pointerDown = false;
+      bool pointerDown = false;
 
       await tester.pumpWidget(
         Center(
           child: FractionalTranslation(
             translation: const Offset(1.0, 1.0),
-            transformHitTests: true,
             child: Listener(
               onPointerDown: (PointerDownEvent event) {
-                _pointerDown = true;
+                pointerDown = true;
               },
               child: SizedBox(
                 key: key1,
@@ -237,9 +234,9 @@ void main() {
           ),
         ),
       );
-      expect(_pointerDown, isFalse);
+      expect(pointerDown, isFalse);
       await tester.tap(find.byKey(key1));
-      expect(_pointerDown, isTrue);
+      expect(pointerDown, isTrue);
     });
 
     testWidgets('semantics bounds are updated', (WidgetTester tester) async {
@@ -258,7 +255,6 @@ void main() {
                   child: FractionalTranslation(
                     key: fractionalTranslationKey,
                     translation: offset,
-                    transformHitTests: true,
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
@@ -869,10 +865,6 @@ void main() {
     Wrap(
       spacing: 8.0, // gap between adjacent Text widget
       runSpacing: 4.0, // gap between lines
-      direction: Axis.horizontal,
-      alignment: WrapAlignment.start,
-      runAlignment: WrapAlignment.start,
-      crossAxisAlignment: WrapCrossAlignment.start,
       textDirection: TextDirection.ltr,
       verticalDirection: VerticalDirection.up,
       children: const <Widget>[

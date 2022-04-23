@@ -24,7 +24,7 @@ void main() {
 
     testWithoutContext('can turn off wrapping', () async {
       final BufferLogger bufferLogger = BufferLogger(
-        outputPreferences: OutputPreferences.test(wrapText: false),
+        outputPreferences: OutputPreferences.test(),
         terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
       );
       final String testString = '0123456789' * 20;
@@ -184,7 +184,7 @@ void main() {
     final Stdio stdio = FakeStdio();
     expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform()).preferredStyle, 0); // Defaults to 0 for backwards compatibility.
 
-    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  1)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018)).preferredStyle, 0);
     expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  2)).preferredStyle, 1);
     expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  3)).preferredStyle, 2);
     expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  4)).preferredStyle, 3);
@@ -227,15 +227,16 @@ late Stream<String> mockStdInStream;
 class TestTerminal extends AnsiTerminal {
   TestTerminal({
     Stdio? stdio,
-    Platform platform = const LocalPlatform(),
+    super.platform = const LocalPlatform(),
     DateTime? now,
-  }) : super(stdio: stdio ?? Stdio(), platform: platform, now: now ?? DateTime(2018));
+  }) : super(stdio: stdio ?? Stdio(), now: now ?? DateTime(2018));
 
   @override
   Stream<String> get keystrokes {
     return mockStdInStream;
   }
 
+  @override
   bool singleCharMode = false;
 
   @override

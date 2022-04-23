@@ -21,7 +21,7 @@ enum _MaterialListType {
 }
 
 class ListDemo extends StatefulWidget {
-  const ListDemo({ Key? key }) : super(key: key);
+  const ListDemo({ super.key });
 
   static const String routeName = '/material/list';
 
@@ -219,7 +219,7 @@ class _ListDemoState extends State<ListDemo> {
       case _MaterialListType.threeLine:
         itemTypeText = 'Three-line';
         break;
-      default:
+      case null:
         break;
     }
 

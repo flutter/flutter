@@ -11,7 +11,7 @@ void main() {
     test('finds the first value in a OffsetLayer when sized', () {
       final ContainerLayer containerLayer = ContainerLayer();
       final List<OffsetLayer> layers = <OffsetLayer>[
-        OffsetLayer(offset: Offset.zero),
+        OffsetLayer(),
         OffsetLayer(offset: const Offset(0.0, 100.0)),
         OffsetLayer(offset: const Offset(0.0, 200.0)),
       ];
@@ -140,7 +140,7 @@ void main() {
     test('finds the first value in a OffsetLayer when sized', () {
       final ContainerLayer containerLayer = ContainerLayer();
       final List<OffsetLayer> layers = <OffsetLayer>[
-        OffsetLayer(offset: Offset.zero),
+        OffsetLayer(),
         OffsetLayer(offset: const Offset(0.0, 100.0)),
         OffsetLayer(offset: const Offset(0.0, 200.0)),
       ];

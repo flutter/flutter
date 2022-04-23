@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,7 +30,7 @@ void main() {
   String? saveText;
 
   setUp(() {
-    firstDate = DateTime(2015, DateTime.january, 1);
+    firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     currentDate = null;
     initialDateRange = DateTimeRange(
@@ -127,7 +129,7 @@ void main() {
   });
 
   testWidgets('Last month header should be visible if last date is selected', (WidgetTester tester) async {
-    firstDate = DateTime(2015, DateTime.january, 1);
+    firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
       start: lastDate,
@@ -141,7 +143,7 @@ void main() {
   });
 
   testWidgets('First month header should be visible if first date is selected', (WidgetTester tester) async {
-    firstDate = DateTime(2015, DateTime.january, 1);
+    firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
       start: firstDate,
@@ -156,9 +158,9 @@ void main() {
   });
 
   testWidgets('Current month header should be visible if no date is selected', (WidgetTester tester) async {
-    firstDate = DateTime(2015, DateTime.january, 1);
+    firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
-    currentDate = DateTime(2016, DateTime.september, 1);
+    currentDate = DateTime(2016, DateTime.september);
     initialDateRange = null;
 
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
@@ -352,7 +354,7 @@ void main() {
                    onPressed: () {
                      showDateRangePicker(
                        context: context,
-                       firstDate:DateTime(2001, DateTime.january, 1),
+                       firstDate:DateTime(2001),
                        lastDate: DateTime(2031, DateTime.december, 31),
                        builder: (BuildContext context, Widget? child) {
                          return Directionality(
@@ -618,7 +620,7 @@ void main() {
 
   group('Input mode', () {
     setUp(() {
-      firstDate = DateTime(2015, DateTime.january, 1);
+      firstDate = DateTime(2015);
       lastDate = DateTime(2017, DateTime.december, 31);
       initialDateRange = DateTimeRange(
         start: DateTime(2017, DateTime.january, 15),
@@ -814,7 +816,6 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData.light().copyWith(
           inputDecorationTheme: const InputDecorationTheme(
-            filled: false,
             border: border,
           ),
         ),
@@ -960,6 +961,121 @@ void main() {
     expect(find.byType(TextField), findsNothing);
     expect(find.byIcon(Icons.edit), findsNothing);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+
+  group('showDateRangePicker avoids overlapping display features', () {
+    testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showDateRangePicker(
+        context: context,
+        firstDate: DateTime(2018),
+        lastDate: DateTime(2030),
+        anchorPoint: const Offset(1000, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // Should take the right side of the screen
+      expect(tester.getTopLeft(find.byType(DateRangePickerDialog)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning with Directionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: child!,
+              ),
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showDateRangePicker(
+        context: context,
+        firstDate: DateTime(2018),
+        lastDate: DateTime(2030),
+        anchorPoint: const Offset(1000, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the right screen
+      expect(tester.getTopLeft(find.byType(DateRangePickerDialog)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning with defaults', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showDateRangePicker(
+        context: context,
+        firstDate: DateTime(2018),
+        lastDate: DateTime(2030),
+      );
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the left screen
+      expect(tester.getTopLeft(find.byType(DateRangePickerDialog)), Offset.zero);
+      expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(390.0, 600.0));
+    });
+  });
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {
@@ -978,7 +1094,7 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
   @override
   String? get restorationId => 'scaffold_state';
 
-  final RestorableDateTimeN _startDate = RestorableDateTimeN(DateTime(2021, 1, 1));
+  final RestorableDateTimeN _startDate = RestorableDateTimeN(DateTime(2021));
   final RestorableDateTimeN _endDate = RestorableDateTimeN(DateTime(2021, 1, 5));
   late final RestorableRouteFuture<DateTimeRange?> _restorableDateRangePickerRouteFuture = RestorableRouteFuture<DateTimeRange?>(
     onComplete: _selectDateRange,
@@ -1019,9 +1135,9 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
         return DateRangePickerDialog(
           restorationId: 'date_picker_dialog',
           initialEntryMode: DatePickerEntryMode.values[args['datePickerEntryMode'] as int],
-          firstDate: DateTime(2021, 1, 1),
+          firstDate: DateTime(2021),
           currentDate: DateTime(2021, 1, 25),
-          lastDate: DateTime(2022, 1, 1),
+          lastDate: DateTime(2022),
         );
       },
     );

@@ -36,7 +36,6 @@ void main() {
     final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
 
     expect(app.name, 'my_project');
-    expect(app.packagesFile.path, fileSystem.path.join(projectPath, '.packages'));
   });
 
   group('FlutterTesterDevices', () {
@@ -82,7 +81,7 @@ void main() {
     TestBuildSystem buildSystem;
 
     final Map<Type, Generator> startOverrides = <Type, Generator>{
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
       Artifacts: () => Artifacts.test(),
@@ -148,14 +147,14 @@ void main() {
           '--run-forever',
           '--non-interactive',
           '--enable-dart-profiling',
-          '--packages=.packages',
+          '--packages=.dart_tool/package_config.json',
           '--flutter-assets-dir=/.tmp_rand0/flutter_tester.rand0',
           '/.tmp_rand0/flutter_tester.rand0/flutter-tester-app.dill',
         ],
         completer: completer,
         stdout:
         '''
-Observatory listening on $observatoryUri
+The Dart VM service is listening on $observatoryUri
 Hello!
 ''',
       ));

@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('Overconstrained flex', () {
     final RenderDecoratedBox box = RenderDecoratedBox(decoration: const BoxDecoration());
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box]);
@@ -79,7 +81,6 @@ void main() {
     );
     final RenderFlex flex = RenderFlex(
       direction: Axis.vertical,
-      verticalDirection: VerticalDirection.down,
       children: <RenderBox>[
         RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 200.0)),
         flexible,
@@ -101,7 +102,6 @@ void main() {
       additionalConstraints: const BoxConstraints.expand(),
     );
     final RenderFlex flex = RenderFlex(
-      direction: Axis.horizontal,
       textDirection: TextDirection.ltr,
       children: <RenderBox>[
         RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200.0)),
@@ -122,7 +122,6 @@ void main() {
   test('Vertical Flipped Constraints', () {
     final RenderFlex flex = RenderFlex(
       direction: Axis.vertical,
-      verticalDirection: VerticalDirection.down,
       children: <RenderBox>[
         RenderAspectRatio(aspectRatio: 1.0),
       ],
@@ -161,9 +160,7 @@ void main() {
     final RenderDecoratedBox box2 = RenderDecoratedBox(decoration: const BoxDecoration());
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box1, box2]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0,
       maxWidth: 100.0,
-      minHeight: 0.0,
       maxHeight: 100.0,
     ));
     expect(box1.size.width, equals(0.0));
@@ -190,9 +187,7 @@ void main() {
     box2ParentData.flex = 2;
     flex.addAll(<RenderBox>[box1, box2]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0,
       maxWidth: 100.0,
-      minHeight: 0.0,
       maxHeight: 100.0,
     ));
     expect(box1.size.width, equals(0.0));
@@ -222,9 +217,7 @@ void main() {
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceEvenly);
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0,
       maxWidth: 500.0,
-      minHeight: 0.0,
       maxHeight: 400.0,
     ));
     Offset getOffset(RenderBox box) {
@@ -255,9 +248,7 @@ void main() {
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceBetween);
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0,
       maxWidth: 500.0,
-      minHeight: 0.0,
       maxHeight: 400.0,
     ));
     Offset getOffset(RenderBox box) {
@@ -310,9 +301,7 @@ void main() {
     );
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 0.0,
       maxWidth: 500.0,
-      minHeight: 0.0,
       maxHeight: 400.0,
     ));
     Offset getOffset(RenderBox box) {
@@ -421,7 +410,7 @@ void main() {
     box2ParentData.flex = 1;
     final List<dynamic> exceptions = <dynamic>[];
     layout(parent, onErrors: () {
-      exceptions.addAll(renderer.takeAllFlutterExceptions());
+      exceptions.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterExceptions());
     });
     expect(exceptions, isNotEmpty);
     expect(exceptions.first, isFlutterError);
@@ -434,7 +423,6 @@ void main() {
     final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: square);
     final RenderFlex flex = RenderFlex(
       textDirection: TextDirection.ltr,
-      mainAxisSize: MainAxisSize.max,
     );
     final RenderConstrainedOverflowBox parent = RenderConstrainedOverflowBox(
       minWidth: 0.0,
@@ -449,7 +437,7 @@ void main() {
     box2ParentData.fit = FlexFit.loose;
     final List<dynamic> exceptions = <dynamic>[];
     layout(parent, onErrors: () {
-      exceptions.addAll(renderer.takeAllFlutterExceptions());
+      exceptions.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterExceptions());
     });
     expect(exceptions, isNotEmpty);
     expect(exceptions.first, isFlutterError);
@@ -657,7 +645,7 @@ void main() {
     // This forces a check for _hasOverflow
     expect(flex.toStringShort(), isNot(contains('OVERFLOWING')));
     layout(flex, phase: EnginePhase.paint, onErrors: () {
-      exceptions.addAll(renderer.takeAllFlutterExceptions());
+      exceptions.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterExceptions());
     });
     // We expect the RenderFlex to throw during performLayout() for not having
     // a text direction, thus leaving it with a null overflow value. It'll then

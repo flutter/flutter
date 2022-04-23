@@ -336,7 +336,6 @@ class TraversalTester {
       ignoreTransform: true,
       ignoreRect: true,
       ignoreId: true,
-      childOrder: DebugSemanticsDumpOrder.traversalOrder,
     ));
   }
 

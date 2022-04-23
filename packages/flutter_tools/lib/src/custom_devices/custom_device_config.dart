@@ -264,8 +264,9 @@ class CustomDeviceConfig {
       '-o', 'ExitOnForwardFailure=yes',
       '-L', r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
       'pi@raspberrypi',
+      "echo 'Port forwarding success'; read",
     ],
-    forwardPortSuccessRegex: RegExp('Linux'),
+    forwardPortSuccessRegex: RegExp('Port forwarding success'),
     screenshotCommand: const <String>[
       'ssh',
       '-o', 'BatchMode=yes',
@@ -284,8 +285,7 @@ class CustomDeviceConfig {
       '-c', '1',
       'raspberrypi'
     ],
-    explicitPingSuccessRegex: true,
-    pingSuccessRegex: null
+    explicitPingSuccessRegex: true
   );
 
   /// Returns an example custom device config that works on the given host platform.
@@ -473,7 +473,7 @@ class CustomDeviceConfig {
       _kEnabled: enabled,
       _kPingCommand: pingCommand,
       _kPingSuccessRegex: pingSuccessRegex?.pattern,
-      _kPostBuildCommand: postBuildCommand,
+      _kPostBuildCommand: (postBuildCommand?.length ?? 0) > 0 ? postBuildCommand : null,
       _kInstallCommand: installCommand,
       _kUninstallCommand: uninstallCommand,
       _kRunDebugCommand: runDebugCommand,

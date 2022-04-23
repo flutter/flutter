@@ -93,7 +93,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: MemoryFileSystem.test().directory('bundle'),
+      uncompressedBundle: MemoryFileSystem.test().directory('bundle'),
+      applicationPackage: MemoryFileSystem.test().directory('bundle'),
     );
 
     device.portForwarder = devicePortForwarder;
@@ -116,7 +117,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
@@ -126,7 +128,7 @@ void main() {
     // Start writing messages to the log reader.
     Timer.run(() {
       deviceLogReader.addLine('Foo');
-      deviceLogReader.addLine('Observatory listening on http://127.0.0.1:456');
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
     });
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -153,7 +155,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
@@ -163,7 +166,7 @@ void main() {
     // Start writing messages to the log reader.
     Timer.run(() {
       deviceLogReader.addLine('Foo');
-      deviceLogReader.addLine('Observatory listening on http://127.0.0.1:456');
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
     });
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -191,7 +194,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
@@ -202,7 +206,7 @@ void main() {
     Timer.run(() async {
       await Future<void>.delayed(const Duration(milliseconds: 1));
       deviceLogReader.addLine('Foo');
-      deviceLogReader.addLine('Observatory listening on http://127.0.0.1:456');
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
     });
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -230,7 +234,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -280,6 +285,7 @@ void main() {
             '--verbose-logging',
             '--cache-sksl',
             '--purge-persistent-cache',
+            '--enable-impeller',
           ].join(' '),
         ], environment: const <String, String>{
         'PATH': '/usr/bin:null',
@@ -296,7 +302,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
@@ -305,7 +312,7 @@ void main() {
 
     // Start writing messages to the log reader.
     Timer.run(() {
-      deviceLogReader.addLine('Observatory listening on http://127.0.0.1:1234');
+      deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:1234');
     });
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -326,6 +333,7 @@ void main() {
         purgePersistentCache: true,
         verboseSystemLogs: true,
         nullAssertions: true,
+        enableImpeller: true,
       ),
       platformArgs: <String, dynamic>{},
     );

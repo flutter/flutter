@@ -54,8 +54,12 @@ const List<String> kRunReleaseArgs = <String>[
   'BUILD_DIR=/build/ios',
   '-sdk',
   'iphoneos',
+  '-destination',
+  'id=123',
   'ONLY_ACTIVE_ARCH=YES',
   'ARCHS=arm64',
+  '-resultBundlePath', '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle',
+  '-resultBundleVersion', '3',
   'FLUTTER_SUPPRESS_ANALYTICS=true',
   'COMPILER_INDEX_STORE_ENABLE=NO',
 ];
@@ -184,6 +188,7 @@ void main() {
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
       processManager.addCommand(const FakeCommand(command: <String>[
         'rsync',
+        '-8',
         '-av',
         '--delete',
         'build/ios/Release-iphoneos/My Super Awesome App.app',

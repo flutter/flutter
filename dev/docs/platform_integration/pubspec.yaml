@@ -1,4 +1,4 @@
 name: platform_integration
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.17.0-0 <3.0.0"

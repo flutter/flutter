@@ -412,6 +412,75 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/100395.
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem', fontSize: 200);
+    const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
+    const String offScreenText = 'off screen';
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      SingleChildScrollView(
+        controller: controller,
+        child: Text.rich(
+          TextSpan(
+            children: <TextSpan>[
+              const TextSpan(text: onScreenText),
+              TextSpan(
+                text: offScreenText,
+                recognizer: TapGestureRecognizer()..onTap = () { },
+              ),
+            ],
+            style: textStyle,
+          ),
+          textDirection: TextDirection.ltr,
+        ),
+      ),
+    );
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+          actions: <SemanticsAction>[SemanticsAction.scrollUp],
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: onScreenText,
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  label: offScreenText,
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  flags: <SemanticsFlag>[SemanticsFlag.isLink, SemanticsFlag.isHidden],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
+
+    // Test show on screen.
+    expect(controller.offset, 0.0);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(4, SemanticsAction.showOnScreen);
+    await tester.pumpAndSettle();
+    expect(controller.offset != 0.0, isTrue);
+
+    semantics.dispose();
+  });
+
   testWidgets('recognizers split semantic node when TextSpan overflows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
@@ -1045,7 +1114,7 @@ void main() {
         ),
       ],
     )));
-  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2', (WidgetTester tester) async {
@@ -1091,7 +1160,7 @@ void main() {
     ignoreRect: true,
     ignoreTransform: true,
     ));
-  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3', (WidgetTester tester) async {
@@ -1149,7 +1218,7 @@ void main() {
     ignoreRect: true,
     ignoreTransform: true,
     ));
-  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4', (WidgetTester tester) async {
@@ -1215,7 +1284,7 @@ void main() {
     ignoreRect: true,
     ignoreTransform: true,
     ));
-  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {
     await tester.pumpWidget(

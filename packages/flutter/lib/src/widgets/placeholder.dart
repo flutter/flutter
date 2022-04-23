@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 
@@ -57,6 +59,7 @@ class Placeholder extends StatelessWidget {
     this.strokeWidth = 2.0,
     this.fallbackWidth = 400.0,
     this.fallbackHeight = 400.0,
+    this.child
   }) : super(key: key);
 
   /// The color to draw the placeholder box.
@@ -81,6 +84,10 @@ class Placeholder extends StatelessWidget {
   ///  * [fallbackWidth], the same but horizontally.
   final double fallbackHeight;
 
+  /// The [child] contained by the placeholder box.
+  ///
+  /// Defaults to null.
+  final Widget? child;
   @override
   Widget build(BuildContext context) {
     return LimitedBox(
@@ -88,11 +95,22 @@ class Placeholder extends StatelessWidget {
       maxHeight: fallbackHeight,
       child: CustomPaint(
         size: Size.infinite,
-        foregroundPainter: _PlaceholderPainter(
+        painter: _PlaceholderPainter(
           color: color,
           strokeWidth: strokeWidth,
         ),
+        child: child,
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ColorProperty('color', color, defaultValue: const Color(0xFF455A64)));
+    properties.add(DoubleProperty('strokeWidth', strokeWidth, defaultValue: 2.0));
+    properties.add(DoubleProperty('fallbackWidth', fallbackWidth, defaultValue: 400.0));
+    properties.add(DoubleProperty('fallbackHeight', fallbackHeight, defaultValue: 400.0));
+    properties.add(DiagnosticsProperty<Widget>('child', child, defaultValue: null));
   }
 }

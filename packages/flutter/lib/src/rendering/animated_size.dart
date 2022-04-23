@@ -175,6 +175,22 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    switch (state) {
+      case RenderAnimatedSizeState.start:
+      case RenderAnimatedSizeState.stable:
+        break;
+      case RenderAnimatedSizeState.changed:
+      case RenderAnimatedSizeState.unstable:
+        // Call markNeedsLayout in case the RenderObject isn't marked dirty
+        // already, to resume interrupted resizing animation.
+        markNeedsLayout();
+        break;
+    }
+  }
+
+  @override
   void detach() {
     _controller.stop();
     super.detach();

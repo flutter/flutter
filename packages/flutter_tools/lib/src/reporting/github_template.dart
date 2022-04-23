@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -25,26 +22,23 @@ import '../version.dart';
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
 class GitHubTemplateCreator {
   GitHubTemplateCreator({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required FlutterProjectFactory flutterProjectFactory,
-    @required HttpClient client,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required FlutterProjectFactory flutterProjectFactory,
   }) : _fileSystem = fileSystem,
       _logger = logger,
-      _flutterProjectFactory = flutterProjectFactory,
-      _client = client;
+      _flutterProjectFactory = flutterProjectFactory;
 
   final FileSystem _fileSystem;
   final Logger _logger;
   final FlutterProjectFactory _flutterProjectFactory;
-  final HttpClient _client;
 
   static String toolCrashSimilarIssuesURL(String errorString) {
     return 'https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}';
   }
 
   /// Restricts exception object strings to contain only information about tool internals.
-  static String sanitizedCrashException(dynamic error) {
+  static String sanitizedCrashException(Object error) {
     if (error is ProcessException) {
       // Suppress args.
       return 'ProcessException: ${error.message} Command: ${error.executable}, OS error code: ${error.errorCode}';
@@ -83,7 +77,7 @@ class GitHubTemplateCreator {
   /// Shorten the URL, if possible.
   Future<String> toolCrashIssueTemplateGitHubURL(
       String command,
-      dynamic error,
+      Object error,
       StackTrace stackTrace,
       String doctorText
     ) async {
@@ -113,12 +107,11 @@ $doctorText
 ${_projectMetadataInformation()}
 ''';
 
-    final String fullURL = 'https://github.com/flutter/flutter/issues/new?'
-      'title=${Uri.encodeQueryComponent(title)}'
+    return 'https://github.com/flutter/flutter/issues'
+      '/new' // We split this here to appease our lint that looks for bad "new bug" links.
+      '?title=${Uri.encodeQueryComponent(title)}'
       '&body=${Uri.encodeQueryComponent(body)}'
       '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}';
-
-    return _shortURL(fullURL);
   }
 
   /// Provide information about the Flutter project in the working directory, if present.
@@ -131,13 +124,14 @@ ${_projectMetadataInformation()}
       return exception.toString();
     }
     try {
-      final FlutterManifest manifest = project?.manifest;
+      final FlutterManifest manifest = project.manifest;
       if (project == null || manifest == null || manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
       final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
+      final FlutterProjectType? projectType = metadata.projectType;
       final StringBuffer description = StringBuffer()
-        ..writeln('**Type**: ${flutterProjectTypeToString(metadata.projectType)}')
+        ..writeln('**Type**: ${projectType == null ? 'malformed' : flutterProjectTypeToString(projectType)}')
         ..writeln('**Version**: ${manifest.appVersion}')
         ..writeln('**Material**: ${manifest.usesMaterialDesign}')
         ..writeln('**Android X**: ${manifest.usesAndroidX}')
@@ -169,30 +163,5 @@ ${_projectMetadataInformation()}
     } on Exception catch (exception) {
       return exception.toString();
     }
-  }
-
-  /// Shorten GitHub URL with git.io API.
-  ///
-  /// See https://github.blog/2011-11-10-git-io-github-url-shortener.
-  Future<String> _shortURL(String fullURL) async {
-    String url;
-    try {
-      _logger.printTrace('Attempting git.io shortener: $fullURL');
-      final List<int> bodyBytes = utf8.encode('url=${Uri.encodeQueryComponent(fullURL)}');
-      final HttpClientRequest request = await _client.postUrl(Uri.parse('https://git.io'));
-      request.headers.set(HttpHeaders.contentLengthHeader, bodyBytes.length.toString());
-      request.add(bodyBytes);
-      final HttpClientResponse response = await request.close();
-
-      if (response.statusCode == 201) {
-        url = response.headers[HttpHeaders.locationHeader]?.first;
-      } else {
-        _logger.printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
-      }
-    } on Exception catch (sendError) {
-      _logger.printTrace('Failed to shorten GitHub template URL: $sendError');
-    }
-
-    return url ?? fullURL;
   }
 }

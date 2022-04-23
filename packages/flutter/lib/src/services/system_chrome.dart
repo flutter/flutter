@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:ui';
 
@@ -266,8 +265,6 @@ class SystemUiOverlayStyle {
   /// applications with a dark background.
   static const SystemUiOverlayStyle light = SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF000000),
-    systemNavigationBarDividerColor: null,
-    statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
@@ -277,8 +274,6 @@ class SystemUiOverlayStyle {
   /// applications with a light background.
   static const SystemUiOverlayStyle dark = SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF000000),
-    systemNavigationBarDividerColor: null,
-    statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.dark,
     statusBarBrightness: Brightness.light,
@@ -289,12 +284,12 @@ class SystemUiOverlayStyle {
     return <String, dynamic>{
       'systemNavigationBarColor': systemNavigationBarColor?.value,
       'systemNavigationBarDividerColor': systemNavigationBarDividerColor?.value,
-      'systemStatusBarContrastEnforced' : systemStatusBarContrastEnforced ?? true,
+      'systemStatusBarContrastEnforced': systemStatusBarContrastEnforced,
       'statusBarColor': statusBarColor?.value,
       'statusBarBrightness': statusBarBrightness?.toString(),
       'statusBarIconBrightness': statusBarIconBrightness?.toString(),
       'systemNavigationBarIconBrightness': systemNavigationBarIconBrightness?.toString(),
-      'systemNavigationBarContrastEnforced' : systemNavigationBarContrastEnforced ?? true,
+      'systemNavigationBarContrastEnforced': systemNavigationBarContrastEnforced,
     };
   }
 
@@ -325,18 +320,16 @@ class SystemUiOverlayStyle {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      systemNavigationBarColor,
-      systemNavigationBarDividerColor,
-      systemNavigationBarContrastEnforced,
-      statusBarColor,
-      statusBarBrightness,
-      statusBarIconBrightness,
-      systemStatusBarContrastEnforced,
-      systemNavigationBarIconBrightness,
-    );
-  }
+  int get hashCode => Object.hash(
+    systemNavigationBarColor,
+    systemNavigationBarDividerColor,
+    systemNavigationBarContrastEnforced,
+    statusBarColor,
+    statusBarBrightness,
+    statusBarIconBrightness,
+    systemStatusBarContrastEnforced,
+    systemNavigationBarIconBrightness,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -502,7 +495,7 @@ class SystemChrome {
   /// [SystemUiMode.leanBack].
   ///
   static Future<void> setSystemUIChangeCallback(SystemUiChangeCallback? callback) async {
-    ServicesBinding.instance!.setSystemUiChangeCallback(callback);
+    ServicesBinding.instance.setSystemUiChangeCallback(callback);
     // Skip setting up the listener if there is no callback.
     if (callback != null) {
       await SystemChannels.platform.invokeMethod<void>(
@@ -566,7 +559,7 @@ class SystemChrome {
   /// navigation bar and synthesize them into a single style. This can be used
   /// to configure the system styles when an app bar is not used.
   ///
-  /// {@tool sample --template=stateful_widget_material}
+  /// {@tool sample}
   /// The following example creates a widget that changes the status bar color
   /// to a random value on Android.
   ///

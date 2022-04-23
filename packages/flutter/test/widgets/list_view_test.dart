@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
 class TestSliverChildListDelegate extends SliverChildListDelegate {
   TestSliverChildListDelegate(List<Widget> children) : super(children);
@@ -76,6 +76,79 @@ class _StatefulListViewState extends State<_StatefulListView> {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('ListView.builder respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return ListView.builder(
+              itemCount: itemCount,
+              itemBuilder: (BuildContext _, int index) => Container(
+                key: Key('$index'),
+                height: 2000.0,
+              ),
+              findChildIndexCallback: (Key key) {
+                finderCalled = true;
+                return null;
+              },
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('ListView.separator respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return ListView.separated(
+              itemCount: itemCount,
+              itemBuilder: (BuildContext _, int index) => Container(
+                key: Key('$index'),
+                height: 2000.0,
+              ),
+              findChildIndexCallback: (Key key) {
+                finderCalled = true;
+                return null;
+              },
+              separatorBuilder: (BuildContext _, int __) => const Divider(),
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
   testWidgets('ListView default control', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -327,7 +400,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics(isHidden: false));
+    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics());
     expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
     expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)), matchesSemantics(isHidden: true));
     expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)), matchesSemantics(isHidden: true));
@@ -353,7 +426,7 @@ void main() {
     );
     // Scrollable maybe be marked dirty after layout.
     await tester.pumpAndSettle();
-    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics(isHidden: false));
+    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics());
     expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
     expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)), matchesSemantics(isHidden: true));
     expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)), matchesSemantics(isHidden: true));

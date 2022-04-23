@@ -26,6 +26,13 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
 /// [EdgeInsets.zero], should be used to prevent clipping larger [child]
 /// widgets.
 ///
+/// {@tool dartpad}
+/// This sample shows produces an enabled and disabled [CupertinoButton] and
+/// [CupertinoButton.filled].
+///
+/// ** See code in examples/api/lib/cupertino/button/cupertino_button.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/buttons/>
@@ -238,43 +245,46 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
     final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: enabled ? _handleTapDown : null,
-      onTapUp: enabled ? _handleTapUp : null,
-      onTapCancel: enabled ? _handleTapCancel : null,
-      onTap: widget.onPressed,
-      child: Semantics(
-        button: true,
-        child: ConstrainedBox(
-          constraints: widget.minSize == null
-            ? const BoxConstraints()
-            : BoxConstraints(
-                minWidth: widget.minSize!,
-                minHeight: widget.minSize!,
-              ),
-          child: FadeTransition(
-            opacity: _opacityAnimation,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: widget.borderRadius,
-                color: backgroundColor != null && !enabled
-                  ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
-                  : backgroundColor,
-              ),
-              child: Padding(
-                padding: widget.padding ?? (backgroundColor != null
-                  ? _kBackgroundButtonPadding
-                  : _kButtonPadding),
-                child: Align(
-                  alignment: widget.alignment,
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: DefaultTextStyle(
-                    style: textStyle,
-                    child: IconTheme(
-                      data: IconThemeData(color: foregroundColor),
-                      child: widget.child,
+    return MouseRegion(
+      cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: enabled ? _handleTapDown : null,
+        onTapUp: enabled ? _handleTapUp : null,
+        onTapCancel: enabled ? _handleTapCancel : null,
+        onTap: widget.onPressed,
+        child: Semantics(
+          button: true,
+          child: ConstrainedBox(
+            constraints: widget.minSize == null
+              ? const BoxConstraints()
+              : BoxConstraints(
+                  minWidth: widget.minSize!,
+                  minHeight: widget.minSize!,
+                ),
+            child: FadeTransition(
+              opacity: _opacityAnimation,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: widget.borderRadius,
+                  color: backgroundColor != null && !enabled
+                    ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
+                    : backgroundColor,
+                ),
+                child: Padding(
+                  padding: widget.padding ?? (backgroundColor != null
+                    ? _kBackgroundButtonPadding
+                    : _kButtonPadding),
+                  child: Align(
+                    alignment: widget.alignment,
+                    widthFactor: 1.0,
+                    heightFactor: 1.0,
+                    child: DefaultTextStyle(
+                      style: textStyle,
+                      child: IconTheme(
+                        data: IconThemeData(color: foregroundColor),
+                        child: widget.child,
+                      ),
                     ),
                   ),
                 ),

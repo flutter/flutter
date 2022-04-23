@@ -289,20 +289,26 @@ class FakeStdio extends Stdio {
 }
 
 class FakePlistParser implements PlistParser {
-  final Map<String, dynamic> _underlyingValues = <String, String>{};
+  FakePlistParser([Map<String, Object>? underlyingValues]):
+    _underlyingValues = underlyingValues ?? <String, Object>{};
 
-  void setProperty(String key, dynamic value) {
+  final Map<String, Object> _underlyingValues;
+
+  void setProperty(String key, Object value) {
     _underlyingValues[key] = value;
   }
 
   @override
-  Map<String, dynamic> parseFile(String plistFilePath) {
+  String? plistXmlContent(String plistFilePath) => throw UnimplementedError();
+
+  @override
+  Map<String, Object> parseFile(String plistFilePath) {
     return _underlyingValues;
   }
 
   @override
-  String getValueFromFile(String plistFilePath, String key) {
-    return _underlyingValues[key] as String;
+  String? getStringValueFromFile(String plistFilePath, String key) {
+    return _underlyingValues[key] as String?;
   }
 }
 
@@ -320,6 +326,7 @@ class FakeFlutterVersion implements FlutterVersion {
   FakeFlutterVersion({
     this.channel = 'unknown',
     this.dartSdkVersion = '12',
+    this.devToolsVersion = '2.8.0',
     this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
     this.engineRevisionShort = 'abcde',
     this.repositoryUrl = 'https://github.com/flutter/flutter.git',
@@ -339,6 +346,9 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   final String channel;
+
+  @override
+  final String devToolsVersion;
 
   @override
   final String dartSdkVersion;
@@ -477,7 +487,7 @@ class TestFeatureFlags implements FeatureFlags {
 }
 
 class FakeStatusLogger extends DelegatingLogger {
-  FakeStatusLogger(Logger delegate) : super(delegate);
+  FakeStatusLogger(super.delegate);
 
   late Status status;
 

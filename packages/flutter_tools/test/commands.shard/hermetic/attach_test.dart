@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
@@ -104,7 +104,7 @@ void main() {
       testUsingContext('finds observatory port and forwards', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
         testDeviceManager.addDevice(device);
@@ -133,7 +133,7 @@ void main() {
       testUsingContext('Fails with tool exit on bad Observatory uri', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           fakeLogReader.dispose();
           return fakeLogReader;
         };
@@ -148,7 +148,7 @@ void main() {
       testUsingContext('accepts filesystem parameters', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
         testDeviceManager.addDevice(device);
@@ -223,7 +223,7 @@ void main() {
       testUsingContext('exits when observatory-port is specified and debug-port is not', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
           return fakeLogReader;
         };
         testDeviceManager.addDevice(device);
@@ -568,6 +568,20 @@ class StreamLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
+    hadErrorOutput = true;
+    _log('[stderr] $message');
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    hadWarningOutput = true;
     _log('[stderr] $message');
   }
 
@@ -582,6 +596,18 @@ class StreamLogger extends Logger {
     bool wrap,
   }) {
     _log('[stdout] $message');
+  }
+
+  @override
+  void printBox(
+    String message, {
+    String title,
+  }) {
+    if (title == null) {
+      _log('[stdout] $message');
+    } else {
+      _log('[stdout] $title: $message');
+    }
   }
 
   @override
@@ -605,7 +631,11 @@ class StreamLogger extends Logger {
   }
 
   @override
-  Status startSpinner({ VoidCallback onFinish }) {
+  Status startSpinner({
+    VoidCallback onFinish,
+    Duration timeout,
+    SlowWarningCallback slowWarningCallback,
+  }) {
     return SilentStatus(
       stopwatch: Stopwatch(),
       onFinish: onFinish,
@@ -772,12 +802,16 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     int hostPort,
     bool ipv6,
     bool disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
   }) async {}
 
   @override
   Uri get uri => Uri.parse('http://localhost:8181');
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   FakeAndroidDevice({@required this.id});
 
@@ -837,6 +871,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Category get category => Category.mobile;
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({this.dds, this.portForwarder, this.logReader});
 

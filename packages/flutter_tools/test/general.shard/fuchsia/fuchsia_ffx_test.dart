@@ -46,7 +46,6 @@ void main() {
           FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[ffx.path, 'target', 'list', '--format', 's'],
-          exitCode: 0,
           stderr: 'No devices found.',
         ),
       ]);
@@ -90,7 +89,6 @@ void main() {
           FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[ffx.path, 'target', 'list', '--format', 's'],
-          exitCode: 0,
           stdout: 'device1\ndevice2',
         ),
       ]);
@@ -112,7 +110,6 @@ void main() {
           FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[ffx.path, '-T', '2', 'target', 'list', '--format', 's'],
-          exitCode: 0,
           stdout: 'device1',
         ),
       ]);
@@ -191,7 +188,6 @@ void main() {
           FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[ffx.path, 'target', 'list', '--format', 'a', 'known-device'],
-          exitCode: 0,
           stdout: '1234-1234-1234-1234',
         ),
       ]);

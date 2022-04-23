@@ -9,7 +9,7 @@ import '../../src/fakes.dart';
 
 void main() {
   testWithoutContext('CustomDeviceWorkflow reports false when custom devices feature is disabled', () {
-    final CustomDeviceWorkflow workflow = CustomDeviceWorkflow(featureFlags: TestFeatureFlags(areCustomDevicesEnabled: false));
+    final CustomDeviceWorkflow workflow = CustomDeviceWorkflow(featureFlags: TestFeatureFlags());
     expect(workflow.appliesToHostPlatform, false);
     expect(workflow.canLaunchDevices, false);
     expect(workflow.canListDevices, false);

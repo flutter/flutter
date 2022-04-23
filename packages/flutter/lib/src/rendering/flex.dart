@@ -1155,8 +1155,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   @override
   String toStringShort() {
     String header = super.toStringShort();
-    if (_hasOverflow)
-      header += ' OVERFLOWING';
+    if (!kReleaseMode) {
+      if (_hasOverflow)
+        header += ' OVERFLOWING';
+    }
     return header;
   }
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../test_utils.dart';
 import 'project.dart';
 
@@ -53,7 +51,8 @@ class BackgroundProject extends Project {
 
   void updateTestIsolatePhrase(String message) {
     final String newMainContents = main.replaceFirst('Isolate thread', message);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents,
+        writeFutureModifiedDate: true);
   }
 }
 
@@ -103,6 +102,10 @@ class RepeatingBackgroundProject extends Project {
 
   void updateTestIsolatePhrase(String message) {
     final String newMainContents = main.replaceFirst('Isolate thread', message);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(
+      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
+      newMainContents,
+      writeFutureModifiedDate: true,
+    );
   }
 }

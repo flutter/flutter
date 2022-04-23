@@ -47,7 +47,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ZtfItHwFlZ8}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This sample application uses an [AnimatedList] to create an effect when
 /// items are removed or added to the list.
 ///
@@ -321,7 +321,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 /// [GlobalKey] or use the static [SliverAnimatedList.of] method from an item's
 /// input callback.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This sample application uses a [SliverAnimatedList] to create an animated
 /// effect when items are removed or added to the list.
 ///
@@ -339,6 +339,7 @@ class SliverAnimatedList extends StatefulWidget {
   const SliverAnimatedList({
     Key? key,
     required this.itemBuilder,
+    this.findChildIndexCallback,
     this.initialItemCount = 0,
   }) : assert(itemBuilder != null),
        assert(initialItemCount != null && initialItemCount >= 0),
@@ -358,6 +359,9 @@ class SliverAnimatedList extends StatefulWidget {
   /// Implementations of this callback should assume that
   /// [SliverAnimatedListState.removeItem] removes an item immediately.
   final AnimatedListItemBuilder itemBuilder;
+
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
+  final ChildIndexGetter? findChildIndexCallback;
 
   /// {@macro flutter.widgets.animatedList.initialItemCount}
   final int initialItemCount;
@@ -507,7 +511,11 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
   }
 
   SliverChildDelegate _createDelegate() {
-    return SliverChildBuilderDelegate(_itemBuilder, childCount: _itemsCount);
+    return SliverChildBuilderDelegate(
+      _itemBuilder,
+      childCount: _itemsCount,
+      findChildIndexCallback: widget.findChildIndexCallback,
+    );
   }
 
   /// Insert an item at [index] and start an animation that will be passed to

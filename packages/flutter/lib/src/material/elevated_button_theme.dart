@@ -55,9 +55,7 @@ class ElevatedButtonThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return style.hashCode;
-  }
+  int get hashCode => style.hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -107,7 +105,7 @@ class ElevatedButtonTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ElevatedButtonTheme theme = ElevatedButtonTheme.of(context);
+  /// ElevatedButtonThemeData theme = ElevatedButtonTheme.of(context);
   /// ```
   static ElevatedButtonThemeData of(BuildContext context) {
     final ElevatedButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<ElevatedButtonTheme>();

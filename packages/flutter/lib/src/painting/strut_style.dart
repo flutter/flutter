@@ -575,17 +575,15 @@ class StrutStyle with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      fontFamily,
-      fontSize,
-      fontWeight,
-      fontStyle,
-      height,
-      leading,
-      forceStrutHeight,
-    );
-  }
+  int get hashCode => Object.hash(
+    fontFamily,
+    fontSize,
+    fontWeight,
+    fontStyle,
+    height,
+    leading,
+    forceStrutHeight,
+  );
 
   @override
   String toStringShort() => objectRuntimeType(this, 'StrutStyle');
@@ -616,7 +614,7 @@ class StrutStyle with Diagnosticable {
     ));
     styles.add(EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
-    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, defaultValue: null, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
+    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
     styles.forEach(properties.add);

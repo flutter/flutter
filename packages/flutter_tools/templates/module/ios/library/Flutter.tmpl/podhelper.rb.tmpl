@@ -81,7 +81,8 @@ def install_flutter_plugin_pods(flutter_application_path)
   plugin_pods.each do |plugin_hash|
     plugin_name = plugin_hash['name']
     plugin_path = plugin_hash['path']
-    if (plugin_name && plugin_path)
+    has_native_build = plugin_hash.fetch('native_build', true)
+    if (plugin_name && plugin_path && has_native_build)
       symlink = File.join(symlinks_dir, plugin_name)
       FileUtils.rm_f(symlink)
       File.symlink(plugin_path, symlink)
@@ -108,7 +109,8 @@ def install_flutter_application_pod(flutter_application_path)
     # CocoaPods will not embed the framework on pod install (before any build phases can run) if the dylib does not exist.
     # Create a dummy dylib.
     FileUtils.mkdir_p(app_framework_dir)
-    `echo "static const int Moo = 88;" | xcrun clang -x c -dynamiclib -o "#{app_framework_dylib}" -`
+    sdk_path = `xcrun --sdk iphoneos --show-sdk-path`.strip
+    `echo "static const int Moo = 88;" | xcrun clang -x c -arch arm64 -dynamiclib -miphoneos-version-min=9.0 -isysroot "#{sdk_path}" -o "#{app_framework_dylib}" -`
   end
 
   # Keep pod and script phase paths relative so they can be checked into source control.

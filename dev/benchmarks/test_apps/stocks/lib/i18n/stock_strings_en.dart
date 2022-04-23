@@ -10,7 +10,7 @@ import 'stock_strings.dart';
 
 /// The translations for English (`en`).
 class StockStringsEn extends StockStrings {
-  StockStringsEn([String locale = 'en']) : super(locale);
+  StockStringsEn([super.locale = 'en']);
 
   @override
   String get title => 'Stocks';

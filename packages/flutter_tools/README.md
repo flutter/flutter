@@ -39,17 +39,30 @@ $ flutter analyze
 As with other parts of the Flutter repository, all changes in behavior [must be
 tested](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#write-test-find-bug).
 Tests live under the `test/` subdirectory.
-- Hermetic unit tests of tool internals go under `test/general.shard`.
-- Tests of tool commands go under `test/commands.shard`. Hermetic tests go under
-  its `hermetic/` subdirectory. Non-hermetic tests go under its `permeable`
-  sub-directory. Avoid adding tests here and prefer writing either a unit test or a full
-  integration test.
-- Integration tests (e.g. tests that run the tool in a subprocess) go under
-  `test/integration.shard`.
 
-In general, the tests for the code in a file called `file.dart` should go in a
-file called `file_test.dart` in the subdirectory that matches the behavior of
-the test.
+- Hermetic unit tests of tool internals go under `test/general.shard`
+  and must run in significantly less than two seconds.
+
+- Tests of tool commands go under `test/commands.shard`. Hermetic
+  tests go under its `hermetic/` subdirectory. Non-hermetic tests go
+  under its `permeable` sub-directory. Avoid adding tests here and
+  prefer writing either a unit test or a full integration test.
+
+- Integration tests (e.g. tests that run the tool in a subprocess) go
+  under `test/integration.shard`.
+
+- Slow web-related tests go in the `test/web.shard` directory.
+
+In general, the tests for the code in a file called `file.dart` should
+go in a file called `file_test.dart` in the subdirectory that matches
+the behavior of the test.
+
+The `dart_test.yaml` file configures the timeout for these tests to be
+15 minutes. The `test.dart` script that is used in CI overrides this
+to two seconds for the `test/general.shard` directory, to catch
+behaviour that is unexpectedly slow.
+
+Please avoid setting any other timeouts.
 
 #### Using local engine builds in integration tests
 
@@ -73,29 +86,26 @@ To run all of the unit tests:
 $ flutter test test/general.shard
 ```
 
-The tests in `test/integration.shard` are slower to run than the tests in
-`test/general.shard`. Depending on your development computer, you might
-want to increase timeouts and limit concurrency. Generally it is easier to run
-these on CI, or to manually verify the behavior you are changing instead of running
-the test.
+The tests in `test/integration.shard` are slower to run than the tests
+in `test/general.shard`. Depending on your development computer, you
+might want to limit concurrency. Generally it is easier to run these
+on CI, or to manually verify the behavior you are changing instead of
+running the test.
 
-The integration tests also require the `FLUTTER_ROOT` environment variable
-to be set. The full invocation to run everything might therefore look something like:
+The integration tests also require the `FLUTTER_ROOT` environment
+variable to be set. The full invocation to run everything might
+therefore look something like:
 
 ```shell
-$ FLUTTER_ROOT=~/path/to/flutter-sdk
-$ flutter test --timeout 2x --concurrency 1
+$ export FLUTTER_ROOT=~/path/to/flutter-sdk
+$ flutter test --concurrency 1
 ```
 
-This will take about an hour to complete.
+This may take some time (on the order of an hour). The unit tests
+alone take much less time (on the order of a minute).
 
-To run only the tests in `test/general.shard` (which takes about a minute),
-in this directory run:
-```shell
-$ flutter test test/general.shard
-```
+You can run the tests in a specific file, e.g.:
 
-To run the tests in a specific file, run:
 ```shell
 $ flutter test test/general.shard/utils_test.dart
 ```

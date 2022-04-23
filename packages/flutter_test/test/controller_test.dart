@@ -94,7 +94,7 @@ void main() {
       expect(semantics.label, 'hello');
       expect(semantics.hasAction(SemanticsAction.tap), true);
       expect(semantics.hasFlag(SemanticsFlag.isButton), true);
-    }, semanticsEnabled: true);
+    });
 
     testWidgets('Returns merged SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
@@ -663,12 +663,12 @@ void main() {
       );
 
       // Make sure widget isn't on screen
-      expect(find.text('Item 15', skipOffstage: true), findsNothing);
+      expect(find.text('Item 15'), findsNothing);
 
       await tester.ensureVisible(find.text('Item 15', skipOffstage: false));
       await tester.pumpAndSettle();
 
-      expect(find.text('Item 15', skipOffstage: true), findsOneWidget);
+      expect(find.text('Item 15'), findsOneWidget);
     },
   );
 
@@ -698,7 +698,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Now the widget is on screen.
-        expect(find.text('Item 45', skipOffstage: true), findsOneWidget);
+        expect(find.text('Item 45'), findsOneWidget);
       },
     );
 
@@ -729,7 +729,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Now the widget is on screen.
-        expect(find.text('Item 45', skipOffstage: true), findsOneWidget);
+        expect(find.text('Item 45'), findsOneWidget);
       },
     );
 
@@ -799,7 +799,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Now the widget is on screen.
-      expect(find.text('Item b-45', skipOffstage: true), findsOneWidget);
+      expect(find.text('Item b-45'), findsOneWidget);
     });
   });
 }

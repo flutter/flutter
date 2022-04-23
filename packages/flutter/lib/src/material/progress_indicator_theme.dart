@@ -94,15 +94,13 @@ class ProgressIndicatorThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      color,
-      linearTrackColor,
-      linearMinHeight,
-      circularTrackColor,
-      refreshBackgroundColor,
-    );
-  }
+  int get hashCode => Object.hash(
+    color,
+    linearTrackColor,
+    linearMinHeight,
+    circularTrackColor,
+    refreshBackgroundColor,
+  );
 
   @override
   bool operator==(Object other) {

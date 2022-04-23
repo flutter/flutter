@@ -400,6 +400,5 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(textColor(), pressedColor);
   },
-    semanticsEnabled: true,
   );
 }

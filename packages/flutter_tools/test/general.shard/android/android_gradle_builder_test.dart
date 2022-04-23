@@ -56,6 +56,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -101,6 +102,7 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
+                bool multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -136,34 +138,29 @@ void main() {
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
       );
-      processManager.addCommand(const FakeCommand(
+
+      const FakeCommand fakeCmd = FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
           'assembleRelease',
         ],
         exitCode: 1,
-        stderr: '\nSome gradle message\n'
-      ));
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
-          'gradlew',
-          '-q',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          '-Ptarget=lib/main.dart',
-          '-Pdart-obfuscation=false',
-          '-Ptrack-widget-creation=false',
-          '-Ptree-shake-icons=false',
-          'assembleRelease',
-        ],
-        exitCode: 1,
-        stderr: '\nSome gradle message\n'
-      ));
+        stderr: '\nSome gradle message\n',
+      );
+
+      processManager.addCommand(fakeCmd);
+
+      const int maxRetries = 2;
+      for (int i = 0; i < maxRetries; i++) {
+        processManager.addCommand(fakeCmd);
+      }
 
       fileSystem.directory('android')
         .childFile('build.gradle')
@@ -182,6 +179,7 @@ void main() {
       int testFnCalled = 0;
       await expectLater(() async {
        await builder.buildGradleApp(
+          maxRetries: maxRetries,
           project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
@@ -205,6 +203,7 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
+                bool multidexEnabled
               }) async {
                 return GradleBuildStatus.retry;
               },
@@ -216,7 +215,10 @@ void main() {
         message: 'Gradle task assembleRelease failed with exit code 1'
       ));
 
-      expect(testFnCalled, equals(2));
+      expect(logger.statusText, contains('Retrying Gradle Build: #1, wait time: 100ms'));
+      expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200ms'));
+
+      expect(testFnCalled, equals(maxRetries + 1));
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
@@ -243,6 +245,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -288,6 +291,7 @@ void main() {
                 String line,
                 FlutterProject project,
                 bool usesAndroidX,
+                bool multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -329,6 +333,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -388,6 +393,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -402,12 +408,12 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       fileSystem.directory('android')
@@ -451,6 +457,7 @@ void main() {
               String line,
               FlutterProject project,
               bool usesAndroidX,
+                bool multidexEnabled
             }) async {
               return GradleBuildStatus.retry;
             },
@@ -489,13 +496,13 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
           '-Pcode-size-directory=foo',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       fileSystem.directory('android')
@@ -582,6 +589,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -655,7 +663,6 @@ void main() {
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleAarRelease',
         ],
-        exitCode: 0,
       ));
 
       final File manifestFile = fileSystem.file('pubspec.yaml');
@@ -768,12 +775,12 @@ void main() {
           '-Plocal-engine-out=out/android_arm',
           '-Ptarget-platform=android-arm',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_arm/flutter_embedding_release.pom')
@@ -842,12 +849,12 @@ void main() {
           '-Plocal-engine-out=out/android_arm64',
           '-Ptarget-platform=android-arm64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_arm64/flutter_embedding_release.pom')
@@ -916,12 +923,12 @@ void main() {
           '-Plocal-engine-out=out/android_x86',
           '-Ptarget-platform=android-x86',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_x86/flutter_embedding_release.pom')
@@ -990,6 +997,7 @@ void main() {
           '-Plocal-engine-out=out/android_x64',
           '-Ptarget-platform=android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -1062,6 +1070,7 @@ void main() {
           '--no-daemon',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=io.flutter.app.FlutterApplication',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -1128,7 +1137,6 @@ void main() {
           '-Ptarget-platform=android-arm',
           'assembleAarRelease'
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_arm/flutter_embedding_release.pom')
@@ -1213,7 +1221,6 @@ void main() {
           '-Ptarget-platform=android-arm64',
           'assembleAarRelease'
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_arm64/flutter_embedding_release.pom')
@@ -1298,7 +1305,6 @@ void main() {
           '-Ptarget-platform=android-x86',
           'assembleAarRelease'
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_x86/flutter_embedding_release.pom')
@@ -1383,7 +1389,6 @@ void main() {
           '-Ptarget-platform=android-x64',
           'assembleAarRelease'
         ],
-        exitCode: 0,
       ));
 
       fileSystem.file('out/android_x64/flutter_embedding_release.pom')

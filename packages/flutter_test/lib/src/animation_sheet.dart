@@ -322,8 +322,8 @@ class _AnimationSheetRecorder extends StatefulWidget {
     required this.child,
     required this.size,
     required this.allLayers,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final _RecordedHandler? handleRecorded;
   final Widget child;
@@ -375,10 +375,9 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
 // If `callback` is null, `_PostFrameCallbacker` is equivalent to a proxy box.
 class _PostFrameCallbacker extends SingleChildRenderObjectWidget {
   const _PostFrameCallbacker({
-    Key? key,
-    Widget? child,
+    super.child,
     this.callback,
-  }) : super(key: key, child: child);
+  });
 
   final FrameCallback? callback;
 
@@ -410,7 +409,7 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (callback != null) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         callback!(duration);
         markNeedsPaint();
       });
@@ -452,18 +451,17 @@ Future<ui.Image> _collateFrames(List<ui.Image> frames, Size frameSize, int cells
 // positioned from top left to bottom right in a row-major order.
 class _CellSheet extends StatelessWidget {
   _CellSheet({
-    Key? key,
+    super.key,
     required this.cellSize,
     required this.children,
   }) : assert(cellSize != null),
-       assert(children != null && children.isNotEmpty),
-       super(key: key);
+       assert(children != null && children.isNotEmpty);
 
   final Size cellSize;
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext _context) {
+  Widget build(BuildContext context) {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       final double rowWidth = constraints.biggest.width;
       final int cellsPerRow = (rowWidth / cellSize.width).floor();
@@ -511,7 +509,7 @@ class _RenderRootableRepaintBoundary extends RenderRepaintBoundary {
 // A [RepaintBoundary], except that its render object has a `fullscreenToImage` method.
 class _RootableRepaintBoundary extends SingleChildRenderObjectWidget {
   /// Creates a widget that isolates repaints.
-  const _RootableRepaintBoundary({ Key? key, Widget? child }) : super(key: key, child: child);
+  const _RootableRepaintBoundary({ super.key, super.child });
 
   @override
   _RenderRootableRepaintBoundary createRenderObject(BuildContext context) => _RenderRootableRepaintBoundary();

@@ -238,9 +238,9 @@ class SystemChannels {
   /// See also:
   ///
   ///  * [RawKeyboard], which uses this channel to expose key data.
-  ///  * [new RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
+  ///  * [RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
   ///    subclasses mentioned above.
-  static const BasicMessageChannel<dynamic> keyEvent = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> keyEvent = BasicMessageChannel<Object?>(
       'flutter/keyevent',
       JSONMessageCodec(),
   );
@@ -271,7 +271,7 @@ class SystemChannels {
   ///    applications to release caches to free up more memory. See
   ///    [WidgetsBindingObserver.didHaveMemoryPressure], which triggers whenever
   ///    a message is received on this channel.
-  static const BasicMessageChannel<dynamic> system = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> system = BasicMessageChannel<Object?>(
       'flutter/system',
       JSONMessageCodec(),
   );
@@ -283,7 +283,7 @@ class SystemChannels {
   ///  * [SemanticsEvent] and its subclasses for a list of valid accessibility
   ///    events that can be sent over this channel.
   ///  * [SemanticsNode.sendEvent], which uses this channel to dispatch events.
-  static const BasicMessageChannel<dynamic> accessibility = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> accessibility = BasicMessageChannel<Object?>(
     'flutter/accessibility',
     StandardMessageCodec(),
   );
@@ -295,7 +295,6 @@ class SystemChannels {
   ///  * [PlatformViewsService] for the available operations on this channel.
   static const MethodChannel platform_views = MethodChannel(
     'flutter/platform_views',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for configuring the Skia graphics library.
@@ -312,7 +311,7 @@ class SystemChannels {
 
   /// A [MethodChannel] for configuring mouse cursors.
   ///
-  /// All outgoing methods defined for this channel uses a `Map<String, dynamic>`
+  /// All outgoing methods defined for this channel uses a `Map<String, Object?>`
   /// to contain multiple parameters, including the following methods (invoked
   /// using [OptionalMethodChannel.invokeMethod]):
   ///
@@ -321,7 +320,6 @@ class SystemChannels {
   ///    integer `device`, and string `kind`.
   static const MethodChannel mouseCursor = OptionalMethodChannel(
     'flutter/mousecursor',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for synchronizing restoration data with the engine.
@@ -352,7 +350,6 @@ class SystemChannels {
   ///    restoration data is used in Flutter.
   static const MethodChannel restoration = OptionalMethodChannel(
     'flutter/restoration',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for installing and managing deferred components.
@@ -378,7 +375,6 @@ class SystemChannels {
   ///    `installDeferredComponent` or `loadLibrary` is called again.
   static const MethodChannel deferredComponent = OptionalMethodChannel(
     'flutter/deferredcomponent',
-    StandardMethodCodec(),
   );
 
   /// A JSON [MethodChannel] for localization.
@@ -396,4 +392,53 @@ class SystemChannels {
     'flutter/localization',
     JSONMethodCodec(),
   );
+
+  /// A [MethodChannel] for platform menu specification and control.
+  ///
+  /// The following outgoing method is defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `Menu.setMenu`: sends the configuration of the platform menu, including
+  ///    labels, enable/disable information, and unique integer identifiers for
+  ///    each menu item. The configuration is sent as a `Map<String, Object?>`
+  ///    encoding the list of top level menu items in window "0", which each
+  ///    have a hierarchy of `Map<String, Object?>` containing the required
+  ///    data, sent via a [StandardMessageCodec]. It is typically generated from
+  ///    a list of [MenuItem]s, and ends up looking like this example:
+  ///
+  /// ```dart
+  /// List<Map<String, Object?>> menu = <String, Object?>{
+  ///   '0': <Map<String, Object?>>[
+  ///     <String, Object?>{
+  ///       'id': 1,
+  ///       'label': 'First Menu Label',
+  ///       'enabled': true,
+  ///       'children': <Map<String, Object?>>[
+  ///         <String, Object?>{
+  ///           'id': 2,
+  ///           'label': 'Sub Menu Label',
+  ///           'enabled': true,
+  ///         },
+  ///       ],
+  ///     },
+  ///   ],
+  /// };
+  /// ```
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]).
+  ///
+  ///  * `Menu.selectedCallback`: Called when a menu item is selected, along
+  ///    with the unique ID of the menu item selected.
+  ///
+  ///  * `Menu.opened`: Called when a submenu is opened, along with the unique
+  ///    ID of the submenu.
+  ///
+  ///  * `Menu.closed`: Called when a submenu is closed, along with the unique
+  ///    ID of the submenu.
+  ///
+  /// See also:
+  ///
+  ///  * [DefaultPlatformMenuDelegate], which uses this channel.
+  static const MethodChannel menu = OptionalMethodChannel('flutter/menu');
 }

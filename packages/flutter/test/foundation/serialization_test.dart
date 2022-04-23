@@ -9,6 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Write and read buffer round-trip', () {
+    test('of empty buffer', () {
+      final WriteBuffer write = WriteBuffer();
+      final ByteData written = write.done();
+
+      expect(written.lengthInBytes, 0);
+    });
     test('of single byte', () {
       final WriteBuffer write = WriteBuffer();
       write.putUint8(201);

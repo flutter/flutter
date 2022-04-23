@@ -9,9 +9,11 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 
 import 'common.dart';
+import 'gc_summarizer.dart';
 import 'percentile_utils.dart';
 import 'profiling_summarizer.dart';
 import 'raster_cache_summarizer.dart';
+import 'refresh_rate_summarizer.dart';
 import 'scene_display_lag_summarizer.dart';
 import 'timeline.dart';
 import 'vsync_frame_lag_summarizer.dart';
@@ -218,6 +220,8 @@ class TimelineSummary {
     final VsyncFrameLagSummarizer vsyncFrameLagSummarizer = _vsyncFrameLagSummarizer();
     final Map<String, dynamic> profilingSummary = _profilingSummarizer().summarize();
     final RasterCacheSummarizer rasterCacheSummarizer = _rasterCacheSummarizer();
+    final GCSummarizer gcSummarizer = _gcSummarizer();
+    final RefreshRateSummary refreshRateSummary = RefreshRateSummary(vsyncEvents: _extractNamedEvents(kUIThreadVsyncProcessEvent));
 
     final Map<String, dynamic> timelineSummary = <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
@@ -268,6 +272,13 @@ class TimelineSummary {
       '90th_percentile_picture_cache_memory': rasterCacheSummarizer.computePercentilePictureMemory(90.0),
       '99th_percentile_picture_cache_memory': rasterCacheSummarizer.computePercentilePictureMemory(99.0),
       'worst_picture_cache_memory': rasterCacheSummarizer.computeWorstPictureMemory(),
+      'total_ui_gc_time': gcSummarizer.totalGCTimeMillis,
+      '30hz_frame_percentage': refreshRateSummary.percentageOf30HzFrames,
+      '60hz_frame_percentage': refreshRateSummary.percentageOf60HzFrames,
+      '80hz_frame_percentage': refreshRateSummary.percentageOf80HzFrames,
+      '90hz_frame_percentage': refreshRateSummary.percentageOf90HzFrames,
+      '120hz_frame_percentage': refreshRateSummary.percentageOf120HzFrames,
+      'illegal_refresh_rate_frame_count': refreshRateSummary.framesWithIllegalRefreshRate.length,
     };
 
     timelineSummary.addAll(profilingSummary);
@@ -432,4 +443,6 @@ class TimelineSummary {
   VsyncFrameLagSummarizer _vsyncFrameLagSummarizer() => VsyncFrameLagSummarizer(_extractEventsWithNames(kVsyncTimelineEventNames));
 
   RasterCacheSummarizer _rasterCacheSummarizer() => RasterCacheSummarizer(_extractNamedEvents(kRasterCacheEvent));
+
+  GCSummarizer _gcSummarizer() => GCSummarizer.fromEvents(_extractEventsWithNames(kGCRootEvents));
 }

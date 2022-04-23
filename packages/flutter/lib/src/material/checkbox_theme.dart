@@ -141,19 +141,17 @@ class CheckboxThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      mouseCursor,
-      fillColor,
-      checkColor,
-      overlayColor,
-      splashRadius,
-      materialTapTargetSize,
-      visualDensity,
-      shape,
-      side,
-    );
-  }
+  int get hashCode => Object.hash(
+    mouseCursor,
+    fillColor,
+    checkColor,
+    overlayColor,
+    splashRadius,
+    materialTapTargetSize,
+    visualDensity,
+    shape,
+    side,
+  );
 
   @override
   bool operator ==(Object other) {

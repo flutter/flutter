@@ -13,10 +13,10 @@ enum FilterType {
 
 class FilteredChildAnimationPage extends StatefulWidget {
   const FilteredChildAnimationPage(this.initialFilterType, {
-    Key? key,
+    super.key,
     this.initialComplexChild = true,
     this.initialUseRepaintBoundary = true,
-  }) : super(key: key);
+  });
 
   final FilterType initialFilterType;
   final bool initialComplexChild;
@@ -41,7 +41,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     _filterType = widget.initialFilterType;
     _complexChild = widget.initialComplexChild;
     _useRepaintBoundary = widget.initialUseRepaintBoundary;
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final RenderBox childBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
       _childCenter = childBox.paintBounds.center;
     });
@@ -64,7 +64,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
       case FilterType.opacity: return 'Fading Child Animation';
       case FilterType.rotateTransform: return 'Transformed Child Animation';
       case FilterType.rotateFilter: return 'Matrix Filtered Child Animation';
-      default: return 'Static Child';
+      case null: return 'Static Child';
     }
   }
 
@@ -73,7 +73,6 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
       color: Colors.green,
       boxShadow: complex ? <BoxShadow>[
         const BoxShadow(
-          color: Colors.black,
           blurRadius: 10.0,
         ),
       ] : null,

@@ -13,15 +13,15 @@ import 'theme.dart';
 /// Defines default property values for descendant [Scrollbar] widgets.
 ///
 /// Descendant widgets obtain the current [ScrollbarThemeData] object with
-/// `ScrollbarTheme.of(context)`. Instances of [ScrollbarThemeData] can be customized
-/// with [ScrollbarThemeData.copyWith].
+/// `ScrollbarTheme.of(context)`. Instances of [ScrollbarThemeData] can be
+/// customized with [ScrollbarThemeData.copyWith].
 ///
-/// Typically the [ScrollbarThemeData] of a [ScrollbarTheme] is specified as part of the overall
-/// [Theme] with [ThemeData.scrollbarTheme].
+/// Typically the [ScrollbarThemeData] of a [ScrollbarTheme] is specified as
+/// part of the overall [Theme] with [ThemeData.scrollbarTheme].
 ///
-/// All [ScrollbarThemeData] properties are `null` by default. When null, the [Scrollbar]
-/// computes its own default values, typically based on the overall theme's
-/// [ThemeData.colorScheme].
+/// All [ScrollbarThemeData] properties are `null` by default. When null, the
+/// [Scrollbar] computes its own default values, typically based on the overall
+/// theme's [ThemeData.colorScheme].
 ///
 /// See also:
 ///
@@ -31,9 +31,9 @@ import 'theme.dart';
 class ScrollbarThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.scrollbarTheme].
   const ScrollbarThemeData({
+    this.thumbVisibility,
     this.thickness,
-    this.showTrackOnHover,
-    this.isAlwaysShown,
+    this.trackVisibility,
     this.radius,
     this.thumbColor,
     this.trackColor,
@@ -42,7 +42,27 @@ class ScrollbarThemeData with Diagnosticable {
     this.mainAxisMargin,
     this.minThumbLength,
     this.interactive,
-  });
+    @Deprecated(
+      'Use thumbVisibility instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    this.isAlwaysShown,
+    @Deprecated(
+      'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    this.showTrackOnHover,
+  }) : assert(
+         isAlwaysShown == null || thumbVisibility == null,
+         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
+         'isAlwaysShown is deprecated.'
+       );
+
+  /// Overrides the default value of [Scrollbar.thumbVisibility] in all
+  /// descendant [Scrollbar] widgets.
+  ///
+  /// Replaces deprecated [isAlwaysShown].
+  final MaterialStateProperty<bool?>? thumbVisibility;
 
   /// Overrides the default value of [Scrollbar.thickness] in all
   /// descendant [Scrollbar] widgets.
@@ -51,12 +71,26 @@ class ScrollbarThemeData with Diagnosticable {
   ///  * [MaterialState.hovered] on web and desktop platforms.
   final MaterialStateProperty<double?>? thickness;
 
+  /// Overrides the default value of [Scrollbar.trackVisibility] in all
+  /// descendant [Scrollbar] widgets.
+  final MaterialStateProperty<bool?>? trackVisibility;
+
   /// Overrides the default value of [Scrollbar.showTrackOnHover] in all
   /// descendant [Scrollbar] widgets.
+  @Deprecated(
+    'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
+    'This feature was deprecated after v2.9.0-1.0.pre.',
+  )
   final bool? showTrackOnHover;
 
   /// Overrides the default value of [Scrollbar.isAlwaysShown] in all
   /// descendant [Scrollbar] widgets.
+  ///
+  /// Deprecated in favor of [thumbVisibility].
+  @Deprecated(
+    'Use thumbVisibility instead. '
+    'This feature was deprecated after v2.9.0-1.0.pre.',
+  )
   final bool? isAlwaysShown;
 
   /// Overrides the default value of [Scrollbar.interactive] in all
@@ -121,9 +155,10 @@ class ScrollbarThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ScrollbarThemeData copyWith({
+    MaterialStateProperty<bool?>? thumbVisibility,
     MaterialStateProperty<double?>? thickness,
+    MaterialStateProperty<bool?>? trackVisibility,
     bool? showTrackOnHover,
-    bool? isAlwaysShown,
     bool? interactive,
     Radius? radius,
     MaterialStateProperty<Color?>? thumbColor,
@@ -132,9 +167,16 @@ class ScrollbarThemeData with Diagnosticable {
     double? crossAxisMargin,
     double? mainAxisMargin,
     double? minThumbLength,
+    @Deprecated(
+      'Use thumbVisibility instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    bool? isAlwaysShown,
   }) {
     return ScrollbarThemeData(
+      thumbVisibility: thumbVisibility ?? this.thumbVisibility,
       thickness: thickness ?? this.thickness,
+      trackVisibility: trackVisibility ?? this.trackVisibility,
       showTrackOnHover: showTrackOnHover ?? this.showTrackOnHover,
       isAlwaysShown: isAlwaysShown ?? this.isAlwaysShown,
       interactive: interactive ?? this.interactive,
@@ -156,10 +198,12 @@ class ScrollbarThemeData with Diagnosticable {
   static ScrollbarThemeData lerp(ScrollbarThemeData? a, ScrollbarThemeData? b, double t) {
     assert(t != null);
     return ScrollbarThemeData(
+      thumbVisibility: _lerpProperties<bool?>(a?.thumbVisibility, b?.thumbVisibility, t, _lerpBool),
       thickness: _lerpProperties<double?>(a?.thickness, b?.thickness, t, lerpDouble),
-      showTrackOnHover: t < 0.5 ? a?.showTrackOnHover : b?.showTrackOnHover,
-      isAlwaysShown: t < 0.5 ? a?.isAlwaysShown : b?.isAlwaysShown,
-      interactive: t < 0.5 ? a?.interactive : b?.interactive,
+      trackVisibility: _lerpProperties<bool?>(a?.trackVisibility, b?.trackVisibility, t, _lerpBool),
+      showTrackOnHover: _lerpBool(a?.showTrackOnHover, b?.showTrackOnHover, t),
+      isAlwaysShown: _lerpBool(a?.isAlwaysShown, b?.isAlwaysShown, t),
+      interactive: _lerpBool(a?.interactive, b?.interactive, t),
       radius: Radius.lerp(a?.radius, b?.radius, t),
       thumbColor: _lerpProperties<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
       trackColor: _lerpProperties<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
@@ -171,21 +215,21 @@ class ScrollbarThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      thickness,
-      showTrackOnHover,
-      isAlwaysShown,
-      interactive,
-      radius,
-      thumbColor,
-      trackColor,
-      trackBorderColor,
-      crossAxisMargin,
-      mainAxisMargin,
-      minThumbLength,
-    );
-  }
+  int get hashCode => Object.hash(
+    thumbVisibility,
+    thickness,
+    trackVisibility,
+    showTrackOnHover,
+    isAlwaysShown,
+    interactive,
+    radius,
+    thumbColor,
+    trackColor,
+    trackBorderColor,
+    crossAxisMargin,
+    mainAxisMargin,
+    minThumbLength,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -194,7 +238,9 @@ class ScrollbarThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     return other is ScrollbarThemeData
+      && other.thumbVisibility == thumbVisibility
       && other.thickness == thickness
+      && other.trackVisibility == trackVisibility
       && other.showTrackOnHover == showTrackOnHover
       && other.isAlwaysShown == isAlwaysShown
       && other.interactive == interactive
@@ -210,7 +256,9 @@ class ScrollbarThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('thumbVisibility', thumbVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('thickness', thickness, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('trackVisibility', trackVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showTrackOnHover', showTrackOnHover, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isAlwaysShown', isAlwaysShown, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('interactive', interactive, defaultValue: null));
@@ -251,6 +299,8 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
     return lerpFunction(resolvedA, resolvedB, t);
   }
 }
+
+bool? _lerpBool(bool? a, bool? b, double t) => t < 0.5 ? a : b;
 
 /// Applies a scrollbar theme to descendant [Scrollbar] widgets.
 ///

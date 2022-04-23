@@ -151,6 +151,17 @@ void main() {
     expect(SemanticsUpdateBuilderSpy.observations[1]!.hintAttributes![0] is SpellOutStringAttribute, isTrue);
     expect(SemanticsUpdateBuilderSpy.observations[1]!.hintAttributes![0].range, const TextRange(start: 1, end: 2));
 
+    expect(
+      tester.widget(find.byType(Semantics)).toString(),
+      'Semantics('
+        'container: false, '
+        'properties: SemanticsProperties, '
+        'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
+        'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
+        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))]' // ignore: missing_whitespace_between_adjacent_strings
+      ')',
+    );
+
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   });

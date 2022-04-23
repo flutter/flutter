@@ -11,7 +11,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../vmservice.dart';
 
 import 'test_device.dart';
@@ -23,7 +23,7 @@ class CoverageCollector extends TestWatcher {
 
   final bool verbose;
   final String packagesPath;
-  Map<String, Map<int, int>> _globalHitmap;
+  Map<String, coverage.HitMap> _globalHitmap;
   bool Function(String) libraryPredicate;
 
   @override
@@ -43,11 +43,11 @@ class CoverageCollector extends TestWatcher {
     }
   }
 
-  void _addHitmap(Map<String, Map<int, int>> hitmap) {
+  void _addHitmap(Map<String, coverage.HitMap> hitmap) {
     if (_globalHitmap == null) {
       _globalHitmap = hitmap;
     } else {
-      coverage.mergeHitmaps(hitmap, _globalHitmap);
+      _globalHitmap.merge(hitmap);
     }
   }
 
@@ -67,7 +67,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     _logMessage('($observatoryUri): collected coverage data; merging...');
-    _addHitmap(await coverage.createHitmap(
+    _addHitmap(await coverage.HitMap.parseJson(
       data['coverage'] as List<Map<String, dynamic>>,
       packagesPath: packagesPath,
       checkIgnoredLines: true,
@@ -110,7 +110,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     _logMessage('Merging coverage data...');
-    _addHitmap(await coverage.createHitmap(
+    _addHitmap(await coverage.HitMap.parseJson(
       data['coverage'] as List<Map<String, dynamic>>,
       packagesPath: packagesPath,
       checkIgnoredLines: true,
@@ -118,33 +118,34 @@ class CoverageCollector extends TestWatcher {
     _logMessage('Done merging coverage data into global coverage map.');
   }
 
-  /// Returns a future that will complete with the formatted coverage data
-  /// (using [formatter]) once all coverage data has been collected.
+  /// Returns formatted coverage data once all coverage data has been collected.
   ///
   /// This will not start any collection tasks. It us up to the caller of to
   /// call [collectCoverage] for each process first.
-  Future<String> finalizeCoverage({
-    coverage.Formatter formatter,
+  String finalizeCoverage({
+    String Function(Map<String, coverage.HitMap> hitmap) formatter,
+    coverage.Resolver resolver,
     Directory coverageDirectory,
-  }) async {
+  }) {
     if (_globalHitmap == null) {
       return null;
     }
     if (formatter == null) {
-      final coverage.Resolver resolver = coverage.Resolver(packagesPath: packagesPath);
+      resolver ??= coverage.Resolver(packagesPath: packagesPath);
       final String packagePath = globals.fs.currentDirectory.path;
       final List<String> reportOn = coverageDirectory == null
-        ? <String>[globals.fs.path.join(packagePath, 'lib')]
-        : <String>[coverageDirectory.path];
-      formatter = coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
+          ? <String>[globals.fs.path.join(packagePath, 'lib')]
+          : <String>[coverageDirectory.path];
+      formatter = (Map<String, coverage.HitMap> hitmap) => hitmap
+          .formatLcov(resolver, reportOn: reportOn, basePath: packagePath);
     }
-    final String result = await formatter.format(_globalHitmap);
+    final String result = formatter(_globalHitmap);
     _globalHitmap = null;
     return result;
   }
 
-  Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) async {
-    final String coverageData = await finalizeCoverage(
+  bool collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) {
+    final String coverageData = finalizeCoverage(
       coverageDirectory: coverageDirectory,
     );
     _logMessage('coverage information collection complete');

@@ -128,7 +128,6 @@ void main() {
     crit = SpringSimulation(SpringDescription.withDampingRatio(
       mass: 1.0,
       stiffness: 100.0,
-      ratio: 1.0,
     ), 0.0, 300.0, 0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
@@ -159,7 +158,6 @@ void main() {
     final SpringSimulation crit = SpringSimulation(SpringDescription.withDampingRatio(
       mass: 1.0,
       stiffness: 100.0,
-      ratio: 1.0,
     ), 0.0, 500.0, 0.0);
 
     crit.tolerance = const Tolerance(distance: 0.01, velocity: 0.01);

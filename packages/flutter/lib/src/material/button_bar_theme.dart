@@ -160,19 +160,17 @@ class ButtonBarThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      alignment,
-      mainAxisSize,
-      buttonTextTheme,
-      buttonMinWidth,
-      buttonHeight,
-      buttonPadding,
-      buttonAlignedDropdown,
-      layoutBehavior,
-      overflowDirection,
-    );
-  }
+  int get hashCode => Object.hash(
+    alignment,
+    mainAxisSize,
+    buttonTextTheme,
+    buttonMinWidth,
+    buttonHeight,
+    buttonPadding,
+    buttonAlignedDropdown,
+    layoutBehavior,
+    overflowDirection,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -205,7 +203,6 @@ class ButtonBarThemeData with Diagnosticable {
       'buttonAlignedDropdown',
       value: buttonAlignedDropdown,
       ifTrue: 'dropdown width matches button',
-      defaultValue: null,
     ));
     properties.add(DiagnosticsProperty<ButtonBarLayoutBehavior>('layoutBehavior', layoutBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<VerticalDirection>('overflowDirection', overflowDirection, defaultValue: null));

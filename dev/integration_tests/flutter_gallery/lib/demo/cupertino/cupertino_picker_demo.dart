@@ -12,7 +12,7 @@ const double _kPickerSheetHeight = 216.0;
 const double _kPickerItemHeight = 32.0;
 
 class CupertinoPickerDemo extends StatefulWidget {
-  const CupertinoPickerDemo({Key? key}) : super(key: key);
+  const CupertinoPickerDemo({super.key});
 
   static const String routeName = '/cupertino/picker';
 
@@ -22,9 +22,8 @@ class CupertinoPickerDemo extends StatefulWidget {
 
 class _BottomPicker extends StatelessWidget {
   const _BottomPicker({
-    Key? key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -54,9 +53,8 @@ class _BottomPicker extends StatelessWidget {
 
 class _Menu extends StatelessWidget {
   const _Menu({
-    Key? key,
     required this.children,
-  }) : super(key: key);
+  });
 
   final List<Widget> children;
 
@@ -247,7 +245,6 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             return _BottomPicker(
               child: CupertinoDatePicker(
                 backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
-                mode: CupertinoDatePickerMode.dateAndTime,
                 initialDateTime: dateTime,
                 onDateTimeChanged: (DateTime newDateTime) {
                   setState(() => dateTime = newDateTime);

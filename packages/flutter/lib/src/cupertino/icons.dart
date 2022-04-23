@@ -21,11 +21,40 @@ import 'package:flutter/widgets.dart';
 ///   cupertino_icons: ^1.0.0
 /// ```
 ///
-/// [![icon gallery preview](https://raw.githubusercontent.com/flutter/cupertino_icons/master/gallery_preview_1.0.0.png)](https://flutter.github.io/cupertino_icons)
+/// {@tool snippet}
 ///
-/// For versions 1.0.0 and above (available only on Flutter SDK versions 1.22+), see the [Cupertino Icons Gallery](https://flutter.github.io/cupertino_icons).
+/// This example shows how to create a [Row] of Cupertino [Icon]s in different colors and
+/// sizes. The first [Icon] uses a [Icon.semanticLabel] to announce in accessibility
+/// modes like VoiceOver.
 ///
-/// For versions 0.1.3 and below, see this [glyph map](https://raw.githubusercontent.com/flutter/cupertino_icons/master/map.png).
+/// ![The following code snippet would generate a row of icons consisting of a pink heart, a green bell, and a blue umbrella, each progressively bigger than the last.](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_icon.png)
+///
+/// ```dart
+/// Row(
+///   mainAxisAlignment: MainAxisAlignment.spaceAround,
+///   children: const <Widget>[
+///     Icon(
+///       CupertinoIcons.heart_fill,
+///       color: Colors.pink,
+///       size: 24.0,
+///       semanticLabel: 'Text to announce in accessibility modes',
+///     ),
+///     Icon(
+///       CupertinoIcons.bell_fill,
+///       color: Colors.green,
+///       size: 30.0,
+///     ),
+///     Icon(
+///       CupertinoIcons.umbrella_fill,
+///       color: Colors.blue,
+///       size: 36.0,
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
+/// For versions 0.1.3 and below, see this [glyph map](https://raw.githubusercontent.com/flutter/packages/master/third_party/packages/cupertino_icons/map.png).
 ///
 /// See also:
 ///

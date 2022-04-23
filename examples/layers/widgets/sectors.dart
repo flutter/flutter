@@ -11,12 +11,12 @@ import '../rendering/src/sector_layout.dart';
 RenderBoxToRenderSectorAdapter initCircle() {
   return RenderBoxToRenderSectorAdapter(
     innerRadius: 25.0,
-    child: RenderSectorRing(padding: 0.0),
+    child: RenderSectorRing(),
   );
 }
 
 class SectorApp extends StatefulWidget {
-  const SectorApp({Key? key}) : super(key: key);
+  const SectorApp({super.key});
 
   @override
   SectorAppState createState() => SectorAppState();

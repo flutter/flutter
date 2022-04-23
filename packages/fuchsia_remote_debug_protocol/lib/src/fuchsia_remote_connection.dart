@@ -260,8 +260,7 @@ class FuchsiaRemoteConnection {
         if (event.eventType == DartVmEventType.started) {
           _log.fine('New VM found on port: ${event.servicePort}. Searching '
               'for Isolate: $pattern');
-          final DartVm? vmService = await _getDartVm(event.uri,
-            timeout: _kDartVmConnectionTimeout);
+          final DartVm? vmService = await _getDartVm(event.uri);
           // If the VM service is null, set the result to the empty list.
           final List<IsolateRef> result = await vmService?.getMainIsolatesByPattern(pattern!) ?? <IsolateRef>[];
           if (result.isNotEmpty) {
@@ -680,14 +679,13 @@ class _SshPortForwarder implements PortForwarder {
   /// If successful returns a valid [ServerSocket] (which must be disconnected
   /// later).
   static Future<ServerSocket?> _createLocalSocket() async {
-    ServerSocket s;
     try {
-      s = await ServerSocket.bind(_ipv4Loopback, 0);
+      return await ServerSocket.bind(_ipv4Loopback, 0);
     } catch (e) {
-      // Failures are signaled by a return value of 0 from this function.
+      // We should not be catching all errors arbitrarily here, this might hide real errors.
+      // TODO(ianh): Determine which exceptions to catch here.
       _log.warning('_createLocalSocket failed: $e');
       return null;
     }
-    return s;
   }
 }

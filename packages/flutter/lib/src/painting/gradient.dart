@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -117,6 +116,24 @@ class GradientRotation extends GradientTransform {
     return Matrix4.identity()
       ..translate(originX, originY)
       ..rotateZ(radians);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is GradientRotation
+        && other.radians == radians;
+  }
+
+  @override
+  int get hashCode => radians.hashCode;
+
+  @override
+  String toString() {
+    return '${objectRuntimeType(this, 'GradientRotation')}(radians: ${debugFormatDouble(radians)})';
   }
 }
 
@@ -310,13 +327,13 @@ abstract class Gradient {
 /// A 2D linear gradient.
 ///
 /// This class is used by [BoxDecoration] to represent linear gradients. This
-/// abstracts out the arguments to the [new ui.Gradient.linear] constructor from
+/// abstracts out the arguments to the [ui.Gradient.linear] constructor from
 /// the `dart:ui` library.
 ///
 /// A gradient has two anchor points, [begin] and [end]. The [begin] point
 /// corresponds to 0.0, and the [end] point corresponds to 1.0. These points are
 /// expressed in fractions, so that the same gradient can be reused with varying
-/// sized boxes without changing the parameters. (This contrasts with [new
+/// sized boxes without changing the parameters. (This contrasts with [
 /// ui.Gradient.linear], whose arguments are expressed in logical pixels.)
 ///
 /// The [colors] are described by a list of [Color] objects. There must be at
@@ -331,9 +348,10 @@ abstract class Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [LinearGradient] to paint on a canvas directly, see [createShader].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
-/// This sample draws a picture that looks like vertical window shades by having
-/// a [Container] display a [BoxDecoration] with a [LinearGradient].
+/// {@tool dartpad}
+/// This sample draws a picture with a gradient sweeping through different
+/// colors, by having a [Container] display a [BoxDecoration] with a
+/// [LinearGradient].
 ///
 /// ** See code in examples/api/lib/painting/gradient/linear_gradient.0.dart **
 /// {@end-tool}
@@ -495,30 +513,47 @@ class LinearGradient extends Gradient {
         && other.begin == begin
         && other.end == end
         && other.tileMode == tileMode
+        && other.transform == transform
         && listEquals<Color>(other.colors, colors)
         && listEquals<double>(other.stops, stops);
   }
 
   @override
-  int get hashCode => hashValues(begin, end, tileMode, hashList(colors), hashList(stops));
+  int get hashCode => Object.hash(
+    begin,
+    end,
+    tileMode,
+    transform,
+    Object.hashAll(colors),
+    stops == null ? null : Object.hashAll(stops!),
+  );
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'LinearGradient')}($begin, $end, $colors, $stops, $tileMode)';
+    final List<String> description = <String>[
+      'begin: $begin',
+      'end: $end',
+      'colors: $colors',
+      if (stops != null) 'stops: $stops',
+      'tileMode: $tileMode',
+      if (transform != null) 'transform: $transform',
+    ];
+
+    return '${objectRuntimeType(this, 'LinearGradient')}(${description.join(', ')})';
   }
 }
 
 /// A 2D radial gradient.
 ///
 /// This class is used by [BoxDecoration] to represent radial gradients. This
-/// abstracts out the arguments to the [new ui.Gradient.radial] constructor from
+/// abstracts out the arguments to the [ui.Gradient.radial] constructor from
 /// the `dart:ui` library.
 ///
 /// A normal radial gradient has a [center] and a [radius]. The [center] point
 /// corresponds to 0.0, and the ring at [radius] from the center corresponds
 /// to 1.0. These lengths are expressed in fractions, so that the same gradient
 /// can be reused with varying sized boxes without changing the parameters.
-/// (This contrasts with [new ui.Gradient.radial], whose arguments are expressed
+/// (This contrasts with [ui.Gradient.radial], whose arguments are expressed
 /// in logical pixels.)
 ///
 /// It is also possible to create a two-point (or focal pointed) radial gradient
@@ -757,6 +792,7 @@ class RadialGradient extends Gradient {
         && other.center == center
         && other.radius == radius
         && other.tileMode == tileMode
+        && other.transform == transform
         && listEquals<Color>(other.colors, colors)
         && listEquals<double>(other.stops, stops)
         && other.focal == focal
@@ -764,18 +800,38 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  int get hashCode => hashValues(center, radius, tileMode, hashList(colors), hashList(stops), focal, focalRadius);
+  int get hashCode => Object.hash(
+    center,
+    radius,
+    tileMode,
+    transform,
+    Object.hashAll(colors),
+    stops == null ? null : Object.hashAll(stops!),
+    focal,
+    focalRadius,
+  );
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'RadialGradient')}($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
+    final List<String> description = <String>[
+      'center: $center',
+      'radius: ${debugFormatDouble(radius)}',
+      'colors: $colors',
+      if (stops != null) 'stops: $stops',
+      'tileMode: $tileMode',
+      if (focal != null) 'focal: $focal',
+      'focalRadius: ${debugFormatDouble(focalRadius)}',
+      if (transform != null) 'transform: $transform',
+    ];
+
+    return '${objectRuntimeType(this, 'RadialGradient')}(${description.join(', ')})';
   }
 }
 
 /// A 2D sweep gradient.
 ///
 /// This class is used by [BoxDecoration] to represent sweep gradients. This
-/// abstracts out the arguments to the [new ui.Gradient.sweep] constructor from
+/// abstracts out the arguments to the [ui.Gradient.sweep] constructor from
 /// the `dart:ui` library.
 ///
 /// A gradient has a [center], a [startAngle], and an [endAngle]. The [startAngle]
@@ -1005,15 +1061,34 @@ class SweepGradient extends Gradient {
         && other.startAngle == startAngle
         && other.endAngle == endAngle
         && other.tileMode == tileMode
+        && other.transform == transform
         && listEquals<Color>(other.colors, colors)
         && listEquals<double>(other.stops, stops);
   }
 
   @override
-  int get hashCode => hashValues(center, startAngle, endAngle, tileMode, hashList(colors), hashList(stops));
+  int get hashCode => Object.hash(
+    center,
+    startAngle,
+    endAngle,
+    tileMode,
+    transform,
+    Object.hashAll(colors),
+    stops == null ? null : Object.hashAll(stops!),
+  );
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'SweepGradient')}($center, $startAngle, $endAngle, $colors, $stops, $tileMode)';
+    final List<String> description = <String>[
+      'center: $center',
+      'startAngle: ${debugFormatDouble(startAngle)}',
+      'endAngle: ${debugFormatDouble(endAngle)}',
+      'colors: $colors',
+      if (stops != null) 'stops: $stops',
+      'tileMode: $tileMode',
+      if (transform != null) 'transform: $transform',
+    ];
+
+    return '${objectRuntimeType(this, 'SweepGradient')}(${description.join(', ')})';
   }
 }

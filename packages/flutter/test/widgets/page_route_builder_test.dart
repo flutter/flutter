@@ -34,7 +34,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   void _presentModalPage() {
     Navigator.of(context).push(PageRouteBuilder<void>(
-      transitionDuration: const Duration(milliseconds: 300),
       barrierColor: Colors.black54,
       opaque: false,
       pageBuilder: (BuildContext context, _, __) {

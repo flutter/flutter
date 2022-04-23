@@ -705,11 +705,9 @@ abstract class WidgetController {
     final List<PointerEventRecord> records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
           PointerAddedEvent(
-            timeStamp: Duration.zero,
             position: startLocation,
           ),
           PointerDownEvent(
-            timeStamp: Duration.zero,
             position: startLocation,
             pointer: pointer,
             buttons: buttons,
@@ -1248,7 +1246,7 @@ abstract class WidgetController {
 /// This is used, for instance, by [FlutterDriver].
 class LiveWidgetController extends WidgetController {
   /// Creates a widget controller that uses the given binding.
-  LiveWidgetController(WidgetsBinding binding) : super(binding);
+  LiveWidgetController(super.binding);
 
   @override
   Future<void> pump([Duration? duration]) async {

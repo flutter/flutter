@@ -98,6 +98,9 @@ abstract class AssetBundle {
   /// loaded, the cache will be reread from the asset bundle.
   void evict(String key) { }
 
+  /// If this is a caching asset bundle, clear all cached data.
+  void clear() { }
+
   @override
   String toString() => '${describeIdentity(this)}()';
 }
@@ -215,6 +218,12 @@ abstract class CachingAssetBundle extends AssetBundle {
     _stringCache.remove(key);
     _structuredDataCache.remove(key);
   }
+
+  @override
+  void clear() {
+    _stringCache.clear();
+    _structuredDataCache.clear();
+  }
 }
 
 /// An [AssetBundle] that loads resources using platform messages.
@@ -223,7 +232,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData? asset =
-        await ServicesBinding.instance!.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
+        await ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null)
       throw FlutterError('Unable to load asset: $key');
     return asset;

@@ -215,14 +215,22 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    assert(widget.enableDrag);
+    assert(
+      widget.enableDrag && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
+    );
     if (_dismissUnderway)
       return;
     widget.animationController!.value -= details.primaryDelta! / _childHeight;
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    assert(widget.enableDrag);
+    assert(
+      widget.enableDrag && widget.animationController != null,
+      "'BottomSheet.animationController' can not be null when 'BottomSheet.enableDrag' is true. "
+      "Use 'BottomSheet.createAnimationController' to create one, or provide another AnimationController.",
+    );
     if (_dismissUnderway)
       return;
     bool isClosing = false;
@@ -318,7 +326,6 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
       maxHeight: isScrollControlled
         ? constraints.maxHeight
         : constraints.maxHeight * 9.0 / 16.0,
@@ -459,6 +466,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     required this.isScrollControlled,
     RouteSettings? settings,
     this.transitionAnimationController,
+    this.anchorPoint,
   }) : assert(isScrollControlled != null),
        assert(isDismissible != null),
        assert(enableDrag != null),
@@ -476,6 +484,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final bool isDismissible;
   final bool enableDrag;
   final AnimationController? transitionAnimationController;
+  final Offset? anchorPoint;
 
   @override
   Duration get transitionDuration => _bottomSheetEnterDuration;
@@ -501,7 +510,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
       _animationController = transitionAnimationController;
       willDisposeAnimationController = false;
     } else {
-      _animationController = BottomSheet.createAnimationController(navigator!.overlay!);
+      _animationController = BottomSheet.createAnimationController(navigator!);
     }
     return _animationController!;
   }
@@ -513,20 +522,23 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     final Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: Builder(
-        builder: (BuildContext context) {
-          final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
-          return _ModalBottomSheet<T>(
-            route: this,
-            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
-            elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
-            shape: shape,
-            clipBehavior: clipBehavior,
-            constraints: constraints,
-            isScrollControlled: isScrollControlled,
-            enableDrag: enableDrag,
-          );
-        },
+      child: DisplayFeatureSubScreen(
+        anchorPoint: anchorPoint,
+        child: Builder(
+          builder: (BuildContext context) {
+            final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
+            return _ModalBottomSheet<T>(
+              route: this,
+              backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
+              elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
+              shape: shape,
+              clipBehavior: clipBehavior,
+              constraints: constraints,
+              isScrollControlled: isScrollControlled,
+              enableDrag: enableDrag,
+            );
+          },
+        ),
       ),
     );
     return capturedThemes.wrap(bottomSheet);
@@ -638,10 +650,12 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// sheet. This is particularly useful in the case that a user wants to observe
 /// [PopupRoute]s within a [NavigatorObserver].
 ///
+/// {@macro flutter.widgets.RawDialogRoute}
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This example demonstrates how to use `showModalBottomSheet` to display a
 /// bottom sheet that obscures the content behind it when a user taps a button.
 /// It also demonstrates how to close the bottom sheet using the [Navigator]
@@ -658,6 +672,8 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///    non-modal bottom sheets.
 ///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
 ///    that grows and then becomes scrollable once it reaches its maximum size.
+///  * [DisplayFeatureSubScreen], which documents the specifics of how
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 Future<T?> showModalBottomSheet<T>({
   required BuildContext context,
@@ -674,6 +690,7 @@ Future<T?> showModalBottomSheet<T>({
   bool enableDrag = true,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
+  Offset? anchorPoint,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -700,6 +717,7 @@ Future<T?> showModalBottomSheet<T>({
     enableDrag: enableDrag,
     settings: routeSettings,
     transitionAnimationController: transitionAnimationController,
+    anchorPoint: anchorPoint,
   ));
 }
 
@@ -714,6 +732,9 @@ Future<T?> showModalBottomSheet<T>({
 /// parameters can be passed in to customize the appearance and behavior of
 /// persistent bottom sheets (see the documentation for these on [BottomSheet]
 /// for more details).
+///
+/// The [enableDrag] parameter specifies whether the bottom sheet can be
+/// dragged up and down and dismissed by swiping downwards.
 ///
 /// To rebuild the bottom sheet (e.g. if it is stateful), call
 /// [PersistentBottomSheetController.setState] on the controller returned by
@@ -752,6 +773,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   ShapeBorder? shape,
   Clip? clipBehavior,
   BoxConstraints? constraints,
+  bool? enableDrag,
   AnimationController? transitionAnimationController,
 }) {
   assert(context != null);
@@ -765,6 +787,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
     shape: shape,
     clipBehavior: clipBehavior,
     constraints: constraints,
+    enableDrag: enableDrag,
     transitionAnimationController: transitionAnimationController,
   );
 }

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class BottomAppBarDemo extends StatefulWidget {
-  const BottomAppBarDemo({Key? key}) : super(key: key);
+  const BottomAppBarDemo({super.key});
 
   static const String routeName = '/material/bottom_app_bar';
 
@@ -27,7 +27,6 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   static const _ChoiceValue<Widget> kNoFab = _ChoiceValue<Widget>(
     title: 'None',
     label: 'do not show a floating action button',
-    value: null,
   );
 
   static const _ChoiceValue<Widget> kCircularFab = _ChoiceValue<Widget>(

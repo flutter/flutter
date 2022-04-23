@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -17,19 +15,19 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
   AnalyzeBase(this.argResults, {
-    @required this.repoRoots,
-    @required this.repoPackages,
-    @required this.fileSystem,
-    @required this.logger,
-    @required this.platform,
-    @required this.processManager,
-    @required this.terminal,
-    @required this.artifacts,
+    required this.repoRoots,
+    required this.repoPackages,
+    required this.fileSystem,
+    required this.logger,
+    required this.platform,
+    required this.processManager,
+    required this.terminal,
+    required this.artifacts,
   });
 
   /// The parsed argument results for execution.
@@ -81,16 +79,22 @@ abstract class AnalyzeBase {
   }
 
   bool get isFlutterRepo => argResults['flutter-repo'] as bool;
-  String get sdkPath => argResults['dart-sdk'] as String ?? artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
+  String get sdkPath {
+    final String? dartSdk = argResults['dart-sdk'] as String?;
+    if (dartSdk != null) {
+      return dartSdk;
+    }
+    return artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
+  }
   bool get isBenchmarking => argResults['benchmark'] as bool;
   String get protocolTrafficLog => argResults['protocol-traffic-log'] as String;
 
   /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
   static String generateErrorsMessage({
-    @required int issueCount,
-    int issueDiff,
-    int files,
-    @required String seconds,
+    required int issueCount,
+    int? issueDiff,
+    int? files,
+    required String seconds,
   }) {
     final StringBuffer errorsMessage = StringBuffer(issueCount > 0
       ? '$issueCount ${pluralize('issue', issueCount)} found.'
@@ -118,7 +122,7 @@ class PackageDependency {
   // This is a map from dependency targets (lib directories) to a list
   // of places that ask for that target (.packages or pubspec.yaml files)
   Map<String, List<String>> values = <String, List<String>>{};
-  String canonicalSource;
+  String? canonicalSource;
   void addCanonicalCase(String packagePath, String pubSpecYamlPath) {
     assert(canonicalSource == null);
     add(packagePath, pubSpecYamlPath);
@@ -129,11 +133,12 @@ class PackageDependency {
   }
   bool get hasConflict => values.length > 1;
   bool get hasConflictAffectingFlutterRepo {
-    assert(globals.fs.path.isAbsolute(Cache.flutterRoot));
+    final String? flutterRoot = Cache.flutterRoot;
+    assert(flutterRoot != null && globals.fs.path.isAbsolute(flutterRoot));
     for (final List<String> targetSources in values.values) {
       for (final String source in targetSources) {
         assert(globals.fs.path.isAbsolute(source));
-        if (globals.fs.path.isWithin(Cache.flutterRoot, source)) {
+        if (globals.fs.path.isWithin(flutterRoot!, source)) {
           return true;
         }
       }
@@ -143,12 +148,13 @@ class PackageDependency {
   void describeConflict(StringBuffer result) {
     assert(hasConflict);
     final List<String> targets = values.keys.toList();
-    targets.sort((String a, String b) => values[b].length.compareTo(values[a].length));
+    targets.sort((String a, String b) => values[b]!.length.compareTo(values[a]!.length));
     for (final String target in targets) {
-      final int count = values[target].length;
+      final List<String> targetList = values[target]!;
+      final int count = targetList.length;
       result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
       bool canonical = false;
-      for (final String source in values[target]) {
+      for (final String source in targetList) {
         result.writeln('    $source');
         if (source == canonicalSource) {
           canonical = true;
@@ -263,18 +269,20 @@ class PackageDependencyTracker {
   String generateConflictReport() {
     assert(hasConflicts);
     final StringBuffer result = StringBuffer();
-    for (final String package in packages.keys.where((String package) => packages[package].hasConflict)) {
-      result.writeln('Package "$package" has conflicts:');
-      packages[package].describeConflict(result);
-    }
+    packages.forEach((String package, PackageDependency dependency) {
+      if (dependency.hasConflict) {
+        result.writeln('Package "$package" has conflicts:');
+        dependency.describeConflict(result);
+      }
+    });
     return result.toString();
   }
 
   Map<String, String> asPackageMap() {
     final Map<String, String> result = <String, String>{};
-    for (final String package in packages.keys) {
-      result[package] = packages[package].target;
-    }
+    packages.forEach((String package, PackageDependency dependency) {
+      result[package] = dependency.target;
+    });
     return result;
   }
 }

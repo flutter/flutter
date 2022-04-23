@@ -27,6 +27,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator that spins clockwise.
   const CupertinoActivityIndicator({
     Key? key,
+    this.color,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
   })  : assert(animating != null),
@@ -43,6 +44,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// to 1.0.
   const CupertinoActivityIndicator.partiallyRevealed({
     Key? key,
+    this.color,
     this.radius = _kDefaultIndicatorRadius,
     this.progress = 1.0,
   })  : assert(radius != null),
@@ -52,6 +54,11 @@ class CupertinoActivityIndicator extends StatefulWidget {
         assert(progress <= 1.0),
         animating = false,
         super(key: key);
+
+  /// Color of the activity indicator.
+  ///
+  /// Defaults to color extracted from native iOS.
+  final Color? color;
 
   /// Whether the activity indicator is running its animation.
   ///
@@ -117,8 +124,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
       child: CustomPaint(
         painter: _CupertinoActivityIndicatorPainter(
           position: _controller,
-          activeColor:
-              CupertinoDynamicColor.resolve(_kActiveTickColor, context),
+          activeColor: widget.color ?? CupertinoDynamicColor.resolve(_kActiveTickColor, context),
           radius: widget.radius,
           progress: widget.progress,
         ),

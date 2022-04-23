@@ -37,7 +37,7 @@ void main() {
         ],
         localizationsDelegates: <LocalizationsDelegate<dynamic>>[
           _DummyLocalizationsDelegate(),
-          GlobalMaterialLocalizations.delegate,
+          ...GlobalMaterialLocalizations.delegates,
         ],
         home: PageView(),
       )
@@ -52,9 +52,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/pull/16782
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          GlobalMaterialLocalizations.delegate,
-        ],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         supportedLocales: const <Locale>[
           Locale('es', 'ES'),
           Locale('zh'),
@@ -87,7 +85,7 @@ class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizatio
 class DummyLocalizations { }
 
 class LocalizationTracker extends StatefulWidget {
-  const LocalizationTracker({Key? key}) : super(key: key);
+  const LocalizationTracker({super.key});
 
   @override
   State<StatefulWidget> createState() => LocalizationTrackerState();

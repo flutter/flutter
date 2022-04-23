@@ -19,7 +19,7 @@ void main() {
   for (int i = 0; i < words.length; i++) {
     if (i.isEven) {
       data.add(
-        InlineSpanSemanticsInformation(words[i], isPlaceholder: false),
+        InlineSpanSemanticsInformation(words[i]),
       );
     } else if (i.isEven) {
       data.add(

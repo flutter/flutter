@@ -104,7 +104,7 @@ void main() {
     expect(first, equals(0));
     expect(second, equals(1));
 
-    await tester.pumpWidget(buildBlock(reverse: false));
+    await tester.pumpWidget(buildBlock());
 
     await tester.tapAt(target);
     expect(first, equals(1));

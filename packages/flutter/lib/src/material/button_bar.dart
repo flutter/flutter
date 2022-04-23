@@ -406,7 +406,10 @@ class _RenderButtonBarRow extends RenderFlex {
               case MainAxisAlignment.end:
                 childParentData.offset = Offset(constraints.maxWidth - child.size.width, currentHeight);
                 break;
-              default:
+              case MainAxisAlignment.spaceAround:
+              case MainAxisAlignment.spaceBetween:
+              case MainAxisAlignment.spaceEvenly:
+              case MainAxisAlignment.start:
                 childParentData.offset = Offset(0, currentHeight);
                 break;
             }
@@ -420,7 +423,10 @@ class _RenderButtonBarRow extends RenderFlex {
               case MainAxisAlignment.end:
                 childParentData.offset = Offset(0, currentHeight);
                 break;
-              default:
+              case MainAxisAlignment.spaceAround:
+              case MainAxisAlignment.spaceBetween:
+              case MainAxisAlignment.spaceEvenly:
+              case MainAxisAlignment.start:
                 childParentData.offset = Offset(constraints.maxWidth - child.size.width, currentHeight);
                 break;
             }
