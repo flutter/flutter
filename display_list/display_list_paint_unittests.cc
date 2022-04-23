@@ -16,6 +16,7 @@ TEST(DisplayListPaint, ConstructorDefaults) {
   EXPECT_FALSE(paint.isDither());
   EXPECT_FALSE(paint.isInvertColors());
   EXPECT_EQ(paint.getColor(), DlColor{0xFF000000});
+  EXPECT_EQ(paint.getAlpha(), 0xFF);
   EXPECT_EQ(paint.getBlendMode(), DlBlendMode::kDefaultMode);
   EXPECT_EQ(paint.getDrawStyle(), DlDrawStyle::kDefaultStyle);
   EXPECT_EQ(paint.getStrokeCap(), DlStrokeCap::kDefaultCap);
@@ -38,6 +39,7 @@ TEST(DisplayListPaint, ConstructorDefaults) {
   EXPECT_NE(paint, DlPaint().setDither(true));
   EXPECT_NE(paint, DlPaint().setInvertColors(true));
   EXPECT_NE(paint, DlPaint().setColor(DlColor(0xFF00FF00)));
+  EXPECT_NE(paint, DlPaint().setAlpha(0x7f));
   EXPECT_NE(paint, DlPaint().setBlendMode(DlBlendMode::kDstIn));
   EXPECT_NE(paint, DlPaint().setDrawStyle(DlDrawStyle::kStrokeAndFill));
   EXPECT_NE(paint, DlPaint().setStrokeCap(DlStrokeCap::kRound));
@@ -65,6 +67,7 @@ TEST(DisplayListPaint, ChainingConstructor) {
           .setDither(true)                                          //
           .setInvertColors(true)                                    //
           .setColor({0xFF00FF00})                                   //
+          .setAlpha(0x7F)                                           //
           .setBlendMode(DlBlendMode::kLuminosity)                   //
           .setDrawStyle(DlDrawStyle::kStrokeAndFill)                //
           .setStrokeCap(DlStrokeCap::kSquare)                       //
@@ -81,7 +84,8 @@ TEST(DisplayListPaint, ChainingConstructor) {
   EXPECT_TRUE(paint.isAntiAlias());
   EXPECT_TRUE(paint.isDither());
   EXPECT_TRUE(paint.isInvertColors());
-  EXPECT_EQ(paint.getColor(), DlColor{0xFF00FF00});
+  EXPECT_EQ(paint.getColor(), DlColor{0x7F00FF00});
+  EXPECT_EQ(paint.getAlpha(), 0x7F);
   EXPECT_EQ(paint.getBlendMode(), DlBlendMode::kLuminosity);
   EXPECT_EQ(paint.getDrawStyle(), DlDrawStyle::kStrokeAndFill);
   EXPECT_EQ(paint.getStrokeCap(), DlStrokeCap::kSquare);

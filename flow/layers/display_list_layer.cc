@@ -160,12 +160,10 @@ void DisplayListLayer::Paint(PaintContext& context) const {
     AutoCachePaint save_paint(context);
     int restore_count = context.leaf_nodes_builder->getSaveCount();
     if (save_paint.paint() != nullptr) {
-      context.leaf_nodes_builder->setAttributesFromPaint(
-          *save_paint.paint(), DisplayListOpFlags::kSaveLayerWithPaintFlags);
-      context.leaf_nodes_builder->saveLayer(&paint_bounds(), true);
+      DlPaint paint = DlPaint().setAlpha(save_paint.paint()->getAlpha());
+      context.leaf_nodes_builder->saveLayer(&paint_bounds(), &paint);
     }
-    display_list()->RenderTo(context.leaf_nodes_builder,
-                             context.inherited_opacity);
+    context.leaf_nodes_builder->drawDisplayList(display_list_.skia_object());
     context.leaf_nodes_builder->restoreToCount(restore_count);
   } else {
     display_list()->RenderTo(context.leaf_nodes_canvas,
