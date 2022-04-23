@@ -131,6 +131,10 @@ TEST_F(DisplayListLayerTest, SimpleDisplayListOpacityInheritance) {
   opacity_layer->Preroll(context, SkMatrix::I());
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 
+  DisplayListBuilder child_builder;
+  child_builder.drawRect(picture_bounds);
+  auto child_display_list = child_builder.Build();
+
   auto save_layer_bounds =
       picture_bounds.makeOffset(layer_offset.fX, layer_offset.fY);
   auto opacity_integral_matrix =
@@ -159,7 +163,7 @@ TEST_F(DisplayListLayerTest, SimpleDisplayListOpacityInheritance) {
           expected_builder.setColor(opacity_alpha << 24);
           expected_builder.saveLayer(&save_layer_bounds, true);
           /* display_list contents */ {  //
-            expected_builder.drawRect(picture_bounds);
+            expected_builder.drawDisplayList(child_display_list);
           }
           expected_builder.restore();
         }
@@ -200,6 +204,11 @@ TEST_F(DisplayListLayerTest, IncompatibleDisplayListOpacityInheritance) {
   opacity_layer->Preroll(context, SkMatrix::I());
   EXPECT_FALSE(opacity_layer->children_can_accept_opacity());
 
+  DisplayListBuilder child_builder;
+  child_builder.drawRect(picture1_bounds);
+  child_builder.drawRect(picture2_bounds);
+  auto child_display_list = child_builder.Build();
+
   auto display_list_bounds = picture1_bounds;
   display_list_bounds.join(picture2_bounds);
   auto save_layer_bounds =
@@ -231,8 +240,7 @@ TEST_F(DisplayListLayerTest, IncompatibleDisplayListOpacityInheritance) {
             expected_builder.transformReset();
             expected_builder.transform(layer_offset_integral_matrix);
 #endif
-            expected_builder.drawRect(picture1_bounds);
-            expected_builder.drawRect(picture2_bounds);
+            expected_builder.drawDisplayList(child_display_list);
           }
           expected_builder.restore();
         }
