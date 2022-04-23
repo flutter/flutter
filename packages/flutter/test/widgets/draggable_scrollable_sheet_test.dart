@@ -20,6 +20,7 @@ void main() {
     Key? stackKey,
     NotificationListenerCallback<ScrollNotification>? onScrollNotification,
     bool ignoreController = false,
+    bool bounceBack = false,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -40,6 +41,7 @@ void main() {
                 initialChildSize: initialChildSize,
                 snap: snap,
                 snapSizes: snapSizes,
+                bounceBack: bounceBack,
                 builder: (BuildContext context, ScrollController scrollController) {
                   return NotificationListener<ScrollNotification>(
                     onNotification: onScrollNotification,

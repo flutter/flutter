@@ -7,11 +7,13 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
+import 'animated_size.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
 import 'layout_builder.dart';
+import 'navigator.dart';
 import 'notification_listener.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
@@ -281,6 +283,7 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.snapSizes,
     this.controller,
     required this.builder,
+    this.bounceBack = false,
   })  : assert(initialChildSize != null),
         assert(minChildSize != null),
         assert(maxChildSize != null),
@@ -289,7 +292,9 @@ class DraggableScrollableSheet extends StatefulWidget {
         assert(minChildSize <= initialChildSize),
         assert(initialChildSize <= maxChildSize),
         assert(expand != null),
-        assert(builder != null);
+        assert(builder != null),
+        assert(!bounceBack || minChildSize == 0.0),
+        assert(!bounceBack || maxChildSize == initialChildSize);
 
   /// The initial fractional value of the parent container's height to use when
   /// displaying the widget.
@@ -362,6 +367,11 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// use the provided [ScrollController] to enable dragging and scrolling
   /// of the contents.
   final ScrollableWidgetBuilder builder;
+
+  /// bounce back property
+  /// Useful if user wants state only 1 state between closed and opened.
+  /// min should be 0, initial and max should be equal
+  final bool bounceBack;
 
   @override
   State<DraggableScrollableSheet> createState() => _DraggableScrollableSheetState();
@@ -638,16 +648,48 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     });
   }
 
+  //flag to prevent unnecessary calls
+  bool _poped = false;
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
-        final Widget sheet = FractionallySizedBox(
-          heightFactor: _extent.currentSize,
-          alignment: Alignment.bottomCenter,
-          child: widget.builder(context, _scrollController),
-        );
+        late final Widget sheet;
+        if (widget.bounceBack) {
+          sheet = NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              final double offset = notification.metrics.pixels;
+              if (offset <= 0.0) {
+                if (_extent.currentSize > _extent.minSize) {
+                  _extent._currentSize.value = _extent.maxSize;
+                } else if (_extent.currentSize <= 0 && !_poped) {
+                  _poped = true;
+                  Navigator.of(context).maybePop();
+                }
+              }
+              return true;
+            },
+            child: AnimatedSize(
+              clipBehavior: Clip.none,
+              duration: (_extent.currentSize == _extent.maxSize)
+                  ? const Duration(milliseconds: 50)
+                  : Duration.zero,
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                height: _extent.currentSize * constraints.biggest.height,
+                child: widget.builder(context, _scrollController),
+              ),
+            ),
+          );
+        } else {
+          sheet = FractionallySizedBox(
+            heightFactor: _extent.currentSize,
+            alignment: Alignment.bottomCenter,
+            child: widget.builder(context, _scrollController),
+          );
+        }
         return widget.expand ? SizedBox.expand(child: sheet) : sheet;
       },
     );
@@ -691,7 +733,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 
   String _snapSizeErrorMessage(int invalidIndex) {
     final List<String> snapSizesWithIndicator = widget.snapSizes!.asMap().keys.map(
-      (int index) {
+          (int index) {
         final String snapSizeString = widget.snapSizes![index].toString();
         if (index == invalidIndex) {
           return '>>> $snapSizeString <<<';
@@ -726,11 +768,9 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
   _DraggableSheetExtent extent;
 
   @override
-  _DraggableScrollableSheetScrollPosition createScrollPosition(
-    ScrollPhysics physics,
-    ScrollContext context,
-    ScrollPosition? oldPosition,
-  ) {
+  _DraggableScrollableSheetScrollPosition createScrollPosition(ScrollPhysics physics,
+      ScrollContext context,
+      ScrollPosition? oldPosition,) {
     return _DraggableScrollableSheetScrollPosition(
       physics: physics,
       context: context,
@@ -778,140 +818,180 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
 /// See also:
 ///
 ///  * [_DraggableScrollableSheetScrollController], which uses this as its [ScrollPosition].
-class _DraggableScrollableSheetScrollPosition
-    extends ScrollPositionWithSingleContext {
-  _DraggableScrollableSheetScrollPosition({
-    required super.physics,
-    required super.context,
-    super.oldPosition,
-    required this.getExtent,
-  });
+class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleContext {
+  _DraggableScrollableSheetScrollPosition
 
-  VoidCallback? _dragCancelCallback;
-  VoidCallback? _ballisticCancelCallback;
-  final _DraggableSheetExtent Function() getExtent;
-  bool get listShouldScroll => pixels > 0.0;
+  (
 
-  _DraggableSheetExtent get extent => getExtent();
+  {
 
-  @override
-  void beginActivity(ScrollActivity? newActivity) {
-    // Cancel the running ballistic simulation, if there is one.
-    _ballisticCancelCallback?.call();
-    super.beginActivity(newActivity);
-  }
+  required
 
-  @override
-  bool applyContentDimensions(double minScrollSize, double maxScrollSize) {
-    // We need to provide some extra size if we haven't yet reached the max or
-    // min sizes. Otherwise, a list with fewer children than the size of
-    // the available space will get stuck.
-    return super.applyContentDimensions(
-      minScrollSize - extent.additionalMinSize,
-      maxScrollSize + extent.additionalMaxSize,
-    );
-  }
+  super
 
-  @override
-  void applyUserOffset(double delta) {
-    if (!listShouldScroll &&
-        (!(extent.isAtMin || extent.isAtMax) ||
+      .
+
+  physics
+
+  ,
+
+  required
+
+  super
+
+      .
+
+  context
+
+  ,
+
+  super
+
+      .
+
+  oldPosition
+
+  ,
+
+  required
+
+  this
+
+      .
+
+  getExtent
+
+  ,
+});
+
+VoidCallback? _dragCancelCallback;
+VoidCallback? _ballisticCancelCallback;
+final _DraggableSheetExtent Function() getExtent;
+
+bool get listShouldScroll => pixels > 0.0;
+
+_DraggableSheetExtent get extent => getExtent();
+
+@override
+void beginActivity(ScrollActivity? newActivity) {
+  // Cancel the running ballistic simulation, if there is one.
+  _ballisticCancelCallback?.call();
+  super.beginActivity(newActivity);
+}
+
+@override
+bool applyContentDimensions(double minScrollSize, double maxScrollSize) {
+  // We need to provide some extra size if we haven't yet reached the max or
+  // min sizes. Otherwise, a list with fewer children than the size of
+  // the available space will get stuck.
+  return super.applyContentDimensions(
+    minScrollSize - extent.additionalMinSize,
+    maxScrollSize + extent.additionalMaxSize,
+  );
+}
+
+@override
+void applyUserOffset(double delta) {
+  if (!listShouldScroll &&
+      (!(extent.isAtMin || extent.isAtMax) ||
           (extent.isAtMin && delta < 0) ||
           (extent.isAtMax && delta > 0))) {
-      extent.addPixelDelta(-delta, context.notificationContext!);
-    } else {
-      super.applyUserOffset(delta);
-    }
-  }
-
-  bool get _isAtSnapSize {
-    return extent.snapSizes.any(
-      (double snapSize) {
-        return (extent.currentSize - snapSize).abs() <= extent.pixelsToSize(physics.tolerance.distance);
-      },
-    );
-  }
-  bool get _shouldSnap => extent.snap && extent.hasDragged && !_isAtSnapSize;
-
-  @override
-  void dispose() {
-    // Stop the animation before dispose.
-    _ballisticCancelCallback?.call();
-    super.dispose();
-  }
-
-  @override
-  void goBallistic(double velocity) {
-    if ((velocity == 0.0 && !_shouldSnap) ||
-        (velocity < 0.0 && listShouldScroll) ||
-        (velocity > 0.0 && extent.isAtMax)) {
-      super.goBallistic(velocity);
-      return;
-    }
-    // Scrollable expects that we will dispose of its current _dragCancelCallback
-    _dragCancelCallback?.call();
-    _dragCancelCallback = null;
-
-    late final Simulation simulation;
-    if (extent.snap) {
-      // Snap is enabled, simulate snapping instead of clamping scroll.
-      simulation = _SnappingSimulation(
-          position: extent.currentPixels,
-          initialVelocity: velocity,
-          pixelSnapSize: extent.pixelSnapSizes,
-          tolerance: physics.tolerance);
-    } else {
-      // The iOS bouncing simulation just isn't right here - once we delegate
-      // the ballistic back to the ScrollView, it will use the right simulation.
-      simulation = ClampingScrollSimulation(
-        // Run the simulation in terms of pixels, not extent.
-        position: extent.currentPixels,
-        velocity: velocity,
-        tolerance: physics.tolerance,
-      );
-    }
-
-    final AnimationController ballisticController = AnimationController.unbounded(
-      debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
-      vsync: context.vsync,
-    );
-    // Stop the ballistic animation if a new activity starts.
-    // See: [beginActivity].
-    _ballisticCancelCallback = ballisticController.stop;
-    double lastPosition = extent.currentPixels;
-    void _tick() {
-      final double delta = ballisticController.value - lastPosition;
-      lastPosition = ballisticController.value;
-      extent.addPixelDelta(delta, context.notificationContext!);
-      if ((velocity > 0 && extent.isAtMax) || (velocity < 0 && extent.isAtMin)) {
-        // Make sure we pass along enough velocity to keep scrolling - otherwise
-        // we just "bounce" off the top making it look like the list doesn't
-        // have more to scroll.
-        velocity = ballisticController.velocity + (physics.tolerance.velocity * ballisticController.velocity.sign);
-        super.goBallistic(velocity);
-        ballisticController.stop();
-      } else if (ballisticController.isCompleted) {
-        super.goBallistic(0);
-      }
-    }
-
-    ballisticController
-      ..addListener(_tick)
-      ..animateWith(simulation).whenCompleteOrCancel(
-        () {
-          _ballisticCancelCallback = null;
-          ballisticController.dispose();
-        },
-      );
-  }
-
-  @override
-  Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
-    // Save this so we can call it later if we have to [goBallistic] on our own.
-    _dragCancelCallback = dragCancelCallback;
-    return super.drag(details, dragCancelCallback);
+    extent.addPixelDelta(-delta, context.notificationContext!);
+  } else {
+    super.applyUserOffset(delta);
   }
 }
+
+bool get _isAtSnapSize {
+  return extent.snapSizes.any(
+        (double snapSize) {
+      return (extent.currentSize - snapSize).abs() <=
+          extent.pixelsToSize(physics.tolerance.distance);
+    },
+  );
+}
+
+bool get _shouldSnap => extent.snap && extent.hasDragged && !_isAtSnapSize;
+
+@override
+void dispose() {
+  // Stop the animation before dispose.
+  _ballisticCancelCallback?.call();
+  super.dispose();
+}
+
+@override
+void goBallistic(double velocity) {
+  if ((velocity == 0.0 && !_shouldSnap) ||
+      (velocity < 0.0 && listShouldScroll) ||
+      (velocity > 0.0 && extent.isAtMax)) {
+    super.goBallistic(velocity);
+    return;
+  }
+  // Scrollable expects that we will dispose of its current _dragCancelCallback
+  _dragCancelCallback?.call();
+  _dragCancelCallback = null;
+
+  late final Simulation simulation;
+  if (extent.snap) {
+    // Snap is enabled, simulate snapping instead of clamping scroll.
+    simulation = _SnappingSimulation(
+        position: extent.currentPixels,
+        initialVelocity: velocity,
+        pixelSnapSize: extent.pixelSnapSizes,
+        tolerance: physics.tolerance);
+  } else {
+    // The iOS bouncing simulation just isn't right here - once we delegate
+    // the ballistic back to the ScrollView, it will use the right simulation.
+    simulation = ClampingScrollSimulation(
+      // Run the simulation in terms of pixels, not extent.
+      position: extent.currentPixels,
+      velocity: velocity,
+      tolerance: physics.tolerance,
+    );
+  }
+
+  final AnimationController ballisticController = AnimationController.unbounded(
+    debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
+    vsync: context.vsync,
+  );
+  // Stop the ballistic animation if a new activity starts.
+  // See: [beginActivity].
+  _ballisticCancelCallback = ballisticController.stop;
+  double lastPosition = extent.currentPixels;
+  void _tick() {
+    final double delta = ballisticController.value - lastPosition;
+    lastPosition = ballisticController.value;
+    extent.addPixelDelta(delta, context.notificationContext!);
+    if ((velocity > 0 && extent.isAtMax) || (velocity < 0 && extent.isAtMin)) {
+      // Make sure we pass along enough velocity to keep scrolling - otherwise
+      // we just "bounce" off the top making it look like the list doesn't
+      // have more to scroll.
+      velocity = ballisticController.velocity +
+          (physics.tolerance.velocity * ballisticController.velocity.sign);
+      super.goBallistic(velocity);
+      ballisticController.stop();
+    } else if (ballisticController.isCompleted) {
+      super.goBallistic(0);
+    }
+  }
+
+  ballisticController
+    ..addListener(_tick)
+    ..animateWith(simulation).whenCompleteOrCancel(
+          () {
+        _ballisticCancelCallback = null;
+        ballisticController.dispose();
+      },
+    );
+}
+
+@override
+Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
+  // Save this so we can call it later if we have to [goBallistic] on our own.
+  _dragCancelCallback = dragCancelCallback;
+  return super.drag(details, dragCancelCallback);
+}}
 
 /// A widget that can notify a descendent [DraggableScrollableSheet] that it
 /// should reset its position to the initial state.
@@ -932,9 +1012,11 @@ class DraggableScrollableActuator extends StatelessWidget {
   /// to reset to their initial position.
   ///
   /// The [child] parameter is required.
-  DraggableScrollableActuator({
-    super.key,
-    required this.child,
+  DraggableScrollableActuator
+
+  ({
+  super.key,
+  required this.child,
   });
 
   /// This child's [DraggableScrollableSheet] descendant will be reset when the
@@ -952,7 +1034,8 @@ class DraggableScrollableActuator extends StatelessWidget {
   /// some [DraggableScrollableSheet] is listening for updates, `false`
   /// otherwise.
   static bool reset(BuildContext context) {
-    final _InheritedResetNotifier? notifier = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
+    final _InheritedResetNotifier? notifier = context.dependOnInheritedWidgetOfExactType<
+        _InheritedResetNotifier>();
     if (notifier == null) {
       return false;
     }
@@ -991,103 +1074,168 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   /// listen to for an indication that it should reset itself back to [DraggableScrollableSheet.initialChildSize].
   ///
   /// The [child] and [notifier] properties must not be null.
-  const _InheritedResetNotifier({
-    required super.child,
-    required _ResetNotifier super.notifier,
-  });
+  const _InheritedResetNotifier
 
-  bool _sendReset() => notifier!.sendReset();
+  (
 
-  /// Specifies whether the [DraggableScrollableSheet] should reset to its
-  /// initial position.
-  ///
-  /// Returns true if the notifier requested a reset, false otherwise.
-  static bool shouldReset(BuildContext context) {
-    final InheritedWidget? widget = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
-    if (widget == null) {
-      return false;
-    }
-    assert(widget is _InheritedResetNotifier);
-    final _InheritedResetNotifier inheritedNotifier = widget as _InheritedResetNotifier;
-    final bool wasCalled = inheritedNotifier.notifier!._wasCalled;
-    inheritedNotifier.notifier!._wasCalled = false;
-    return wasCalled;
-  }
+  {
+
+  required
+
+  super
+
+      .
+
+  child
+
+  ,
+
+  required _ResetNotifier
+
+  super
+
+      .
+
+  notifier
+
+  ,
+});
+
+bool _sendReset() => notifier!.sendReset();
+
+/// Specifies whether the [DraggableScrollableSheet] should reset to its
+/// initial position.
+///
+/// Returns true if the notifier requested a reset, false otherwise.
+static bool shouldReset
+(
+
+BuildContext context
+) {
+final InheritedWidget? widget = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
+if (widget == null) {
+return false;
+}
+assert(widget is _InheritedResetNotifier);
+final _InheritedResetNotifier inheritedNotifier = widget as _InheritedResetNotifier;
+final bool wasCalled = inheritedNotifier.notifier!._wasCalled;
+inheritedNotifier.notifier!._wasCalled = false;
+return wasCalled;
+}
 }
 
 class _SnappingSimulation extends Simulation {
-  _SnappingSimulation({
-    required this.position,
-    required double initialVelocity,
-    required List<double> pixelSnapSize,
-    super.tolerance,
-  }) {
-    _pixelSnapSize = _getSnapSize(initialVelocity, pixelSnapSize);
-    // Check the direction of the target instead of the sign of the velocity because
-    // we may snap in the opposite direction of velocity if velocity is very low.
-    if (_pixelSnapSize < position) {
-      velocity = math.min(-minimumSpeed, initialVelocity);
-    } else {
-      velocity = math.max(minimumSpeed, initialVelocity);
-    }
-  }
+  _SnappingSimulation
 
-  final double position;
-  late final double velocity;
+  (
 
-  // A minimum speed to snap at. Used to ensure that the snapping animation
-  // does not play too slowly.
-  static const double minimumSpeed = 1600.0;
+  {
 
-  late final double _pixelSnapSize;
+  required
 
-  @override
-  double dx(double time) {
-    if (isDone(time)) {
-      return 0;
-    }
-    return velocity;
-  }
+  this
 
-  @override
-  bool isDone(double time) {
-    return x(time) == _pixelSnapSize;
-  }
+      .
 
-  @override
-  double x(double time) {
-    final double newPosition = position + velocity * time;
-    if ((velocity >= 0 && newPosition > _pixelSnapSize) ||
-        (velocity < 0 && newPosition < _pixelSnapSize)) {
-      // We're passed the snap size, return it instead.
-      return _pixelSnapSize;
-    }
-    return newPosition;
-  }
+  position
 
-  // Find the two closest snap sizes to the position. If the velocity is
-  // non-zero, select the size in the velocity's direction. Otherwise,
-  // the nearest snap size.
-  double _getSnapSize(double initialVelocity, List<double> pixelSnapSizes) {
-    final int indexOfNextSize = pixelSnapSizes
-        .indexWhere((double size) => size >= position);
-    if (indexOfNextSize == 0) {
-      return pixelSnapSizes.first;
-    }
-    final double nextSize = pixelSnapSizes[indexOfNextSize];
-    final double previousSize = pixelSnapSizes[indexOfNextSize - 1];
-    if (initialVelocity.abs() <= tolerance.velocity) {
-      // If velocity is zero, snap to the nearest snap size with the minimum velocity.
-      if (position - previousSize < nextSize - position) {
-        return previousSize;
-      } else {
-        return nextSize;
-      }
-    }
-    // Snap forward or backward depending on current velocity.
-    if (initialVelocity < 0.0) {
-      return pixelSnapSizes[indexOfNextSize - 1];
-    }
-    return pixelSnapSizes[indexOfNextSize];
-  }
+  ,
+
+  required
+
+  double
+
+  initialVelocity
+
+  ,
+
+  required
+
+  List
+
+  <
+
+  double
+
+  >
+
+  pixelSnapSize
+
+  ,
+
+  super
+
+      .
+
+  tolerance
+
+  ,
+}) {
+_pixelSnapSize = _getSnapSize(initialVelocity, pixelSnapSize);
+// Check the direction of the target instead of the sign of the velocity because
+// we may snap in the opposite direction of velocity if velocity is very low.
+if (_pixelSnapSize < position) {
+velocity = math.min(-minimumSpeed, initialVelocity);
+} else {
+velocity = math.max(minimumSpeed, initialVelocity);
 }
+}
+
+final double position;
+late final double velocity;
+
+// A minimum speed to snap at. Used to ensure that the snapping animation
+// does not play too slowly.
+static const double minimumSpeed = 1600.0;
+
+late final double _pixelSnapSize;
+
+@override
+double dx(double time) {
+  if (isDone(time)) {
+    return 0;
+  }
+  return velocity;
+}
+
+@override
+bool isDone(double time) {
+  return x(time) == _pixelSnapSize;
+}
+
+@override
+double x(double time) {
+  final double newPosition = position + velocity * time;
+  if ((velocity >= 0 && newPosition > _pixelSnapSize) ||
+      (velocity < 0 && newPosition < _pixelSnapSize)) {
+    // We're passed the snap size, return it instead.
+    return _pixelSnapSize;
+  }
+  return newPosition;
+}
+
+// Find the two closest snap sizes to the position. If the velocity is
+// non-zero, select the size in the velocity's direction. Otherwise,
+// the nearest snap size.
+double _getSnapSize(double initialVelocity, List<double> pixelSnapSizes) {
+  final int indexOfNextSize = pixelSnapSizes
+      .indexWhere((double size) => size >= position);
+  if (indexOfNextSize == 0) {
+    return pixelSnapSizes.first;
+  }
+  final double nextSize = pixelSnapSizes[indexOfNextSize];
+  final double previousSize = pixelSnapSizes[indexOfNextSize - 1];
+  if (initialVelocity.abs() <= tolerance.velocity) {
+    // If velocity is zero, snap to the nearest snap size with the minimum velocity.
+    if (position - previousSize < nextSize - position) {
+      return previousSize;
+    } else {
+      return nextSize;
+    }
+  }
+  // Snap forward or backward depending on current velocity.
+  if (initialVelocity < 0.0) {
+    return pixelSnapSizes[indexOfNextSize - 1];
+  }
+  return pixelSnapSizes[indexOfNextSize];
+}}
