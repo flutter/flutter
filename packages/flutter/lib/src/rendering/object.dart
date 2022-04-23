@@ -130,9 +130,9 @@ class PaintingContext extends ClipContext {
       child._layerHandle.layer = childLayer = layer;
     } else {
       assert(debugAlsoPaintedParent || childLayer.attached);
-      Offset? oldOffset;
+      Offset? debugOldOffset;
       assert(() {
-        oldOffset = childLayer!.offset;
+        debugOldOffset = childLayer!.offset;
         return true;
       }());
       childLayer.removeAllChildren();
@@ -142,7 +142,7 @@ class PaintingContext extends ClipContext {
         'existing layer $childLayer. See the documentation of RenderObject.updateCompositedLayer '
         'for more information on how to correctly implement this method.'
       );
-      assert(oldOffset == updatedLayer.offset);
+      assert(debugOldOffset == updatedLayer.offset);
     }
     child._needsCompositedLayerUpdate = false;
 
@@ -179,9 +179,9 @@ class PaintingContext extends ClipContext {
     assert(child._layerHandle.layer != null);
 
     final OffsetLayer childLayer = child._layerHandle.layer! as OffsetLayer;
-    Offset? oldOffset;
+    Offset? debugOldOffset;
     assert(() {
-      oldOffset = childLayer.offset;
+      debugOldOffset = childLayer.offset;
       return true;
     }());
     final OffsetLayer updatedLayer = child.updateCompositedLayer(oldLayer: childLayer);
@@ -190,7 +190,7 @@ class PaintingContext extends ClipContext {
       'existing layer $childLayer. See the documentation of RenderObject.updateCompositedLayer '
       'for more information on how to correctly implement this method.'
     );
-    assert(oldOffset == updatedLayer.offset);
+    assert(debugOldOffset == updatedLayer.offset);
     child._needsCompositedLayerUpdate = false;
   }
 
@@ -2145,6 +2145,23 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// See [RepaintBoundary] for more information about how repaint boundaries function.
   bool get isRepaintBoundary => false;
 
+  /// T render object composites as a repaint boundary, but only if its child
+  /// does.
+  ///
+  /// For example, a render object which is a repaint boundary only when its
+  /// child needs compositing would declare this as follows:
+  ///
+  /// ```dart
+  ///    @override
+  ///    bool get isRepaintBoundary => child?.needsCompositing ?? false;
+  ///
+  ///    @override
+  ///    bool get compositingDependsOnChild => true;
+  /// ```
+  ///
+  /// See [RepaintBoundary] for more information about how repaint boundaries function.
+  bool get compositingDependsOnChild => false;
+
   /// Called, in debug mode, if [isRepaintBoundary] is true, when either the
   /// this render object or its parent attempt to paint.
   ///
@@ -2277,11 +2294,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       final RenderObject parent = this.parent! as RenderObject;
       if (parent._needsCompositingBitsUpdate)
         return;
-      if (!isRepaintBoundary || !_wasRepaintBoundary) {
-        if (!parent.isRepaintBoundary) {
-          parent.markNeedsCompositingBitsUpdate();
-          return;
-        }
+
+      if (!_wasRepaintBoundary && (parent.compositingDependsOnChild || !parent._wasRepaintBoundary)) {
+        parent.markNeedsCompositingBitsUpdate();
+        return;
       }
     }
     assert(() {
@@ -2329,10 +2345,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _needsPaint = false;
       _needsCompositedLayerUpdate = false;
       owner?._nodesNeedingPaint.remove(this);
+      _needsCompositingBitsUpdate = false;
       markNeedsPaint();
-    } else if (oldNeedsCompositing != _needsCompositing)
+    } else if (oldNeedsCompositing != _needsCompositing) {
+      _needsCompositingBitsUpdate = false;
       markNeedsPaint();
-    _needsCompositingBitsUpdate = false;
+    } else {
+      _needsCompositingBitsUpdate = false;
+    }
   }
 
   /// Whether this render object's paint information is dirty.
