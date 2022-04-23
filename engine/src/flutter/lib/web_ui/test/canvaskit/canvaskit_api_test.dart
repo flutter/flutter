@@ -1483,7 +1483,8 @@ void _paragraphTests() {
     expect(paragraph.getRectsForPlaceholders(), hasLength(1));
     expect(paragraph.getLineMetrics(), hasLength(1));
 
-    final SkLineMetrics lineMetrics = paragraph.getLineMetrics().single;
+    final SkLineMetrics lineMetrics =
+        paragraph.getLineMetrics().cast<SkLineMetrics>().single;
     expect(lineMetrics.ascent, within<double>(distance: 0.5, from: 20.7));
     expect(lineMetrics.descent, within<double>(distance: 0.2, from: 4.3));
     expect(lineMetrics.isHardBreak, isTrue);
