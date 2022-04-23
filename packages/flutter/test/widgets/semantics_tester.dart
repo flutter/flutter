@@ -39,6 +39,7 @@ class TestSemantics {
     this.actions = 0,
     this.label = '',
     this.value = '',
+    this.tooltip = '',
     this.increasedValue = '',
     this.decreasedValue = '',
     this.hint = '',
@@ -72,6 +73,7 @@ class TestSemantics {
     this.increasedValue = '',
     this.decreasedValue = '',
     this.hint = '',
+    this.tooltip = '',
     this.textDirection,
     this.transform,
     this.textSelection,
@@ -110,6 +112,7 @@ class TestSemantics {
     this.label = '',
     this.hint = '',
     this.value = '',
+    this.tooltip = '',
     this.increasedValue = '',
     this.decreasedValue = '',
     this.textDirection,
@@ -175,6 +178,9 @@ class TestSemantics {
   /// A brief textual description of the result of the action that can be
   /// performed on this node.
   final String hint;
+
+  /// A textual tooltip of this node.
+  final String tooltip;
 
   /// The reading direction of the [label].
   ///
@@ -292,6 +298,8 @@ class TestSemantics {
       return fail('expected node id $id to have decreasedValue "$decreasedValue" but found value "${nodeData.decreasedValue}".');
     if (hint != nodeData.hint)
       return fail('expected node id $id to have hint "$hint" but found hint "${nodeData.hint}".');
+    if (tooltip != nodeData.tooltip)
+      return fail('expected node id $id to have tooltip "$tooltip" but found hint "${nodeData.tooltip}".');
     if (textDirection != null && textDirection != nodeData.textDirection)
       return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
     if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '' || node.increasedValue != '' || node.decreasedValue != '') && nodeData.textDirection == null)
@@ -365,6 +373,8 @@ class TestSemantics {
       buf.writeln("$indent  decreasedValue: '$decreasedValue',");
     if (hint != null && hint != '')
       buf.writeln("$indent  hint: '$hint',");
+    if (tooltip != null && tooltip != '')
+      buf.writeln("$indent  tooltip: '$tooltip',");
     if (textDirection != null)
       buf.writeln('$indent  textDirection: $textDirection,');
     if (textSelection?.isValid ?? false)

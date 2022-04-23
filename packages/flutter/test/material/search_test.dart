@@ -616,7 +616,7 @@ void main() {
                               SemanticsFlag.isFocusable,
                             ],
                             actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'Back',
+                            tooltip: 'Back',
                             textDirection: TextDirection.ltr,
                           ),
                           TestSemantics(

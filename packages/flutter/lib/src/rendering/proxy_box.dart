@@ -3863,6 +3863,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     AttributedString? attributedIncreasedValue,
     AttributedString? attributedDecreasedValue,
     AttributedString? attributedHint,
+    String? tooltip,
     SemanticsHintOverrides? hintOverrides,
     TextDirection? textDirection,
     SemanticsSortKey? sortKey,
@@ -3921,6 +3922,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _attributedIncreasedValue = attributedIncreasedValue,
        _attributedDecreasedValue = attributedDecreasedValue,
        _attributedHint = attributedHint,
+       _tooltip = tooltip,
        _hintOverrides = hintOverrides,
        _textDirection = textDirection,
        _sortKey = sortKey,
@@ -4312,6 +4314,18 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_attributedHint == value)
       return;
     _attributedHint = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.tooltip] semantic to the given value.
+  ///
+  /// The reading direction is given by [textDirection].
+  String? get tooltip => _tooltip;
+  String? _tooltip;
+  set tooltip(String? value) {
+    if (_tooltip == value)
+      return;
+    _tooltip = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4847,6 +4861,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.attributedDecreasedValue = attributedDecreasedValue!;
     if (attributedHint != null)
       config.attributedHint = attributedHint!;
+    if (tooltip != null)
+      config.tooltip = tooltip!;
     if (hintOverrides != null && hintOverrides!.isNotEmpty)
       config.hintOverrides = hintOverrides;
     if (scopesRoute != null)

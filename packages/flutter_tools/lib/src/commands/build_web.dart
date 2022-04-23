@@ -63,7 +63,10 @@ class BuildWebCommand extends BuildSubCommand {
           'The value has to start and end with a slash "/". '
           'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base'
     );
-
+    argParser.addOption('dart2js-optimization',
+      help: 'Sets the optimization level used for Dart compilation to JavaScript. '
+          'Valid values range from O0 to O4.'
+    );
   }
 
   @override
@@ -120,6 +123,7 @@ class BuildWebCommand extends BuildSubCommand {
       boolArg('source-maps'),
       boolArg('native-null-assertions'),
       baseHref,
+      stringArg('dart2js-optimization'),
     );
     return FlutterCommandResult.success();
   }
