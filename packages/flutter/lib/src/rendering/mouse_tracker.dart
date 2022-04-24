@@ -319,7 +319,8 @@ class MouseTracker extends ChangeNotifier {
         // so that [mouseIsConnected], which is decided by `_mouseStates`, is
         // correct during the callbacks.
         if (existingState == null) {
-          assert(event is! PointerRemovedEvent);
+          if (event is PointerRemovedEvent)
+            return;
           _mouseStates[device] = _MouseState(initialEvent: event);
         } else {
           assert(event is! PointerAddedEvent);

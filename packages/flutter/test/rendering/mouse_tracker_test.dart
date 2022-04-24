@@ -133,6 +133,15 @@ void main() {
     listenerLogs.clear();
   });
 
+  test('should not crash if the first event is a Removed event', () {
+    final List<PointerEvent> events = <PointerEvent>[];
+    _setUpWithOneAnnotation(logEvents: events);
+    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.remove, Offset.zero),
+    ]));
+    events.clear();
+  });
+
   test('should correctly handle multiple devices', () {
     final List<PointerEvent> events = <PointerEvent>[];
     _setUpWithOneAnnotation(logEvents: events);
