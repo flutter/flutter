@@ -339,6 +339,47 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
+testWidgets('Tapping inside a modal BottomSheet and outside a DraggableScrollableSheet should dismiss it by default', (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          savedContext = context;
+          return Container();
+        },
+      ),
+    ));
+
+    await tester.pump();
+    expect(find.text('BottomSheet'), findsNothing);
+
+    bool showBottomSheetThenCalled = false;
+    final GlobalKey draggableScrollableSheetKey = GlobalKey();
+    showModalBottomSheet<void>(
+      context: savedContext,
+      builder: (BuildContext context) => DraggableScrollableSheet(
+        key: draggableScrollableSheetKey,
+        builder: (_, __) => const Text('BottomSheet'),
+      ),
+    ).then<void>((void value) {
+      showBottomSheetThenCalled = true;
+    });
+
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet'), findsOneWidget);
+    expect(showBottomSheetThenCalled, isFalse);
+
+    final RenderBox renderBox = draggableScrollableSheetKey.currentContext!.findRenderObject()! as RenderBox;
+    final Offset position = renderBox.localToGlobal(Offset.zero);
+
+    // Tap above the bottom sheet to dismiss it.
+    await tester.tapAt(Offset(20.0, position.dy - 10.0));
+    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    expect(showBottomSheetThenCalled, isTrue);
+    expect(find.text('BottomSheet'), findsNothing);
+  });
+  
   testWidgets('Verify that the BottomSheet animates non-linearly', (WidgetTester tester) async {
     late BuildContext savedContext;
 

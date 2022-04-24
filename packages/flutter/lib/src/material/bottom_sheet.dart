@@ -209,6 +209,8 @@ class _BottomSheetState extends State<BottomSheet> {
 
   bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
 
+  double _contentExtent = 1.0;
+
   void _handleDragStart(DragStartDetails details) {
     widget.onDragStart?.call(details);
   }
@@ -263,6 +265,9 @@ class _BottomSheetState extends State<BottomSheet> {
     if (notification.extent == notification.minExtent) {
       widget.onClosing();
     }
+
+    _contentExtent = notification.extent;
+
     return false;
   }
 
@@ -301,7 +306,12 @@ class _BottomSheetState extends State<BottomSheet> {
     bottomSheet = ModalRoute.of(context)?.barrierDismissible != true
         ? bottomSheet
         : GestureDetector(
-            onTap: () => Navigator.maybePop(context),
+            onTapUp: (TapUpDetails detail) {
+              final double relativePosition = 1 - detail.localPosition.dy / _childHeight;
+              if (relativePosition > _contentExtent) {
+                Navigator.maybePop(context);
+              }
+            },
             child: bottomSheet,
           );
 
