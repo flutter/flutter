@@ -79,6 +79,7 @@ class BottomSheet extends StatefulWidget {
     this.shape,
     this.clipBehavior,
     this.constraints,
+    this.barrierDismissible = false,
     required this.onClosing,
     required this.builder,
   }) : assert(enableDrag != null),
@@ -179,6 +180,11 @@ class BottomSheet extends StatefulWidget {
   /// the available space. Otherwise, no alignment is applied.
   final BoxConstraints? constraints;
 
+  /// If true, the bottom sheet will be dismissed when user taps on the scrim.
+  /// 
+  /// Default is false.
+  final bool? barrierDismissible;
+
   @override
   State<BottomSheet> createState() => _BottomSheetState();
 
@@ -209,7 +215,7 @@ class _BottomSheetState extends State<BottomSheet> {
 
   bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
 
-  double _contentRelativeExtent = 1.0;
+  double _contentExtent = 1.0;
 
   void _handleDragStart(DragStartDetails details) {
     widget.onDragStart?.call(details);
@@ -266,7 +272,9 @@ class _BottomSheetState extends State<BottomSheet> {
       widget.onClosing();
     }
 
-    _contentRelativeExtent = notification.extent / notification.maxExtent;
+    if (notification.expand) {
+      _contentExtent = notification.extent;
+    }
 
     return false;
   }
@@ -303,12 +311,12 @@ class _BottomSheetState extends State<BottomSheet> {
       );
     }
 
-    bottomSheet = ModalRoute.of(context)?.barrierDismissible != true
+    bottomSheet = widget.barrierDismissible != true
         ? bottomSheet
         : GestureDetector(
             onTapUp: (TapUpDetails detail) {
               final double relativePosition = 1 - detail.localPosition.dy / _childHeight;
-              if (relativePosition > _contentRelativeExtent) {
+              if (relativePosition > _contentExtent) {
                 Navigator.maybePop(context);
               }
             },
@@ -422,6 +430,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String routeLabel = _getRouteLabel(localizations);
+    final bool? barrierDismissible = ModalRoute.of(context)?.barrierDismissible;
 
     return AnimatedBuilder(
       animation: widget.route!.animation!,
@@ -441,6 +450,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         enableDrag: widget.enableDrag,
         onDragStart: handleDragStart,
         onDragEnd: handleDragEnd,
+        barrierDismissible: barrierDismissible,
       ),
       builder: (BuildContext context, Widget? child) {
         // Disable the initial animation when accessible navigation is on so

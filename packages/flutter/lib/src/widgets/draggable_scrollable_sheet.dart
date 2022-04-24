@@ -399,6 +399,7 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
     required this.maxExtent,
     required this.initialExtent,
     required this.context,
+    required this.expand,
   }) : assert(extent != null),
        assert(initialExtent != null),
        assert(minExtent != null),
@@ -409,7 +410,8 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
        assert(minExtent <= initialExtent),
        assert(extent <= maxExtent),
        assert(initialExtent <= maxExtent),
-       assert(context != null);
+       assert(context != null),
+       assert(expand != null);
 
   /// The current value of the extent, between [minExtent] and [maxExtent].
   final double extent;
@@ -422,6 +424,9 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
 
   /// The initially requested value for [extent].
   final double initialExtent;
+
+  /// Whether the widget that fired this notification should expand to fill the available space in its parent or not.
+  final bool expand;
 
   /// The build context of the widget that fired this notification.
   ///
@@ -456,6 +461,7 @@ class _DraggableSheetExtent {
     required this.snapSizes,
     required this.initialSize,
     required this.onSizeChanged,
+    required this.expand,
     ValueNotifier<double>? currentSize,
     bool? hasDragged,
   })  : assert(minSize != null),
@@ -479,6 +485,7 @@ class _DraggableSheetExtent {
   final double initialSize;
   final ValueNotifier<double> _currentSize;
   final VoidCallback onSizeChanged;
+  final bool expand;
   double availablePixels;
 
   // Used to disable snapping until the user has dragged on the sheet. We do
@@ -538,6 +545,7 @@ class _DraggableSheetExtent {
       extent: currentSize,
       initialExtent: initialSize,
       context: context,
+      expand: expand,
     ).dispatch(context);
   }
 
@@ -560,6 +568,7 @@ class _DraggableSheetExtent {
     required List<double> snapSizes,
     required double initialSize,
     required VoidCallback onSizeChanged,
+    required bool expand,
   }) {
     return _DraggableSheetExtent(
       minSize: minSize,
@@ -573,6 +582,7 @@ class _DraggableSheetExtent {
           ? _currentSize.value.clamp(minSize, maxSize)
           : initialSize),
       hasDragged: hasDragged,
+      expand: expand,
     );
   }
 }
@@ -586,12 +596,16 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     super.initState();
     _extent = _DraggableSheetExtent(
       minSize: widget.minChildSize,
-      maxSize: widget.expand ? widget.maxChildSize : widget.initialChildSize,
+      maxSize: widget.maxChildSize,
       snap: widget.snap,
       snapSizes: _impliedSnapSizes(),
       initialSize: widget.initialChildSize,
       onSizeChanged: _setExtent,
-    )..updateSize(widget.initialChildSize, context);
+      expand: widget.expand,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _extent.updateSize(widget.initialChildSize, context);
+    });
     _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
     widget.controller?._attach(_scrollController);
   }
@@ -666,11 +680,12 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     _extent.dispose();
     _extent = _extent.copyWith(
       minSize: widget.minChildSize,
-      maxSize: widget.expand ? widget.maxChildSize : widget.initialChildSize,
+      maxSize: widget.maxChildSize,
       snap: widget.snap,
       snapSizes: _impliedSnapSizes(),
       initialSize: widget.initialChildSize,
       onSizeChanged: _setExtent,
+      expand: widget.expand,
     );
     // Modify the existing scroll controller instead of replacing it so that
     // developers listening to the controller do not have to rebuild their listeners.

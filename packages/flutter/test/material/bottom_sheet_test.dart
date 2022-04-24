@@ -414,8 +414,7 @@ testWidgets('Tapping inside a modal BottomSheet and outside a DraggableScrollabl
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    final RenderBox renderBox = draggableScrollableSheetKey.currentContext!.findRenderObject()! as RenderBox;
-    final Offset position = renderBox.localToGlobal(Offset.zero);
+    final Offset position = tester.getTopLeft(find.byKey(draggableScrollableSheetKey));
 
     // Tap above the draggable scrollable sheet to dismiss it.
     await tester.tapAt(Offset(20.0, position.dy - 10.0));
@@ -423,7 +422,7 @@ testWidgets('Tapping inside a modal BottomSheet and outside a DraggableScrollabl
     expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsNothing);
   });
-  
+
   testWidgets('Verify that the BottomSheet animates non-linearly', (WidgetTester tester) async {
     late BuildContext savedContext;
 
@@ -805,6 +804,7 @@ testWidgets('Tapping inside a modal BottomSheet and outside a DraggableScrollabl
                   children: <TestSemantics>[
                     TestSemantics(
                       label: 'BottomSheet',
+                      actions: <SemanticsAction>[SemanticsAction.tap],
                       textDirection: TextDirection.ltr,
                     ),
                   ],
@@ -904,12 +904,17 @@ testWidgets('Tapping inside a modal BottomSheet and outside a DraggableScrollabl
                   ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                      actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollUp],
-                      children: <TestSemantics>[
+                      actions: <SemanticsAction>[SemanticsAction.tap],
+                      children:<TestSemantics>[
                         TestSemantics(
-                          label: 'BottomSheet',
-                          textDirection: TextDirection.ltr,
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollUp],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'BottomSheet',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
                       ],
                     ),
