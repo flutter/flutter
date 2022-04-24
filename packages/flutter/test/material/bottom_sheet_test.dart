@@ -373,7 +373,7 @@ testWidgets('Tapping inside a modal BottomSheet and outside a DraggableScrollabl
     final RenderBox renderBox = draggableScrollableSheetKey.currentContext!.findRenderObject()! as RenderBox;
     final Offset position = renderBox.localToGlobal(Offset.zero);
 
-    // Tap above the bottom sheet to dismiss it.
+    // Tap above the draggable scrollable sheet to dismiss it.
     await tester.tapAt(Offset(20.0, position.dy - 10.0));
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(showBottomSheetThenCalled, isTrue);
