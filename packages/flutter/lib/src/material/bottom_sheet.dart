@@ -181,7 +181,7 @@ class BottomSheet extends StatefulWidget {
   final BoxConstraints? constraints;
 
   /// If true, the bottom sheet will be dismissed when user taps on the scrim.
-  /// 
+  ///
   /// Default is false.
   final bool? barrierDismissible;
 
