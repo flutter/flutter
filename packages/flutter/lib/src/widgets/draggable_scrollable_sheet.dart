@@ -586,7 +586,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     super.initState();
     _extent = _DraggableSheetExtent(
       minSize: widget.minChildSize,
-      maxSize: widget.maxChildSize,
+      maxSize: widget.expand ? widget.maxChildSize : widget.initialChildSize,
       snap: widget.snap,
       snapSizes: _impliedSnapSizes(),
       initialSize: widget.initialChildSize,
@@ -666,7 +666,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     _extent.dispose();
     _extent = _extent.copyWith(
       minSize: widget.minChildSize,
-      maxSize: widget.maxChildSize,
+      maxSize: widget.expand ? widget.maxChildSize : widget.initialChildSize,
       snap: widget.snap,
       snapSizes: _impliedSnapSizes(),
       initialSize: widget.initialChildSize,

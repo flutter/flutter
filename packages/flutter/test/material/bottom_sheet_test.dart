@@ -270,6 +270,50 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
   });
 
+  testWidgets('Tapping on a DraggableScrollableSheet in a modal BottomSheet should not dismiss it when expand=false', (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(find.text('BottomSheet'), findsNothing);
+
+    bool showBottomSheetThenCalled = false;
+    showModalBottomSheet<void>(
+      context: savedContext,
+      builder: (BuildContext context) => DraggableScrollableSheet(
+        expand: false,
+        builder: (_, ScrollController controller) {
+          return SingleChildScrollView(
+            controller: controller,
+            child: const Text('BottomSheet'),
+          );
+        },
+      ),
+    ).then<void>((void value) {
+      showBottomSheetThenCalled = true;
+    });
+
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet'), findsOneWidget);
+    expect(showBottomSheetThenCalled, isFalse);
+
+    // Tap on the bottom sheet itself, it should not be dismissed
+    await tester.tap(find.text('BottomSheet'));
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet'), findsOneWidget);
+    expect(showBottomSheetThenCalled, isFalse);
+  });
+
   testWidgets('Tapping outside a modal BottomSheet should dismiss it by default', (WidgetTester tester) async {
     late BuildContext savedContext;
 
