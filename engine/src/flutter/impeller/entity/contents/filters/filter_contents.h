@@ -8,7 +8,7 @@
 #include <variant>
 #include <vector>
 
-#include "impeller/entity/contents/filters/filter_input.h"
+#include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/formats.h"
 
@@ -145,8 +145,6 @@ class FilterContents : public Contents {
   FilterInput::Vector inputs_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FilterContents);
-
-  friend FilterContentsFilterInput;
 };
 
 }  // namespace impeller
