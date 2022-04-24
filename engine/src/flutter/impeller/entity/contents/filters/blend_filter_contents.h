@@ -5,7 +5,7 @@
 #pragma once
 
 #include "impeller/entity/contents/filters/filter_contents.h"
-#include "impeller/entity/contents/filters/filter_input.h"
+#include "impeller/entity/contents/filters/inputs/filter_input.h"
 
 namespace impeller {
 

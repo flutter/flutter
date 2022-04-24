@@ -7,7 +7,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
-#include "impeller/entity/contents/filters/filter_input.h"
+#include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"

@@ -5,7 +5,7 @@
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
 
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/contents/filters/filter_input.h"
+#include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 
