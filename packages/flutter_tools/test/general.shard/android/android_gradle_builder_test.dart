@@ -142,7 +142,7 @@ void main() {
         command: <String>[
          'gradlew',
           '--full-stacktrace',
-          '--debug',
+          '--info',
           '-Pverbose=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -782,7 +782,7 @@ void main() {
           '-Pis-plugin=false',
           '-PbuildNumber=1.0',
           '--full-stacktrace',
-          '--debug',
+          '--info',
           '-Pverbose=true',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
