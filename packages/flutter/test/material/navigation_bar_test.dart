@@ -218,7 +218,6 @@ void main() {
     expect(paddedCenter.dx, closeTo(defaultWidth / 2, precisionErrorTolerance));
   });
 
-
   testWidgets('NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
     // Pre-M3 settings that were hand coded.
     await tester.pumpWidget(
