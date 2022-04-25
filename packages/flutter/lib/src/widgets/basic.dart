@@ -83,15 +83,26 @@ export 'package:flutter/services.dart' show
 /// An [InheritedElement] that has hundreds of dependencies but will
 /// infrequently change.  This provides a performance tradeoff where building
 /// the [Widget]s is faster but performing updates is slower.
+///
+/// |                     | _UbiquitiousInheritedElement | InheritedElement |
+/// |---------------------|------------------------------|------------------|
+/// | insert (best case)  | O(1)                         | O(1)             |
+/// | insert (worst case) | O(1)                         | O(n)             |
+/// | search (best case)  | O(n)                         | O(1)             |
+/// | search (worst case) | O(n)                         | O(n)             |
+///
+/// Insert happens when building the [Widget] tree, search happens when updating
+/// [Widget]s.
 class _UbiquitousInheritedElement extends InheritedElement {
   /// Creates an element that uses the given widget as its configuration.
   _UbiquitousInheritedElement(InheritedWidget widget) : super(widget);
 
   @override
   void setDependencies(Element dependent, Object? value) {
-    if (value != null) {
-      throw Exception('Setting aspects on _UbiquitousInheritedElement is not supported.');
-    }
+    // This is where the cost of [InheritedElement] is incurred during build
+    // time of the widget tree.  Omitting this bookkeeping is where the
+    // performance savings come from.
+    assert(value != null);
   }
 
   @override
