@@ -1160,6 +1160,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
             bodyText2Style = Theme.of(context).textTheme.bodyText2!;
             captionStyle = Theme.of(context).textTheme.caption!;
             return Stepper(
+              type: StepperType.horizontal,
               currentStep: index,
               onStepTapped: (int i) {
                 setState(() {
@@ -1168,26 +1169,19 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
               },
               steps: <Step>[
                 Step(
-                  title: const Text('Step 1 Title'),
-                  content: const Text('Step 1 Content'),
-                  label: Text('Step 1 Label', style: Theme.of(context).textTheme.caption),
+                  title: const Text('Title 1'),
+                  content: const Text('Content 1'),
+                  label: Text('Label 1', style: Theme.of(context).textTheme.caption),
                 ),
                 Step(
-                  title: const Text('Step 2 Title'),
-                  content: const Text('Step 2 Content'),
-                  label: Text('Step 2 Label', style: Theme.of(context).textTheme.bodyText1),
+                  title: const Text('Title 2'),
+                  content: const Text('Content 2'),
+                  label: Text('Label 2', style: Theme.of(context).textTheme.bodyText1),
                 ),
                 Step(
-                  title: const Text('Step 3 Title'),
-                  content: const Text('Step 3 Content'),
-                  subtitle: const Text('Step 3 Subtitle'),
-                  label: Text('Step 3 Label',
-                      style: Theme.of(context).textTheme.bodyText1),
-                ),
-                Step(
-                  title: const Text('Step 4 Title'),
-                  content: const Text('Step 4 Content'),
-                  label: Text('Step 4 Label',
+                  title: const Text('Title 3'),
+                  content: const Text('Content 3'),
+                  label: Text('Label 3',
                       style: Theme.of(context).textTheme.bodyText2),
                 ),
               ],
@@ -1199,41 +1193,41 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
     // Check Styles of Label Text Widgets before tapping steps
     final Text label1TextWidget =
-        tester.widget<Text>(find.text('Step 1 Label'));
-    final Text label4TextWidget =
-        tester.widget<Text>(find.text('Step 4 Label'));
+        tester.widget<Text>(find.text('Label 1'));
+    final Text label3TextWidget =
+        tester.widget<Text>(find.text('Label 3'));
 
     expect(captionStyle, label1TextWidget.style);
-    expect(bodyText2Style, label4TextWidget.style);
+    expect(bodyText2Style, label3TextWidget.style);
 
     late Text selectedLabelTextWidget;
     late Text nextLabelTextWidget;
 
     // Tap to Step1 Label then, `index` become 0
-    await tester.tap(find.text('Step 1 Label'));
+    await tester.tap(find.text('Label 1'));
     expect(index, 0);
 
     // Check Styles of Selected Label Text Widgets and Another Label Text Widget
     selectedLabelTextWidget =
-        tester.widget<Text>(find.text('Step ${index + 1} Label'));
+        tester.widget<Text>(find.text('Label ${index + 1}'));
     expect(captionStyle, selectedLabelTextWidget.style);
     nextLabelTextWidget =
-        tester.widget<Text>(find.text('Step ${index + 2} Label'));
+        tester.widget<Text>(find.text('Label ${index + 2}'));
     expect(bodyText1Style, nextLabelTextWidget.style);
-    
+
 
     // Tap to Step2 Label then, `index` become 1
-    await tester.tap(find.text('Step 2 Label'));
+    await tester.tap(find.text('Label 2'));
     expect(index, 1);
 
     // Check Styles of Selected Label Text Widgets and Another Label Text Widget
     selectedLabelTextWidget =
-        tester.widget<Text>(find.text('Step ${index + 1} Label'));
+        tester.widget<Text>(find.text('Label ${index + 1}'));
     expect(bodyText1Style, selectedLabelTextWidget.style);
 
     nextLabelTextWidget =
-        tester.widget<Text>(find.text('Step ${index + 2} Label'));
-    expect(bodyText1Style, nextLabelTextWidget.style);
+        tester.widget<Text>(find.text('Label ${index + 2}'));
+    expect(bodyText2Style, nextLabelTextWidget.style);
   });
 }
 
