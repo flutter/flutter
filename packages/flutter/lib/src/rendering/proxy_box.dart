@@ -892,24 +892,12 @@ class RenderOpacity extends RenderProxyBox {
         layer = null;
         return;
       }
-      if (needsCompositing) {
-        layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
-      } else {
-        bool skipSaveLayer = _alpha == 255;
-        assert(() {
-          skipSaveLayer = debugDisableOpacityLayers;
-          return true;
-        }());
-
-        if (skipSaveLayer) {
-          super.paint(context, offset);
-        } else {
-          context.canvas.saveLayer(offset & size, Paint()..color = Color(_alpha << 24));
-          super.paint(context, offset);
-          context.canvas.restore();
-        }
-        layer = null;
-      }
+      assert(needsCompositing);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     }
   }
 
@@ -1017,6 +1005,10 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
       }
       assert(needsCompositing);
       layer = context.pushOpacity(offset, _alpha!, super.paint, oldLayer: layer as OpacityLayer?);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     }
   }
 
@@ -1126,6 +1118,10 @@ class RenderShaderMask extends RenderProxyBox {
         ..maskRect = offset & size
         ..blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -1192,6 +1188,10 @@ class RenderBackdropFilter extends RenderProxyBox {
       layer!.filter = _filter;
       layer!.blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -2481,6 +2481,10 @@ class RenderTransform extends RenderProxyBox {
           layer = ImageFilterLayer(imageFilter: filter);
         }
         context.pushLayer(layer!, super.paint, offset);
+        assert(() {
+          layer!.debugCreator = debugCreator;
+          return true;
+        }());
       }
     }
   }
@@ -5267,7 +5271,10 @@ class RenderLeaderLayer extends RenderProxyBox {
         ..offset = offset;
     }
     context.pushLayer(layer!, super.paint, Offset.zero);
-    assert(layer != null);
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -5479,6 +5486,10 @@ class RenderFollowerLayer extends RenderProxyBox {
         double.infinity,
       ),
     );
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
