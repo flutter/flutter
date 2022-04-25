@@ -27,6 +27,7 @@ test_fixtures("file_fixtures") {
     "embarcadero.jpg",
     "kalimba.jpg",
     "sample.vert",
+    "struct_def_bug.vert",
     "types.h",
     "test_texture.frag",
     "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf",
