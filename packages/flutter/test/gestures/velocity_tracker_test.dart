@@ -171,4 +171,83 @@ void main() {
       });
     });
   });
+
+  group('VelocityTracker', () {
+    group('getVelocityEstimate', () {
+      void _expectVelocityEstimateToMatch(VelocityEstimate? velocityEstimate,
+          VelocityEstimate velocityEstimateRef) {
+        expect(velocityEstimate, isNotNull);
+        expect(velocityEstimate!.pixelsPerSecond,
+            equals(velocityEstimateRef.pixelsPerSecond));
+        expect(velocityEstimate.confidence,
+            equals(velocityEstimateRef.confidence));
+        expect(velocityEstimate.duration, equals(velocityEstimateRef.duration));
+        expect(velocityEstimate.offset, equals(velocityEstimateRef.offset));
+      }
+
+      test(
+          'Returns an horizontal infinite velocity when the duration is 0.0 for an horizontal trajectory',
+          () {
+        final VelocityTracker velocityTracker = VelocityTracker.withKind(PointerDeviceKind.touch);
+        const List<Offset> trajectory = <Offset>[
+          Offset(10.0, 0.0),
+          Offset(20.0, 0.0),
+          Offset(50.0, 0.0)
+        ];
+        for (final Offset point in trajectory) {
+          velocityTracker.addPosition(Duration.zero, point);
+        }
+        _expectVelocityEstimateToMatch(
+          velocityTracker.getVelocityEstimate(),
+          VelocityEstimate(
+              pixelsPerSecond: const Offset(double.infinity, 0.0),
+              confidence: 1.0,
+              duration: Duration.zero,
+              offset: trajectory.last - trajectory.first),
+        );
+      });
+      test(
+          'Returns a vertical infinite velocity when the duration is 0.0 for an vertical trajectory',
+          () {
+        final VelocityTracker velocityTracker = VelocityTracker.withKind(PointerDeviceKind.touch);
+        const List<Offset> trajectory = <Offset>[
+          Offset(0.0, 329.0),
+          Offset(0.0, 437.0),
+          Offset(0.0, 872.0)
+        ];
+        for (final Offset point in trajectory) {
+          velocityTracker.addPosition(Duration.zero, point);
+        }
+        _expectVelocityEstimateToMatch(
+          velocityTracker.getVelocityEstimate(),
+          VelocityEstimate(
+              pixelsPerSecond: const Offset(0.0, double.infinity),
+              confidence: 1.0,
+              duration: Duration.zero,
+              offset: trajectory.last - trajectory.first),
+        );
+      });
+      test(
+          'Returns an infinite velocity when the duration is 0.0 for a neither horizontal/vertical trajectory',
+          () {
+        final VelocityTracker velocityTracker = VelocityTracker.withKind(PointerDeviceKind.touch);
+        const List<Offset> trajectory = <Offset>[
+          Offset(10.0, 23.0),
+          Offset(20.0, 67.0),
+          Offset(50.0, 118.0)
+        ];
+        for (final Offset point in trajectory) {
+          velocityTracker.addPosition(Duration.zero, point);
+        }
+        _expectVelocityEstimateToMatch(
+          velocityTracker.getVelocityEstimate(),
+          VelocityEstimate(
+              pixelsPerSecond: Offset.infinite,
+              confidence: 1.0,
+              duration: Duration.zero,
+              offset: trajectory.last - trajectory.first),
+        );
+      });
+    });
+  });
 }
