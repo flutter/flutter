@@ -1,4 +1,4 @@
-Signature: 5237eea1e3cc3e4e601d59b781676311
+Signature: e5d5c643e22bf792d9e6d32ee994bf82
 
 UNUSED LICENSES:
 
@@ -6818,6 +6818,9 @@ ORIGIN: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp + ../../../
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
 FILE: ../../../third_party/skia/gm/palette.cpp
+FILE: ../../../third_party/skia/include/core/SkOpenTypeSVGDecoder.h
+FILE: ../../../third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h
+FILE: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSBIX.cpp
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_hmtx.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLWGSLCodeGenerator.cpp
