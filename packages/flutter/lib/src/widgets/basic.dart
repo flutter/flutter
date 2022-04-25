@@ -95,7 +95,7 @@ export 'package:flutter/services.dart' show
 /// [Widget]s.
 class _UbiquitousInheritedElement extends InheritedElement {
   /// Creates an element that uses the given widget as its configuration.
-  _UbiquitousInheritedElement(InheritedWidget widget) : super(widget);
+  _UbiquitousInheritedElement(super.widget);
 
   @override
   void setDependencies(Element dependent, Object? value) {
@@ -131,8 +131,7 @@ class _UbiquitousInheritedElement extends InheritedElement {
 ///
 ///  * [_UbiquitousInheritedElement], the [Element] for [_UbiquitousInheritedWidget].
 abstract class _UbiquitousInheritedWidget extends InheritedWidget {
-  const _UbiquitousInheritedWidget({ Key? key, required Widget child })
-    : super(key: key, child: child);
+  const _UbiquitousInheritedWidget({super.key, required super.child});
 
   @override
   InheritedElement createElement() => _UbiquitousInheritedElement(this);

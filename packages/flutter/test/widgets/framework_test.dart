@@ -1713,7 +1713,7 @@ The findRenderObject() method was called for the following element:
 }
 
 class _TestInheritedElement extends InheritedElement {
-  _TestInheritedElement(InheritedWidget widget) : super(widget);
+  _TestInheritedElement(super.widget);
   @override
   bool doesDependOnInheritedElement(InheritedElement element) {
     return super.doesDependOnInheritedElement(element);
