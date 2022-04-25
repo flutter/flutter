@@ -1181,8 +1181,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
                 Step(
                   title: const Text('Title 3'),
                   content: const Text('Content 3'),
-                  label: Text('Label 3',
-                      style: Theme.of(context).textTheme.bodyText2),
+                  label: Text('Label 3', style: Theme.of(context).textTheme.bodyText2),
                 ),
               ],
             );
