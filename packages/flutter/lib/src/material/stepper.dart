@@ -758,8 +758,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    _buildIcon(i),
-                    _buildLabelText(i),
+                    if (widget.steps[i].label != null) const SizedBox(height: 24.0,),
+                    Center(child: _buildIcon(i)),
+                    if (widget.steps[i].label != null) SizedBox(height : 24.0, child: _buildLabelText(i),),
                   ],
                 ),
               ),
