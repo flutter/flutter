@@ -164,7 +164,8 @@ class Step {
   /// Whether or not the step is active. The flag only influences styling.
   final bool isActive;
 
-  /// Optional widget that appears under the [title]. By default, uses the `bodyText1` theme.
+  /// Only [StepperType.horizontal], Optional widget that appears under the [title].
+  /// By default, uses the `bodyText1` theme.
   final Widget? label;
 }
 
