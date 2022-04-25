@@ -17,6 +17,13 @@ import 'framework.dart';
 /// [ImageFiltered.enabled] to `false` is a more efficient manner of disabling
 /// an image filter.
 ///
+/// The framework does not attempt to optimize out "no-op" filters because it
+/// cannot tell the difference between an intentional no-op and a filter that is
+/// only incidentally a no-op. Consider an ImageFilter.matrix that is animated
+/// and happens to pass through the identity matrix. If the framework identified it
+/// as a no-op it would drop and then recreate the layer during the animation which
+/// would be more expensive than keeping it around.
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=7Lftorq4i2o}
 ///
 /// See also:
@@ -43,7 +50,7 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   /// widget.
   ///
   /// Prefer setting enabled to `false` instead of creating a "no-op" filter
-  /// type.
+  /// type for performance reasons.
   final bool enabled;
 
   @override
