@@ -1119,6 +1119,10 @@ class RenderShaderMask extends RenderProxyBox {
         ..maskRect = offset & size
         ..blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -1185,6 +1189,10 @@ class RenderBackdropFilter extends RenderProxyBox {
       layer!.filter = _filter;
       layer!.blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -2430,6 +2438,10 @@ class RenderTransform extends RenderProxyBox {
           layer = ImageFilterLayer(imageFilter: filter);
         }
         context.pushLayer(layer!, super.paint, offset);
+        assert(() {
+          layer!.debugCreator = debugCreator;
+          return true;
+        }());
       }
     }
   }
@@ -5216,7 +5228,10 @@ class RenderLeaderLayer extends RenderProxyBox {
         ..offset = offset;
     }
     context.pushLayer(layer!, super.paint, Offset.zero);
-    assert(layer != null);
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -5428,6 +5443,10 @@ class RenderFollowerLayer extends RenderProxyBox {
         double.infinity,
       ),
     );
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
