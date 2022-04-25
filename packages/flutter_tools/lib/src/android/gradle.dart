@@ -269,7 +269,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     ];
     if (_logger.isVerbose) {
       command.add('--full-stacktrace');
-      command.add('--debug');
+      command.add('--info');
       command.add('-Pverbose=true');
     } else {
       command.add('-q');
@@ -593,7 +593,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     ];
     if (_logger.isVerbose) {
       command.add('--full-stacktrace');
-      command.add('--debug');
+      command.add('--info');
       command.add('-Pverbose=true');
     } else {
       command.add('-q');
