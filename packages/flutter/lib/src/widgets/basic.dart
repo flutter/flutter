@@ -102,7 +102,7 @@ class _UbiquitousInheritedElement extends InheritedElement {
     // This is where the cost of [InheritedElement] is incurred during build
     // time of the widget tree.  Omitting this bookkeeping is where the
     // performance savings come from.
-    assert(value != null);
+    assert(value == null);
   }
 
   @override
