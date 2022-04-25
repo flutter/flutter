@@ -59,7 +59,8 @@ Future<void> main() async {
         );
       });
 
-      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
+      // Check the tool is no longer copying to the legacy xcframework location.
+      checkDirectoryNotExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
 
       final Directory ephemeralIOSHostApp = Directory(path.join(
         projectDir.path,
@@ -79,32 +80,6 @@ Future<void> main() async {
         );
       }
 
-      section('Build ephemeral host app when SDK is on external disk');
-
-      // Pretend the SDK was on an external drive with stray "._" files in the xcframework
-      // and build again.
-      Directory(path.join(
-        projectDir.path,
-        '.ios',
-        'Flutter',
-        'engine',
-        'Flutter.xcframework',
-        '._ios-arm64_x86_64-simulator',
-      )).createSync(recursive: true);
-
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'build',
-          options: <String>['ios', '--no-codesign', '--simulator', '--debug'],
-        );
-      });
-
-      section('Clean build');
-
-      await inDirectory(projectDir, () async {
-        await flutter('clean');
-      });
-
       section('Build ephemeral host app in profile mode without CocoaPods');
 
       await inDirectory(projectDir, () async {
@@ -113,8 +88,6 @@ Future<void> main() async {
           options: <String>['ios', '--no-codesign', '--profile'],
         );
       });
-
-      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
 
       if (!exists(ephemeralIOSHostApp)) {
         return TaskResult.failure('Failed to build ephemeral host .app');
@@ -211,7 +184,6 @@ dependencies:
           options: <String>['ios', '--no-codesign', '-v'],
         );
       });
-      checkDirectoryExists(path.join(projectDir.path, '.ios', 'Flutter', 'engine', 'Flutter.xcframework'));
 
       final bool ephemeralHostAppWithCocoaPodsBuilt = exists(ephemeralIOSHostApp);
 
@@ -265,8 +237,6 @@ dependencies:
       final File objectiveCAnalyticsOutputFile = File(path.join(tempDir.path, 'analytics-objc.log'));
       final Directory objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
 
-      final File dummyAppFramework = File(path.join(projectDir.path, '.ios', 'Flutter', 'App.framework', 'App'));
-      checkFileNotExists(dummyAppFramework.path);
       await inDirectory(objectiveCHostApp, () async {
         section('Validate iOS Objective-C host app Podfile');
 
@@ -305,7 +275,7 @@ end
 
         final File hostPodfileLockFile = File(path.join(objectiveCHostApp.path, 'Podfile.lock'));
         final String hostPodfileLockOutput = hostPodfileLockFile.readAsStringSync();
-        if (!hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/engine"')
+        if (!hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/FlutterPluginRegistrant"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/url_launcher_ios/ios"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/google_sign_in/ios"')
@@ -315,13 +285,9 @@ end
           throw TaskResult.failure('Building host app Podfile.lock does not contain expected pods');
         }
 
-        // Just running "pod install" should create a fake App.framework so CocoaPods recognizes
-        // it as a framework that needs to be embedded, before Flutter actually creates it.
-        checkFileExists(dummyAppFramework.path);
-        final String? version = await minPhoneOSVersion(dummyAppFramework.path);
-        if (version != '11.0') {
-          throw TaskResult.failure('Minimum version set to $version, expected 11.0');
-        }
+        // Check the tool is no longer copying to the legacy App.framework location.
+        final File dummyAppFramework = File(path.join(projectDir.path, '.ios', 'Flutter', 'App.framework', 'App'));
+        checkFileNotExists(dummyAppFramework.path);
 
         section('Build iOS Objective-C host app');
 
