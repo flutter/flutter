@@ -885,6 +885,9 @@ class RenderOpacity extends RenderProxyBox {
   }
 
   @override
+  bool get alwaysNeedsCompositing => child != null && _alpha > 0;
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       if (_alpha == 0) {

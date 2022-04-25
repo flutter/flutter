@@ -240,13 +240,13 @@ void main() {
     expect(renderOpacity.needsCompositing, false);
   });
 
-  test('RenderOpacity does not composite if it is opaque', () {
+  test('RenderOpacity does composite if it is opaque', () {
     final RenderOpacity renderOpacity = RenderOpacity(
       child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
 
     layout(renderOpacity, phase: EnginePhase.composite);
-    expect(renderOpacity.needsCompositing, false);
+    expect(renderOpacity.needsCompositing, true);
   });
 
   test('RenderOpacity reuses its layer', () {
