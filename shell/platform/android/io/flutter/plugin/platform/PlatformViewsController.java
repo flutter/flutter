@@ -906,7 +906,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       // The platform view is appended to a mutator view.
       //
       // Otherwise, hide the platform view, but don't remove it from the view hierarchy yet as
-      // they are removed when the framework diposes the platform view widget.
+      // they are removed when the framework disposes the platform view widget.
       if (currentFrameUsedPlatformViewIds.contains(viewId)
           && (isFrameRenderedUsingImageReaders || !synchronizeToNativeViewHierarchy)) {
         parentView.setVisibility(View.VISIBLE);
