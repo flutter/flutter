@@ -63,8 +63,6 @@ dependency_overrides:
     path: ../../../third_party/pkg/flutter_packages/packages/metrics_center
   path:
     path: ../../../third_party/dart/third_party/pkg/path
-  pedantic:
-    path: ../../../third_party/dart/third_party/pkg/pedantic
   smith:
     path: ../../../third_party/dart/pkg/smith
   source_span:
