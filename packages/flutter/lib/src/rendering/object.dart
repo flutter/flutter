@@ -2145,7 +2145,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// See [RepaintBoundary] for more information about how repaint boundaries function.
   bool get isRepaintBoundary => false;
 
-  /// T render object composites as a repaint boundary, but only if its child
+  /// The render object composites as a repaint boundary, but only if its child
   /// does.
   ///
   /// For example, a render object which is a repaint boundary only when its
