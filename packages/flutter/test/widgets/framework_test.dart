@@ -1696,12 +1696,16 @@ The findRenderObject() method was called for the following element:
   });
 
   testWidgets('doesDependOnInheritedElement', (WidgetTester tester) async {
-    final _TestInheritedElement ancestor = _TestInheritedElement(
-        const Directionality(
-            textDirection: TextDirection.ltr, child: Placeholder()));
-    final _TestInheritedElement child = _TestInheritedElement(
-        const Directionality(
-            textDirection: TextDirection.ltr, child: Placeholder()));
+    final _TestInheritedElement ancestor =
+        _TestInheritedElement(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: Placeholder(),
+    ));
+    final _TestInheritedElement child =
+        _TestInheritedElement(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: Placeholder(),
+    ));
     expect(child.doesDependOnInheritedElement(ancestor), isFalse);
     child.dependOnInheritedElement(ancestor);
     expect(child.doesDependOnInheritedElement(ancestor), isTrue);
