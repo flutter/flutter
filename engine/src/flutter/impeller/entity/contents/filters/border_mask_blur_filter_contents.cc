@@ -117,13 +117,10 @@ std::optional<Rect> BorderMaskBlurFilterContents::GetFilterCoverage(
   if (!coverage.has_value()) {
     return std::nullopt;
   }
-
+  auto transform = inputs[0]->GetTransform(entity);
   auto transformed_blur_vector =
-      inputs[0]
-          ->GetTransform(entity)
-          .TransformDirection(
-              Vector2(Radius{sigma_x_}.radius, Radius{sigma_y_}.radius))
-          .Abs();
+      transform.TransformDirection(Vector2(Radius{sigma_x_}.radius, 0)).Abs() +
+      transform.TransformDirection(Vector2(0, Radius{sigma_y_}.radius)).Abs();
   auto extent = coverage->size + transformed_blur_vector * 2;
   return Rect(coverage->origin - transformed_blur_vector,
               Size(extent.x, extent.y));

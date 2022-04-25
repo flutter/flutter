@@ -766,12 +766,12 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     // Renders a red "cover" rectangle that shows the original position of the
     // unfiltered input.
     Entity cover_entity;
-    cover_entity.SetContents(
-        SolidColorContents::Make(PathBuilder{}
-                                     .AddRect(Rect(-Point(bridge->GetSize()) / 2,
-                                                   Size(bridge->GetSize())))
-                                     .TakePath(),
-                                 cover_color));
+    cover_entity.SetContents(SolidColorContents::Make(
+        PathBuilder{}
+            .AddRect(
+                Rect(-Point(bridge->GetSize()) / 2, Size(bridge->GetSize())))
+            .TakePath(),
+        cover_color));
     cover_entity.SetTransformation(ctm);
 
     cover_entity.Render(context, pass);
@@ -848,6 +848,34 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
     auto expected = Rect::MakeLTRB(-4, -4, 14, 14);
+    ASSERT_TRUE(actual.has_value());
+    ASSERT_RECT_NEAR(actual.value(), expected);
+  }
+}
+
+TEST_P(EntityTest, BorderMaskBlurCoverageIsCorrect) {
+  auto fill = std::make_shared<SolidColorContents>();
+  fill->SetPath(
+      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath());
+  fill->SetColor(Color::CornflowerBlue());
+  auto border_mask_blur = FilterContents::MakeBorderMaskBlur(
+      FilterInput::Make(fill), FilterContents::Radius{3},
+      FilterContents::Radius{4});
+
+  {
+    Entity e;
+    e.SetTransformation(Matrix());
+    auto actual = border_mask_blur->GetCoverage(e);
+    auto expected = Rect::MakeXYWH(-3, -4, 306, 408);
+    ASSERT_TRUE(actual.has_value());
+    ASSERT_RECT_NEAR(actual.value(), expected);
+  }
+
+  {
+    Entity e;
+    e.SetTransformation(Matrix::MakeRotationZ(Radians{kPi / 4}));
+    auto actual = border_mask_blur->GetCoverage(e);
+    auto expected = Rect::MakeXYWH(-287.792, -4.94975, 504.874, 504.874);
     ASSERT_TRUE(actual.has_value());
     ASSERT_RECT_NEAR(actual.value(), expected);
   }
