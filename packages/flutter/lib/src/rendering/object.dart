@@ -435,7 +435,10 @@ class PaintingContext extends ClipContext {
   /// {@endtemplate}
   ClipRectLayer? pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer? oldLayer }) {
     final Rect offsetClipRect = clipRect.shift(offset);
-    if (needsCompositing) {
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    } else if (needsCompositing) {
       final ClipRectLayer layer = oldLayer ?? ClipRectLayer();
       layer
         ..clipRect = offsetClipRect
