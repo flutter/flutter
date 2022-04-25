@@ -842,10 +842,10 @@ class RenderOpacity extends RenderProxyBox {
        _alpha = ui.Color.getAlphaFromOpacity(opacity),
        super(child);
 
-  int _alpha;
-
   @override
   bool get alwaysNeedsCompositing => child != null && _alpha > 0;
+
+  int _alpha;
 
   /// The fraction to scale the child's alpha value.
   ///
@@ -864,8 +864,8 @@ class RenderOpacity extends RenderProxyBox {
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
-    final bool wasVisible = _alpha != 0;
     final bool didNeedCompositing = alwaysNeedsCompositing;
+    final bool wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
     if (didNeedCompositing != alwaysNeedsCompositing)
@@ -888,9 +888,6 @@ class RenderOpacity extends RenderProxyBox {
     _alwaysIncludeSemantics = value;
     markNeedsSemanticsUpdate();
   }
-
-  @override
-  bool get alwaysNeedsCompositing => child != null && _alpha > 0;
 
   @override
   void paint(PaintingContext context, Offset offset) {
