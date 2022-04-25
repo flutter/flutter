@@ -12,14 +12,11 @@ enum StatusProjectValidator {
 class ProjectValidatorResult {
 
   const ProjectValidatorResult({
-    required String name,
-    required String value,
-    required StatusProjectValidator status,
-    String? warning,
-  }) : name = name,
-       value = value,
-       warning = warning,
-       status = status;
+    required this.name,
+    required this.value,
+    required this.status,
+    this.warning,
+  });
 
   final String name;
   final String value;
