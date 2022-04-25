@@ -286,7 +286,7 @@ class RangeSlider extends StatefulWidget {
   final int? divisions;
 
   /// Labels to show as text in the [SliderThemeData.rangeValueIndicatorShape]
-  /// when the slider is active and the [SliderThemeData.showValueIndicator]
+  /// when the slider is active and [SliderThemeData.showValueIndicator]
   /// is satisfied.
   ///
   /// There are two labels: one for the start thumb and one for the end thumb.
@@ -1493,7 +1493,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     double value,
     double increasedValue,
     double decreasedValue,
-    String? label,
     VoidCallback increaseAction,
     VoidCallback decreaseAction,
   ) {
@@ -1531,7 +1530,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       values.start,
       _increasedStartValue,
       _decreasedStartValue,
-      labels?.start,
       _increaseStartAction,
       _decreaseStartAction,
     );
@@ -1539,7 +1537,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       values.end,
       _increasedEndValue,
       _decreasedEndValue,
-      labels?.end,
       _increaseEndAction,
       _decreaseEndAction,
     );

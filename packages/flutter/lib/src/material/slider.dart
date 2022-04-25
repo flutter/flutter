@@ -318,7 +318,7 @@ class Slider extends StatefulWidget {
   final int? divisions;
 
   /// A label to show above the slider when the slider is active and
-  /// the [SliderThemeData.showValueIndicator] is satisfied.
+  /// [SliderThemeData.showValueIndicator] is satisfied.
   ///
   /// It is used to display the value of a discrete slider, and it is displayed
   /// as part of the value indicator shape.
