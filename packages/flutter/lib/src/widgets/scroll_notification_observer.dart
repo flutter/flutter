@@ -5,11 +5,11 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import 'framework.dart';
 import 'notification_listener.dart';
 import 'scroll_notification.dart';
+import 'scroll_position.dart';
 
 /// A [ScrollNotification] listener for [ScrollNotificationObserver].
 ///
