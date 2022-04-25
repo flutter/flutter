@@ -2145,23 +2145,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// See [RepaintBoundary] for more information about how repaint boundaries function.
   bool get isRepaintBoundary => false;
 
-  /// The render object composites as a repaint boundary, but only if its child
-  /// does.
-  ///
-  /// For example, a render object which is a repaint boundary only when its
-  /// child needs compositing would declare this as follows:
-  ///
-  /// ```dart
-  ///    @override
-  ///    bool get isRepaintBoundary => child?.needsCompositing ?? false;
-  ///
-  ///    @override
-  ///    bool get compositingDependsOnChild => true;
-  /// ```
-  ///
-  /// See [RepaintBoundary] for more information about how repaint boundaries function.
-  bool get compositingDependsOnChild => false;
-
   /// Called, in debug mode, if [isRepaintBoundary] is true, when either the
   /// this render object or its parent attempt to paint.
   ///
@@ -2295,7 +2278,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       if (parent._needsCompositingBitsUpdate)
         return;
 
-      if (!_wasRepaintBoundary && (parent.compositingDependsOnChild || !parent._wasRepaintBoundary)) {
+      if ((!_wasRepaintBoundary || !isRepaintBoundary) && !parent.isRepaintBoundary) {
         parent.markNeedsCompositingBitsUpdate();
         return;
       }

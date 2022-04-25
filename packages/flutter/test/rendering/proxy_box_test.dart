@@ -733,51 +733,6 @@ void main() {
 
     expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
   });
-
-  test('A RenderObject can be a repaint boundary conditional on whether or not its children need compositing', () {
-    final ConditionalNeedsCompositing childBox = ConditionalNeedsCompositing();
-    final ConditionalOnChildCompositingRepaintBoundary renderBox = ConditionalOnChildCompositingRepaintBoundary(childBox);
-
-    layout(renderBox, phase: EnginePhase.composite);
-
-    expect(renderBox.compositCount, 0);
-    expect(renderBox.paintCount, 1);
-    expect(childBox.needsCompositing, false);
-    expect(renderBox.needsCompositing, false);
-
-    // mark child as needing compositing.
-    childBox.alwaysNeedsCompositing = true;
-    childBox.markNeedsCompositingBitsUpdate();
-
-    pumpFrame(phase: EnginePhase.composite);
-
-    expect(renderBox.compositCount, 1);
-    expect(childBox.needsCompositing, true);
-    expect(renderBox.needsCompositing, true);
-    expect(renderBox.isRepaintBoundary, true);
-
-    // mark child as not needing compositing.
-    childBox.alwaysNeedsCompositing = false;
-    childBox.markNeedsCompositingBitsUpdate();
-
-    pumpFrame(phase: EnginePhase.composite);
-
-    expect(renderBox.compositCount, 1);
-    expect(childBox.needsCompositing, false);
-    expect(renderBox.needsCompositing, false);
-    expect(renderBox.isRepaintBoundary, false);
-
-    // And back to compositing
-    childBox.alwaysNeedsCompositing = true;
-    childBox.markNeedsCompositingBitsUpdate();
-
-    pumpFrame(phase: EnginePhase.composite);
-
-    expect(renderBox.compositCount, 2);
-    expect(childBox.needsCompositing, true);
-    expect(renderBox.needsCompositing, true);
-    expect(renderBox.isRepaintBoundary, true);
-  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -870,48 +825,6 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     paintCount += 1;
-    super.paint(context, offset);
-  }
-}
-
-/// A render object that becomes a repaint boundary if its child needs
-/// compositing.
-class ConditionalOnChildCompositingRepaintBoundary extends RenderProxyBox {
-  ConditionalOnChildCompositingRepaintBoundary(super.child);
-
-  @override
-  bool get isRepaintBoundary => child?.needsCompositing ?? false;
-
-  @override
-  bool get compositingDependsOnChild => true;
-
-  int paintCount = 0;
-  int compositCount = 0;
-
-  @override
-  OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
-    compositCount += 1;
-    return oldLayer ?? OffsetLayer();
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    paintCount += 1;
-    super.paint(context, offset);
-  }
-}
-
-class ConditionalNeedsCompositing extends RenderProxyBox {
-  @override
-  bool alwaysNeedsCompositing = false;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (needsCompositing) {
-      layer = context.pushOpacity(offset, 100, super.paint, oldLayer: layer as OpacityLayer?);
-      return;
-    }
-    layer = null;
     super.paint(context, offset);
   }
 }
