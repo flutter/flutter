@@ -644,7 +644,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               // flood the tips of the connector lines.
               _buildLine(!_isFirst(index)),
               _buildIcon(index),
-              _buildLabelText(index),
               _buildLine(!_isLast(index)),
             ],
           ),
