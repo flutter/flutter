@@ -15,7 +15,7 @@ TextRun::TextRun(Font font) : font_(std::move(font)) {
 
 TextRun::~TextRun() = default;
 
-bool TextRun::AddGlyph(Glyph glyph, Matrix position) {
+bool TextRun::AddGlyph(Glyph glyph, Point position) {
   glyphs_.emplace_back(GlyphPosition{glyph, position});
   return true;
 }

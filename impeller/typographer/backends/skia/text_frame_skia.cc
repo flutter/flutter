@@ -52,8 +52,7 @@ TextFrame TextFrameFromTextBlob(sk_sp<SkTextBlob> blob, Scalar scale) {
           // kFull_Positioning has two scalars per glyph.
           const SkPoint* glyph_points = run.points();
           const auto* point = glyph_points + i;
-          text_run.AddGlyph(glyphs[i],
-                            Matrix::MakeTranslation({point->x(), point->y()}));
+          text_run.AddGlyph(glyphs[i], Point{point->x(), point->y()});
         }
         break;
       case SkTextBlobRunIterator::kRSXform_Positioning:
