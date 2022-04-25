@@ -1083,7 +1083,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     if (size.isEmpty)
       return;
 
-    // We have overflow and the clipBehavior isn't none. Clip it.
     _clipRectLayer.layer = context.pushClipRect(
       needsCompositing,
       offset,
