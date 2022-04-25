@@ -1976,10 +1976,18 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         color.alpha != 0xFF,
       );
     }
-    canvas.drawRRect(
-      offsetRRect,
-      Paint()..color = color
-    );
+    if (clipBehavior == Clip.antiAliasWithSaveLayer) {
+      // If we want to avoid the bleeding edge artifact
+      // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
+      // using saveLayer, we have to call drawPaint instead of drawPath as
+      // anti-aliased drawPath will always have such artifacts.
+      canvas.drawPaint( Paint()..color = color);
+    } else {
+      canvas.drawRRect(
+        offsetRRect,
+        Paint()..color = color
+      );
+    }
     layer = context.pushClipRRect(
       needsCompositing,
       offset,
@@ -2090,10 +2098,18 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       );
     }
 
-    canvas.drawPath(
-      offsetPath,
-      Paint()..color = color,
-    );
+    if (clipBehavior == Clip.antiAliasWithSaveLayer) {
+      // If we want to avoid the bleeding edge artifact
+      // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
+      // using saveLayer, we have to call drawPaint instead of drawPath as
+      // anti-aliased drawPath will always have such artifacts.
+      canvas.drawPaint( Paint()..color = color);
+    } else {
+      canvas.drawPath(
+        offsetPath,
+        Paint()..color = color
+      );
+    }
     layer = context.pushClipPath(
       needsCompositing,
       offset,
