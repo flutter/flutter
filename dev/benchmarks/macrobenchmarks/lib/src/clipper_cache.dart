@@ -15,7 +15,7 @@ class ClipperCachePage extends StatefulWidget {
 class _ClipperCachePageState extends State<ClipperCachePage>
     with TickerProviderStateMixin {
   final ScrollController _controller = ScrollController();
-  final bool isComplex = false;
+  final bool isComplex = true;
 
   @override
   void initState() {
