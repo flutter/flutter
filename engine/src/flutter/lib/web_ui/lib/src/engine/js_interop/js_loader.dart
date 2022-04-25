@@ -47,6 +47,7 @@ external DidCreateEngineInitializerFn? get didCreateEngineInitializer;
 /// and run a Flutter Web app, from JavaScript.
 @JS()
 @anonymous
+@staticInterop
 abstract class FlutterEngineInitializer{
   external factory FlutterEngineInitializer({
     required InitializeEngineFn initializeEngine,
@@ -59,6 +60,7 @@ abstract class FlutterEngineInitializer{
 /// (when called from JS).
 @JS()
 @anonymous
+@staticInterop
 abstract class InitializeEngineFnParameters {
 }
 
@@ -75,6 +77,7 @@ typedef ImmediateRunAppFn = Promise<FlutterApp> Function();
 /// and returns a promise of a FlutterAppCleaner.
 @JS()
 @anonymous
+@staticInterop
 abstract class FlutterAppRunner {
   /// Runs a flutter app
   external factory FlutterAppRunner({
@@ -86,6 +89,7 @@ abstract class FlutterAppRunner {
 /// runApp function of the FlutterAppRunner object (from JS).
 @JS()
 @anonymous
+@staticInterop
 abstract class RunAppFnParameters {
 }
 
@@ -97,6 +101,7 @@ typedef RunAppFn = Promise<FlutterApp> Function([RunAppFnParameters?]);
 /// A class that exposes the public API of a running Flutter Web App running.
 @JS()
 @anonymous
+@staticInterop
 abstract class FlutterApp {
   /// Cleans a Flutter app
   external factory FlutterApp();
