@@ -1453,6 +1453,17 @@ targets:
       task_name: animated_image_gc_perf
     scheduler: luci
 
+  - name: Linux_android animated_complex_opacity_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: animated_complex_opacity_perf__e2e_summary
+    scheduler: luci
+
   - name: Linux_android animated_placeholder_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
