@@ -232,11 +232,16 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     auto& struct_definitions = root["struct_definitions"] =
         nlohmann::json::array_t{};
     if (entrypoints.front().execution_model ==
-        spv::ExecutionModel::ExecutionModelVertex) {
+            spv::ExecutionModel::ExecutionModelVertex &&
+        !shader_resources.stage_inputs.empty()) {
       if (auto struc =
               ReflectPerVertexStructDefinition(shader_resources.stage_inputs);
           struc.has_value()) {
         struct_definitions.emplace_back(EmitStructDefinition(struc.value()));
+      } else {
+        // If there are stage inputs, it is an error to not generate a per
+        // vertex data struct for a vertex like shader stage.
+        return std::nullopt;
       }
     }
 
@@ -662,7 +667,10 @@ Reflector::ReflectPerVertexStructDefinition(
 
   for (size_t i = 0; i < locations.size(); i++) {
     if (locations.count(i) != 1) {
-      // Locations are not contiguous. Bail.
+      // Locations are not contiguous. This usually happens when a single stage
+      // input takes multiple input slots. No reflection information can be
+      // generated for such cases anyway. So bail! It is up to the shader author
+      // to make sure one stage input maps to a single input slot.
       return std::nullopt;
     }
   }
@@ -677,6 +685,7 @@ Reflector::ReflectPerVertexStructDefinition(
       }
     }
     // This really cannot happen with all the validation above.
+    FML_UNREACHABLE();
     return nullptr;
   };
 
