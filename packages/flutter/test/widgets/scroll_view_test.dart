@@ -1444,9 +1444,6 @@ void main() {
         ),
       ),
     );
-    final ScrollController controller = PrimaryScrollController.of(
-      tester.element(find.byType(CustomScrollView).first),
-    )!;
     await tester.pumpAndSettle();
     expect(
       tester.getRect(
