@@ -17,15 +17,20 @@ const Set<TargetPlatform> _kMobilePlatforms = <TargetPlatform>{
 
 /// Associates a [ScrollController] with a subtree.
 ///
-// TODO(Piinks): update docs if this concept tracks
+/// When a [ScrollView] has [ScrollView.primary] set to true, the [ScrollView]
+/// uses [of] to inherit the [PrimaryScrollController] associated with its
+/// subtree.
 ///
-/// When a [ScrollView] has [ScrollView.primary] set to true and is not given
-/// an explicit [ScrollController], the [ScrollView] uses [of] to find the
-/// [ScrollController] associated with its subtree.
+/// The PrimaryScrollController can be automatically inherited
+/// based on the [scrollDirection] and [TargetPlatform]. A [ScrollView] that has
+/// not been provided a controller, or set [ScrollView.primary], will evaluate
+/// this inheritance option using [shouldInherit]. By default, an [Axis.vertical]
+/// ScrollView on mobile platforms will automatically inherit the
+/// PrimaryScrollController.
 ///
-/// This mechanism can be used to provide default behavior for scroll views in a
-/// subtree. For example, the [Scaffold] uses this mechanism to implement the
-/// scroll-to-top gesture on iOS.
+/// Inheriting this ScrollController can provide default behavior for scroll
+/// views in a subtree. For example, the [Scaffold] uses this mechanism to
+/// implement the scroll-to-top gesture on iOS.
 ///
 /// Another default behavior handled by the PrimaryScrollController is default
 /// [ScrollAction]s. If a ScrollAction is not handled by an otherwise focused
@@ -83,7 +88,6 @@ class PrimaryScrollController extends InheritedWidget {
   ///
   /// When empty, no ScrollView in any Axis will automatically inherit this
   /// controller. Defaults to [TargetPlatformVariant.mobile].
-  // TODO(Piinks): Consider a better name if this concept tracks
   final Set<TargetPlatform> autoForPlatforms;
 
   /// Returns true if this PrimaryScrollController is configured to be

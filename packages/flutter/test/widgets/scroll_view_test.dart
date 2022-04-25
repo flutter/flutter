@@ -1414,6 +1414,58 @@ void main() {
     );
   });
 
+  testWidgets('Fallback ScrollActions handle too many positions with error message', (WidgetTester tester)  async {
+    Widget getScrollView() {
+      return SizedBox(
+        width: 400.0,
+        child: CustomScrollView(
+          primary: true,
+          slivers: List<Widget>.generate(
+            20,
+            (int index) {
+              return SliverToBoxAdapter(
+                child: Focus(
+                  child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Row(
+          children: <Widget>[
+            getScrollView(),
+            getScrollView(),
+          ],
+        ),
+      ),
+    );
+    final ScrollController controller = PrimaryScrollController.of(
+      tester.element(find.byType(CustomScrollView).first),
+    )!;
+    await tester.pumpAndSettle();
+    expect(
+      tester.getRect(
+        find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false).first
+      ),
+      equals(const Rect.fromLTRB(0.0, 0.0, 400.0, 50.0)),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(exception, isAssertionError);
+    expect(
+      exception.message,
+      contains(
+        'A ScrollAction was invoked with the PrimaryScrollController, but '
+        'more than one ScrollPosition is attached.'
+      ),
+    );
+  });
+
   testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
     final List<int> numbers = <int>[0,1,2];
 

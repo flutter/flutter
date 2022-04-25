@@ -1512,12 +1512,12 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             'ScrollController should be associated with the ScrollView that '
             'the Scrollbar is being applied to. '
             '${tryPrimary
-              ? 'A ScrollView with an Axis.vertical '
-                'ScrollDirection will automatically use the '
+              ? 'A ScrollView with an Axis.vertical ScrollDirection on mobile '
+                'platforms will automatically use the '
                 'PrimaryScrollController if the user has not provided a '
-                'ScrollController, but a ScrollDirection of Axis.horizontal will '
-                'not. To use the PrimaryScrollController explicitly, set ScrollView.primary '
-                'to true for the Scrollable widget.'
+                'ScrollController. To use the PrimaryScrollController '
+                'explicitly, set ScrollView.primary  to true for the Scrollable '
+                'widget.'
               : 'When providing your own ScrollController, ensure both the '
                 'Scrollbar and the Scrollable widget use the same one.'
             }',
@@ -1542,16 +1542,17 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             'The Scrollbar requires a single ScrollPosition in order to be painted.',
           ),
           ErrorHint(
-            'When $when, the associated Scrollable '
-            'widgets must have unique ScrollControllers. '
+            'When $when, the associated ScrollController should only have one '
+            'ScrollPosition attached. '
             '${tryPrimary
-              ? 'The PrimaryScrollController is used by default for '
-                'ScrollViews with an Axis.vertical ScrollDirection, '
-                'unless the ScrollView has been provided its own '
-                'ScrollController. More than one Scrollable may have tried '
-                'to use the PrimaryScrollController of the current context.'
-              : 'The provided ScrollController must be unique to a '
-                'Scrollable widget.'
+              ? 'If a ScrollController has not been provided, the '
+                'PrimaryScrollController is used by default on mobile platforms '
+                'for ScrollViews with an Axis.vertical scroll direction. More '
+                'than one ScrollView may have tried to use the '
+                'PrimaryScrollController of the current context. '
+                'ScrollView.primary can override this behavior.'
+              : 'The provided ScrollController must be unique to one '
+                'ScrollView widget.'
             }',
           ),
         ]);

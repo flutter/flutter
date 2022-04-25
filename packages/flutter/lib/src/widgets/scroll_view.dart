@@ -177,7 +177,7 @@ abstract class ScrollView extends StatelessWidget {
   /// Setting to false will explicitly prevent inheriting any
   /// [PrimaryScrollController].
   ///
-  /// Defaults to null. In the case of null,
+  /// Defaults to null. When null, and a controller is not provided,
   /// [PrimaryScrollController.shouldInherit] is used to decide automatic
   /// inheritance. By default, a [PrimaryScrollController] is configured to
   /// automatically be inherited on [TargetPlatformVariant.mobile] for
