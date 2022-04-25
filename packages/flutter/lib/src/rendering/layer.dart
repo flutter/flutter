@@ -1974,7 +1974,7 @@ class BackdropFilterLayer extends ContainerLayer {
 /// to track down the cause of performance problems.
 @Deprecated(
   'Use a clip and canvas operations directly (See RenderPhysicalModel). '
-  'This feature was deprecated after v2.13.0-0.0.pre.733',
+  'This feature was deprecated after v2.13.0-0.0.pre.',
 )
 class PhysicalModelLayer extends ContainerLayer {
   /// Creates a composited layer that uses a physical model to producing
@@ -1984,7 +1984,7 @@ class PhysicalModelLayer extends ContainerLayer {
   /// arguments must be non-null before the compositing phase of the pipeline.
   @Deprecated(
     'Use a clip and canvas operations directly (See RenderPhysicalModel). '
-    'This feature was deprecated after v2.13.0-0.0.pre.733',
+    'This feature was deprecated after v2.13.0-0.0.pre.',
   )
   PhysicalModelLayer({
     Path? clipPath,

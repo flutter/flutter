@@ -434,11 +434,12 @@ class PaintingContext extends ClipContext {
   /// (e.g. from opacity layer to a clip rect layer).
   /// {@endtemplate}
   ClipRectLayer? pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer? oldLayer }) {
-    final Rect offsetClipRect = clipRect.shift(offset);
     if (clipBehavior == Clip.none) {
       painter(this, offset);
       return null;
-    } else if (needsCompositing) {
+    }
+    final Rect offsetClipRect = clipRect.shift(offset);
+    if (needsCompositing) {
       final ClipRectLayer layer = oldLayer ?? ClipRectLayer();
       layer
         ..clipRect = offsetClipRect
@@ -472,12 +473,13 @@ class PaintingContext extends ClipContext {
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   ClipRRectLayer? pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer? oldLayer }) {
     assert(clipBehavior != null);
-    final Rect offsetBounds = bounds.shift(offset);
-    final RRect offsetClipRRect = clipRRect.shift(offset);
     if (clipBehavior == Clip.none) {
       painter(this, offset);
       return null;
-    } else if (needsCompositing) {
+    }
+    final Rect offsetBounds = bounds.shift(offset);
+    final RRect offsetClipRRect = clipRRect.shift(offset);
+    if (needsCompositing) {
       final ClipRRectLayer layer = oldLayer ?? ClipRRectLayer();
       layer
         ..clipRRect = offsetClipRRect
@@ -511,12 +513,13 @@ class PaintingContext extends ClipContext {
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   ClipPathLayer? pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer? oldLayer }) {
     assert(clipBehavior != null);
-    final Rect offsetBounds = bounds.shift(offset);
-    final Path offsetClipPath = clipPath.shift(offset);
     if (clipBehavior == Clip.none) {
       painter(this, offset);
       return null;
-    } else if (needsCompositing) {
+    }
+    final Rect offsetBounds = bounds.shift(offset);
+    final Path offsetClipPath = clipPath.shift(offset);
+    if (needsCompositing) {
       final ClipPathLayer layer = oldLayer ?? ClipPathLayer();
       layer
         ..clipPath = offsetClipPath
