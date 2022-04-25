@@ -106,65 +106,41 @@ bool TextContents::Render(const ContentContext& renderer,
   // and the vertex shader uses this to size the glyph correctly. The
   // interpolated vertex information is also used in the fragment shader to
   // sample from the glyph atlas.
-  {
-    VertexBufferBuilder<VS::PerVertexData> vertex_builder;
-    if (!Tessellator{}.Tessellate(
-            FillType::kPositive,
-            PathBuilder{}
-                .AddRect(Rect::MakeXYWH(0.0, 0.0, 1.0, 1.0))
-                .TakePath()
-                .CreatePolyline(),
-            [&vertex_builder](Point point) {
-              VS::PerVertexData vtx;
-              vtx.unit_vertex = point;
-              vertex_builder.AppendVertex(std::move(vtx));
-            })) {
-      return false;
-    }
-    auto dummy = vertex_builder.CreateVertexBuffer(pass.GetTransientsBuffer());
-    auto vertex_buffer = dummy;
-    if (!vertex_buffer) {
-      return false;
-    }
-    cmd.BindVertices(std::move(vertex_buffer));
-  }
 
-  size_t instance_count = 0u;
-  std::vector<Matrix> glyph_positions;
-  std::vector<Point> glyph_sizes;
-  std::vector<Point> atlas_positions;
-  std::vector<Point> atlas_glyph_sizes;
+  const std::vector<Point> unit_vertex_points = {
+      {0, 0}, {1, 0}, {0, 1}, {1, 0}, {0, 1}, {1, 1},
+  };
 
+  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   for (const auto& run : frame_.GetRuns()) {
     auto font = run.GetFont();
     auto glyph_size = ISize::Ceil(font.GetMetrics().GetBoundingBox().size);
     for (const auto& glyph_position : run.GetGlyphPositions()) {
-      FontGlyphPair font_glyph_pair{font, glyph_position.glyph};
-      auto atlas_glyph_pos = atlas->FindFontGlyphPosition(font_glyph_pair);
-      if (!atlas_glyph_pos.has_value()) {
-        VALIDATION_LOG << "Could not find glyph position in the atlas.";
-        return false;
+      for (const auto& point : unit_vertex_points) {
+        VS::PerVertexData vtx;
+        vtx.unit_vertex = point;
+
+        FontGlyphPair font_glyph_pair{font, glyph_position.glyph};
+        auto atlas_glyph_pos = atlas->FindFontGlyphPosition(font_glyph_pair);
+        if (!atlas_glyph_pos.has_value()) {
+          VALIDATION_LOG << "Could not find glyph position in the atlas.";
+          return false;
+        }
+        vtx.glyph_position =
+            glyph_position.position +
+            Point{font.GetMetrics().min_extent.x, font.GetMetrics().ascent};
+        vtx.glyph_size = Point{static_cast<Scalar>(glyph_size.width),
+                               static_cast<Scalar>(glyph_size.height)};
+        vtx.atlas_position = atlas_glyph_pos->origin;
+        vtx.atlas_glyph_size =
+            Point{atlas_glyph_pos->size.width, atlas_glyph_pos->size.height};
+        vertex_builder.AppendVertex(std::move(vtx));
       }
-      instance_count++;
-      glyph_positions.emplace_back(glyph_position.position.Translate(
-          {font.GetMetrics().min_extent.x, font.GetMetrics().ascent, 0.0}));
-      glyph_sizes.emplace_back(Point{static_cast<Scalar>(glyph_size.width),
-                                     static_cast<Scalar>(glyph_size.height)});
-      atlas_positions.emplace_back(atlas_glyph_pos->origin);
-      atlas_glyph_sizes.emplace_back(
-          Point{atlas_glyph_pos->size.width, atlas_glyph_pos->size.height});
     }
   }
-
-  cmd.instance_count = instance_count;
-  VS::BindGlyphPositions(
-      cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(glyph_positions));
-  VS::BindGlyphSizes(
-      cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(glyph_sizes));
-  VS::BindAtlasPositions(
-      cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(atlas_positions));
-  VS::BindAtlasGlyphSizes(
-      cmd, pass.GetTransientsBuffer().EmplaceStorageBuffer(atlas_glyph_sizes));
+  auto vertex_buffer =
+      vertex_builder.CreateVertexBuffer(pass.GetTransientsBuffer());
+  cmd.BindVertices(std::move(vertex_buffer));
 
   if (!pass.AddCommand(cmd)) {
     return false;

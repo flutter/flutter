@@ -20,9 +20,9 @@ class TextRun {
  public:
   struct GlyphPosition {
     Glyph glyph;
-    Matrix position;
+    Point position;
 
-    GlyphPosition(Glyph p_glyph, Matrix p_position)
+    GlyphPosition(Glyph p_glyph, Point p_position)
         : glyph(p_glyph), position(p_position) {}
   };
 
@@ -45,7 +45,7 @@ class TextRun {
   ///
   /// @return     If the glyph could be added to the run.
   ///
-  bool AddGlyph(Glyph glyph, Matrix position);
+  bool AddGlyph(Glyph glyph, Point position);
 
   //----------------------------------------------------------------------------
   /// @brief      Get the number of glyphs in the run.
