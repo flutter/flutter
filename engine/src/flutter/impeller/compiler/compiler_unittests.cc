@@ -24,6 +24,14 @@ TEST_P(CompilerTest, CanCompile) {
   ASSERT_TRUE(CanCompileAndReflect("sample.vert"));
 }
 
+TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
+  if (GetParam() == TargetPlatform::kFlutterSPIRV) {
+    // This is a failure of reflection which this target doesn't perform.
+    GTEST_SKIP();
+  }
+  ASSERT_FALSE(CanCompileAndReflect("struct_def_bug.vert"));
+}
+
 #define INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(suite_name)              \
   INSTANTIATE_TEST_SUITE_P(                                               \
       suite_name, CompilerTest,                                           \
