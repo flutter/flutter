@@ -73,6 +73,9 @@ class _ImageFilterRenderObject extends RenderProxyBox {
       filterLayer.imageFilter = imageFilter;
     }
     context.pushLayer(layer!, super.paint, offset);
-    assert(layer != null);
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 }
