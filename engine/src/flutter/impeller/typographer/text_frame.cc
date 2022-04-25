@@ -16,8 +16,8 @@ std::optional<Rect> TextFrame::GetBounds() const {
   for (const auto& run : runs_) {
     const auto glyph_bounds = run.GetFont().GetMetrics().GetBoundingBox();
     for (const auto& glyph_position : run.GetGlyphPositions()) {
-      Vector2 position = glyph_position.position * Vector2();
-      Rect glyph_rect = Rect(position + glyph_bounds.origin, glyph_bounds.size);
+      Rect glyph_rect = Rect(glyph_position.position + glyph_bounds.origin,
+                             glyph_bounds.size);
       result = result.has_value() ? result->Union(glyph_rect) : glyph_rect;
     }
   }
