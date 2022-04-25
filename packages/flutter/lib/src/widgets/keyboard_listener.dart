@@ -23,7 +23,7 @@ export 'package:flutter/services.dart' show KeyEvent;
 ///
 /// The [KeyboardListener] is different from [RawKeyboardListener] in that
 /// [KeyboardListener] uses the newer [HardwareKeyboard] API, which is
-/// preferrable.
+/// preferable.
 ///
 /// See also:
 ///
