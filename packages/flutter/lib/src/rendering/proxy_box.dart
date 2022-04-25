@@ -844,6 +844,9 @@ class RenderOpacity extends RenderProxyBox {
 
   int _alpha;
 
+  @override
+  bool get alwaysNeedsCompositing => child != null && _alpha > 0;
+
   /// The fraction to scale the child's alpha value.
   ///
   /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
@@ -862,8 +865,11 @@ class RenderOpacity extends RenderProxyBox {
     if (_opacity == value)
       return;
     final bool wasVisible = _alpha != 0;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
     _opacity = value;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
+    if (didNeedCompositing != alwaysNeedsCompositing)
+      markNeedsCompositingBitsUpdate();
     markNeedsPaint();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
