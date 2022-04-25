@@ -705,6 +705,27 @@ class ClipRect extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=eI43jkQkrvs}
 ///
+/// {@tool dartpad}
+/// This example shows various [ClipRRect]s applied to containers.
+///
+/// ** See code in examples/api/lib/widgets/basic/clip_rrect.0.dart **
+/// {@end-tool}
+///
+/// ## Troubleshooting
+///
+/// ### Why doesn't my [ClipRRect] child have rounded corners?
+///
+/// When a [ClipRRect] is bigger than the child it contains, its rounded corners
+/// could be drawn in unexpected positions. Make sure that [ClipRRect] and its child
+/// have the same bounds (by shrinking the [ClipRRect] with a [FittedBox] or by
+/// growing the child).
+///
+/// {@tool dartpad}
+/// This example shows a [ClipRRect] that adds round corners to an image.
+///
+/// ** See code in examples/api/lib/widgets/basic/clip_rrect.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CustomClipper], for information about creating custom clips.
@@ -6674,6 +6695,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     AttributedString? attributedDecreasedValue,
     String? hint,
     AttributedString? attributedHint,
+    String? tooltip,
     String? onTapHint,
     String? onLongPressHint,
     TextDirection? textDirection,
@@ -6738,6 +6760,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       attributedDecreasedValue: attributedDecreasedValue,
       hint: hint,
       attributedHint: attributedHint,
+      tooltip: tooltip,
       textDirection: textDirection,
       sortKey: sortKey,
       tagForChildren: tagForChildren,
@@ -6880,6 +6903,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       attributedIncreasedValue: _effectiveAttributedIncreasedValue,
       attributedDecreasedValue: _effectiveAttributedDecreasedValue,
       attributedHint: _effectiveAttributedHint,
+      tooltip: properties.tooltip,
       hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
@@ -6915,7 +6939,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     final bool containsText = properties.attributedLabel != null ||
                               properties.label != null ||
                               properties.value != null ||
-                              properties.hint != null;
+                              properties.hint != null ||
+                              properties.tooltip != null;
 
     if (!containsText)
       return null;
@@ -6956,6 +6981,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..attributedIncreasedValue = _effectiveAttributedIncreasedValue
       ..attributedDecreasedValue = _effectiveAttributedDecreasedValue
       ..attributedHint = _effectiveAttributedHint
+      ..tooltip = properties.tooltip
       ..hintOverrides = properties.hintOverrides
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
