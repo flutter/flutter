@@ -2905,7 +2905,7 @@ void main() {
         expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
       });
 
-      testWidgets('_handleScrollMetricsNotification safely calls setState()', (WidgetTester tester) async {
+      testWidgets('_handleScrollNotification safely calls setState()', (WidgetTester tester) async {
         // Regression test for failures found in Google internal issue b/185192049.
         final ScrollController controller = ScrollController(initialScrollOffset: 400);
         await tester.pumpWidget(

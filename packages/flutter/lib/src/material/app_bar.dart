@@ -736,24 +736,24 @@ class _AppBarState extends State<AppBar> {
   static const double _defaultElevation = 4.0;
   static const Color _defaultShadowColor = Color(0xFF000000);
 
-  ScrollMetricsNotificationObserverState? _scrollMetricsNotificationObserver;
+  ScrollNotificationObserverState? _scrollNotificationObserver;
   bool _scrolledUnder = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_scrollMetricsNotificationObserver != null)
-      _scrollMetricsNotificationObserver!.removeListener(_handleScrollMetricsNotification);
-    _scrollMetricsNotificationObserver = ScrollMetricsNotificationObserver.of(context);
-    if (_scrollMetricsNotificationObserver != null)
-      _scrollMetricsNotificationObserver!.addListener(_handleScrollMetricsNotification);
+    if (_scrollNotificationObserver != null)
+      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+    _scrollNotificationObserver = ScrollNotificationObserver.of(context);
+    if (_scrollNotificationObserver != null)
+      _scrollNotificationObserver!.addListener(_handleScrollNotification);
   }
 
   @override
   void dispose() {
-    if (_scrollMetricsNotificationObserver != null) {
-      _scrollMetricsNotificationObserver!.removeListener(_handleScrollMetricsNotification);
-      _scrollMetricsNotificationObserver = null;
+    if (_scrollNotificationObserver != null) {
+      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+      _scrollNotificationObserver = null;
     }
     super.dispose();
   }
@@ -766,7 +766,7 @@ class _AppBarState extends State<AppBar> {
     Scaffold.of(context).openEndDrawer();
   }
 
-  void _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
+  void _handleScrollNotification(ScrollNotification notification) {
     final bool oldScrolledUnder = _scrolledUnder;
     final ScrollMetrics metrics = notification.metrics;
 
