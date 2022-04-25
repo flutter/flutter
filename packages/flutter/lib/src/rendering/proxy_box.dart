@@ -1976,13 +1976,8 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         color.alpha != 0xFF,
       );
     }
-    if (clipBehavior == Clip.antiAliasWithSaveLayer) {
-      // If we want to avoid the bleeding edge artifact
-      // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
-      // using saveLayer, we have to call drawPaint instead of drawPath as
-      // anti-aliased drawPath will always have such artifacts.
-      canvas.drawPaint( Paint()..color = color);
-    } else {
+    final bool usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
+    if (!usesSaveLayer) {
       canvas.drawRRect(
         offsetRRect,
         Paint()..color = color
@@ -1993,7 +1988,16 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
       offset,
       Offset.zero & size,
       _clip!,
-      super.paint,
+      (PaintingContext context, Offset offset) {
+        if (usesSaveLayer) {
+          // If we want to avoid the bleeding edge artifact
+          // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
+          // using saveLayer, we have to call drawPaint instead of drawPath as
+          // anti-aliased drawPath will always have such artifacts.
+          context.canvas.drawPaint( Paint()..color = color);
+        }
+        super.paint(context, offset);
+      },
       oldLayer: layer as ClipRRectLayer?,
       clipBehavior: clipBehavior,
     );
@@ -2097,14 +2101,8 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         color.alpha != 0xFF,
       );
     }
-
-    if (clipBehavior == Clip.antiAliasWithSaveLayer) {
-      // If we want to avoid the bleeding edge artifact
-      // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
-      // using saveLayer, we have to call drawPaint instead of drawPath as
-      // anti-aliased drawPath will always have such artifacts.
-      canvas.drawPaint( Paint()..color = color);
-    } else {
+    final bool usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
+    if (!usesSaveLayer) {
       canvas.drawPath(
         offsetPath,
         Paint()..color = color
@@ -2115,7 +2113,16 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       offset,
       Offset.zero & size,
       _clip!,
-      super.paint,
+      (PaintingContext context, Offset offset) {
+        if (usesSaveLayer) {
+          // If we want to avoid the bleeding edge artifact
+          // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
+          // using saveLayer, we have to call drawPaint instead of drawPath as
+          // anti-aliased drawPath will always have such artifacts.
+          context.canvas.drawPaint( Paint()..color = color);
+        }
+        super.paint(context, offset);
+      },
       oldLayer: layer as ClipPathLayer?,
       clipBehavior: clipBehavior,
     );
