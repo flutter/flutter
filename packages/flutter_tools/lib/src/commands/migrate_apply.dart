@@ -21,7 +21,13 @@ class MigrateApplyCommand extends FlutterCommand {
     required this.logger,
     required this.fileSystem,
     required this.terminal,
-  }) : _verbose = verbose {
+  }) : _verbose = verbose,
+       migrateUtils = MigrateUtils(
+         logger = logger,
+         fileSystem = fileSystem,
+         platform,
+         processManager
+       ) {
     requiresPubspecYaml();
     argParser.addOption(
       'working-directory',
@@ -47,6 +53,8 @@ class MigrateApplyCommand extends FlutterCommand {
   final FileSystem fileSystem;
 
   final Terminal terminal;
+
+  final MigrateUtils migrateUtils;
 
   @override
   final String name = 'apply';
@@ -194,7 +202,7 @@ class MigrateApplyCommand extends FlutterCommand {
     }
     if (selection == 'y') {
       // Runs `flutter pub upgrade --major-versions`
-      await MigrateUtils.flutterPubUpgrade(flutterProject.directory.path, logger);
+      await migrateUtils.flutterPubUpgrade(flutterProject.directory.path, logger);
     }
   }
 
@@ -258,7 +266,7 @@ class MigrateApplyCommand extends FlutterCommand {
           }
         }
         // Runs `./gradelw tasks`in the project's android directory.
-        await MigrateUtils.gradlewTasks(flutterProject.directory.childDirectory('android').path, logger);
+        await migrateUtils.gradlewTasks(flutterProject.directory.childDirectory('android').path, logger);
         logger.printStatus('Old lockfiles renamed to:');
         for (final String path in backedUpFilePaths) {
           logger.printStatus(path, color: TerminalColor.grey, indent: 2);

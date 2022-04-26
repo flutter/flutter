@@ -17,7 +17,13 @@ class MigrateStatusCommand extends FlutterCommand {
     bool verbose = false,
     required this.logger,
     required this.fileSystem,
-  }) : _verbose = verbose {
+  }) : _verbose = verbose,
+       migrateUtils = MigrateUtils(
+         logger = logger,
+         fileSystem = fileSystem,
+         platform,
+         processManager
+       ) {
     requiresPubspecYaml();
     argParser.addOption(
       'working-directory',
@@ -41,6 +47,8 @@ class MigrateStatusCommand extends FlutterCommand {
   final Logger logger;
 
   final FileSystem fileSystem;
+
+  final MigrateUtils migrateUtils;
 
   @override
   final String name = 'status';
@@ -95,7 +103,7 @@ class MigrateStatusCommand extends FlutterCommand {
       files.addAll(manifest.resolvedConflictFiles(workingDirectory));
       files.addAll(manifest.remainingConflictFiles(workingDirectory));
       for (final String localPath in files) {
-        final DiffResult result = await MigrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath), logger);
+        final DiffResult result = await migrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath), logger);
         if (result.diff != '') {
           // Print with different colors for better visibility.
           int lineNumber = -1;

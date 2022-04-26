@@ -15,7 +15,13 @@ class MigrateStartCommand extends FlutterCommand {
     bool verbose = false,
     required this.logger,
     required this.fileSystem,
-  }) : _verbose = verbose {
+  }) : _verbose = verbose,
+       migrateUtils = MigrateUtils(
+         logger = logger,
+         fileSystem = fileSystem,
+         platform,
+         processManager
+       ) {
     requiresPubspecYaml();
     argParser.addOption(
       'working-directory',
@@ -77,6 +83,8 @@ class MigrateStartCommand extends FlutterCommand {
 
   final FileSystem fileSystem;
 
+  final MigrateUtils migrateUtils;
+
   @override
   final String name = 'start';
 
@@ -97,7 +105,14 @@ class MigrateStartCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    if (!await gitRepoExists(project.directory.path, logger)) {
+    migrateUtils = MigrateUtils({
+      required Logger logger,
+      required FileSystem fileSystem,
+      required Platform platform,
+      required ProcessManager processManager,
+    })
+
+    if (!await gitRepoExists(project.directory.path, logger, migrateUtils)) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -121,7 +136,7 @@ class MigrateStartCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    if (await hasUncommittedChanges(project.directory.path, logger)) {
+    if (await hasUncommittedChanges(project.directory.path, logger, migrateUtils)) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -148,6 +163,7 @@ class MigrateStartCommand extends FlutterCommand {
       preferTwoWayMerge: boolArg('prefer-two-way-merge'),
       fileSystem: fileSystem,
       logger: logger,
+      migrateUtils: migrateUtils,
     );
     if (migrateResult == null) {
       return const FlutterCommandResult(ExitStatus.fail);

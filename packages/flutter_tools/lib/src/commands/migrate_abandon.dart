@@ -16,7 +16,12 @@ class MigrateAbandonCommand extends FlutterCommand {
     required this.logger,
     required this.fileSystem,
     required this.terminal,
-  }) {
+  }) : migrateUtils = MigrateUtils(
+         logger = logger,
+         fileSystem = fileSystem,
+         platform,
+         processManager
+       ) {
     requiresPubspecYaml();
     argParser.addOption(
       'working-directory',
@@ -31,6 +36,8 @@ class MigrateAbandonCommand extends FlutterCommand {
   final FileSystem fileSystem;
 
   final Terminal terminal;
+
+  final MigrateUtils migrateUtils;
 
   @override
   final String name = 'abandon';
