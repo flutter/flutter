@@ -197,11 +197,11 @@ bool EntityPass::Render(ContentContext& renderer,
 
       auto sub_command_buffer = context->CreateRenderCommandBuffer();
 
-      sub_command_buffer->SetLabel("Offscreen Command Buffer");
-
       if (!sub_command_buffer) {
         return false;
       }
+
+      sub_command_buffer->SetLabel("Offscreen Command Buffer");
 
       auto sub_renderpass =
           sub_command_buffer->CreateRenderPass(subpass_target);
