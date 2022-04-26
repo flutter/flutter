@@ -320,7 +320,7 @@ class _ZoomEnterTransition extends StatelessWidget {
         opacity: fadeTransition,
         child: ScaleTransition(
           scale: scaleTransition,
-          filterQuality: FilterQuality.none,
+          filterQuality: FilterQuality.low,
           child: child,
         ),
       ),
@@ -369,7 +369,7 @@ class _ZoomExitTransition extends StatelessWidget {
       opacity: fadeTransition,
       child: ScaleTransition(
         scale: scaleTransition,
-        filterQuality: FilterQuality.none,
+        filterQuality: FilterQuality.low,
         child: child,
       ),
     );
