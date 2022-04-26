@@ -9,6 +9,8 @@ import 'rendering_tester.dart';
 
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('only send semantics update if semantics have changed', () {
     final TestRender testRender = TestRender()
       ..attributedLabel = AttributedString('hello')
@@ -19,7 +21,7 @@ void main() {
       child: testRender,
     );
     int semanticsUpdateCount = 0;
-    final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
+    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
       listener: () {
         ++semanticsUpdateCount;
       },

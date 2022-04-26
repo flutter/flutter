@@ -35,14 +35,13 @@ abstract class InteractiveInkFeature extends InkFeature {
   ///
   /// The [controller] and [referenceBox] arguments must not be null.
   InteractiveInkFeature({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
+    required super.controller,
+    required super.referenceBox,
     required Color color,
-    VoidCallback? onRemoved,
+    super.onRemoved,
   }) : assert(controller != null),
        assert(referenceBox != null),
-       _color = color,
-       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved);
+       _color = color;
 
   /// Called when the user input that triggered this feature's appearance was confirmed.
   ///
@@ -186,8 +185,8 @@ abstract class _ParentInkResponseState {
 class _ParentInkResponseProvider extends InheritedWidget {
   const _ParentInkResponseProvider({
     required this.state,
-    required Widget child,
-  }) : super(child: child);
+    required super.child,
+  });
 
   final _ParentInkResponseState state;
 
@@ -291,10 +290,11 @@ class InkResponse extends StatelessWidget {
   /// The [containedInkWell], [highlightShape], [enableFeedback],
   /// and [excludeFromSemantics] arguments must not be null.
   const InkResponse({
-    Key? key,
+    super.key,
     this.child,
     this.onTap,
     this.onTapDown,
+    this.onTapUp,
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
@@ -323,8 +323,7 @@ class InkResponse extends StatelessWidget {
        assert(enableFeedback != null),
        assert(excludeFromSemantics != null),
        assert(autofocus != null),
-       assert(canRequestFocus != null),
-       super(key: key);
+       assert(canRequestFocus != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -336,6 +335,10 @@ class InkResponse extends StatelessWidget {
 
   /// Called when the user taps down this part of the material.
   final GestureTapDownCallback? onTapDown;
+
+  /// Called when the user releases a tap that was started on this part of the
+  /// material. [onTap] is called immediately after.
+  final GestureTapUpCallback? onTapUp;
 
   /// Called when the user cancels a tap that was started on this part of the
   /// material.
@@ -583,6 +586,7 @@ class InkResponse extends StatelessWidget {
     return _InkResponseStateWidget(
       onTap: onTap,
       onTapDown: onTapDown,
+      onTapUp: onTapUp,
       onTapCancel: onTapCancel,
       onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
@@ -633,6 +637,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.child,
     this.onTap,
     this.onTapDown,
+    this.onTapUp,
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
@@ -669,6 +674,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final Widget? child;
   final GestureTapCallback? onTap;
   final GestureTapDownCallback? onTapDown;
+  final GestureTapUpCallback? onTapUp;
   final GestureTapCallback? onTapCancel;
   final GestureTapCallback? onDoubleTap;
   final GestureLongPressCallback? onLongPress;
@@ -707,6 +713,7 @@ class _InkResponseStateWidget extends StatefulWidget {
       if (onDoubleTap != null) 'double tap',
       if (onLongPress != null) 'long press',
       if (onTapDown != null) 'tap down',
+      if (onTapUp != null) 'tap up',
       if (onTapCancel != null) 'tap cancel',
     ];
     properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
@@ -762,12 +769,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   bool get _anyChildInkResponsePressed => _activeChildren.isNotEmpty;
 
   void _simulateTap([Intent? intent]) {
-    _startSplash(context: context);
+    _startNewSplash(context: context);
     _handleTap();
   }
 
   void _simulateLongPress() {
-    _startSplash(context: context);
+    _startNewSplash(context: context);
     _handleLongPress();
   }
 
@@ -959,11 +966,15 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void _handleTapDown(TapDownDetails details) {
     if (_anyChildInkResponsePressed)
       return;
-    _startSplash(details: details);
+    _startNewSplash(details: details);
     widget.onTapDown?.call(details);
   }
 
-  void _startSplash({TapDownDetails? details, BuildContext? context}) {
+  void _handleTapUp(TapUpDetails details) {
+    widget.onTapUp?.call(details);
+  }
+
+  void _startNewSplash({TapDownDetails? details, BuildContext? context}) {
     assert(details != null || context != null);
 
     final Offset globalPosition;
@@ -977,6 +988,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     final InteractiveInkFeature splash = _createInkFeature(globalPosition);
     _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes!.add(splash);
+    _currentSplash?.cancel();
     _currentSplash = splash;
     updateKeepAlive();
     updateHighlight(_HighlightType.pressed, value: true);
@@ -1003,6 +1015,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void _handleDoubleTap() {
     _currentSplash?.confirm();
     _currentSplash = null;
+    updateHighlight(_HighlightType.pressed, value: false);
     widget.onDoubleTap?.call();
   }
 
@@ -1087,6 +1100,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         if (_hasFocus) MaterialState.focused,
       },
     );
+
     return _ParentInkResponseProvider(
       state: this,
       child: Actions(
@@ -1105,6 +1119,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
               onLongPress: widget.excludeFromSemantics || widget.onLongPress == null ? null : _simulateLongPress,
               child: GestureDetector(
                 onTapDown: enabled ? _handleTapDown : null,
+                onTapUp: enabled ? _handleTapUp : null,
                 onTap: enabled ? _handleTap : null,
                 onTapCancel: enabled ? _handleTapCancel : null,
                 onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
@@ -1207,58 +1222,35 @@ class InkWell extends InkResponse {
   /// The [enableFeedback], and [excludeFromSemantics] arguments
   /// must not be null.
   const InkWell({
-    Key? key,
-    Widget? child,
-    GestureTapCallback? onTap,
-    GestureTapCallback? onDoubleTap,
-    GestureLongPressCallback? onLongPress,
-    GestureTapDownCallback? onTapDown,
-    GestureTapCancelCallback? onTapCancel,
-    ValueChanged<bool>? onHighlightChanged,
-    ValueChanged<bool>? onHover,
-    MouseCursor? mouseCursor,
-    Color? focusColor,
-    Color? hoverColor,
-    Color? highlightColor,
-    MaterialStateProperty<Color?>? overlayColor,
-    Color? splashColor,
-    InteractiveInkFeatureFactory? splashFactory,
-    double? radius,
-    BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
+    super.key,
+    super.child,
+    super.onTap,
+    super.onDoubleTap,
+    super.onLongPress,
+    super.onTapDown,
+    super.onTapUp,
+    super.onTapCancel,
+    super.onHighlightChanged,
+    super.onHover,
+    super.mouseCursor,
+    super.focusColor,
+    super.hoverColor,
+    super.highlightColor,
+    super.overlayColor,
+    super.splashColor,
+    super.splashFactory,
+    super.radius,
+    super.borderRadius,
+    super.customBorder,
     bool? enableFeedback = true,
-    bool excludeFromSemantics = false,
-    FocusNode? focusNode,
-    bool canRequestFocus = true,
-    ValueChanged<bool>? onFocusChange,
-    bool autofocus = false,
+    super.excludeFromSemantics,
+    super.focusNode,
+    super.canRequestFocus,
+    super.onFocusChange,
+    super.autofocus,
   }) : super(
-    key: key,
-    child: child,
-    onTap: onTap,
-    onDoubleTap: onDoubleTap,
-    onLongPress: onLongPress,
-    onTapDown: onTapDown,
-    onTapCancel: onTapCancel,
-    onHighlightChanged: onHighlightChanged,
-    onHover: onHover,
-    mouseCursor: mouseCursor,
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
-    focusColor: focusColor,
-    hoverColor: hoverColor,
-    highlightColor: highlightColor,
-    overlayColor: overlayColor,
-    splashColor: splashColor,
-    splashFactory: splashFactory,
-    radius: radius,
-    borderRadius: borderRadius,
-    customBorder: customBorder,
     enableFeedback: enableFeedback ?? true,
-    excludeFromSemantics: excludeFromSemantics,
-    focusNode: focusNode,
-    canRequestFocus: canRequestFocus,
-    onFocusChange: onFocusChange,
-    autofocus: autofocus,
   );
 }

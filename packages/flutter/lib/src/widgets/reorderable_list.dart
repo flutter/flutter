@@ -110,10 +110,12 @@ class ReorderableList extends StatefulWidget {
   ///
   /// The [itemCount] must be greater than or equal to zero.
   const ReorderableList({
-    Key? key,
+    super.key,
     required this.itemBuilder,
     required this.itemCount,
     required this.onReorder,
+    this.onReorderStart,
+    this.onReorderEnd,
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
@@ -134,8 +136,7 @@ class ReorderableList extends StatefulWidget {
        assert(
          itemExtent == null || prototypeItem == null,
          'You can only pass itemExtent or prototypeItem, not both',
-       ),
-       super(key: key);
+       );
 
   /// {@template flutter.widgets.reorderable_list.itemBuilder}
   /// Called, as needed, to build list item widgets.
@@ -165,6 +166,34 @@ class ReorderableList extends StatefulWidget {
   /// of the items.
   /// {@endtemplate}
   final ReorderCallback onReorder;
+
+  /// {@template flutter.widgets.reorderable_list.onReorderStart}
+  /// A callback that is called when an item drag has started.
+  ///
+  /// The index parameter of the callback is the index of the selected item.
+  ///
+  /// See also:
+  ///
+  ///   * [onReorderEnd], which is a called when the dragged item is dropped.
+  ///   * [onReorder], which reports that a list item has been dragged to a new
+  ///     location.
+  /// {@endtemplate}
+  final void Function(int index)? onReorderStart;
+
+  /// {@template flutter.widgets.reorderable_list.onReorderEnd}
+  /// A callback that is called when the dragged item is dropped.
+  ///
+  /// The index parameter of the callback is the index where the item is
+  /// dropped. Unlike [onReorder], this is called even when the list item is
+  /// dropped in the same location.
+  ///
+  /// See also:
+  ///
+  ///   * [onReorderStart], which is a called when an item drag has started.
+  ///   * [onReorder], which reports that a list item has been dragged to a new
+  ///     location.
+  /// {@endtemplate}
+  final void Function(int index)? onReorderEnd;
 
   /// {@template flutter.widgets.reorderable_list.proxyDecorator}
   /// A callback that allows the app to add an animated decoration around
@@ -360,6 +389,8 @@ class ReorderableListState extends State<ReorderableList> {
             itemBuilder: widget.itemBuilder,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
+            onReorderStart: widget.onReorderStart,
+            onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator,
           ),
         ),
@@ -396,10 +427,13 @@ class SliverReorderableList extends StatefulWidget {
   ///
   /// The [itemCount] must be greater than or equal to zero.
   const SliverReorderableList({
-    Key? key,
+    super.key,
     required this.itemBuilder,
+    this.findChildIndexCallback,
     required this.itemCount,
     required this.onReorder,
+    this.onReorderStart,
+    this.onReorderEnd,
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
@@ -407,17 +441,25 @@ class SliverReorderableList extends StatefulWidget {
        assert(
          itemExtent == null || prototypeItem == null,
          'You can only pass itemExtent or prototypeItem, not both',
-       ),
-       super(key: key);
+       );
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
+
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
+  final ChildIndexGetter? findChildIndexCallback;
 
   /// {@macro flutter.widgets.reorderable_list.itemCount}
   final int itemCount;
 
   /// {@macro flutter.widgets.reorderable_list.onReorder}
   final ReorderCallback onReorder;
+
+  /// {@macro flutter.widgets.reorderable_list.onReorderStart}
+  final void Function(int)? onReorderStart;
+
+  /// {@macro flutter.widgets.reorderable_list.onReorderEnd}
+  final void Function(int)? onReorderEnd;
 
   /// {@macro flutter.widgets.reorderable_list.proxyDecorator}
   final ReorderItemProxyDecorator? proxyDecorator;
@@ -640,9 +682,10 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     assert(_dragInfo == null);
     final _ReorderableItemState item = _items[_dragIndex!]!;
     item.dragging = true;
+    widget.onReorderStart?.call(_dragIndex!);
     item.rebuild();
     _dragStartTransitionComplete = false;
-    SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       _dragStartTransitionComplete = true;
     });
 
@@ -702,6 +745,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         }
       }
     });
+    widget.onReorderEnd?.call(_insertIndex!);
   }
 
   void _dropCompleted() {
@@ -866,6 +910,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       // by a zero height SizedBox, so that the gap can move around. To make the
       // list extent stable we add a dummy entry to the end.
       childCount: widget.itemCount + (_dragInfo != null ? 1 : 0),
+      findChildIndexCallback: widget.findChildIndexCallback,
     );
     if (widget.itemExtent != null) {
       return SliverFixedExtentList(
@@ -887,10 +932,10 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 ///
 /// The scroll velocity is controlled by the [velocityScalar]:
 ///
-/// velocity = <distance of overscroll> * [velocityScalar].
+/// velocity = <distance of overscroll> * [_kDefaultAutoScrollVelocityScalar].
 class _EdgeDraggingAutoScroller {
   /// Creates a auto scroller that scrolls the [scrollable].
-  _EdgeDraggingAutoScroller(this.scrollable, {this.onScrollViewScrolled, this.velocityScalar = _kDefaultAutoScrollVelocityScalar});
+  _EdgeDraggingAutoScroller(this.scrollable, {this.onScrollViewScrolled});
 
   // An eyeball value
   static const double _kDefaultAutoScrollVelocityScalar = 7;
@@ -904,12 +949,6 @@ class _EdgeDraggingAutoScroller {
   /// target no longer triggers the auto scroll. This callback will be called
   /// in between each scroll.
   final VoidCallback? onScrollViewScrolled;
-
-  /// The velocity scalar per pixel over scroll.
-  ///
-  /// How the velocity scale with the over scroll distance. The auto scroll
-  /// velocity = <distance of overscroll> * velocityScalar.
-  final double velocityScalar;
 
   late Rect _dragTargetRelatedToScrollOrigin;
 
@@ -1002,7 +1041,7 @@ class _EdgeDraggingAutoScroller {
       _scrolling = false;
       return;
     }
-    final Duration duration = Duration(milliseconds: (1000 / velocityScalar).round());
+    final Duration duration = Duration(milliseconds: (1000 / _kDefaultAutoScrollVelocityScalar).round());
     await scrollable.position.animateTo(
       newOffset,
       duration: duration,
@@ -1193,11 +1232,11 @@ class ReorderableDragStartListener extends StatelessWidget {
   /// This is most commonly used to wrap part of a list item like a drag
   /// handle.
   const ReorderableDragStartListener({
-    Key? key,
+    super.key,
     required this.child,
     required this.index,
     this.enabled = true,
-  }) : super(key: key);
+  });
 
   /// The widget for which the application would like to respond to a tap and
   /// drag gesture by starting a reordering drag on a reorderable list.
@@ -1261,11 +1300,11 @@ class ReorderableDelayedDragStartListener extends ReorderableDragStartListener {
   /// This is most commonly used to wrap an entire list item in a reorderable
   /// list.
   const ReorderableDelayedDragStartListener({
-    Key? key,
-    required Widget child,
-    required int index,
-    bool enabled = true,
-  }) : super(key: key, child: child, index: index, enabled: enabled);
+    super.key,
+    required super.child,
+    required super.index,
+    super.enabled,
+  });
 
   @override
   MultiDragGestureRecognizer createRecognizer() {
@@ -1385,7 +1424,6 @@ Offset _overlayOrigin(BuildContext context) {
 
 class _DragItemProxy extends StatelessWidget {
   const _DragItemProxy({
-    Key? key,
     required this.listState,
     required this.index,
     required this.child,
@@ -1393,7 +1431,7 @@ class _DragItemProxy extends StatelessWidget {
     required this.size,
     required this.animation,
     required this.proxyDecorator,
-  }) : super(key: key);
+  });
 
   final SliverReorderableListState listState;
   final int index;
@@ -1497,5 +1535,5 @@ class _ReorderableItemGlobalKey extends GlobalObjectKey {
   }
 
   @override
-  int get hashCode => hashValues(subKey, index, state);
+  int get hashCode => Object.hash(subKey, index, state);
 }

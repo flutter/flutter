@@ -133,7 +133,7 @@ class RangeSlider extends StatefulWidget {
   /// equal to the [min] and less than or equal to the [max]. The [divisions]
   /// must be null or greater than 0.
   RangeSlider({
-    Key? key,
+    super.key,
     required this.values,
     required this.onChanged,
     this.onChangeStart,
@@ -152,8 +152,7 @@ class RangeSlider extends StatefulWidget {
        assert(values.start <= values.end),
        assert(values.start >= min && values.start <= max),
        assert(values.end >= min && values.end <= max),
-       assert(divisions == null || divisions > 0),
-       super(key: key);
+       assert(divisions == null || divisions > 0);
 
   /// The currently selected values for this range slider.
   ///
@@ -286,7 +285,9 @@ class RangeSlider extends StatefulWidget {
   /// If null, the slider is continuous.
   final int? divisions;
 
-  /// Labels to show as text in the [SliderThemeData.rangeValueIndicatorShape].
+  /// Labels to show as text in the [SliderThemeData.rangeValueIndicatorShape]
+  /// when the slider is active and [SliderThemeData.showValueIndicator]
+  /// is satisfied.
   ///
   /// There are two labels: one for the start thumb and one for the end thumb.
   ///
@@ -561,20 +562,20 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
 
-    const double _defaultTrackHeight = 4;
-    const RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape();
-    const RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape();
-    const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
-    const RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape();
-    const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
-    const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
-    const double _defaultMinThumbSeparation = 8;
+    const double defaultTrackHeight = 4;
+    const RangeSliderTrackShape defaultTrackShape = RoundedRectRangeSliderTrackShape();
+    const RangeSliderTickMarkShape defaultTickMarkShape = RoundRangeSliderTickMarkShape();
+    const SliderComponentShape defaultOverlayShape = RoundSliderOverlayShape();
+    const RangeSliderThumbShape defaultThumbShape = RoundRangeSliderThumbShape();
+    const RangeSliderValueIndicatorShape defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
+    const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
+    const double defaultMinThumbSeparation = 8;
 
     // The value indicator's color is not the same as the thumb and active track
     // (which can be defined by activeColor) if the
     // RectangularSliderValueIndicatorShape is used. In all other cases, the
     // value indicator is assumed to be the same as the active color.
-    final RangeSliderValueIndicatorShape valueIndicatorShape = sliderTheme.rangeValueIndicatorShape ?? _defaultValueIndicatorShape;
+    final RangeSliderValueIndicatorShape valueIndicatorShape = sliderTheme.rangeValueIndicatorShape ?? defaultValueIndicatorShape;
     final Color valueIndicatorColor;
     if (valueIndicatorShape is RectangularRangeSliderValueIndicatorShape) {
       valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
@@ -583,7 +584,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     }
 
     sliderTheme = sliderTheme.copyWith(
-      trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
+      trackHeight: sliderTheme.trackHeight ?? defaultTrackHeight,
       activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
       inactiveTrackColor: widget.inactiveColor ?? sliderTheme.inactiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.24),
       disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.32),
@@ -597,16 +598,16 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       disabledThumbColor: sliderTheme.disabledThumbColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(.38), theme.colorScheme.surface),
       overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
       valueIndicatorColor: valueIndicatorColor,
-      rangeTrackShape: sliderTheme.rangeTrackShape ?? _defaultTrackShape,
-      rangeTickMarkShape: sliderTheme.rangeTickMarkShape ?? _defaultTickMarkShape,
-      rangeThumbShape: sliderTheme.rangeThumbShape ?? _defaultThumbShape,
-      overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
+      rangeTrackShape: sliderTheme.rangeTrackShape ?? defaultTrackShape,
+      rangeTickMarkShape: sliderTheme.rangeTickMarkShape ?? defaultTickMarkShape,
+      rangeThumbShape: sliderTheme.rangeThumbShape ?? defaultThumbShape,
+      overlayShape: sliderTheme.overlayShape ?? defaultOverlayShape,
       rangeValueIndicatorShape: valueIndicatorShape,
-      showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
+      showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
       valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1!.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
-      minThumbSeparation: sliderTheme.minThumbSeparation ?? _defaultMinThumbSeparation,
+      minThumbSeparation: sliderTheme.minThumbSeparation ?? defaultMinThumbSeparation,
       thumbSelector: sliderTheme.thumbSelector ?? _defaultRangeThumbSelector,
     );
 
@@ -656,7 +657,6 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
 class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _RangeSliderRenderObjectWidget({
-    Key? key,
     required this.values,
     required this.divisions,
     required this.labels,
@@ -668,7 +668,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
     required this.onChangeEnd,
     required this.state,
     required this.semanticFormatterCallback,
-  }) : super(key: key);
+  });
 
   final RangeValues values;
   final int? divisions;
@@ -1493,7 +1493,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     double value,
     double increasedValue,
     double decreasedValue,
-    String? label,
     VoidCallback increaseAction,
     VoidCallback decreaseAction,
   ) {
@@ -1505,7 +1504,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;
     }
-    config.label = label ?? '';
+
     if (semanticFormatterCallback != null) {
       config.value = semanticFormatterCallback!(_state._lerp(value));
       config.increasedValue = semanticFormatterCallback!(_state._lerp(increasedValue));
@@ -1531,7 +1530,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       values.start,
       _increasedStartValue,
       _decreasedStartValue,
-      labels?.start,
       _increaseStartAction,
       _decreaseStartAction,
     );
@@ -1539,7 +1537,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       values.end,
       _increasedEndValue,
       _decreasedEndValue,
-      labels?.end,
       _increaseEndAction,
       _decreaseEndAction,
     );

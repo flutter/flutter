@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -554,20 +553,13 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
   ///
   /// The [showName] and [level] arguments must not be null.
   TransformProperty(
-    String name,
-    Matrix4? value, {
-    bool showName = true,
-    Object? defaultValue = kNoDefaultValue,
-    DiagnosticLevel level = DiagnosticLevel.info,
+    String super.name,
+    super.value, {
+    super.showName,
+    super.defaultValue,
+    super.level,
   }) : assert(showName != null),
-       assert(level != null),
-       super(
-         name,
-         value,
-         showName: showName,
-         defaultValue: defaultValue,
-         level: level,
-       );
+       assert(level != null);
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {

@@ -37,15 +37,15 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 /// don't set [clipBehavior] or be sure that the InteractiveViewer widget is the
 /// size of the area that should be interactive.
 ///
-/// See [flutter-go](https://github.com/justinmc/flutter-go) for an example of
-/// robust positioning of an InteractiveViewer child that works for all screen
-/// sizes and child sizes.
-///
 /// The [child] must not be null.
 ///
 /// See also:
 ///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
 ///     which includes the use of InteractiveViewer.
+///   * The [flutter-go demo](https://github.com/justinmc/flutter-go), which includes robust positioning of an InteractiveViewer child
+///     that works for all screen sizes and child sizes.
+///   * The [Lazy Flutter Performance Session](https://www.youtube.com/watch?v=qax_nOpgz7E), which includes the use of an InteractiveViewer to
+///     performantly view subsets of a large set of widgets using the builder constructor.
 ///
 /// {@tool dartpad}
 /// This example shows a simple Container that can be panned and zoomed.
@@ -58,7 +58,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// The [child] parameter must not be null.
   InteractiveViewer({
-    Key? key,
+    super.key,
     this.clipBehavior = Clip.hardEdge,
     this.alignPanAxis = false,
     this.boundaryMargin = EdgeInsets.zero,
@@ -95,8 +95,7 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
            && boundaryMargin.left.isFinite),
        ),
-       builder = null,
-       super(key: key);
+       builder = null;
 
   /// Creates an InteractiveViewer for a child that is created on demand.
   ///
@@ -106,7 +105,7 @@ class InteractiveViewer extends StatefulWidget {
   /// The [builder] parameter must not be null. See its docs for an example of
   /// using it to optimize a large child.
   InteractiveViewer.builder({
-    Key? key,
+    super.key,
     this.clipBehavior = Clip.hardEdge,
     this.alignPanAxis = false,
     this.boundaryMargin = EdgeInsets.zero,
@@ -143,8 +142,7 @@ class InteractiveViewer extends StatefulWidget {
                  boundaryMargin.left.isFinite),
        ),
        constrained = false,
-       child = null,
-       super(key: key);
+       child = null;
 
   /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
   /// but it will not receive gestures in these areas.
@@ -1068,13 +1066,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 // InteractiveViewer's depending on if it's using a builder or a child.
 class _InteractiveViewerBuilt extends StatelessWidget {
   const _InteractiveViewerBuilt({
-    Key? key,
     required this.child,
     required this.childKey,
     required this.clipBehavior,
     required this.constrained,
     required this.matrix,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final GlobalKey childKey;
@@ -1103,14 +1100,10 @@ class _InteractiveViewerBuilt extends StatelessWidget {
       );
     }
 
-    if (clipBehavior != Clip.none) {
-      child = ClipRect(
-        clipBehavior: clipBehavior,
-        child: child,
-      );
-    }
-
-    return child;
+    return ClipRect(
+      clipBehavior: clipBehavior,
+      child: child,
+    );
   }
 }
 

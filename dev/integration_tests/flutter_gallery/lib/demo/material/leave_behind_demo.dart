@@ -33,7 +33,7 @@ class LeaveBehindItem implements Comparable<LeaveBehindItem> {
 }
 
 class LeaveBehindDemo extends StatefulWidget {
-  const LeaveBehindDemo({ Key? key }) : super(key: key);
+  const LeaveBehindDemo({ super.key });
 
   static const String routeName = '/material/leave-behind';
 
@@ -188,13 +188,12 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
 
 class _LeaveBehindListItem extends StatelessWidget {
   const _LeaveBehindListItem({
-    Key? key,
     required this.item,
     required this.onArchive,
     required this.onDelete,
     required this.dismissDirection,
     required this.confirmDismiss,
-  }) : super(key: key);
+  });
 
   final LeaveBehindItem item;
   final DismissDirection dismissDirection;
@@ -230,9 +229,9 @@ class _LeaveBehindListItem extends StatelessWidget {
         confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
           switch(dismissDirection) {
             case DismissDirection.endToStart:
-              return await _showConfirmationDialog(context, 'archive') == true;
+              return await _showConfirmationDialog(context, 'archive') ?? false;
             case DismissDirection.startToEnd:
-              return await _showConfirmationDialog(context, 'delete') == true;
+              return await _showConfirmationDialog(context, 'delete') ?? false;
             case DismissDirection.horizontal:
             case DismissDirection.vertical:
             case DismissDirection.up:

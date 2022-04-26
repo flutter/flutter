@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class FortnightlyDemo extends StatelessWidget {
-  const FortnightlyDemo({Key? key}) : super(key: key);
+  const FortnightlyDemo({super.key});
 
   static const String routeName = '/fortnightly';
 
@@ -33,7 +33,7 @@ class FortnightlyDemo extends StatelessWidget {
 }
 
 class ShortAppBar extends StatelessWidget {
-  const ShortAppBar({ Key? key, this.onBackPressed }) : super(key: key);
+  const ShortAppBar({ super.key, this.onBackPressed });
 
   final VoidCallback? onBackPressed;
 
@@ -68,7 +68,7 @@ class ShortAppBar extends StatelessWidget {
 }
 
 class FruitPage extends StatelessWidget {
-  const FruitPage({Key? key}) : super(key: key);
+  const FruitPage({super.key});
 
   static final String paragraph1 = '''
 Have you ever held a quince? It's strange;

@@ -49,7 +49,7 @@ class BasicMessageChannel<T> {
   final MessageCodec<T> codec;
 
   /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
   /// Sends the specified [message] to the platform plugins on this channel.
@@ -129,17 +129,7 @@ class MethodChannel {
   /// The messenger used by this channel to send platform messages.
   ///
   /// The messenger may not be null.
-  BinaryMessenger get binaryMessenger {
-    assert(
-      _binaryMessenger != null || ServicesBinding.instance != null,
-      'Cannot use this MethodChannel before the binary messenger has been initialized. '
-      'This happens when you invoke platform methods before the WidgetsFlutterBinding '
-      'has been initialized. You can fix this by either calling WidgetsFlutterBinding.ensureInitialized() '
-      'before this or by passing a custom BinaryMessenger instance to MethodChannel().',
-    );
-
-    return _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
-  }
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
   /// Backend implementation of [invokeMethod].
@@ -437,8 +427,7 @@ class MethodChannel {
 /// {@macro flutter.services.method_channel.FIFO}
 class OptionalMethodChannel extends MethodChannel {
   /// Creates a [MethodChannel] that ignores missing platform plugins.
-  const OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])
-    : super(name, codec, binaryMessenger);
+  const OptionalMethodChannel(super.name, [super.codec, super.binaryMessenger]);
 
   @override
   Future<T?> invokeMethod<T>(String method, [ dynamic arguments ]) async {
@@ -480,7 +469,7 @@ class EventChannel {
   final MethodCodec codec;
 
   /// The messenger used by this channel to send platform messages, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.

@@ -310,7 +310,7 @@ class UndoableDirectionalFocusAction extends UndoableFocusActionBase<Directional
 
 /// A button class that takes focus when clicked.
 class DemoButton extends StatefulWidget {
-  const DemoButton({Key? key, required this.name}) : super(key: key);
+  const DemoButton({super.key, required this.name});
 
   final String name;
 
@@ -356,7 +356,7 @@ class _DemoButtonState extends State<DemoButton> {
 }
 
 class FocusDemo extends StatefulWidget {
-  const FocusDemo({Key? key}) : super(key: key);
+  const FocusDemo({super.key});
 
   static GlobalKey appKey = GlobalKey();
 

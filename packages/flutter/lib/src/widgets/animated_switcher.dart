@@ -109,7 +109,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// The [duration], [transitionBuilder], [layoutBuilder], [switchInCurve], and
   /// [switchOutCurve] parameters must not be null.
   const AnimatedSwitcher({
-    Key? key,
+    super.key,
     this.child,
     required this.duration,
     this.reverseDuration,
@@ -121,8 +121,7 @@ class AnimatedSwitcher extends StatefulWidget {
        assert(switchInCurve != null),
        assert(switchOutCurve != null),
        assert(transitionBuilder != null),
-       assert(layoutBuilder != null),
-       super(key: key);
+       assert(layoutBuilder != null);
 
   /// The current child widget to display. If there was a previous child, then
   /// that child will be faded out using the [switchOutCurve], while the new

@@ -14,15 +14,15 @@ import 'test_utils.dart';
 
 void main() {
   Directory tempDir;
-  FlutterRunTestDriver _flutter;
+  FlutterRunTestDriver flutter;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
-    _flutter = FlutterRunTestDriver(tempDir);
+    flutter = FlutterRunTestDriver(tempDir);
   });
 
   tearDown(() async {
-    await _flutter.stop();
+    await flutter.stop();
     tryToDelete(tempDir);
   });
 

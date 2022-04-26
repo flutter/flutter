@@ -707,7 +707,7 @@ class _LayoutSpy extends LeafRenderObjectWidget {
 }
 
 class _LayoutSpyElement extends LeafRenderObjectElement {
-  _LayoutSpyElement(LeafRenderObjectWidget widget) : super(widget);
+  _LayoutSpyElement(super.widget);
 }
 
 class _RenderLayoutSpy extends RenderBox {

@@ -119,7 +119,7 @@ class AnimatedCrossFade extends StatefulWidget {
   ///
   /// All the arguments other than [key] must be non-null.
   const AnimatedCrossFade({
-    Key? key,
+    super.key,
     required this.firstChild,
     required this.secondChild,
     this.firstCurve = Curves.linear,
@@ -130,6 +130,7 @@ class AnimatedCrossFade extends StatefulWidget {
     required this.duration,
     this.reverseDuration,
     this.layoutBuilder = defaultLayoutBuilder,
+    this.excludeBottomFocus = true,
   }) : assert(firstChild != null),
        assert(secondChild != null),
        assert(firstCurve != null),
@@ -139,7 +140,7 @@ class AnimatedCrossFade extends StatefulWidget {
        assert(crossFadeState != null),
        assert(duration != null),
        assert(layoutBuilder != null),
-       super(key: key);
+       assert(excludeBottomFocus != null);
 
   /// The child that is visible when [crossFadeState] is
   /// [CrossFadeState.showFirst]. It fades out when transitioning
@@ -205,6 +206,15 @@ class AnimatedCrossFade extends StatefulWidget {
   /// [AnimatedCrossFade] is being forced to a particular size, then it can
   /// result in the widgets jumping about when the cross-fade state is changed.
   final AnimatedCrossFadeBuilder layoutBuilder;
+
+  /// When true, this is equivalent to wrapping the bottom widget with an [ExcludeFocus]
+  /// widget while it is at the bottom of the cross-fade stack.
+  ///
+  /// Defaults to true. When it is false, the bottom widget in the cross-fade stack
+  /// can remain in focus until the top widget requests focus. This is useful for
+  /// animating between different [TextField]s so the keyboard remains open during the
+  /// cross-fade animation.
+  final bool excludeBottomFocus;
 
   /// The default layout algorithm used by [AnimatedCrossFade].
   ///
@@ -345,6 +355,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       child: IgnorePointer(
         child: ExcludeSemantics( // Always exclude the semantics of the widget that's fading out.
           child: ExcludeFocus(
+            excluding: widget.excludeBottomFocus,
             child: FadeTransition(
               opacity: bottomAnimation,
               child: bottomChild,

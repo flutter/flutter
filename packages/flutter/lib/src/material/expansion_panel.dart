@@ -33,7 +33,7 @@ class _SaltedKey<S, V> extends LocalKey {
   }
 
   @override
-  int get hashCode => hashValues(runtimeType, salt, value);
+  int get hashCode => Object.hash(runtimeType, salt, value);
 
   @override
   String toString() {
@@ -57,6 +57,8 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
 /// expanded.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=2aJZzRMziJc}
 ///
 /// Expansion panels are only intended to be used as children for
 /// [ExpansionPanelList].
@@ -124,17 +126,11 @@ class ExpansionPanelRadio extends ExpansionPanel {
   /// [headerBuilder], [body], [value] must not be null.
   ExpansionPanelRadio({
     required this.value,
-    required ExpansionPanelHeaderBuilder headerBuilder,
-    required Widget body,
-    bool canTapOnHeader = false,
-    Color? backgroundColor,
-  }) : assert(value != null),
-      super(
-        body: body,
-        headerBuilder: headerBuilder,
-        canTapOnHeader: canTapOnHeader,
-        backgroundColor: backgroundColor,
-      );
+    required super.headerBuilder,
+    required super.body,
+    super.canTapOnHeader,
+    super.backgroundColor,
+  }) : assert(value != null);
 
   /// The value that uniquely identifies a radio panel so that the currently
   /// selected radio panel can be identified.
@@ -164,7 +160,7 @@ class ExpansionPanelList extends StatefulWidget {
   ///
   /// The [children] and [animationDuration] arguments must not be null.
   const ExpansionPanelList({
-    Key? key,
+    super.key,
     this.children = const <ExpansionPanel>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
@@ -174,8 +170,7 @@ class ExpansionPanelList extends StatefulWidget {
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
-       initialOpenPanelValue = null,
-       super(key: key);
+       initialOpenPanelValue = null;
 
   /// Creates a radio expansion panel list widget.
   ///
@@ -191,7 +186,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// ** See code in examples/api/lib/material/expansion_panel/expansion_panel_list.expansion_panel_list_radio.0.dart **
   /// {@end-tool}
   const ExpansionPanelList.radio({
-    Key? key,
+    super.key,
     this.children = const <ExpansionPanelRadio>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
@@ -201,8 +196,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.elevation = 2,
   }) : assert(children != null),
        assert(animationDuration != null),
-       _allowOnlyOnePanelOpen = true,
-       super(key: key);
+       _allowOnlyOnePanelOpen = true;
 
   /// The children of the expansion panel list. They are laid out in a similar
   /// fashion to [ListBody].

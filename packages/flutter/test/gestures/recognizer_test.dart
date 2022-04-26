@@ -42,7 +42,7 @@ const PointerUpEvent up2 = PointerUpEvent(
 );
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   test('GestureRecognizer smoketest', () {
     final TestGestureRecognizer recognizer = TestGestureRecognizer(debugOwner: 0);
@@ -193,7 +193,7 @@ void main() {
 }
 
 class TestGestureRecognizer extends GestureRecognizer {
-  TestGestureRecognizer({ Object? debugOwner }) : super(debugOwner: debugOwner);
+  TestGestureRecognizer({ super.debugOwner });
 
   @override
   String get debugDescription => 'debugDescription content';
@@ -213,7 +213,7 @@ class TestGestureRecognizer extends GestureRecognizer {
 class IndefiniteGestureRecognizer extends GestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    GestureBinding.instance!.gestureArena.add(event.pointer, this);
+    GestureBinding.instance.gestureArena.add(event.pointer, this);
   }
 
   @override
@@ -233,12 +233,9 @@ class TestPrimaryPointerGestureRecognizer<T extends PointerEvent> extends Primar
     this.resolution, {
     this.onAcceptGesture,
     this.onRejectGesture,
-    double? preAcceptSlopTolerance,
-    double? postAcceptSlopTolerance,
-  }) : super(
-    preAcceptSlopTolerance: preAcceptSlopTolerance,
-    postAcceptSlopTolerance: postAcceptSlopTolerance,
-  );
+    super.preAcceptSlopTolerance,
+    super.postAcceptSlopTolerance,
+  });
 
   final GestureDisposition resolution;
   final VoidCallback? onAcceptGesture;

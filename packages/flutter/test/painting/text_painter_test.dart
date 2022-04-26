@@ -37,6 +37,24 @@ void main() {
     expect(caretOffset.dx, painter.width);
   });
 
+  test('TextPainter caret test with WidgetSpan', () {
+    // Regression test for https://github.com/flutter/flutter/issues/98458.
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    painter.text = const TextSpan(children: <InlineSpan>[
+      TextSpan(text: 'before'),
+      WidgetSpan(child: Text('widget')),
+      TextSpan(text: 'after'),
+    ]);
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+    painter.layout();
+    final Offset caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: painter.text!.toPlainText().length), ui.Rect.zero);
+    expect(caretOffset.dx, painter.width);
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
   test('TextPainter null text test', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
@@ -996,6 +1014,26 @@ void main() {
         ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/87545
+
+  test('TextPainter line metrics update after layout', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    const String text = 'word1 word2 word3';
+    painter.text = const TextSpan(
+      text: text,
+    );
+
+    painter.layout(maxWidth: 80);
+
+    List<ui.LineMetrics> lines = painter.computeLineMetrics();
+    expect(lines.length, 3);
+
+    painter.layout(maxWidth: 1000);
+
+    lines = painter.computeLineMetrics();
+    expect(lines.length, 1);
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/62819
 }
 
 class MockCanvas extends Fake implements Canvas {

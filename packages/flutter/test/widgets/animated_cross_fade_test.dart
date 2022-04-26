@@ -385,6 +385,31 @@ void main() {
     expect(hiddenNode.hasPrimaryFocus, isFalse);
   });
 
+  testWidgets('AnimatedCrossFade bottom child can have focus', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: TextButton(onPressed: () {}, child: const Text('AAA')),
+          secondChild: TextButton(onPressed: () {}, child: const Text('BBB')),
+          crossFadeState: CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 50),
+          excludeBottomFocus: false,
+        ),
+      ),
+    );
+
+    final FocusNode visibleNode = Focus.of(tester.element(find.text('AAA')), scopeOk: true);
+    visibleNode.requestFocus();
+    await tester.pump();
+    expect(visibleNode.hasPrimaryFocus, isTrue);
+
+    final FocusNode hiddenNode = Focus.of(tester.element(find.text('BBB')), scopeOk: true);
+    hiddenNode.requestFocus();
+    await tester.pump();
+    expect(hiddenNode.hasPrimaryFocus, isTrue);
+  });
+
   testWidgets('AnimatedCrossFade second child do not receive touch events',
       (WidgetTester tester) async {
     int numberOfTouchEventNoticed = 0;

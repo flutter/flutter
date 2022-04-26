@@ -389,6 +389,35 @@ void main() {
     expect(scrollable.position.pixels, equals(0.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  testWidgets('Tapping the status bar scrolls to top with ease out curve animation', (WidgetTester tester) async {
+    const int duration = 1000;
+    final List<double> stops = <double>[0.842, 0.959, 0.993, 1.0];
+    const double scrollOffset = 1000;
+
+    await tester.pumpWidget(_buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    scrollable.position.jumpTo(scrollOffset);
+    await tester.tapAt(const Offset(100.0, 10.0));
+
+    await tester.pump(Duration.zero);
+    expect(scrollable.position.pixels, equals(scrollOffset));
+
+    for (int i = 0; i < stops.length; i++) {
+      await tester.pump( Duration(milliseconds: duration ~/ stops.length));
+      // Scroll pixel position is very long double, compare with floored int
+      // pixel position
+      expect(
+        scrollable.position.pixels.toInt(),
+        equals(
+         (scrollOffset * (1 - stops[i])).toInt()
+        )
+      );
+    }
+
+    // Finally stops at the top.
+    expect(scrollable.position.pixels, equals(0.0));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
   testWidgets('Tapping the status bar does not scroll to top', (WidgetTester tester) async {
     await tester.pumpWidget(_buildStatusBarTestApp(TargetPlatform.android));
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
@@ -502,6 +531,41 @@ void main() {
     expect(didPressButton, isFalse);
     await tester.tap(find.text('X'));
     expect(didPressButton, isTrue);
+  });
+
+  testWidgets('Persistent bottom buttons alignment', (WidgetTester tester) async {
+    Widget buildApp(AlignmentDirectional persistentAligment) {
+      return MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: Container(
+                color: Colors.amber[500],
+                height: 5000.0,
+                child: const Text('body'),
+              ),
+            ),
+            persistentFooterAlignment: persistentAligment,
+            persistentFooterButtons: <Widget>[
+              TextButton(
+                onPressed: () { },
+                child: const Text('X'),
+              ),
+            ],
+          ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(AlignmentDirectional.centerEnd));
+    Finder footerButton = find.byType(TextButton);
+    expect(tester.getTopRight(footerButton).dx, 800.0 - 8.0);
+
+    await tester.pumpWidget(buildApp(AlignmentDirectional.center));
+    footerButton = find.byType(TextButton);
+    expect(tester.getCenter(footerButton).dx, 800.0 / 2);
+
+    await tester.pumpWidget(buildApp(AlignmentDirectional.centerStart));
+    footerButton = find.byType(TextButton);
+    expect(tester.getTopLeft(footerButton).dx, 8.0);
   });
 
   testWidgets('Persistent bottom buttons apply media padding', (WidgetTester tester) async {
@@ -2275,6 +2339,7 @@ void main() {
       '     Material\n'
       '     _ScrollNotificationObserverScope\n'
       '     NotificationListener<ScrollNotification>\n'
+      '     NotificationListener<ScrollMetricsNotification>\n'
       '     ScrollNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold\n'
@@ -2418,11 +2483,10 @@ class _GeometryCachePainter extends CustomPainter {
 class _CustomPageRoute<T> extends PageRoute<T> {
   _CustomPageRoute({
     required this.builder,
-    RouteSettings settings = const RouteSettings(),
+    RouteSettings super.settings = const RouteSettings(),
     this.maintainState = true,
-    bool fullscreenDialog = false,
-  }) : assert(builder != null),
-       super(settings: settings, fullscreenDialog: fullscreenDialog);
+    super.fullscreenDialog,
+  }) : assert(builder != null);
 
   final WidgetBuilder builder;
 

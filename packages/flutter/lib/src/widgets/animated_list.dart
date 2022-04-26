@@ -62,7 +62,7 @@ class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted
   /// or removed.
   const AnimatedList({
-    Key? key,
+    super.key,
     required this.itemBuilder,
     this.initialItemCount = 0,
     this.scrollDirection = Axis.vertical,
@@ -74,8 +74,7 @@ class AnimatedList extends StatefulWidget {
     this.padding,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(itemBuilder != null),
-       assert(initialItemCount != null && initialItemCount >= 0),
-       super(key: key);
+       assert(initialItemCount != null && initialItemCount >= 0);
 
   /// Called, as needed, to build list item widgets.
   ///
@@ -337,12 +336,12 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 class SliverAnimatedList extends StatefulWidget {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedList({
-    Key? key,
+    super.key,
     required this.itemBuilder,
+    this.findChildIndexCallback,
     this.initialItemCount = 0,
   }) : assert(itemBuilder != null),
-       assert(initialItemCount != null && initialItemCount >= 0),
-       super(key: key);
+       assert(initialItemCount != null && initialItemCount >= 0);
 
   /// Called, as needed, to build list item widgets.
   ///
@@ -358,6 +357,9 @@ class SliverAnimatedList extends StatefulWidget {
   /// Implementations of this callback should assume that
   /// [SliverAnimatedListState.removeItem] removes an item immediately.
   final AnimatedListItemBuilder itemBuilder;
+
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
+  final ChildIndexGetter? findChildIndexCallback;
 
   /// {@macro flutter.widgets.animatedList.initialItemCount}
   final int initialItemCount;
@@ -507,7 +509,11 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
   }
 
   SliverChildDelegate _createDelegate() {
-    return SliverChildBuilderDelegate(_itemBuilder, childCount: _itemsCount);
+    return SliverChildBuilderDelegate(
+      _itemBuilder,
+      childCount: _itemsCount,
+      findChildIndexCallback: widget.findChildIndexCallback,
+    );
   }
 
   /// Insert an item at [index] and start an animation that will be passed to

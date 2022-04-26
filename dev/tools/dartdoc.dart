@@ -91,12 +91,12 @@ Future<void> main(List<String> arguments) async {
     pubEnvironment['PUB_CACHE'] = pubCachePath;
   }
 
-  final String pubExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/pub';
+  final String dartExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/dart';
 
   // Run pub.
-  ProcessWrapper process = ProcessWrapper(await Process.start(
-    pubExecutable,
-    <String>['get'],
+  ProcessWrapper process = ProcessWrapper(await runPubProcess(
+    dartBinaryPath: dartExecutable,
+    arguments: <String>['get'],
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   ));
@@ -120,8 +120,9 @@ Future<void> main(List<String> arguments) async {
 
   // Verify which version of snippets and dartdoc we're using.
   final ProcessResult snippetsResult = Process.runSync(
-    pubExecutable,
+    dartExecutable,
     <String>[
+      'pub',
       'global',
       'list',
     ],
@@ -172,7 +173,6 @@ Future<void> main(List<String> arguments) async {
       'analyzer',
       'args',
       'barback',
-      'cli_util',
       'csslib',
       'flutter_goldens',
       'flutter_goldens_client',
@@ -216,11 +216,11 @@ Future<void> main(List<String> arguments) async {
   ];
 
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
-  print('Executing: (cd $kDocsRoot ; $pubExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
+  print('Executing: (cd $kDocsRoot ; $dartExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
 
-  process = ProcessWrapper(await Process.start(
-    pubExecutable,
-    dartdocArgs,
+  process = ProcessWrapper(await runPubProcess(
+    dartBinaryPath: dartExecutable,
+    arguments: dartdocArgs,
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   ));
@@ -381,6 +381,25 @@ void cleanOutSnippets() {
   }
 }
 
+void _sanityCheckExample(File file, RegExp regExp) {
+  if (file.existsSync()) {
+    final List<String> contents = file.readAsLinesSync();
+    bool found = false;
+    for (final String line in contents) {
+      if (regExp.matchAsPrefix(line) != null) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      throw Exception("Missing example code in ${file.path}. Either it didn't get published, publishing has changed, or the example no longer exists.");
+    }
+  } else {
+    throw Exception("Missing example code sanity test file ${file.path}. Either it didn't get published, or you might have to update the test to look at a different file.");
+  }
+}
+
+/// Runs a sanity check by running a test.
 void sanityCheckDocs() {
   final List<String> canaries = <String>[
     '$kPublishRoot/assets/overrides.css',
@@ -397,6 +416,22 @@ void sanityCheckDocs() {
     if (!File(canary).existsSync())
       throw Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
   }
+  // Make sure at least one example of each kind includes source code.
+
+  // Check a "sample" example, any one will do.
+  final File sampleExample = File('$kPublishRoot/api/widgets/showGeneralDialog.html');
+  final RegExp sampleRegExp = RegExp(r'\s*<pre id="longSnippet1" class="language-dart">\s*<code class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;');
+  _sanityCheckExample(sampleExample, sampleRegExp);
+
+  // Check a "snippet" example, any one will do.
+  final File snippetExample = File('$kPublishRoot/api/widgets/ModalRoute/barrierColor.html');
+  final RegExp snippetRegExp = RegExp(r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.backgroundColor;.*</pre>');
+  _sanityCheckExample(snippetExample, snippetRegExp);
+
+  // Check a "dartpad" example, any one will do.
+  final File dartpadExample = File('$kPublishRoot/api/widgets/PhysicalShape-class.html');
+  final RegExp dartpadRegExp = RegExp(r'\s*<iframe class="snippet-dartpad" src="https://dartpad\.dev.*sample_id=widgets\.PhysicalShape\.\d+.*">\s*</iframe>');
+  _sanityCheckExample(dartpadExample, dartpadRegExp);
 }
 
 /// Creates a custom index.html because we try to maintain old
@@ -464,7 +499,6 @@ void putRedirectInOldIndexLocation() {
   File('$kPublishRoot/flutter/index.html').writeAsStringSync(metaTag);
 }
 
-
 void writeSnippetsIndexFile() {
   final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
   if (snippetsDir.existsSync()) {
@@ -530,4 +564,19 @@ void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> f
       if (!filter.any((Pattern pattern) => line.contains(pattern)))
         print('$prefix$line'.trim());
     });
+}
+
+Future<Process> runPubProcess({
+  required String dartBinaryPath,
+  required List<String> arguments,
+  String? workingDirectory,
+  Map<String, String>? environment,
+  @visibleForTesting
+  ProcessManager processManager = const LocalProcessManager(),
+}) {
+  return processManager.start(
+    <Object>[dartBinaryPath, 'pub', ...arguments],
+    workingDirectory: workingDirectory,
+    environment: environment,
+  );
 }

@@ -143,13 +143,12 @@ class UnderlineInputBorder extends InputBorder {
   /// and right corners have a circular radius of 4.0. The [borderRadius]
   /// parameter must not be null.
   const UnderlineInputBorder({
-    BorderSide borderSide = const BorderSide(),
+    super.borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.only(
       topLeft: Radius.circular(4.0),
       topRight: Radius.circular(4.0),
     ),
-  }) : assert(borderRadius != null),
-       super(borderSide: borderSide);
+  }) : assert(borderRadius != null);
 
   /// The radii of the border's rounded rectangle corners.
   ///
@@ -285,12 +284,11 @@ class OutlineInputBorder extends InputBorder {
   ///    will extend beyond the container as if the border were still being
   ///    drawn.
   const OutlineInputBorder({
-    BorderSide borderSide = const BorderSide(),
+    super.borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
     this.gapPadding = 4.0,
   }) : assert(borderRadius != null),
-       assert(gapPadding != null && gapPadding >= 0.0),
-       super(borderSide: borderSide);
+       assert(gapPadding != null && gapPadding >= 0.0);
 
   // The label text's gap can extend into the corners (even both the top left
   // and the top right corner). To avoid the more complicated problem of finding
@@ -507,5 +505,5 @@ class OutlineInputBorder extends InputBorder {
   }
 
   @override
-  int get hashCode => hashValues(borderSide, borderRadius, gapPadding);
+  int get hashCode => Object.hash(borderSide, borderRadius, gapPadding);
 }

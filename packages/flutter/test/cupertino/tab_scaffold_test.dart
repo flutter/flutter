@@ -8,12 +8,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 
 late List<int> selectedTabs;
 
 class MockCupertinoTabController extends CupertinoTabController {
-  MockCupertinoTabController({ required int initialIndex }): super(initialIndex: initialIndex);
+  MockCupertinoTabController({ required super.initialIndex });
 
   bool isDisposed = false;
   int numOfListeners = 0;

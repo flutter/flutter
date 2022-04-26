@@ -14,7 +14,7 @@ const Color falseColor = Colors.green;
 /// Mock widget which plays the role of a button -- it can emit notifications
 /// that [MaterialState] values are now in or out of play.
 class _InnerWidget extends StatefulWidget {
-  const _InnerWidget({required this.onValueChanged, required this.controller, Key? key}) : super(key: key);
+  const _InnerWidget({required this.onValueChanged, required this.controller});
   final ValueChanged<bool> onValueChanged;
   final StreamController<bool> controller;
 
@@ -37,8 +37,7 @@ class _MyWidget extends StatefulWidget {
     required this.controller,
     required this.evaluator,
     required this.materialState,
-    Key? key,
-  }) : super(key: key);
+  });
 
   /// Wrapper around `MaterialStateMixin.isPressed/isHovered/isFocused/etc`.
   final bool Function(_MyWidgetState state) evaluator;

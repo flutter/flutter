@@ -67,11 +67,11 @@ Widget buildTestWidgets({
 
 class TestWidget extends SingleChildRenderObjectWidget {
   const TestWidget({
-    Key? key,
-    required Widget child,
+    super.key,
+    required Widget super.child,
     required this.label,
     required this.isSemanticBoundary,
-  }) : super(key: key, child: child);
+  });
 
   final String label;
   final bool isSemanticBoundary;

@@ -27,8 +27,8 @@ void main() {
   element.findRootAncestorStateOfType<targetType>();
   element.findAncestorRenderObjectOfType<targetType>();
 
-  // Changes made in https://github.com/flutter/flutter/pull/45941
-  final WidgetsBinding binding = WidgetsBinding.instance!;
+  // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
+  final WidgetsBinding binding = WidgetsBinding.instance;
   binding.deferFirstFrame();
   binding.allowFirstFrame();
 
@@ -220,4 +220,13 @@ void main() {
   OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
   notification = OverscrollIndicatorNotification(error: '');
   notification.disallowIndicator();
+
+  // Changes made in https://github.com/flutter/flutter/pull/96957
+  CupertinoScrollbar scrollbar = CupertinoScrollbar(thumbVisibility: true);
+  bool nowShowing = scrollbar.thumbVisibility;
+  RawScrollbar rawScrollbar = RawScrollbar(thumbVisibility: true);
+  nowShowing = rawScrollbar.thumbVisibility;
+
+  // Change made in https://github.com/flutter/flutter/pull/100381
+  SelectionOverlay.fadeDuration;
 }

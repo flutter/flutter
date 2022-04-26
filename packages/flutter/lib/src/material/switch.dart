@@ -12,6 +12,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'material_state.dart';
 import 'shadows.dart';
+import 'switch_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
@@ -64,7 +65,7 @@ class Switch extends StatelessWidget {
   /// * [value] determines whether this switch is on or off.
   /// * [onChanged] is called when the user toggles the switch on or off.
   const Switch({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -89,8 +90,7 @@ class Switch extends StatelessWidget {
   })  : _switchType = _SwitchType.material,
         assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
-        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        super(key: key);
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   /// Creates an adaptive [Switch] based on whether the target platform is iOS
   /// or macOS, following Material design's
@@ -108,7 +108,7 @@ class Switch extends StatelessWidget {
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Switch.adaptive({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -133,8 +133,7 @@ class Switch extends StatelessWidget {
   })  : assert(autofocus != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        _switchType = _SwitchType.adaptive,
-        super(key: key);
+        _switchType = _SwitchType.adaptive;
 
   /// Whether this switch is on or off.
   ///
@@ -397,9 +396,12 @@ class Switch extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  Size _getSwitchSize(ThemeData theme) {
+  Size _getSwitchSize(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final SwitchThemeData switchTheme = SwitchTheme.of(context);
+
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
-      ?? theme.switchTheme.materialTapTargetSize
+      ?? switchTheme.materialTapTargetSize
       ?? theme.materialTapTargetSize;
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
@@ -410,7 +412,7 @@ class Switch extends StatelessWidget {
   }
 
   Widget _buildCupertinoSwitch(BuildContext context) {
-    final Size size = _getSwitchSize(Theme.of(context));
+    final Size size = _getSwitchSize(context);
     return Focus(
       focusNode: focusNode,
       autofocus: autofocus,
@@ -433,7 +435,7 @@ class Switch extends StatelessWidget {
     return _MaterialSwitch(
       value: value,
       onChanged: onChanged,
-      size: _getSwitchSize(Theme.of(context)),
+      size: _getSwitchSize(context),
       activeColor: activeColor,
       activeTrackColor: activeTrackColor,
       inactiveThumbColor: inactiveThumbColor,
@@ -489,7 +491,6 @@ class Switch extends StatelessWidget {
 
 class _MaterialSwitch extends StatefulWidget {
   const _MaterialSwitch({
-    Key? key,
     required this.value,
     required this.onChanged,
     required this.size,
@@ -514,8 +515,7 @@ class _MaterialSwitch extends StatefulWidget {
     this.autofocus = false,
   })  : assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
-        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        super(key: key);
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   final bool value;
   final ValueChanged<bool>? onChanged;
@@ -691,6 +691,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     }
 
     final ThemeData theme = Theme.of(context);
+    final SwitchThemeData switchTheme = SwitchTheme.of(context);
 
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
@@ -698,46 +699,46 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
     final Color effectiveActiveThumbColor = widget.thumbColor?.resolve(activeStates)
       ?? _widgetThumbColor.resolve(activeStates)
-      ?? theme.switchTheme.thumbColor?.resolve(activeStates)
+      ?? switchTheme.thumbColor?.resolve(activeStates)
       ?? _defaultThumbColor.resolve(activeStates);
     final Color effectiveInactiveThumbColor = widget.thumbColor?.resolve(inactiveStates)
       ?? _widgetThumbColor.resolve(inactiveStates)
-      ?? theme.switchTheme.thumbColor?.resolve(inactiveStates)
+      ?? switchTheme.thumbColor?.resolve(inactiveStates)
       ?? _defaultThumbColor.resolve(inactiveStates);
     final Color effectiveActiveTrackColor = widget.trackColor?.resolve(activeStates)
       ?? _widgetTrackColor.resolve(activeStates)
-      ?? theme.switchTheme.trackColor?.resolve(activeStates)
+      ?? switchTheme.trackColor?.resolve(activeStates)
       ?? _defaultTrackColor.resolve(activeStates);
     final Color effectiveInactiveTrackColor = widget.trackColor?.resolve(inactiveStates)
       ?? _widgetTrackColor.resolve(inactiveStates)
-      ?? theme.switchTheme.trackColor?.resolve(inactiveStates)
+      ?? switchTheme.trackColor?.resolve(inactiveStates)
       ?? _defaultTrackColor.resolve(inactiveStates);
 
     final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
       ?? widget.focusColor
-      ?? theme.switchTheme.overlayColor?.resolve(focusedStates)
+      ?? switchTheme.overlayColor?.resolve(focusedStates)
       ?? theme.focusColor;
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
         ?? widget.hoverColor
-        ?? theme.switchTheme.overlayColor?.resolve(hoveredStates)
+        ?? switchTheme.overlayColor?.resolve(hoveredStates)
         ?? theme.hoverColor;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-        ?? theme.switchTheme.overlayColor?.resolve(activePressedStates)
+        ?? switchTheme.overlayColor?.resolve(activePressedStates)
         ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-        ?? theme.switchTheme.overlayColor?.resolve(inactivePressedStates)
+        ?? switchTheme.overlayColor?.resolve(inactivePressedStates)
         ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-        ?? theme.switchTheme.mouseCursor?.resolve(states)
+        ?? switchTheme.mouseCursor?.resolve(states)
         ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
     });
 
@@ -763,7 +764,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             ..reactionColor = effectiveActivePressedOverlayColor
             ..hoverColor = effectiveHoverOverlayColor
             ..focusColor = effectiveFocusOverlayColor
-            ..splashRadius = widget.splashRadius ?? theme.switchTheme.splashRadius ?? kRadialReactionRadius
+            ..splashRadius = widget.splashRadius ?? switchTheme.splashRadius ?? kRadialReactionRadius
             ..downPosition = downPosition
             ..isFocused = states.contains(MaterialState.focused)
             ..isHovered = states.contains(MaterialState.hovered)

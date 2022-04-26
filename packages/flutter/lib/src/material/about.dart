@@ -55,7 +55,7 @@ class AboutListTile extends StatelessWidget {
   /// derived from the nearest [Title] widget. The version, icon, and legalese
   /// values default to the empty string.
   const AboutListTile({
-    Key? key,
+    super.key,
     this.icon,
     this.child,
     this.applicationName,
@@ -64,7 +64,7 @@ class AboutListTile extends StatelessWidget {
     this.applicationLegalese,
     this.aboutBoxChildren,
     this.dense,
-  }) : super(key: key);
+  });
 
   /// The icon to show for this drawer item.
   ///
@@ -167,8 +167,9 @@ class AboutListTile extends StatelessWidget {
 /// The licenses shown on the [LicensePage] are those returned by the
 /// [LicenseRegistry] API, which can be used to add more licenses to the list.
 ///
-/// The [context], [useRootNavigator] and [routeSettings] arguments are passed to
-/// [showDialog], the documentation for which discusses how it is used.
+/// The [context], [useRootNavigator], [routeSettings] and [anchorPoint]
+/// arguments are passed to [showDialog], the documentation for which discusses
+/// how it is used.
 void showAboutDialog({
   required BuildContext context,
   String? applicationName,
@@ -178,6 +179,7 @@ void showAboutDialog({
   List<Widget>? children,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
+  Offset? anchorPoint,
 }) {
   assert(context != null);
   assert(useRootNavigator != null);
@@ -194,6 +196,7 @@ void showAboutDialog({
       );
     },
     routeSettings: routeSettings,
+    anchorPoint: anchorPoint,
   );
 }
 
@@ -262,13 +265,13 @@ class AboutDialog extends StatelessWidget {
   /// derived from the nearest [Title] widget. The version, icon, and legalese
   /// values default to the empty string.
   const AboutDialog({
-    Key? key,
+    super.key,
     this.applicationName,
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
     this.children,
-  }) : super(key: key);
+  });
 
   /// The name of the application.
   ///
@@ -381,12 +384,12 @@ class LicensePage extends StatefulWidget {
   /// The licenses shown on the [LicensePage] are those returned by the
   /// [LicenseRegistry] API, which can be used to add more licenses to the list.
   const LicensePage({
-    Key? key,
+    super.key,
     this.applicationName,
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
-  }) : super(key: key);
+  });
 
   /// The name of the application.
   ///
@@ -460,14 +463,12 @@ class _LicensePageState extends State<LicensePage> {
 
 class _AboutProgram extends StatelessWidget {
   const _AboutProgram({
-    Key? key,
     required this.name,
     required this.version,
     this.icon,
     this.legalese,
   })  : assert(name != null),
-        assert(version != null),
-        super(key: key);
+        assert(version != null);
 
   final String name;
   final String version;
@@ -490,17 +491,21 @@ class _AboutProgram extends StatelessWidget {
           ),
           if (icon != null)
             IconTheme(data: Theme.of(context).iconTheme, child: icon!),
-          Text(
-            version,
-            style: Theme.of(context).textTheme.bodyText2,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: _textVerticalSeparation),
-          Text(
-            legalese ?? '',
-            style: Theme.of(context).textTheme.caption,
-            textAlign: TextAlign.center,
-          ),
+          if (version != '')
+            Padding(
+              padding: const EdgeInsets.only(bottom: _textVerticalSeparation),
+              child: Text(
+                version,
+                style: Theme.of(context).textTheme.bodyText2,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          if (legalese != null && legalese != '')
+            Text(
+              legalese!,
+              style: Theme.of(context).textTheme.caption,
+              textAlign: TextAlign.center,
+            ),
           const SizedBox(height: _textVerticalSeparation),
           Text(
             'Powered by Flutter',
@@ -515,13 +520,11 @@ class _AboutProgram extends StatelessWidget {
 
 class _PackagesView extends StatefulWidget {
   const _PackagesView({
-    Key? key,
     required this.about,
     required this.isLateral,
     required this.selectedId,
   })  : assert(about != null),
-        assert(isLateral != null),
-        super(key: key);
+        assert(isLateral != null);
 
   final Widget about;
   final bool isLateral;
@@ -635,13 +638,12 @@ class _PackagesViewState extends State<_PackagesView> {
 
 class _PackageListTile extends StatelessWidget {
   const _PackageListTile({
-    Key? key,
     required this.packageName,
     this.index,
     required this.isSelected,
     required this.numberLicenses,
     this.onTap,
-}) : super(key:key);
+});
 
   final String packageName;
   final int? index;
@@ -734,16 +736,15 @@ class _DetailArguments {
   }
 
   @override
-  int get hashCode => hashValues(packageName, hashList(licenseEntries));
+  int get hashCode => Object.hash(packageName, Object.hashAll(licenseEntries));
 }
 
 class _PackageLicensePage extends StatefulWidget {
   const _PackageLicensePage({
-    Key? key,
     required this.packageName,
     required this.licenseEntries,
     required this.scrollController,
-  }) : super(key: key);
+  });
 
   final String packageName;
   final List<LicenseEntry> licenseEntries;
@@ -780,7 +781,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         return true;
       }());
       final List<LicenseParagraph> paragraphs =
-        await SchedulerBinding.instance!.scheduleTask<List<LicenseParagraph>>(
+        await SchedulerBinding.instance.scheduleTask<List<LicenseParagraph>>(
           license.paragraphs.toList,
           Priority.animation,
           debugLabel: 'License',
@@ -910,9 +911,8 @@ class _PackageLicensePageTitle extends StatelessWidget {
   const _PackageLicensePageTitle(
     this.title,
     this.subtitle,
-    this.theme, {
-    Key? key,
-  }) : super(key: key);
+    this.theme,
+  );
 
   final String title;
   final String subtitle;
@@ -920,12 +920,14 @@ class _PackageLicensePageTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color? color = Theme.of(context).appBarTheme.foregroundColor;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(title, style: theme.headline6),
-        Text(subtitle, style: theme.subtitle2),
+        Text(title, style: theme.headline6?.copyWith(color: color)),
+        Text(subtitle, style: theme.subtitle2?.copyWith(color: color)),
       ],
     );
   }
@@ -1012,7 +1014,6 @@ class _MasterDetailFlow extends StatefulWidget {
   /// Creates a master detail navigation flow which is either nested or
   /// lateral depending on screen width.
   const _MasterDetailFlow({
-    Key? key,
     required this.detailPageBuilder,
     required this.masterViewBuilder,
     this.automaticallyImplyLeading = true,
@@ -1022,8 +1023,7 @@ class _MasterDetailFlow extends StatefulWidget {
   })  : assert(masterViewBuilder != null),
         assert(automaticallyImplyLeading != null),
         assert(detailPageBuilder != null),
-        assert(displayMode != null),
-        super(key: key);
+        assert(displayMode != null);
 
   /// Builder for the master view for lateral navigation.
   ///
@@ -1244,12 +1244,11 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
 
 class _MasterPage extends StatelessWidget {
   const _MasterPage({
-    Key? key,
     this.leading,
     this.title,
     this.masterViewBuilder,
     required this.automaticallyImplyLeading,
-  }) : super(key: key);
+  });
 
   final _MasterViewBuilder? masterViewBuilder;
   final Widget? title;
@@ -1278,7 +1277,6 @@ const double _kDetailPageFABGutterWidth = 84.0;
 
 class _MasterDetailScaffold extends StatefulWidget {
   const _MasterDetailScaffold({
-    Key? key,
     required this.detailPageBuilder,
     required this.masterViewBuilder,
     this.actionBuilder,
@@ -1287,8 +1285,7 @@ class _MasterDetailScaffold extends StatefulWidget {
     required this.automaticallyImplyLeading,
     this.detailPageFABlessGutterWidth,
   })  : assert(detailPageBuilder != null),
-        assert(masterViewBuilder != null),
-        super(key: key);
+        assert(masterViewBuilder != null);
 
   final _MasterViewBuilder masterViewBuilder;
 
@@ -1328,15 +1325,13 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
 
   @override
   void openDetailPage(Object arguments) {
-    SchedulerBinding.instance!
-        .addPostFrameCallback((_) => _detailArguments.value = arguments);
+    SchedulerBinding.instance.addPostFrameCallback((_) => _detailArguments.value = arguments);
     _MasterDetailFlow.of(context)!.openDetailPage(arguments);
   }
 
   @override
   void setInitialDetailPage(Object arguments) {
-    SchedulerBinding.instance!
-        .addPostFrameCallback((_) => _detailArguments.value = arguments);
+    SchedulerBinding.instance.addPostFrameCallback((_) => _detailArguments.value = arguments);
     _MasterDetailFlow.of(context)!.setInitialDetailPage(arguments);
   }
 
@@ -1431,13 +1426,11 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
 
 class _DetailView extends StatelessWidget {
   const _DetailView({
-    Key? key,
     required _DetailPageBuilder builder,
     Object? arguments,
   })  : assert(builder != null),
         _builder = builder,
-        _arguments = arguments,
-        super(key: key);
+        _arguments = arguments;
 
   final _DetailPageBuilder _builder;
   final Object? _arguments;

@@ -2595,6 +2595,39 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         );
       });
     });
+
+    testWithoutContext('throws when the language code is not supported', () {
+      const String arbFileWithInvalidCode = '''
+{
+  "@@locale": "invalid",
+  "title": "invalid"
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile('app_invalid.arb')
+        .writeAsStringSync(arbFileWithInvalidCode);
+
+      expect(
+        () {
+          LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: 'app_invalid.arb',
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+          )
+            ..loadResources()
+            ..writeOutputFiles(BufferLogger.test());
+        },
+        throwsA(isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('"invalid" is not a supported language code.'),
+        )),
+      );
+    });
   });
 
   testWithoutContext('should generate a valid pubspec.yaml file when using synthetic package if it does not already exist', () {

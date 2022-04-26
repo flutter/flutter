@@ -445,6 +445,10 @@ flutter:
 
       expect(getGradleVersionFor('4.0.0'), '6.7');
       expect(getGradleVersionFor('4.1.0'), '6.7');
+
+      expect(getGradleVersionFor('7.0'), '7.4');
+      expect(getGradleVersionFor('7.1.2'), '7.4');
+      expect(getGradleVersionFor('7.2'), '7.4');
     });
 
     testWithoutContext('throws on unsupported versions', () {
@@ -539,9 +543,9 @@ flutter:
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          "      releaseImplementation 'com.mycompany:flutter_release:2.2'\n"
-          "      debugImplementation 'com.mycompany:flutter_debug:2.2'\n"
-          "      profileImplementation 'com.mycompany:flutter_profile:2.2'\n"
+          "      releaseImplementation 'com.mycompany:flutter:2.2:release'\n"
+          "      debugImplementation 'com.mycompany:flutter:2.2:debug'\n"
+          "      profileImplementation 'com.mycompany:flutter:2.2:profile'\n"
           '    }\n'
           '\n'
           '\n'
@@ -590,7 +594,7 @@ flutter:
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          "      releaseImplementation 'com.mycompany:flutter_release:1.0'\n"
+          "      releaseImplementation 'com.mycompany:flutter:1.0:release'\n"
           '    }\n'
           '\n'
           'To learn more, visit https://flutter.dev/go/build-aar\n'
@@ -628,7 +632,7 @@ flutter:
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          "      debugImplementation 'com.mycompany:flutter_debug:1.0'\n"
+          "      debugImplementation 'com.mycompany:flutter:1.0:debug'\n"
           '    }\n'
           '\n'
           'To learn more, visit https://flutter.dev/go/build-aar\n'
@@ -667,7 +671,7 @@ flutter:
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          "      profileImplementation 'com.mycompany:flutter_profile:1.0'\n"
+          "      profileImplementation 'com.mycompany:flutter:1.0:profile'\n"
           '    }\n'
           '\n'
           '\n'
