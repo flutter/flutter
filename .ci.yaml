@@ -108,6 +108,25 @@ platform_properties:
       os: Mac-12
       cpu: x86
       device_os: N
+  mac_arm64_android:
+    properties:
+      caches: >-
+          [
+            {"name":"builder_mac_devicelab","path":"builder"},
+            {"name":"android_sdk","path":"android"},
+            {"name":"flutter_sdk","path":"flutter sdk"},
+            {"name":"gradle","path":"gradle"},
+            {"name":"openjdk_11","path":"java"},
+            {"name":"pub_cache","path":".pub-cache"}
+          ]
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:31v8"},
+          {"dependency": "open_jdk", "version": "11"}
+        ]
+      os: Mac-12
+      cpu: arm64
+      device_os: N
   mac_ios:
     properties:
       caches: >-
@@ -3110,6 +3129,17 @@ targets:
       task_name: hello_world_android__compile
     scheduler: luci
 
+  - name: Mac_arm64_android hello_world_android__compile
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/87508
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","mac","arm64"]
+      task_name: hello_world_android__compile
+    scheduler: luci
+
   - name: Mac_android hot_mode_dev_cycle__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3127,6 +3157,17 @@ targets:
     properties:
       tags: >
         ["devicelab","android","mac"]
+      task_name: integration_test_test
+    scheduler: luci
+
+  - name: Mac_arm64_android integration_test_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/87508
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","mac","arm64"]
       task_name: integration_test_test
     scheduler: luci
 
@@ -3158,6 +3199,19 @@ targets:
     properties:
       tags: >
         ["devicelab","android","mac"]
+      task_name: run_release_test
+    scheduler: luci
+
+  - name: Mac_arm64_android run_release_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/87508
+    runIf:
+      - dev/**
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","mac","arm64"]
       task_name: run_release_test
     scheduler: luci
 
