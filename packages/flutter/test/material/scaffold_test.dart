@@ -2339,7 +2339,6 @@ void main() {
       '     Material\n'
       '     _ScrollNotificationObserverScope\n'
       '     NotificationListener<ScrollNotification>\n'
-      '     NotificationListener<ScrollMetricsNotification>\n'
       '     ScrollNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold\n'
