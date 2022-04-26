@@ -2559,6 +2559,37 @@ void main() {
     expect(scrollStarted, 2);
     expect(scrollEnded, 2);
   });
+
+  // Regression test of https://github.com/flutter/flutter/issues/93818
+  group('NestedScrollView scroll normally when using', (){
+    testWidgets('ScrollController.jumpTo', (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
+      final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+
+      await tester.pumpWidget(buildTest(controller: controller, key: globalKey));
+      // Jump to the end of the list
+      controller.jumpTo(100000);
+      await tester.pumpAndSettle();
+      expect(globalKey.currentState!.outerController.position.pixels, globalKey.currentState!.outerController.position.maxScrollExtent);
+      expect(globalKey.currentState!.innerController.position.pixels, globalKey.currentState!.innerController.position.maxScrollExtent);
+    });
+
+    testWidgets('ScrollController.animateTo', (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
+      final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+
+      await tester.pumpWidget(buildTest(controller: controller, key: globalKey));
+      // Animate to the end of the list
+      controller.animateTo(
+        100000,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+      expect(globalKey.currentState!.outerController.position.pixels, globalKey.currentState!.outerController.position.maxScrollExtent);
+      expect(globalKey.currentState!.innerController.position.pixels, globalKey.currentState!.innerController.position.maxScrollExtent);
+    });
+  });
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {

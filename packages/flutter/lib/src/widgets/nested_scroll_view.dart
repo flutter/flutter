@@ -799,10 +799,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   double unnestOffset(double value, _NestedScrollPosition source) {
     if (source == _outerPosition)
-      return value.clamp(
-        _outerPosition!.minScrollExtent,
-        _outerPosition!.maxScrollExtent,
-      );
+      return value;
     if (value < source.minScrollExtent)
       return value - source.minScrollExtent + _outerPosition!.minScrollExtent;
     return value - source.minScrollExtent + _outerPosition!.maxScrollExtent;
