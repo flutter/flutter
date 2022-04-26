@@ -315,6 +315,14 @@ void main() {
         fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin',
           'snapshots', 'frontend_server.dart.snapshot')
       );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.impellerc).path,
+        fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.libtessellator).path,
+        fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'),
+      );
     });
 
     testWithoutContext('getEngineType', () {
