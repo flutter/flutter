@@ -107,6 +107,7 @@ source_set("flutter_linux_sources") {
     "fl_engine.cc",
     "fl_event_channel.cc",
     "fl_gl_area.cc",
+    "fl_gnome_settings.cc",
     "fl_json_message_codec.cc",
     "fl_json_method_codec.cc",
     "fl_key_channel_responder.cc",
@@ -128,6 +129,7 @@ source_set("flutter_linux_sources") {
     "fl_renderer.cc",
     "fl_renderer_gl.cc",
     "fl_renderer_headless.cc",
+    "fl_settings.cc",
     "fl_settings_plugin.cc",
     "fl_standard_message_codec.cc",
     "fl_standard_method_codec.cc",
@@ -175,6 +177,13 @@ test_fixtures("flutter_linux_fixtures") {
   fixtures = []
 }
 
+copy("flutter_linux_gschemas") {
+  testonly = true
+
+  sources = [ "testing/gschemas/ubuntu-20.04.compiled" ]
+  outputs = [ "$target_gen_dir/assets/{{source_name_part}}/gschemas.compiled" ]
+}
+
 executable("flutter_linux_unittests") {
   testonly = true
 
@@ -186,6 +195,7 @@ executable("flutter_linux_unittests") {
     "fl_dart_project_test.cc",
     "fl_engine_test.cc",
     "fl_event_channel_test.cc",
+    "fl_gnome_settings_test.cc",
     "fl_json_message_codec_test.cc",
     "fl_json_method_codec_test.cc",
     "fl_key_channel_responder_test.cc",
@@ -197,6 +207,7 @@ executable("flutter_linux_unittests") {
     "fl_method_response_test.cc",
     "fl_pixel_buffer_texture_test.cc",
     "fl_plugin_registrar_test.cc",
+    "fl_settings_plugin_test.cc",
     "fl_standard_message_codec_test.cc",
     "fl_standard_method_codec_test.cc",
     "fl_string_codec_test.cc",
@@ -210,6 +221,7 @@ executable("flutter_linux_unittests") {
     "testing/mock_epoxy.cc",
     "testing/mock_plugin_registrar.cc",
     "testing/mock_renderer.cc",
+    "testing/mock_settings.cc",
     "testing/mock_signal_handler.cc",
     "testing/mock_text_input_plugin.cc",
     "testing/mock_texture_registrar.cc",
@@ -229,6 +241,7 @@ executable("flutter_linux_unittests") {
 
   deps = [
     ":flutter_linux_fixtures",
+    ":flutter_linux_gschemas",
     ":flutter_linux_sources",
     "//flutter/runtime:libdart",
     "//flutter/shell/platform/embedder:embedder_headers",
