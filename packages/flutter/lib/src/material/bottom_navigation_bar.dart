@@ -192,19 +192,19 @@ class BottomNavigationBar extends StatefulWidget {
        assert(items.length >= 2),
        assert(
         items.every((BottomNavigationBarItem item) => item.label != null),
-        'Every item must have a non-null label',
-       ),
-       assert(0 <= currentIndex && currentIndex < items.length),
-       assert(elevation == null || elevation >= 0.0),
-       assert(iconSize != null && iconSize >= 0.0),
-       assert(
-         selectedItemColor == null || fixedColor == null,
-         'Either selectedItemColor or fixedColor can be specified, but not both',
-       ),
-       assert(selectedFontSize != null && selectedFontSize >= 0.0),
-       assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
-       selectedItemColor = selectedItemColor ?? fixedColor,
-       super(key: key);
+          'Every item must have a non-null label',
+        ),
+        assert(0 <= currentIndex && currentIndex < items.length),
+        assert(elevation == null || elevation >= 0.0),
+        assert(iconSize != null && iconSize >= 0.0),
+        assert(
+          selectedItemColor == null || fixedColor == null,
+          'Either selectedItemColor or fixedColor can be specified, but not both',
+        ),
+        assert(selectedFontSize != null && selectedFontSize >= 0.0),
+        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
+        selectedItemColor = selectedItemColor ?? fixedColor,
+        super(key: key);
 
   /// Defines the appearance of the button items that are arrayed within the
   /// bottom navigation bar.
@@ -396,9 +396,9 @@ class _BottomNavigationTile extends StatelessWidget {
        assert(item != null),
        assert(animation != null),
        assert(selected != null),
-       assert(selectedLabelStyle != null),
-       assert(unselectedLabelStyle != null),
-       assert(mouseCursor != null);
+        assert(selectedLabelStyle != null),
+        assert(unselectedLabelStyle != null),
+        assert(mouseCursor != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -656,10 +656,10 @@ class _Label extends StatelessWidget {
        assert(animation != null),
        assert(item != null),
        assert(selectedLabelStyle != null),
-       assert(unselectedLabelStyle != null),
-       assert(showSelectedLabels != null),
-       assert(showUnselectedLabels != null),
-       super(key: key);
+        assert(unselectedLabelStyle != null),
+        assert(showSelectedLabels != null),
+        assert(showUnselectedLabels != null),
+        super(key: key);
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -841,22 +841,22 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           color: widget.items[index].backgroundColor!,
           vsync: this,
         )..controller.addStatusListener(
-          (AnimationStatus status) {
-            switch (status) {
-              case AnimationStatus.completed:
-                setState(() {
-                  final _Circle circle = _circles.removeFirst();
-                  _backgroundColor = circle.color;
-                  circle.dispose();
-                });
-                break;
-              case AnimationStatus.dismissed:
-              case AnimationStatus.forward:
-              case AnimationStatus.reverse:
-                break;
-            }
-          },
-        ),
+            (AnimationStatus status) {
+              switch (status) {
+                case AnimationStatus.completed:
+                  setState(() {
+                    final _Circle circle = _circles.removeFirst();
+                    _backgroundColor = circle.color;
+                    circle.dispose();
+                  });
+                  break;
+                case AnimationStatus.dismissed:
+                case AnimationStatus.forward:
+                case AnimationStatus.reverse:
+                  break;
+              }
+            },
+          ),
       );
     }
   }
@@ -895,11 +895,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
   }
 
-  static IconThemeData _effectiveIconTheme(IconThemeData? iconTheme, Color? itemColor, TextStyle? textStyle) {
-    final IconThemeData effectiveIconTheme = iconTheme ?? const IconThemeData();
-    // Prefer the iconTheme over itemColor and textStyle color if present.
-    // If iconTheme is not set, prefer textStyle color over itemColor
-    return iconTheme == null ? effectiveIconTheme.copyWith(color: textStyle?.color ?? itemColor) : effectiveIconTheme;
+  static IconThemeData _effectiveIconTheme(IconThemeData? iconTheme, Color? itemColor) {
+    // Prefer the iconTheme over itemColor if present.
+    return iconTheme ?? IconThemeData(color: itemColor);
   }
 
   List<Widget> _createTiles(BottomNavigationBarLandscapeLayout layout) {
@@ -923,15 +921,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final IconThemeData effectiveSelectedIconTheme =
       _effectiveIconTheme(
         widget.selectedIconTheme ?? bottomTheme.selectedIconTheme,
-        widget.selectedItemColor,
-        widget.selectedLabelStyle,
+        widget.selectedItemColor
       );
 
     final IconThemeData effectiveUnselectedIconTheme =
       _effectiveIconTheme(
         widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
-        widget.unselectedItemColor,
-        widget.unselectedLabelStyle,
+        widget.unselectedItemColor
       );
 
     final Color themeColor;
