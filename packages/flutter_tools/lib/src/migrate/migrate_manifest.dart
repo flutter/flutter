@@ -44,10 +44,10 @@ class MigrateManifest {
     if (!valid) {
       throwToolExit('Invalid .migrate_manifest file in the migrate working directory. Entry is not a Yaml list. Fix the manifest or abandon the migration and try again.', exitCode: 1);
     }
-    // We can fill the maps with partially dummy data as not all properties are used by the manifest.
     if (mergedFilesYaml != null) {
       for (final Object? localPath in mergedFilesYaml as YamlList) {
         if (localPath is String) {
+          // We can fill the maps with partially dummy data as not all properties are used by the manifest.
           migrateResult.mergeResults.add(StringMergeResult.explicit(mergedString: '', hasConflict: false, exitCode: 0, localPath: localPath));
         }
       }

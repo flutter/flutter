@@ -13,6 +13,7 @@ import 'migrate_utils.dart';
 /// The compute function does not clean up the temp directories, as the directories may be reused,
 /// so this must be done manually afterwards.
 class MigrateResult {
+  /// Explicitly initialize the MigrateResult.
   MigrateResult({
     required this.mergeResults,
     required this.addedFiles,
@@ -34,21 +35,42 @@ class MigrateResult {
       diffMap = <String, DiffResult>{},
       sdkDirs = <String, Directory>{};
 
+  /// The results of merging existing files with the target files.
   final List<MergeResult> mergeResults;
+
+  /// Tracks the files that are to be newly added to the project.
   final List<FilePendingMigration> addedFiles;
+
+  /// Tracks the files that are to be deleted from the project.
   final List<FilePendingMigration> deletedFiles;
+
+  /// Tracks the temporary directories created during the migrate compute process.
   final List<Directory> tempDirectories;
+
+  /// Mapping between the local path of a file and the type of merge that should be used.
   final Map<String, MergeType> mergeTypeMap;
+
+  /// Mapping between the local path of a file and the diff between the base and target
+  /// versions of the file.
   final Map<String, DiffResult> diffMap;
+
+  /// The root directory of the base app.
   Directory? generatedBaseTemplateDirectory;
+
+  /// The root directory of the target app.
   Directory? generatedTargetTemplateDirectory;
+
+  /// The root directories of the Flutter SDK for each revision.
   Map<String, Directory> sdkDirs;
 }
 
 /// Defines available merge techniques.
 enum MergeType {
+  /// A standard three-way merge.
   threeWay,
+  /// A two way merge that ignores the base version of the file.
   twoWay,
+  /// A `CustomMerge` manually handles the merge.
   custom,
 }
 
