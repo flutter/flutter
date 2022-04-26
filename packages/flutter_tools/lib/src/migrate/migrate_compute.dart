@@ -12,14 +12,8 @@ import '../project.dart';
 import '../version.dart';
 import 'custom_merge.dart';
 import 'migrate_manifest.dart';
+import 'migrate_result.dart';
 import 'migrate_utils.dart';
-
-/// Defines available merge techniques.
-enum MergeType {
-  threeWay,
-  twoWay,
-  custom,
-}
 
 // This defines files and directories that should be skipped regardless
 // of gitignore and config settings
@@ -85,53 +79,6 @@ bool _skippedMerge(String localPath) {
     }
   }
   return false;
-}
-
-/// Stores a file that has been marked for migration and metadata about the file.
-class FilePendingMigration {
-  FilePendingMigration(this.localPath, this.file);
-  String localPath;
-  File file;
-}
-
-/// Data class that holds all results and generated directories from a computeMigration run.
-///
-/// mergeResults, addedFiles, and deletedFiles includes the sets of files to be migrated while
-/// the other members track the temporary sdk and generated app directories created by the tool.
-///
-/// The compute function does not clean up the temp directories, as the directories may be reused,
-/// so this must be done manually afterwards.
-class MigrateResult {
-  MigrateResult({
-    required this.mergeResults,
-    required this.addedFiles,
-    required this.deletedFiles,
-    required this.tempDirectories,
-    required this.sdkDirs,
-    required this.mergeTypeMap,
-    required this.diffMap,
-    this.generatedBaseTemplateDirectory,
-    this.generatedTargetTemplateDirectory});
-
-  /// Creates a MigrateResult with all empty members.
-  MigrateResult.empty()
-    : mergeResults = <MergeResult>[],
-      addedFiles = <FilePendingMigration>[],
-      deletedFiles = <FilePendingMigration>[],
-      tempDirectories = <Directory>[],
-      mergeTypeMap = <String, MergeType>{},
-      diffMap = <String, DiffResult>{},
-      sdkDirs = <String, Directory>{};
-
-  final List<MergeResult> mergeResults;
-  final List<FilePendingMigration> addedFiles;
-  final List<FilePendingMigration> deletedFiles;
-  final List<Directory> tempDirectories;
-  final Map<String, MergeType> mergeTypeMap;
-  final Map<String, DiffResult> diffMap;
-  Directory? generatedBaseTemplateDirectory;
-  Directory? generatedTargetTemplateDirectory;
-  Map<String, Directory> sdkDirs;
 }
 
 /// Computes the changes that migrates the current flutter project to the target revision.
@@ -786,7 +733,7 @@ Future<void> computeMerge(
 }
 
 /// Writes the files into the working directory for the developer to review and resolve any conflicts.
-Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, MigrateUtils migrateUtils, {bool verbose = false, FlutterProject? flutterProject}) async {
+Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool verbose = false, FlutterProject? flutterProject}) async {
   flutterProject ??= FlutterProject.current();
   final Directory workingDir = flutterProject.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
   if (verbose) {
@@ -797,9 +744,9 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, Migrate
     final File file = workingDir.childFile(result.localPath);
     file.createSync(recursive: true);
     if (result is StringMergeResult) {
-      file.writeAsStringSync((result as StringMergeResult).mergedString!, flush: true);
+      file.writeAsStringSync((result as StringMergeResult).mergedString, flush: true);
     } else {
-      file.writeAsBytesSync((result as BinaryMergeResult).mergedBytes!, flush: true);
+      file.writeAsBytesSync((result as BinaryMergeResult).mergedBytes, flush: true);
     }
   }
   // Write all files that are newly added in target
@@ -821,7 +768,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, Migrate
   manifest.writeFile();
 
   // output the manifest contents.
-  checkAndPrintMigrateStatus(manifest, workingDir, migrateUtils, logger: logger);
+  checkAndPrintMigrateStatus(manifest, workingDir, logger: logger);
 
   logger.printBox('Working directory created at `${workingDir.path}`');
 }

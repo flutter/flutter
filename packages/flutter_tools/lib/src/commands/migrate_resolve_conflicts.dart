@@ -23,14 +23,7 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
     required this.logger,
     required this.fileSystem,
     required this.terminal,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : migrateUtils = MigrateUtils(
-         logger: logger,
-         fileSystem: fileSystem,
-         platform: platform,
-         processManager: processManager,
-       ) {
+  }) {
     requiresPubspecYaml();
     argParser.addOption(
       'working-directory',
@@ -55,8 +48,6 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
   final FileSystem fileSystem;
 
   final Terminal terminal;
-
-  final MigrateUtils migrateUtils;
 
   @override
   final String name = 'resolve-conflicts';
@@ -98,9 +89,9 @@ class MigrateResolveConflictsCommand extends FlutterCommand {
 
     final int contextLineCount = int.parse(stringArg('context-lines')!);
 
-    checkAndPrintMigrateStatus(manifest, workingDirectory, migrateUtils, logger: logger);
+    checkAndPrintMigrateStatus(manifest, workingDirectory, logger: logger);
 
-    final List<String> conflictFiles = manifest.remainingConflictFiles(workingDirectory, migrateUtils);
+    final List<String> conflictFiles = manifest.remainingConflictFiles(workingDirectory);
 
     terminal.usesTerminalUi = true;
 

@@ -106,7 +106,7 @@ class MigrateApplyCommand extends FlutterCommand {
 
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
-    if (!checkAndPrintMigrateStatus(manifest, workingDirectory, migrateUtils, warnConflict: true, logger: logger) && !force) {
+    if (!checkAndPrintMigrateStatus(manifest, workingDirectory, warnConflict: true, logger: logger) && !force) {
       logger.printStatus('Conflicting files found. Resolve these conflicts and try again.');
       logger.printStatus('Guided conflict resolution wizard:');
       printCommandText('flutter migrate resolve-conflicts', logger);

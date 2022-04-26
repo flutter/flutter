@@ -8,8 +8,8 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../migrate/migrate_compute.dart';
-import '../migrate/migrate_utils.dart';
+import 'migrate_result.dart';
+import 'migrate_utils.dart';
 
 /// Represents the mamifest file that tracks the contents of the current
 /// migration working directory.
@@ -90,10 +90,10 @@ class MigrateManifest {
   }
 
   /// A list of local paths of files that require conflict resolution.
-  List<String> remainingConflictFiles(Directory workingDir, MigrateUtils migrateUtils) {
+  List<String> remainingConflictFiles(Directory workingDir) {
     final List<String> output = <String>[];
     for (final String localPath in conflictFiles) {
-      if (!migrateUtils.conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
+      if (!_conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
         output.add(localPath);
       }
     }
@@ -101,10 +101,10 @@ class MigrateManifest {
   }
 
   // A list of local paths of files that had conflicts and are now fully resolved.
-  List<String> resolvedConflictFiles(Directory workingDir, MigrateUtils migrateUtils) {
+  List<String> resolvedConflictFiles(Directory workingDir) {
     final List<String> output = <String>[];
     for (final String localPath in conflictFiles) {
-      if (migrateUtils.conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
+      if (_conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
         output.add(localPath);
       }
     }
@@ -174,17 +174,25 @@ class MigrateManifest {
   }
 }
 
+/// Returns true if the file does not contain any git conflit markers.
+bool _conflictsResolved(String contents) {
+  if (contents.contains('>>>>>>>') && contents.contains('=======') && contents.contains('<<<<<<<')) {
+    return false;
+  }
+  return true;
+}
+
 /// Returns true if the migration working directory has all conflicts resolved and prints the migration status.
 ///
 /// The migration status printout lists all added, deleted, merged, and conflicted files.
-bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, MigrateUtils migrateUtils, {bool warnConflict = false, Logger? logger}) {
+bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, {bool warnConflict = false, Logger? logger}) {
   String printout = '';
   String redPrintout = '';
   bool result = true;
   final List<String> remainingConflicts = <String>[];
   final List<String> mergedFiles = <String>[];
   for (final String localPath in manifest.conflictFiles) {
-    if (!migrateUtils.conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
+    if (!_conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
       remainingConflicts.add(localPath);
     } else {
       mergedFiles.add(localPath);

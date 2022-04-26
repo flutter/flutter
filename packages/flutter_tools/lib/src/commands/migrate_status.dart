@@ -106,8 +106,8 @@ class MigrateStatusCommand extends FlutterCommand {
       }
       final List<String> files = <String>[];
       files.addAll(manifest.mergedFiles);
-      files.addAll(manifest.resolvedConflictFiles(workingDirectory, migrateUtils));
-      files.addAll(manifest.remainingConflictFiles(workingDirectory, migrateUtils));
+      files.addAll(manifest.resolvedConflictFiles(workingDirectory));
+      files.addAll(manifest.remainingConflictFiles(workingDirectory));
       for (final String localPath in files) {
         final DiffResult result = await migrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
         if (result.diff != '') {
@@ -135,9 +135,9 @@ class MigrateStatusCommand extends FlutterCommand {
 
     logger.printBox('Working directory at `${workingDirectory.path}`');
 
-    checkAndPrintMigrateStatus(manifest, workingDirectory, migrateUtils, logger: logger);
+    checkAndPrintMigrateStatus(manifest, workingDirectory, logger: logger);
 
-    final bool readyToApply = manifest.remainingConflictFiles(workingDirectory, migrateUtils).isEmpty;
+    final bool readyToApply = manifest.remainingConflictFiles(workingDirectory).isEmpty;
 
     if (!readyToApply) {
       logger.printStatus('Guided conflict resolution wizard:');

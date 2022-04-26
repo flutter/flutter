@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/migrate/migrate_compute.dart';
 import 'package:flutter_tools/src/migrate/migrate_manifest.dart';
+import 'package:flutter_tools/src/migrate/migrate_result.dart';
 import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 
 import '../../src/common.dart';
@@ -188,13 +189,13 @@ void main() {
     testWithoutContext('simple MigrateResult', () async {
       final MigrateManifest manifest = MigrateManifest(migrateRootDir: fileSystem.directory('root'), migrateResult: MigrateResult(
         mergeResults: <MergeResult>[
-          MergeResult.explicit(
+          StringMergeResult.explicit(
             localPath: 'merged_file',
             mergedString: 'str',
             hasConflict: false,
             exitCode: 0,
           ),
-          MergeResult.explicit(
+          StringMergeResult.explicit(
             localPath: 'conflict_file',
             mergedString: '<<<<<<<<<<<',
             hasConflict: true,

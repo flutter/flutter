@@ -9,6 +9,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../migrate/migrate_compute.dart';
+import '../migrate/migrate_result.dart';
 import '../migrate/migrate_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -173,7 +174,7 @@ class MigrateStartCommand extends FlutterCommand {
       directories: migrateResult.tempDirectories,
     );
 
-    await writeWorkingDir(migrateResult, logger, migrateUtils, verbose: _verbose, flutterProject: project);
+    await writeWorkingDir(migrateResult, logger, verbose: _verbose, flutterProject: project);
 
     logger.printStatus('The migrate tool has staged proposed changes in the migrate working directory.\n');
     logger.printStatus('Guided conflict resolution wizard:');

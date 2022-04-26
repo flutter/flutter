@@ -29,7 +29,7 @@ class MigrateCommand extends FlutterCommand {
   }) : _verbose = verbose {
     addSubcommand(MigrateAbandonCommand(logger: logger, fileSystem: fileSystem, terminal: terminal, platform: platform, processManager: processManager));
     addSubcommand(MigrateApplyCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, terminal: terminal, platform: platform, processManager: processManager));
-    addSubcommand(MigrateResolveConflictsCommand(logger: logger, fileSystem: fileSystem, terminal: terminal, platform: platform, processManager: processManager));
+    addSubcommand(MigrateResolveConflictsCommand(logger: logger, fileSystem: fileSystem, terminal: terminal));
     addSubcommand(MigrateStartCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, platform: platform, processManager: processManager));
     addSubcommand(MigrateStatusCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, platform: platform, processManager: processManager));
   }
