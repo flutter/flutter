@@ -491,6 +491,10 @@ class PaintingContext extends ClipContext {
   /// (e.g. from opacity layer to a clip rect layer).
   /// {@endtemplate}
   ClipRectLayer? pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer? oldLayer }) {
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    }
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
       final ClipRectLayer layer = oldLayer ?? ClipRectLayer();
@@ -526,6 +530,10 @@ class PaintingContext extends ClipContext {
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   ClipRRectLayer? pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer? oldLayer }) {
     assert(clipBehavior != null);
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    }
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
@@ -562,6 +570,10 @@ class PaintingContext extends ClipContext {
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   ClipPathLayer? pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer? oldLayer }) {
     assert(clipBehavior != null);
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    }
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {

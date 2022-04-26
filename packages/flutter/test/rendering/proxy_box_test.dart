@@ -5,9 +5,8 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -15,7 +14,6 @@ import 'rendering_tester.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
-
   test('RenderFittedBox handles applying paint transform and hit-testing with empty size', () {
     final RenderFittedBox fittedBox = RenderFittedBox(
       child: RenderCustomPaint(
@@ -61,47 +59,20 @@ void main() {
     expect(painted, equals(false));
   });
 
-  test('RenderPhysicalModel compositing on Fuchsia', () {
-    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-
+  test('RenderPhysicalModel compositing', () {
     final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
     layout(root, phase: EnginePhase.composite);
-    expect(root.needsCompositing, isTrue);
+    expect(root.needsCompositing, isFalse);
 
     // On Fuchsia, the system compositor is responsible for drawing shadows
     // for physical model layers with non-zero elevation.
     root.elevation = 1.0;
     pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isTrue);
+    expect(root.needsCompositing, isFalse);
 
     root.elevation = 0.0;
     pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isTrue);
-
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-  test('RenderPhysicalModel compositing on non-Fuchsia', () {
-    for (final TargetPlatform platform in TargetPlatform.values) {
-      if (platform == TargetPlatform.fuchsia) {
-        continue;
-      }
-      debugDefaultTargetPlatformOverride = platform;
-
-      final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
-      layout(root, phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
-
-      // Flutter now composites physical shapes on all platforms.
-      root.elevation = 1.0;
-      pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
-
-      root.elevation = 0.0;
-      pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
-    }
-    debugDefaultTargetPlatformOverride = null;
+    expect(root.needsCompositing, isFalse);
   });
 
   test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
@@ -128,9 +99,6 @@ void main() {
   group('RenderPhysicalShape', () {
     test('shape change triggers repaint', () {
       for (final TargetPlatform platform in TargetPlatform.values) {
-        if (platform == TargetPlatform.fuchsia) {
-          continue;
-        }
         debugDefaultTargetPlatformOverride = platform;
 
         final RenderPhysicalShape root = RenderPhysicalShape(
@@ -151,27 +119,24 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
 
-    test('compositing on non-Fuchsia', () {
+    test('compositing', () {
       for (final TargetPlatform platform in TargetPlatform.values) {
-        if (platform == TargetPlatform.fuchsia) {
-          continue;
-        }
         debugDefaultTargetPlatformOverride = platform;
         final RenderPhysicalShape root = RenderPhysicalShape(
           color: const Color(0xffff00ff),
           clipper: const ShapeBorderClipper(shape: CircleBorder()),
         );
         layout(root, phase: EnginePhase.composite);
-        expect(root.needsCompositing, isTrue);
+        expect(root.needsCompositing, isFalse);
 
         // On non-Fuchsia platforms, we composite physical shape layers
         root.elevation = 1.0;
         pumpFrame(phase: EnginePhase.composite);
-        expect(root.needsCompositing, isTrue);
+        expect(root.needsCompositing, isFalse);
 
         root.elevation = 0.0;
         pumpFrame(phase: EnginePhase.composite);
-        expect(root.needsCompositing, isTrue);
+        expect(root.needsCompositing, isFalse);
       }
       debugDefaultTargetPlatformOverride = null;
     });
@@ -287,7 +252,9 @@ void main() {
   test('RenderOpacity reuses its layer', () {
     _testLayerReuse<OpacityLayer>(RenderOpacity(
       opacity: 0.5,  // must not be 0 or 1.0. Otherwise, it won't create a layer
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderRepaintBoundary(
+        child: RenderSizedBox(const Size(1.0, 1.0)),
+      ), // size doesn't matter
     ));
   });
 
@@ -353,9 +320,7 @@ void main() {
   test('RenderClipRect reuses its layer', () {
     _testLayerReuse<ClipRectLayer>(RenderClipRect(
       clipper: _TestRectClipper(),
-      // Inject opacity under the clip to force compositing.
-      child: RenderOpacity(
-        opacity: 0.5,
+      child: RenderRepaintBoundary(
         child: RenderSizedBox(const Size(1.0, 1.0)),
       ), // size doesn't matter
     ));
@@ -364,9 +329,7 @@ void main() {
   test('RenderClipRRect reuses its layer', () {
     _testLayerReuse<ClipRRectLayer>(RenderClipRRect(
       clipper: _TestRRectClipper(),
-      // Inject opacity under the clip to force compositing.
-      child: RenderOpacity(
-        opacity: 0.5,
+      child: RenderRepaintBoundary(
         child: RenderSizedBox(const Size(1.0, 1.0)),
       ), // size doesn't matter
     ));
@@ -375,9 +338,7 @@ void main() {
   test('RenderClipOval reuses its layer', () {
     _testLayerReuse<ClipPathLayer>(RenderClipOval(
       clipper: _TestRectClipper(),
-      // Inject opacity under the clip to force compositing.
-      child: RenderOpacity(
-        opacity: 0.5,
+      child: RenderRepaintBoundary(
         child: RenderSizedBox(const Size(1.0, 1.0)),
       ), // size doesn't matter
     ));
@@ -386,32 +347,28 @@ void main() {
   test('RenderClipPath reuses its layer', () {
     _testLayerReuse<ClipPathLayer>(RenderClipPath(
       clipper: _TestPathClipper(),
-      // Inject opacity under the clip to force compositing.
-      child: RenderOpacity(
-        opacity: 0.5,
+      child: RenderRepaintBoundary(
         child: RenderSizedBox(const Size(1.0, 1.0)),
       ), // size doesn't matter
     ));
   });
 
   test('RenderPhysicalModel reuses its layer', () {
-    _testLayerReuse<PhysicalModelLayer>(RenderPhysicalModel(
+    _testLayerReuse<ClipRRectLayer>(RenderPhysicalModel(
+      clipBehavior: Clip.hardEdge,
       color: const Color.fromRGBO(0, 0, 0, 1.0),
-      // Inject opacity under the clip to force compositing.
-      child: RenderOpacity(
-        opacity: 0.5,
+      child: RenderRepaintBoundary(
         child: RenderSizedBox(const Size(1.0, 1.0)),
       ), // size doesn't matter
     ));
   });
 
   test('RenderPhysicalShape reuses its layer', () {
-    _testLayerReuse<PhysicalModelLayer>(RenderPhysicalShape(
+    _testLayerReuse<ClipPathLayer>(RenderPhysicalShape(
       clipper: _TestPathClipper(),
+      clipBehavior: Clip.hardEdge,
       color: const Color.fromRGBO(0, 0, 0, 1.0),
-      // Inject opacity under the clip to force compositing.
-      child: RenderOpacity(
-        opacity: 0.5,
+      child: RenderRepaintBoundary(
         child: RenderSizedBox(const Size(1.0, 1.0)),
       ), // size doesn't matter
     ));
@@ -421,9 +378,7 @@ void main() {
     _testLayerReuse<TransformLayer>(RenderTransform(
       // Use a 3D transform to force compositing.
       transform: Matrix4.rotationX(0.1),
-      // Inject opacity under the clip to force compositing.
-      child: RenderOpacity(
-        opacity: 0.5,
+      child: RenderRepaintBoundary(
         child: RenderSizedBox(const Size(1.0, 1.0)),
       ), // size doesn't matter
     ));
@@ -434,8 +389,7 @@ void main() {
       fit: BoxFit.cover,
       clipBehavior: Clip.hardEdge,
       // Inject opacity under the clip to force compositing.
-      child: RenderOpacity(
-        opacity: 0.5,
+      child: RenderRepaintBoundary(
         child: RenderSizedBox(const Size(100.0, 200.0)),
       ), // size doesn't matter
     ));
@@ -445,8 +399,7 @@ void main() {
     _testLayerReuse<TransformLayer>(RenderFittedBox(
       fit: BoxFit.fill,
       // Inject opacity under the clip to force compositing.
-      child: RenderOpacity(
-        opacity: 0.5,
+      child: RenderRepaintBoundary(
         child: RenderSizedBox(const Size(1, 1)),
       ), // size doesn't matter
     ));
@@ -768,7 +721,7 @@ void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
   expect(L, isNot(Layer));
   expect(renderObject.debugLayer, null);
   layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
-  final Layer layer = renderObject.debugLayer!;
+  final Layer? layer = renderObject.debugLayer;
   expect(layer, isA<L>());
   expect(layer, isNotNull);
 

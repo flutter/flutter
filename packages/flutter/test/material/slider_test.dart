@@ -784,6 +784,7 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..rrect(color: const Color(0xfffafafa))
         ..rrect(color: customColor1) // active track
         ..rrect(color: customColor2) // inactive track
         ..circle(color: customColor1.withOpacity(0.12)) // overlay
@@ -2415,7 +2416,7 @@ void main() {
         ..paragraph(),
     );
 
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 3));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 2));
 
     await tester.tap(find.text('Next'));
@@ -2432,7 +2433,7 @@ void main() {
     );
 
     // Represents the ElevatedButton with inner Text, inner page.
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
 
     // Don't stop holding the value indicator.

@@ -1360,7 +1360,7 @@ void main() {
     );
 
     // Represents the Raised Button and Range Slider.
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 3));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 4));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 3));
 
     await tester.tap(find.text('Next'));
@@ -1379,7 +1379,7 @@ void main() {
     );
 
     // Represents the raised button with inner page text.
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
 
     // Don't stop holding the value indicator.
