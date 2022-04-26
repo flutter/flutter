@@ -29,7 +29,6 @@ typedef _HistoryMove = Future<void> Function(int count);
 /// bridge from the app to the engine.
 @JS()
 @anonymous
-@staticInterop
 abstract class JsUrlStrategy {
   /// Creates an instance of [JsUrlStrategy] from a bag of URL strategy
   /// functions.
@@ -42,9 +41,7 @@ abstract class JsUrlStrategy {
     required _StateOperation replaceState,
     required _HistoryMove go,
   });
-}
 
-extension JsUrlStrategyExtension on JsUrlStrategy {
   /// Adds a listener to the `popstate` event and returns a function that, when
   /// invoked, removes the listener.
   external ui.VoidCallback addPopStateListener(html.EventListener fn);
