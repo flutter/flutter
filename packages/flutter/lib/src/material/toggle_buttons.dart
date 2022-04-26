@@ -779,15 +779,11 @@ class ToggleButtons extends StatelessWidget {
       return MergeSemantics(
         child: Semantics(
           container: true,
-          button: true,
           enabled: onPressed != null,
           child: _InputPadding(
             minSize: minPaddingSize,
             direction: direction,
-            child: Semantics(
-              excludeSemantics: true,
-              child: button,
-            ),
+            child: button,
           ),
         ),
       );
