@@ -1475,6 +1475,39 @@ void _testTappable() {
 
     semantics().semanticsEnabled = false;
   });
+
+  test('can switch tappable between enabled and disabled', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    void updateTappable({required bool enabled}) {
+      final SemanticsTester tester = SemanticsTester(semantics());
+      tester.updateNode(
+        id: 0,
+        hasTap: true,
+        hasEnabledState: true,
+        isEnabled: enabled,
+        isButton: true,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+    }
+
+    updateTappable(enabled: false);
+    expectSemanticsTree('<sem role="button" aria-disabled="true" style="$rootSemanticStyle"></sem>');
+
+    updateTappable(enabled: true);
+    expectSemanticsTree('<sem role="button" style="$rootSemanticStyle"></sem>');
+
+    updateTappable(enabled: false);
+    expectSemanticsTree('<sem role="button" aria-disabled="true" style="$rootSemanticStyle"></sem>');
+
+    updateTappable(enabled: true);
+    expectSemanticsTree('<sem role="button" style="$rootSemanticStyle"></sem>');
+
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testImage() {
