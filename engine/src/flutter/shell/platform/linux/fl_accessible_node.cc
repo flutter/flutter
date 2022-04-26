@@ -22,6 +22,7 @@ static struct {
      FALSE},
     {ATK_STATE_SELECTED, kFlutterSemanticsFlagIsSelected, FALSE},
     {ATK_STATE_ENABLED, kFlutterSemanticsFlagIsEnabled, FALSE},
+    {ATK_STATE_SENSITIVE, kFlutterSemanticsFlagIsEnabled, FALSE},
     {ATK_STATE_READ_ONLY, kFlutterSemanticsFlagIsReadOnly, FALSE},
     {ATK_STATE_INVALID, static_cast<FlutterSemanticsFlag>(0), FALSE},
 };
