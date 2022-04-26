@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
-import 'debug.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
@@ -843,6 +842,16 @@ class RenderOpacity extends RenderProxyBox {
        _alpha = ui.Color.getAlphaFromOpacity(opacity),
        super(child);
 
+  @override
+  bool get isRepaintBoundary => child != null && (_alpha > 0);
+
+  @override
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
+    updatedLayer.alpha = _alpha;
+    return updatedLayer;
+  }
+
   int _alpha;
 
   /// The fraction to scale the child's alpha value.
@@ -862,10 +871,13 @@ class RenderOpacity extends RenderProxyBox {
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
+    final bool wasRepaintBoundary = isRepaintBoundary;
     final bool wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
-    markNeedsPaint();
+    if (wasRepaintBoundary != isRepaintBoundary)
+      markNeedsCompositingBitsUpdate();
+    markNeedsCompositedLayerUpdate();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
@@ -886,31 +898,10 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      if (needsCompositing) {
-        layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
-      } else {
-        bool skipSaveLayer = _alpha == 255;
-        assert(() {
-          skipSaveLayer = debugDisableOpacityLayers;
-          return true;
-        }());
-
-        if (skipSaveLayer) {
-          super.paint(context, offset);
-        } else {
-          context.canvas.saveLayer(offset & size, Paint()..color = Color(_alpha << 24));
-          super.paint(context, offset);
-          context.canvas.restore();
-        }
-        layer = null;
-      }
+    if (_alpha == 0) {
+      return;
     }
+    super.paint(context, offset);
   }
 
   @override
@@ -936,8 +927,15 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   int? _alpha;
 
   @override
-  bool get alwaysNeedsCompositing => child != null && _currentlyNeedsCompositing!;
-  bool? _currentlyNeedsCompositing;
+  bool get isRepaintBoundary => child != null && _currentlyIsRepaintBoundary!;
+  bool? _currentlyIsRepaintBoundary;
+
+  @override
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
+    updatedLayer.alpha = _alpha;
+    return updatedLayer;
+  }
 
   /// The animation that drives this render object's opacity.
   ///
@@ -997,11 +995,11 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     final int? oldAlpha = _alpha;
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
-      final bool? didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha! > 0;
-      if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
+      final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
+      _currentlyIsRepaintBoundary = _alpha! > 0;
+      if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary)
         markNeedsCompositingBitsUpdate();
-      markNeedsPaint();
+      markNeedsCompositedLayerUpdate();
       if (oldAlpha == 0 || _alpha == 0)
         markNeedsSemanticsUpdate();
     }
@@ -1009,15 +1007,10 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha!, super.paint, oldLayer: layer as OpacityLayer?);
+    if (_alpha == 0) {
+      return;
     }
+    super.paint(context, offset);
   }
 
   @override
@@ -1126,6 +1119,10 @@ class RenderShaderMask extends RenderProxyBox {
         ..maskRect = offset & size
         ..blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -1192,6 +1189,10 @@ class RenderBackdropFilter extends RenderProxyBox {
       layer!.filter = _filter;
       layer!.blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -2481,6 +2482,10 @@ class RenderTransform extends RenderProxyBox {
           layer = ImageFilterLayer(imageFilter: filter);
         }
         context.pushLayer(layer!, super.paint, offset);
+        assert(() {
+          layer!.debugCreator = debugCreator;
+          return true;
+        }());
       }
     }
   }
@@ -5267,7 +5272,10 @@ class RenderLeaderLayer extends RenderProxyBox {
         ..offset = offset;
     }
     context.pushLayer(layer!, super.paint, Offset.zero);
-    assert(layer != null);
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -5479,6 +5487,10 @@ class RenderFollowerLayer extends RenderProxyBox {
         double.infinity,
       ),
     );
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override

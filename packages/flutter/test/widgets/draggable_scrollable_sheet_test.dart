@@ -1209,4 +1209,19 @@ void main() {
     expect(controller.isAttached, true);
     expect(controller.size, isNotNull);
     });
+
+    testWidgets('DraggableScrollableController.animateTo should not leak Ticker', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/102483
+      final DraggableScrollableController controller = DraggableScrollableController();
+      await tester.pumpWidget(_boilerplate(() {}, controller: controller));
+
+      controller.animateTo(0.0, curve: Curves.linear, duration: const Duration(milliseconds: 200));
+      await tester.pump();
+
+      // Dispose the DraggableScrollableSheet
+      await tester.pumpWidget(const SizedBox.shrink());
+      // Controller should be detached and no exception should be thrown
+      expect(controller.isAttached, false);
+      expect(tester.takeException(), isNull);
+    });
 }

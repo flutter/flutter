@@ -80,12 +80,69 @@ export 'package:flutter/services.dart' show
 
 // BIDIRECTIONAL TEXT SUPPORT
 
+/// An [InheritedElement] that has hundreds of dependencies but will
+/// infrequently change.  This provides a performance tradeoff where building
+/// the [Widget]s is faster but performing updates is slower.
+///
+/// |                     | _UbiquitiousInheritedElement | InheritedElement |
+/// |---------------------|------------------------------|------------------|
+/// | insert (best case)  | O(1)                         | O(1)             |
+/// | insert (worst case) | O(1)                         | O(n)             |
+/// | search (best case)  | O(n)                         | O(1)             |
+/// | search (worst case) | O(n)                         | O(n)             |
+///
+/// Insert happens when building the [Widget] tree, search happens when updating
+/// [Widget]s.
+class _UbiquitousInheritedElement extends InheritedElement {
+  /// Creates an element that uses the given widget as its configuration.
+  _UbiquitousInheritedElement(super.widget);
+
+  @override
+  void setDependencies(Element dependent, Object? value) {
+    // This is where the cost of [InheritedElement] is incurred during build
+    // time of the widget tree.  Omitting this bookkeeping is where the
+    // performance savings come from.
+    assert(value == null);
+  }
+
+  @override
+  Object? getDependencies(Element dependent) {
+    return null;
+  }
+
+  @override
+  void notifyClients(InheritedWidget oldWidget) {
+    _recurseChildren(this, (Element element) {
+      if (element.doesDependOnInheritedElement(this)) {
+        notifyDependent(oldWidget, element);
+      }
+    });
+  }
+
+  static void _recurseChildren(Element element, ElementVisitor visitor) {
+    element.visitChildren((Element child) {
+      _recurseChildren(child, visitor);
+    });
+    visitor(element);
+  }
+}
+
+/// See also:
+///
+///  * [_UbiquitousInheritedElement], the [Element] for [_UbiquitousInheritedWidget].
+abstract class _UbiquitousInheritedWidget extends InheritedWidget {
+  const _UbiquitousInheritedWidget({super.key, required super.child});
+
+  @override
+  InheritedElement createElement() => _UbiquitousInheritedElement(this);
+}
+
 /// A widget that determines the ambient directionality of text and
 /// text-direction-sensitive render objects.
 ///
 /// For example, [Padding] depends on the [Directionality] to resolve
 /// [EdgeInsetsDirectional] objects into absolute [EdgeInsets] objects.
-class Directionality extends InheritedWidget {
+class Directionality extends _UbiquitousInheritedWidget {
   /// Creates a widget that determines the directionality of text and
   /// text-direction-sensitive render objects.
   ///

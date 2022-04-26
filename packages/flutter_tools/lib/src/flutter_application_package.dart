@@ -105,8 +105,6 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         return applicationBinary == null
             ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
             : FuchsiaApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.windows_uwp_x64:
-        return BuildableUwpApp(project: FlutterProject.current().windowsUwp);
     }
   }
 }

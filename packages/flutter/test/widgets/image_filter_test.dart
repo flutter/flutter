@@ -86,4 +86,25 @@ void main() {
     await pumpWithSigma(10.0);
     expect(renderObject.debugLayer, same(originalLayer));
   });
+
+  testWidgets('Image filter - enabled and disabled', (WidgetTester tester) async {
+    Future<void> pumpWithEnabledStaet(bool enabled) async {
+      await tester.pumpWidget(
+        RepaintBoundary(
+          child: ImageFiltered(
+            enabled: enabled,
+            imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: const Placeholder(),
+          ),
+        ),
+      );
+    }
+
+    await pumpWithEnabledStaet(false);
+    expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+
+
+    await pumpWithEnabledStaet(true);
+    expect(tester.layers, contains(isA<ImageFilterLayer>()));
+  });
 }
