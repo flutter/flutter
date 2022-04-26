@@ -1531,13 +1531,15 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the route.
   ///
   /// To use [pushNamed], an [Navigator.onGenerateRoute] callback must be
   /// provided,
+  /// {@endtemplate}
+  ///
+  /// {@template flutter.widgets.navigator.pushNamed.returnValue}
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
   /// {@endtemplate}
   ///
   /// {@template flutter.widgets.Navigator.pushNamed}
@@ -1699,15 +1701,14 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the type of the return value of the old route.
   ///
   /// To use [pushReplacementNamed], a [Navigator.onGenerateRoute] callback must
   /// be provided.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
@@ -1793,15 +1794,13 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the return value type of the old route.
   ///
   /// To use [popAndPushNamed], a [Navigator.onGenerateRoute] callback must be provided.
-  ///
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
@@ -1898,14 +1897,13 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the new route.
   ///
   /// To use [pushNamedAndRemoveUntil], an [Navigator.onGenerateRoute] callback
   /// must be provided.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
@@ -1982,11 +1980,10 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the route.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -2068,12 +2065,11 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the type of the return value of the old route.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -2155,11 +2151,10 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a [Future] that completes to the `result` value passed to [pop]
-  /// when the pushed route is popped off the navigator.
-  ///
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -4078,6 +4073,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushNamed}
   ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
+  ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
@@ -4144,6 +4141,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// finished animating in.
   ///
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
@@ -4215,6 +4214,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
   ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
+  ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
@@ -4277,6 +4278,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// the previous routes until the `predicate` returns true.
   ///
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
@@ -4345,6 +4348,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Push the given route onto the navigator.
   ///
   /// {@macro flutter.widgets.navigator.push}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -4493,6 +4498,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushReplacement}
   ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
+  ///
   /// {@tool snippet}
   ///
   /// Typical usage is as follows:
@@ -4577,6 +4584,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// routes until the `predicate` returns true.
   ///
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
+  ///
+  /// {@macro flutter.widgets.navigator.pushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
