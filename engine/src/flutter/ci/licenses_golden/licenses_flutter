@@ -490,10 +490,16 @@ FILE: ../../../flutter/impeller/entity/contents/filters/border_mask_blur_filter_
 FILE: ../../../flutter/impeller/entity/contents/filters/border_mask_blur_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/filter_contents.h
-FILE: ../../../flutter/impeller/entity/contents/filters/filter_input.cc
-FILE: ../../../flutter/impeller/entity/contents/filters/filter_input.h
 FILE: ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents.h
+FILE: ../../../flutter/impeller/entity/contents/filters/inputs/contents_filter_input.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/inputs/contents_filter_input.h
+FILE: ../../../flutter/impeller/entity/contents/filters/inputs/filter_contents_filter_input.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/inputs/filter_contents_filter_input.h
+FILE: ../../../flutter/impeller/entity/contents/filters/inputs/filter_input.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/inputs/filter_input.h
+FILE: ../../../flutter/impeller/entity/contents/filters/inputs/texture_filter_input.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/inputs/texture_filter_input.h
 FILE: ../../../flutter/impeller/entity/contents/linear_gradient_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/linear_gradient_contents.h
 FILE: ../../../flutter/impeller/entity/contents/snapshot.cc
@@ -543,6 +549,7 @@ FILE: ../../../flutter/impeller/fixtures/instanced_draw.frag
 FILE: ../../../flutter/impeller/fixtures/instanced_draw.vert
 FILE: ../../../flutter/impeller/fixtures/kalimba.jpg
 FILE: ../../../flutter/impeller/fixtures/sample.vert
+FILE: ../../../flutter/impeller/fixtures/struct_def_bug.vert
 FILE: ../../../flutter/impeller/fixtures/test_texture.frag
 FILE: ../../../flutter/impeller/fixtures/test_texture.vert
 FILE: ../../../flutter/impeller/fixtures/types.h
@@ -719,6 +726,7 @@ FILE: ../../../flutter/impeller/tessellator/c/tessellator.h
 FILE: ../../../flutter/impeller/tessellator/dart/lib/tessellator.dart
 FILE: ../../../flutter/impeller/tessellator/tessellator.cc
 FILE: ../../../flutter/impeller/tessellator/tessellator.h
+FILE: ../../../flutter/impeller/tessellator/tessellator_unittests.cc
 FILE: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.cc
 FILE: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.h
 FILE: ../../../flutter/impeller/typographer/backends/skia/text_render_context_skia.cc
