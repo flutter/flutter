@@ -112,7 +112,8 @@ void Canvas::DrawPath(Path path, Paint paint) {
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetBlendMode(paint.blend_mode);
-  entity.SetContents(paint.WithFilters(paint.CreateContentsForEntity(std::move(path))));
+  entity.SetContents(
+      paint.WithFilters(paint.CreateContentsForEntity(std::move(path))));
 
   GetCurrentPass().AddEntity(std::move(entity));
 }

@@ -286,7 +286,8 @@ std::optional<Rect> Path::GetBoundingBox() const {
   return Rect{min.x, min.y, difference.x, difference.y};
 }
 
-std::optional<Rect> Path::GetTransformedBoundingBox(const Matrix& transform) const {
+std::optional<Rect> Path::GetTransformedBoundingBox(
+    const Matrix& transform) const {
   auto bounds = GetBoundingBox();
   if (!bounds.has_value()) {
     return std::nullopt;
