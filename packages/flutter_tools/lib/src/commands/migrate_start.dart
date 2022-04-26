@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
 import '../migrate/migrate_compute.dart';
 import '../migrate/migrate_utils.dart';
 import '../project.dart';
@@ -15,12 +19,14 @@ class MigrateStartCommand extends FlutterCommand {
     bool verbose = false,
     required this.logger,
     required this.fileSystem,
+    required Platform platform,
+    required ProcessManager processManager,
   }) : _verbose = verbose,
        migrateUtils = MigrateUtils(
-         logger = logger,
-         fileSystem = fileSystem,
-         platform,
-         processManager
+         logger: logger,
+         fileSystem: fileSystem,
+         platform: platform,
+         processManager: processManager,
        ) {
     requiresPubspecYaml();
     argParser.addOption(
@@ -105,13 +111,6 @@ class MigrateStartCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    migrateUtils = MigrateUtils({
-      required Logger logger,
-      required FileSystem fileSystem,
-      required Platform platform,
-      required ProcessManager processManager,
-    })
-
     if (!await gitRepoExists(project.directory.path, logger, migrateUtils)) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
@@ -174,7 +173,7 @@ class MigrateStartCommand extends FlutterCommand {
       directories: migrateResult.tempDirectories,
     );
 
-    await writeWorkingDir(migrateResult, logger, verbose: _verbose, flutterProject: project);
+    await writeWorkingDir(migrateResult, logger, migrateUtils, verbose: _verbose, flutterProject: project);
 
     logger.printStatus('The migrate tool has staged proposed changes in the migrate working directory.\n');
     logger.printStatus('Guided conflict resolution wizard:');

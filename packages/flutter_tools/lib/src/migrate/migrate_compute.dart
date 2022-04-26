@@ -273,8 +273,8 @@ Future<MigrateResult?> computeMigration({
     }
   }
 
-  await migrateUtils.gitInit(migrateResult.generatedBaseTemplateDirectory!.absolute.path, logger);
-  await migrateUtils.gitInit(migrateResult.generatedTargetTemplateDirectory!.absolute.path, logger);
+  await migrateUtils.gitInit(migrateResult.generatedBaseTemplateDirectory!.absolute.path);
+  await migrateUtils.gitInit(migrateResult.generatedTargetTemplateDirectory!.absolute.path);
 
   final String name = flutterProject.manifest.appName;
   final String androidLanguage = flutterProject.android.isKotlin ? 'kotlin' : 'java';
@@ -324,12 +324,10 @@ Future<MigrateResult?> computeMigration({
       androidLanguage: androidLanguage,
       iosLanguage: iosLanguage,
       outputDirectory: migrateResult.generatedTargetTemplateDirectory!.absolute.path,
-      logger: logger,
-      fileSystem: fileSystem,
     );
   }
 
-  await migrateUtils.gitInit(flutterProject.directory.absolute.path, logger);
+  await migrateUtils.gitInit(flutterProject.directory.absolute.path);
 
   // Generate diffs. These diffs are used to determine if a file is newly added, needs merging,
   // or deleted (rare). Only files with diffs between the base and target revisions need to be
@@ -481,7 +479,7 @@ Future<void> createBase(
             status.pause();
             logger.printStatus('Cloning SDK $activeRevision', indent: 2, color: TerminalColor.grey);
             status.resume();
-            sdkAvailable = await migrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path, Cache.flutterRoot!, logger);
+            sdkAvailable = await migrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path);
             revisionToFlutterSdkDir[revision] = sdkDir;
           }
         } else {
@@ -501,8 +499,6 @@ Future<void> createBase(
         iosLanguage: iosLanguage,
         outputDirectory: migrateResult.generatedBaseTemplateDirectory!.absolute.path,
         platforms: platforms,
-        logger: logger,
-        fileSystem: fileSystem,
       );
       if (newDirectoryPath != migrateResult.generatedBaseTemplateDirectory?.path) {
         migrateResult.generatedBaseTemplateDirectory = fileSystem.directory(newDirectoryPath);
@@ -550,12 +546,12 @@ Future<void> diffBaseAndTarget(
     if (_skipped(localPath, blacklistPrefixes: blacklistPrefixes)) {
       continue;
     }
-    if (await migrateUtils.isGitIgnored(baseTemplateFile.absolute.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path, logger)) {
-      migrateResult.diffMap[localPath] = DiffResult.ignored();
+    if (await migrateUtils.isGitIgnored(baseTemplateFile.absolute.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path)) {
+      migrateResult.diffMap[localPath] = DiffResult(diffType: DiffType.ignored);
     }
     final File targetTemplateFile = migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
     if (targetTemplateFile.existsSync()) {
-      final DiffResult diff = await migrateUtils.diffFiles(baseTemplateFile, targetTemplateFile, logger);
+      final DiffResult diff = await migrateUtils.diffFiles(baseTemplateFile, targetTemplateFile);
       migrateResult.diffMap[localPath] = diff;
       if (verbose && diff.diff != '') {
         status.pause();
@@ -566,7 +562,7 @@ Future<void> diffBaseAndTarget(
     } else {
       // Current file has no new template counterpart, which is equivalent to a deletion.
       // This could also indicate a renaming if there is an addition with equivalent contents.
-      migrateResult.diffMap[localPath] = DiffResult.deletion();
+      migrateResult.diffMap[localPath] = DiffResult(diffType: DiffType.deletion);
     }
   }
   if (verbose) {
@@ -597,10 +593,10 @@ Future<void> computeNewlyAddedFiles(
     if (migrateResult.diffMap.containsKey(localPath) || _skipped(localPath, blacklistPrefixes: blacklistPrefixes)) {
       continue;
     }
-    if (await migrateUtils.isGitIgnored(targetTemplateFile.absolute.path, migrateResult.generatedTargetTemplateDirectory!.absolute.path, logger)) {
-      migrateResult.diffMap[localPath] = DiffResult.ignored();
+    if (await migrateUtils.isGitIgnored(targetTemplateFile.absolute.path, migrateResult.generatedTargetTemplateDirectory!.absolute.path)) {
+      migrateResult.diffMap[localPath] = DiffResult(diffType: DiffType.ignored);
     }
-    migrateResult.diffMap[localPath] = DiffResult.addition();
+    migrateResult.diffMap[localPath] = DiffResult(diffType: DiffType.addition);
     if (flutterProject.directory.childFile(localPath).existsSync()) {
       // Don't store as added file if file already exists in the project.
       continue;
@@ -656,16 +652,16 @@ Future<void> computeMerge(
     // Diff the current file against the old generated template
     final String localPath = getLocalPath(currentFile.path, projectRootPath, fileSystem);
     missingAlwaysMigrateFiles.remove(localPath);
-    if (migrateResult.diffMap.containsKey(localPath) && migrateResult.diffMap[localPath]!.isIgnored ||
-        await migrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path, logger) ||
+    if (migrateResult.diffMap.containsKey(localPath) && migrateResult.diffMap[localPath]!.diffType == DiffType.ignored ||
+        await migrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path) ||
         _skipped(localPath, blacklistPrefixes: blacklistPrefixes) ||
         _skippedMerge(localPath)) {
       continue;
     }
     final File baseTemplateFile = migrateResult.generatedBaseTemplateDirectory!.childFile(localPath);
     final File targetTemplateFile = migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
-    final DiffResult userDiff = await migrateUtils.diffFiles(currentFile, baseTemplateFile, logger);
-    final DiffResult targetDiff = await migrateUtils.diffFiles(currentFile, targetTemplateFile, logger);
+    final DiffResult userDiff = await migrateUtils.diffFiles(currentFile, baseTemplateFile);
+    final DiffResult targetDiff = await migrateUtils.diffFiles(currentFile, targetTemplateFile);
     if (targetDiff.exitCode == 0) {
       // current file is already the same as the target file.
       continue;
@@ -677,7 +673,7 @@ Future<void> computeMerge(
     if (userDiff.exitCode == 0 || alwaysMigrate) {
       if (migrateResult.diffMap.containsKey(localPath) || alwaysMigrate) {
         // File changed between base and target
-        if (migrateResult.diffMap[localPath]!.isDeletion) {
+        if (migrateResult.diffMap[localPath]!.diffType == DiffType.deletion) {
           // File is deleted in new template
           migrateResult.deletedFiles.add(FilePendingMigration(localPath, currentFile));
           continue;
@@ -686,14 +682,14 @@ Future<void> computeMerge(
           // Accept the target version wholesale
           MergeResult result;
           try {
-            result = MergeResult.explicit(
+            result = StringMergeResult.explicit(
               mergedString: targetTemplateFile.readAsStringSync(),
               hasConflict: false,
               exitCode: 0,
               localPath: localPath,
             );
           } on FileSystemException {
-            result = MergeResult.explicit(
+            result = BinaryMergeResult.explicit(
               mergedBytes: targetTemplateFile.readAsBytesSync(),
               hasConflict: false,
               exitCode: 0,
@@ -752,21 +748,20 @@ Future<void> computeMerge(
             current: currentPath,
             target: targetPath,
             localPath: localPath,
-            logger: logger,
           );
         }
       }
       if (result != null) {
         // Don't include if result is identical to the current file.
-        if (result.mergedString != null) {
-          if (result.mergedString == currentFile.readAsStringSync()) {
+        if (result is StringMergeResult) {
+          if ((result as StringMergeResult).mergedString == currentFile.readAsStringSync()) {
             status.pause();
             logger.printStatus('$localPath was merged with a $mergeType.');
             status.resume();
             continue;
           }
         } else {
-          if (result.mergedBytes == currentFile.readAsBytesSync()) {
+          if ((result as BinaryMergeResult).mergedBytes == currentFile.readAsBytesSync()) {
             continue;
           }
         }
@@ -791,7 +786,7 @@ Future<void> computeMerge(
 }
 
 /// Writes the files into the working directory for the developer to review and resolve any conflicts.
-Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool verbose = false, FlutterProject? flutterProject}) async {
+Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, MigrateUtils migrateUtils, {bool verbose = false, FlutterProject? flutterProject}) async {
   flutterProject ??= FlutterProject.current();
   final Directory workingDir = flutterProject.directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
   if (verbose) {
@@ -801,10 +796,10 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
   for (final MergeResult result in migrateResult.mergeResults) {
     final File file = workingDir.childFile(result.localPath);
     file.createSync(recursive: true);
-    if (result.mergedString != null) {
-      file.writeAsStringSync(result.mergedString!, flush: true);
+    if (result is StringMergeResult) {
+      file.writeAsStringSync((result as StringMergeResult).mergedString!, flush: true);
     } else {
-      file.writeAsBytesSync(result.mergedBytes!, flush: true);
+      file.writeAsBytesSync((result as BinaryMergeResult).mergedBytes!, flush: true);
     }
   }
   // Write all files that are newly added in target
@@ -826,7 +821,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, Logger logger, {bool v
   manifest.writeFile();
 
   // output the manifest contents.
-  checkAndPrintMigrateStatus(manifest, workingDir, logger: logger);
+  checkAndPrintMigrateStatus(manifest, workingDir, migrateUtils, logger: logger);
 
   logger.printBox('Working directory created at `${workingDir.path}`');
 }

@@ -46,11 +46,11 @@ class MigrateUtils {
     final RunResult result = await _processUtils.run(cmdArgs);
 
     // diff exits with 1 if diffs are found.
-    checkForErrors(result, allowedExitCodes: <int>[1], commandDescription: 'git ${cmdArgs.join(' ')}');
-    return DiffResult(diffType: DiffType.modification, diff: result.stdout, exitCode: result.exitCode);
+    checkForErrors(result, allowedExitCodes: <int>[0, 1], commandDescription: 'git ${cmdArgs.join(' ')}');
+    return DiffResult(diffType: DiffType.command, diff: result.stdout, exitCode: result.exitCode);
   }
 
-  /// Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
+  /// Clones a copy of the flutter repo into the destination directory. Returns false if unsuccessful.
   Future<bool> cloneFlutter(String revision, String destination) async {
     // Use https url instead of ssh to avoid need to setup ssh on git.
     List<String> cmdArgs = <String>['git', 'clone', '--filter=blob:none', 'https://github.com/flutter/flutter.git', destination];
@@ -179,7 +179,7 @@ class MigrateUtils {
   }
 
   /// Returns true if the workingDirectory git repo has any uncommited changes.
-  Future<bool> hasUncommitedChanges(String workingDirectory) async {
+  Future<bool> hasUncommittedChanges(String workingDirectory) async {
     final List<String> cmdArgs = <String>['git', 'diff', '--quiet', 'HEAD', '--', '.'];
     // windows uses double quotes.
     if (_platform.isWindows) {
@@ -248,7 +248,7 @@ class MigrateUtils {
     bool exit = true,
     bool silent = false
   }) {
-    if ((result.exitCode != 0 && !allowedExitCodes.contains(result.exitCode)) && !allowedExitCodes.contains(-1)) {
+    if (!allowedExitCodes.contains(result.exitCode) && !allowedExitCodes.contains(-1)) {
       if (!silent) {
         _logger.printError('Command encountered an error with exit code ${result.exitCode}.');
         if (commandDescription != null) {
@@ -279,10 +279,11 @@ class MigrateUtils {
 
 /// Defines the classification of difference between files.
 enum DiffType {
-  modification,
+  command,
   addition,
   deletion,
   ignored,
+  none,
 }
 
 /// Tracks the output of a git diff command or any special cases such as addition of a new
@@ -292,14 +293,16 @@ class DiffResult {
     required this.diffType,
     this.diff,
     this.exitCode,
-  });
+  }) : assert(diffType == DiffType.command && exitCode != null || diffType != DiffType.command && exitCode == null);
 
   /// The diff string output by git.
   final String? diff;
 
   final DiffType diffType;
 
-  /// The exitcode of the command. This is zero when no diffs are found.
+  /// The exit code of the command. This is zero when no diffs are found.
+  ///
+  /// The exitCode is null when the diffType is not `command`.
   final int? exitCode;
 }
 

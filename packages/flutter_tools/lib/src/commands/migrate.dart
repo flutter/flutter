@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/terminal.dart';
 import '../migrate/migrate_utils.dart';
 import '../runner/flutter_command.dart';
@@ -20,12 +24,14 @@ class MigrateCommand extends FlutterCommand {
     required this.logger,
     required FileSystem fileSystem,
     required Terminal terminal,
+    required Platform platform,
+    required ProcessManager processManager,
   }) : _verbose = verbose {
-    addSubcommand(MigrateAbandonCommand(logger: logger, fileSystem: fileSystem, terminal: terminal));
-    addSubcommand(MigrateApplyCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, terminal: terminal));
-    addSubcommand(MigrateResolveConflictsCommand(logger: logger, fileSystem: fileSystem, terminal: terminal));
-    addSubcommand(MigrateStartCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));
-    addSubcommand(MigrateStatusCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem));
+    addSubcommand(MigrateAbandonCommand(logger: logger, fileSystem: fileSystem, terminal: terminal, platform: platform, processManager: processManager));
+    addSubcommand(MigrateApplyCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, terminal: terminal, platform: platform, processManager: processManager));
+    addSubcommand(MigrateResolveConflictsCommand(logger: logger, fileSystem: fileSystem, terminal: terminal, platform: platform, processManager: processManager));
+    addSubcommand(MigrateStartCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, platform: platform, processManager: processManager));
+    addSubcommand(MigrateStatusCommand(verbose: _verbose, logger: logger, fileSystem: fileSystem, platform: platform, processManager: processManager));
   }
 
   final bool _verbose;
@@ -51,7 +57,7 @@ class MigrateCommand extends FlutterCommand {
 }
 
 Future<bool> gitRepoExists(String projectDirectory, Logger logger, MigrateUtils migrateUtils) async {
-  if (await migrateUtils.isGitRepo(projectDirectory, logger)) {
+  if (await migrateUtils.isGitRepo(projectDirectory)) {
     return true;
   }
   logger.printStatus('Project is not a git repo. Please initialize a git repo and try again.');
@@ -60,7 +66,7 @@ Future<bool> gitRepoExists(String projectDirectory, Logger logger, MigrateUtils 
 }
 
 Future<bool> hasUncommittedChanges(String projectDirectory, Logger logger, MigrateUtils migrateUtils) async {
-  if (await migrateUtils.hasUncommitedChanges(projectDirectory, logger)) {
+  if (await migrateUtils.hasUncommittedChanges(projectDirectory)) {
     logger.printStatus('There are uncommitted changes in your project. Please git commit, abandon, or stash your changes before trying again.');
     return true;
   }

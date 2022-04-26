@@ -41,7 +41,7 @@ class MetadataCustomMerge extends CustomMerge {
       FlutterProjectMetadata(target, logger),
       logger,
     );
-    return MergeResult.explicit(
+    return StringMergeResult.explicit(
       mergedString: result.toString(),
       hasConflict: false,
       exitCode: 0,

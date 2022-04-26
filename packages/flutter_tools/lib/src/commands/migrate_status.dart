@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/terminal.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
@@ -17,12 +21,14 @@ class MigrateStatusCommand extends FlutterCommand {
     bool verbose = false,
     required this.logger,
     required this.fileSystem,
+    required Platform platform,
+    required ProcessManager processManager,
   }) : _verbose = verbose,
        migrateUtils = MigrateUtils(
-         logger = logger,
-         fileSystem = fileSystem,
-         platform,
-         processManager
+         logger: logger,
+         fileSystem: fileSystem,
+         platform: platform,
+         processManager: processManager,
        ) {
     requiresPubspecYaml();
     argParser.addOption(
@@ -100,14 +106,14 @@ class MigrateStatusCommand extends FlutterCommand {
       }
       final List<String> files = <String>[];
       files.addAll(manifest.mergedFiles);
-      files.addAll(manifest.resolvedConflictFiles(workingDirectory));
-      files.addAll(manifest.remainingConflictFiles(workingDirectory));
+      files.addAll(manifest.resolvedConflictFiles(workingDirectory, migrateUtils));
+      files.addAll(manifest.remainingConflictFiles(workingDirectory, migrateUtils));
       for (final String localPath in files) {
-        final DiffResult result = await migrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath), logger);
+        final DiffResult result = await migrateUtils.diffFiles(project.directory.childFile(localPath), workingDirectory.childFile(localPath));
         if (result.diff != '') {
           // Print with different colors for better visibility.
           int lineNumber = -1;
-          for (final String line in result.diff.split('\n')) {
+          for (final String line in result.diff!.split('\n')) {
             lineNumber++;
             if (line.startsWith('---') || line.startsWith('+++') || line.startsWith('&&') || _initialDiffLines.contains(lineNumber)) {
               logger.printStatus(line);
@@ -129,9 +135,9 @@ class MigrateStatusCommand extends FlutterCommand {
 
     logger.printBox('Working directory at `${workingDirectory.path}`');
 
-    checkAndPrintMigrateStatus(manifest, workingDirectory, logger: logger);
+    checkAndPrintMigrateStatus(manifest, workingDirectory, migrateUtils, logger: logger);
 
-    final bool readyToApply = manifest.remainingConflictFiles(workingDirectory).isEmpty;
+    final bool readyToApply = manifest.remainingConflictFiles(workingDirectory, migrateUtils).isEmpty;
 
     if (!readyToApply) {
       logger.printStatus('Guided conflict resolution wizard:');

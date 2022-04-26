@@ -48,14 +48,14 @@ class MigrateManifest {
     if (mergedFilesYaml != null) {
       for (final Object? localPath in mergedFilesYaml as YamlList) {
         if (localPath is String) {
-          migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: false, exitCode: 0, localPath: localPath));
+          migrateResult.mergeResults.add(StringMergeResult.explicit(mergedString: '', hasConflict: false, exitCode: 0, localPath: localPath));
         }
       }
     }
     if (conflictFilesYaml != null) {
       for (final Object? localPath in conflictFilesYaml as YamlList) {
         if (localPath is String) {
-          migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: true, exitCode: 1, localPath: localPath));
+          migrateResult.mergeResults.add(StringMergeResult.explicit(mergedString: '', hasConflict: true, exitCode: 1, localPath: localPath));
         }
       }
     }
@@ -90,10 +90,10 @@ class MigrateManifest {
   }
 
   /// A list of local paths of files that require conflict resolution.
-  List<String> remainingConflictFiles(Directory workingDir) {
+  List<String> remainingConflictFiles(Directory workingDir, MigrateUtils migrateUtils) {
     final List<String> output = <String>[];
     for (final String localPath in conflictFiles) {
-      if (!MigrateUtils.conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
+      if (!migrateUtils.conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
         output.add(localPath);
       }
     }
@@ -101,10 +101,10 @@ class MigrateManifest {
   }
 
   // A list of local paths of files that had conflicts and are now fully resolved.
-  List<String> resolvedConflictFiles(Directory workingDir) {
+  List<String> resolvedConflictFiles(Directory workingDir, MigrateUtils migrateUtils) {
     final List<String> output = <String>[];
     for (final String localPath in conflictFiles) {
-      if (MigrateUtils.conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
+      if (migrateUtils.conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
         output.add(localPath);
       }
     }
@@ -177,14 +177,14 @@ class MigrateManifest {
 /// Returns true if the migration working directory has all conflicts resolved and prints the migration status.
 ///
 /// The migration status printout lists all added, deleted, merged, and conflicted files.
-bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, {bool warnConflict = false, Logger? logger}) {
+bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, MigrateUtils migrateUtils, {bool warnConflict = false, Logger? logger}) {
   String printout = '';
   String redPrintout = '';
   bool result = true;
   final List<String> remainingConflicts = <String>[];
   final List<String> mergedFiles = <String>[];
   for (final String localPath in manifest.conflictFiles) {
-    if (!MigrateUtils.conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
+    if (!migrateUtils.conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
       remainingConflicts.add(localPath);
     } else {
       mergedFiles.add(localPath);

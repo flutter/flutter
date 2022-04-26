@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/terminal.dart';
 import '../flutter_project_metadata.dart';
 import '../migrate/migrate_manifest.dart';
@@ -21,12 +25,14 @@ class MigrateApplyCommand extends FlutterCommand {
     required this.logger,
     required this.fileSystem,
     required this.terminal,
+    required Platform platform,
+    required ProcessManager processManager,
   }) : _verbose = verbose,
        migrateUtils = MigrateUtils(
-         logger = logger,
-         fileSystem = fileSystem,
-         platform,
-         processManager
+         logger: logger,
+         fileSystem: fileSystem,
+         platform: platform,
+         processManager: processManager,
        ) {
     requiresPubspecYaml();
     argParser.addOption(
@@ -72,7 +78,7 @@ class MigrateApplyCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = FlutterProject.current();
 
-    if (!await gitRepoExists(flutterProject.directory.path, logger)) {
+    if (!await gitRepoExists(flutterProject.directory.path, logger, migrateUtils)) {
       logger.printStatus('No git repo found. Please run in a project with an initialized git repo or initialize one with:');
       printCommandText('git init', logger);
       return const FlutterCommandResult(ExitStatus.fail);
@@ -100,14 +106,14 @@ class MigrateApplyCommand extends FlutterCommand {
 
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
-    if (!checkAndPrintMigrateStatus(manifest, workingDirectory, warnConflict: true, logger: logger) && !force) {
+    if (!checkAndPrintMigrateStatus(manifest, workingDirectory, migrateUtils, warnConflict: true, logger: logger) && !force) {
       logger.printStatus('Conflicting files found. Resolve these conflicts and try again.');
       logger.printStatus('Guided conflict resolution wizard:');
       printCommandText('flutter migrate resolve-conflicts', logger);
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    if (await hasUncommittedChanges(flutterProject.directory.path, logger) && !force) {
+    if (await hasUncommittedChanges(flutterProject.directory.path, logger, migrateUtils) && !force) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
@@ -202,7 +208,7 @@ class MigrateApplyCommand extends FlutterCommand {
     }
     if (selection == 'y') {
       // Runs `flutter pub upgrade --major-versions`
-      await migrateUtils.flutterPubUpgrade(flutterProject.directory.path, logger);
+      await migrateUtils.flutterPubUpgrade(flutterProject.directory.path);
     }
   }
 
@@ -266,7 +272,7 @@ class MigrateApplyCommand extends FlutterCommand {
           }
         }
         // Runs `./gradelw tasks`in the project's android directory.
-        await migrateUtils.gradlewTasks(flutterProject.directory.childDirectory('android').path, logger);
+        await migrateUtils.gradlewTasks(flutterProject.directory.childDirectory('android').path);
         logger.printStatus('Old lockfiles renamed to:');
         for (final String path in backedUpFilePaths) {
           logger.printStatus(path, color: TerminalColor.grey, indent: 2);

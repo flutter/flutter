@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/terminal.dart';
 import '../migrate/migrate_utils.dart';
 import '../project.dart';
@@ -16,11 +20,13 @@ class MigrateAbandonCommand extends FlutterCommand {
     required this.logger,
     required this.fileSystem,
     required this.terminal,
+    required Platform platform,
+    required ProcessManager processManager,
   }) : migrateUtils = MigrateUtils(
-         logger = logger,
-         fileSystem = fileSystem,
-         platform,
-         processManager
+         logger: logger,
+         fileSystem: fileSystem,
+         platform: platform,
+         processManager: processManager,
        ) {
     requiresPubspecYaml();
     argParser.addOption(
