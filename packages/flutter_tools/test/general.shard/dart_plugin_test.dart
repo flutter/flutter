@@ -1054,7 +1054,4 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   WindowsProject windows;
-
-  @override
-  WindowsUwpProject windowsUwp;
 }

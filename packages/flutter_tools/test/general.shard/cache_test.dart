@@ -604,20 +604,6 @@ void main() {
     ]));
   });
 
-  testWithoutContext('Windows UWP desktop artifacts include profile, debug, and release artifacts', () {
-    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
-    final WindowsUwpEngineArtifacts artifacts = WindowsUwpEngineArtifacts(
-      cache,
-      platform: FakePlatform(operatingSystem: 'windows'),
-    );
-
-    expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
-      contains(contains('profile')),
-      contains(contains('release')),
-      contains(contains('debug')),
-    ]));
-  });
-
   testWithoutContext('Linux desktop artifacts ignore filtering when requested', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 

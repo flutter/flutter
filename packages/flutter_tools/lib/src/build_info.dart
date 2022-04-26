@@ -527,7 +527,6 @@ enum TargetPlatform {
   linux_x64,
   linux_arm64,
   windows_x64,
-  windows_uwp_x64,
   fuchsia_arm64,
   fuchsia_x64,
   tester,
@@ -660,8 +659,6 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
       return 'linux-arm64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
-    case TargetPlatform.windows_uwp_x64:
-      return 'windows-uwp-x64';
     case TargetPlatform.fuchsia_arm64:
       return 'fuchsia-arm64';
     case TargetPlatform.fuchsia_x64:
@@ -705,8 +702,6 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.linux_arm64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
-    case 'windows-uwp-x64':
-      return TargetPlatform.windows_uwp_x64;
     case 'web-javascript':
       return TargetPlatform.web_javascript;
   }
@@ -770,7 +765,6 @@ String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.linux_x64:
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
-    case TargetPlatform.windows_uwp_x64:
     case TargetPlatform.windows_x64:
       throw UnsupportedError('Unexpected Fuchsia platform $targetPlatform');
   }
@@ -857,11 +851,6 @@ String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
 /// Returns the Windows build output directory.
 String getWindowsBuildDirectory() {
   return globals.fs.path.join(getBuildDirectory(), 'windows');
-}
-
-/// Returns the Windows UWP build output directory.
-String getWindowsBuildUwpDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'winuwp');
 }
 
 /// Returns the Fuchsia build output directory.
@@ -1030,7 +1019,6 @@ String getNameForTargetPlatformArch(TargetPlatform platform) {
     case TargetPlatform.ios:
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
-    case TargetPlatform.windows_uwp_x64:
       throw UnsupportedError('Unexpected target platform $platform');
   }
 }
