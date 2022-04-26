@@ -79,7 +79,8 @@ void ReportUnhandledException(Dart_Handle exception_handle,
 }
 }  // namespace
 
-void DartVMInitializer::Initialize(Dart_InitializeParams* params) {
+void DartVMInitializer::Initialize(Dart_InitializeParams* params,
+                                   bool enable_timeline_event_handler) {
   FML_DCHECK(!gDartInitialized);
 
   char* error = Dart_Initialize(params);
@@ -90,9 +91,12 @@ void DartVMInitializer::Initialize(Dart_InitializeParams* params) {
     gDartInitialized = true;
   }
 
+  if (enable_timeline_event_handler) {
+    fml::tracing::TraceSetTimelineMicrosSource(Dart_TimelineGetMicros);
+    fml::tracing::TraceSetTimelineEventHandler(LogDartTimelineEvent);
+  }
+
   fml::TimePoint::SetClockSource(flutter::DartTimelineTicksSinceEpoch);
-  fml::tracing::TraceSetTimelineEventHandler(LogDartTimelineEvent);
-  fml::tracing::TraceSetTimelineMicrosSource(Dart_TimelineGetMicros);
   tonic::SetUnhandledExceptionReporter(&ReportUnhandledException);
 }
 

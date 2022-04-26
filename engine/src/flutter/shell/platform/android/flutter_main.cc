@@ -105,6 +105,12 @@ void FlutterMain::Init(JNIEnv* env,
     }
   }
 
+#if FLUTTER_RELEASE
+  // On most platforms the timeline is always disabled in release mode.
+  // On Android, enable it in release mode only when using systrace.
+  settings.enable_timeline_event_handler = settings.trace_systrace;
+#endif  // FLUTTER_RELEASE
+
   int64_t init_time_micros = initTimeMillis * 1000;
   settings.engine_start_timestamp =
       std::chrono::microseconds(Dart_TimelineGetMicros() - init_time_micros);

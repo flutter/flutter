@@ -458,7 +458,8 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     params.thread_exit = ThreadExitCallback;
     params.get_service_assets = GetVMServiceAssetsArchiveCallback;
     params.entropy_source = dart::bin::GetEntropy;
-    DartVMInitializer::Initialize(&params);
+    DartVMInitializer::Initialize(&params,
+                                  settings_.enable_timeline_event_handler);
     // Send the earliest available timestamp in the application lifecycle to
     // timeline. The difference between this timestamp and the time we render
     // the very first frame gives us a good idea about Flutter's startup time.

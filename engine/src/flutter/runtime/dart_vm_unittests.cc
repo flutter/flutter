@@ -43,5 +43,14 @@ TEST_F(DartVMTest, OldGenHeapSize) {
   ASSERT_TRUE(vm);
 }
 
+TEST_F(DartVMTest, DisableTimelineEventHandler) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  fml::tracing::TraceSetTimelineEventHandler(nullptr);
+  auto settings = CreateSettingsForFixture();
+  settings.enable_timeline_event_handler = false;
+  auto vm = DartVMRef::Create(settings);
+  ASSERT_FALSE(fml::tracing::TraceHasTimelineEventHandler());
+}
+
 }  // namespace testing
 }  // namespace flutter
