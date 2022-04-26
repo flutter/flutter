@@ -18,6 +18,7 @@
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
+#include "impeller/tessellator/tessellator.h"
 #include "third_party/imgui/imgui.h"
 
 namespace impeller {

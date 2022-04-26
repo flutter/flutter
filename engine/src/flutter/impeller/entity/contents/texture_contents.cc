@@ -81,7 +81,11 @@ bool TextureContents::Render(const ContentContext& renderer,
               texture_size;
           vertex_builder.AppendVertex(data);
         });
-    if (!tess_result) {
+
+    if (tess_result == Tessellator::Result::kInputError) {
+      return true;
+    }
+    if (tess_result == Tessellator::Result::kTessellationError) {
       return false;
     }
   }

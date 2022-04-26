@@ -50,7 +50,7 @@ VertexBuffer SolidColorContents::CreateSolidFillVertices(const Path& path,
         vtx.vertices = point;
         vtx_builder.AppendVertex(vtx);
       });
-  if (!tesselation_result) {
+  if (tesselation_result != Tessellator::Result::kSuccess) {
     return {};
   }
 
