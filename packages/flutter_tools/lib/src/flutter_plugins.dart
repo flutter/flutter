@@ -1102,6 +1102,10 @@ Future<void> injectBuildTimePluginFiles(
 ///
 /// These files are required at compile-time.
 ///
+/// This method used to generate the plugin registrar for the webPlatform too,
+/// but now the web tooling is able to call [injectBuildTimePluginFiles] as
+/// needed (at build time).
+///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 Future<void> injectPlugins(
   FlutterProject project, {

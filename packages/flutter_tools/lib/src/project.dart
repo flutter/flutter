@@ -328,9 +328,7 @@ class FlutterProject {
       linuxPlatform: featureFlags.isLinuxEnabled && linux.existsSync(),
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
-      // Web only needs the platform-specific tooling when doing flutter run or
-      // flutter build, not at compile-time, so we disable the webPlatform entry.
-      // webPlatform: featureFlags.isWebEnabled && web.existsSync(),
+      webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
     );
   }
@@ -375,10 +373,6 @@ class FlutterProject {
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
-      // Web plugin registrar is an artifact that gets injected only as needed
-      // (when doing flutter run or flutter build), so we disable the webPlatform
-      // from here. Web calls `injectPlugins` at the right time.
-      // webPlatform: webPlatform,
     );
   }
 
