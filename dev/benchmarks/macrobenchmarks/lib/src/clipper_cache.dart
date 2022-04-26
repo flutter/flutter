@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'picture_cache.dart';
 
@@ -14,21 +15,28 @@ class ClipperCachePage extends StatefulWidget {
 
 class _ClipperCachePageState extends State<ClipperCachePage>
     with TickerProviderStateMixin {
+  final double _animateOffset = 80;
   final ScrollController _controller = ScrollController();
-  final bool isComplex = true;
+  final bool _isComplex = true;
+  late double _topMargin;
 
   @override
   void initState() {
     super.initState();
+    const double itemHeight = 140;
+    _topMargin = (window.physicalSize.height / window.devicePixelRatio - itemHeight * 4) / 2;
+    if (_topMargin < 0) {
+      _topMargin = 0;
+    }
     _controller.addListener(() {
       if (_controller.offset < 10) {
-        _controller.animateTo(80, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
-      } else if (_controller.offset > 70) {
+        _controller.animateTo(_animateOffset, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+      } else if (_controller.offset > _animateOffset - 10) {
         _controller.animateTo(0, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
       }
     });
     Timer(const Duration(milliseconds: 500), () {
-      _controller.animateTo(80, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
+      _controller.animateTo(_animateOffset, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
     });
   }
 
@@ -39,23 +47,24 @@ class _ClipperCachePageState extends State<ClipperCachePage>
       body: ListView(
         controller: _controller,
         children: <Widget>[
+          SizedBox(height: _topMargin),
           ClipPath(
             clipBehavior: Clip.antiAliasWithSaveLayer,
-            child: _makeChild(0, isComplex)
+            child: _makeChild(0, _isComplex)
           ),
           ClipRect(
             clipBehavior: Clip.antiAliasWithSaveLayer,
-            child: _makeChild(1, isComplex)
+            child: _makeChild(1, _isComplex)
           ),
           ClipRRect(
             clipBehavior: Clip.antiAliasWithSaveLayer,
-            child: _makeChild(2, isComplex)
+            child: _makeChild(2, _isComplex)
           ),
           PhysicalModel(
             clipBehavior: Clip.antiAliasWithSaveLayer,
             color: Colors.blueAccent,
             borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-            child: _makeChild(2, isComplex),
+            child: _makeChild(2, _isComplex),
           ),
           const SizedBox(height: 1000),
         ],
