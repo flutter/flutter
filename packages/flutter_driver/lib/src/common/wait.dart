@@ -65,7 +65,7 @@ abstract class SerializableWaitCondition {
   /// Serializes the object to JSON.
   Map<String, String> serialize() {
     return <String, String>{
-      'conditionName': conditionName
+      'conditionName': conditionName,
     };
   }
 

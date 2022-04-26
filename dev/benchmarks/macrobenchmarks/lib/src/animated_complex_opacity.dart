@@ -33,7 +33,7 @@ class _AnimatedComplexOpacityState extends State<AnimatedComplexOpacity> with Si
             for (int i = 0; i < 20; i++)
             FadeTransition(opacity: animation, child: Center(
               child: Transform.scale(scale: 1.01, child: const ModeratelyComplexWidget()),
-            ))
+            )),
           ],
         ),
       ),

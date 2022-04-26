@@ -662,7 +662,7 @@ void main() {
       "trackBorderColor: Instance of '_MaterialStatePropertyWith<Color?>'",
       'crossAxisMargin: 3.0',
       'mainAxisMargin: 6.0',
-      'minThumbLength: 120.0'
+      'minThumbLength: 120.0',
     ]);
 
     // On the web, Dart doubles and ints are backed by the same kind of object because

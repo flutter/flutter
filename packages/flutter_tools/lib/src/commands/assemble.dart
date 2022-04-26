@@ -179,12 +179,12 @@ class AssembleCommand extends FlutterCommand {
     final String name = argumentResults.rest.first;
     final Map<String, Target> targetMap = <String, Target>{
       for (final Target target in _kDefaultTargets)
-        target.name: target
+        target.name: target,
     };
     final List<Target> results = <Target>[
       for (final String targetName in argumentResults.rest)
         if (targetMap.containsKey(targetName))
-          targetMap[targetName]!
+          targetMap[targetName]!,
     ];
     if (results.isEmpty) {
       throwToolExit('No target named "$name" defined.');
@@ -386,8 +386,8 @@ void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File ou
           'skipped': measurement.skipped,
           'succeeded': measurement.succeeded,
           'elapsedMilliseconds': measurement.elapsedMilliseconds,
-        }
-    ]
+        },
+    ],
   };
   if (!outFile.parent.existsSync()) {
     outFile.parent.createSync(recursive: true);

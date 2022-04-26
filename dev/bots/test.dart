@@ -1268,7 +1268,7 @@ Future<void> _runFlutterPluginsTests() async {
         'core.longPaths=true',
         'clone',
         'https://github.com/flutter/plugins.git',
-        '.'
+        '.',
       ],
       workingDirectory: checkout.path,
     );
@@ -1329,7 +1329,7 @@ Future<void> _runSkpGeneratorTests() async {
       'core.longPaths=true',
       'clone',
       'https://github.com/flutter/tests.git',
-      '.'
+      '.',
     ],
     workingDirectory: checkout.path,
   );

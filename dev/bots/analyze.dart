@@ -638,7 +638,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
       'These are the exported packages:',
       ...packages.map<String>((String path) => '  lib/$path.dart'),
       'These are the directories:',
-      ...directories.map<String>((String path) => '  lib/src/$path/')
+      ...directories.map<String>((String path) => '  lib/src/$path/'),
     ].join('\n'));
   }
   // Verify that the imports are well-ordered.
@@ -1585,7 +1585,7 @@ Future<void> _checkConsumerDependencies() async {
       'pub',
       'deps',
       '--json',
-      '--directory=${path.join(flutterRoot, 'packages', package)}'
+      '--directory=${path.join(flutterRoot, 'packages', package)}',
     ]);
     if (result.exitCode != 0) {
       print(result.stdout as Object);

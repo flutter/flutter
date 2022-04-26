@@ -274,7 +274,7 @@ void main() {
               <PathCommandAnimation>[
                 PathCommandAnimation('M', <List<Point<double>>>[
                   <Point<double>>[Point<double>(5.0, 6.0)],
-                ])
+                ]),
               ],
               opacities: <double>[1.0],
           )),

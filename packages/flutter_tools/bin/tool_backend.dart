@@ -59,7 +59,7 @@ or
     if (Platform.isWindows)
       'flutter.bat'
     else
-      'flutter'
+      'flutter',
   ]);
   final String bundlePlatform = targetPlatform.startsWith('windows') ? 'windows' : targetPlatform;
   final String target = '${buildMode}_bundle_${bundlePlatform}_assets';

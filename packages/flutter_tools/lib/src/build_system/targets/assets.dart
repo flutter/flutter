@@ -265,7 +265,7 @@ class CopyAssets extends Target {
 
   @override
   List<String> get depfiles => const <String>[
-    'flutter_assets.d'
+    'flutter_assets.d',
   ];
 
   @override

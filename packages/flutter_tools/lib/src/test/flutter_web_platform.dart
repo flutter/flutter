@@ -367,7 +367,7 @@ class FlutterWebPlatform extends PlatformPlugin {
             'width': width.toDouble(),
             'height': height.toDouble(),
             'scale': 1.0,
-          }
+          },
         });
         bytes = base64.decode(response.result['data'] as String);
       } on WipError catch (ex) {

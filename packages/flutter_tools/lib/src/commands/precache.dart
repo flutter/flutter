@@ -87,7 +87,7 @@ class PrecacheCommand extends FlutterCommand {
       'android_gen_snapshot',
       'android_maven',
       'android_internal_build',
-    ]
+    ],
   };
 
   /// Returns a reverse mapping of _expandedArtifacts, from child artifact name
@@ -96,7 +96,7 @@ class PrecacheCommand extends FlutterCommand {
     return <String, String>{
       for (final MapEntry<String, List<String>> entry in _expandedArtifacts.entries)
         for (final String childArtifactName in entry.value)
-          childArtifactName: entry.key
+          childArtifactName: entry.key,
     };
   }
 

@@ -33,7 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ),
     ColorBoxPage(
       key: PageStorageKey<String>('pageTwo'),
-    )
+    ),
   ];
   int currentTab = 0;
   final PageStorageBucket _bucket = PageStorageBucket();

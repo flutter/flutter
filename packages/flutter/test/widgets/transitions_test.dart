@@ -25,11 +25,13 @@ void main() {
           width: 4.0,
         ),
         borderRadius: BorderRadius.zero,
-        boxShadow: const <BoxShadow> [BoxShadow(
-          color: Color(0x66000000),
-          blurRadius: 10.0,
-          spreadRadius: 4.0,
-        )],
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 10.0,
+            spreadRadius: 4.0,
+          ),
+        ],
       ),
       end: BoxDecoration(
         color: const Color(0xFF000000),

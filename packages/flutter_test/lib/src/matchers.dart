@@ -604,7 +604,7 @@ Matcher matchesSemantics({
     if (hasToggledState) SemanticsFlag.hasToggledState,
     if (isToggled) SemanticsFlag.isToggled,
     if (hasImplicitScrolling) SemanticsFlag.hasImplicitScrolling,
-    if (isSlider) SemanticsFlag.isSlider
+    if (isSlider) SemanticsFlag.isSlider,
   ];
 
   final List<SemanticsAction> actions = <SemanticsAction>[

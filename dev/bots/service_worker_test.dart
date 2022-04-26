@@ -239,7 +239,7 @@ Future<void> runWebServiceWorkerTest({
         ...<String, int>{
           'manifest.json': 1,
           'favicon.ico': 1,
-        }
+        },
     });
     expect(reportedVersion, '1');
     reportedVersion = null;
@@ -313,7 +313,7 @@ Future<void> runWebServiceWorkerTest({
         ...<String, int>{
           'manifest.json': 1,
           'favicon.ico': 1,
-        }
+        },
     });
 
     expect(reportedVersion, '3');
@@ -366,7 +366,7 @@ Future<void> runWebServiceWorkerTest({
         ...<String, int>{
           'manifest.json': 1,
           'favicon.ico': 1,
-        }
+        },
     });
 
     expect(reportedVersion, '4');

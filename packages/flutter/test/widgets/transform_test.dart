@@ -412,8 +412,8 @@ void main() {
       1.0, 0.0, 0.0, 0.0,
       0.0, 1.0, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      25.0, 25.0, 0.0, 1.0]
-    );
+      25.0, 25.0, 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Transform.scale with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -430,8 +430,8 @@ void main() {
       3.14159, 0.0, 0.0, 0.0,
       0.0, 3.14159, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      -856.636, -642.477, 0.0, 1.0]
-    );
+      -856.636, -642.477, 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -448,8 +448,8 @@ void main() {
       moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
       moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
-    );
+      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Offset Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -470,8 +470,8 @@ void main() {
       moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
       moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
-    );
+      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Transform layers update to match child and filterQuality', (WidgetTester tester) async {

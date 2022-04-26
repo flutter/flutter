@@ -34,7 +34,7 @@ class ExampleWidget extends StatelessWidget {
         fontFamily: 'Sorts Mill Goudy',
         fontFeatures: <FontFeature>[
           FontFeature.historicalForms(), // Enables "hist".
-          FontFeature.historicalLigatures() // Enables "hlig".
+          FontFeature.historicalLigatures(), // Enables "hlig".
         ],
       ),
     );

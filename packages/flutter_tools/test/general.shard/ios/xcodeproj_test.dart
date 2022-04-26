@@ -364,7 +364,7 @@ void main() {
   testUsingContext('xcodebuild build settings contains Flutter Xcode environment variables', () async {
     platform.environment = const <String, String>{
       'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
-      'FLUTTER_XCODE_ARCHS': 'arm64'
+      'FLUTTER_XCODE_ARCHS': 'arm64',
     };
     fakeProcessManager.addCommands(<FakeCommand>[
       kWhichSysctlCommand,
@@ -382,7 +382,7 @@ void main() {
           '-showBuildSettings',
           'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
           'CODE_SIGN_STYLE=Manual',
-          'ARCHS=arm64'
+          'ARCHS=arm64',
         ],
       ),
     ]);
@@ -398,7 +398,7 @@ void main() {
   testWithoutContext('xcodebuild clean contains Flutter Xcode environment variables', () async {
     platform.environment = const <String, String>{
       'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
-      'FLUTTER_XCODE_ARCHS': 'arm64'
+      'FLUTTER_XCODE_ARCHS': 'arm64',
     };
 
     fakeProcessManager.addCommands(const <FakeCommand>[
@@ -415,7 +415,7 @@ void main() {
           '-quiet',
           'clean',
           'CODE_SIGN_STYLE=Manual',
-          'ARCHS=arm64'
+          'ARCHS=arm64',
         ],
       ),
     ]);
@@ -669,7 +669,7 @@ Information about project "Runner":
         'Ignored': 'Bogus',
         'FLUTTER_NOT_XCODE': 'Bogus',
         'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
-        'FLUTTER_XCODE_ARCHS': 'arm64'
+        'FLUTTER_XCODE_ARCHS': 'arm64',
       };
       final List<String> environmentVariablesAsBuildSettings = environmentVariablesAsXcodeBuildSettings(platform);
       expect(environmentVariablesAsBuildSettings, <String>['CODE_SIGN_STYLE=Manual', 'ARCHS=arm64']);
