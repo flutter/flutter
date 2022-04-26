@@ -5,6 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -219,5 +220,62 @@ void main() {
     await tester.tap(find.text('pop'));
     await tester.pumpAndSettle();
     expect(builtCount, 1);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+   testWidgets('_ZoomPageTransition uses a FilterQuality while animating', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return TextButton(
+            child: const Text('pop'),
+            onPressed: () { Navigator.pop(context); },
+          );
+        },
+      ),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: ZoomPageTransitionsBuilder(), // creates a _ZoomPageTransition
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+
+    await tester.tap(find.text('push'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(tester.layers, contains(isA<ImageFilterLayer>()));
+    expect(tester.layers.whereType<ImageFilterLayer>(), hasLength(1));
+
+    await tester.pumpAndSettle();
+
+    expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+
+    await tester.tap(find.text('pop'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(tester.layers, contains(isA<ImageFilterLayer>()));
+    // exiting requires two different zooms.
+    expect(tester.layers.whereType<ImageFilterLayer>(), hasLength(2));
+
+    await tester.pumpAndSettle();
+
+    expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }
