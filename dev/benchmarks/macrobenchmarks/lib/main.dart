@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'common.dart';
 
+import 'src/animated_complex_opacity.dart';
 import 'src/animated_image.dart';
 import 'src/animated_placeholder.dart';
 import 'src/animation_with_microtasks.dart';
@@ -72,6 +73,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         ...opacityPeepholeRoutes,
         kGradientPerfRouteName: (BuildContext context) => const GradientPerfHomePage(),
         ...gradientPerfRoutes,
+        kAnimatedComplexOpacityPerfRouteName: (BuildContext context) => const AnimatedComplexOpacity(),
       },
     );
   }
@@ -255,6 +257,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Gradient performance tests'),
             onPressed: () {
               Navigator.pushNamed(context, kGradientPerfRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimatedComplexOpacityPerfRouteName),
+            child: const Text('Animated complex opacity perf'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedComplexOpacityPerfRouteName);
             },
           ),
         ],
