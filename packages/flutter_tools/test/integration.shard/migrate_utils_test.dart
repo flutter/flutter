@@ -73,7 +73,7 @@ void main() {
       expect(await utils.isGitRepo(projectRoot.parent.path), false);
     });
 
-    testWithoutContext('hasUncommitedChanges false on clean repo', () async {
+    testWithoutContext('hasUncommittedChanges false on clean repo', () async {
       expect(projectRoot.existsSync(), true);
       expect(projectRoot.childDirectory('.git').existsSync(), false);
       await utils.gitInit(projectRootPath);
@@ -86,10 +86,10 @@ void main() {
       await processUtils.run(<String>['git', 'add', '.'], workingDirectory: projectRootPath);
       await processUtils.run(<String>['git', 'commit', '-m', 'Initial commit'], workingDirectory: projectRootPath);
 
-      expect(await utils.hasUncommitedChanges(projectRootPath), false);
+      expect(await utils.hasUncommittedChanges(projectRootPath), false);
     });
 
-    testWithoutContext('hasUncommitedChanges true on dirty repo', () async {
+    testWithoutContext('hasUncommittedChanges true on dirty repo', () async {
       expect(projectRoot.existsSync(), true);
       expect(projectRoot.childDirectory('.git').existsSync(), false);
       await utils.gitInit(projectRootPath);
@@ -99,7 +99,7 @@ void main() {
         ..createSync()
         ..writeAsStringSync('void main() {}', flush: true);
 
-      expect(await utils.hasUncommitedChanges(projectRootPath), true);
+      expect(await utils.hasUncommittedChanges(projectRootPath), true);
     });
 
     testWithoutContext('diffFiles', () async {
@@ -129,14 +129,14 @@ void main() {
 
       result = await utils.diffFiles(file1, file2);
       expect(result.diff, '');
-      expect(result.diffType, DiffType.modification);
+      expect(result.diffType, DiffType.command);
       expect(result.exitCode, 0);
 
       file2.writeAsStringSync('void main() {}\na second line\na third line\n', flush: true);
 
       result = await utils.diffFiles(file1, file2);
       expect(result.diff, contains('@@ -1 +1,3 @@\n void main() {}\n+a second line\n+a third line'));
-      expect(result.diffType, DiffType.modification);
+      expect(result.diffType, DiffType.command);
       expect(result.exitCode, 1);
     });
 
