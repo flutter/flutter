@@ -147,8 +147,8 @@ class MigrateManifest {
 
   /// Writes the manifest yaml file in the working directory.
   void writeFile() {
-    final StringBuffer mergedFileManifestContents = '';
-    final StringBuffer conflictFilesManifestContents = '';
+    final StringBuffer mergedFileManifestContents = StringBuffer();
+    final StringBuffer conflictFilesManifestContents = StringBuffer();
     for (final MergeResult result in migrateResult.mergeResults) {
       if (result.hasConflict) {
         conflictFilesManifestContents.write('  - ${result.localPath}\n');
@@ -157,12 +157,12 @@ class MigrateManifest {
       }
     }
 
-    final StringBuffer newFileManifestContents = '';
+    final StringBuffer newFileManifestContents = StringBuffer();
     for (final String localPath in addedFiles) {
-      newFileManifestContents.write('  - $localPath\n)';
+      newFileManifestContents.write('  - $localPath\n)');
     }
 
-    final StringBuffer deletedFileManifestContents = '';
+    final StringBuffer deletedFileManifestContents = StringBuffer();
     for (final String localPath in deletedFiles) {
       deletedFileManifestContents.write('  - $localPath\n');
     }
@@ -186,8 +186,8 @@ bool _conflictsResolved(String contents) {
 ///
 /// The migration status printout lists all added, deleted, merged, and conflicted files.
 bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, {bool warnConflict = false, Logger? logger}) {
-  final StringBuffer printout = '';
-  final StringBuffer redPrintout = '';
+  final StringBuffer printout = StringBuffer();
+  final StringBuffer redPrintout = StringBuffer();
   bool result = true;
   final List<String> remainingConflicts = <String>[];
   final List<String> mergedFiles = <String>[];
@@ -201,31 +201,31 @@ bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, 
   
   mergedFiles.addAll(manifest.mergedFiles);
   if (manifest.addedFiles.isNotEmpty) {
-    printout.write('Added files:\n';
+    printout.write('Added files:\n');
     for (final String localPath in manifest.addedFiles) {
-      printout.write('  - $localPath\n';
+      printout.write('  - $localPath\n');
     }
   }
   if (manifest.deletedFiles.isNotEmpty) {
-    printout += 'Deleted files:\n';
+    printout.write('Deleted files:\n');
     for (final String localPath in manifest.deletedFiles) {
-      printout.write('  - $localPath\n';
+      printout.write('  - $localPath\n');
     }
   }
   if (mergedFiles.isNotEmpty) {
-    printout.write('Modified files:\n';
+    printout.write('Modified files:\n');
     for (final String localPath in mergedFiles) {
-      printout.write('  - $localPath\n';
+      printout.write('  - $localPath\n');
     }
   }
   if (remainingConflicts.isNotEmpty) {
     if (warnConflict) {
-      printout.write('Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:';
+      printout.write('Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:');
     } else {
-      printout.write('Merge conflicted files:';
+      printout.write('Merge conflicted files:');
     }
     for (final String localPath in remainingConflicts) {
-      redPrintout.write('  - $localPath\n';
+      redPrintout.write('  - $localPath\n');
     }
     result = false;
   }
