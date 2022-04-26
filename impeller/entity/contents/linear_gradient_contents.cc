@@ -4,6 +4,7 @@
 
 #include "linear_gradient_contents.h"
 
+#include "flutter/fml/logging.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/render_pass.h"
@@ -58,7 +59,11 @@ bool LinearGradientContents::Render(const ContentContext& renderer,
                                    vtx.vertices = point;
                                    vertices_builder.AppendVertex(vtx);
                                  });
-    if (!result) {
+
+    if (result == Tessellator::Result::kInputError) {
+      return true;
+    }
+    if (result == Tessellator::Result::kTessellationError) {
       return false;
     }
   }

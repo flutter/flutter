@@ -47,11 +47,11 @@ struct Vertices* Tessellate(PathBuilder* builder,
   auto polyline = path.CreatePolyline(smoothing);
 
   std::vector<float> points;
-  if (!Tessellator{}.Tessellate(path.GetFillType(), polyline,
-                                [&points](Point vertex) {
-                                  points.push_back(vertex.x);
-                                  points.push_back(vertex.y);
-                                })) {
+  if (Tessellator{}.Tessellate(path.GetFillType(), polyline,
+                               [&points](Point vertex) {
+                                 points.push_back(vertex.x);
+                                 points.push_back(vertex.y);
+                               }) != Tessellator::Result::kSuccess) {
     return nullptr;
   }
 

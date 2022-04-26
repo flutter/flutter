@@ -201,9 +201,9 @@ bool SolidStrokeContents::Render(const ContentContext& renderer,
   auto smoothing = SmoothingApproximation(
       5.0 / (stroke_size_ * entity.GetTransformation().GetMaxBasisLength()),
       0.0, 0.0);
-  cmd.BindVertices(CreateSolidStrokeVertices(
-      path_, pass.GetTransientsBuffer(), cap_proc_, join_proc_,
-      miter_limit_, smoothing));
+  cmd.BindVertices(CreateSolidStrokeVertices(path_, pass.GetTransientsBuffer(),
+                                             cap_proc_, join_proc_,
+                                             miter_limit_, smoothing));
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
   VS::BindStrokeInfo(cmd,
                      pass.GetTransientsBuffer().EmplaceUniform(stroke_info));

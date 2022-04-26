@@ -26,6 +26,12 @@ enum class WindingOrder {
 ///
 class Tessellator {
  public:
+  enum class Result {
+    kSuccess,
+    kInputError,
+    kTessellationError,
+  };
+
   Tessellator();
 
   ~Tessellator();
@@ -39,11 +45,11 @@ class Tessellator {
   /// @param[in]  polyline  The polyline
   /// @param[in]  callback  The callback
   ///
-  /// @return If tessellation was successful.
+  /// @return The result status of the tessellation.
   ///
-  bool Tessellate(FillType fill_type,
-                  const Path::Polyline& polyline,
-                  VertexCallback callback) const;
+  Tessellator::Result Tessellate(FillType fill_type,
+                                 const Path::Polyline& polyline,
+                                 VertexCallback callback) const;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Tessellator);
