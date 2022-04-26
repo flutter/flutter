@@ -52,6 +52,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// constraints provided to an attached sheet change.
 class DraggableScrollableController extends ChangeNotifier {
   _DraggableScrollableSheetScrollController? _attachedController;
+  final Set<AnimationController> _animationControllers = <AnimationController>{};
 
   /// Get the current size (as a fraction of the parent height) of the attached sheet.
   double get size {
@@ -115,6 +116,7 @@ class DraggableScrollableController extends ChangeNotifier {
       vsync: _attachedController!.position.context.vsync,
       value: _attachedController!.extent.currentSize,
     );
+    _animationControllers.add(animationController);
     _attachedController!.position.goIdle();
     // This disables any snapping until the next user interaction with the sheet.
     _attachedController!.extent.hasDragged = false;
@@ -175,6 +177,7 @@ class DraggableScrollableController extends ChangeNotifier {
     assert(_attachedController == null, 'Draggable scrollable controller is already attached to a sheet.');
     _attachedController = scrollController;
     _attachedController!.extent._currentSize.addListener(notifyListeners);
+    _attachedController!.onPositionDetached = _disposeAnimationControllers;
   }
 
   void _onExtentReplaced(_DraggableSheetExtent previousExtent) {
@@ -192,6 +195,13 @@ class DraggableScrollableController extends ChangeNotifier {
   void _detach() {
     _attachedController?.extent._currentSize.removeListener(notifyListeners);
     _attachedController = null;
+  }
+
+  void _disposeAnimationControllers() {
+    for (final AnimationController animationController in _animationControllers) {
+      animationController.dispose();
+    }
+    _animationControllers.clear();
   }
 }
 
@@ -724,6 +734,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
   }) : assert(extent != null);
 
   _DraggableSheetExtent extent;
+  VoidCallback? onPositionDetached;
 
   @override
   _DraggableScrollableSheetScrollPosition createScrollPosition(
@@ -763,6 +774,12 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
       );
     }
     extent.updateSize(extent.initialSize, position.context.notificationContext!);
+  }
+
+  @override
+  void detach(ScrollPosition position) {
+    onPositionDetached?.call();
+    super.detach(position);
   }
 }
 
