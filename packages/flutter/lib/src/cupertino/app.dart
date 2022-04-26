@@ -43,6 +43,12 @@ import 'theme.dart';
 /// widget, which the [CupertinoApp] composes. If you use Material widgets, a
 /// [MaterialApp] also creates the needed dependencies for Cupertino widgets.
 ///
+/// {@template flutter.cupertino.CupertinoApp.defaultSelectionStyle}
+/// The [CupertinoApp] automatically creates a [DefaultSelectionStyle] with
+/// selectionColor sets to [CupertinoThemeData.primaryColor] with 0.2 opacity
+/// and cursorColor sets to [CupertinoThemeData.primaryColor].
+/// {@endtemplate}
+///
 /// Use this widget with caution on Android since it may produce behaviors
 /// Android users are not expecting such as:
 ///
@@ -142,7 +148,7 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   const CupertinoApp({
-    Key? key,
+    super.key,
     this.navigatorKey,
     this.home,
     this.theme,
@@ -182,12 +188,11 @@ class CupertinoApp extends StatefulWidget {
        routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
-       backButtonDispatcher = null,
-       super(key: key);
+       backButtonDispatcher = null;
 
   /// Creates a [CupertinoApp] that uses the [Router] instead of a [Navigator].
   const CupertinoApp.router({
-    Key? key,
+    super.key,
     this.routeInformationProvider,
     required RouteInformationParser<Object> this.routeInformationParser,
     required RouterDelegate<Object> this.routerDelegate,
@@ -225,8 +230,7 @@ class CupertinoApp extends StatefulWidget {
        onGenerateInitialRoutes = null,
        onUnknownRoute = null,
        routes = null,
-       initialRoute = null,
-       super(key: key);
+       initialRoute = null;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -586,10 +590,14 @@ class _CupertinoAppState extends State<CupertinoApp> {
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(
           data: effectiveThemeData,
-          child: HeroControllerScope(
-            controller: _heroController,
-            child: Builder(
-              builder: _buildWidgetApp,
+          child: DefaultSelectionStyle(
+            selectionColor: effectiveThemeData.primaryColor.withOpacity(0.2),
+            cursorColor: effectiveThemeData.primaryColor,
+            child: HeroControllerScope(
+              controller: _heroController,
+              child: Builder(
+                builder: _buildWidgetApp,
+              ),
             ),
           ),
         ),

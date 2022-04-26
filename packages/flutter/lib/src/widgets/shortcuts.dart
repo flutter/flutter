@@ -267,16 +267,16 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   ///
   /// The same [LogicalKeyboardKey] may not be appear more than once in the set.
   LogicalKeySet(
-    LogicalKeyboardKey key1, [
-    LogicalKeyboardKey? key2,
-    LogicalKeyboardKey? key3,
-    LogicalKeyboardKey? key4,
-  ]) : super(key1, key2, key3, key4);
+    super.key1, [
+    super.key2,
+    super.key3,
+    super.key4,
+  ]);
 
   /// Create  a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
   ///
   /// Do not mutate the `keys` set after passing it to this object.
-  LogicalKeySet.fromSet(Set<LogicalKeyboardKey> keys) : super.fromSet(keys);
+  LogicalKeySet.fromSet(super.keys) : super.fromSet();
 
   @override
   Iterable<LogicalKeyboardKey> get triggers => _triggers;
@@ -340,22 +340,14 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
   /// Create a diagnostics property for `Map<ShortcutActivator, Intent>` objects,
   /// which are the same type as the [Shortcuts.shortcuts] property.
   ShortcutMapProperty(
-    String name,
-    Map<ShortcutActivator, Intent> value, {
-    bool showName = true,
-    Object defaultValue = kNoDefaultValue,
-    DiagnosticLevel level = DiagnosticLevel.info,
-    String? description,
+    String super.name,
+    Map<ShortcutActivator, Intent> super.value, {
+    super.showName,
+    Object super.defaultValue,
+    super.level,
+    super.description,
   }) : assert(showName != null),
-       assert(level != null),
-       super(
-         name,
-         value,
-         showName: showName,
-         defaultValue: defaultValue,
-         level: level,
-         description: description,
-       );
+       assert(level != null);
 
   @override
   Map<ShortcutActivator, Intent> get value => super.value!;
@@ -818,14 +810,13 @@ class Shortcuts extends StatefulWidget {
   ///
   /// The [child] and [shortcuts] arguments are required.
   const Shortcuts({
-    Key? key,
+    super.key,
     this.manager,
     required this.shortcuts,
     required this.child,
     this.debugLabel,
   }) : assert(shortcuts != null),
-       assert(child != null),
-       super(key: key);
+       assert(child != null);
 
   /// The [ShortcutManager] that will manage the mapping between key
   /// combinations and [Action]s.
@@ -973,10 +964,10 @@ class _ShortcutsState extends State<Shortcuts> {
 class _ShortcutsMarker extends InheritedNotifier<ShortcutManager> {
   const _ShortcutsMarker({
     required ShortcutManager manager,
-    required Widget child,
+    required super.child,
   })  : assert(manager != null),
         assert(child != null),
-        super(notifier: manager, child: child);
+        super(notifier: manager);
 
   ShortcutManager get manager => super.notifier!;
 }
@@ -1011,10 +1002,10 @@ class _ShortcutsMarker extends InheritedNotifier<ShortcutManager> {
 class CallbackShortcuts extends StatelessWidget {
   /// Creates a const [CallbackShortcuts] widget.
   const CallbackShortcuts({
-    Key? key,
+    super.key,
     required this.bindings,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// A map of key combinations to callbacks used to define the shortcut
   /// bindings.

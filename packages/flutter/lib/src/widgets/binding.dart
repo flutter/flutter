@@ -435,6 +435,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
             debugProfileBuildsEnabled = value;
         },
       );
+      registerBoolServiceExtension(
+        name: 'profileUserWidgetBuilds',
+        getter: () async => debugProfileBuildsEnabledUserWidgets,
+        setter: (bool value) async {
+          if (debugProfileBuildsEnabledUserWidgets != value)
+            debugProfileBuildsEnabledUserWidgets = value;
+        },
+      );
     }
 
     assert(() {
@@ -1112,7 +1120,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   /// The [RenderObject] created by this element is not automatically set as a
   /// child of the hosting [RenderObject]. To actually attach this element to
   /// the render tree, call [RenderObjectToWidgetAdapter.attachToRenderTree].
-  RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
+  RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> super.widget);
 
   Element? _child;
 

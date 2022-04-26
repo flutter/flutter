@@ -1657,7 +1657,7 @@ void main() {
 }
 
 class _TestPage extends StatelessWidget {
-  const _TestPage({Key? key, this.useRootNavigator}) : super(key: key);
+  const _TestPage({this.useRootNavigator});
 
   final bool? useRootNavigator;
 

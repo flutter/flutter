@@ -134,6 +134,7 @@ void main() {
         PointerDeviceKind.touch,
         PointerDeviceKind.stylus,
         PointerDeviceKind.invertedStylus,
+        PointerDeviceKind.trackpad,
         PointerDeviceKind.unknown,
       });
 

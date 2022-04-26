@@ -117,7 +117,7 @@ class RadioListTile<T> extends StatelessWidget {
   ///   selected.
   /// * [onChanged] is called when the user selects this radio button.
   const RadioListTile({
-    Key? key,
+    super.key,
     required this.value,
     required this.groupValue,
     required this.onChanged,
@@ -143,8 +143,7 @@ class RadioListTile<T> extends StatelessWidget {
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
        assert(controlAffinity != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(autofocus != null);
 
   /// The value represented by this radio button.
   final T value;

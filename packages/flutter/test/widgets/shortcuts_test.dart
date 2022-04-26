@@ -11,9 +11,8 @@ typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent
 
 class TestAction extends CallbackAction<Intent> {
   TestAction({
-    required OnInvokeCallback onInvoke,
-  })  : assert(onInvoke != null),
-        super(onInvoke: onInvoke);
+    required super.onInvoke,
+  })  : assert(onInvoke != null);
 
   static const LocalKey key = ValueKey<Type>(TestAction);
 }

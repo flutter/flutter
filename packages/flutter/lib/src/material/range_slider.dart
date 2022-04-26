@@ -133,7 +133,7 @@ class RangeSlider extends StatefulWidget {
   /// equal to the [min] and less than or equal to the [max]. The [divisions]
   /// must be null or greater than 0.
   RangeSlider({
-    Key? key,
+    super.key,
     required this.values,
     required this.onChanged,
     this.onChangeStart,
@@ -152,8 +152,7 @@ class RangeSlider extends StatefulWidget {
        assert(values.start <= values.end),
        assert(values.start >= min && values.start <= max),
        assert(values.end >= min && values.end <= max),
-       assert(divisions == null || divisions > 0),
-       super(key: key);
+       assert(divisions == null || divisions > 0);
 
   /// The currently selected values for this range slider.
   ///
@@ -286,7 +285,9 @@ class RangeSlider extends StatefulWidget {
   /// If null, the slider is continuous.
   final int? divisions;
 
-  /// Labels to show as text in the [SliderThemeData.rangeValueIndicatorShape].
+  /// Labels to show as text in the [SliderThemeData.rangeValueIndicatorShape]
+  /// when the slider is active and [SliderThemeData.showValueIndicator]
+  /// is satisfied.
   ///
   /// There are two labels: one for the start thumb and one for the end thumb.
   ///
@@ -656,7 +657,6 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
 class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _RangeSliderRenderObjectWidget({
-    Key? key,
     required this.values,
     required this.divisions,
     required this.labels,
@@ -668,7 +668,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
     required this.onChangeEnd,
     required this.state,
     required this.semanticFormatterCallback,
-  }) : super(key: key);
+  });
 
   final RangeValues values;
   final int? divisions;
@@ -1493,7 +1493,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     double value,
     double increasedValue,
     double decreasedValue,
-    String? label,
     VoidCallback increaseAction,
     VoidCallback decreaseAction,
   ) {
@@ -1505,7 +1504,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;
     }
-    config.label = label ?? '';
+
     if (semanticFormatterCallback != null) {
       config.value = semanticFormatterCallback!(_state._lerp(value));
       config.increasedValue = semanticFormatterCallback!(_state._lerp(increasedValue));
@@ -1531,7 +1530,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       values.start,
       _increasedStartValue,
       _decreasedStartValue,
-      labels?.start,
       _increaseStartAction,
       _decreaseStartAction,
     );
@@ -1539,7 +1537,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       values.end,
       _increasedEndValue,
       _decreasedEndValue,
-      labels?.end,
       _increaseEndAction,
       _decreaseEndAction,
     );

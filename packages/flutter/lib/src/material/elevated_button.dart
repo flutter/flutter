@@ -62,28 +62,17 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
   const ElevatedButton({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
-    required Widget? child,
-  }) : super(
-    key: key,
-    onPressed: onPressed,
-    onLongPress: onLongPress,
-    onHover: onHover,
-    onFocusChange: onFocusChange,
-    style: style,
-    focusNode: focusNode,
-    autofocus: autofocus,
-    clipBehavior: clipBehavior,
-    child: child,
-  );
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
+    super.autofocus = false,
+    super.clipBehavior = Clip.none,
+    required super.child,
+  });
 
   /// Create an elevated button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -451,13 +440,13 @@ class _ElevatedButtonDefaultMouseCursor extends MaterialStateProperty<MouseCurso
 
 class _ElevatedButtonWithIcon extends ElevatedButton {
   _ElevatedButtonWithIcon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
     required Widget icon,
@@ -465,13 +454,6 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
   }) : assert(icon != null),
        assert(label != null),
        super(
-         key: key,
-         onPressed: onPressed,
-         onLongPress: onLongPress,
-         onHover: onHover,
-         onFocusChange: onFocusChange,
-         style: style,
-         focusNode: focusNode,
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _ElevatedButtonWithIconChild(icon: icon, label: label),
@@ -492,7 +474,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
 }
 
 class _ElevatedButtonWithIconChild extends StatelessWidget {
-  const _ElevatedButtonWithIconChild({ Key? key, required this.label, required this.icon }) : super(key: key);
+  const _ElevatedButtonWithIconChild({ required this.label, required this.icon });
 
   final Widget label;
   final Widget icon;

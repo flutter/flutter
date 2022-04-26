@@ -504,7 +504,7 @@ abstract class Widget extends DiagnosticableTree {
 ///    be read by descendant widgets.
 abstract class StatelessWidget extends Widget {
   /// Initializes [key] for subclasses.
-  const StatelessWidget({ Key? key }) : super(key: key);
+  const StatelessWidget({ super.key });
 
   /// Creates a [StatelessElement] to manage this widget's location in the tree.
   ///
@@ -749,7 +749,7 @@ abstract class StatelessWidget extends Widget {
 ///    be read by descendant widgets.
 abstract class StatefulWidget extends Widget {
   /// Initializes [key] for subclasses.
-  const StatefulWidget({ Key? key }) : super(key: key);
+  const StatefulWidget({ super.key });
 
   /// Creates a [StatefulElement] to manage this widget's location in the tree.
   ///
@@ -1378,7 +1378,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
 ///  * [Widget], for an overview of widgets in general.
 abstract class ProxyWidget extends Widget {
   /// Creates a widget that has exactly one child widget.
-  const ProxyWidget({ Key? key, required this.child }) : super(key: key);
+  const ProxyWidget({ super.key, required this.child });
 
   /// The widget below this widget in the tree.
   ///
@@ -1444,8 +1444,7 @@ abstract class ProxyWidget extends Widget {
 abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const ParentDataWidget({ Key? key, required Widget child })
-    : super(key: key, child: child);
+  const ParentDataWidget({ super.key, required super.child });
 
   @override
   ParentDataElement<T> createElement() => ParentDataElement<T>(this);
@@ -1672,8 +1671,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 abstract class InheritedWidget extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const InheritedWidget({ Key? key, required Widget child })
-    : super(key: key, child: child);
+  const InheritedWidget({ super.key, required super.child });
 
   @override
   InheritedElement createElement() => InheritedElement(this);
@@ -1707,7 +1705,7 @@ abstract class InheritedWidget extends ProxyWidget {
 abstract class RenderObjectWidget extends Widget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const RenderObjectWidget({ Key? key }) : super(key: key);
+  const RenderObjectWidget({ super.key });
 
   /// RenderObjectWidgets always inflate to a [RenderObjectElement] subclass.
   @override
@@ -1751,7 +1749,7 @@ abstract class RenderObjectWidget extends Widget {
 abstract class LeafRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const LeafRenderObjectWidget({ Key? key }) : super(key: key);
+  const LeafRenderObjectWidget({ super.key });
 
   @override
   LeafRenderObjectElement createElement() => LeafRenderObjectElement(this);
@@ -1768,7 +1766,7 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
 abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const SingleChildRenderObjectWidget({ Key? key, this.child }) : super(key: key);
+  const SingleChildRenderObjectWidget({ super.key, this.child });
 
   /// The widget below this widget in the tree.
   ///
@@ -1804,9 +1802,8 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///
   /// The [children] argument must not be null and must not contain any null
   /// objects.
-  MultiChildRenderObjectWidget({ Key? key, this.children = const <Widget>[] })
-    : assert(children != null),
-      super(key: key) {
+  MultiChildRenderObjectWidget({ super.key, this.children = const <Widget>[] })
+    : assert(children != null) {
     assert(() {
       for (int index = 0; index < children.length; index++) {
         // TODO(a14n): remove this check to have a lot more const widget
@@ -2563,11 +2560,10 @@ class BuildOwner {
       return true;
     }());
     if (!kReleaseMode) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
         if (debugEnhanceBuildTimelineArguments) {
           debugTimelineArguments = <String, String>{
-            ...debugTimelineArguments,
             'dirty count': '${_dirtyElements.length}',
             'dirty list': '$_dirtyElements',
             'lock level': '$_debugStateLockLevel',
@@ -2643,7 +2639,7 @@ class BuildOwner {
         }());
         final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(element.widget);
         if (isTimelineTracked) {
-          Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+          Map<String, String>? debugTimelineArguments;
           assert(() {
             if (kDebugMode && debugEnhanceBuildTimelineArguments) {
               debugTimelineArguments = element.widget.toDiagnosticsNode().toTimelineArguments();
@@ -2926,7 +2922,7 @@ class BuildOwner {
   @pragma('vm:notify-debugger-on-exception')
   void finalizeTree() {
     if (!kReleaseMode) {
-      Timeline.startSync('FINALIZE TREE', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      Timeline.startSync('FINALIZE TREE');
     }
     try {
       lockState(_inactiveElements._unmountAll); // this unregisters the GlobalKeys
@@ -3515,7 +3511,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           updateSlotForChild(child, newSlot);
         final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(newWidget);
         if (isTimelineTracked) {
-          Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+          Map<String, String>? debugTimelineArguments;
           assert(() {
             if (kDebugMode && debugEnhanceBuildTimelineArguments) {
               debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
@@ -3780,7 +3776,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
     final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(newWidget);
     if (isTimelineTracked) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      Map<String, String>? debugTimelineArguments;
       assert(() {
         if (kDebugMode && debugEnhanceBuildTimelineArguments) {
           debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
@@ -3793,33 +3789,35 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       );
     }
 
-    final Key? key = newWidget.key;
-    if (key is GlobalKey) {
-      final Element? newChild = _retakeInactiveElement(key, newWidget);
-      if (newChild != null) {
-        assert(newChild._parent == null);
-        assert(() {
-          _debugCheckForCycles(newChild);
-          return true;
-        }());
-        newChild._activateWithParent(this, newSlot);
-        final Element? updatedChild = updateChild(newChild, newWidget, newSlot);
-        assert(newChild == updatedChild);
-        return updatedChild!;
+    try {
+      final Key? key = newWidget.key;
+      if (key is GlobalKey) {
+        final Element? newChild = _retakeInactiveElement(key, newWidget);
+        if (newChild != null) {
+          assert(newChild._parent == null);
+          assert(() {
+            _debugCheckForCycles(newChild);
+            return true;
+          }());
+          newChild._activateWithParent(this, newSlot);
+          final Element? updatedChild = updateChild(newChild, newWidget, newSlot);
+          assert(newChild == updatedChild);
+          return updatedChild!;
+        }
       }
+      final Element newChild = newWidget.createElement();
+      assert(() {
+        _debugCheckForCycles(newChild);
+        return true;
+      }());
+      newChild.mount(this, newSlot);
+      assert(newChild._lifecycleState == _ElementLifecycle.active);
+
+      return newChild;
+    } finally {
+      if (isTimelineTracked)
+        Timeline.finishSync();
     }
-    final Element newChild = newWidget.createElement();
-    assert(() {
-      _debugCheckForCycles(newChild);
-      return true;
-    }());
-    newChild.mount(this, newSlot);
-    assert(newChild._lifecycleState == _ElementLifecycle.active);
-
-    if (isTimelineTracked)
-      Timeline.finishSync();
-
-    return newChild;
   }
 
   void _debugCheckForCycles(Element newChild) {
@@ -4199,6 +4197,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return true;
   }
 
+  /// Returns `true` if [dependOnInheritedElement] was previously called with [ancestor].
+  @protected
+  bool doesDependOnInheritedElement(InheritedElement ancestor) =>
+      _dependencies != null && _dependencies!.contains(ancestor);
+
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect }) {
     assert(ancestor != null);
@@ -4542,15 +4545,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
 class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   _ElementDiagnosticableTreeNode({
-    String? name,
-    required Element value,
-    required DiagnosticsTreeStyle? style,
+    super.name,
+    required Element super.value,
+    required super.style,
     this.stateful = false,
-  }) : super(
-    name: name,
-    value: value,
-    style: style,
-  );
+  });
 
   final bool stateful;
 
@@ -4763,7 +4762,7 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget? child)
 /// Contrast with [RenderObjectElement].
 abstract class ComponentElement extends Element {
   /// Creates an element that uses the given widget as its configuration.
-  ComponentElement(Widget widget) : super(widget);
+  ComponentElement(super.widget);
 
   Element? _child;
 
@@ -4868,7 +4867,7 @@ abstract class ComponentElement extends Element {
 /// An [Element] that uses a [StatelessWidget] as its configuration.
 class StatelessElement extends ComponentElement {
   /// Creates an element that uses the given widget as its configuration.
-  StatelessElement(StatelessWidget widget) : super(widget);
+  StatelessElement(StatelessWidget super.widget);
 
   @override
   Widget build() => (widget as StatelessWidget).build(this);
@@ -5135,7 +5134,7 @@ class StatefulElement extends ComponentElement {
 /// An [Element] that uses a [ProxyWidget] as its configuration.
 abstract class ProxyElement extends ComponentElement {
   /// Initializes fields for subclasses.
-  ProxyElement(ProxyWidget widget) : super(widget);
+  ProxyElement(ProxyWidget super.widget);
 
   @override
   Widget build() => (widget as ProxyWidget).child;
@@ -5174,7 +5173,7 @@ abstract class ProxyElement extends ComponentElement {
 /// An [Element] that uses a [ParentDataWidget] as its configuration.
 class ParentDataElement<T extends ParentData> extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
-  ParentDataElement(ParentDataWidget<T> widget) : super(widget);
+  ParentDataElement(ParentDataWidget<T> super.widget);
 
   void _applyParentData(ParentDataWidget<T> widget) {
     void applyParentDataToChild(Element child) {
@@ -5236,7 +5235,7 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
 /// An [Element] that uses an [InheritedWidget] as its configuration.
 class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
-  InheritedElement(InheritedWidget widget) : super(widget);
+  InheritedElement(InheritedWidget super.widget);
 
   final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
 
@@ -5578,7 +5577,7 @@ class InheritedElement extends ProxyElement {
 /// fast. It is also used by the test framework and [debugDumpApp].
 abstract class RenderObjectElement extends Element {
   /// Creates an element that uses the given widget as its configuration.
-  RenderObjectElement(RenderObjectWidget widget) : super(widget);
+  RenderObjectElement(RenderObjectWidget super.widget);
 
   /// The underlying [RenderObject] for this element.
   ///
@@ -6123,7 +6122,7 @@ abstract class RenderObjectElement extends Element {
 /// elements inherit their owner from their parent.
 abstract class RootRenderObjectElement extends RenderObjectElement {
   /// Initializes fields for subclasses.
-  RootRenderObjectElement(RenderObjectWidget widget) : super(widget);
+  RootRenderObjectElement(super.widget);
 
   /// Set the owner of the element. The owner will be propagated to all the
   /// descendants of this element.
@@ -6152,7 +6151,7 @@ abstract class RootRenderObjectElement extends RenderObjectElement {
 /// An [Element] that uses a [LeafRenderObjectWidget] as its configuration.
 class LeafRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
-  LeafRenderObjectElement(LeafRenderObjectWidget widget) : super(widget);
+  LeafRenderObjectElement(LeafRenderObjectWidget super.widget);
 
   @override
   void forgetChild(Element child) {
@@ -6190,7 +6189,7 @@ class LeafRenderObjectElement extends RenderObjectElement {
 /// expected to inherit from [SingleChildRenderObjectWidget].
 class SingleChildRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
-  SingleChildRenderObjectElement(SingleChildRenderObjectWidget widget) : super(widget);
+  SingleChildRenderObjectElement(SingleChildRenderObjectWidget super.widget);
 
   Element? _child;
 
@@ -6259,9 +6258,8 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 ///   is used for the slots of the children.
 class MultiChildRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
-  MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget)
-    : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
-      super(widget);
+  MultiChildRenderObjectElement(MultiChildRenderObjectWidget super.widget)
+    : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children));
 
   @override
   ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> get renderObject {

@@ -158,6 +158,9 @@ Future<void> run(List<String> arguments) async {
     ...arguments,
   ]);
 
+  print('$clock Executable allowlist...');
+  await _checkForNewExecutables();
+
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
   print('$clock Dart analysis (with --watch)...');
@@ -1680,6 +1683,63 @@ Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
     <String>['analyze', ...options],
     workingDirectory: workingDirectory,
   );
+}
+
+// These files legitimately require executable permissions
+const Set<String> kExecutableAllowlist = <String>{
+  'bin/dart',
+  'bin/flutter',
+  'bin/internal/update_dart_sdk.sh',
+
+  'dev/bots/accept_android_sdk_licenses.sh',
+  'dev/bots/codelabs_build_test.sh',
+  'dev/bots/docs.sh',
+
+  'dev/conductor/bin/conductor',
+  'dev/conductor/core/lib/src/proto/compile_proto.sh',
+
+  'dev/customer_testing/ci.sh',
+
+  'dev/integration_tests/flutter_gallery/tool/run_instrumentation_test.sh',
+
+  'dev/integration_tests/ios_add2app_life_cycle/build_and_test.sh',
+
+  'dev/integration_tests/deferred_components_test/download_assets.sh',
+  'dev/integration_tests/deferred_components_test/run_release_test.sh',
+
+  'dev/tools/gen_keycodes/bin/gen_keycodes',
+  'dev/tools/repackage_gradle_wrapper.sh',
+
+  'packages/flutter_tools/bin/macos_assemble.sh',
+  'packages/flutter_tools/bin/tool_backend.sh',
+  'packages/flutter_tools/bin/xcode_backend.sh',
+};
+
+Future<void> _checkForNewExecutables() async {
+  // 0b001001001
+  const int executableBitMask = 0x49;
+
+  final List<File> files = await _gitFiles(flutterRoot);
+  int unexpectedExecutableCount = 0;
+  for (final File file in files) {
+    final String relativePath = path.relative(
+      file.path,
+      from: flutterRoot,
+    );
+    final FileStat stat = file.statSync();
+    final bool isExecutable = stat.mode & executableBitMask != 0x0;
+    if (isExecutable && !kExecutableAllowlist.contains(relativePath)) {
+      unexpectedExecutableCount += 1;
+      print('$relativePath is executable: ${(stat.mode & 0x1FF).toRadixString(2)}');
+    }
+  }
+  if (unexpectedExecutableCount > 0) {
+    throw Exception(
+      'found $unexpectedExecutableCount unexpected executable file'
+      '${unexpectedExecutableCount == 1 ? '' : 's'}! If this was intended, you '
+      'must add this file to kExecutableAllowlist in dev/bots/analyze.dart',
+    );
+  }
 }
 
 final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');

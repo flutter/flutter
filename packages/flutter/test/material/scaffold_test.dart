@@ -533,6 +533,41 @@ void main() {
     expect(didPressButton, isTrue);
   });
 
+  testWidgets('Persistent bottom buttons alignment', (WidgetTester tester) async {
+    Widget buildApp(AlignmentDirectional persistentAligment) {
+      return MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: Container(
+                color: Colors.amber[500],
+                height: 5000.0,
+                child: const Text('body'),
+              ),
+            ),
+            persistentFooterAlignment: persistentAligment,
+            persistentFooterButtons: <Widget>[
+              TextButton(
+                onPressed: () { },
+                child: const Text('X'),
+              ),
+            ],
+          ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(AlignmentDirectional.centerEnd));
+    Finder footerButton = find.byType(TextButton);
+    expect(tester.getTopRight(footerButton).dx, 800.0 - 8.0);
+
+    await tester.pumpWidget(buildApp(AlignmentDirectional.center));
+    footerButton = find.byType(TextButton);
+    expect(tester.getCenter(footerButton).dx, 800.0 / 2);
+
+    await tester.pumpWidget(buildApp(AlignmentDirectional.centerStart));
+    footerButton = find.byType(TextButton);
+    expect(tester.getTopLeft(footerButton).dx, 8.0);
+  });
+
   testWidgets('Persistent bottom buttons apply media padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -2302,9 +2337,10 @@ void main() {
       '     PhysicalModel\n'
       '     AnimatedPhysicalModel\n'
       '     Material\n'
-      '     _ScrollMetricsNotificationObserverScope\n'
+      '     _ScrollNotificationObserverScope\n'
+      '     NotificationListener<ScrollNotification>\n'
       '     NotificationListener<ScrollMetricsNotification>\n'
-      '     ScrollMetricsNotificationObserver\n'
+      '     ScrollNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold\n'
       '     MediaQuery\n'
@@ -2447,11 +2483,10 @@ class _GeometryCachePainter extends CustomPainter {
 class _CustomPageRoute<T> extends PageRoute<T> {
   _CustomPageRoute({
     required this.builder,
-    RouteSettings settings = const RouteSettings(),
+    RouteSettings super.settings = const RouteSettings(),
     this.maintainState = true,
-    bool fullscreenDialog = false,
-  }) : assert(builder != null),
-       super(settings: settings, fullscreenDialog: fullscreenDialog);
+    super.fullscreenDialog,
+  }) : assert(builder != null);
 
   final WidgetBuilder builder;
 

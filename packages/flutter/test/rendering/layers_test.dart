@@ -756,27 +756,28 @@ class FakeSceneBuilder extends Fake implements SceneBuilder {
   }
 
   bool pushedOpacity = false;
-  @override
-  OpacityEngineLayer pushOpacity(int alpha, {Offset? offset = Offset.zero, OpacityEngineLayer? oldLayer}) {
-    pushedOpacity = true;
-    return FakeOpacityEngineLayer();
-  }
-
   bool pushedOffset = false;
-  @override
-  OffsetEngineLayer pushOffset(double x, double y, {OffsetEngineLayer? oldLayer}) {
-    pushedOffset = true;
-    return FakeOffsetEngineLayer();
-  }
-
   bool addedPicture = false;
-  @override
-  void addPicture(Offset offset, Picture picture, {bool isComplexHint = false, bool willChangeHint = false}) {
-    addedPicture = true;
-  }
 
   @override
-  void pop() {}
+  dynamic noSuchMethod(Invocation invocation) {
+    // Use noSuchMethod forwarding instead of override these methods to make it easier
+    // for these methods to add new optional arguments in the future.
+    switch (invocation.memberName) {
+      case #pushOpacity:
+        pushedOpacity = true;
+        return FakeOpacityEngineLayer();
+      case #pushOffset:
+        pushedOffset = true;
+        return FakeOffsetEngineLayer();
+      case #addPicture:
+        addedPicture = true;
+        return;
+      case #pop:
+        return;
+    }
+    super.noSuchMethod(invocation);
+  }
 }
 
 class FakeOpacityEngineLayer extends FakeEngineLayer implements OpacityEngineLayer {}

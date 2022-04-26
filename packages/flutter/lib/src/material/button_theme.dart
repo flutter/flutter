@@ -66,7 +66,7 @@ class ButtonTheme extends InheritedTheme {
   /// The [textTheme], [minWidth], [height], and [colorScheme] arguments
   /// must not be null.
   ButtonTheme({
-    Key? key,
+    super.key,
     ButtonTextTheme textTheme = ButtonTextTheme.normal,
     ButtonBarLayoutBehavior layoutBehavior = ButtonBarLayoutBehavior.padded,
     double minWidth = 88.0,
@@ -82,7 +82,7 @@ class ButtonTheme extends InheritedTheme {
     Color? splashColor,
     ColorScheme? colorScheme,
     MaterialTapTargetSize? materialTapTargetSize,
-    required Widget child,
+    required super.child,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
@@ -104,18 +104,16 @@ class ButtonTheme extends InheritedTheme {
          splashColor: splashColor,
          colorScheme: colorScheme,
          materialTapTargetSize: materialTapTargetSize,
-       ),
-       super(key: key, child: child);
+       );
 
   /// Creates a button theme from [data].
   ///
   /// The [data] argument must not be null.
   const ButtonTheme.fromButtonThemeData({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// Specifies the color and geometry of buttons.
   final ButtonThemeData data;

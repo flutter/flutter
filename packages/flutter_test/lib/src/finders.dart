@@ -83,16 +83,16 @@ class CommonFinders {
   /// ## Sample code
   ///
   /// ```dart
-  /// expect(find.textContain('Back'), findsOneWidget);
-  /// expect(find.textContain(RegExp(r'(\w+)')), findsOneWidget);
+  /// expect(find.textContaining('Back'), findsOneWidget);
+  /// expect(find.textContaining(RegExp(r'(\w+)')), findsOneWidget);
   /// ```
   ///
   /// This will match [Text], [Text.rich], and [EditableText] widgets that
   /// contain the given pattern : 'Back' or RegExp(r'(\w+)').
   ///
   /// ```dart
-  /// expect(find.textContain('Close', findRichText: true), findsOneWidget);
-  /// expect(find.textContain(RegExp(r'(\w+)'), findRichText: true), findsOneWidget);
+  /// expect(find.textContaining('Close', findRichText: true), findsOneWidget);
+  /// expect(find.textContaining(RegExp(r'(\w+)'), findRichText: true), findsOneWidget);
   /// ```
   ///
   /// This will match [Text], [Text.rich], [EditableText], as well as standalone

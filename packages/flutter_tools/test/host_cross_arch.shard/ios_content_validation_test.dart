@@ -9,9 +9,9 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
+import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 import '../src/darwin_common.dart';
-import 'test_utils.dart';
 
 void main() {
   group('iOS app validation', () {

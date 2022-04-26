@@ -115,7 +115,7 @@ class IconButton extends StatelessWidget {
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
   const IconButton({
-    Key? key,
+    super.key,
     this.iconSize,
     this.visualDensity,
     this.padding = const EdgeInsets.all(8.0),
@@ -139,8 +139,7 @@ class IconButton extends StatelessWidget {
        assert(alignment != null),
        assert(splashRadius == null || splashRadius > 0),
        assert(autofocus != null),
-       assert(icon != null),
-       super(key: key);
+       assert(icon != null);
 
   /// The size of the icon inside the button.
   ///

@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -299,7 +298,7 @@ class ListTile extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   const ListTile({
-    Key? key,
+    super.key,
     this.leading,
     this.title,
     this.subtitle,
@@ -332,8 +331,7 @@ class ListTile extends StatelessWidget {
        assert(enabled != null),
        assert(selected != null),
        assert(autofocus != null),
-       assert(!isThreeLine || subtitle != null),
-       super(key: key);
+       assert(!isThreeLine || subtitle != null);
 
   /// A widget to display before the title.
   ///
@@ -843,7 +841,6 @@ enum _ListTileSlot {
 
 class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_ListTileSlot> {
   const _ListTile({
-    Key? key,
     this.leading,
     required this.title,
     this.subtitle,
@@ -864,8 +861,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
        assert(titleBaselineType != null),
        assert(horizontalTitleGap != null),
        assert(minVerticalPadding != null),
-       assert(minLeadingWidth != null),
-       super(key: key);
+       assert(minLeadingWidth != null);
 
   final Widget? leading;
   final Widget title;

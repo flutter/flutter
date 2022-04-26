@@ -634,6 +634,7 @@ class _AndroidMotionEventConverter {
     int toolType = AndroidPointerProperties.kToolTypeUnknown;
     switch (event.kind) {
       case PointerDeviceKind.touch:
+      case PointerDeviceKind.trackpad:
         toolType = AndroidPointerProperties.kToolTypeFinger;
         break;
       case PointerDeviceKind.mouse:
@@ -646,8 +647,6 @@ class _AndroidMotionEventConverter {
         toolType = AndroidPointerProperties.kToolTypeEraser;
         break;
       case PointerDeviceKind.unknown:
-      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         toolType = AndroidPointerProperties.kToolTypeUnknown;
         break;
     }
@@ -939,36 +938,24 @@ abstract class AndroidViewController extends PlatformViewController {
 /// and is defined for backward compatibility.
 class SurfaceAndroidViewController extends TextureAndroidViewController{
     SurfaceAndroidViewController._({
-    required int viewId,
-    required String viewType,
-    required TextDirection layoutDirection,
-    dynamic creationParams,
-    MessageCodec<dynamic>? creationParamsCodec,
-  })  : super._(
-          viewId: viewId,
-          viewType: viewType,
-          layoutDirection: layoutDirection,
-          creationParams: creationParams,
-          creationParamsCodec: creationParamsCodec,
-        );
+    required super.viewId,
+    required super.viewType,
+    required super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+  })  : super._();
 }
 
 /// Controls an Android view that is composed using the Android view hierarchy.
 /// This controller is created from the [PlatformViewsService.initExpensiveAndroidView] factory.
 class ExpensiveAndroidViewController extends AndroidViewController {
   ExpensiveAndroidViewController._({
-    required int viewId,
-    required String viewType,
-    required TextDirection layoutDirection,
-    dynamic creationParams,
-    MessageCodec<dynamic>? creationParamsCodec,
-  })  : super._(
-          viewId: viewId,
-          viewType: viewType,
-          layoutDirection: layoutDirection,
-          creationParams: creationParams,
-          creationParamsCodec: creationParamsCodec,
-        );
+    required super.viewId,
+    required super.viewType,
+    required super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+  })  : super._();
 
   @override
   Future<void> _sendCreateMessage({Size? size}) {
@@ -1022,18 +1009,12 @@ class ExpensiveAndroidViewController extends AndroidViewController {
 /// The controller is typically created with [PlatformViewsService.initAndroidView].
 class TextureAndroidViewController extends AndroidViewController {
   TextureAndroidViewController._({
-    required int viewId,
-    required String viewType,
-    required TextDirection layoutDirection,
-    dynamic creationParams,
-    MessageCodec<dynamic>? creationParamsCodec,
-  }) : super._(
-          viewId: viewId,
-          viewType: viewType,
-          layoutDirection: layoutDirection,
-          creationParams: creationParams,
-          creationParamsCodec: creationParamsCodec,
-        );
+    required super.viewId,
+    required super.viewType,
+    required super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+  }) : super._();
 
   /// The texture entry id into which the Android view is rendered.
   int? _textureId;

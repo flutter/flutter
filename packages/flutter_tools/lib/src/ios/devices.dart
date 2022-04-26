@@ -302,7 +302,8 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool isSupported() => true;
+  // 32-bit devices are not supported.
+  bool isSupported() => cpuArchitecture == DarwinArch.arm64;
 
   @override
   Future<LaunchResult> startApp(

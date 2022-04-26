@@ -153,7 +153,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Typically used in the [Scaffold.appBar] property.
   AppBar({
-    Key? key,
+    super.key,
     this.leading,
     this.automaticallyImplyLeading = true,
     this.title,
@@ -198,8 +198,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
        assert(primary != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
-       preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height),
-       super(key: key);
+       preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
 
   /// Used by [Scaffold] to compute its [AppBar]'s overall height. The returned value is
   /// the same `preferredSize.height` unless [AppBar.toolbarHeight] was null and
@@ -737,24 +736,24 @@ class _AppBarState extends State<AppBar> {
   static const double _defaultElevation = 4.0;
   static const Color _defaultShadowColor = Color(0xFF000000);
 
-  ScrollMetricsNotificationObserverState? _scrollMetricsNotificationObserver;
+  ScrollNotificationObserverState? _scrollNotificationObserver;
   bool _scrolledUnder = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_scrollMetricsNotificationObserver != null)
-      _scrollMetricsNotificationObserver!.removeListener(_handleScrollMetricsNotification);
-    _scrollMetricsNotificationObserver = ScrollMetricsNotificationObserver.of(context);
-    if (_scrollMetricsNotificationObserver != null)
-      _scrollMetricsNotificationObserver!.addListener(_handleScrollMetricsNotification);
+    if (_scrollNotificationObserver != null)
+      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+    _scrollNotificationObserver = ScrollNotificationObserver.of(context);
+    if (_scrollNotificationObserver != null)
+      _scrollNotificationObserver!.addListener(_handleScrollNotification);
   }
 
   @override
   void dispose() {
-    if (_scrollMetricsNotificationObserver != null) {
-      _scrollMetricsNotificationObserver!.removeListener(_handleScrollMetricsNotification);
-      _scrollMetricsNotificationObserver = null;
+    if (_scrollNotificationObserver != null) {
+      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
+      _scrollNotificationObserver = null;
     }
     super.dispose();
   }
@@ -767,7 +766,7 @@ class _AppBarState extends State<AppBar> {
     Scaffold.of(context).openEndDrawer();
   }
 
-  void _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
+  void _handleScrollNotification(ScrollNotification notification) {
     final bool oldScrolledUnder = _scrolledUnder;
     final ScrollMetrics metrics = notification.metrics;
 
@@ -1377,7 +1376,7 @@ class SliverAppBar extends StatefulWidget {
   /// The arguments [forceElevated], [primary], [floating], [pinned], [snap]
   /// and [automaticallyImplyLeading] must not be null.
   const SliverAppBar({
-    Key? key,
+    super.key,
     this.leading,
     this.automaticallyImplyLeading = true,
     this.title,
@@ -1434,8 +1433,7 @@ class SliverAppBar extends StatefulWidget {
        assert(toolbarHeight != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
-       assert(collapsedHeight == null || collapsedHeight >= toolbarHeight, 'The "collapsedHeight" argument has to be larger than or equal to [toolbarHeight].'),
-       super(key: key);
+       assert(collapsedHeight == null || collapsedHeight >= toolbarHeight, 'The "collapsedHeight" argument has to be larger than or equal to [toolbarHeight].');
 
   /// {@macro flutter.material.appbar.leading}
   ///
@@ -1815,7 +1813,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
 // center it within its (NavigationToolbar) parent, and allow the
 // parent to constrain the title's actual height.
 class _AppBarTitleBox extends SingleChildRenderObjectWidget {
-  const _AppBarTitleBox({ Key? key, required Widget child }) : assert(child != null), super(key: key, child: child);
+  const _AppBarTitleBox({ required Widget super.child }) : assert(child != null);
 
   @override
   _RenderAppBarTitleBox createRenderObject(BuildContext context) {
@@ -1832,9 +1830,8 @@ class _AppBarTitleBox extends SingleChildRenderObjectWidget {
 
 class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
   _RenderAppBarTitleBox({
-    RenderBox? child,
-    TextDirection? textDirection,
-  }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
+    super.textDirection,
+  }) : super(alignment: Alignment.center);
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {

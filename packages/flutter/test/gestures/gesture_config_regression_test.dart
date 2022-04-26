@@ -13,7 +13,7 @@ class TestResult {
 }
 
 class NestedScrollableCase extends StatefulWidget {
-  const NestedScrollableCase({Key? key, required this.testResult}) : super(key: key);
+  const NestedScrollableCase({super.key, required this.testResult});
 
   final TestResult testResult;
 
@@ -57,7 +57,7 @@ class _NestedScrollableCaseState extends State<NestedScrollableCase> {
 }
 
 class NestedDragableCase extends StatefulWidget {
-  const NestedDragableCase({Key? key, required this.testResult}) : super(key: key);
+  const NestedDragableCase({super.key, required this.testResult});
 
   final TestResult testResult;
 

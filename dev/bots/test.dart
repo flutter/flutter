@@ -200,6 +200,7 @@ Future<void> main(List<String> args) async {
       // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
+      'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
       'web_tests': _runWebHtmlUnitTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=canvaskit`
@@ -331,9 +332,11 @@ Future<void> _runTestHarnessTests() async {
     exitWithError(<String>[versionError]);
 }
 
+final String _toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
+
 Future<void> _runGeneralToolTests() async {
   await _dartRunTest(
-    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    _toolsPath,
     testPaths: <String>[path.join('test', 'general.shard')],
     enableFlutterToolAsserts: false,
     // Detect unit test time regressions (poor time delay handling, etc).
@@ -345,7 +348,7 @@ Future<void> _runGeneralToolTests() async {
 
 Future<void> _runCommandsToolTests() async {
   await _dartRunTest(
-    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    _toolsPath,
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'commands.shard')],
   );
@@ -353,22 +356,30 @@ Future<void> _runCommandsToolTests() async {
 
 Future<void> _runWebToolTests() async {
   await _dartRunTest(
-    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    _toolsPath,
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'web.shard')],
     includeLocalEngineEnv: true,
   );
 }
 
+Future<void> _runToolHostCrossArchTests() {
+  return _dartRunTest(
+    _toolsPath,
+    // These are integration tests
+    forceSingleCore: true,
+    testPaths: <String>[path.join('test', 'host_cross_arch.shard')],
+  );
+}
+
 Future<void> _runIntegrationToolTests() async {
-  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
-  final List<String> allTests = Directory(path.join(toolsPath, 'test', 'integration.shard'))
+  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))
       .listSync(recursive: true).whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
 
   await _dartRunTest(
-    toolsPath,
+    _toolsPath,
     forceSingleCore: true,
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
   );
