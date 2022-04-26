@@ -4,7 +4,6 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/migrate/migrate_compute.dart';
 import 'package:flutter_tools/src/migrate/migrate_manifest.dart';
 import 'package:flutter_tools/src/migrate/migrate_result.dart';
 import 'package:flutter_tools/src/migrate/migrate_utils.dart';

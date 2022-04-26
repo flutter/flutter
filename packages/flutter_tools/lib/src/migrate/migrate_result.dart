@@ -3,12 +3,6 @@
 // found in the LICENSE file.
 
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/terminal.dart';
-import '../cache.dart';
-import '../commands/migrate.dart';
-import '../flutter_project_metadata.dart';
-import '../project.dart';
 import 'migrate_utils.dart';
 
 /// Data class that holds all results and generated directories from a computeMigration run.
