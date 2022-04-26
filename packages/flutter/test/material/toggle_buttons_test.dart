@@ -1015,6 +1015,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1042,6 +1044,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1068,6 +1072,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1108,6 +1114,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: borderColor,
@@ -1137,6 +1145,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: selectedBorderColor,
@@ -1165,6 +1175,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: disabledBorderColor,
@@ -1432,6 +1444,8 @@ void main() {
       expect(
         toggleButtonRenderObject[0],
         paints
+          // physical model
+          ..path()
           // leading side, top and bottom - enabled
           ..path(
             style: PaintingStyle.stroke,
@@ -1445,6 +1459,8 @@ void main() {
       expect(
         toggleButtonRenderObject[1],
         paints
+          // physical model
+          ..path()
           // leading side - selected
           ..path(
             style: PaintingStyle.stroke,
@@ -1464,6 +1480,8 @@ void main() {
       expect(
         toggleButtonRenderObject[2],
         paints
+          // physical model
+          ..path()
           // leading side - selected, since previous button is selected
           ..path(
             style: PaintingStyle.stroke,
@@ -1515,6 +1533,8 @@ void main() {
       expect(
         toggleButtonRenderObject[0],
         paints
+        // physical model
+          ..path()
         // left side, top and right - enabled.
           ..path(
             style: PaintingStyle.stroke,
@@ -1528,6 +1548,8 @@ void main() {
       expect(
         toggleButtonRenderObject[1],
         paints
+        // physical model
+          ..path()
         // top side - selected.
           ..path(
             style: PaintingStyle.stroke,
@@ -1547,6 +1569,8 @@ void main() {
       expect(
         toggleButtonRenderObject[2],
         paints
+        // physical model
+          ..path()
         // top side - selected, since previous button is selected.
           ..path(
             style: PaintingStyle.stroke,
@@ -1712,6 +1736,8 @@ void main() {
     expect(
       toggleButtonRenderObject[0],
       paints
+      // physical model paints
+        ..path()
       // left side, top and right - enabled.
         ..path(
           style: PaintingStyle.stroke,

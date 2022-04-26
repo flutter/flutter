@@ -240,8 +240,7 @@ void main() {
           child: ClipRect(
             child: Transform(
               transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-              child: Opacity(
-                opacity: 0.9,
+              child: RepaintBoundary(
                 child: Container(
                   color: const Color(0xFF00FF00),
                 ),
@@ -265,7 +264,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2.0,
-        child: Opacity(opacity: 0.5, child: Container()),
+        child: RepaintBoundary(child: Container()),
       ),
     );
 
@@ -305,7 +304,7 @@ void main() {
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(100.0, 50.0),
-        child: Opacity(opacity: 0.5, child: Container()),
+        child: RepaintBoundary(child: Container()),
       ),
     );
 
@@ -320,7 +319,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
-        child: Opacity(opacity: 0.5, child: Container()),
+        child: RepaintBoundary(child: Container()),
       ),
     );
 

@@ -591,35 +591,28 @@ void main() {
       )),
     );
 
-    PhysicalModelLayer? _dfsFindPhysicalLayer(ContainerLayer layer) {
-      expect(layer, isNotNull);
-      Layer? child = layer.firstChild;
-      while (child != null) {
-        if (child is PhysicalModelLayer) {
-          return child;
+    Object? _dfsFindPhysicalLayer(RenderObject object) {
+      expect(object, isNotNull);
+      if (object is RenderPhysicalModel || object is RenderPhysicalShape) {
+        return object;
+      }
+      final List<RenderObject> children = <RenderObject>[];
+      object.visitChildren(children.add);
+      for (final RenderObject child in children) {
+        final Object? result = _dfsFindPhysicalLayer(child);
+        if (result != null) {
+          return result;
         }
-        if (child is ContainerLayer) {
-          Layer? innerChild = child.firstChild;
-          while (innerChild != null) {
-            if (innerChild is ContainerLayer) {
-              final PhysicalModelLayer? candidate = _dfsFindPhysicalLayer(innerChild);
-                if (candidate != null) {
-                  return candidate;
-                }
-              }
-            innerChild = innerChild.nextSibling;
-          }
-        }
-        child = child.nextSibling;
       }
       return null;
     }
 
-    final ContainerLayer nestedScrollViewLayer = find.byType(NestedScrollView).evaluate().first.renderObject!.debugLayer!;
+    final RenderObject nestedScrollViewLayer = find.byType(NestedScrollView).evaluate().first.renderObject!;
     void _checkPhysicalLayer({required double elevation}) {
-      final PhysicalModelLayer? layer = _dfsFindPhysicalLayer(nestedScrollViewLayer);
-      expect(layer, isNotNull);
-      expect(layer!.elevation, equals(elevation));
+      final dynamic physicalModel = _dfsFindPhysicalLayer(nestedScrollViewLayer);
+      expect(physicalModel, isNotNull);
+      // ignore: avoid_dynamic_calls
+      expect(physicalModel.elevation, equals(elevation));
     }
 
     int expectedBuildCount = 0;
