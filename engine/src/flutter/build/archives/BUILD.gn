@@ -1,46 +1,65 @@
-import("//flutter/build/zip_bundle.gni")
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
-zip_bundle("artifacts") {
-  deps = [
-    "//flutter/flutter_frontend_server:frontend_server",
-    "//flutter/lib/snapshot:generate_snapshot_bin",
-    "//flutter/shell/testing:testing",
-  ]
-  prefix = "$full_platform_name/"
-  if (flutter_runtime_mode != "debug") {
-    prefix = "$full_platform_name-$flutter_runtime_mode/"
-  }
-  output = "$prefix/artifacts.zip"
-  files = [
-    {
-      source = "//third_party/icu/flutter/icudtl.dat"
-      destination = "icudtl.dat"
-    },
-    {
-      source = "$root_out_dir/gen/flutter/lib/snapshot/isolate_snapshot.bin"
-      destination = "isolate_snapshot.bin"
-    },
-    {
-      source = "$root_gen_dir/flutter/lib/snapshot/vm_isolate_snapshot.bin"
-      destination = "vm_isolate_snapshot.bin"
-    },
-    {
-      source = "$root_gen_dir/frontend_server.dart.snapshot"
-      destination = "frontend_server.dart.snapshot"
-    },
-  ]
-  if (host_os == "win") {
-    files += [
+import("//flutter/build/zip_bundle.gni")
+import("//flutter/common/config.gni")
+
+if (build_engine_artifacts) {
+  zip_bundle("artifacts") {
+    deps = [
+      "//flutter/flutter_frontend_server:frontend_server",
+      "//flutter/impeller/compiler:impellerc",
+      "//flutter/impeller/tessellator:tessellator_shared",
+      "//flutter/lib/snapshot:generate_snapshot_bin",
+      "//flutter/shell/testing:testing",
+    ]
+    prefix = "$full_platform_name/"
+    if (flutter_runtime_mode != "debug") {
+      prefix = "$full_platform_name-$flutter_runtime_mode/"
+    }
+    output = "$prefix/artifacts.zip"
+    files = [
       {
-        source = "$root_out_dir/flutter_tester.exe"
-        destination = "flutter_tester"
+        source = "//third_party/icu/flutter/icudtl.dat"
+        destination = "icudtl.dat"
+      },
+      {
+        source = "$root_out_dir/gen/flutter/lib/snapshot/isolate_snapshot.bin"
+        destination = "isolate_snapshot.bin"
+      },
+      {
+        source = "$root_gen_dir/flutter/lib/snapshot/vm_isolate_snapshot.bin"
+        destination = "vm_isolate_snapshot.bin"
+      },
+      {
+        source = "$root_gen_dir/frontend_server.dart.snapshot"
+        destination = "frontend_server.dart.snapshot"
       },
     ]
-  } else {
+
+    exe = ""
+    if (host_os == "win") {
+      exe = ".exe"
+    }
+    dll = ".so"
+    if (host_os == "win") {
+      dll = ".dll"
+    } else if (host_os == "mac") {
+      dll = ".dylib"
+    }
     files += [
       {
-        source = "$root_out_dir/flutter_tester"
-        destination = "flutter_tester"
+        source = "$root_out_dir/flutter_tester$exe"
+        destination = "flutter_tester$exe"
+      },
+      {
+        source = "$root_out_dir/impellerc$exe"
+        destination = "impellerc$exe"
+      },
+      {
+        source = "$root_out_dir/libtessellator$dll"
+        destination = "libtessellator$dll"
       },
     ]
   }
