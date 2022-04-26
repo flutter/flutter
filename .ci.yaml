@@ -108,7 +108,7 @@ platform_properties:
       os: Mac-12
       cpu: x86
       device_os: N
-  mac_android:
+  mac_arm64_android:
     properties:
       caches: >-
           [
