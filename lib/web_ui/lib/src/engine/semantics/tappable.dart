@@ -38,6 +38,7 @@ class Tappable extends RoleManager {
       semanticsObject.element.setAttribute('aria-disabled', 'true');
       _stopListening();
     } else {
+      semanticsObject.element.removeAttribute('aria-disabled');
       // Excluding text fields because text fields have browser-specific logic
       // for recognizing taps and activating the keyboard.
       if (semanticsObject.hasAction(ui.SemanticsAction.tap) &&
