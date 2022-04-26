@@ -26,9 +26,6 @@ const String kSupportedVariants = 'supportedVariants';
 enum PluginPlatformVariant {
   /// Win32 variant of Windows.
   win32,
-
-  // UWP variant of Windows.
-  winuwp,
 }
 
 /// Marker interface for all platform specific plugin config implementations.
@@ -396,7 +393,6 @@ class WindowsPlugin extends PluginPlatform
     } else {
       const Map<String, PluginPlatformVariant> variantByName = <String, PluginPlatformVariant>{
         'win32': PluginPlatformVariant.win32,
-        'uwp': PluginPlatformVariant.winuwp,
       };
       for (final String variantName in variantList.cast<String>()) {
         final PluginPlatformVariant? variant = variantByName[variantName];

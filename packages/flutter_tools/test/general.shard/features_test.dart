@@ -366,37 +366,5 @@ void main() {
 
       expect(featureFlags.isWindowsEnabled, true);
     });
-
-    // Windows UWP desktop
-
-    testWithoutContext('Flutter Windows UWP desktop off by default on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-
-      expect(featureFlags.isWindowsUwpEnabled, false);
-    });
-
-    testWithoutContext('Flutter Windows UWP desktop enabled with config on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-      testConfig.setValue('enable-windows-uwp-desktop', true);
-
-      expect(featureFlags.isWindowsUwpEnabled, true);
-    });
-
-    testWithoutContext('Flutter Windows UWP desktop config includes removal warning', () {
-      expect(windowsUwpEmbedding.extraHelpText, contains('Windows UWP support is obsolete and will be removed'));
-    });
-
-    testWithoutContext('Flutter Windows UWP desktop off by default on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-
-      expect(featureFlags.isWindowsUwpEnabled, false);
-    });
-
-    testWithoutContext('Flutter Windows UWP desktop not enabled with config on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      testConfig.setValue('enable-windows-uwp-desktop', true);
-
-      expect(featureFlags.isWindowsUwpEnabled, false);
-    });
   });
 }

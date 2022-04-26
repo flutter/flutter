@@ -214,11 +214,6 @@ class Template {
       if (relativeDestinationPath.startsWith('windows.tmpl') && !windows) {
         return null;
       }
-      // Only build a Windows UWP project if explicitly asked.
-      final bool windowsUwp = (context['winuwp'] as bool?) ?? false;
-      if (relativeDestinationPath.startsWith('winuwp.tmpl') && !windowsUwp) {
-        return null;
-      }
 
       final String? projectName = context['projectName'] as String?;
       final String? androidIdentifier = context['androidIdentifier'] as String?;

@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
-import 'package:flutter_tools/src/commands/build_winuwp.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
@@ -23,7 +22,6 @@ import '../../src/test_flutter_command_runner.dart';
 
 const String flutterRoot = r'C:\flutter';
 const String buildFilePath = r'C:\windows\CMakeLists.txt';
-const String buildUwpFilePath = r'C:\winuwp\CMakeLists.txt';
 const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
 const String _cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
 const String _defaultGenerator = 'Visual Studio 16 2019';
@@ -72,31 +70,19 @@ void main() {
     setUpMockCoreProjectFiles();
   }
 
-  void setUpMockUwpFilesForBuild(int version) {
-    final Directory projectDirectory = (fileSystem.file(buildUwpFilePath)
-      ..createSync(recursive: true))
-      .parent;
-    projectDirectory.childFile('project_version').writeAsString(version.toString());
-    setUpMockCoreProjectFiles();
-  }
-
   // Returns the command matching the build_windows call to generate CMake
   // files.
   FakeCommand cmakeGenerationCommand({
     void Function() onRun,
-    bool winuwp = false,
     String generator = _defaultGenerator,
   }) {
     return FakeCommand(
       command: <String>[
         _cmakePath,
         '-S',
-        fileSystem.path.dirname(winuwp ? buildUwpFilePath : buildFilePath),
+        fileSystem.path.dirname(buildFilePath),
         '-B',
-        if (winuwp)
-          r'build\winuwp'
-        else
-          r'build\windows',
+        r'build\windows',
         '-G',
         generator,
       ],
@@ -109,20 +95,15 @@ void main() {
     bool verbose = false,
     void Function() onRun,
     String stdout = '',
-    bool winuwp = false,
   }) {
     return FakeCommand(
       command: <String>[
         _cmakePath,
         '--build',
-        if (winuwp)
-          r'build\winuwp'
-        else
-          r'build\windows',
+        r'build\windows',
         '--config',
         buildMode,
-        if (!winuwp)
-          ...<String>['--target', 'INSTALL'],
+        ...<String>['--target', 'INSTALL'],
         if (verbose)
           '--verbose'
       ],
@@ -614,125 +595,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     Platform: () => windowsPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
     Usage: () => usage,
-  });
-
-  testUsingContext('Windows UWP build fails when there is no windows project', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
-      ..visualStudioOverride = fakeVisualStudio;
-    setUpMockCoreProjectFiles();
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['winuwp', '--no-pub']
-    ), throwsToolExit(message: 'No Windows UWP desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
-      'to learn about adding Windows support to a project.'));
-  }, overrides: <Type, Generator>{
-    Platform: () => windowsPlatform,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
-  });
-
-  testUsingContext('Windows build fails on non windows platform', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
-      ..visualStudioOverride = fakeVisualStudio;
-    setUpMockUwpFilesForBuild(0);
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['winuwp', '--no-pub']
-    ), throwsToolExit());
-  }, overrides: <Type, Generator>{
-    Platform: () => notWindowsPlatform,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
-  });
-
-  testUsingContext('Windows UWP build fails on non windows platform', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
-      ..visualStudioOverride = fakeVisualStudio;
-    setUpMockProjectFilesForBuild();
-
-    expect(createTestCommandRunner(command).run(
-        const <String>['winuwp', '--no-pub']
-    ), throwsToolExit(message: '"build winuwp" only supported on Windows hosts.'));
-  }, overrides: <Type, Generator>{
-    Platform: () => notWindowsPlatform,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
-  });
-
-  testUsingContext('Windows UWP build fails when the project version is out of date', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
-      ..visualStudioOverride = fakeVisualStudio;
-    setUpMockUwpFilesForBuild(-1);
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['winuwp', '--no-pub']
-    ), throwsToolExit(message: 'The Windows UWP project template and build process has changed. '
-        'In order to build you must delete the winuwp directory and re-create the project'));
-  }, overrides: <Type, Generator>{
-    Platform: () => windowsPlatform,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
-  });
-
-  testUsingContext('Windows UWP build fails when feature is disabled', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
-      ..visualStudioOverride = fakeVisualStudio;
-    setUpMockProjectFilesForBuild();
-
-    // This message should include 'To enable, run "flutter config --enable-windows-uwp-desktop"."
-    // once the `windowsUwpEmbedding` feature is available on all channels.
-    expect(createTestCommandRunner(command).run(
-        const <String>['winuwp', '--no-pub']
-    ), throwsToolExit(message: RegExp(r'"build winuwp" is not currently supported\.$')));
-  }, overrides: <Type, Generator>{
-    Platform: () => windowsPlatform,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(),
-  });
-
-  testUsingContext('Windows UWP build completes successfully', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
-      ..visualStudioOverride = fakeVisualStudio;
-    setUpMockUwpFilesForBuild(0);
-
-    await createTestCommandRunner(command).run(
-      const <String>['winuwp', '--no-pub']
-    );
-  }, overrides: <Type, Generator>{
-    Platform: () => windowsPlatform,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
-        command: <String>[
-          r'C:\flutter\bin\flutter',
-          'assemble',
-          '--no-version-check',
-          '--output=build',
-          '-dTargetPlatform=windows-uwp-x64',
-          '-dTrackWidgetCreation=true',
-          '-dBuildMode=release',
-          r'-dTargetFile=lib\main.dart',
-          '-dTreeShakeIcons="true"',
-          '-dDartObfuscation=false',
-          'release_bundle_windows_assets_uwp'
-        ],
-      ),
-      cmakeGenerationCommand(winuwp: true),
-      buildCommand('Release',  stdout: 'STDOUT STUFF', winuwp: true),
-    ]),
-    FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
   });
 }
 

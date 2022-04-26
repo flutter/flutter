@@ -38,10 +38,7 @@ enum Artifact {
   windowsDesktopPath,
   /// The root of the cpp client code for Windows desktop.
   windowsCppClientWrapper,
-  /// The root of the cpp client code for Windows UWP desktop.
-  windowsUwpCppClientWrapper,
-  /// The root of the Windows UWP desktop sources.
-  windowsUwpDesktopPath,
+
   /// The root of the sky_engine package.
   skyEnginePath,
   /// The location of the macOS engine podspec file.
@@ -54,9 +51,6 @@ enum Artifact {
   /// Tools related to subsetting or icon font files.
   fontSubset,
   constFinder,
-
-  // Windows UWP app management tool.
-  uwptool,
 }
 
 /// A subset of [Artifact]s that are platform and build mode independent
@@ -120,7 +114,6 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_uwp_x64:
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
@@ -137,7 +130,6 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
 bool _isWindows(TargetPlatform? platform) {
   switch (platform) {
     case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_uwp_x64:
       return true;
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
@@ -190,9 +182,7 @@ String? _artifactToFileName(Artifact artifact, [ TargetPlatform? platform, Build
     case Artifact.linuxHeaders:
       return 'flutter_linux';
     case Artifact.windowsCppClientWrapper:
-    case Artifact.windowsUwpCppClientWrapper:
       return 'cpp_client_wrapper';
-    case Artifact.windowsUwpDesktopPath:
     case Artifact.windowsDesktopPath:
       return '';
     case Artifact.skyEnginePath:
@@ -209,8 +199,6 @@ String? _artifactToFileName(Artifact artifact, [ TargetPlatform? platform, Build
       return 'font-subset$exe';
     case Artifact.constFinder:
       return 'const_finder.dart.snapshot';
-    case Artifact.uwptool:
-      return 'uwptool$exe';
   }
 }
 
@@ -431,7 +419,6 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_uwp_x64:
         return _getDesktopArtifactPath(artifact, platform, mode);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -483,12 +470,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.platformKernelDill:
       case Artifact.platformLibrariesJson:
       case Artifact.skyEnginePath:
-      case Artifact.uwptool:
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
-      case Artifact.windowsUwpCppClientWrapper:
-      case Artifact.windowsUwpDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -519,12 +503,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.platformKernelDill:
       case Artifact.platformLibrariesJson:
       case Artifact.skyEnginePath:
-      case Artifact.uwptool:
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
-      case Artifact.windowsUwpCppClientWrapper:
-      case Artifact.windowsUwpDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -567,12 +548,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.linuxHeaders:
       case Artifact.platformLibrariesJson:
       case Artifact.skyEnginePath:
-      case Artifact.uwptool:
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
-      case Artifact.windowsUwpCppClientWrapper:
-      case Artifact.windowsUwpDesktopPath:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -626,15 +604,9 @@ class CachedArtifacts implements Artifacts {
         }
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
-      case Artifact.windowsUwpDesktopPath:
-        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-        return _fileSystem.path.join(engineArtifactsPath, 'windows-uwp-x64-${getNameForBuildMode(mode!)}', _artifactToFileName(artifact, platform, mode));
       case Artifact.windowsCppClientWrapper:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, platform, mode));
-      case Artifact.windowsUwpCppClientWrapper:
-        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-        return _fileSystem.path.join(engineArtifactsPath, 'windows-uwp-x64-debug', _artifactToFileName(artifact, platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
@@ -642,11 +614,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.constFinder:
         return _cache.getArtifactDirectory('engine')
                      .childDirectory(_enginePlatformDirectoryName(platform))
-                     .childFile(_artifactToFileName(artifact, platform, mode)!)
-                     .path;
-      case Artifact.uwptool:
-        return _cache.getArtifactDirectory('engine')
-                     .childDirectory('windows-uwp-x64-${getNameForBuildMode(mode ?? BuildMode.debug)}')
                      .childFile(_artifactToFileName(artifact, platform, mode)!)
                      .path;
       case Artifact.flutterFramework:
@@ -684,7 +651,6 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-      case TargetPlatform.windows_uwp_x64:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
         final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode!), '-')}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
@@ -914,19 +880,15 @@ class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.constFinder:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
-      case Artifact.windowsUwpDesktopPath:
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
       case Artifact.windowsDesktopPath:
       case Artifact.windowsCppClientWrapper:
-      case Artifact.windowsUwpCppClientWrapper:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(
           _hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName,
         );
-      case Artifact.uwptool:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
     }
   }
 
