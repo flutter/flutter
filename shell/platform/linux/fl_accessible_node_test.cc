@@ -72,10 +72,13 @@ TEST(FlAccessibleNodeTest, SetFlags) {
 
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 0);
   fl_accessible_node_set_flags(
-      node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsFocusable |
+      node, static_cast<FlutterSemanticsFlag>(kFlutterSemanticsFlagIsEnabled |
+                                              kFlutterSemanticsFlagIsFocusable |
                                               kFlutterSemanticsFlagIsFocused));
 
   AtkStateSet* state = atk_object_ref_state_set(ATK_OBJECT(node));
+  EXPECT_TRUE(atk_state_set_contains_state(state, ATK_STATE_ENABLED));
+  EXPECT_TRUE(atk_state_set_contains_state(state, ATK_STATE_SENSITIVE));
   EXPECT_TRUE(atk_state_set_contains_state(state, ATK_STATE_FOCUSABLE));
   EXPECT_TRUE(atk_state_set_contains_state(state, ATK_STATE_FOCUSED));
   EXPECT_TRUE(!atk_state_set_contains_state(state, ATK_STATE_CHECKED));
