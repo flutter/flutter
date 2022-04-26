@@ -52,7 +52,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// constraints provided to an attached sheet change.
 class DraggableScrollableController extends ChangeNotifier {
   _DraggableScrollableSheetScrollController? _attachedController;
-  Set<AnimationController> _animationControllers = <AnimationController>{};
+  final Set<AnimationController> _animationControllers = <AnimationController>{};
 
   /// Get the current size (as a fraction of the parent height) of the attached sheet.
   double get size {
@@ -201,7 +201,7 @@ class DraggableScrollableController extends ChangeNotifier {
     for (final AnimationController animationController in _animationControllers) {
       animationController.dispose();
     }
-    _animationControllers = <AnimationController>{};
+    _animationControllers.clear();
   }
 }
 

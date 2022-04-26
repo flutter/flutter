@@ -1211,6 +1211,7 @@ void main() {
     });
 
     testWidgets('DraggableScrollableController.animateTo should not leak Ticker', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/102483
       final DraggableScrollableController controller = DraggableScrollableController();
       await tester.pumpWidget(_boilerplate(() {}, controller: controller));
 
