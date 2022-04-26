@@ -264,6 +264,19 @@ TEST(GeometryTest, QuaternionLerp) {
   ASSERT_QUATERNION_NEAR(q3, expected);
 }
 
+TEST(GeometryTest, EmptyPath) {
+  auto path = PathBuilder{}.TakePath();
+  ASSERT_EQ(path.GetComponentCount(), 1u);
+
+  ContourComponent c;
+  path.GetContourComponentAtIndex(0, c);
+  ASSERT_POINT_NEAR(c.destination, Point());
+
+  Path::Polyline polyline = path.CreatePolyline();
+  ASSERT_TRUE(polyline.points.empty());
+  ASSERT_TRUE(polyline.contours.empty());
+}
+
 TEST(GeometryTest, SimplePath) {
   Path path;
 

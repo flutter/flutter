@@ -11,6 +11,7 @@ namespace impeller {
 std::shared_ptr<Contents> Paint::CreateContentsForEntity(Path path,
                                                          bool cover) const {
   if (contents) {
+    contents->SetPath(std::move(path));
     return contents;
   }
 

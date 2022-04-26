@@ -34,11 +34,15 @@ static void DestroyTessellator(TESStesselator* tessellator) {
   }
 }
 
-bool Tessellator::Tessellate(FillType fill_type,
-                             const Path::Polyline& polyline,
-                             VertexCallback callback) const {
+Tessellator::Result Tessellator::Tessellate(FillType fill_type,
+                                            const Path::Polyline& polyline,
+                                            VertexCallback callback) const {
   if (!callback) {
-    return false;
+    return Result::kInputError;
+  }
+
+  if (polyline.points.empty()) {
+    return Result::kInputError;
   }
 
   using CTessellator =
@@ -49,7 +53,7 @@ bool Tessellator::Tessellate(FillType fill_type,
       DestroyTessellator);
 
   if (!tessellator) {
-    return false;
+    return Result::kTessellationError;
   }
 
   constexpr int kVertexSize = 2;
@@ -85,7 +89,7 @@ bool Tessellator::Tessellate(FillType fill_type,
   );
 
   if (result != 1) {
-    return false;
+    return Result::kTessellationError;
   }
 
   // TODO(csg): This copy can be elided entirely for the current use case.
@@ -109,7 +113,7 @@ bool Tessellator::Tessellate(FillType fill_type,
     callback(vtx);
   }
 
-  return true;
+  return Result::kSuccess;
 }
 
 }  // namespace impeller

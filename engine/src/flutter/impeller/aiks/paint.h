@@ -9,6 +9,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/contents/solid_stroke_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
@@ -27,6 +28,8 @@ struct Paint {
   };
 
   Color color = Color::Black();
+  std::shared_ptr<LinearGradientContents> contents;
+
   Scalar stroke_width = 0.0;
   SolidStrokeContents::Cap stroke_cap = SolidStrokeContents::Cap::kButt;
   SolidStrokeContents::Join stroke_join = SolidStrokeContents::Join::kMiter;
@@ -34,7 +37,6 @@ struct Paint {
   Style style = Style::kFill;
   Entity::BlendMode blend_mode = Entity::BlendMode::kSourceOver;
   std::optional<MaskBlur> mask_blur;
-  std::shared_ptr<Contents> contents;
 
   /// @brief      Wrap this paint's configured filters to the given contents.
   /// @param[in]  input           The contents to wrap with paint's filters.

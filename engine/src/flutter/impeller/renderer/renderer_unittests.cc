@@ -279,7 +279,8 @@ TEST_P(RendererTest, CanRenderInstanced) {
 
   VertexBufferBuilder<VS::PerVertexData> builder;
 
-  ASSERT_TRUE(
+  ASSERT_EQ(
+      Tessellator::Result::kSuccess,
       Tessellator{}.Tessellate(FillType::kPositive,
                                PathBuilder{}
                                    .AddRect(Rect::MakeXYWH(10, 10, 100, 100))
