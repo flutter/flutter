@@ -148,7 +148,7 @@ Future<int> main(List<String> args) async {
       errSink: errBuffer,
     );
     final List<io.File> fileList = await clangTidy.computeChangedFiles();
-    expect(fileList.length, lessThan(300));
+    expect(fileList.length, lessThan(500));
   });
 
   test('No Commands are produced when no files changed', () async {
