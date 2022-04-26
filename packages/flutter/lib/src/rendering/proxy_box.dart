@@ -843,7 +843,14 @@ class RenderOpacity extends RenderProxyBox {
        super(child);
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
+  bool get isRepaintBoundary => child != null && (_alpha > 0);
+
+  @override
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
+    updatedLayer.alpha = _alpha;
+    return updatedLayer;
+  }
 
   int _alpha;
 
@@ -864,13 +871,13 @@ class RenderOpacity extends RenderProxyBox {
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
-    final bool didNeedCompositing = alwaysNeedsCompositing;
+    final bool wasRepaintBoundary = isRepaintBoundary;
     final bool wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
-    if (didNeedCompositing != alwaysNeedsCompositing)
+    if (wasRepaintBoundary != isRepaintBoundary)
       markNeedsCompositingBitsUpdate();
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
@@ -891,15 +898,10 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+    if (_alpha == 0) {
+      return;
     }
+    super.paint(context, offset);
   }
 
   @override
@@ -925,8 +927,15 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
   int? _alpha;
 
   @override
-  bool get alwaysNeedsCompositing => child != null && _currentlyNeedsCompositing!;
-  bool? _currentlyNeedsCompositing;
+  bool get isRepaintBoundary => child != null && _currentlyIsRepaintBoundary!;
+  bool? _currentlyIsRepaintBoundary;
+
+  @override
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
+    updatedLayer.alpha = _alpha;
+    return updatedLayer;
+  }
 
   /// The animation that drives this render object's opacity.
   ///
@@ -986,11 +995,11 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     final int? oldAlpha = _alpha;
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
-      final bool? didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha! > 0;
-      if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
+      final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
+      _currentlyIsRepaintBoundary = _alpha! > 0;
+      if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary)
         markNeedsCompositingBitsUpdate();
-      markNeedsPaint();
+      markNeedsCompositedLayerUpdate();
       if (oldAlpha == 0 || _alpha == 0)
         markNeedsSemanticsUpdate();
     }
@@ -998,15 +1007,10 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha!, super.paint, oldLayer: layer as OpacityLayer?);
+    if (_alpha == 0) {
+      return;
     }
+    super.paint(context, offset);
   }
 
   @override
@@ -1115,6 +1119,10 @@ class RenderShaderMask extends RenderProxyBox {
         ..maskRect = offset & size
         ..blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -1181,6 +1189,10 @@ class RenderBackdropFilter extends RenderProxyBox {
       layer!.filter = _filter;
       layer!.blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
+      assert(() {
+        layer!.debugCreator = debugCreator;
+        return true;
+      }());
     } else {
       layer = null;
     }
@@ -2426,6 +2438,10 @@ class RenderTransform extends RenderProxyBox {
           layer = ImageFilterLayer(imageFilter: filter);
         }
         context.pushLayer(layer!, super.paint, offset);
+        assert(() {
+          layer!.debugCreator = debugCreator;
+          return true;
+        }());
       }
     }
   }
@@ -3859,6 +3875,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     AttributedString? attributedIncreasedValue,
     AttributedString? attributedDecreasedValue,
     AttributedString? attributedHint,
+    String? tooltip,
     SemanticsHintOverrides? hintOverrides,
     TextDirection? textDirection,
     SemanticsSortKey? sortKey,
@@ -3917,6 +3934,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _attributedIncreasedValue = attributedIncreasedValue,
        _attributedDecreasedValue = attributedDecreasedValue,
        _attributedHint = attributedHint,
+       _tooltip = tooltip,
        _hintOverrides = hintOverrides,
        _textDirection = textDirection,
        _sortKey = sortKey,
@@ -4308,6 +4326,18 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_attributedHint == value)
       return;
     _attributedHint = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.tooltip] semantic to the given value.
+  ///
+  /// The reading direction is given by [textDirection].
+  String? get tooltip => _tooltip;
+  String? _tooltip;
+  set tooltip(String? value) {
+    if (_tooltip == value)
+      return;
+    _tooltip = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4843,6 +4873,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.attributedDecreasedValue = attributedDecreasedValue!;
     if (attributedHint != null)
       config.attributedHint = attributedHint!;
+    if (tooltip != null)
+      config.tooltip = tooltip!;
     if (hintOverrides != null && hintOverrides!.isNotEmpty)
       config.hintOverrides = hintOverrides;
     if (scopesRoute != null)
@@ -5196,7 +5228,10 @@ class RenderLeaderLayer extends RenderProxyBox {
         ..offset = offset;
     }
     context.pushLayer(layer!, super.paint, Offset.zero);
-    assert(layer != null);
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
@@ -5408,6 +5443,10 @@ class RenderFollowerLayer extends RenderProxyBox {
         double.infinity,
       ),
     );
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override

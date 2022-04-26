@@ -317,7 +317,8 @@ class Slider extends StatefulWidget {
   /// If null, the slider is continuous.
   final int? divisions;
 
-  /// A label to show above the slider when the slider is active.
+  /// A label to show above the slider when the slider is active and
+  /// [SliderThemeData.showValueIndicator] is satisfied.
   ///
   /// It is used to display the value of a discrete slider, and it is displayed
   /// as part of the value indicator shape.
@@ -1506,7 +1507,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;
     }
-    config.label = _label ?? '';
+
     if (semanticFormatterCallback != null) {
       config.value = semanticFormatterCallback!(_state._lerp(value));
       config.increasedValue = semanticFormatterCallback!(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)));

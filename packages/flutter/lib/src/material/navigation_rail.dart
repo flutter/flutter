@@ -46,6 +46,13 @@ import 'theme.dart';
 /// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows the creation of [NavigationRail] widget used within a Scaffold with 3
+/// [NavigationRailDestination]s, as described in: https://m3.material.io/components/navigation-rail/overview
+///
+/// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], which can display the navigation rail within a [Row] of the

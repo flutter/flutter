@@ -69,6 +69,21 @@ enum _FloatingActionButtonType {
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.1.dart **
 /// {@end-tool}
 ///
+/// Material Design 3 introduced new types of floating action buttons.
+/// {@tool dartpad}
+/// This sample shows the creation of [FloatingActionButton] widget in the typical location in a Scaffold,
+/// as described in: https://m3.material.io/components/floating-action-button/overview
+///
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.2.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of all the variants of [FloatingActionButton] widget as
+/// described in: https://m3.material.io/components/floating-action-button/overview
+///
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], in which floating action buttons typically live.
