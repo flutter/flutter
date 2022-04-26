@@ -516,8 +516,9 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
 
   setup_locales(self);
 
+  g_autoptr(FlSettings) settings = fl_settings_new();
   self->settings_plugin = fl_settings_plugin_new(self->binary_messenger);
-  fl_settings_plugin_start(self->settings_plugin);
+  fl_settings_plugin_start(self->settings_plugin, settings);
 
   result = self->embedder_api.UpdateSemanticsEnabled(self->engine, TRUE);
   if (result != kSuccess) {
