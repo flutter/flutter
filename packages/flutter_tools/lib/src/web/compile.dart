@@ -6,6 +6,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/web.dart';
@@ -15,6 +16,7 @@ import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
+import 'migrations/scrub_generated_plugin_registrant.dart';
 
 Future<void> buildWeb(
   FlutterProject flutterProject,
@@ -31,6 +33,16 @@ Future<void> buildWeb(
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
   outputDirectory.createSync(recursive: true);
+
+  // The migrators to apply to a Web project.
+  final List<ProjectMigrator> migrators = <ProjectMigrator>[
+    ScrubGeneratedPluginRegistrant(flutterProject.web, globals.logger),
+  ];
+
+  final ProjectMigration migration = ProjectMigration(migrators);
+  if (!migration.run()) {
+    throwToolExit('Failed to run all web migrations.');
+  }
 
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
