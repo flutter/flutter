@@ -159,6 +159,8 @@ using TimelineMicrosSource = int64_t (*)();
 
 void TraceSetTimelineEventHandler(TimelineEventHandler handler);
 
+bool TraceHasTimelineEventHandler();
+
 void TraceSetTimelineMicrosSource(TimelineMicrosSource source);
 
 void TraceTimelineEvent(TraceArg category_group,

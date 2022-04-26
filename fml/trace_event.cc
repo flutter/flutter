@@ -51,6 +51,11 @@ void TraceSetTimelineEventHandler(TimelineEventHandler handler) {
   gTimelineEventHandler = handler;
 }
 
+bool TraceHasTimelineEventHandler() {
+  return static_cast<bool>(
+      gTimelineEventHandler.load(std::memory_order_relaxed));
+}
+
 void TraceSetTimelineMicrosSource(TimelineMicrosSource source) {
   gTimelineMicrosSource = source;
 }
@@ -306,6 +311,10 @@ void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
 void TraceSetAllowlist(const std::vector<std::string>& allowlist) {}
 
 void TraceSetTimelineEventHandler(TimelineEventHandler handler) {}
+
+bool TraceHasTimelineEventHandler() {
+  return false;
+}
 
 void TraceSetTimelineMicrosSource(TimelineMicrosSource source) {}
 
