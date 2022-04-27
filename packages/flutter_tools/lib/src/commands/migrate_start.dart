@@ -61,7 +61,7 @@ class MigrateStartCommand extends FlutterCommand {
       valueHelp: 'path',
     );
     argParser.addFlag(
-      'use-fallback-base-revision',
+      'allow-fallback-base-revision',
       help: 'If a base revision cannot be determined, this flag enables using flutter 1.0.0 as a fallback base revision. '
             'Using this fallback will typically produce worse quality migrations and possibly more conflicts.',
     );
@@ -165,7 +165,7 @@ class MigrateStartCommand extends FlutterCommand {
       deleteTempDirectories: boolArg('delete-temp-directories'),
       platforms: platforms,
       preferTwoWayMerge: boolArg('prefer-two-way-merge'),
-      useFallbackBaseRevision: boolArg('use-fallback-base-revision'),
+      useFallbackBaseRevision: boolArg('allow-fallback-base-revision'),
       fileSystem: fileSystem,
       logger: logger,
       migrateUtils: migrateUtils,

@@ -110,7 +110,7 @@ Future<MigrateResult?> computeMigration({
     bool deleteTempDirectories = true,
     List<SupportedPlatform>? platforms,
     bool preferTwoWayMerge = false,
-    bool useFallbackBaseRevision = false;
+    bool allowFallbackBaseRevision = false;
     required FileSystem fileSystem,
     required Logger logger,
     required MigrateUtils migrateUtils,
@@ -147,7 +147,7 @@ Future<MigrateResult?> computeMigration({
   blacklistPrefixes.remove(null);
 
   final FlutterVersion version = FlutterVersion(workingDirectory: flutterProject.directory.absolute.path);
-  final String fallbackRevision = getFallbackBaseRevision(metadata, verbose, logger, status);
+  final String fallbackRevision = getBaseRevision(metadata, allowFallbackBaseRevision, verbose, logger, status);
   targetRevision ??= version.frameworkRevision;
   String rootBaseRevision = '';
   final Map<String, List<MigratePlatformConfig>> revisionToConfigs = <String, List<MigratePlatformConfig>>{};
@@ -353,9 +353,16 @@ String getLocalPath(String path, String basePath, FileSystem fileSystem) {
 }
 
 /// Returns a base revision to fallback to in case a true base revision is unknown.
-String getFallbackBaseRevision(FlutterProjectMetadata metadata, bool verbose, Logger logger, Status status) {
+String getBaseRevision(FlutterProjectMetadata metadata, bool allowFallbackBaseRevision, bool verbose, Logger logger, Status status) {
   if (metadata.versionRevision != null) {
     return metadata.versionRevision!;
+  }
+  if (!allowFallbackBaseRevision) {
+    status.stop();
+    logger.printError('Could not determine base revision this app was created with.');
+    logger.printError('.metadata file did not exist or did not contain a valid revision.', indent: 2);
+    logger.printError('Run this command again with the --allow-fallback-base-revision flag to use Flutter v1.0.0 as the base revision.', indent: 2);
+    throwToolExit('Failed to resolve base revision')
   }
   // Earliest version of flutter with .metadata: c17099f474675d8066fec6984c242d8b409ae985 (2017)
   // Flutter 2.0.0: 60bd88df915880d23877bfc1602e8ddcf4c4dd2a
