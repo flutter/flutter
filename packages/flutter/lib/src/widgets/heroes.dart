@@ -166,7 +166,6 @@ class Hero extends StatefulWidget {
     this.flightShuttleBuilder,
     this.placeholderBuilder,
     this.transitionOnUserGestures = false,
-    this.curve = Curves.linear,
     required this.child,
   }) : assert(tag != null),
        assert(transitionOnUserGestures != null),
@@ -189,11 +188,6 @@ class Hero extends StatefulWidget {
   /// [HeroController.createRectTween] is used. The [HeroController] created by
   /// [MaterialApp] creates a [MaterialRectArcTween].
   final CreateRectTween? createRectTween;
-
-  /// The curve applied to the animation of rects.
-  ///
-  /// If not provided, defaults to [Curve.linear].
-  final Curve curve;
 
   /// The widget subtree that will "fly" from one route to another during a
   /// [Navigator] push or pop transition.

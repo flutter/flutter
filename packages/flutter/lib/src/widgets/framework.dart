@@ -5241,16 +5241,12 @@ class InheritedTreeCache {
   InheritedTreeCache._(this._user, this._system);
 
   factory InheritedTreeCache.fromParent(InheritedTreeCache parent, bool system) {
-    potentialCopyLength += parent._user.length;
-    potentialCopyLength += parent._system.length;
     if (system) {
-      copyLength += parent._system.length;
       return InheritedTreeCache._(
         parent._user,
         HashMap<Type, InheritedElement>.of(parent._system),
       );
     }
-    copyLength += parent._user.length;
     return InheritedTreeCache._(
       HashMap<Type, InheritedElement>.of(parent._user),
       parent._system,
@@ -5265,12 +5261,8 @@ class InheritedTreeCache {
   final Map<Type, InheritedElement> _system;
 
   InheritedElement? operator[](Type type) {
-    print('${copyLength / potentialCopyLength * 100}% savings');
     return _user[type] ?? _system[type];
   }
-
-  static int copyLength = 0;
-  static int potentialCopyLength = 0;
 
   void update(Type type, InheritedElement value, bool system) {
     if (system) {
