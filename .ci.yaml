@@ -1433,7 +1433,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android android_semantics_integration_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/98417
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
