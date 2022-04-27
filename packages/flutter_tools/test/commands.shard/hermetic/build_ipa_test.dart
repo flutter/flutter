@@ -83,7 +83,7 @@ void main() {
   }
 
   const FakeCommand xattrCommand = FakeCommand(command: <String>[
-    'xattr', '-r', '-d', 'com.apple.FinderInfo', '/'
+    'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
   FakeCommand _setUpXCResultCommand({String stdout = '', void Function() onRun}) {
@@ -296,8 +296,8 @@ void main() {
           _exportOptionsPlist,
         ],
         exitCode: 1,
-        stderr: 'error: exportArchive: "Runner.app" requires a provisioning profile.'
-      )
+        stderr: 'error: exportArchive: "Runner.app" requires a provisioning profile.',
+      ),
     ]);
     _createMinimalMockProjectFiles();
 

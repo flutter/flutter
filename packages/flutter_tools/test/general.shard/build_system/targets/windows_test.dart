@@ -156,8 +156,8 @@ void main() {
         'platform': 'ios',
         'data': <String, Object>{
           'A': 'B',
-        }
-      }
+        },
+      },
     ));
 
     await const DebugBundleWindowsAssets().build(environment);

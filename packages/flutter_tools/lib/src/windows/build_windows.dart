@@ -168,11 +168,11 @@ Future<void> _runBuild(
         if (install)
           ...<String>['--target', 'INSTALL'],
         if (globals.logger.isVerbose)
-          '--verbose'
+          '--verbose',
       ],
       environment: <String, String>{
         if (globals.logger.isVerbose)
-          'VERBOSE_SCRIPT_LOGGING': 'true'
+          'VERBOSE_SCRIPT_LOGGING': 'true',
       },
       trace: true,
       stdoutErrorMatcher: errorMatcher,

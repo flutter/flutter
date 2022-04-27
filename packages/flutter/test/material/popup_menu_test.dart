@@ -869,8 +869,8 @@ void main() {
                 bounds: Rect.fromLTRB(390, 0, 410, 600),
                 type: DisplayFeatureType.cutout,
                 state: DisplayFeatureState.unknown,
-              )
-            ]
+              ),
+            ],
           ),
           child: Scaffold(
             body: Navigator(
@@ -2215,20 +2215,22 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             title: const Text('PopupMenu Test'),
-            actions: <Widget>[PopupMenuButton<int>(
-              child: SizedBox(
-                key: buttonKey,
-                height: height,
-                width: width,
-                child: const ColoredBox(
-                  color: Colors.pink,
+            actions: <Widget>[
+              PopupMenuButton<int>(
+                child: SizedBox(
+                  key: buttonKey,
+                  height: height,
+                  width: width,
+                  child: const ColoredBox(
+                    color: Colors.pink,
+                  ),
                 ),
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                  const PopupMenuItem<int>(value: 1, child: Text('-1-')),
+                  const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+                ],
               ),
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                const PopupMenuItem<int>(value: 1, child: Text('-1-')),
-                const PopupMenuItem<int>(value: 2, child: Text('-2-')),
-              ],
-            )],
+            ],
           ),
           body: Container(),
         ),
@@ -2269,30 +2271,32 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             title: const Text('PopupMenu Test'),
-            actions: <Widget>[PopupMenuButton<int>(
-              child: SizedBox(
-                key: buttonKey,
-                height: height,
-                width: width,
-                child: const ColoredBox(
-                  color: Colors.pink,
-                ),
-              ),
-              itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<int>>[
-                  PopupMenuItem<int>(
-                    value: 1,
-                    child: Builder(
-                      builder: (BuildContext context) {
-                        mediaQueryPadding = MediaQuery.of(context).padding;
-                        return Text('-1-' * 500); // A long long text string.
-                      },
-                    ),
+            actions: <Widget>[
+              PopupMenuButton<int>(
+                child: SizedBox(
+                  key: buttonKey,
+                  height: height,
+                  width: width,
+                  child: const ColoredBox(
+                    color: Colors.pink,
                   ),
-                  const PopupMenuItem<int>(value: 2, child: Text('-2-')),
-                ];
-              },
-            )],
+                ),
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    PopupMenuItem<int>(
+                      value: 1,
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          mediaQueryPadding = MediaQuery.of(context).padding;
+                          return Text('-1-' * 500); // A long long text string.
+                        },
+                      ),
+                    ),
+                    const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+                  ];
+                },
+              ),
+            ],
           ),
           body: const SizedBox.shrink(),
         ),
@@ -2570,7 +2574,7 @@ void main() {
                 splashRadius: splashRadius,
                 child: const Text('An item'),
                 itemBuilder: (_) => <PopupMenuEntry<String>>[
-                  const PopupMenuDivider()
+                  const PopupMenuDivider(),
                 ],
               ),
             ),

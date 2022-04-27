@@ -1076,9 +1076,9 @@ void main() {
             height: 1000.0,
             width: 1000.0,
             child: Text('Test'),
-          )
-        ]
-      )
+          ),
+        ],
+      ),
     ));
 
     expect(find.byType(StretchingOverscrollIndicator), findsNothing);
@@ -1094,9 +1094,9 @@ void main() {
             height: 1000.0,
             width: 1000.0,
             child: Text('Test'),
-          )
-        ]
-      )
+          ),
+        ],
+      ),
     ));
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
@@ -1106,15 +1106,15 @@ void main() {
   testWidgets('ScrollBehavior stretch android overscroll indicator via useMaterial3 flag', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
-        home: ListView(
-            children: const <Widget>[
-              SizedBox(
-                height: 1000.0,
-                width: 1000.0,
-                child: Text('Test'),
-              )
-            ]
-        )
+      home: ListView(
+        children: const <Widget>[
+          SizedBox(
+            height: 1000.0,
+            width: 1000.0,
+            child: Text('Test'),
+          ),
+        ],
+      ),
     ));
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
@@ -1131,9 +1131,9 @@ void main() {
             height: 1000.0,
             width: 1000.0,
             child: Text('Test'),
-          )
-        ]
-      )
+          ),
+        ],
+      ),
     ));
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
@@ -1151,9 +1151,9 @@ void main() {
             height: 1000.0,
             width: 1000.0,
             child: Text('Test'),
-          )
-        ]
-      )
+          ),
+        ],
+      ),
     ));
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);

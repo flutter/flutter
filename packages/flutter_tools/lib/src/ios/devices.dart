@@ -133,7 +133,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async {
     if (!_platform.isMacOS) {
       return const <String>[
-        'Control of iOS devices or simulators only supported on macOS.'
+        'Control of iOS devices or simulators only supported on macOS.',
       ];
     }
 

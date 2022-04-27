@@ -186,8 +186,8 @@ void main() {
         'platform': 'ios',
         'data': <String, Object>{
           'A': 'B',
-        }
-      }
+        },
+      },
     ));
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');

@@ -1144,7 +1144,7 @@ void main() {
                 waitDuration: waitDuration,
                 showDuration: Duration(days: 1),
                 child: Text('tooltip2'),
-              )
+              ),
             ],
           ),
         ),

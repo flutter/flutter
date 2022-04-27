@@ -60,7 +60,7 @@ void main() {
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
-          'assembleRelease'
+          'assembleRelease',
         ],
         exitCode: 1,
         stderr: '\nSome gradle message\n',
@@ -150,7 +150,7 @@ void main() {
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
-          'assembleRelease'
+          'assembleRelease',
         ],
       ));
 
@@ -656,7 +656,7 @@ void main() {
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
-          'assembleRelease'
+          'assembleRelease',
         ],
       ));
       fileSystem.directory('android')
@@ -788,7 +788,7 @@ void main() {
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          'assembleAarRelease'
+          'assembleAarRelease',
         ],
       ));
 
@@ -841,7 +841,7 @@ void main() {
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          'assembleAarRelease'
+          'assembleAarRelease',
         ],
         exitCode: 108,
         stderr: 'Gradle task assembleAarRelease failed with exit code 108.',
@@ -1119,7 +1119,7 @@ void main() {
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
-          'assembleRelease'
+          'assembleRelease',
         ],
         exitCode: 1,
       ));
@@ -1192,7 +1192,7 @@ void main() {
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
-          'assembleRelease'
+          'assembleRelease',
         ],
       ));
       fileSystem.file('android/gradlew').createSync(recursive: true);
@@ -1253,7 +1253,7 @@ void main() {
           '-Plocal-engine-build-mode=release',
           '-Plocal-engine-out=out/android_arm',
           '-Ptarget-platform=android-arm',
-          'assembleAarRelease'
+          'assembleAarRelease',
         ],
       ));
 
@@ -1337,7 +1337,7 @@ void main() {
           '-Plocal-engine-build-mode=release',
           '-Plocal-engine-out=out/android_arm64',
           '-Ptarget-platform=android-arm64',
-          'assembleAarRelease'
+          'assembleAarRelease',
         ],
       ));
 
@@ -1421,7 +1421,7 @@ void main() {
           '-Plocal-engine-build-mode=release',
           '-Plocal-engine-out=out/android_x86',
           '-Ptarget-platform=android-x86',
-          'assembleAarRelease'
+          'assembleAarRelease',
         ],
       ));
 
@@ -1505,7 +1505,7 @@ void main() {
           '-Plocal-engine-build-mode=release',
           '-Plocal-engine-out=out/android_x64',
           '-Ptarget-platform=android-x64',
-          'assembleAarRelease'
+          'assembleAarRelease',
         ],
       ));
 

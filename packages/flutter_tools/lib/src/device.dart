@@ -158,7 +158,7 @@ abstract class DeviceManager {
           }, onError: (dynamic error, StackTrace stackTrace) {
             // Return matches from other discoverers even if one fails.
             _logger.printTrace('Ignored error discovering $deviceId: $error');
-          })
+          }),
     ];
 
     // Wait for an exact match, or for all discoverers to return results.
@@ -722,7 +722,7 @@ abstract class Device {
         'flutterExit': supportsFlutterExit,
         'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
         'startPaused': supportsStartPaused,
-      }
+      },
     };
   }
 

@@ -53,7 +53,7 @@ class ActionSheetSample extends StatelessWidget {
               Navigator.pop(context);
             },
             child: const Text('Yes'),
-          )
+          ),
         ],
       ),
     );

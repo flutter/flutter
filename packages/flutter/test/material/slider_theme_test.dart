@@ -90,7 +90,7 @@ void main() {
       "rangeValueIndicatorShape: Instance of 'PaddleRangeSliderValueIndicatorShape'",
       'showValueIndicator: always',
       'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
-      'mouseCursor: MaterialStateMouseCursor(clickable)'
+      'mouseCursor: MaterialStateMouseCursor(clickable)',
     ]);
   });
 

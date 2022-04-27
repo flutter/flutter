@@ -33,7 +33,7 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{
       'flutter': 'flutter',
-      'second': 'second'
+      'second': 'second',
     };
 
     final Image image = Image.network(
@@ -60,7 +60,7 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{
       'flutter': 'flutter',
-      'second': 'second'
+      'second': 'second',
     };
 
     final Image image = Image.network(
@@ -87,7 +87,7 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{
       'flutter': 'flutter',
-      'second': 'second'
+      'second': 'second',
     };
 
     final Image image = Image.network(

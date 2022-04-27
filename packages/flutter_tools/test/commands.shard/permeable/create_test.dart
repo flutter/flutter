@@ -1034,7 +1034,7 @@ void main() {
         projectDir.childDirectory('example').childDirectory('web'),
         isNot(exists));
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'windows'
+      'windows',
     ], pluginClass: 'FlutterProjectPluginCApi',
     unexpectedPlatforms: <String>['some_platform']);
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
@@ -1317,7 +1317,7 @@ void main() {
         command: const <String>['openssl', 'x509', '-subject'],
         stdin: IOSink(controller.sink),
         stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
-      )
+      ),
     ]);
 
     controller.stream.listen((List<int> chunk) {
@@ -1764,7 +1764,7 @@ void main() {
         '--org', 'com.bar.foo',
         '-i', 'objc',
         '-a', 'java',
-        '--platforms', 'ios,android'
+        '--platforms', 'ios,android',
       ],
       <String>[],
     );
@@ -1918,7 +1918,7 @@ void main() {
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
             response: FakeResponse(body: utf8.encode('void main() {}')),
-          )
+          ),
         ]);
       };
     },
@@ -1941,7 +1941,7 @@ void main() {
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
             response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); } // ignore: avoid_print')),
-          )
+          ),
         ]);
       };
     },
@@ -1968,7 +1968,7 @@ void main() {
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
             response: FakeResponse(body: utf8.encode(samplesIndexJson)),
-          )
+          ),
         ]);
       };
     },
@@ -1996,7 +1996,7 @@ void main() {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
-          )
+          ),
         ]);
       };
     },
@@ -2021,7 +2021,7 @@ void main() {
           FakeRequest(
             Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
             response: const FakeResponse(statusCode: HttpStatus.notFound),
-          )
+          ),
         ]);
       };
     },
@@ -2055,7 +2055,7 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('macos'),
         isNot(exists));
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: <String>[
-      'some_platform'
+      'some_platform',
     ], pluginClass: 'somePluginClass',
     unexpectedPlatforms: <String>[ 'ios', 'android', 'web', 'linux', 'windows', 'macos']);
   }, overrides: <Type, Generator>{
@@ -2141,7 +2141,7 @@ void main() {
     expect(
         projectDir.childDirectory('example').childDirectory('android'), exists);
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'android'
+      'android',
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform'],
     androidIdentifier: 'com.example.flutter_project');
@@ -2162,7 +2162,7 @@ void main() {
         projectDir.childDirectory('lib').childFile('flutter_project_web.dart'),
         exists);
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'web'
+      'web',
     ], pluginClass: 'FlutterProjectWeb',
     unexpectedPlatforms: <String>['some_platform'],
     androidIdentifier: 'com.example.flutter_project',
@@ -2188,7 +2188,7 @@ void main() {
         projectDir.childDirectory('lib').childFile('flutter_project_web.dart'),
         isNot(exists));
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'some_platform'
+      'some_platform',
     ], pluginClass: 'somePluginClass',
     unexpectedPlatforms: <String>['web']);
     expect(logger.errorText, contains(_kNoPlatformsMessage));
@@ -2324,7 +2324,7 @@ void main() {
     expect(projectDir.childDirectory('ios'), exists);
     expect(projectDir.childDirectory('example').childDirectory('ios'), exists);
     validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'ios', 'android'
+      'ios', 'android',
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform'],
     androidIdentifier: 'com.example.flutter_project');

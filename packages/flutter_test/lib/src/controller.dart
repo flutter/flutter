@@ -722,7 +722,7 @@ abstract class WidgetController {
               delta: offsets[t+1] - offsets[t],
               pointer: pointer,
               buttons: buttons,
-            )
+            ),
           ]),
       ],
       PointerEventRecord(duration, <PointerEvent>[
@@ -734,7 +734,7 @@ abstract class WidgetController {
           // change = PointerChange.up, which translates to PointerUpEvent,
           // doesn't provide the button field.
           // buttons: buttons,
-        )
+        ),
       ]),
     ];
     return TestAsyncUtils.guard<void>(() async {

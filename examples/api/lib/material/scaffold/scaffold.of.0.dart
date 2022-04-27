@@ -53,7 +53,7 @@ class MyScaffoldBody extends StatelessWidget {
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                      )
+                      ),
                     ],
                   ),
                 ),

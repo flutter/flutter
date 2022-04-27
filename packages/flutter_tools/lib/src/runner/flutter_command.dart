@@ -153,11 +153,11 @@ abstract class FlutterCommand extends Command<void> {
     ],
     'canvaskit': <String>[
       'FLUTTER_WEB_AUTO_DETECT=false',
-      'FLUTTER_WEB_USE_SKIA=true'
+      'FLUTTER_WEB_USE_SKIA=true',
     ],
     'html': <String>[
       'FLUTTER_WEB_AUTO_DETECT=false',
-      'FLUTTER_WEB_USE_SKIA=false'
+      'FLUTTER_WEB_USE_SKIA=false',
     ],
   };
 

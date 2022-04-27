@@ -145,7 +145,7 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
       workingDirectory: buildDir.path,
       environment: <String, String>{
         'CC': 'clang',
-        'CXX': 'clang++'
+        'CXX': 'clang++',
       },
       trace: true,
     );

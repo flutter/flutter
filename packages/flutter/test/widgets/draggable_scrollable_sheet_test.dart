@@ -1016,7 +1016,7 @@ void main() {
           _boilerplate(
             null,
             controller: controller,
-          )
+          ),
         ],
       ),
     ), null, EnginePhase.build);

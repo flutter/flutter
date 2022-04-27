@@ -105,11 +105,11 @@ void main() {
         buildMode,
         ...<String>['--target', 'INSTALL'],
         if (verbose)
-          '--verbose'
+          '--verbose',
       ],
       environment: <String, String>{
         if (verbose)
-          'VERBOSE_SCRIPT_LOGGING': 'true'
+          'VERBOSE_SCRIPT_LOGGING': 'true',
       },
       onRun: onRun,
       stdout: stdout,

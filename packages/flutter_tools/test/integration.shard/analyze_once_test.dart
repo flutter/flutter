@@ -119,7 +119,7 @@ void main() {
           'Analyzing error.dart',
           "error $analyzerSeparator Target of URI doesn't exist",
           "error $analyzerSeparator Expected to find ';'",
-          'error $analyzerSeparator Unterminated string literal'
+          'error $analyzerSeparator Unterminated string literal',
         ],
         exitMessageContains: '3 issues found',
         exitCode: 1
@@ -133,7 +133,7 @@ void main() {
           'Analyzing 2 items',
           "error $analyzerSeparator Target of URI doesn't exist",
           "error $analyzerSeparator Expected to find ';'",
-          'error $analyzerSeparator Unterminated string literal'
+          'error $analyzerSeparator Unterminated string literal',
         ],
         exitMessageContains: '3 issues found',
         exitCode: 1

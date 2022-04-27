@@ -44,7 +44,7 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<String> get depfiles => <String>[
-    'flutter_assets.d'
+    'flutter_assets.d',
   ];
 
   @override

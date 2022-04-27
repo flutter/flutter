@@ -84,7 +84,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                   onSelected: () {
                     _handleMenuSelection(MenuSelection.about);
                   },
-                )
+                ),
               ],
             ),
             PlatformMenuItemGroup(
@@ -118,7 +118,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                       },
                     ),
                   ],
-                )
+                ),
               ],
             ),
             if (PlatformProvidedMenuItem.hasMenu(PlatformProvidedMenuItemType.quit))
