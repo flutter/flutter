@@ -55,7 +55,7 @@ void main() {
   });
 
 
-  void _createSampleProject(Directory directory, { bool brokenCode = false }) {
+  void createSampleProject(Directory directory, { bool brokenCode = false }) {
     final File pubspecFile = fileSystem.file(fileSystem.path.join(directory.path, 'pubspec.yaml'));
     pubspecFile.writeAsStringSync('''
   name: foo_project
@@ -75,7 +75,7 @@ void main() {
 
   group('analyze --watch', () {
     testUsingContext('AnalysisServer success', () async {
-      _createSampleProject(tempDir);
+      createSampleProject(tempDir);
 
       final Pub pub = Pub(
         fileSystem: fileSystem,
@@ -113,7 +113,7 @@ void main() {
   });
 
   testUsingContext('AnalysisServer errors', () async {
-    _createSampleProject(tempDir, brokenCode: true);
+    createSampleProject(tempDir, brokenCode: true);
 
     final Pub pub = Pub(
       fileSystem: fileSystem,

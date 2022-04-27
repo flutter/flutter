@@ -1557,7 +1557,7 @@ flutter:
         tryToDelete(tempDir);
       });
 
-      void _createPubspecFile(String yamlString) {
+      void createPubspecFile(String yamlString) {
         projectDir.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(yamlString);
       }
 
@@ -1581,7 +1581,7 @@ flutter:
           pluginClass: SomePlugin
           package: AndroidPackage
   ''';
-        _createPubspecFile(pluginYaml);
+        createPubspecFile(pluginYaml);
         validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
           'ios', 'macos', 'windows', 'linux', 'android', 'web',
         ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');
