@@ -156,20 +156,20 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('test page transition (_ZoomPageTransition)', (WidgetTester tester) async {
-    Iterable<T> _findWidgets<T extends Widget>(Finder of) {
+    Iterable<T> findWidgets<T extends Widget>(Finder of) {
       return tester.widgetList<T>(
         find.ancestor(of: of, matching: find.byType(T)),
       );
     }
 
-    FadeTransition _findForwardFadeTransition(Finder of) {
-      return _findWidgets<FadeTransition>(of).where(
+    FadeTransition findForwardFadeTransition(Finder of) {
+      return findWidgets<FadeTransition>(of).where(
             (FadeTransition t) => t.opacity.status == AnimationStatus.forward,
       ).first;
     }
 
-    ScaleTransition _findForwardScaleTransition(Finder of) {
-      return _findWidgets<ScaleTransition>(of).where(
+    ScaleTransition findForwardScaleTransition(Finder of) {
+      return findWidgets<ScaleTransition>(of).where(
             (ScaleTransition t) => t.scale.status == AnimationStatus.forward,
       ).first;
     }
@@ -189,9 +189,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    ScaleTransition widget1Scale = _findForwardScaleTransition(find.text('Page 1'));
-    ScaleTransition widget2Scale = _findForwardScaleTransition(find.text('Page 2'));
-    FadeTransition widget2Opacity = _findForwardFadeTransition(find.text('Page 2'));
+    ScaleTransition widget1Scale = findForwardScaleTransition(find.text('Page 1'));
+    ScaleTransition widget2Scale = findForwardScaleTransition(find.text('Page 2'));
+    FadeTransition widget2Opacity = findForwardFadeTransition(find.text('Page 2'));
 
     // Page 1 is enlarging, starts from 1.0.
     expect(widget1Scale.scale.value, greaterThan(1.0));
@@ -211,9 +211,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    widget1Scale = _findForwardScaleTransition(find.text('Page 1'));
-    widget2Scale = _findForwardScaleTransition(find.text('Page 2'));
-    widget2Opacity = _findForwardFadeTransition(find.text('Page 2'));
+    widget1Scale = findForwardScaleTransition(find.text('Page 1'));
+    widget2Scale = findForwardScaleTransition(find.text('Page 2'));
+    widget2Opacity = findForwardFadeTransition(find.text('Page 2'));
 
     // Page 1 is narrowing down, but still larger than 1.0.
     expect(widget1Scale.scale.value, greaterThan(1.0));

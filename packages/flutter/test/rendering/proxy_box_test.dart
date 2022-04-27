@@ -384,7 +384,7 @@ void main() {
     ));
   });
 
-  void _testFittedBoxWithClipRectLayer() {
+  void testFittedBoxWithClipRectLayer() {
     _testLayerReuse<ClipRectLayer>(RenderFittedBox(
       fit: BoxFit.cover,
       clipBehavior: Clip.hardEdge,
@@ -395,7 +395,7 @@ void main() {
     ));
   }
 
-  void _testFittedBoxWithTransformLayer() {
+  void testFittedBoxWithTransformLayer() {
     _testLayerReuse<TransformLayer>(RenderFittedBox(
       fit: BoxFit.fill,
       // Inject opacity under the clip to force compositing.
@@ -406,20 +406,20 @@ void main() {
   }
 
   test('RenderFittedBox reuses ClipRectLayer', () {
-    _testFittedBoxWithClipRectLayer();
+    testFittedBoxWithClipRectLayer();
   });
 
   test('RenderFittedBox reuses TransformLayer', () {
-    _testFittedBoxWithTransformLayer();
+    testFittedBoxWithTransformLayer();
   });
 
   test('RenderFittedBox switches between ClipRectLayer and TransformLayer, and reuses them', () {
-    _testFittedBoxWithClipRectLayer();
+    testFittedBoxWithClipRectLayer();
 
     // clip -> transform
-    _testFittedBoxWithTransformLayer();
+    testFittedBoxWithTransformLayer();
     // transform -> clip
-    _testFittedBoxWithClipRectLayer();
+    testFittedBoxWithClipRectLayer();
   });
 
   test('RenderFittedBox respects clipBehavior', () {
