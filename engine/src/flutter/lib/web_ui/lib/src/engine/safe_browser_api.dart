@@ -966,12 +966,31 @@ class OffScreenCanvas {
         height: height,
       );
       canvasElement!.className = 'gl-canvas';
-      final double cssWidth = width / EnginePlatformDispatcher.browserDevicePixelRatio;
-      final double cssHeight = height / EnginePlatformDispatcher.browserDevicePixelRatio;
-      canvasElement!.style
-        ..position = 'absolute'
-        ..width = '${cssWidth}px'
-        ..height = '${cssHeight}px';
+      _updateCanvasCssSize(canvasElement!);
+    }
+  }
+
+  void _updateCanvasCssSize(html.CanvasElement element) {
+    final double cssWidth = width / EnginePlatformDispatcher.browserDevicePixelRatio;
+    final double cssHeight = height / EnginePlatformDispatcher.browserDevicePixelRatio;
+    element.style
+      ..position = 'absolute'
+      ..width = '${cssWidth}px'
+      ..height = '${cssHeight}px';
+  }
+
+  void resize(int requestedWidth, int requestedHeight) {
+    if(requestedWidth != width && requestedHeight != height) {
+      width = requestedWidth;
+      height = requestedHeight;
+      if(offScreenCanvas != null) {
+        offScreenCanvas!.width = requestedWidth;
+        offScreenCanvas!.height = requestedHeight;
+      } else if (canvasElement != null) {
+        canvasElement!.width = requestedWidth;
+        canvasElement!.height = requestedHeight;
+        _updateCanvasCssSize(canvasElement!);
+      }
     }
   }
 

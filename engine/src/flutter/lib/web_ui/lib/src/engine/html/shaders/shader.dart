@@ -22,6 +22,27 @@ import 'vertex_shaders.dart';
 const double kFltEpsilon = 1.19209290E-07; // == 1 / (2 ^ 23)
 const double kFltEpsilonSquared = 1.19209290E-07 * 1.19209290E-07;
 
+class SharedCanvas {
+  OffScreenCanvas? _canvas;
+  bool _checkedOut = false;
+  GlContext checkOutContext(int width, int height) {
+    assert(!_checkedOut);
+    _checkedOut = true;
+    if(_canvas == null) {
+      _canvas = OffScreenCanvas(width, height);
+    } else {
+      _canvas!.resize(width, height);
+    }
+    return GlContext(_canvas!);
+  }
+
+  void checkInContext() {
+    assert(_checkedOut);
+    _checkedOut = false;
+  }
+}
+SharedCanvas _sharedCanvas = SharedCanvas();
+
 abstract class EngineGradient implements ui.Gradient {
   /// Hidden constructor to prevent subclassing.
   EngineGradient._();
@@ -58,9 +79,7 @@ class GradientSweep extends EngineGradient {
 
     initWebGl();
     // Render gradient into a bitmap and create a canvas pattern.
-    final OffScreenCanvas offScreenCanvas =
-        OffScreenCanvas(widthInPixels, heightInPixels);
-    final GlContext gl = GlContext(offScreenCanvas);
+    final GlContext gl = _sharedCanvas.checkOutContext(widthInPixels, heightInPixels);
     gl.setViewportSize(widthInPixels, heightInPixels);
 
     final NormalizedGradient normalizedGradient =
@@ -82,23 +101,27 @@ class GradientSweep extends EngineGradient {
     final Object gradientMatrix =
           gl.getUniformLocation(glProgram.program, 'm_gradient');
     gl.setUniformMatrix4fv(gradientMatrix, false, matrix4 ?? Matrix4.identity().storage);
-    if (createDataUrl) {
-      return glRenderer!.drawRectToImageUrl(
-          ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
-          gl,
-          glProgram,
-          normalizedGradient,
-          widthInPixels,
-          heightInPixels);
-    } else {
-      return glRenderer!.drawRect(
-          ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
-          gl,
-          glProgram,
-          normalizedGradient,
-          widthInPixels,
-          heightInPixels)!;
-    }
+    final Object result = () {
+      if (createDataUrl) {
+        return glRenderer!.drawRectToImageUrl(
+            ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
+            gl,
+            glProgram,
+            normalizedGradient,
+            widthInPixels,
+            heightInPixels);
+      } else {
+        return glRenderer!.drawRect(
+            ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
+            gl,
+            glProgram,
+            normalizedGradient,
+            widthInPixels,
+            heightInPixels)!;
+      }
+    }();
+    _sharedCanvas.checkInContext();
+    return result;
   }
 
   @override
@@ -222,9 +245,7 @@ class GradientLinear extends EngineGradient {
     assert(widthInPixels > 0 && heightInPixels > 0);
     initWebGl();
     // Render gradient into a bitmap and create a canvas pattern.
-    final OffScreenCanvas offScreenCanvas =
-        OffScreenCanvas(widthInPixels, heightInPixels);
-    final GlContext gl = GlContext(offScreenCanvas);
+    final GlContext gl = _sharedCanvas.checkOutContext(widthInPixels, heightInPixels);
     gl.setViewportSize(widthInPixels, heightInPixels);
 
     final NormalizedGradient normalizedGradient =
@@ -314,27 +335,31 @@ class GradientLinear extends EngineGradient {
     final Object uRes = gl.getUniformLocation(glProgram.program, 'u_resolution');
     gl.setUniform2f(uRes, widthInPixels.toDouble(), heightInPixels.toDouble());
 
-    if (createDataUrl) {
-      return glRenderer!.drawRectToImageUrl(
-        ui.Rect.fromLTWH(0, 0, shaderBounds.width,
-            shaderBounds.height) /* !! shaderBounds */,
-        gl,
-        glProgram,
-        normalizedGradient,
-        widthInPixels,
-        heightInPixels,
-      );
-    } else {
-      return glRenderer!.drawRect(
-        ui.Rect.fromLTWH(0, 0, shaderBounds.width,
-            shaderBounds.height) /* !! shaderBounds */,
-        gl,
-        glProgram,
-        normalizedGradient,
-        widthInPixels,
-        heightInPixels,
-      )!;
-    }
+    final Object result = () {
+      if (createDataUrl) {
+        return glRenderer!.drawRectToImageUrl(
+          ui.Rect.fromLTWH(0, 0, shaderBounds.width,
+              shaderBounds.height) /* !! shaderBounds */,
+          gl,
+          glProgram,
+          normalizedGradient,
+          widthInPixels,
+          heightInPixels,
+        );
+      } else {
+        return glRenderer!.drawRect(
+          ui.Rect.fromLTWH(0, 0, shaderBounds.width,
+              shaderBounds.height) /* !! shaderBounds */,
+          gl,
+          glProgram,
+          normalizedGradient,
+          widthInPixels,
+          heightInPixels,
+        )!;
+      }
+    }();
+    _sharedCanvas.checkInContext();
+    return result;
   }
 
   /// Creates a linear gradient with tiling repeat or mirror.
@@ -490,9 +515,7 @@ class GradientRadial extends EngineGradient {
 
     initWebGl();
     // Render gradient into a bitmap and create a canvas pattern.
-    final OffScreenCanvas offScreenCanvas =
-        OffScreenCanvas(widthInPixels, heightInPixels);
-    final GlContext gl = GlContext(offScreenCanvas);
+    final GlContext gl = _sharedCanvas.checkOutContext(widthInPixels, heightInPixels);
     gl.setViewportSize(widthInPixels, heightInPixels);
 
     final NormalizedGradient normalizedGradient =
@@ -519,23 +542,27 @@ class GradientRadial extends EngineGradient {
     gl.setUniformMatrix4fv(gradientMatrix, false,
         matrix4 == null ? Matrix4.identity().storage : matrix4!);
 
-    if (createDataUrl) {
-      return glRenderer!.drawRectToImageUrl(
-          ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
-          gl,
-          glProgram,
-          normalizedGradient,
-          widthInPixels,
-          heightInPixels);
-    } else {
-      return glRenderer!.drawRect(
-          ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
-          gl,
-          glProgram,
-          normalizedGradient,
-          widthInPixels,
-          heightInPixels)!;
-    }
+    final Object result = () {
+      if (createDataUrl) {
+        return glRenderer!.drawRectToImageUrl(
+            ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
+            gl,
+            glProgram,
+            normalizedGradient,
+            widthInPixels,
+            heightInPixels);
+      } else {
+        return glRenderer!.drawRect(
+            ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
+            gl,
+            glProgram,
+            normalizedGradient,
+            widthInPixels,
+            heightInPixels)!;
+      }
+    }();
+    _sharedCanvas.checkInContext();
+    return result;
   }
 
   /// Creates a radial gradient with tiling repeat or mirror.
