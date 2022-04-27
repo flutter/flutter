@@ -110,6 +110,7 @@ Future<MigrateResult?> computeMigration({
     bool deleteTempDirectories = true,
     List<SupportedPlatform>? platforms,
     bool preferTwoWayMerge = false,
+    bool useFallbackBaseRevision = false;
     required FileSystem fileSystem,
     required Logger logger,
     required MigrateUtils migrateUtils,

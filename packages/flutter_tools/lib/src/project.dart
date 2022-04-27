@@ -35,7 +35,6 @@ enum SupportedPlatform {
   macos,
   web,
   windows,
-  windowsuwp,
   fuchsia,
   root, // Special platform to represent the root project directory
 }
@@ -59,9 +58,6 @@ String? platformToSubdirectoryPrefix(SupportedPlatform platform) {
     }
     case SupportedPlatform.windows: {
       return 'windows';
-    }
-    case SupportedPlatform.windowsuwp: {
-      return 'winuwp';
     }
     case SupportedPlatform.fuchsia: {
       return 'fuchsia';

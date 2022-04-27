@@ -91,6 +91,10 @@ class MigrateStatusCommand extends FlutterCommand {
     }
 
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDirectory);
+    if (!manifestFile.existsSync()) {
+      logger.printError('No migrate manifest in the migrate working directory at ${workingDirectory.path}. Fix the working directory or abandon and restart the migration.');
+      return const FlutterCommandResult(ExitStatus.fail);
+    }
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
 
     if (boolArg('diff') || _verbose) {
