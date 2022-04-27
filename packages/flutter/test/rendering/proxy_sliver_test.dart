@@ -98,10 +98,33 @@ void main() {
     expect(renderSliverAnimatedOpacity.needsCompositing, false);
   });
 
-  test('RenderSliverAnimatedOpacity does composite if it is opaque', () {
+  test('RenderSliverAnimatedOpacity does not composite if it is fully opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
     )..value = 1.0;
+
+    final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
+      opacity: opacityAnimation,
+      sliver: RenderSliverToBoxAdapter(
+        child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      ),
+    );
+
+    final RenderViewport root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 250.0,
+      children: <RenderSliver>[renderSliverAnimatedOpacity],
+    );
+
+    layout(root, phase: EnginePhase.composite);
+    expect(renderSliverAnimatedOpacity.needsCompositing, false);
+  });
+
+  test('RenderSliverAnimatedOpacity does composite if it is partially opaque', () {
+    final Animation<double> opacityAnimation = AnimationController(
+      vsync: FakeTickerProvider(),
+    )..value = 0.5;
 
     final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
       opacity: opacityAnimation,

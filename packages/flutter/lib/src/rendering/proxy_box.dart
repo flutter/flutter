@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
@@ -996,7 +997,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
-      _currentlyIsRepaintBoundary = _alpha! > 0;
+      _currentlyIsRepaintBoundary = _alpha! > 0 && _alpha! < 255;
       if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary)
         markNeedsCompositingBitsUpdate();
       markNeedsCompositedLayerUpdate();
@@ -1005,12 +1006,25 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     }
   }
 
+  /// Snap the opacity layer to the nearest phyiscal pixel to avoid
+  /// an obvious pixel snap when the opacity_layer is dropped.
+  Offset _snapToPhysicalPixels(Offset offset) {
+    final double dpr = RendererBinding.instance.window.devicePixelRatio;
+    final double wdx = (offset.dx * dpr).roundToDouble();
+    final double wdy = (offset.dy * dpr).roundToDouble();
+    return Offset(wdx / dpr, wdy / dpr);
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_alpha == 0) {
       return;
     }
-    super.paint(context, offset);
+    if (!isRepaintBoundary) {
+      super.paint(context, _snapToPhysicalPixels(offset));
+    } else {
+      super.paint(context, offset);
+    }
   }
 
   @override

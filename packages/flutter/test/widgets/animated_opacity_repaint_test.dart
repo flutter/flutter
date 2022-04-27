@@ -32,12 +32,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(RenderTestObject.paintCount, 1);
+    expect(RenderTestObject.paintCount, 2);
 
     controller.stop();
     await tester.pump();
 
-    expect(RenderTestObject.paintCount, 1);
+    expect(RenderTestObject.paintCount, 2);
   });
 
   testWidgets('RenderAnimatedOpacityMixin allows opacity layer to be disposed when animating to 0 opacity', (WidgetTester tester) async {
@@ -55,13 +55,18 @@ void main() {
     );
 
     expect(RenderTestObject.paintCount, 1);
-    expect(tester.layers, contains(isA<OpacityLayer>()));
+    expect(tester.layers, isNot(contains(isA<OpacityLayer>())));
     controller.forward();
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.layers, contains(isA<OpacityLayer>()));
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
 
-    expect(RenderTestObject.paintCount, 1);
+    expect(RenderTestObject.paintCount, 2);
 
     controller.stop();
     await tester.pump();

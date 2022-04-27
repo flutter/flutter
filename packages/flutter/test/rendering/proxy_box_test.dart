@@ -272,7 +272,7 @@ void main() {
     expect(renderAnimatedOpacity.needsCompositing, false);
   });
 
-  test('RenderAnimatedOpacity does composite if it is opaque', () {
+  test('RenderAnimatedOpacity does not composite if it is fully opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: FakeTickerProvider(),
     )..value = 1.0;
@@ -283,7 +283,39 @@ void main() {
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
+    expect(renderAnimatedOpacity.needsCompositing, false);
+  });
+
+  test('RenderAnimatedOpacity does composite if it is partially opaque', () {
+    final Animation<double> opacityAnimation = AnimationController(
+      vsync: FakeTickerProvider(),
+    )..value = 0.5;
+
+    final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
+      opacity: opacityAnimation,
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    );
+
+    layout(renderAnimatedOpacity, phase: EnginePhase.composite);
     expect(renderAnimatedOpacity.needsCompositing, true);
+  });
+
+  test('RenderAnimatedOpacity snaps child to physical pixels when fully opaque', () {
+    RenderOffsetRecorder.lastOffset = Offset.zero;
+    final Animation<double> opacityAnimation = AnimationController(
+      vsync: FakeTickerProvider(),
+    )..value = 1.0;
+
+    final RenderChildAtOffset renderChildAtOffset = RenderChildAtOffset(
+       RenderAnimatedOpacity(
+        opacity: opacityAnimation,
+        child: RenderOffsetRecorder(),
+      )
+    );
+
+    layout(renderChildAtOffset, phase: EnginePhase.composite);
+    expect(RenderOffsetRecorder.lastOffset.dx, closeTo(1.33333, 0.001));
+    expect(RenderOffsetRecorder.lastOffset.dy, closeTo(5.33333, 0.001));
   });
 
   test('RenderAnimatedOpacity reuses its layer', () {
@@ -789,5 +821,27 @@ void expectAssertionError() {
   final bool asserted = errorDetails.toString().contains('Failed assertion');
   if (!asserted) {
     FlutterError.reportError(errorDetails);
+  }
+}
+
+class RenderChildAtOffset extends RenderProxyBox {
+  RenderChildAtOffset(super.child);
+
+  static const Offset coordinates = Offset(1.23123221, 5.231212322);
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    assert(offset == Offset.zero);
+    super.paint(context, coordinates);
+  }
+}
+
+class RenderOffsetRecorder extends RenderProxyBox {
+  static Offset lastOffset = Offset.zero;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    lastOffset = offset;
+    super.paint(context, offset);
   }
 }
