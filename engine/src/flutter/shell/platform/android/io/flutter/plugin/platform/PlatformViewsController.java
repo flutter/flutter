@@ -541,16 +541,18 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   public void attachToView(@NonNull FlutterView newFlutterView) {
     flutterView = newFlutterView;
     // Add wrapper for platform views that use GL texture.
-    for (int viewId = 0; viewId < viewWrappers.size(); viewId++) {
-      flutterView.addView(viewWrappers.get(viewId));
+    for (int index = 0; index < viewWrappers.size(); index++) {
+      final PlatformViewWrapper view = viewWrappers.valueAt(index);
+      flutterView.addView(view);
     }
     // Add wrapper for platform views that are composed at the view hierarchy level.
-    for (int viewId = 0; viewId < platformViewParent.size(); viewId++) {
-      flutterView.addView(platformViewParent.get(viewId));
+    for (int index = 0; index < platformViewParent.size(); index++) {
+      final FlutterMutatorView view = platformViewParent.valueAt(index);
+      flutterView.addView(view);
     }
     // Notify platform views that they are now attached to a FlutterView.
-    for (int platformViewId = 0; platformViewId < platformViews.size(); platformViewId++) {
-      final PlatformView view = platformViews.valueAt(platformViewId);
+    for (int index = 0; index < platformViews.size(); index++) {
+      final PlatformView view = platformViews.valueAt(index);
       view.onFlutterViewAttached(flutterView);
     }
   }
@@ -564,12 +566,14 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    */
   public void detachFromView() {
     // Remove wrapper for platform views that use GL texture.
-    for (int viewId = 0; viewId < viewWrappers.size(); viewId++) {
-      flutterView.removeView(viewWrappers.get(viewId));
+    for (int index = 0; index < viewWrappers.size(); index++) {
+      final PlatformViewWrapper view = viewWrappers.valueAt(index);
+      flutterView.removeView(view);
     }
     // Remove wrapper for platform views that are composed at the view hierarchy level.
-    for (int viewId = 0; viewId < platformViewParent.size(); viewId++) {
-      flutterView.removeView(platformViewParent.get(viewId));
+    for (int index = 0; index < platformViewParent.size(); index++) {
+      final FlutterMutatorView view = platformViewParent.valueAt(index);
+      flutterView.removeView(view);
     }
     destroyOverlaySurfaces();
     removeOverlaySurfaces();
@@ -577,8 +581,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     flutterViewConvertedToImageView = false;
 
     // Notify that the platform view have been detached from FlutterView.
-    for (int platformViewId = 0; platformViewId < platformViews.size(); platformViewId++) {
-      final PlatformView view = platformViews.valueAt(platformViewId);
+    for (int index = 0; index < platformViews.size(); index++) {
+      final PlatformView view = platformViews.valueAt(index);
       view.onFlutterViewDetached();
     }
   }
