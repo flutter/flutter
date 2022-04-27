@@ -53,11 +53,13 @@ class LoggingSocketTest : public ::testing::Test {
     zx::socket local;
     ASSERT_EQ(ZX_OK, zx::socket::create(ZX_SOCKET_DATAGRAM, &local, &socket_));
 
-    fx_logger_config_t config = {.min_severity = FX_LOG_INFO,
-                                 .console_fd = -1,
-                                 .log_service_channel = local.release(),
-                                 .tags = nullptr,
-                                 .num_tags = 0};
+    fx_logger_config_t config = {
+        .min_severity = FX_LOG_INFO,
+        .console_fd = -1,
+        .log_sink_socket = local.release(),
+        .tags = nullptr,
+        .num_tags = 0,
+    };
 
     fx_log_reconfigure(&config);
   }
