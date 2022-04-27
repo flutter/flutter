@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
 import 'scroll_notification.dart';
+import 'scroll_position.dart';
 
 /// A [ScrollNotification] listener for [ScrollNotificationObserver].
 ///
@@ -151,14 +152,27 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification notification) {
-        _notifyListeners(notification);
+    // A ScrollMetricsNotification allows listeners to be notified for an
+    // initial state, as well as if the content dimensions change without
+    // scrolling.
+    return NotificationListener<ScrollMetricsNotification>(
+      onNotification: (ScrollMetricsNotification notification) {
+        _notifyListeners(_ConvertedScrollMetricsNotification(
+          metrics: notification.metrics,
+          context: notification.context,
+          depth: notification.depth,
+        ));
         return false;
       },
-      child: _ScrollNotificationObserverScope(
-        scrollNotificationObserverState: this,
-        child: widget.child,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification notification) {
+          _notifyListeners(notification);
+          return false;
+        },
+        child: _ScrollNotificationObserverScope(
+          scrollNotificationObserverState: this,
+          child: widget.child,
+        ),
       ),
     );
   }
@@ -169,4 +183,12 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     _listeners = null;
     super.dispose();
   }
+}
+
+class _ConvertedScrollMetricsNotification extends ScrollUpdateNotification {
+  _ConvertedScrollMetricsNotification({
+    required super.metrics,
+    required super.context,
+    required super.depth,
+  });
 }
