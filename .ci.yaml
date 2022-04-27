@@ -122,7 +122,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "open_jdk", "version": "11"}
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       os: Mac-12
       cpu: arm64
