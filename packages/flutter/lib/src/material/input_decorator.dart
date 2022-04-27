@@ -1955,7 +1955,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getIconColor(ThemeData themeData) {
-    Color _resolveIconColor(Set<MaterialState> states) {
+    Color resolveIconColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused))
         return themeData.disabledColor;
 
@@ -1970,7 +1970,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       }
     }
     return MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState)
-      ?? MaterialStateProperty.resolveWith(_resolveIconColor).resolve(materialState);
+      ?? MaterialStateProperty.resolveWith(resolveIconColor).resolve(materialState);
   }
 
   Color _getPrefixIconColor(ThemeData themeData) {

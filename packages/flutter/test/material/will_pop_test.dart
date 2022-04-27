@@ -413,7 +413,7 @@ void main() {
       ),
     ];
 
-    Widget _buildNavigator(Key? key, List<Page<dynamic>> pages) {
+    Widget buildNavigator(Key? key, List<Page<dynamic>> pages) {
       return Navigator(
         key: key,
         pages: pages,
@@ -430,9 +430,9 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               contentsSetState = setState;
               if (moveToAnotherNavigator) {
-                return _buildNavigator(const ValueKey<int>(1), pages);
+                return buildNavigator(const ValueKey<int>(1), pages);
               }
-              return _buildNavigator(const ValueKey<int>(2), pages);
+              return buildNavigator(const ValueKey<int>(2), pages);
             },
           ),
         ),

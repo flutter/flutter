@@ -1185,22 +1185,22 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 100));
     expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
 
-    bool _isVisible(Element node) {
-      bool isVisible = true;
+    bool isVisible(Element node) {
+      bool visible = true;
       node.visitAncestorElements((Element ancestor) {
         final RenderObject r = ancestor.renderObject!;
         if (r is RenderAnimatedOpacity && r.opacity.value == 0) {
-          isVisible = false;
+          visible = false;
           return false;
         }
         return true;
       });
-      return isVisible;
+      return visible;
     }
 
     // Of all heroes only one should be visible now.
     final Iterable<Element> elements = find.text('Hero').evaluate();
-    expect(elements.where(_isVisible).length, 1);
+    expect(elements.where(isVisible).length, 1);
 
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));

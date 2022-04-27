@@ -316,7 +316,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           //     finishes. We leave a listener remover for the next call to
           //     properly clean up the existing train hopping.
           TrainHoppingAnimation? newAnimation;
-          void _jumpOnAnimationEnd(AnimationStatus status) {
+          void jumpOnAnimationEnd(AnimationStatus status) {
             switch (status) {
               case AnimationStatus.completed:
               case AnimationStatus.dismissed:
@@ -335,10 +335,10 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
             }
           }
           _trainHoppingListenerRemover = () {
-            nextTrain.removeStatusListener(_jumpOnAnimationEnd);
+            nextTrain.removeStatusListener(jumpOnAnimationEnd);
             newAnimation?.dispose();
           };
-          nextTrain.addStatusListener(_jumpOnAnimationEnd);
+          nextTrain.addStatusListener(jumpOnAnimationEnd);
           newAnimation = TrainHoppingAnimation(
             currentTrain,
             nextTrain,

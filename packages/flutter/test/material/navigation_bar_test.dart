@@ -292,7 +292,7 @@ void main() {
 
 
   testWidgets('Navigation bar semantics', (WidgetTester tester) async {
-    Widget _widget({int selectedIndex = 0}) {
+    Widget widget({int selectedIndex = 0}) {
       return _buildWidget(
         NavigationBar(
           selectedIndex: selectedIndex,
@@ -310,7 +310,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_widget());
+    await tester.pumpWidget(widget());
 
     expect(
       tester.getSemantics(find.text('AC')),
@@ -332,7 +332,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_widget(selectedIndex: 1));
+    await tester.pumpWidget(widget(selectedIndex: 1));
 
     expect(
       tester.getSemantics(find.text('AC')),
@@ -356,7 +356,7 @@ void main() {
   });
 
   testWidgets('Navigation bar semantics with some labels hidden', (WidgetTester tester) async {
-    Widget _widget({int selectedIndex = 0}) {
+    Widget widget({int selectedIndex = 0}) {
       return _buildWidget(
         NavigationBar(
           labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
@@ -375,7 +375,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_widget());
+    await tester.pumpWidget(widget());
 
     expect(
       tester.getSemantics(find.text('AC')),
@@ -397,7 +397,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_widget(selectedIndex: 1));
+    await tester.pumpWidget(widget(selectedIndex: 1));
 
     expect(
       tester.getSemantics(find.text('AC')),
@@ -423,7 +423,7 @@ void main() {
   testWidgets('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
     const int animationMilliseconds = 800;
 
-    Widget _widget({double textScaleFactor = 1}) {
+    Widget widget({double textScaleFactor = 1}) {
       return _buildWidget(
         MediaQuery(
           data: MediaQueryData(textScaleFactor: textScaleFactor),
@@ -444,10 +444,10 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_widget());
+    await tester.pumpWidget(widget());
     final double initialHeight = tester.getSize(find.byType(NavigationBar)).height;
 
-    await tester.pumpWidget(_widget(textScaleFactor: 2));
+    await tester.pumpWidget(widget(textScaleFactor: 2));
     final double newHeight = tester.getSize(find.byType(NavigationBar)).height;
 
     expect(newHeight, equals(initialHeight));
