@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -71,6 +73,54 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
 
       await parser.parsingFuture;
+      await delegate.setNewRouteFuture;
+      await tester.pump();
+      expect(find.text('update'), findsOneWidget);
+    });
+  });
+
+  testWidgets('Interrupts route parsing should not crash', (WidgetTester tester) async {
+    final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
+    provider.value = const RouteInformation(
+      location: 'initial',
+    );
+    final CompleterRouteInformationParser parser = CompleterRouteInformationParser();
+    final SimpleAsyncRouterDelegate delegate = SimpleAsyncRouterDelegate(
+      builder: (BuildContext context, RouteInformation? information) {
+        if (information == null)
+          return const Text('waiting');
+        return Text(information.location!);
+      },
+    );
+    await tester.runAsync(() async {
+      await tester.pumpWidget(buildBoilerPlate(
+        Router<RouteInformation>(
+          routeInformationProvider: provider,
+          routeInformationParser: parser,
+          routerDelegate: delegate,
+        ),
+      ));
+      // Future has not yet completed.
+      expect(find.text('waiting'), findsOneWidget);
+
+      final Completer<void> firstTransactionCompleter = parser.completer;
+
+      // Start a new parsing transaction before the previous one complete.
+      provider.value = const RouteInformation(
+        location: 'update',
+      );
+      await tester.pump();
+      expect(find.text('waiting'), findsOneWidget);
+      // Completing the previous transaction does not cause an update.
+      firstTransactionCompleter.complete();
+      await firstTransactionCompleter.future;
+      await tester.pump();
+      expect(find.text('waiting'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // Make sure the new transaction can complete and update correctly.
+      parser.completer.complete();
+      await parser.completer.future;
       await delegate.setNewRouteFuture;
       await tester.pump();
       expect(find.text('update'), findsOneWidget);
@@ -1406,6 +1456,24 @@ class SimpleAsyncRouteInformationParser extends RouteInformationParser<RouteInfo
   @override
   Future<RouteInformation> parseRouteInformation(RouteInformation information) {
     return parsingFuture = Future<RouteInformation>.value(information);
+  }
+
+  @override
+  RouteInformation restoreRouteInformation(RouteInformation configuration) {
+    return configuration;
+  }
+}
+
+class CompleterRouteInformationParser extends RouteInformationParser<RouteInformation> {
+  CompleterRouteInformationParser();
+
+  late Completer<void> completer;
+
+  @override
+  Future<RouteInformation> parseRouteInformation(RouteInformation information) async {
+    completer = Completer<void>();
+    await completer.future;
+    return SynchronousFuture<RouteInformation>(information);
   }
 
   @override

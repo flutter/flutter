@@ -23,7 +23,7 @@ final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment:
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
   '-fembed-bitcode-marker',
-  '-miphoneos-version-min=9.0',
+  '-miphoneos-version-min=11.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -85,7 +85,7 @@ void main() {
             '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         '-dynamiclib',
         '-fembed-bitcode-marker',
-        '-miphonesimulator-version-min=9.0',
+        '-miphonesimulator-version-min=11.0',
         '-Xlinker',
         '-rpath',
         '-Xlinker',
@@ -186,8 +186,8 @@ void main() {
         'platform': 'ios',
         'data': <String, Object>{
           'A': 'B',
-        }
-      }
+        },
+      },
     ));
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');

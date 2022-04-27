@@ -84,13 +84,13 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 TextField(
                   controller: billingAddress1,
                   autofillHints: const <String>[
-                    AutofillHints.streetAddressLine1
+                    AutofillHints.streetAddressLine1,
                   ],
                 ),
                 TextField(
                   controller: billingAddress2,
                   autofillHints: const <String>[
-                    AutofillHints.streetAddressLine2
+                    AutofillHints.streetAddressLine2,
                   ],
                 ),
               ],
@@ -109,7 +109,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               TextField(
                 controller: creditCardSecurityCode,
                 autofillHints: const <String>[
-                  AutofillHints.creditCardSecurityCode
+                  AutofillHints.creditCardSecurityCode,
                 ],
               ),
             ],

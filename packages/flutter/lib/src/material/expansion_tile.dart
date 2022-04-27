@@ -9,6 +9,7 @@ import 'colors.dart';
 import 'expansion_tile_theme.dart';
 import 'icons.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
 import 'theme.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
@@ -48,7 +49,7 @@ class ExpansionTile extends StatefulWidget {
   /// the tile to reveal or hide the [children]. The [initiallyExpanded] property must
   /// be non-null.
   const ExpansionTile({
-    Key? key,
+    super.key,
     this.leading,
     required this.title,
     this.subtitle,
@@ -74,8 +75,7 @@ class ExpansionTile extends StatefulWidget {
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
            'are aligned in a column, not a row. Try to use another constant.',
-       ),
-       super(key: key);
+       );
 
   /// A widget to display before the title.
   ///

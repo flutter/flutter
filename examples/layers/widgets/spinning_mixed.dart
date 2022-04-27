@@ -17,7 +17,7 @@ void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex
 
 // Solid color, Widget version
 class Rectangle extends StatelessWidget {
-  const Rectangle(this.color, { Key? key }) : super(key: key);
+  const Rectangle(this.color, { super.key });
 
   final Color color;
 

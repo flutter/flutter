@@ -43,7 +43,7 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
     for (final Vector3 point in <Vector3>[
       quad.point1,
       quad.point2,
-      quad.point3
+      quad.point3,
     ]) {
       if (point.x < xMin) {
         xMin = point.x;

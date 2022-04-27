@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -37,6 +39,26 @@ class _MatchesMethodCall extends Matcher {
         newDescription.add(' with arguments: ').addDescriptionOf(arguments);
     return newDescription;
   }
+}
+
+// Used to set window.viewInsets since the real ui.WindowPadding has only a
+// private constructor.
+class _TestWindowPadding implements ui.WindowPadding {
+  const _TestWindowPadding({
+    required this.bottom,
+  });
+
+  @override
+  final double bottom;
+
+  @override
+  double get top => 0.0;
+
+  @override
+  double get left => 0.0;
+
+  @override
+  double get right => 0.0;
 }
 
 late TextEditingController controller;
@@ -106,6 +128,51 @@ void main() {
     expect(tester.testTextInput.editingState!['text'], equals('test'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
+
+  // Related issue: https://github.com/flutter/flutter/issues/98115
+  testWidgets('ScheduleShowCaretOnScreen with no animation when the window changes metrics', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final Widget widget = MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          controller: scrollController,
+          child: Column(
+            children: <Widget>[
+              Column(
+                children: List<Widget>.generate(
+                  5,
+                  (_) {
+                    return Container(
+                      height: 1200.0,
+                      color: Colors.black12,
+                    );
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 20,
+                child: EditableText(
+                  controller: TextEditingController(),
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(),
+                  cursorColor: Colors.red,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+    await tester.showKeyboard(find.byType(EditableText));
+    TestWidgetsFlutterBinding.instance.window.viewInsetsTestValue = const _TestWindowPadding(bottom: 500);
+    await tester.pump();
+
+    // The offset of the scrollController should change immediately after window changes its metrics.
+    final double offsetAfter = scrollController.offset;
+    expect(offsetAfter, isNot(0.0));
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/34538.
   testWidgets('RTL arabic correct caret placement after trailing whitespace', (WidgetTester tester) async {
@@ -502,6 +569,58 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
+  testWidgets('EditableText sends enableInteractiveSelection to config', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              enableInteractiveSelection: true,
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              keyboardType: TextInputType.multiline,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textInputConfiguration.enableInteractiveSelection, isTrue);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              enableInteractiveSelection: false,
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              keyboardType: TextInputType.multiline,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textInputConfiguration.enableInteractiveSelection, isFalse);
+  });
+
   testWidgets('selection persists when unfocused', (WidgetTester tester) async {
     const TextEditingValue value = TextEditingValue(
       text: 'test test',
@@ -539,6 +658,36 @@ void main() {
 
     expect(controller.value, value);
     expect(focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('use DefaultSelectionStyle for selection color', (WidgetTester tester) async {
+    const TextEditingValue value = TextEditingValue(
+      text: 'test test',
+      selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 5, extentOffset: 7),
+    );
+    const Color selectionColor = Colors.orange;
+    controller.value = value;
+    await tester.pumpWidget(
+      DefaultSelectionStyle(
+        selectionColor: selectionColor,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              keyboardType: TextInputType.multiline,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        )
+      ),
+    );
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.renderEditable.selectionColor, selectionColor);
   });
 
   testWidgets('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {
@@ -5033,6 +5182,53 @@ void main() {
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
   }, skip: kIsWeb); // [intended]
+
+
+  testWidgets('text selection handle visibility for long text', (WidgetTester tester) async {
+    // long text which is scrollable based on given box size
+    const String testText =
+        'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.';
+    final TextEditingController controller =
+        TextEditingController(text: testText);
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: EditableText(
+              controller: controller,
+              showSelectionHandles: true,
+              focusNode: FocusNode(),
+              style: Typography.material2018().black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // scroll to a text that is outside of the inital visible rect
+    scrollController.jumpTo(151);
+    await tester.pump();
+
+    // long press on a word to trigger a select
+    await tester.longPressAt(const Offset(20, 15));
+    // wait for adjustments of scroll area
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // assert not jumped to top
+    expect(scrollController.offset, equals(151));
+  });
 
   const String testText = 'Now is the time for\n' // 20
       'all good people\n'                         // 20 + 16 => 36
@@ -11731,6 +11927,107 @@ void main() {
     await tester.pump();
     expect(receivedIntent, isFalse);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/100585.
+  testWidgets('can paste and remove field', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'text');
+    late StateSetter setState;
+    bool showField = true;
+    final _CustomTextSelectionControls controls = _CustomTextSelectionControls(
+      onPaste: () {
+        setState(() {
+          showField = false;
+        });
+      },
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          if (!showField) {
+            return const Placeholder();
+          }
+          return EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: controls,
+          );
+        },
+      ),
+    ));
+
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    await tester.longPress(find.byType(EditableText));
+    await tester.pump();
+    expect(state.showToolbar(), isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
+
+    await tester.tap(find.text('Paste'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+  // On web, the text selection toolbar paste button is handled by the browser.
+  }, skip: kIsWeb); // [intended]
+
+  // Regression test for https://github.com/flutter/flutter/issues/100585.
+  testWidgets('can cut and remove field', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'text');
+    late StateSetter setState;
+    bool showField = true;
+    final _CustomTextSelectionControls controls = _CustomTextSelectionControls(
+      onCut: () {
+        setState(() {
+          showField = false;
+        });
+      },
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          if (!showField) {
+            return const Placeholder();
+          }
+          return EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: controls,
+          );
+        },
+      ),
+    ));
+
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    await tester.tapAt(textOffsetToPosition(tester, 2));
+    state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pump();
+    expect(state.showToolbar(), isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Cut'), findsOneWidget);
+
+    await tester.tap(find.text('Cut'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+  // On web, the text selection toolbar cut button is handled by the browser.
+  }, skip: kIsWeb); // [intended]
 }
 
 class UnsettableController extends TextEditingController {
@@ -11844,20 +12141,135 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 }
 
+// Fake text selection controls that call a callback when paste happens.
+class _CustomTextSelectionControls extends TextSelectionControls {
+  _CustomTextSelectionControls({
+    this.onPaste,
+    this.onCut,
+  });
+
+  static const double _kToolbarContentDistanceBelow = 20.0;
+  static const double _kToolbarContentDistance = 8.0;
+
+  final VoidCallback? onPaste;
+  final VoidCallback? onCut;
+
+  @override
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus, Offset? lastSecondaryTapDownPosition) {
+    final Offset selectionMidpoint = position;
+    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
+      ? endpoints[1]
+      : endpoints[0];
+    final Offset anchorAbove = Offset(
+      globalEditableRegion.left + selectionMidpoint.dx,
+      globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance
+    );
+    final Offset anchorBelow = Offset(
+      globalEditableRegion.left + selectionMidpoint.dx,
+      globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
+    );
+    return _CustomTextSelectionToolbar(
+      anchorAbove: anchorAbove,
+      anchorBelow: anchorBelow,
+      handlePaste: () => handlePaste(delegate),
+      handleCut: () => handleCut(delegate),
+    );
+  }
+
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+    return Container();
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.zero;
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+
+  @override
+  bool canCut(TextSelectionDelegate delegate) {
+    return true;
+  }
+
+  @override
+  bool canPaste(TextSelectionDelegate delegate) {
+    return true;
+  }
+
+  @override
+  Future<void> handlePaste(TextSelectionDelegate delegate) {
+    onPaste?.call();
+    return super.handlePaste(delegate);
+  }
+
+  @override
+  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
+    onCut?.call();
+    return super.handleCut(delegate, clipboardStatus);
+  }
+}
+
+// A fake text selection toolbar with only a paste button.
+class _CustomTextSelectionToolbar extends StatefulWidget {
+  const _CustomTextSelectionToolbar({
+    required this.anchorAbove,
+    required this.anchorBelow,
+    this.handlePaste,
+    this.handleCut,
+  });
+
+  final Offset anchorAbove;
+  final Offset anchorBelow;
+  final VoidCallback? handlePaste;
+  final VoidCallback? handleCut;
+
+  @override
+  _CustomTextSelectionToolbarState createState() => _CustomTextSelectionToolbarState();
+}
+
+class _CustomTextSelectionToolbarState extends State<_CustomTextSelectionToolbar> {
+  @override
+  Widget build(BuildContext context) {
+    return TextSelectionToolbar(
+      anchorAbove: widget.anchorAbove,
+      anchorBelow: widget.anchorBelow,
+      toolbarBuilder: (BuildContext context, Widget child) {
+        return Container(
+          color: Colors.pink,
+          child: child,
+        );
+      },
+      children: <Widget>[
+        TextSelectionToolbarTextButton(
+          padding: TextSelectionToolbarTextButton.getPadding(0, 2),
+          onPressed: widget.handleCut,
+          child: const Text('Cut'),
+        ),
+        TextSelectionToolbarTextButton(
+          padding: TextSelectionToolbarTextButton.getPadding(1, 2),
+          onPressed: widget.handlePaste,
+          child: const Text('Paste'),
+        ),
+      ],
+    );
+  }
+}
+
 class CustomStyleEditableText extends EditableText {
   CustomStyleEditableText({
-    Key? key,
-    required TextEditingController controller,
-    required Color cursorColor,
-    required FocusNode focusNode,
-    required TextStyle style,
+    super.key,
+    required super.controller,
+    required super.cursorColor,
+    required super.focusNode,
+    required super.style,
   }) : super(
-          key: key,
-          controller: controller,
-          cursorColor: cursorColor,
           backgroundCursorColor: Colors.grey,
-          focusNode: focusNode,
-          style: style,
         );
   @override
   CustomStyleEditableTextState createState() =>
@@ -11876,10 +12288,10 @@ class CustomStyleEditableTextState extends EditableTextState {
 
 class TransformedEditableText extends StatefulWidget {
   const TransformedEditableText({
-    Key? key,
+    super.key,
     required this.offset,
     required this.transformButtonKey,
-  }) : super(key: key);
+  });
 
   final Offset offset;
   final Key transformButtonKey;
@@ -11927,7 +12339,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
 }
 
 class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
-  const NoImplicitScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const NoImplicitScrollPhysics({ super.parent });
 
   @override
   bool get allowImplicitScrolling => false;
@@ -11939,7 +12351,7 @@ class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
 }
 
 class SkipPainting extends SingleChildRenderObjectWidget {
-  const SkipPainting({ Key? key, required Widget child }): super(key: key, child: child);
+  const SkipPainting({ super.key, required Widget super.child });
 
   @override
   SkipPaintingRenderObject createRenderObject(BuildContext context) => SkipPaintingRenderObject();

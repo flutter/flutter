@@ -12,6 +12,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'navigation_bar.dart';
 import 'navigation_rail_theme.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 
 /// A material widget that is meant to be displayed at the left or right of an
@@ -43,6 +44,13 @@ import 'theme.dart';
 /// `_selectedIndex` is updated by the `onDestinationSelected` callback.
 ///
 /// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of [NavigationRail] widget used within a Scaffold with 3
+/// [NavigationRailDestination]s, as described in: https://m3.material.io/components/navigation-rail/overview
+///
+/// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -78,7 +86,7 @@ class NavigationRail extends StatefulWidget {
   ///
   /// Typically used within a [Row] that defines the [Scaffold.body] property.
   const NavigationRail({
-    Key? key,
+    super.key,
     this.backgroundColor,
     this.extended = false,
     this.leading,
@@ -104,8 +112,7 @@ class NavigationRail extends StatefulWidget {
         assert(minExtendedWidth == null || minExtendedWidth > 0),
         assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
         assert(extended != null),
-        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none)),
-        super(key: key);
+        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none));
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
   /// contents.
@@ -752,13 +759,12 @@ class _RailDestination extends StatelessWidget {
 /// indicator will be a stadium shape.
 class _AddIndicator extends StatelessWidget {
   const _AddIndicator({
-    Key? key,
     required this.addIndicator,
     required this.isCircular,
     required this.indicatorColor,
     required this.indicatorAnimation,
     required this.child,
-  }) : super(key: key);
+  });
 
   final bool addIndicator;
   final bool isCircular;
@@ -881,11 +887,9 @@ class NavigationRailDestination {
 
 class _ExtendedNavigationRailAnimation extends InheritedWidget {
   const _ExtendedNavigationRailAnimation({
-    Key? key,
     required this.animation,
-    required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(child != null);
 
   final Animation<double> animation;
 
@@ -951,12 +955,10 @@ class _DefaultsM2 extends NavigationRailThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_90
+// Generated version v0_92
 class _TokenDefaultsM3 extends NavigationRailThemeData {
-  _TokenDefaultsM3(BuildContext context)
-      : _theme = Theme.of(context),
-        _colors = Theme.of(context).colorScheme,
-        super(
+  _TokenDefaultsM3(this.context)
+      : super(
           elevation: 0.0,
           groupAlignment: -1,
           labelType: NavigationRailLabelType.none,
@@ -965,17 +967,18 @@ class _TokenDefaultsM3 extends NavigationRailThemeData {
           minExtendedWidth: 256,
         );
 
-  final ThemeData _theme;
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override Color? get backgroundColor => _colors.surface;
 
   @override TextStyle? get unselectedLabelTextStyle {
-    return _theme.textTheme.labelMedium!.copyWith(color: _colors.onSurface);
+    return _textTheme.labelMedium!.copyWith(color: _colors.onSurface);
   }
 
   @override TextStyle? get selectedLabelTextStyle {
-    return _theme.textTheme.labelMedium!.copyWith(color: _colors.onSurface);
+    return _textTheme.labelMedium!.copyWith(color: _colors.onSurface);
   }
 
   @override IconThemeData? get unselectedIconTheme {

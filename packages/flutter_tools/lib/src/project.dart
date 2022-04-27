@@ -35,7 +35,6 @@ enum SupportedPlatform {
   macos,
   web,
   windows,
-  windowsuwp,
   fuchsia,
   root, // Special platform to represent the root project directory
 }
@@ -194,9 +193,6 @@ class FlutterProject {
   /// The Windows sub project of this project.
   late final WindowsProject windows = WindowsProject.fromFlutter(this);
 
-  /// The Windows UWP sub project of this project.
-  late final WindowsUwpProject windowsUwp = WindowsUwpProject.fromFlutter(this);
-
   /// The Fuchsia sub project of this project.
   late final FuchsiaProject fuchsia = FuchsiaProject._(this);
 
@@ -236,7 +232,7 @@ class FlutterProject {
   /// The generated Dart plugin registrant for non-web platforms.
   File get dartPluginRegistrant => dartTool
     .childDirectory('flutter_build')
-    .childFile('generated_main.dart');
+    .childFile('dart_plugin_registrant.dart');
 
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
@@ -277,9 +273,6 @@ class FlutterProject {
     }
     if (windows.existsSync()) {
       platforms.add(SupportedPlatform.windows);
-    }
-    if (windowsUwp.existsSync()) {
-      platforms.add(SupportedPlatform.windowsuwp);
     }
     if (fuchsia.existsSync()) {
       platforms.add(SupportedPlatform.fuchsia);
@@ -336,7 +329,6 @@ class FlutterProject {
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
-      winUwpPlatform: featureFlags.isWindowsUwpEnabled && windowsUwp.existsSync(),
       deprecationBehavior: deprecationBehavior,
     );
   }
@@ -350,7 +342,6 @@ class FlutterProject {
     bool macOSPlatform = false,
     bool windowsPlatform = false,
     bool webPlatform = false,
-    bool winUwpPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
     if (!directory.existsSync() || isPlugin) {
@@ -375,9 +366,6 @@ class FlutterProject {
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    if (winUwpPlatform) {
-      await windowsUwp.ensureReadyForPlatformSpecificTooling();
-    }
     await injectPlugins(
       this,
       androidPlatform: androidPlatform,
@@ -386,7 +374,6 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       webPlatform: webPlatform,
-      winUwpPlatform: winUwpPlatform,
     );
   }
 
@@ -589,6 +576,11 @@ class AndroidProject extends FlutterProjectPlatform {
         'agpVersion': gradle.templateAndroidGradlePluginVersion,
         'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
         'gradleVersion': gradle.templateDefaultGradleVersion,
+        'gradleVersionForModule': gradle.templateDefaultGradleVersionForModule,
+        'compileSdkVersion': gradle.compileSdkVersion,
+        'minSdkVersion': gradle.minSdkVersion,
+        'ndkVersion': gradle.ndkVersion,
+        'targetSdkVersion': gradle.targetSdkVersion,
       },
       printStatusWhenWriting: false,
     );

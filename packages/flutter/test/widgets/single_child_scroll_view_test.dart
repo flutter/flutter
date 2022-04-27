@@ -13,15 +13,12 @@ import 'semantics_tester.dart';
 
 class TestScrollPosition extends ScrollPositionWithSingleContext {
   TestScrollPosition({
-    required ScrollPhysics physics,
+    required super.physics,
     required ScrollContext state,
-    double initialPixels = 0.0,
-    ScrollPosition? oldPosition,
+    double super.initialPixels,
+    super.oldPosition,
   }) : super(
-    physics: physics,
     context: state,
-    initialPixels: initialPixels,
-    oldPosition: oldPosition,
   );
 }
 

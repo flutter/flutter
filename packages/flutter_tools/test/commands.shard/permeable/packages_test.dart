@@ -106,8 +106,8 @@ void main() {
       );
     }
 
-    const List<String> pubOutput = <String>[
-      '.packages',
+    final List<String> pubOutput = <String>[
+      globals.fs.path.join('.dart_tool', 'package_config.json'),
       'pubspec.lock',
     ];
 
@@ -503,8 +503,10 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       final IOSink stdin = IOSink(StreamController<List<int>>().sink);
       processManager.addCommand(
-        FakeCommand(command: const <String>[
-          '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', '--foo', 'bar'],
+        FakeCommand(
+          command: const <String>[
+            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', '--foo', 'bar',
+          ],
           stdin: stdin,
         ),
       );
@@ -531,8 +533,10 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       final IOSink stdin = IOSink(StreamController<List<int>>().sink);
       processManager.addCommand(
-        FakeCommand(command: const <String>[
-          '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'token', 'list'],
+        FakeCommand(
+          command: const <String>[
+            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'token', 'list',
+          ],
           stdin: stdin,
         ),
       );
@@ -557,8 +561,10 @@ void main() {
     testUsingContext('upgrade does not check for pubspec.yaml if -h/--help is passed', () async {
       Cache.flutterRoot = '';
       processManager.addCommand(
-        FakeCommand(command: const <String>[
-          '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'upgrade', '-h'],
+        FakeCommand(
+          command: const <String>[
+            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'upgrade', '-h',
+          ],
           stdin:  IOSink(StreamController<List<int>>().sink),
         ),
       );

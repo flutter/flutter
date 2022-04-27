@@ -25,6 +25,7 @@ const String _defaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
 const String _defaultNewCodepointsPath = 'codepoints';
 const String _defaultOldCodepointsPath = 'bin/cache/artifacts/material_fonts/codepoints';
 const String _defaultFontFamily = 'MaterialIcons';
+const String _defaultDemoFilePath = '/tmp/new_icons_demo.dart';
 
 const String _beginGeneratedMark = '// BEGIN GENERATED ICONS';
 const String _endGeneratedMark = '// END GENERATED ICONS';
@@ -216,7 +217,12 @@ void main(List<String> args) {
     stdout.write(newIconsContents);
   } else {
     iconsFile.writeAsStringSync(newIconsContents);
-    _regenerateCodepointsFile(oldCodepointsFile, newTokenPairMap);
+
+    final SplayTreeMap<String, String> sortedNewTokenPairMap = SplayTreeMap<String, String>.of(newTokenPairMap);
+    _regenerateCodepointsFile(oldCodepointsFile, sortedNewTokenPairMap);
+
+    sortedNewTokenPairMap.removeWhere((String key, String value) => oldTokenPairMap.containsKey(key));
+    _generateIconDemo(File(_defaultDemoFilePath), sortedNewTokenPairMap);
   }
 }
 
@@ -276,7 +282,7 @@ String _regenerateIconsFile(
     bool enforceSafetyChecks,
   ) {
   final List<Icon> newIcons = tokenPairMap.entries
-      .map((MapEntry<String, String> entry) => Icon(entry, fontFamily))
+      .map((MapEntry<String, String> entry) => Icon(entry, fontFamily: fontFamily))
       .toList();
   newIcons.sort((Icon a, Icon b) => a._compareTo(b));
 
@@ -379,18 +385,54 @@ bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCode
   }
 }
 
-void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> newTokenPairMap) {
+void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> tokenPairMap) {
   stderr.writeln('Regenerating old codepoints file ${oldCodepointsFile.path}');
 
   final StringBuffer buf = StringBuffer();
-  final SplayTreeMap<String, String> sortedNewTokenPairMap = SplayTreeMap<String, String>.of(newTokenPairMap);
-  sortedNewTokenPairMap.forEach((String key, String value) => buf.writeln('$key $value'));
+  tokenPairMap.forEach((String key, String value) => buf.writeln('$key $value'));
   oldCodepointsFile.writeAsStringSync(buf.toString());
+}
+
+void _generateIconDemo(File demoFilePath, Map<String, String> tokenPairMap) {
+  if (tokenPairMap.isEmpty) {
+    stderr.writeln('No new icons, skipping generating icon demo');
+    return;
+  }
+  stderr.writeln('Generating icon demo at $_defaultDemoFilePath');
+
+  final StringBuffer newIconUsages = StringBuffer();
+  for (final MapEntry<String, String> entry in tokenPairMap.entries) {
+    newIconUsages.writeln(Icon(entry).usage);
+  }
+  final String demoFileContents = '''
+    import 'package:flutter/material.dart';
+
+    void main() => runApp(const IconDemo());
+
+    class IconDemo extends StatelessWidget {
+      const IconDemo({ Key? key }) : super(key: key);
+
+      @override
+      Widget build(BuildContext context) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            body: Wrap(
+              children: const [
+                ${newIconUsages.toString()}
+              ],
+            ),
+          ),
+        );
+      }
+    }
+    ''';
+  demoFilePath.writeAsStringSync(demoFileContents);
 }
 
 class Icon {
   // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"}).
-  Icon(MapEntry<String, String> tokenPair, this.fontFamily) {
+  Icon(MapEntry<String, String> tokenPair, {this.fontFamily = _defaultFontFamily}) {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
@@ -432,7 +474,7 @@ class Icon {
     '_monoline_filled',
     '_outlined',
     '_rounded',
-    '_sharp'
+    '_sharp',
   ];
 
   late String id; // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
@@ -449,6 +491,8 @@ class Icon {
 
   String get dartDoc =>
       '<i class="material-icons$htmlSuffix md-36">$shortId</i> &#x2014; $family icon named "$name"$style';
+
+  String get usage => 'Icon(Icons.$flutterId),';
 
   String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId)
       ? ', matchTextDirection: true'

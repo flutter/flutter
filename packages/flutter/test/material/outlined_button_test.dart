@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,11 +14,13 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('OutlinedButton, OutlinedButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+    final bool material3 = theme.useMaterial3;
 
     // Enabled OutlinedButton
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: colorScheme),
+        theme: theme,
         home: Center(
           child: OutlinedButton(
             onPressed: () { },
@@ -39,12 +42,14 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
 
-    expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
-    RoundedRectangleBorder materialShape = material.shape! as RoundedRectangleBorder;
-    expect(materialShape.side, BorderSide(color: colorScheme.onSurface.withOpacity(0.12)));
-    expect(materialShape.borderRadius, const BorderRadius.all(Radius.circular(4.0)));
+    expect(material.shape, material3
+      ? StadiumBorder(side: BorderSide(color: colorScheme.outline))
+      : RoundedRectangleBorder(
+          side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+          borderRadius: const BorderRadius.all(Radius.circular(4))
+        ));
 
     expect(material.textStyle!.color, colorScheme.primary);
     expect(material.textStyle!.fontFamily, 'Roboto');
@@ -59,8 +64,13 @@ void main() {
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start the splash animation
     await tester.pump(const Duration(milliseconds: 100)); // splash is underway
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..circle(color: colorScheme.primary.withAlpha(0x1f))); // splash color is primary(0.12)
+
+    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
+    // the effect with paint methods.
+    if (!material3) {
+      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+      expect(inkFeatures, paints..circle(color: colorScheme.primary.withOpacity(0.12)));
+    }
 
     await gesture.up();
     await tester.pumpAndSettle();
@@ -72,12 +82,14 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
 
-    expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
-    materialShape = material.shape! as RoundedRectangleBorder;
-    expect(materialShape.side, BorderSide(color: colorScheme.onSurface.withOpacity(0.12)));
-    expect(materialShape.borderRadius, const BorderRadius.all(Radius.circular(4.0)));
+    expect(material.shape, material3
+      ? StadiumBorder(side: BorderSide(color: colorScheme.outline))
+      : RoundedRectangleBorder(
+          side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+          borderRadius: const BorderRadius.all(Radius.circular(4))
+        ));
 
     expect(material.textStyle!.color, colorScheme.primary);
     expect(material.textStyle!.fontFamily, 'Roboto');
@@ -89,7 +101,7 @@ void main() {
     final Key iconButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: colorScheme),
+        theme: theme,
         home: Center(
           child: OutlinedButton.icon(
             key: iconButtonKey,
@@ -113,12 +125,14 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
 
-    expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
-    materialShape = material.shape! as RoundedRectangleBorder;
-    expect(materialShape.side, BorderSide(color: colorScheme.onSurface.withOpacity(0.12)));
-    expect(materialShape.borderRadius, const BorderRadius.all(Radius.circular(4.0)));
+    expect(material.shape, material3
+        ? StadiumBorder(side: BorderSide(color: colorScheme.outline))
+        : RoundedRectangleBorder(
+            side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+            borderRadius: const BorderRadius.all(Radius.circular(4))
+        ));
 
     expect(material.textStyle!.color, colorScheme.primary);
     expect(material.textStyle!.fontFamily, 'Roboto');
@@ -129,7 +143,7 @@ void main() {
     // Disabled OutlinedButton
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: colorScheme),
+        theme: theme,
         home: const Center(
           child: OutlinedButton(
             onPressed: null,
@@ -146,12 +160,14 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
 
-    expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
-    materialShape = material.shape! as RoundedRectangleBorder;
-    expect(materialShape.side, BorderSide(color: colorScheme.onSurface.withOpacity(0.12)));
-    expect(materialShape.borderRadius, const BorderRadius.all(Radius.circular(4.0)));
+    expect(material.shape, material3
+        ? StadiumBorder(side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)))
+        : RoundedRectangleBorder(
+        side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+        borderRadius: const BorderRadius.all(Radius.circular(4))
+    ));
 
     expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
     expect(material.textStyle!.fontFamily, 'Roboto');
@@ -530,6 +546,10 @@ void main() {
             child: OutlinedButton(
               style: ButtonStyle(
                 side: MaterialStateProperty.resolveWith<BorderSide>(getBorderSide),
+                // Test assumes a rounded rect for the shape
+                shape: ButtonStyleButton.allOrNull(
+                  const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4)))
+                ),
               ),
               onPressed: () {},
               focusNode: focusNode,
@@ -807,13 +827,14 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Theme(
-          data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, textTheme: Typography.englishLike2014),
           child: Container(
             alignment: Alignment.topLeft,
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
                 shape: const RoundedRectangleBorder(), // default border radius is 0
                 backgroundColor: fillColor,
+                minimumSize: const Size(64, 36),
               ).copyWith(
                 side: MaterialStateProperty.resolveWith<BorderSide>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled))
@@ -831,10 +852,6 @@ void main() {
         ),
       );
     }
-
-    // 116 = 16 + 'button'.length * 14 + 16, horizontal padding = 16
-    const Rect clipRect = Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
-    final Path clipPath = Path()..addRect(clipRect);
     final Finder outlinedButton = find.byType(OutlinedButton);
 
     BorderSide getBorderSide() {
@@ -852,12 +869,6 @@ void main() {
     // Expect that the button is disabled and painted with the disabled border color.
     expect(tester.widget<OutlinedButton>(outlinedButton).enabled, false);
     expect(getBorderSide(), disabledBorderSide);
-    _checkPhysicalLayer(
-      tester.element(outlinedButton),
-      fillColor,
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
 
     // Pump a new button with a no-op onPressed callback to make it enabled.
     await tester.pumpWidget(
@@ -875,23 +886,11 @@ void main() {
     // Wait for the border's color to change to pressed
     await tester.pump(const Duration(milliseconds: 200));
     expect(getBorderSide(), pressedBorderSide);
-    _checkPhysicalLayer(
-      tester.element(outlinedButton),
-      fillColor,
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
 
     // Tap gesture completes, button returns to its initial configuration.
     await gesture.up();
     await tester.pumpAndSettle();
     expect(getBorderSide(), enabledBorderSide);
-    _checkPhysicalLayer(
-      tester.element(outlinedButton),
-      fillColor,
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
   });
 
   testWidgets('OutlinedButton has no clip by default', (WidgetTester tester) async {
@@ -963,20 +962,24 @@ void main() {
 
   testWidgets('OutlinedButton scales textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: Center(
-            child: OutlinedButton(
-              style: ButtonStyle(
-                // Specifying minimumSize to mimic the original minimumSize for
-                // RaisedButton so that the corresponding button size matches
-                // the original version of this test.
-                minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+      Theme(
+        // Force Material 2 typography.
+        data: ThemeData(textTheme: Typography.englishLike2014),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: Center(
+              child: OutlinedButton(
+                style: ButtonStyle(
+                  // Specifying minimumSize to mimic the original minimumSize for
+                  // RaisedButton so that the corresponding button size matches
+                  // the original version of this test.
+                  minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+                ),
+                onPressed: () {},
+                child: const Text('ABC'),
               ),
-              onPressed: () {},
-              child: const Text('ABC'),
             ),
           ),
         ),
@@ -988,20 +991,24 @@ void main() {
 
     // textScaleFactor expands text, but not button.
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(textScaleFactor: 1.3),
-          child: Center(
-            child: OutlinedButton(
-              style: ButtonStyle(
-                // Specifying minimumSize to mimic the original minimumSize for
-                // RaisedButton so that the corresponding button size matches
-                // the original version of this test.
-                minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+      Theme(
+        // Force Material 2 typography.
+        data: ThemeData(textTheme: Typography.englishLike2014),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(textScaleFactor: 1.3),
+            child: Center(
+              child: OutlinedButton(
+                style: ButtonStyle(
+                  // Specifying minimumSize to mimic the original minimumSize for
+                  // RaisedButton so that the corresponding button size matches
+                  // the original version of this test.
+                  minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+                ),
+                onPressed: () {},
+                child: const Text('ABC'),
               ),
-              onPressed: () {},
-              child: const Text('ABC'),
             ),
           ),
         ),
@@ -1016,14 +1023,18 @@ void main() {
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(textScaleFactor: 3.0),
-          child: Center(
-            child: OutlinedButton(
-              onPressed: () {},
-              child: const Text('ABC'),
+      Theme(
+        // Force Material 2 typography.
+        data: ThemeData(textTheme: Typography.englishLike2014),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(textScaleFactor: 3.0),
+            child: Center(
+              child: OutlinedButton(
+                onPressed: () {},
+                child: const Text('ABC'),
+              ),
             ),
           ),
         ),
@@ -1037,7 +1048,6 @@ void main() {
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
   });
-
 
   testWidgets('OutlinedButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
     bool didPressButton = false;
@@ -1077,11 +1087,15 @@ void main() {
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
       return tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(textTheme: Typography.englishLike2014),
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Center(
               child: OutlinedButton(
-                style: ButtonStyle(visualDensity: visualDensity),
+                style: ButtonStyle(
+                  visualDensity: visualDensity,
+                  minimumSize: ButtonStyleButton.allOrNull(const Size(64, 36)),
+                ),
                 key: key,
                 onPressed: () {},
                 child: useText
@@ -1202,7 +1216,15 @@ void main() {
           testWidgets(testName, (WidgetTester tester) async {
             await tester.pumpWidget(
               MaterialApp(
-                theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+                theme: ThemeData(
+                  colorScheme: const ColorScheme.light(),
+                  // Force Material 2 defaults for the typography and size
+                  // default values as the test was designed against these settings.
+                  textTheme: Typography.englishLike2014,
+                  outlinedButtonTheme: OutlinedButtonThemeData(
+                    style: OutlinedButton.styleFrom(minimumSize: const Size(64, 36)),
+                  ),
+                ),
                 home: Builder(
                   builder: (BuildContext context) {
                     return MediaQuery(
@@ -1433,8 +1455,8 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    // Default splashFactory (from Theme.of().splashFactory), one splash circle drawn.
-    await tester.pumpWidget(buildFrame());
+    // InkRipple.splashFactory, one splash circle drawn.
+    await tester.pumpWidget(buildFrame(splashFactory: InkRipple.splashFactory));
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
       final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
@@ -1445,7 +1467,56 @@ void main() {
     }
   });
 
-  testWidgets('OultinedButton.icon does not overflow', (WidgetTester tester) async {
+  testWidgets('OutlinedButton uses InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: OutlinedButton(
+            onPressed: () { },
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    final InkWell buttonInkWell = tester.widget<InkWell>(find.descendant(
+      of: find.byType(OutlinedButton),
+      matching: find.byType(InkWell),
+    ));
+
+    if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
+      expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
+    } else {
+      expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('OutlinedButton uses InkRipple when useMaterial3 is false', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: OutlinedButton(
+            onPressed: () { },
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    final InkWell buttonInkWell = tester.widget<InkWell>(find.descendant(
+      of: find.byType(OutlinedButton),
+      matching: find.byType(InkWell),
+    ));
+    expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('OutlinedButton.icon does not overflow', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/77815
     await tester.pumpWidget(
       MaterialApp(
@@ -1509,6 +1580,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(textTheme: Typography.englishLike2014),
         home: Scaffold(
           body: Center(
             child: Column(
@@ -1652,29 +1724,6 @@ void main() {
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
-}
-
-PhysicalModelLayer _findPhysicalLayer(Element element) {
-  expect(element, isNotNull);
-  RenderObject? object = element.renderObject;
-  while (object != null && object is! RenderRepaintBoundary && object is! RenderView) {
-    object = object.parent as RenderObject?;
-  }
-  expect(object!.debugLayer, isNotNull);
-  expect(object.debugLayer!.firstChild, isA<PhysicalModelLayer>());
-  final PhysicalModelLayer layer = object.debugLayer!.firstChild! as PhysicalModelLayer;
-  final Layer child = layer.firstChild!;
-  return child is PhysicalModelLayer ? child : layer;
-}
-
-void _checkPhysicalLayer(Element element, Color expectedColor, { Path? clipPath, Rect? clipRect }) {
-  final PhysicalModelLayer expectedLayer = _findPhysicalLayer(element);
-  expect(expectedLayer.elevation, 0.0);
-  expect(expectedLayer.color, expectedColor);
-  if (clipPath != null) {
-    expect(clipRect, isNotNull);
-    expect(expectedLayer.clipPath, coversSameAreaAs(clipPath, areaToCompare: clipRect!.inflate(10.0)));
-  }
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {

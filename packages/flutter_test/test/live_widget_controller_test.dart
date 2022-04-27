@@ -8,7 +8,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class CountButton extends StatefulWidget {
-  const CountButton({Key? key}) : super(key: key);
+  const CountButton({super.key});
 
   @override
   State<CountButton> createState() => _CountButtonState();
@@ -30,7 +30,7 @@ class _CountButtonState extends State<CountButton> {
 }
 
 class AnimateSample extends StatefulWidget {
-  const AnimateSample({Key? key}) : super(key: key);
+  const AnimateSample({super.key});
 
   @override
   State<AnimateSample> createState() => _AnimateSampleState();
@@ -129,8 +129,8 @@ void main() {
               position: location,
               buttons: kSecondaryMouseButton,
               pointer: 1,
-            )
-          ])
+            ),
+          ]),
       ],
       PointerEventRecord(const Duration(milliseconds: 80), <PointerEvent>[
         PointerUpEvent(
@@ -138,8 +138,8 @@ void main() {
           position: location,
           buttons: kSecondaryMouseButton,
           pointer: 1,
-        )
-      ])
+        ),
+      ]),
     ];
     final List<Duration> timeDiffs =
         await controller.handlePointerEventRecord(records);

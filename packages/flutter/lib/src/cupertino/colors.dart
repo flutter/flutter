@@ -598,13 +598,13 @@ class CupertinoColors {
 ///
 /// ```dart
 /// CupertinoButton(
-///   child: child,
 ///   // CupertinoDynamicColor works out of box in a CupertinoButton.
 ///   color: const CupertinoDynamicColor.withBrightness(
 ///     color: CupertinoColors.white,
 ///     darkColor: CupertinoColors.black,
 ///   ),
 ///   onPressed: () { },
+///   child: child,
 /// )
 /// ```
 /// {@end-tool}

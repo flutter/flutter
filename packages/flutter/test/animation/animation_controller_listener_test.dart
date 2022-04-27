@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 
@@ -39,24 +38,9 @@ void main() {
 
 class _TestAnimationController extends AnimationController {
   _TestAnimationController({
-    double? value,
-    Duration? duration,
-    Duration? reverseDuration,
-    String? debugLabel,
-    double lowerBound = 0.0,
-    double upperBound = 1.0,
-    AnimationBehavior animationBehavior = AnimationBehavior.normal,
-    required TickerProvider vsync,
-  }) : super(
-      value: value,
-      duration: duration,
-      reverseDuration: reverseDuration,
-      debugLabel: debugLabel,
-      lowerBound: lowerBound,
-      upperBound: upperBound,
-      animationBehavior: animationBehavior,
-      vsync: vsync,
-  );
+    super.duration,
+    required super.vsync,
+  });
 
   void publicNotifyListeners() {
     super.notifyListeners();

@@ -72,7 +72,7 @@ class TestDispatcher extends ActionDispatcher {
 }
 
 class TestDispatcher1 extends TestDispatcher {
-  const TestDispatcher1({PostInvokeCallback? postInvoke}) : super(postInvoke: postInvoke);
+  const TestDispatcher1({super.postInvoke});
 }
 
 void main() {
@@ -1470,7 +1470,7 @@ void main() {
                   setState = stateSetter;
                   return Actions(
                     actions: <Type, Action<Intent>> {
-                      if (action2LookupContext != null) LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: action2LookupContext!)
+                      if (action2LookupContext != null) LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: action2LookupContext!),
                     },
                     child: Builder(
                       builder: (BuildContext context3) {
@@ -1579,7 +1579,7 @@ void main() {
                                 context: context2,
                               ),
                               context: context3,
-                            )
+                            ),
                           },
                           child: Builder(
                             builder: (BuildContext context4) {
@@ -1843,7 +1843,7 @@ class LogInvocationContextAction extends ContextAction<LogIntent> {
 }
 
 class LogInvocationButDeferIsEnabledAction extends LogInvocationAction {
-  LogInvocationButDeferIsEnabledAction({ required String actionName }) : super(actionName: actionName);
+  LogInvocationButDeferIsEnabledAction({ required super.actionName });
 
   // Defer `isActionEnabled` to the overridable action.
   @override
@@ -1852,10 +1852,10 @@ class LogInvocationButDeferIsEnabledAction extends LogInvocationAction {
 
 class RedirectOutputAction extends LogInvocationAction {
   RedirectOutputAction({
-      required String actionName,
-      bool enabled = true,
+      required super.actionName,
+      super.enabled,
       required this.newLog,
-  }) : super(actionName: actionName, enabled: enabled);
+  });
 
   final List<String> newLog;
 

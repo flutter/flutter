@@ -89,14 +89,14 @@ void main() {
 
     testWithoutContext('Flutter macOS desktop help string', () {
       expect(flutterMacOSDesktopFeature.generateHelpMessage(),
-      'Enable or disable beta-quality support for desktop on macOS. '
+      'Enable or disable support for desktop on macOS. '
       'This setting will take effect on the master, beta, and stable channels. '
       'Newer beta versions are available on the beta channel.');
     });
 
     testWithoutContext('Flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
-      'Enable or disable beta-quality support for desktop on Linux. '
+      'Enable or disable support for desktop on Linux. '
       'This setting will take effect on the master, beta, and stable channels. '
       'Newer beta versions are available on the beta channel.');
     });
@@ -365,34 +365,6 @@ void main() {
       platform.environment = <String, String>{'FLUTTER_WINDOWS': 'true'};
 
       expect(featureFlags.isWindowsEnabled, true);
-    });
-
-    // Windows UWP desktop
-
-    testWithoutContext('Flutter Windows UWP desktop off by default on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-
-      expect(featureFlags.isWindowsUwpEnabled, false);
-    });
-
-    testWithoutContext('Flutter Windows UWP desktop enabled with config on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-      testConfig.setValue('enable-windows-uwp-desktop', true);
-
-      expect(featureFlags.isWindowsUwpEnabled, true);
-    });
-
-    testWithoutContext('Flutter Windows UWP desktop off by default on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-
-      expect(featureFlags.isWindowsUwpEnabled, false);
-    });
-
-    testWithoutContext('Flutter Windows UWP desktop not enabled with config on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      testConfig.setValue('enable-windows-uwp-desktop', true);
-
-      expect(featureFlags.isWindowsUwpEnabled, false);
     });
   });
 }

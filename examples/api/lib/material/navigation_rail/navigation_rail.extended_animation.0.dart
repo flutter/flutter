@@ -13,15 +13,11 @@ void main() => runApp(const MyApp());
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  static const String _title = 'NavigationRail.extendedAnimation Sample';
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: _title,
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyNavigationRail(),
+        body: MyNavigationRail(),
       ),
     );
   }
@@ -78,9 +74,16 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
         // This is the main content.
         Expanded(
           child: Center(
-            child: Text('selectedIndex: $_selectedIndex'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text('Tap on FloatingActionButton to expand'),
+                const SizedBox(height: 20),
+                Text('selectedIndex: $_selectedIndex'),
+              ],
+            ),
           ),
-        )
+        ),
       ],
     );
   }

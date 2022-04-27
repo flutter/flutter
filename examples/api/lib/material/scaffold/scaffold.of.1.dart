@@ -53,7 +53,7 @@ class MyStatelessWidget extends StatelessWidget {
                               onPressed: () {
                                 Navigator.pop(context);
                               },
-                            )
+                            ),
                           ],
                         ),
                       ),

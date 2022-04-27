@@ -151,7 +151,7 @@ abstract class Repository {
         upstreamRemote.name,
         '--',
         upstreamRemote.url,
-        checkoutDirectory.path
+        checkoutDirectory.path,
       ],
       'Cloning $name repo',
       workingDirectory: parentDirectory.path,
@@ -302,7 +302,7 @@ abstract class Repository {
         'merge-base',
         '--is-ancestor',
         possibleDescendant,
-        possibleAncestor
+        possibleAncestor,
       ],
       'verify $possibleAncestor is a direct ancestor of $possibleDescendant.',
       allowNonZeroExitCode: true,
@@ -467,26 +467,20 @@ abstract class Repository {
 class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
-    String name = 'framework',
-    Remote upstreamRemote = const Remote(
+    super.name = 'framework',
+    super.upstreamRemote = const Remote(
         name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
-    bool localUpstream = false,
-    String? previousCheckoutLocation,
-    String initialRef = FrameworkRepository.defaultBranch,
-    Remote? mirrorRemote,
+    super.localUpstream,
+    super.previousCheckoutLocation,
+    String super.initialRef = FrameworkRepository.defaultBranch,
+    super.mirrorRemote,
     List<String>? additionalRequiredLocalBranches,
   }) : super(
-          name: name,
-          upstreamRemote: upstreamRemote,
-          mirrorRemote: mirrorRemote,
-          initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
-          localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          previousCheckoutLocation: previousCheckoutLocation,
           requiredLocalBranches: <String>[
             ...?additionalRequiredLocalBranches,
             ...kReleaseChannels,
@@ -620,6 +614,39 @@ class FrameworkRepository extends Repository {
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
 
+  /// Create a release candidate branch version file.
+  ///
+  /// This file allows for easily traversing what candidadate branch was used
+  /// from a release channel.
+  ///
+  /// Returns [true] if the version file was updated and a commit is needed.
+  Future<bool> updateCandidateBranchVersion(
+    String branch, {
+    @visibleForTesting File? versionFile,
+  }) async {
+    assert(branch.isNotEmpty);
+    versionFile ??= (await checkoutDirectory)
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('release-candidate-branch.version');
+    if (versionFile.existsSync()) {
+      final String oldCandidateBranch = versionFile.readAsStringSync();
+      if (oldCandidateBranch.trim() == branch.trim()) {
+        stdio.printTrace(
+          'Tried to update the candidate branch but version file is already up to date at: $branch',
+        );
+        return false;
+      }
+    }
+    stdio.printStatus('Create ${versionFile.path} containing $branch');
+    versionFile.writeAsStringSync(
+      // Version files have trailing newlines
+      '${branch.trim()}\n',
+      flush: true,
+    );
+    return true;
+  }
+
   /// Update this framework's engine version file.
   ///
   /// Returns [true] if the version file was updated and a commit is needed.
@@ -724,26 +751,20 @@ class HostFrameworkRepository extends FrameworkRepository {
 class EngineRepository extends Repository {
   EngineRepository(
     this.checkouts, {
-    String name = 'engine',
-    String initialRef = EngineRepository.defaultBranch,
-    Remote upstreamRemote = const Remote(
+    super.name = 'engine',
+    String super.initialRef = EngineRepository.defaultBranch,
+    super.upstreamRemote = const Remote(
         name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
-    bool localUpstream = false,
-    String? previousCheckoutLocation,
-    Remote? mirrorRemote,
+    super.localUpstream,
+    super.previousCheckoutLocation,
+    super.mirrorRemote,
     List<String>? additionalRequiredLocalBranches,
   }) : super(
-          name: name,
-          upstreamRemote: upstreamRemote,
-          mirrorRemote: mirrorRemote,
-          initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
-          localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          previousCheckoutLocation: previousCheckoutLocation,
           requiredLocalBranches: additionalRequiredLocalBranches ?? const <String>[],
         );
 

@@ -41,6 +41,7 @@ import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
@@ -59,6 +60,9 @@ typedef DwdsLauncher = Future<Dwds> Function({
   bool spawnDds,
   bool enableDevtoolsLaunch,
   DevtoolsLauncher devtoolsLauncher,
+  bool launchDevToolsInNewWindow,
+  SdkConfigurationProvider sdkConfigurationProvider,
+  bool emitDebugEvents,
 });
 
 // A minimal index for projects that do not yet support web.
@@ -263,7 +267,7 @@ class WebAssetServer implements AssetReader {
           final String result =
               await globals.fs.file(uri.toFilePath()).readAsString();
           return shelf.Response.ok(result, headers: <String, String>{
-            HttpHeaders.contentTypeHeader: 'application/javascript'
+            HttpHeaders.contentTypeHeader: 'application/javascript',
           });
         }
         return innerHandler(request);
@@ -271,7 +275,7 @@ class WebAssetServer implements AssetReader {
     }
 
     logging.Logger.root.level = logging.Level.ALL;
-    logging.Logger.root.onRecord.listen(_log);
+    logging.Logger.root.onRecord.listen(log);
 
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
@@ -809,6 +813,7 @@ class WebDevFS implements DevFS {
           'stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile(
           'manifest.json', '{"info":"manifest not generated in run mode."}');
+      webAssetServer.writeFile('flutter.js', flutter_js.generateFlutterJsFile());
       webAssetServer.writeFile('flutter_service_worker.js',
           '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
@@ -999,11 +1004,22 @@ class ReleaseAssetServer {
   }
 }
 
-void _log(logging.LogRecord event) {
+@visibleForTesting
+void log(logging.LogRecord event) {
   final String error = event.error == null? '': 'Error: ${event.error}';
   if (event.level >= logging.Level.SEVERE) {
     globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
   } else if (event.level == logging.Level.WARNING) {
+    // TODO(elliette): Remove the following message suppressions after DWDS is
+    // >13.1.0, https://github.com/flutter/flutter/issues/101639
+    const String dartUri = 'DartUri';
+    if (event.loggerName == dartUri) {
+      const String webSqlWarning = 'Unresolved uri: dart:web_sql';
+      const String uiWarning = 'Unresolved uri: dart:ui';
+      if (event.message == webSqlWarning || event.message == uiWarning) {
+        return;
+      }
+    }
     globals.printWarning('${event.loggerName}: ${event.message}$error');
   } else  {
     globals.printTrace('${event.loggerName}: ${event.message}$error');

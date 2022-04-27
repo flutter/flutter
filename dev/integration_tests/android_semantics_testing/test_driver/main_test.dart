@@ -120,29 +120,7 @@ void main() {
         // Ideally this should test the case where there is nothing on the
         // clipboard as well, but there is no reliable way to clear the
         // clipboard on Android devices.
-        final SerializableFinder normalTextField = find.descendant(
-          of: find.byValueKey(normalTextFieldKeyValue),
-          matching: find.byType('Semantics'),
-          firstMatchOnly: true,
-        );
-        await driver.tap(normalTextField);
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.enterText('hello world');
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.tap(normalTextField);
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-        await driver.tap(normalTextField);
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.tap(find.text('Select all'));
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.tap(find.text('Copy'));
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-        await driver.enterText('');
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        // Go back to previous page and forward again to unfocus the field.
-        await driver.tap(find.byValueKey(backButtonKeyValue));
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await driver.tap(find.text(textFieldRoute));
+        await driver.requestData('setClipboard#Hello World');
         await Future<void>.delayed(const Duration(milliseconds: 500));
       });
 

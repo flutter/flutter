@@ -277,7 +277,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           if (globals.fs.isDirectorySync(path))
             ..._findTests(globals.fs.directory(path))
           else
-            globals.fs.path.normalize(globals.fs.path.absolute(path))
+            globals.fs.path.normalize(globals.fs.path.absolute(path)),
       ];
     }
 
@@ -378,8 +378,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
-        packagesPath: globals.fs.file(buildInfo.packagesPath)
-          .parent.parent.childFile('.packages').path
+        packagesPath: buildInfo.packagesPath
       );
     }
 

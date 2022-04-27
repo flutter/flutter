@@ -117,6 +117,7 @@ class FlutterOptions {
   static const String kInitializeFromDill = 'initialize-from-dill';
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const String kFatalWarnings = 'fatal-warnings';
+  static const String kUseApplicationBinary = 'use-application-binary';
 }
 
 /// flutter command categories for usage.
@@ -152,11 +153,11 @@ abstract class FlutterCommand extends Command<void> {
     ],
     'canvaskit': <String>[
       'FLUTTER_WEB_AUTO_DETECT=false',
-      'FLUTTER_WEB_USE_SKIA=true'
+      'FLUTTER_WEB_USE_SKIA=true',
     ],
     'html': <String>[
       'FLUTTER_WEB_AUTO_DETECT=false',
-      'FLUTTER_WEB_USE_SKIA=false'
+      'FLUTTER_WEB_USE_SKIA=false',
     ],
   };
 
@@ -606,6 +607,16 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesApplicationBinaryOption() {
+    argParser.addOption(
+      FlutterOptions.kUseApplicationBinary,
+      help: 'Specify a pre-built application binary to use when running. For Android applications, '
+        'this must be the path to an APK. For iOS applications, the path to an IPA. Other device types '
+        'do not yet support prebuilt application binaries.',
+      valueHelp: 'path/to/app.apk',
+    );
+  }
+
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
@@ -948,6 +959,16 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableImpellerFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-impeller',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Whether to enable the experimental Impeller rendering engine. '
+              'Impeller is currently only supported on iOS. This flag will '
+              'be ignored when targeting other platforms.',
+    );
+  }
+
   /// Compute the [BuildInfo] for the current flutter command.
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.
@@ -1280,8 +1301,14 @@ abstract class FlutterCommand extends Command<void> {
     if (shouldUpdateCache) {
       // First always update universal artifacts, as some of these (e.g.
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
-      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
-      await globals.cache.updateAll(await requiredArtifacts);
+      final bool offline;
+      if (argParser.options.containsKey('offline')) {
+        offline = boolArg('offline');
+      } else {
+        offline = false;
+      }
+      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal}, offline: offline);
+      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
     }
     globals.cache.releaseLock();
 
@@ -1564,10 +1591,6 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
-    case TargetPlatform.windows_uwp_x64:
-      if (featureFlags.isWindowsUwpEnabled) {
-        return DevelopmentArtifact.windowsUwp;
-      }
       return null;
   }
 }

@@ -193,11 +193,11 @@ Widget buildFrame({
 
 class TestApp extends StatefulWidget {
   const TestApp({
-    Key? key,
+    super.key,
     required this.textDirection,
     required this.child,
     this.mediaSize,
-  }) : super(key: key);
+  });
 
   final TextDirection textDirection;
   final Widget child;
@@ -3322,7 +3322,7 @@ void main() {
                   alignment: buttonAlignment ?? AlignmentDirectional.centerStart,
                   value: 'enabled',
                   child: const Text('enabled'),
-                )
+                ),
               ],
             ),
           ),
@@ -3573,7 +3573,7 @@ void main() {
       value,
       'Two',
       'Free',
-      'Four'
+      'Four',
     ].map<DropdownMenuItem<String>>((String value) {
       return DropdownMenuItem<String>(
         value: value,

@@ -90,7 +90,7 @@ void main() {
       "rangeValueIndicatorShape: Instance of 'PaddleRangeSliderValueIndicatorShape'",
       'showValueIndicator: always',
       'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
-      'mouseCursor: MaterialStateMouseCursor(clickable)'
+      'mouseCursor: MaterialStateMouseCursor(clickable)',
     ]);
   });
 
@@ -1134,6 +1134,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        // physical model
+        ..rrect()
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 24.0, 302.0,
           topLeft: const Radius.circular(2.0),

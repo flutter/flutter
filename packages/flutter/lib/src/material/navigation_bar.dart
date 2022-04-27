@@ -12,6 +12,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'navigation_bar_theme.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -52,7 +53,7 @@ class NavigationBar extends StatelessWidget {
   /// The value of [destinations] must be a list of two or more
   /// [NavigationDestination] values.
   const NavigationBar({
-    Key? key,
+    super.key,
     this.animationDuration,
     this.selectedIndex = 0,
     required this.destinations,
@@ -62,8 +63,7 @@ class NavigationBar extends StatelessWidget {
     this.height,
     this.labelBehavior,
   }) :  assert(destinations != null && destinations.length >= 2),
-        assert(0 <= selectedIndex && selectedIndex < destinations.length),
-        super(key: key);
+        assert(0 <= selectedIndex && selectedIndex < destinations.length);
 
   /// Determines the transition time for each destination as it goes between
   /// selected and unselected.
@@ -134,8 +134,8 @@ class NavigationBar extends StatelessWidget {
 
   VoidCallback _handleTap(int index) {
     return onDestinationSelected != null
-        ? () => onDestinationSelected!(index)
-        : () {};
+      ? () => onDestinationSelected!(index)
+      : () {};
   }
 
   @override
@@ -225,12 +225,12 @@ class NavigationDestination extends StatelessWidget {
   /// Creates a navigation bar destination with an icon and a label, to be used
   /// in the [NavigationBar.destinations].
   const NavigationDestination({
-    Key? key,
+    super.key,
     required this.icon,
     this.selectedIcon,
     required this.label,
     this.tooltip,
-  }) : super(key: key);
+  });
 
   /// The [Widget] (usually an [Icon]) that's displayed for this
   /// [NavigationDestination].
@@ -350,12 +350,11 @@ class NavigationDestination extends StatelessWidget {
 class _NavigationDestinationBuilder extends StatelessWidget {
   /// Builds a destination (icon + label) to use in a Material 3 [NavigationBar].
   const _NavigationDestinationBuilder({
-    Key? key,
     required this.buildIcon,
     required this.buildLabel,
     required this.label,
     this.tooltip,
-  }) : super(key: key);
+  });
 
   /// Builds the icon for an destination in a [NavigationBar].
   ///
@@ -427,14 +426,13 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// Adds the information needed to build a navigation destination to the
   /// [child] and descendants.
   const _NavigationDestinationInfo({
-    Key? key,
     required this.index,
     required this.totalNumberOfDestinations,
     required this.selectedAnimation,
     required this.labelBehavior,
     required this.onTap,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// Which destination index is this in the navigation bar.
   ///
@@ -514,14 +512,14 @@ class NavigationIndicator extends StatelessWidget {
   /// Builds an indicator, usually used in a stack behind the icon of a
   /// navigation bar destination.
   const NavigationIndicator({
-    Key? key,
+    super.key,
     required this.animation,
     this.color,
     this.width = 64,
     this.height = 32,
     this.borderRadius = const BorderRadius.all(Radius.circular(16)),
     this.shape,
-  }) : super(key: key);
+  });
 
   /// Determines the scale of the indicator.
   ///
@@ -622,10 +620,9 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// Builds a widget to layout an icon + label for a destination in a Material
   /// 3 [NavigationBar].
   const _NavigationBarDestinationLayout({
-    Key? key,
     required this.icon,
     required this.label,
-  }) : super(key: key);
+  });
 
   /// The icon widget that sits on top of the label.
   ///
@@ -688,7 +685,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
 class _DestinationLayoutAnimationBuilder extends StatelessWidget {
   /// Builds a child with the appropriate animation [Curve] based on the
   /// [_NavigationDestinationInfo.labelBehavior].
-  const _DestinationLayoutAnimationBuilder({Key? key, required this.builder}) : super(key: key);
+  const _DestinationLayoutAnimationBuilder({required this.builder});
 
   /// Builds the child of this widget.
   ///
@@ -731,9 +728,8 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
   /// Adds the appropriate semantics for navigation bar destinations to the
   /// [child].
   const _NavigationBarDestinationSemantics({
-    Key? key,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// The widget that should receive the destination semantics.
   final Widget child;
@@ -776,10 +772,9 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
 class _NavigationBarDestinationTooltip extends StatelessWidget {
   /// Adds a tooltip to the [child] widget.
   const _NavigationBarDestinationTooltip({
-    Key? key,
     required this.message,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// The text that is rendered in the tooltip when it appears.
   final String message;
@@ -901,10 +896,9 @@ class _ClampTextScaleFactor extends StatelessWidget {
   /// Clamps the text scale factor of descendants by modifying the [MediaQuery]
   /// surrounding [child].
   const _ClampTextScaleFactor({
-    Key? key,
     this.upperLimit = double.infinity,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// The maximum amount that the text scale factor should be for the [child]
   /// widget.
@@ -940,11 +934,10 @@ class _ClampTextScaleFactor extends StatelessWidget {
 class _StatusTransitionWidgetBuilder extends StatusTransitionWidget {
   /// Creates a widget that rebuilds when the given animation changes status.
   const _StatusTransitionWidgetBuilder({
-    Key? key,
-    required Animation<double> animation,
+    required super.animation,
     required this.builder,
     this.child,
-  }) : super(animation: animation, key: key);
+  });
 
   /// Called every time the [animation] changes [AnimationStatus].
   final TransitionBuilder builder;
@@ -999,12 +992,11 @@ class _SelectableAnimatedBuilder extends StatefulWidget {
   /// Builds and maintains an [AnimationController] that will animate from 0 to
   /// 1 and back depending on when [isSelected] is true.
   const _SelectableAnimatedBuilder({
-    Key? key,
     required this.isSelected,
     this.duration = const Duration(milliseconds: 200),
     this.alwaysDoFullAnimation = false,
     required this.builder,
-  }) : super(key: key);
+  });
 
   /// When true, the widget will animate an animation controller from 0 to 1.
   ///
@@ -1098,12 +1090,11 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
 /// are removed when this widget is disposed.
 class _CurvedAnimationBuilder extends StatefulWidget {
   const _CurvedAnimationBuilder({
-    Key? key,
     required this.animation,
     required this.curve,
     required this.reverseCurve,
     required this.builder,
-  }) : super(key: key);
+  });
 
   final Animation<double> animation;
   final Curve curve;
@@ -1216,19 +1207,18 @@ class _Defaults extends NavigationBarThemeData {
 // These defaults are generated from the Material Design Token
 // database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_90
+// Generated version v0_92
 class _TokenDefaultsM3 extends NavigationBarThemeData {
-  _TokenDefaultsM3(BuildContext context)
-      : _theme = Theme.of(context),
-        _colors = Theme.of(context).colorScheme,
-        super(
+  _TokenDefaultsM3(this.context)
+      : super(
           height: 80.0,
           elevation: 3.0,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         );
 
-  final ThemeData _theme;
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   // With Material 3, the NavigationBar uses an overlay blend for the
   // default color regardless of light/dark mode. This should be handled
@@ -1252,7 +1242,7 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
 
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-    final TextStyle style = _theme.textTheme.labelMedium!;
+    final TextStyle style = _textTheme.labelMedium!;
       return style.apply(color: states.contains(MaterialState.selected)
         ? _colors.onSurface
         : _colors.onSurfaceVariant

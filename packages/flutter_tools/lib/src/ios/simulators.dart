@@ -319,13 +319,12 @@ class SimDevice {
 
 class IOSSimulator extends Device {
   IOSSimulator(
-    String id, {
+    super.id, {
       required this.name,
       required this.simulatorCategory,
       required SimControl simControl,
     }) : _simControl = simControl,
          super(
-           id,
            category: Category.mobile,
            platformType: PlatformType.ios,
            ephemeral: true,
@@ -474,7 +473,7 @@ class IOSSimulator extends Device {
         if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
         if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
         '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
-        if (route != null) '--route=$route'
+        if (route != null) '--route=$route',
       ],
     ];
 

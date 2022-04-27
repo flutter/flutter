@@ -52,7 +52,16 @@ String? _findMatchId(List<String> idList, String idPattern) {
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, androidArm, androidArm64 ,ios, fuchsia, fake, windows }
+enum DeviceOperatingSystem {
+  android,
+  androidArm,
+  androidArm64,
+  fake,
+  fuchsia,
+  ios,
+  macos,
+  windows,
+}
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -71,6 +80,8 @@ abstract class DeviceDiscovery {
         return IosDeviceDiscovery();
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
+      case DeviceOperatingSystem.macos:
+        return MacosDeviceDiscovery();
       case DeviceOperatingSystem.windows:
         return WindowsDeviceDiscovery();
       case DeviceOperatingSystem.fake:
@@ -342,6 +353,40 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   }
 }
 
+class MacosDeviceDiscovery implements DeviceDiscovery {
+  factory MacosDeviceDiscovery() {
+    return _instance ??= MacosDeviceDiscovery._();
+  }
+
+  MacosDeviceDiscovery._();
+
+  static MacosDeviceDiscovery? _instance;
+
+  static const MacosDevice _device = MacosDevice();
+
+  @override
+  Future<Map<String, HealthCheckResult>> checkDevices() async {
+    return <String, HealthCheckResult>{};
+  }
+
+  @override
+  Future<void> chooseWorkingDevice() async { }
+
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async { }
+
+  @override
+  Future<List<String>> discoverDevices() async {
+    return <String>['macos'];
+  }
+
+  @override
+  Future<void> performPreflightTasks() async { }
+
+  @override
+  Future<Device> get workingDevice  async => _device;
+}
+
 class WindowsDeviceDiscovery implements DeviceDiscovery {
   factory WindowsDeviceDiscovery() {
     return _instance ??= WindowsDeviceDiscovery._();
@@ -374,7 +419,6 @@ class WindowsDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Device> get workingDevice  async => _device;
-
 }
 
 class FuchsiaDeviceDiscovery implements DeviceDiscovery {
@@ -994,6 +1038,58 @@ class IosDevice extends Device {
   Future<void> reboot() {
     return Process.run('idevicediagnostics', <String>['restart', '-u', deviceId]);
   }
+}
+
+class MacosDevice extends Device {
+  const MacosDevice();
+
+  @override
+  String get deviceId => 'macos';
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    return <String, dynamic>{};
+  }
+
+  @override
+  Future<void> home() async { }
+
+  @override
+  Future<bool> isAsleep() async {
+    return false;
+  }
+
+  @override
+  Future<bool> isAwake() async {
+    return true;
+  }
+
+  @override
+  Stream<String> get logcat => const Stream<String>.empty();
+
+  @override
+  Future<void> clearLogs() async {}
+
+  @override
+  Future<void> reboot() async { }
+
+  @override
+  Future<void> sendToSleep() async { }
+
+  @override
+  Future<void> stop(String packageName) async { }
+
+  @override
+  Future<void> tap(int x, int y) async { }
+
+  @override
+  Future<void> togglePower() async { }
+
+  @override
+  Future<void> unlock() async { }
+
+  @override
+  Future<void> wakeUp() async { }
 }
 
 class WindowsDevice extends Device {
