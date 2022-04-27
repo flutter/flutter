@@ -581,12 +581,12 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
 
   @override
   void didChangeDependencies() {
-    _routeParsePending = widget.routeInformationProvider != null;
+    _routeParsePending = true;
     super.didChangeDependencies();
-    if (_routeParsePending) {
+    if (widget.routeInformationProvider != null && _routeParsePending) {
       _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setNewRoutePath);
     }
-    assert(!_routeParsePending);
+    _routeParsePending = false;
     _maybeNeedToReportRouteInformation();
   }
 
