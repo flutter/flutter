@@ -267,6 +267,14 @@ class MigrateUtils {
     }
     return true;
   }
+
+  /// Returns true if the file does not contain any git conflit markers.
+  bool conflictsResolved(String contents) {
+    if (contents.contains('>>>>>>>') && contents.contains('=======') && contents.contains('<<<<<<<')) {
+      return false;
+    }
+    return true;
+  }
 }
 
 /// Defines the classification of difference between files.

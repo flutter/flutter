@@ -44,10 +44,10 @@ class MigrateManifest {
     if (!valid) {
       throwToolExit('Invalid .migrate_manifest file in the migrate working directory. Entry is not a Yaml list. Fix the manifest or abandon the migration and try again.', exitCode: 1);
     }
-    // We can fill the maps with partially dummy data as not all properties are used by the manifest.
     if (mergedFilesYaml != null) {
       for (final Object? localPath in mergedFilesYaml as YamlList) {
         if (localPath is String) {
+          // We can fill the maps with partially dummy data as not all properties are used by the manifest.
           migrateResult.mergeResults.add(StringMergeResult.explicit(mergedString: '', hasConflict: false, exitCode: 0, localPath: localPath));
         }
       }
@@ -147,27 +147,27 @@ class MigrateManifest {
 
   /// Writes the manifest yaml file in the working directory.
   void writeFile() {
-    String mergedFileManifestContents = '';
-    String conflictFilesManifestContents = '';
+    final StringBuffer mergedFileManifestContents = StringBuffer();
+    final StringBuffer conflictFilesManifestContents = StringBuffer();
     for (final MergeResult result in migrateResult.mergeResults) {
       if (result.hasConflict) {
-        conflictFilesManifestContents += '  - ${result.localPath}\n';
+        conflictFilesManifestContents.write('  - ${result.localPath}\n');
       } else {
-        mergedFileManifestContents += '  - ${result.localPath}\n';
+        mergedFileManifestContents.write('  - ${result.localPath}\n');
       }
     }
 
-    String newFileManifestContents = '';
+    final StringBuffer newFileManifestContents = StringBuffer();
     for (final String localPath in addedFiles) {
-      newFileManifestContents += '  - $localPath\n';
+      newFileManifestContents.write('  - $localPath\n)');
     }
 
-    String deletedFileManifestContents = '';
+    final StringBuffer deletedFileManifestContents = StringBuffer();
     for (final String localPath in deletedFiles) {
-      deletedFileManifestContents += '  - $localPath\n';
+      deletedFileManifestContents.write('  - $localPath\n');
     }
 
-    final String migrateManifestContents = 'merged_files:\n${mergedFileManifestContents}conflict_files:\n${conflictFilesManifestContents}added_files:\n${newFileManifestContents}deleted_files:\n$deletedFileManifestContents';
+    final String migrateManifestContents = 'merged_files:\n${mergedFileManifestContents.toString()}conflict_files:\n${conflictFilesManifestContents.toString()}added_files:\n${newFileManifestContents.toString()}deleted_files:\n${deletedFileManifestContents.toString()}';
     final File migrateManifest = getManifestFileFromDirectory(migrateRootDir);
     migrateManifest.createSync(recursive: true);
     migrateManifest.writeAsStringSync(migrateManifestContents, flush: true);
@@ -186,8 +186,8 @@ bool _conflictsResolved(String contents) {
 ///
 /// The migration status printout lists all added, deleted, merged, and conflicted files.
 bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, {bool warnConflict = false, Logger? logger}) {
-  String printout = '';
-  String redPrintout = '';
+  final StringBuffer printout = StringBuffer();
+  final StringBuffer redPrintout = StringBuffer();
   bool result = true;
   final List<String> remainingConflicts = <String>[];
   final List<String> mergedFiles = <String>[];
@@ -201,37 +201,37 @@ bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, 
   
   mergedFiles.addAll(manifest.mergedFiles);
   if (manifest.addedFiles.isNotEmpty) {
-    printout += 'Added files:\n';
+    printout.write('Added files:\n');
     for (final String localPath in manifest.addedFiles) {
-      printout += '  - $localPath\n';
+      printout.write('  - $localPath\n');
     }
   }
   if (manifest.deletedFiles.isNotEmpty) {
-    printout += 'Deleted files:\n';
+    printout.write('Deleted files:\n');
     for (final String localPath in manifest.deletedFiles) {
-      printout += '  - $localPath\n';
+      printout.write('  - $localPath\n');
     }
   }
   if (mergedFiles.isNotEmpty) {
-    printout += 'Modified files:\n';
+    printout.write('Modified files:\n');
     for (final String localPath in mergedFiles) {
-      printout += '  - $localPath\n';
+      printout.write('  - $localPath\n');
     }
   }
   if (remainingConflicts.isNotEmpty) {
     if (warnConflict) {
-      printout += 'Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:';
+      printout.write('Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:');
     } else {
-      printout += 'Merge conflicted files:';
+      printout.write('Merge conflicted files:');
     }
     for (final String localPath in remainingConflicts) {
-      redPrintout += '  - $localPath\n';
+      redPrintout.write('  - $localPath\n');
     }
     result = false;
   }
   if (logger != null) {
-    logger.printStatus(printout);
-    logger.printStatus(redPrintout, color: TerminalColor.red, newline: false);
+    logger.printStatus(printout.toString());
+    logger.printStatus(redPrintout.toString(), color: TerminalColor.red, newline: false);
   }
   return result;
 }

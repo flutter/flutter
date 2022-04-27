@@ -35,6 +35,7 @@ enum SupportedPlatform {
   macos,
   web,
   windows,
+  windowsuwp,
   fuchsia,
   root, // Special platform to represent the root project directory
 }

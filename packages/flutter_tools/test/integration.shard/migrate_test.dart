@@ -7,7 +7,11 @@
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/migrate/migrate_compute.dart';
+import 'package:flutter_tools/src/migrate/migrate_result.dart';
+import 'package:flutter_tools/src/migrate/migrate_utils.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
@@ -21,11 +25,19 @@ void main() {
   Directory tempDir;
   FlutterRunTestDriver flutter;
   BufferLogger logger;
+  MigrateUtils utils;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
     flutter = FlutterRunTestDriver(tempDir);
-    logger = BufferLogger.test();
+    // logger = BufferLogger.test();
+    logger = globals.logger;
+    utils = MigrateUtils(
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: globals.platform,
+      processManager: globals.processManager,
+    );
   });
 
   tearDown(() async {
@@ -66,7 +78,7 @@ void main() {
   }
 
   // Migrates a clean untouched app generated with flutter create
-  testWithoutContext('vanilla migrate process succeeds', () async {
+  testUsingContext('vanilla migrate process succeeds', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
     await installProject('version:1.22.6_stable');
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -78,65 +90,10 @@ void main() {
       '--verbose',
     ], workingDirectory: tempDir.path);
     expect(result.stdout.toString(), contains('Working directory created at'));
-    expect(result.stdout.toString(), contains('''
-Added files:
-             - macos/Runner.xcworkspace/contents.xcworkspacedata
-             - macos/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
-             - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png
-             - macos/Runner/DebugProfile.entitlements
-             - macos/Runner/Base.lproj/MainMenu.xib
-             - macos/Runner/MainFlutterWindow.swift
-             - macos/Runner/Configs/AppInfo.xcconfig
-             - macos/Runner/Configs/Debug.xcconfig
-             - macos/Runner/Configs/Release.xcconfig
-             - macos/Runner/Configs/Warnings.xcconfig
-             - macos/Runner/AppDelegate.swift
-             - macos/Runner/Info.plist
-             - macos/Runner/Release.entitlements
-             - macos/Runner.xcodeproj/project.pbxproj
-             - macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
-             - macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
-             - macos/Flutter/Flutter-Debug.xcconfig
-             - macos/Flutter/Flutter-Release.xcconfig
-             - macos/.gitignore
-             - web/index.html
-             - web/favicon.png
-             - web/icons/Icon-192.png
-             - web/icons/Icon-maskable-192.png
-             - web/icons/Icon-maskable-512.png
-             - web/icons/Icon-512.png
-             - web/manifest.json
-             - linux/main.cc
-             - linux/CMakeLists.txt
-             - linux/my_application.h
-             - linux/my_application.cc
-             - linux/flutter/CMakeLists.txt
-             - linux/.gitignore
+    expect(result.stdout.toString(), contains('''Added files:
              - android/app/src/main/res/values-night/styles.xml
              - android/app/src/main/res/drawable-v21/launch_background.xml
              - analysis_options.yaml
-             - windows/CMakeLists.txt
-             - windows/runner/flutter_window.cpp
-             - windows/runner/utils.h
-             - windows/runner/utils.cpp
-             - windows/runner/runner.exe.manifest
-             - windows/runner/CMakeLists.txt
-             - windows/runner/win32_window.h
-             - windows/runner/win32_window.cpp
-             - windows/runner/resources/app_icon.ico
-             - windows/runner/resource.h
-             - windows/runner/Runner.rc
-             - windows/runner/main.cpp
-             - windows/runner/flutter_window.h
-             - windows/flutter/CMakeLists.txt
-             - windows/.gitignore
            Modified files:
              - .metadata
              - ios/Runner/Info.plist
@@ -161,6 +118,9 @@ Added files:
       'apply',
       '--verbose',
     ], workingDirectory: tempDir.path);
+    logger.printStatus('${result.exitCode}', color: TerminalColor.blue);
+    logger.printStatus(result.stdout, color: TerminalColor.green);
+    logger.printStatus(result.stderr, color: TerminalColor.red);
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Migration complete'));
 
@@ -173,7 +133,7 @@ Added files:
   });
 
   // Migrates a clean untouched app generated with flutter create
-  testWithoutContext('vanilla migrate builds', () async {
+  testUsingContext('vanilla migrate builds', () async {
     // Flutter Stable 2.0.0 hash: 60bd88df915880d23877bfc1602e8ddcf4c4dd2a
     await installProject('version:2.0.0_stable', main: '''
 import 'package:flutter/material.dart';
@@ -214,6 +174,9 @@ class MyApp extends StatelessWidget {
       'apply',
       '--verbose',
     ], workingDirectory: tempDir.path);
+    logger.printStatus('${result.exitCode}', color: TerminalColor.blue);
+    logger.printStatus(result.stdout, color: TerminalColor.green);
+    logger.printStatus(result.stderr, color: TerminalColor.red);
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Migration complete'));
 
@@ -284,6 +247,7 @@ class MyApp extends StatelessWidget {
       deleteTempDirectories: false,
       fileSystem: fileSystem,
       logger: logger,
+      migrateUtils: utils,
     );
     expect(result.sdkDirs.length, equals(1));
     expect(result.deletedFiles.isEmpty, true);
@@ -294,7 +258,7 @@ class MyApp extends StatelessWidget {
   });
 
   // Migrates a user-modified app
-  testWithoutContext('modified migrate process succeeds', () async {
+  testUsingContext('modified migrate process succeeds', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
     await installProject('version:1.22.6_stable', vanilla: false);
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -325,8 +289,7 @@ class MyApp extends StatelessWidget {
     ], workingDirectory: tempDir.path);
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Working directory created at'));
-    expect(result.stdout.toString(), contains('''
-Modified files:
+    expect(result.stdout.toString(), contains('''Modified files:
              - .metadata
              - ios/Runner/Info.plist
              - ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
@@ -352,9 +315,9 @@ Modified files:
       'apply',
       '--verbose',
     ], workingDirectory: tempDir.path);
-    expect(result.exitCode, 0);
-    expect(result.stdout.toString(), contains('''Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:'''));
-    expect(result.stdout.toString(), contains(']   - pubspec.yaml'));
+    expect(result.exitCode, 1);
+    expect(result.stderr.toString(), contains('''Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:'''));
+    expect(result.stderr.toString(), contains(']   - pubspec.yaml'));
 
     result = await processManager.run(<String>[
       flutterBin,
