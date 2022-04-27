@@ -361,7 +361,7 @@ class CocoaPods {
         '  pod repo update\n',
         emphasis: true,
       );
-    } else if ((stdout.contains('ffi_c.bundle') || stdout.contains('/ffi/')) &&
+    } else if ((stderr.contains('ffi_c.bundle') || stderr.contains('/ffi/')) &&
         _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
       // https://github.com/flutter/flutter/issues/70796
       UsageEvent(
