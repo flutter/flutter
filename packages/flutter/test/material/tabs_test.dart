@@ -3030,7 +3030,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Tab).first));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -3221,8 +3220,7 @@ void main() {
       );
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-      addTearDown(gesture.removePointer);
-      await gesture.moveTo(tester.getCenter(find.byType(Tab)));
+        await gesture.moveTo(tester.getCenter(find.byType(Tab)));
       await tester.pumpAndSettle();
       final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
       expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0.0, 276.0, 800.0, 324.0), color: const Color(0xff00ff00)));

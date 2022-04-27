@@ -143,8 +143,7 @@ void main() {
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
       await gesture.moveTo(contextMenuAction);
-      addTearDown(gesture.removePointer);
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
         kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,

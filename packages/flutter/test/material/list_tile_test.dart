@@ -1212,7 +1212,6 @@ void main() {
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(ListTile)));
 
     await tester.pumpWidget(buildApp());
@@ -1417,7 +1416,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(ListTile)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -1745,8 +1743,7 @@ void main() {
       final Offset listTile = tester.getCenter(find.byKey(tileKey));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-      addTearDown(gesture.removePointer);
-      await gesture.moveTo(listTile);
+        await gesture.moveTo(listTile);
       await tester.pumpAndSettle();
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     });

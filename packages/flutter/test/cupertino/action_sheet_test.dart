@@ -1098,7 +1098,7 @@ void main() {
 
     final Offset actionSheetAction = tester.getCenter(find.text('One'));
     await gesture.moveTo(actionSheetAction);
-    addTearDown(gesture.removePointer);
+
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
