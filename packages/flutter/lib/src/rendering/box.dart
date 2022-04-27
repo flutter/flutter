@@ -1804,7 +1804,6 @@ abstract class RenderBox extends RenderObject {
   bool _computingThisDryLayout = false;
 
   bool _notifyParentIfDirty = false;
-  Constraints? _lastConstraints;
 
   /// Returns the [Size] that this [RenderBox] would like to be given the
   /// provided [BoxConstraints].
@@ -2380,9 +2379,8 @@ abstract class RenderBox extends RenderObject {
 
   @override
   void layout(Constraints constraints, {bool parentUsesSize = false}) {
-    if (constraints != _lastConstraints) {
+    if (hasSize && constraints != this.constraints) {
       _clearCachedData();
-      _lastConstraints = constraints;
     }
     super.layout(constraints, parentUsesSize: parentUsesSize);
   }
