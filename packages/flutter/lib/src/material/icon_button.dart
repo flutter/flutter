@@ -21,7 +21,7 @@ import 'tooltip.dart';
 // See: <https://material.io/design/usability/accessibility.html#layout-typography>.
 const double _kMinButtonSize = kMinInteractiveDimension;
 
-/// A material design icon button.
+/// A Material Design icon button.
 ///
 /// An icon button is a picture printed on a [Material] widget that reacts to
 /// touches by filling with color (ink).

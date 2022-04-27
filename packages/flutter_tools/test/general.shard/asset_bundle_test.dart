@@ -521,7 +521,7 @@ flutter:
     Platform: () => FakePlatform(),
   });
 
-  testUsingContext('does not include material design assets if uses-material-design: true is '
+  testUsingContext('does not include Material Design assets if uses-material-design: true is '
     'specified only by a dependency', () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/

@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 // ignore_for_file: non_constant_identifier_names
 
-/// A set of platform-adaptive material design icons.
+/// A set of platform-adaptive Material Design icons.
 ///
 /// Use [Icons.adaptive] to access a static instance of this class.
 class PlatformAdaptiveIcons implements Icons {
@@ -93,7 +93,7 @@ class PlatformAdaptiveIcons implements Icons {
   // END GENERATED PLATFORM ADAPTIVE ICONS
 }
 
-/// Identifiers for the supported material design icons.
+/// Identifiers for the supported Material Design icons.
 ///
 /// Use with the [Icon] class to show specific icons.
 ///
@@ -152,7 +152,7 @@ class Icons {
   // prevents instantiation and extension.
   Icons._();
 
-  /// A set of platform-adaptive material design icons.
+  /// A set of platform-adaptive Material Design icons.
   ///
   /// Provides a convenient way to show a certain set of platform-appropriate
   /// icons on Apple platforms.

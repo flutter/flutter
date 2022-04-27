@@ -98,7 +98,7 @@ class ChipTheme extends InheritedTheme {
   bool updateShouldNotify(ChipTheme oldWidget) => data != oldWidget.data;
 }
 
-/// Holds the color, shape, and text styles for a material design chip theme.
+/// Holds the color, shape, and text styles for a Material Design chip theme.
 ///
 /// Use this class to configure a [ChipTheme] widget, or to set the
 /// [ThemeData.chipTheme] for a [Theme] widget.

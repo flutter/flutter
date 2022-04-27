@@ -52,7 +52,7 @@ const double _monthNavButtonsWidth = 108.0;
 ///  * [showDatePicker], which creates a Dialog that contains a
 ///    [CalendarDatePicker] and provides an optional compact view where the
 ///    user can enter a date as a line of text.
-///  * [showTimePicker], which shows a dialog that contains a material design
+///  * [showTimePicker], which shows a dialog that contains a Material Design
 ///    time picker.
 ///
 class CalendarDatePicker extends StatefulWidget {

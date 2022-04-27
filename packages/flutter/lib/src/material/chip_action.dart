@@ -8,7 +8,7 @@ import 'chip.dart';
 import 'debug.dart';
 import 'theme_data.dart';
 
-/// A material design action chip.
+/// A Material Design action chip.
 ///
 /// Action chips are a set of options which trigger an action related to primary
 /// content. Action chips should appear dynamically and contextually in a UI.

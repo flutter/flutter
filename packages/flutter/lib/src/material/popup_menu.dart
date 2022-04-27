@@ -47,7 +47,7 @@ enum PopupMenuPosition {
   under,
 }
 
-/// A base class for entries in a material design popup menu.
+/// A base class for entries in a Material Design popup menu.
 ///
 /// The popup menu widget uses this interface to interact with the menu items.
 /// To show a popup menu, use the [showMenu] function. To create a button that
@@ -96,7 +96,7 @@ abstract class PopupMenuEntry<T> extends StatefulWidget {
   bool represents(T? value);
 }
 
-/// A horizontal divider in a material design popup menu.
+/// A horizontal divider in a Material Design popup menu.
 ///
 /// This widget adapts the [Divider] for use in popup menus.
 ///
@@ -180,7 +180,7 @@ class _RenderMenuItem extends RenderShiftedBox {
   }
 }
 
-/// An item in a material design popup menu.
+/// An item in a Material Design popup menu.
 ///
 /// To show a popup menu, use the [showMenu] function. To create a button that
 /// shows a popup menu, consider using [PopupMenuButton].
@@ -384,7 +384,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   }
 }
 
-/// An item with a checkmark in a material design popup menu.
+/// An item with a checkmark in a Material Design popup menu.
 ///
 /// To show a popup menu, use the [showMenu] function. To create a button that
 /// shows a popup menu, consider using [PopupMenuButton].
@@ -1123,7 +1123,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// ```
   ///
   /// The default constraints ensure that the menu width matches maximum width
-  /// recommended by the material design guidelines.
+  /// recommended by the Material Design guidelines.
   /// Specifying this parameter enables creation of menu wider than
   /// the default maximum width.
   final BoxConstraints? constraints;
