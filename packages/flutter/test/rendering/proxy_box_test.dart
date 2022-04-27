@@ -242,7 +242,7 @@ void main() {
 
   test('RenderOpacity does composite if it is opaque', () {
     final RenderOpacity renderOpacity = RenderOpacity(
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderRepaintBoundary(child: RenderSizedBox(const Size(1.0, 1.0))), // size doesn't matter
     );
 
     layout(renderOpacity, phase: EnginePhase.composite);

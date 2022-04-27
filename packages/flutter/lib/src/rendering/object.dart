@@ -669,6 +669,10 @@ class PaintingContext extends ClipContext {
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
   /// ancestor render objects that this render object will include a composited
   /// layer, which, for example, causes them to use composited clips.
+  @Deprecated(
+    'Use pushOpacityLayer instead to avoid forced compositing. '
+    'This feature was deprecated after v2.13.0-0.0.pre.'
+  )
   OpacityLayer pushOpacity(Offset offset, int alpha, PaintingContextCallback painter, { OpacityLayer? oldLayer }) {
     final OpacityLayer layer = oldLayer ?? OpacityLayer();
     layer
@@ -676,6 +680,40 @@ class PaintingContext extends ClipContext {
       ..offset = offset;
     pushLayer(layer, painter, Offset.zero);
     return layer;
+  }
+
+  /// Blend further painting with an alpha value.
+  ///
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
+  ///
+  /// The `offset` argument indicates an offset to apply to all the children
+  /// (the rendering created by `painter`).
+  ///
+  /// The `alpha` argument is the alpha value to use when blending the painting
+  /// done by `painter`. An alpha value of 0 means the painting is fully
+  /// transparent and an alpha value of 255 means the painting is fully opaque.
+  ///
+  /// The `painter` callback will be called while the `alpha` is applied. It
+  /// is called synchronously during the call to [pushOpacityLayer].
+  ///
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
+  OpacityLayer? pushOpacityLayer(bool needsCompositing, Size size, Offset offset, int alpha, PaintingContextCallback painter, { OpacityLayer? oldLayer }) {
+    if (alpha == 0) {
+      return null;
+    }
+    if (needsCompositing) {
+      final OpacityLayer layer = oldLayer ?? OpacityLayer();
+      layer
+        ..alpha = alpha
+        ..offset = offset;
+      pushLayer(layer, painter, Offset.zero);
+      return layer;
+    } else {
+      canvas.saveLayer(offset & size, Paint()..color = Color(alpha << 24));
+      painter(this, offset);
+      canvas.restore();
+      return null;
+    }
   }
 
   @override

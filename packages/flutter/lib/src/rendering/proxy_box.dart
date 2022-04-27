@@ -842,16 +842,6 @@ class RenderOpacity extends RenderProxyBox {
        _alpha = ui.Color.getAlphaFromOpacity(opacity),
        super(child);
 
-  @override
-  bool get isRepaintBoundary => child != null && (_alpha > 0);
-
-  @override
-  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
-    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
-    updatedLayer.alpha = _alpha;
-    return updatedLayer;
-  }
-
   int _alpha;
 
   /// The fraction to scale the child's alpha value.
@@ -871,13 +861,10 @@ class RenderOpacity extends RenderProxyBox {
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
-    final bool wasRepaintBoundary = isRepaintBoundary;
     final bool wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
-    if (wasRepaintBoundary != isRepaintBoundary)
-      markNeedsCompositingBitsUpdate();
-    markNeedsCompositedLayerUpdate();
+    markNeedsPaint();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
@@ -898,10 +885,11 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_alpha == 0) {
-      return;
-    }
-    super.paint(context, offset);
+    layer = context.pushOpacityLayer(needsCompositing, size, offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
+    assert(() {
+      layer?.debugCreator = debugCreator;
+      return true;
+    }());
   }
 
   @override
