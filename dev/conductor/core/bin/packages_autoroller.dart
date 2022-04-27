@@ -6,6 +6,7 @@ import 'dart:io' as io;
 
 import 'package:args/args.dart';
 import 'package:conductor_core/conductor_core.dart';
+import 'package:conductor_core/packages_autoroller.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
@@ -52,8 +53,8 @@ ${parser.usage}
     rethrow;
   }
 
-  final String mirrorUrl = results[kMirrorRemote]!;
-  final String upstreamUrl = results[kUpstreamRemote]!;
+  final String mirrorUrl = results[kMirrorRemote]! as String;
+  final String upstreamUrl = results[kUpstreamRemote]! as String;
 
   final FrameworkRepository framework = FrameworkRepository(
     _localCheckouts,

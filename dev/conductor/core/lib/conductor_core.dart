@@ -10,7 +10,6 @@ export 'src/codesign.dart';
 export 'src/git.dart';
 export 'src/globals.dart';
 export 'src/next.dart' hide kStateOption, kYesFlag;
-export 'src/packages_autoroller.dart';
 export 'src/repository.dart';
 export 'src/start.dart' hide kStateOption;
 export 'src/state.dart';
