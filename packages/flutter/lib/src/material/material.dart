@@ -400,6 +400,9 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color? backgroundColor = _getBackgroundColor(context);
+    final Color? modelShadowColor = widget.shadowColor ?? (theme.useMaterial3 ? null : theme.shadowColor);
+    // If no shadow color is specified, use 0 for elevation in the model so a drop shadow won't be painted.
+    final double modelElevation = modelShadowColor != null ? widget.elevation : 0;
     assert(
       backgroundColor != null || widget.type == MaterialType.transparency,
       'If Material type is not MaterialType.transparency, a color must '
@@ -449,9 +452,9 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         duration: widget.animationDuration,
         shape: BoxShape.rectangle,
         clipBehavior: widget.clipBehavior,
-        elevation: widget.elevation,
+        elevation: modelElevation,
         color: color,
-        shadowColor: widget.shadowColor ?? (theme.useMaterial3 ? const Color(0x00000000) : theme.shadowColor),
+        shadowColor: modelShadowColor ?? const Color(0x00000000),
         animateColor: false,
         child: contents,
       );
@@ -476,7 +479,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       clipBehavior: widget.clipBehavior,
       elevation: widget.elevation,
       color: backgroundColor!,
-      shadowColor: widget.shadowColor ?? (theme.useMaterial3 ? const Color(0x00000000) : theme.shadowColor),
+      shadowColor: modelShadowColor,
       surfaceTintColor: widget.surfaceTintColor,
       child: contents,
     );
@@ -742,8 +745,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
        assert(shape != null),
        assert(clipBehavior != null),
        assert(elevation != null && elevation >= 0.0),
-       assert(color != null),
-       assert(shadowColor != null);
+       assert(color != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -777,7 +779,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   final Color color;
 
   /// The target shadow color.
-  final Color shadowColor;
+  final Color? shadowColor;
 
   /// The target surface tint color.
   final Color? surfaceTintColor;
@@ -808,11 +810,13 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       widget.elevation,
       (dynamic value) => Tween<double>(begin: value as double),
     ) as Tween<double>?;
-    _shadowColor = visitor(
-      _shadowColor,
-      widget.shadowColor,
-      (dynamic value) => ColorTween(begin: value as Color),
-    ) as ColorTween?;
+    _shadowColor =  widget.shadowColor != null
+      ? visitor(
+          _shadowColor,
+          widget.shadowColor,
+          (dynamic value) => ColorTween(begin: value as Color),
+        ) as ColorTween?
+      : null;
     _surfaceTintColor = widget.surfaceTintColor != null
       ? visitor(
           _surfaceTintColor,
@@ -834,15 +838,18 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
     final Color color = Theme.of(context).useMaterial3
       ? ElevationOverlay.applySurfaceTint(widget.color, _surfaceTintColor?.evaluate(animation), elevation)
       : ElevationOverlay.applyOverlay(context, widget.color, elevation);
+    // If no shadow color is specified, use 0 for elevation in the model so a drop shadow won't be painted.
+    final double modelElevation = widget.shadowColor != null ? elevation : 0;
+    final Color shadowColor = _shadowColor?.evaluate(animation) ?? const Color(0x00000000);
     return PhysicalShape(
       clipper: ShapeBorderClipper(
         shape: shape,
         textDirection: Directionality.maybeOf(context),
       ),
       clipBehavior: widget.clipBehavior,
-      elevation: elevation,
+      elevation: modelElevation,
       color: color,
-      shadowColor: _shadowColor!.evaluate(animation)!,
+      shadowColor: shadowColor,
       child: _ShapeBorderPaint(
         shape: shape,
         borderOnForeground: widget.borderOnForeground,
