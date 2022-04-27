@@ -1751,9 +1751,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
           // fall through to the defaultShortcuts.
           child: TextSelectionGestures.platformDefaults(
-            child: TextSelectionGestures(
-              manager: LoggingTextSelectionGesturesManager(),
-              gestures: _defaultGestures,
+            // child: TextSelectionGestures(
+              // manager: LoggingTextSelectionGesturesManager(),
+              // gestures: _defaultGestures,
               child: DefaultTextEditingShortcuts(
                 child: Actions(
                   actions: widget.actions ?? WidgetsApp.defaultActions,
@@ -1764,7 +1764,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                     ),
                   ),
                 ),
-              ),
+              // ),
             ),
           ),
         ),

@@ -47,13 +47,54 @@ class TextSelectionGestures extends StatefulWidget {
     TapGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
             (BuildContext context) => TapGestureRecognizer(debugOwner: context),
             (TapGestureRecognizer instance, BuildContext context) {
-          instance
-            ..onTapDown = (TapDownDetails details) {
-              print('default');
-              Actions.invoke(context, ExtendSelectionToLastTapDownPositionIntent(lastTapDownPosition: details.globalPosition, cause: SelectionChangedCause.tap));
-            };
+              instance
+                ..onSecondaryTap = () {
+                }
+                ..onSecondaryTapDown = (TapDownDetails details) {}
+                ..onTapDown = (TapDownDetails details) {
+                  Actions.invoke(context, ExtendSelectionToLastTapDownPositionIntent(lastTapDownPosition: details.globalPosition, cause: SelectionChangedCause.tap));
+                }
+                ..onTapUp = (TapUpDetails details) {
+                
+                }
+                ..onTapCancel = () {};
         }
-    )
+    ),
+    LongPressGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+            (BuildContext context) => LongPressGestureRecognizer(debugOwner: context, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch }),
+            (LongPressGestureRecognizer instance, BuildContext context) {
+              instance
+                ..onLongPressStart = (LongPressStartDetails details) {
+                  // Actions.invoke(
+                  //   context,
+                  //   SelectTextAtPositionIntent(
+                  //
+                  //     cause: SelectionChangedCause.longpress,
+                  //   ),
+                  // );
+                }
+                ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {}
+                ..onLongPressEnd = (LongPressEndDetails details) {};
+        }
+    ),
+    PanGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+            (BuildContext context) => PanGestureRecognizer(debugOwner: context, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
+            (PanGestureRecognizer instance, BuildContext context) {
+              instance
+                ..dragStartBehavior = DragStartBehavior.down
+                ..onStart = (DragStartDetails details) {}
+                ..onUpdate = (DragUpdateDetails details) {}
+                ..onEnd = (DragEndDetails details) {};
+            }
+    ),
+    ForcePressGestureRecognizer : ContextGestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
+            (BuildContext context) => ForcePressGestureRecognizer(debugOwner: context),
+            (ForcePressGestureRecognizer instance, BuildContext context) {
+              instance
+                ..onStart = (ForcePressDetails details) {}
+                ..onEnd = (ForcePressDetails details) {};
+            }
+    ),
   };
 
   @override
@@ -99,7 +140,7 @@ class TextSelectionGesturesManager extends ChangeNotifier {
   set gestures(Map<Type, ContextGestureRecognizerFactory> gestures) {
     _gestures = gestures;
   }
-
+ 
   @protected
   void handlePointerDown(BuildContext context, PointerDownEvent event, Map<Type, GestureRecognizer> recognizers) {
     for (final GestureRecognizer recognizer in recognizers.values) {
