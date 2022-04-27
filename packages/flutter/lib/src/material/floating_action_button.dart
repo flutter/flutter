@@ -509,7 +509,7 @@ class FloatingActionButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
     final FloatingActionButtonThemeData defaults = theme.useMaterial3
-      ? _M3Defaults(context, _floatingActionButtonType, child != null)
+      ? _TokenDefaultsM3(context, _floatingActionButtonType, child != null)
       : _M2Defaults(context, _floatingActionButtonType, child != null);
 
     final Color foregroundColor = this.foregroundColor
