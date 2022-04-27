@@ -6,29 +6,26 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const HeroApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class HeroApp extends StatelessWidget {
+  const HeroApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Hero Sample')),
         body: const Center(
-          child: MyStatelessWidget(),
+          child: HeroExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class HeroExample extends StatelessWidget {
+  const HeroExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +38,7 @@ class MyStatelessWidget extends StatelessWidget {
         ListTile(
           leading: Hero(
             tag: 'hero-rectangle',
-            child: _blueRectangle(const Size(50, 50)),
+            child: _blueBox(const Size(50, 50)),
           ),
           onTap: () => _gotoDetailsPage(context),
           title:
@@ -51,7 +48,7 @@ class MyStatelessWidget extends StatelessWidget {
     );
   }
 
-  Widget _blueRectangle(Size size) {
+  Widget _blueBox(Size size) {
     return Container(
       width: size.width,
       height: size.height,
@@ -63,7 +60,7 @@ class MyStatelessWidget extends StatelessWidget {
     Navigator.of(context).push(MaterialPageRoute<void>(
       builder: (BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: const Text('second Page'),
+          title: const Text('Second Page'),
         ),
         body: Center(
           child: Column(
@@ -71,7 +68,7 @@ class MyStatelessWidget extends StatelessWidget {
             children: <Widget>[
               Hero(
                 tag: 'hero-rectangle',
-                child: _blueRectangle(const Size(200, 200)),
+                child: _blueBox(const Size(200, 200)),
               ),
             ],
           ),
