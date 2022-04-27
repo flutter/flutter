@@ -158,6 +158,7 @@ void main() {
     );
 
     expect(_getMaterial(tester).color, const Color(0xffeaeaea));
+    expect(_getMaterial(tester).surfaceTintColor, null);
     expect(_getMaterial(tester).elevation, 0);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
     expect(_indicator(tester)?.color, const Color(0x3d2196f3));
@@ -185,7 +186,8 @@ void main() {
       ),
     );
 
-    expect(_getMaterial(tester).color, const Color(0xffecf6fe));
+    expect(_getMaterial(tester).color, ThemeData().colorScheme.surface);
+    expect(_getMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
     expect(_getMaterial(tester).elevation, 3);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
     expect(_indicator(tester)?.color, const Color(0xff2196f3));
