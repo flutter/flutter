@@ -123,7 +123,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
        String currentText = "";
 
        // Look for bad spell check suggestion spans, if there are any.
-       while (!foundBadSpan && span_pointer < rawSpellCheckResults!.length) {
+       while (!foundBadSpan && span_pointer < rawSpellCheckResults.length) {
            SpellCheckerSuggestionSpan currentSpan = rawSpellCheckResults[span_pointer];
            spanText = lastUsedText.substring(currentSpan.start, currentSpan.end);
            currentText = text.substring(currentSpan.start, currentSpan.end);
@@ -140,7 +140,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
 
        if (foundBadSpan) {
            // Handle deletion case as a proof of concept:
-                      SpellCheckerSuggestionSpan currentSpan = rawSpellCheckResults[span_pointer];
+            SpellCheckerSuggestionSpan currentSpan = rawSpellCheckResults[span_pointer];
 
            int j = currentSpan.start + 1;
            int spanLength = currentSpan.end - currentSpan.start;
@@ -157,10 +157,10 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
            }
 
            if (!foundWord) {
-               while (span_pointer < rawSpellCheckResults!.length) {
+               while (span_pointer < rawSpellCheckResults.length) {
                    currentSpan = rawSpellCheckResults[span_pointer];
-                   currentSpan.start = currentSpan.start - spanLength;
-                   currentSpan.end = currentSpan.end - spanLength;
+                   currentSpan.start = (j-1) - spanLength;
+                   currentSpan.end = currentSpan.start + spanLength;
 
                    correctedSpellCheckResults.add(currentSpan);
 
@@ -187,7 +187,7 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
       List<SpellCheckerSuggestionSpan>? spellCheckResults;
 
       if (lastUsedText.length > value.text.length && rawSpellCheckResults != null) {
-        spellCheckResults = correctSpellCheckResults(rawSpellCheckResults!, value.text);
+        spellCheckResults = correctSpellCheckResults(rawSpellCheckResults, value.text);
       } else {
         spellCheckResults = rawSpellCheckResults;
       }
