@@ -11,7 +11,8 @@
 class DartVMInitializer {
  public:
   static void Initialize(Dart_InitializeParams* params,
-                         bool enable_timeline_event_handler);
+                         bool enable_timeline_event_handler,
+                         bool trace_systrace);
   static void Cleanup();
 
  private:
