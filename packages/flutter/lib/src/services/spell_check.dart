@@ -86,10 +86,11 @@ abstract class SpellCheckSuggestionsHandler {
 }
 
 class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandler {
-
-     int scssSpans_consumed_index = 0;
+    //TODO(camillesimon): Replace method of building TextSpan tree in three parts with method of building in one part. Attempt started below.
+    int scssSpans_consumed_index = 0;
     int text_consumed_index = 0;
 
+    String lastUsedText = "";
 
     final TargetPlatform platform;
 
@@ -112,12 +113,86 @@ class DefaultSpellCheckSuggestionsHandler implements SpellCheckSuggestionsHandle
             );
         }
 
+   // An attempt to fix the asynchronny issue. Assumes only one addition or one deletion can occur at a time.
+   List<SpellCheckerSuggestionSpan>? correctSpellCheckResults(List<SpellCheckerSuggestionSpan> rawSpellCheckResults, String text) {
+       List<SpellCheckerSuggestionSpan>? correctedSpellCheckResults = <SpellCheckerSuggestionSpan>[];
+       int span_pointer = 0;
+       bool foundBadSpan = false;
+
+       String spanText;
+       String currentText = "";
+
+       // Look for bad spell check suggestion spans, if there are any.
+       while (!foundBadSpan && span_pointer < rawSpellCheckResults!.length) {
+           SpellCheckerSuggestionSpan currentSpan = rawSpellCheckResults[span_pointer];
+           spanText = lastUsedText.substring(currentSpan.start, currentSpan.end);
+           currentText = text.substring(currentSpan.start, currentSpan.end);
+
+           if (spanText != currentText) {
+               foundBadSpan = true;
+           } else {
+               correctedSpellCheckResults.add(currentSpan);
+                          span_pointer += 1;
+
+           }
+
+       }
+
+       if (foundBadSpan) {
+           // Handle deletion case as a proof of concept:
+                      SpellCheckerSuggestionSpan currentSpan = rawSpellCheckResults[span_pointer];
+
+           int j = currentSpan.start + 1;
+           int spanLength = currentSpan.end - currentSpan.start;
+           bool foundWord = false;
+
+           while (!foundWord && j+spanLength-1 < lastUsedText.length) {
+               spanText = lastUsedText.substring(j, j + spanLength-1);
+
+               if (spanText == currentText) {
+                   foundWord = true;
+               }
+
+               j += 1;
+           }
+
+           if (!foundWord) {
+               while (span_pointer < rawSpellCheckResults!.length) {
+                   currentSpan = rawSpellCheckResults[span_pointer];
+                   currentSpan.start = currentSpan.start - spanLength;
+                   currentSpan.end = currentSpan.end - spanLength;
+
+                   correctedSpellCheckResults.add(currentSpan);
+
+                    span_pointer += 1;
+               }
+           }
+
+       }
+
+      for (SpellCheckerSuggestionSpan span in correctedSpellCheckResults) {
+          print("${span.start}, ${span.end}, ${span.replacementSuggestions}");
+      }
+       return correctedSpellCheckResults;
+   }     
+
   @override
   TextSpan buildTextSpanWithSpellCheckSuggestions(
-      List<SpellCheckerSuggestionSpan>? spellCheckResults,
+      List<SpellCheckerSuggestionSpan>? rawSpellCheckResults,
       TextEditingValue value, TextStyle? style, bool composingWithinCurrentTextRange) {
       scssSpans_consumed_index = 0;
       text_consumed_index = 0;
+
+      String text = value.text;
+      List<SpellCheckerSuggestionSpan>? spellCheckResults;
+
+      if (lastUsedText.length > value.text.length && rawSpellCheckResults != null) {
+        spellCheckResults = correctSpellCheckResults(rawSpellCheckResults!, value.text);
+      } else {
+        spellCheckResults = rawSpellCheckResults;
+      }
+
+      lastUsedText = value.text;
 
       TextStyle misspelledStyle;
 
