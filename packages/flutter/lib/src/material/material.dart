@@ -15,7 +15,7 @@ import 'theme.dart';
 /// Used by [InkHighlight] and [InkSplash], for example.
 typedef RectCallback = Rect Function();
 
-/// The various kinds of material in material design. Used to
+/// The various kinds of material in Material Design. Used to
 /// configure the default behavior of [Material] widgets.
 ///
 /// See also:
@@ -48,7 +48,7 @@ enum MaterialType {
   transparency
 }
 
-/// The border radii used by the various kinds of material in material design.
+/// The border radii used by the various kinds of material in Material Design.
 ///
 /// See also:
 ///
@@ -62,7 +62,7 @@ const Map<MaterialType, BorderRadius?> kMaterialEdges = <MaterialType, BorderRad
   MaterialType.transparency: null,
 };
 
-/// An interface for creating [InkSplash]s and [InkHighlight]s on a material.
+/// An interface for creating [InkSplash]s and [InkHighlight]s on a [Material].
 ///
 /// Typically obtained via [Material.of].
 abstract class MaterialInkController {
@@ -99,7 +99,7 @@ abstract class MaterialInkController {
 ///
 /// ## The Material Metaphor
 ///
-/// Material is the central metaphor in material design. Each piece of material
+/// Material is the central metaphor in Material Design. Each piece of material
 /// exists at a given elevation, which influences how that piece of material
 /// visually relates to other pieces of material and how that material casts
 /// shadows.

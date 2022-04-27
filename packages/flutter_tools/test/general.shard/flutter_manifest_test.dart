@@ -65,7 +65,7 @@ dependencies:
     expect(flutterManifest.assets, isEmpty);
   });
 
-  testWithoutContext('FlutterManifest knows if material design is used', () async {
+  testWithoutContext('FlutterManifest knows if Material Design is used', () async {
     const String manifest = '''
 name: test
 dependencies:

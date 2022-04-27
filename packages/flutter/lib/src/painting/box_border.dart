@@ -253,7 +253,7 @@ abstract class BoxBorder extends ShapeBorder {
 /// {@end-tool}
 /// {@tool snippet}
 ///
-/// The border for a material design divider:
+/// The border for a Material Design divider:
 ///
 /// ```dart
 /// Border(bottom: BorderSide(color: Theme.of(context).dividerColor))
@@ -299,7 +299,7 @@ abstract class BoxBorder extends ShapeBorder {
 ///  * [BoxDecoration], which uses this class to describe its edge decoration.
 ///  * [BorderSide], which is used to describe each side of the box.
 ///  * [Theme], from the material layer, which can be queried to obtain appropriate colors
-///    to use for borders in a material app, as shown in the "divider" sample above.
+///    to use for borders in a [MaterialApp], as shown in the "divider" sample above.
 class Border extends BoxBorder {
   /// Creates a border.
   ///
@@ -594,7 +594,7 @@ class Border extends BoxBorder {
 ///  * [BoxDecoration], which uses this class to describe its edge decoration.
 ///  * [BorderSide], which is used to describe each side of the box.
 ///  * [Theme], from the material layer, which can be queried to obtain appropriate colors
-///    to use for borders in a material app, as shown in the "divider" sample above.
+///    to use for borders in a [MaterialApp], as shown in the "divider" sample above.
 class BorderDirectional extends BoxBorder {
   /// Creates a border.
   ///

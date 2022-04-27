@@ -62,7 +62,7 @@ class _PreferredAppBarSize extends Size {
   final double? bottomHeight;
 }
 
-/// A material design app bar.
+/// A Material Design app bar.
 ///
 /// An app bar consists of a toolbar and potentially other widgets, such as a
 /// [TabBar] and a [FlexibleSpaceBar]. App bars typically expose one or more
@@ -144,7 +144,7 @@ class _PreferredAppBarSize extends Size {
 ///  * <https://material.io/design/components/app-bars-top.html>
 ///  * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
-  /// Creates a material design app bar.
+  /// Creates a Material Design app bar.
   ///
   /// The arguments [primary], [toolbarOpacity], [bottomOpacity],
   /// [backwardsCompatibility], and [automaticallyImplyLeading] must
@@ -1269,7 +1269,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-/// A material design app bar that integrates with a [CustomScrollView].
+/// A Material Design app bar that integrates with a [CustomScrollView].
 ///
 /// An app bar consists of a toolbar and potentially other widgets, such as a
 /// [TabBar] and a [FlexibleSpaceBar]. App bars typically expose one or more
@@ -1355,7 +1355,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///    can expand and collapse.
 ///  * <https://material.io/design/components/app-bars-top.html>
 class SliverAppBar extends StatefulWidget {
-  /// Creates a material design app bar that can be placed in a [CustomScrollView].
+  /// Creates a Material Design app bar that can be placed in a [CustomScrollView].
   ///
   /// The arguments [forceElevated], [primary], [floating], [pinned], [snap]
   /// and [automaticallyImplyLeading] must not be null.

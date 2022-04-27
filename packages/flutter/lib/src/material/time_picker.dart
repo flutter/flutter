@@ -1782,14 +1782,14 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
 /// Signature for when the time picker entry mode is changed.
 typedef EntryModeChangeCallback = void Function(TimePickerEntryMode);
 
-/// A material design time picker designed to appear inside a popup dialog.
+/// A Material Design time picker designed to appear inside a popup dialog.
 ///
 /// Pass this widget to [showDialog]. The value returned by [showDialog] is the
 /// selected [TimeOfDay] if the user taps the "OK" button, or null if the user
 /// taps the "CANCEL" button. The selected time is reported by calling
 /// [Navigator.pop].
 class TimePickerDialog extends StatefulWidget {
-  /// Creates a material time picker.
+  /// Creates a Material Design time picker.
   ///
   /// [initialTime] must not be null.
   const TimePickerDialog({
@@ -2327,7 +2327,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   }
 }
 
-/// Shows a dialog containing a material design time picker.
+/// Shows a dialog containing a Material Design time picker.
 ///
 /// The returned Future resolves to the time selected by the user when the user
 /// closes the dialog. If the user cancels the dialog, null is returned.
@@ -2400,7 +2400,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 ///
 /// See also:
 ///
-///  * [showDatePicker], which shows a dialog that contains a material design
+///  * [showDatePicker], which shows a dialog that contains a Material Design
 ///    date picker.
 ///  * [TimePickerThemeData], which allows you to customize the colors,
 ///    typography, and shape of the time picker.

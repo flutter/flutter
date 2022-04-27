@@ -50,10 +50,10 @@ enum ThemeMode {
   dark,
 }
 
-/// An application that uses material design.
+/// An application that uses Material Design.
 ///
 /// A convenience widget that wraps a number of widgets that are commonly
-/// required for material design applications. It builds upon a [WidgetsApp] by
+/// required for Material Design applications. It builds upon a [WidgetsApp] by
 /// adding material-design specific functionality, such as [AnimatedTheme] and
 /// [GridPaper].
 ///

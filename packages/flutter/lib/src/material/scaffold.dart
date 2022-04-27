@@ -474,8 +474,8 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     }
   }
 
-  /// Removes all the materialBanners currently in queue by clearing the queue
-  /// and running normal exit animation on the current materialBanner.
+  /// Removes all the [MaterialBanner]s currently in queue by clearing the queue
+  /// and running normal exit animation on the current [MaterialBanner].
   void clearMaterialBanners() {
     if (_materialBanners.isEmpty || _materialBannerController!.status == AnimationStatus.dismissed)
       return;
@@ -1333,7 +1333,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 }
 
-/// Implements the basic material design visual layout structure.
+/// Implements the basic Material Design visual layout structure.
 ///
 /// This class provides APIs for showing drawers and bottom sheets.
 ///
@@ -1454,7 +1454,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///  * <https://material.io/design/layout/responsive-layout-grid.html>
 ///  * Cookbook: [Add a Drawer to a screen](https://flutter.dev/docs/cookbook/design/drawer)
 class Scaffold extends StatefulWidget {
-  /// Creates a visual scaffold for material design widgets.
+  /// Creates a visual scaffold for Material Design widgets.
   const Scaffold({
     super.key,
     this.appBar,
@@ -2250,7 +2250,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     );
   }
 
-  /// Shows a material design bottom sheet in the nearest [Scaffold]. To show
+  /// Shows a Material Design bottom sheet in the nearest [Scaffold]. To show
   /// a persistent bottom sheet, use the [Scaffold.bottomSheet].
   ///
   /// Returns a controller that can be used to close and otherwise manipulate the

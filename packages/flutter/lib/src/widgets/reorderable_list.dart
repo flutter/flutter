@@ -60,7 +60,7 @@ import 'transitions.dart';
 ///    its items.
 ///  * [SliverReorderableList], a sliver list that allows the user to reorder
 ///    its items.
-///  * [ReorderableListView], a material design list that allows the user to
+///  * [ReorderableListView], a Material Design list that allows the user to
 ///    reorder its items.
 typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 
@@ -102,7 +102,7 @@ typedef ReorderItemProxyDecorator = Widget Function(Widget child, int index, Ani
 ///
 ///  * [SliverReorderableList], a sliver list that allows the user to reorder
 ///    its items.
-///  * [ReorderableListView], a material design list that allows the user to
+///  * [ReorderableListView], a Material Design list that allows the user to
 ///    reorder its items.
 class ReorderableList extends StatefulWidget {
   /// Creates a scrolling container that allows the user to interactively
@@ -419,7 +419,7 @@ class ReorderableListState extends State<ReorderableList> {
 ///
 ///  * [ReorderableList], a regular widget list that allows the user to reorder
 ///    its items.
-///  * [ReorderableListView], a material design list that allows the user to
+///  * [ReorderableListView], a Material Design list that allows the user to
 ///    reorder its items.
 class SliverReorderableList extends StatefulWidget {
   /// Creates a sliver list that allows the user to interactively reorder its
@@ -1223,7 +1223,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
 ///    its items.
 ///  * [SliverReorderableList], a sliver list that allows the user to reorder
 ///    its items.
-///  * [ReorderableListView], a material design list that allows the user to
+///  * [ReorderableListView], a Material Design list that allows the user to
 ///    reorder its items.
 class ReorderableDragStartListener extends StatelessWidget {
   /// Creates a listener for a drag immediately following a pointer down
@@ -1291,7 +1291,7 @@ class ReorderableDragStartListener extends StatelessWidget {
 ///    its items.
 ///  * [SliverReorderableList], a sliver list that allows the user to reorder
 ///    its items.
-///  * [ReorderableListView], a material design list that allows the user to
+///  * [ReorderableListView], a Material Design list that allows the user to
 ///    reorder its items.
 class ReorderableDelayedDragStartListener extends ReorderableDragStartListener {
   /// Creates a listener for an drag following a long press event over the

@@ -47,7 +47,7 @@ enum TabBarIndicatorSize {
   label,
 }
 
-/// A material design [TabBar] tab.
+/// A Material Design [TabBar] tab.
 ///
 /// If both [icon] and [text] are provided, the text is displayed below
 /// the icon.
@@ -59,7 +59,7 @@ enum TabBarIndicatorSize {
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 ///  * <https://material.io/design/components/tabs.html>
 class Tab extends StatelessWidget implements PreferredSizeWidget {
-  /// Creates a material design [TabBar] tab.
+  /// Creates a Material Design [TabBar] tab.
   ///
   /// At least one of [text], [icon], and [child] must be non-null. The [text]
   /// and [child] arguments must not be used at the same time. The
@@ -552,7 +552,7 @@ class _TabBarScrollController extends ScrollController {
   }
 }
 
-/// A material design widget that displays a horizontal row of tabs.
+/// A Material Design widget that displays a horizontal row of tabs.
 ///
 /// Typically created as the [AppBar.bottom] part of an [AppBar] and in
 /// conjunction with a [TabBarView].
@@ -588,7 +588,7 @@ class _TabBarScrollController extends ScrollController {
 ///  * [TabBarView], which displays page views that correspond to each tab.
 ///  * [TabBar], which is used to display the [Tab] that corresponds to each page of the [TabBarView].
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
-  /// Creates a material design tab bar.
+  /// Creates a Material Design tab bar.
   ///
   /// The [tabs] argument must not be null and its length must match the [controller]'s
   /// [TabController.length].

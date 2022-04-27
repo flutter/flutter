@@ -30,7 +30,7 @@ enum _FloatingActionButtonType {
   extended,
 }
 
-/// A material design floating action button.
+/// A Material Design floating action button.
 ///
 /// A floating action button is a circular icon button that hovers over content
 /// to promote a primary action in the application. Floating action buttons are
@@ -331,7 +331,7 @@ class FloatingActionButton extends StatelessWidget {
   /// If this is not explicitly set, then there can only be one
   /// [FloatingActionButton] per route (that is, per screen), since otherwise
   /// there would be a tag conflict (multiple heroes on one route can't have the
-  /// same tag). The material design specification recommends only using one
+  /// same tag). The Material Design specification recommends only using one
   /// floating action button per screen.
   final Object? heroTag;
 

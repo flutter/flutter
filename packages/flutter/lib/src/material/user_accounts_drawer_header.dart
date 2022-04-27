@@ -282,7 +282,7 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
   }
 }
 
-/// A material design [Drawer] header that identifies the app's user.
+/// A Material Design [Drawer] header that identifies the app's user.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -291,7 +291,7 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
 ///  * [DrawerHeader], for a drawer header that doesn't show user accounts.
 ///  * <https://material.io/design/components/navigation-drawer.html#anatomy>
 class UserAccountsDrawerHeader extends StatefulWidget {
-  /// Creates a material design drawer header.
+  /// Creates a Material Design drawer header.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   const UserAccountsDrawerHeader({
