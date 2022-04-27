@@ -9,7 +9,6 @@ found in the LICENSE file. -->
 
     <application android:name="${applicationName}" android:label="platform_view_layout">
         <activity android:name=".DummyPlatformViewActivity"
-                  android:exported="true"
                   android:launchMode="singleTop"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
