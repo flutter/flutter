@@ -581,6 +581,39 @@ void testMain() {
       expect(result, isNull);
     });
 
+    test('diffViewList works for flutter/flutter#101580', () {
+      ViewListDiffResult? result;
+
+      // Reverse the list
+      result = diffViewList(<int>[1, 2, 3, 4], <int>[4, 3, 2, 1]);
+      expect(result, isNotNull);
+      expect(result!.viewsToAdd, <int>[3, 2, 1]);
+      expect(result.viewsToRemove, isEmpty);
+      expect(result.addToBeginning, isFalse);
+
+      // Sort the list
+      result = diffViewList(<int>[3, 4, 1, 2], <int>[1, 2, 3, 4]);
+      expect(result, isNotNull);
+      expect(result!.viewsToAdd, <int>[3, 4]);
+      expect(result.viewsToRemove, isEmpty);
+      expect(result.addToBeginning, isFalse);
+
+      // Move last view to the beginning
+      // (The algo explores the diff from left to right, but in this case, it'd
+      // more efficient to add [1] at the beginning. Maybe we should compute both
+      // diffs, from left and right, and return the one that results in fewer
+      // add/remove operations?)
+      result = diffViewList(<int>[2, 3, 4, 1], <int>[1, 2, 3, 4]);
+      expect(result, isNotNull);
+      expect(result!.viewsToAdd, <int>[2, 3, 4]);
+      expect(result.viewsToRemove, isEmpty);
+      expect(result.addToBeginning, isFalse);
+
+      // Shuffle the list
+      result = diffViewList(<int>[1, 2, 3, 4], <int>[2, 4, 1, 3]);
+      expect(result, isNull);
+    });
+
     test('does not crash when a prerolled platform view is not composited',
         () async {
       ui.platformViewRegistry.registerViewFactory(

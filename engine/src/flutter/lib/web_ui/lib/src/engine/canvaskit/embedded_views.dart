@@ -997,9 +997,14 @@ ViewListDiffResult? diffViewList(List<int> active, List<int> next) {
         }
       }
     }
+    // Remove all ids from viewsToRemove that also exist in viewsToAdd.
+    final List<int> viewsToAdd = next.sublist(active.length - index);
+    final Set<int> viewsToAddSet = viewsToAdd.toSet();
+    final List<int> viewsToRemove = active.sublist(0, index).where((int e) => !viewsToAddSet.contains(e)).toList();
+
     return ViewListDiffResult(
-      active.sublist(0, index),
-      next.sublist(active.length - index),
+      viewsToRemove,
+      viewsToAdd,
       false,
     );
   }
@@ -1011,9 +1016,15 @@ ViewListDiffResult? diffViewList(List<int> active, List<int> next) {
         return null;
       }
     }
+
+    // Remove all ids from viewsToRemove that also exist in viewsToAdd.
+    final List<int> viewsToAdd = active.sublist(index + 1);
+    final Set<int> viewsToAddSet = viewsToAdd.toSet();
+    final List<int> viewsToRemove = next.sublist(0, next.length - index - 1).where((int e) => !viewsToAddSet.contains(e)).toList();
+
     return ViewListDiffResult(
-      active.sublist(index + 1),
-      next.sublist(0, next.length - index - 1),
+      viewsToAdd,
+      viewsToRemove,
       true,
       viewToInsertBefore: active.first,
     );
