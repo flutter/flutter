@@ -7090,7 +7090,7 @@ void main() {
         pointer: 1,
         kind: PointerDeviceKind.mouse,
       );
-        await gesture.up();
+      await gesture.up();
 
       // Cursor at tap position, not at word edge.
       expect(
@@ -8421,7 +8421,7 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-        await tester.pump();
+      await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
       expect(
@@ -9582,7 +9582,7 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-        await tester.pump();
+      await tester.pump();
       await gesture.up();
       await tester.pump();
 
@@ -9614,7 +9614,7 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-        await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
       await gesture.up();
       await tester.pump();
 
@@ -9646,7 +9646,7 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
-        await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
       await gesture.down(textFieldPos);

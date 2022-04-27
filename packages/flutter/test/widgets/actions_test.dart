@@ -397,7 +397,7 @@ void main() {
       );
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
       await gesture.addPointer(location: const Offset(1, 1));
-        await tester.pump();
+      await tester.pump();
 
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
@@ -750,7 +750,7 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-        await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
+      await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(hovering, isTrue);
@@ -813,7 +813,7 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-        await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
+      await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(hovering, isFalse);

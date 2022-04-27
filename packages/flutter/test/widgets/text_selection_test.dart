@@ -1222,7 +1222,7 @@ void main() {
       expect(endDragEndDetails, isNull);
 
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(spy.leftHandleKey)));
-        await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 200));
       expect(startDragStartDetails!.globalPosition, tester.getCenter(find.byKey(spy.leftHandleKey)));
 
       const Offset newLocation = Offset(20, 20);

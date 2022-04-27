@@ -1194,7 +1194,7 @@ void main() {
         kind: PointerDeviceKind.mouse,
       );
       await gesture.addPointer();
-        await gesture.moveTo(center);
+      await gesture.moveTo(center);
       await tester.pumpAndSettle();
       expect(getFABWidget(fabFinder).elevation, 8);
 

@@ -3115,7 +3115,7 @@ void main() {
         textFieldPos,
         kind: PointerDeviceKind.mouse,
       );
-        await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
       await gesture.up();
       await tester.pump();
 
@@ -3148,7 +3148,7 @@ void main() {
         textEndPos,
         kind: PointerDeviceKind.mouse,
       );
-        await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
       await gesture.down(textEndPos);

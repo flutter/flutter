@@ -615,7 +615,6 @@ void main() {
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: hoverColor));
-
   });
 
   testWidgets('Does ElevatedButton work with focus', (WidgetTester tester) async {

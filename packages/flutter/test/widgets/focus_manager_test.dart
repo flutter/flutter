@@ -1160,7 +1160,7 @@ void main() {
       expect(lastMode, FocusHighlightMode.touch);
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
       final TestGesture gesture = await tester.startGesture(Offset.zero, kind: PointerDeviceKind.mouse);
-        await gesture.up();
+      await gesture.up();
       expect(callCount, equals(3));
       expect(lastMode, FocusHighlightMode.traditional);
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));

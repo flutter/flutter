@@ -2705,7 +2705,6 @@ void main() {
     await tester.pumpWidget(chipWidget(enabled: false));
     await tester.pumpAndSettle();
     expect(find.byType(RawChip), paints..rrect(color: disabledColor));
-
   });
 
   testWidgets('Chip uses stateful border side color from resolveWith', (WidgetTester tester) async {
@@ -2794,7 +2793,6 @@ void main() {
   testWidgets('Chip uses stateful nullable border side color from resolveWith', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
     const Color focusedColor = Color(0x00000003);
@@ -2881,7 +2879,6 @@ void main() {
     await tester.pumpWidget(chipWidget(enabled: false));
     await tester.pumpAndSettle();
     expect(find.byType(RawChip), paints..rrect(color: disabledColor));
-
   });
 
   testWidgets('Chip uses stateful shape in different states', (WidgetTester tester) async {
@@ -2955,7 +2952,6 @@ void main() {
     await tester.pumpWidget(chipWidget(enabled: false));
     await tester.pumpAndSettle();
     expect(getMaterial(tester).shape, isA<BeveledRectangleBorder>());
-
   });
 
   testWidgets('Chip defers to theme, if shape and side resolves to null', (WidgetTester tester) async {

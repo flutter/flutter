@@ -139,7 +139,7 @@ void main() {
       );
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-        // Start out of hoverTarget
+      // Start out of hoverTarget
       await gesture.moveTo(const Offset(100, 100));
       await tester.pumpWidget(subject);
       expect(hovered, isFalse);
@@ -497,7 +497,7 @@ void main() {
       );
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-        // Start out of hoverTarget
+      // Start out of hoverTarget
       await gesture.moveTo(const Offset(100, 100));
 
       await tester.pumpWidget(subject);
@@ -566,7 +566,7 @@ void main() {
       );
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-        // Start out of hoverTarget
+      // Start out of hoverTarget
       await gesture.moveTo(const Offset(100, 100));
       await tester.pumpWidget(subject);
       expect(hovered, isFalse);

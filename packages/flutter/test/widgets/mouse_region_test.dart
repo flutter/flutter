@@ -1312,7 +1312,7 @@ void main() {
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
       // Move to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
@@ -1359,7 +1359,7 @@ void main() {
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
       // Move to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));
@@ -1405,7 +1405,7 @@ void main() {
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
       // Move to the overlapping area.
       await gesture.moveTo(const Offset(75, 75));

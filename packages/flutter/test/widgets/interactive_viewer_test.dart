@@ -91,7 +91,7 @@ void main() {
         childOffset.dy + 20.0,
       );
       TestGesture gesture = await tester.startGesture(childInterior);
-        await tester.pump();
+      await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
       await gesture.up();
@@ -147,7 +147,7 @@ void main() {
         childOffset.dy + 20.0,
       );
       TestGesture gesture = await tester.startGesture(childOffset);
-        await tester.pump();
+      await tester.pump();
       await gesture.moveTo(childInterior);
       await tester.pump();
       await gesture.up();
@@ -259,7 +259,7 @@ void main() {
         childOffset.dy + 20.0,
       );
       TestGesture gesture = await tester.startGesture(childInterior);
-        await tester.pump();
+      await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
       await gesture.up();
@@ -314,7 +314,7 @@ void main() {
         childOffset.dy + 20.0,
       );
       final TestGesture gesture = await tester.startGesture(childInterior);
-        await tester.pump();
+      await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
       await gesture.up();
@@ -353,7 +353,7 @@ void main() {
         childOffset.dy + 10.0,
       );
       final TestGesture gesture = await tester.startGesture(childInterior);
-        await tester.pump();
+      await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
       await gesture.up();
@@ -822,7 +822,7 @@ void main() {
 
       // Attempting to pan doesn't work because it's disabled, but the
       // interaction methods are still called.
-        await tester.pump();
+      await tester.pump();
       await gesture.moveTo(childInterior);
       await tester.pump();
       await gesture.up();
@@ -894,7 +894,7 @@ void main() {
 
       // Attempting to pan doesn't work because it's disabled, but the
       // interaction methods are still called.
-        await tester.pump();
+      await tester.pump();
       await gesture.moveTo(childInterior);
       await tester.pump();
       await gesture.up();
@@ -942,7 +942,7 @@ void main() {
         childOffset.dy + 20.0,
       );
       TestGesture gesture = await tester.startGesture(childInterior);
-        await tester.pump();
+      await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
       await gesture.up();
@@ -1105,7 +1105,7 @@ void main() {
       Offset scaleEnd2 = Offset(childInterior.dx + 20.0, childInterior.dy);
       TestGesture gesture = await tester.createGesture();
       TestGesture gesture2 = await tester.createGesture();
-        addTearDown(gesture2.removePointer);
+      addTearDown(gesture2.removePointer);
       await gesture.down(scaleStart1);
       await gesture2.down(scaleStart2);
       await tester.pump();
@@ -1125,7 +1125,7 @@ void main() {
       scaleEnd2 = Offset(childInterior.dx + 48.0, childInterior.dy);
       gesture = await tester.createGesture();
       gesture2 = await tester.createGesture();
-        addTearDown(gesture2.removePointer);
+      addTearDown(gesture2.removePointer);
       await gesture.down(scaleStart1);
       await gesture2.down(scaleStart2);
       await tester.pump();
@@ -1241,7 +1241,7 @@ void main() {
         childOffset.dy + translationY,
       );
       final TestGesture gesture = await tester.startGesture(childInterior);
-        await tester.pump();
+      await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
       await gesture.up();
