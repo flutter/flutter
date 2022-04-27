@@ -10,7 +10,7 @@ abstract class ProjectValidator {
   /// Can return more than one result in case a file/command have a lot of info to share to the user
   Future<List<ProjectValidatorResult>> start(FlutterProject project);
   /// new ProjectValidators should be added here for the ValidateProjectCommand to run
-  static List <ProjectValidator> allProjectValidators = <ProjectValidator>[
+  static const List <ProjectValidator> allProjectValidators = <ProjectValidator>[
     // TODO(jasguerrero): add validators
   ];
 }

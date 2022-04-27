@@ -32,6 +32,21 @@ class ProjectValidatorDummy extends ProjectValidator {
   }
 }
 
+class ProjectValidatorSecondDummy extends ProjectValidator {
+  @override
+  Future<List<ProjectValidatorResult>> start(FlutterProject project) async{
+    return <ProjectValidatorResult>[
+      const ProjectValidatorResult(name: 'second', value: 'pass', status: StatusProjectValidator.success),
+      const ProjectValidatorResult(name: 'second fail', value: 'second fail', status: StatusProjectValidator.error),
+    ];
+  }
+
+  @override
+  bool supportsProject(FlutterProject project) {
+    return true;
+  }
+}
+
 class ProjectValidatorCrash extends ProjectValidator {
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async{
@@ -45,18 +60,23 @@ class ProjectValidatorCrash extends ProjectValidator {
 }
 
 void main() {
-  final BufferLogger loggerTest = BufferLogger.test();
   FileSystem fileSystem;
 
   group('analyze project command', () {
-    setUpAll(() {
+
+    setUp(() {
       fileSystem = MemoryFileSystem.test();
     });
+
     testUsingContext('success, error and warning', () async {
+      final BufferLogger loggerTest = BufferLogger.test();
       final ValidateProjectCommand command = ValidateProjectCommand(
           fileSystem: fileSystem,
           logger: loggerTest,
-          allProjectValidators: <ProjectValidator>[ProjectValidatorDummy()]
+          allProjectValidators: <ProjectValidator>[
+            ProjectValidatorDummy(),
+            ProjectValidatorSecondDummy()
+          ]
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -67,14 +87,15 @@ void main() {
           '│ [✓] pass: value                          │\n'
           '│ [✗] Error: my error                      │\n'
           '│ [!] pass two: pass (warning: my warning) │\n'
-          '│                                          │\n'
+          '│ [✓] second: pass                         │\n'
+          '│ [✗] Error: second fail                   │\n'
           '└──────────────────────────────────────────┘\n';
 
       expect(loggerTest.statusText, contains(expected));
     });
 
     testUsingContext('crash', () async {
-
+      final BufferLogger loggerTest = BufferLogger.test();
       final ValidateProjectCommand command = ValidateProjectCommand(
           fileSystem: fileSystem,
           logger: loggerTest,

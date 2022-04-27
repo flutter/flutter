@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:path/path.dart';
+
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../project.dart';
@@ -60,17 +63,19 @@ class ValidateProjectCommand extends FlutterCommand {
 
   void printResults(final List<List<ProjectValidatorResult>> futureResults) {
     final StringBuffer buffer = StringBuffer();
+    final List<String> resultsString = <String>[];
 
     for (final List<ProjectValidatorResult> resultList in futureResults) {
       for (final ProjectValidatorResult result in resultList) {
-        addToBufferResult(result, buffer);
+        resultsString.add(getStringResult(result));
       }
     }
 
+    buffer.writeAll(resultsString, '\n');
     logger.printBox(buffer.toString());
   }
 
-  void addToBufferResult(ProjectValidatorResult result, StringBuffer buffer) {
+  String getStringResult(ProjectValidatorResult result) {
     final String icon;
     switch(result.status) {
       case StatusProjectValidator.error:
@@ -87,7 +92,7 @@ class ValidateProjectCommand extends FlutterCommand {
         break;
     }
 
-    buffer.writeln('$icon $result');
+    return '$icon $result';
   }
 
   String getUserPath(){
