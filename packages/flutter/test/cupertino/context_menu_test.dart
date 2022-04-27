@@ -12,7 +12,7 @@ void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   const double kOpenScale = 1.1;
 
-  Widget _getChild() {
+  Widget getChild() {
     return Container(
       width: 300.0,
       height: 100.0,
@@ -20,7 +20,7 @@ void main() {
     );
   }
 
-  Widget _getContextMenu({
+  Widget getContextMenu({
     Alignment alignment = Alignment.center,
     Size screenSize = const Size(800.0, 600.0),
     Widget? child,
@@ -37,7 +37,7 @@ void main() {
                   child: Text('CupertinoContextMenuAction $alignment'),
                 ),
               ],
-              child: child ?? _getChild(),
+              child: child ?? getChild(),
             ),
           ),
         ),
@@ -46,7 +46,7 @@ void main() {
   }
 
   // Finds the child widget that is rendered inside of _DecoyChild.
-  Finder _findDecoyChild(Widget child) {
+  Finder findDecoyChild(Widget child) {
     return find.descendant(
       of: find.byType(ShaderMask),
       matching: find.byWidget(child),
@@ -54,23 +54,23 @@ void main() {
   }
 
   // Finds the child widget rendered inside of _ContextMenuRouteStatic.
-  Finder _findStatic() {
+  Finder findStatic() {
     return find.descendant(
       of: find.byType(CupertinoApp),
       matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ContextMenuRouteStatic'),
     );
   }
 
-  Finder _findStaticChild(Widget child) {
+  Finder findStaticChild(Widget child) {
     return find.descendant(
-      of: _findStatic(),
+      of: findStatic(),
       matching: find.byWidget(child),
     );
   }
 
-  Finder _findStaticChildDecoration(WidgetTester tester) {
+  Finder findStaticChildDecoration(WidgetTester tester) {
     return find.descendant(
-      of: _findStatic(),
+      of: findStatic(),
       matching: find.byType(DecoratedBox),
     );
   }
@@ -78,7 +78,7 @@ void main() {
   group('CupertinoContextMenu before and during opening', () {
     testWidgets('An unopened CupertinoContextMenu renders child in the same place as without', (WidgetTester tester) async {
       // Measure the child in the scene with no CupertinoContextMenu.
-      final Widget child = _getChild();
+      final Widget child = getChild();
       await tester.pumpWidget(
         CupertinoApp(
           home: CupertinoPageScaffold(
@@ -91,14 +91,14 @@ void main() {
       final Rect childRect = tester.getRect(find.byWidget(child));
 
       // When wrapped in a CupertinoContextMenu, the child is rendered in the same Rect.
-      await tester.pumpWidget(_getContextMenu(child: child));
+      await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byWidget(child), findsOneWidget);
       expect(tester.getRect(find.byWidget(child)), childRect);
     });
 
     testWidgets('Can open CupertinoContextMenu by tap and hold', (WidgetTester tester) async {
-      final Widget child = _getChild();
-      await tester.pumpWidget(_getContextMenu(child: child));
+      final Widget child = getChild();
+      await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
       expect(find.byType(ShaderMask), findsNothing);
@@ -108,20 +108,20 @@ void main() {
       await tester.pump();
 
       // The _DecoyChild is showing directly on top of the child.
-      expect(_findDecoyChild(child), findsOneWidget);
-      Rect decoyChildRect = tester.getRect(_findDecoyChild(child));
+      expect(findDecoyChild(child), findsOneWidget);
+      Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
       expect(find.byType(ShaderMask), findsOneWidget);
 
       // After a small delay, the _DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 100));
-      decoyChildRect = tester.getRect(_findDecoyChild(child));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, isNot(equals(decoyChildRect)));
 
       // Eventually the decoy fully scales by _kOpenSize.
       await tester.pump(const Duration(milliseconds: 500));
-      decoyChildRect = tester.getRect(_findDecoyChild(child));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, isNot(equals(decoyChildRect)));
       expect(decoyChildRect.width, childRect.width * kOpenScale);
 
@@ -129,11 +129,11 @@ void main() {
       await tester.pumpAndSettle();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsOneWidget);
+      expect(findStatic(), findsOneWidget);
     });
 
     testWidgets('CupertinoContextMenu is in the correct position when within a nested navigator', (WidgetTester tester) async {
-      final Widget child = _getChild();
+      final Widget child = getChild();
       await tester.pumpWidget(CupertinoApp(
         home: CupertinoPageScaffold(
           child: MediaQuery(
@@ -173,20 +173,20 @@ void main() {
       await tester.pump();
 
       // The _DecoyChild is showing directly on top of the child.
-      expect(_findDecoyChild(child), findsOneWidget);
-      Rect decoyChildRect = tester.getRect(_findDecoyChild(child));
+      expect(findDecoyChild(child), findsOneWidget);
+      Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
       expect(find.byType(ShaderMask), findsOneWidget);
 
       // After a small delay, the _DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 100));
-      decoyChildRect = tester.getRect(_findDecoyChild(child));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, isNot(equals(decoyChildRect)));
 
       // Eventually the decoy fully scales by _kOpenSize.
       await tester.pump(const Duration(milliseconds: 500));
-      decoyChildRect = tester.getRect(_findDecoyChild(child));
+      decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, isNot(equals(decoyChildRect)));
       expect(decoyChildRect.width, childRect.width * kOpenScale);
 
@@ -194,11 +194,11 @@ void main() {
       await tester.pumpAndSettle();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsOneWidget);
+      expect(findStatic(), findsOneWidget);
     });
 
     testWidgets('Hovering over Cupertino context menu updates cursor to clickable on Web', (WidgetTester tester) async {
-      final Widget child  = _getChild();
+      final Widget child  = getChild();
       await tester.pumpWidget(CupertinoApp(
         home: CupertinoPageScaffold(
           child: Center(
@@ -232,7 +232,7 @@ void main() {
 
   group('CupertinoContextMenu when open', () {
     testWidgets('Last action does not have border', (WidgetTester tester) async {
-      final Widget child  = _getChild();
+      final Widget child  = getChild();
       await tester.pumpWidget(CupertinoApp(
         home: CupertinoPageScaffold(
           child: Center(
@@ -253,14 +253,14 @@ void main() {
       await tester.pumpAndSettle();
       await firstGesture.up();
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsOneWidget);
+      expect(findStatic(), findsOneWidget);
 
-      expect(_findStaticChildDecoration(tester), findsNWidgets(1));
+      expect(findStaticChildDecoration(tester), findsNWidgets(1));
 
       // Close the CupertinoContextMenu.
       await tester.tapAt(const Offset(1.0, 1.0));
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsNothing);
+      expect(findStatic(), findsNothing);
 
       await tester.pumpWidget(CupertinoApp(
         home: CupertinoPageScaffold(
@@ -285,14 +285,14 @@ void main() {
       await tester.pumpAndSettle();
       await secondGesture.up();
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsOneWidget);
+      expect(findStatic(), findsOneWidget);
 
-      expect(_findStaticChildDecoration(tester), findsNWidgets(3));
+      expect(findStaticChildDecoration(tester), findsNWidgets(3));
     });
 
     testWidgets('Can close CupertinoContextMenu by background tap', (WidgetTester tester) async {
-      final Widget child = _getChild();
-      await tester.pumpWidget(_getContextMenu(child: child));
+      final Widget child = getChild();
+      await tester.pumpWidget(getContextMenu(child: child));
 
       // Open the CupertinoContextMenu
       final Rect childRect = tester.getRect(find.byWidget(child));
@@ -300,17 +300,17 @@ void main() {
       await tester.pumpAndSettle();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsOneWidget);
+      expect(findStatic(), findsOneWidget);
 
       // Tap and ensure that the CupertinoContextMenu is closed.
       await tester.tapAt(const Offset(1.0, 1.0));
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsNothing);
+      expect(findStatic(), findsNothing);
     });
 
     testWidgets('Can close CupertinoContextMenu by dragging down', (WidgetTester tester) async {
-      final Widget child = _getChild();
-      await tester.pumpWidget(_getContextMenu(child: child));
+      final Widget child = getChild();
+      await tester.pumpWidget(getContextMenu(child: child));
 
       // Open the CupertinoContextMenu
       final Rect childRect = tester.getRect(find.byWidget(child));
@@ -318,11 +318,11 @@ void main() {
       await tester.pumpAndSettle();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsOneWidget);
+      expect(findStatic(), findsOneWidget);
 
       // Drag down not far enough and it bounces back and doesn't close.
-      expect(_findStaticChild(child), findsOneWidget);
-      Offset staticChildCenter = tester.getCenter(_findStaticChild(child));
+      expect(findStaticChild(child), findsOneWidget);
+      Offset staticChildCenter = tester.getCenter(findStaticChild(child));
       TestGesture swipeGesture = await tester.startGesture(staticChildCenter);
       await swipeGesture.moveBy(
         const Offset(0.0, 100.0),
@@ -331,14 +331,14 @@ void main() {
       await tester.pump();
       await swipeGesture.up();
       await tester.pump();
-      expect(tester.getCenter(_findStaticChild(child)).dy, greaterThan(staticChildCenter.dy));
+      expect(tester.getCenter(findStaticChild(child)).dy, greaterThan(staticChildCenter.dy));
       await tester.pumpAndSettle();
-      expect(tester.getCenter(_findStaticChild(child)), equals(staticChildCenter));
-      expect(_findStatic(), findsOneWidget);
+      expect(tester.getCenter(findStaticChild(child)), equals(staticChildCenter));
+      expect(findStatic(), findsOneWidget);
 
       // Drag down far enough and it does close.
-      expect(_findStaticChild(child), findsOneWidget);
-      staticChildCenter = tester.getCenter(_findStaticChild(child));
+      expect(findStaticChild(child), findsOneWidget);
+      staticChildCenter = tester.getCenter(findStaticChild(child));
       swipeGesture = await tester.startGesture(staticChildCenter);
       await swipeGesture.moveBy(
         const Offset(0.0, 200.0),
@@ -347,12 +347,12 @@ void main() {
       await tester.pump();
       await swipeGesture.up();
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsNothing);
+      expect(findStatic(), findsNothing);
     });
 
     testWidgets('Can close CupertinoContextMenu by flinging down', (WidgetTester tester) async {
-      final Widget child = _getChild();
-      await tester.pumpWidget(_getContextMenu(child: child));
+      final Widget child = getChild();
+      await tester.pumpWidget(getContextMenu(child: child));
 
       // Open the CupertinoContextMenu
       final Rect childRect = tester.getRect(find.byWidget(child));
@@ -360,24 +360,24 @@ void main() {
       await tester.pumpAndSettle();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsOneWidget);
+      expect(findStatic(), findsOneWidget);
 
       // Fling up and nothing happens.
-      expect(_findStaticChild(child), findsOneWidget);
-      await tester.fling(_findStaticChild(child), const Offset(0.0, -100.0), 1000.0);
+      expect(findStaticChild(child), findsOneWidget);
+      await tester.fling(findStaticChild(child), const Offset(0.0, -100.0), 1000.0);
       await tester.pumpAndSettle();
-      expect(_findStaticChild(child), findsOneWidget);
+      expect(findStaticChild(child), findsOneWidget);
 
       // Fling down to close the menu.
-      expect(_findStaticChild(child), findsOneWidget);
-      await tester.fling(_findStaticChild(child), const Offset(0.0, 100.0), 1000.0);
+      expect(findStaticChild(child), findsOneWidget);
+      await tester.fling(findStaticChild(child), const Offset(0.0, 100.0), 1000.0);
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsNothing);
+      expect(findStatic(), findsNothing);
     });
 
     testWidgets("Backdrop is added using ModalRoute's filter parameter", (WidgetTester tester) async {
-      final Widget child = _getChild();
-      await tester.pumpWidget(_getContextMenu(child: child));
+      final Widget child = getChild();
+      await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byType(BackdropFilter), findsNothing);
 
       // Open the CupertinoContextMenu
@@ -386,7 +386,7 @@ void main() {
       await tester.pumpAndSettle();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsOneWidget);
+      expect(findStatic(), findsOneWidget);
       expect(find.byType(BackdropFilter), findsOneWidget);
     });
   });
@@ -397,8 +397,8 @@ void main() {
       await binding.setSurfaceSize(portraitScreenSize);
 
       // Pump a CupertinoContextMenu in the center of the screen and open it.
-      final Widget child = _getChild();
-      await tester.pumpWidget(_getContextMenu(
+      final Widget child = getChild();
+      await tester.pumpWidget(getContextMenu(
         screenSize: portraitScreenSize,
         child: child,
       ));
@@ -416,10 +416,10 @@ void main() {
       // Close the CupertinoContextMenu.
       await tester.tapAt(const Offset(1.0, 1.0));
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsNothing);
+      expect(findStatic(), findsNothing);
 
       // Pump a CupertinoContextMenu on the left of the screen and open it.
-      await tester.pumpWidget(_getContextMenu(
+      await tester.pumpWidget(getContextMenu(
         alignment: Alignment.centerLeft,
         screenSize: portraitScreenSize,
         child: child,
@@ -440,10 +440,10 @@ void main() {
       // Close the CupertinoContextMenu.
       await tester.tapAt(const Offset(1.0, 1.0));
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsNothing);
+      expect(findStatic(), findsNothing);
 
       // Pump a CupertinoContextMenu on the right of the screen and open it.
-      await tester.pumpWidget(_getContextMenu(
+      await tester.pumpWidget(getContextMenu(
         alignment: Alignment.centerRight,
         screenSize: portraitScreenSize,
         child: child,
@@ -466,8 +466,8 @@ void main() {
 
     testWidgets('Landscape', (WidgetTester tester) async {
       // Pump a CupertinoContextMenu in the center of the screen and open it.
-      final Widget child = _getChild();
-      await tester.pumpWidget(_getContextMenu(
+      final Widget child = getChild();
+      await tester.pumpWidget(getContextMenu(
         child: child,
       ));
       expect(find.byType(CupertinoContextMenuAction), findsNothing);
@@ -485,10 +485,10 @@ void main() {
       // Close the CupertinoContextMenu.
       await tester.tapAt(const Offset(1.0, 1.0));
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsNothing);
+      expect(findStatic(), findsNothing);
 
       // Pump a CupertinoContextMenu on the left of the screen and open it.
-      await tester.pumpWidget(_getContextMenu(
+      await tester.pumpWidget(getContextMenu(
         alignment: Alignment.centerLeft,
         child: child,
       ));
@@ -508,10 +508,10 @@ void main() {
       // Close the CupertinoContextMenu.
       await tester.tapAt(const Offset(1.0, 1.0));
       await tester.pumpAndSettle();
-      expect(_findStatic(), findsNothing);
+      expect(findStatic(), findsNothing);
 
       // Pump a CupertinoContextMenu on the right of the screen and open it.
-      await tester.pumpWidget(_getContextMenu(
+      await tester.pumpWidget(getContextMenu(
         alignment: Alignment.centerRight,
         child: child,
       ));

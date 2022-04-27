@@ -576,14 +576,14 @@ void main() {
 
   testWidgets('ScrollbarThemeData.trackVisibility test', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    bool? _getTrackVisibility(Set<MaterialState> states) {
+    bool? getTrackVisibility(Set<MaterialState> states) {
       return true;
     }
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData().copyWith(
           scrollbarTheme: _scrollbarTheme(
-            trackVisibility: MaterialStateProperty.resolveWith(_getTrackVisibility),
+            trackVisibility: MaterialStateProperty.resolveWith(getTrackVisibility),
           ),
         ),
         home: ScrollConfiguration(

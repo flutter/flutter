@@ -980,12 +980,12 @@ void main() {
     }
     const double splashRadius = 24.0;
 
-    Finder _findRadio() {
+    Finder findRadio() {
       return find.byWidgetPredicate((Widget widget) => widget is Radio<bool>);
     }
 
-    MaterialInkController? _getRadioMaterial(WidgetTester tester) {
-      return Material.of(tester.element(_findRadio()));
+    MaterialInkController? getRadioMaterial(WidgetTester tester) {
+      return Material.of(tester.element(findRadio()));
     }
 
     Widget buildRadio({bool active = false, bool focused = false, bool useOverlay = true}) {
@@ -1008,11 +1008,11 @@ void main() {
     }
 
     await tester.pumpWidget(buildRadio(useOverlay: false));
-    await tester.press(_findRadio());
+    await tester.press(findRadio());
     await tester.pumpAndSettle();
 
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: fillColor.withAlpha(kRadialReactionAlpha),
@@ -1022,11 +1022,11 @@ void main() {
     );
 
     await tester.pumpWidget(buildRadio(active: true, useOverlay: false));
-    await tester.press(_findRadio());
+    await tester.press(findRadio());
     await tester.pumpAndSettle();
 
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: fillColor.withAlpha(kRadialReactionAlpha),
@@ -1036,11 +1036,11 @@ void main() {
     );
 
     await tester.pumpWidget(buildRadio());
-    await tester.press(_findRadio());
+    await tester.press(findRadio());
     await tester.pumpAndSettle();
 
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: inactivePressedOverlayColor,
@@ -1050,11 +1050,11 @@ void main() {
     );
 
     await tester.pumpWidget(buildRadio(active: true));
-    await tester.press(_findRadio());
+    await tester.press(findRadio());
     await tester.pumpAndSettle();
 
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: activePressedOverlayColor,
@@ -1068,7 +1068,7 @@ void main() {
 
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: focusOverlayColor,
@@ -1081,11 +1081,11 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(_findRadio()));
+    await gesture.moveTo(tester.getCenter(findRadio()));
     await tester.pumpAndSettle();
 
     expect(
-      _getRadioMaterial(tester),
+      getRadioMaterial(tester),
       paints
         ..circle(
           color: hoverOverlayColor,

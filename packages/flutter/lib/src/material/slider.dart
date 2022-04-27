@@ -715,7 +715,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
     // in range_slider.dart.
-    Size _screenSize() => MediaQuery.of(context).size;
+    Size screenSize() => MediaQuery.of(context).size;
 
     VoidCallback? handleDidGainAccessibilityFocus;
     switch (theme.platform) {
@@ -757,7 +757,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             label: widget.label,
             sliderTheme: sliderTheme,
             textScaleFactor: MediaQuery.of(context).textScaleFactor,
-            screenSize: _screenSize(),
+            screenSize: screenSize(),
             onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
             onChangeStart: _handleDragStart,
             onChangeEnd: _handleDragEnd,
