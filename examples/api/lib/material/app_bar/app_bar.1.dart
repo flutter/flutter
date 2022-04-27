@@ -41,7 +41,7 @@ class MyStatelessWidget extends StatelessWidget {
             style: style,
             onPressed: () {},
             child: const Text('Action 2'),
-          )
+          ),
         ],
       ),
     );

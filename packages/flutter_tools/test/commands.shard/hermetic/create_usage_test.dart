@@ -142,7 +142,8 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
-        'create', '--no-pub', '--template=app', 'testy']);
+        'create', '--no-pub', '--template=app', 'testy',
+      ]);
       expect((await command.usageValues).commandCreateIosLanguage, 'swift');
 
       await runner.run(<String>[

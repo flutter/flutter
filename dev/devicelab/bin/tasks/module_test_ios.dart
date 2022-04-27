@@ -425,7 +425,7 @@ end
             '-archivePath',
             objectiveCBuildArchiveDirectory.path,
             'COMPILER_INDEX_STORE_ENABLE=NO',
-            'archive'
+            'archive',
           ],
           environment: <String, String> {
             'FLUTTER_ANALYTICS_LOG_FILE': objectiveCAnalyticsOutputFile.path,

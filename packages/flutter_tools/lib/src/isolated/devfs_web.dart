@@ -267,7 +267,7 @@ class WebAssetServer implements AssetReader {
           final String result =
               await globals.fs.file(uri.toFilePath()).readAsString();
           return shelf.Response.ok(result, headers: <String, String>{
-            HttpHeaders.contentTypeHeader: 'application/javascript'
+            HttpHeaders.contentTypeHeader: 'application/javascript',
           });
         }
         return innerHandler(request);

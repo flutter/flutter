@@ -8,7 +8,7 @@ import 'card_theme.dart';
 import 'material.dart';
 import 'theme.dart';
 
-/// A material design card: a panel with slightly rounded corners and an
+/// A Material Design card: a panel with slightly rounded corners and an
 /// elevation shadow.
 ///
 /// A card is a sheet of [Material] used to represent some related information,
@@ -54,7 +54,7 @@ import 'theme.dart';
 ///  * [showDialog], to display a modal card.
 ///  * <https://material.io/design/components/cards.html>
 class Card extends StatelessWidget {
-  /// Creates a material design card.
+  /// Creates a Material Design card.
   ///
   /// The [elevation] must be null or non-negative. The [borderOnForeground]
   /// must not be null.

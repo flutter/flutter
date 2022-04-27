@@ -18,7 +18,7 @@ const int _kIndeterminateCircularDuration = 1333 * 2222;
 
 enum _ActivityIndicatorType { material, adaptive }
 
-/// A base class for material design progress indicators.
+/// A base class for Material Design progress indicators.
 ///
 /// This widget cannot be instantiated directly. For a linear progress
 /// indicator, see [LinearProgressIndicator]. For a circular progress indicator,
@@ -225,7 +225,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   }
 }
 
-/// A material design linear progress indicator, also known as a progress bar.
+/// A Material Design linear progress indicator, also known as a progress bar.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=O-rhXZLtpv0}
 ///
@@ -438,7 +438,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   }
 }
 
-/// A material design circular progress indicator, which spins to indicate that
+/// A Material Design circular progress indicator, which spins to indicate that
 /// the application is busy.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=O-rhXZLtpv0}

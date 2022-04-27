@@ -799,20 +799,15 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
       return;
     }
 
-    if (clipBehavior == Clip.none) {
-      _clipRectLayer.layer = null;
-      super.paint(context, offset);
-    } else {
-      // We have overflow and the clipBehavior isn't none. Clip it.
-      _clipRectLayer.layer = context.pushClipRect(
-        needsCompositing,
-        offset,
-        Offset.zero & size,
-        super.paint,
-        clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer.layer,
-      );
-    }
+    // We have overflow and the clipBehavior isn't none. Clip it.
+    _clipRectLayer.layer = context.pushClipRect(
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      super.paint,
+      clipBehavior: clipBehavior,
+      oldLayer: _clipRectLayer.layer,
+    );
 
     // Display the overflow indicator.
     assert(() {

@@ -65,7 +65,7 @@ class Response {
   String toJson() => json.encode(<String, dynamic>{
         'result': allTestsPassed.toString(),
         'failureDetails': _failureDetailsAsString(),
-        if (data != null) 'data': data
+        if (data != null) 'data': data,
       });
 
   /// Deserializes the result from JSON.

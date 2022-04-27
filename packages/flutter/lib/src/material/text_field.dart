@@ -113,7 +113,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   }
 }
 
-/// A material design text field.
+/// A Material Design text field.
 ///
 /// A text field lets the user enter text, either with hardware keyboard or with
 /// an onscreen keyboard.

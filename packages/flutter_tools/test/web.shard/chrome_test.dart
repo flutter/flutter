@@ -214,7 +214,7 @@ void main() {
           'example_url',
         ],
         stderr: kDevtoolsStderr,
-      )
+      ),
     ]);
 
     await expectReturnsNormallyLater(
@@ -253,7 +253,7 @@ void main() {
           'example_url',
         ],
         stderr: kDevtoolsStderr,
-      )
+      ),
     ]);
 
     await expectReturnsNormallyLater(

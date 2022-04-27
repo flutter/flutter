@@ -48,7 +48,7 @@ void main() {
             command: <String>['echo', 'test',],
             stdout: 'output',
             stderr: 'error',
-          )
+          ),
         ]);
         final ProcessRunner processRunner = ProcessRunner(
             subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
@@ -62,7 +62,7 @@ void main() {
             stdout: 'output',
             stderr: 'error',
             exitCode: -1,
-          )
+          ),
         ]);
         final ProcessRunner processRunner = ProcessRunner(
             subprocessOutput: false, platform: platform, processManager: fakeProcessManager);

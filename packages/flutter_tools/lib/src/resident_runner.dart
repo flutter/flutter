@@ -1523,7 +1523,6 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
     case TargetPlatform.linux_x64:
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
-    case TargetPlatform.windows_uwp_x64:
     case TargetPlatform.windows_x64:
       return null;
   }

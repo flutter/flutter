@@ -131,7 +131,6 @@ void main() {
         'linux-x64': false,
         'linux-arm64': false,
         'windows-x64': false,
-        'windows-uwp-x64': false,
         'web-javascript': true,
         'ios': false,
         'android': false,

@@ -55,7 +55,7 @@ void main() {
           '--verbosity=warning',
           'get',
           '--no-precompile',
-        ])
+        ]),
       ]);
       final BufferLogger logger = BufferLogger.test();
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -102,7 +102,7 @@ void main() {
           '--verbosity=warning',
           'get',
           '--no-precompile',
-        ])
+        ]),
       ]);
       final BufferLogger logger = BufferLogger.test();
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -149,7 +149,7 @@ void main() {
           '--verbosity=warning',
           'get',
           '--no-precompile',
-        ])
+        ]),
       ]);
       final BufferLogger logger = BufferLogger.test();
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -259,7 +259,7 @@ void main() {
           '--verbosity=warning',
           'get',
           '--no-precompile',
-      ])
+      ]),
     ]);
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -297,7 +297,7 @@ void main() {
           '--verbosity=warning',
           'get',
           '--no-precompile',
-      ])
+      ]),
     ]);
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -336,7 +336,7 @@ void main() {
           '--no-precompile',
       ], onRun: () {
         fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-      })
+      }),
     ]);
     final BufferLogger logger = BufferLogger.test();
 
@@ -406,7 +406,7 @@ void main() {
           '--verbosity=warning',
           'get',
           '--no-precompile',
-      ])
+      ]),
     ]);
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -444,7 +444,7 @@ void main() {
           '--verbosity=warning',
           'get',
           '--no-precompile',
-      ])
+      ]),
     ]);
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();

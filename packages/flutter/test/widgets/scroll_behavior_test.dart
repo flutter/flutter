@@ -82,7 +82,8 @@ void main() {
   });
 
   testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
           behavior: const ScrollBehavior(),
@@ -92,35 +93,38 @@ void main() {
                 height: 1000.0,
                 width: 1000.0,
                 child: Text('Test'),
-              )
-            ]
-          )
+              ),
+            ],
+          ),
         ),
-    ));
+      ),
+    );
 
     expect(find.byType(StretchingOverscrollIndicator), findsNothing);
     expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('ScrollBehavior stretch android overscroll indicator', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(size: Size(800, 600)),
-        child: ScrollConfiguration(
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800, 600)),
+          child: ScrollConfiguration(
             behavior: const ScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
             child: ListView(
-                children: const <Widget>[
-                  SizedBox(
-                    height: 1000.0,
-                    width: 1000.0,
-                    child: Text('Test'),
-                  )
-                ]
-            )
+              children: const <Widget>[
+                SizedBox(
+                  height: 1000.0,
+                  width: 1000.0,
+                  child: Text('Test'),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);

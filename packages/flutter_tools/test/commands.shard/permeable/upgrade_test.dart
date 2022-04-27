@@ -157,7 +157,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'git', 'fetch', '--tags'
+          'git', 'fetch', '--tags',
         ]),
         const FakeCommand(command: <String>[
           'git', 'rev-parse', '--verify', '@{upstream}',
@@ -185,7 +185,7 @@ void main() {
     testUsingContext('fetchLatestVersion throws toolExit if HEAD is detached', () async {
       processManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>[
-          'git', 'fetch', '--tags'
+          'git', 'fetch', '--tags',
         ]),
         FakeCommand(
           command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
@@ -214,7 +214,7 @@ void main() {
     testUsingContext('fetchLatestVersion throws toolExit if no upstream configured', () async {
       processManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>[
-          'git', 'fetch', '--tags'
+          'git', 'fetch', '--tags',
         ]),
         FakeCommand(
           command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],

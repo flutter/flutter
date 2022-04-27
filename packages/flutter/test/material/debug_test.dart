@@ -29,7 +29,7 @@ void main() {
       'FlutterError\n'
       '   No Material widget found.\n'
       '   Chip widgets require a Material widget ancestor.\n'
-      '   In material design, most widgets are conceptually "printed" on a\n'
+      '   In Material Design, most widgets are conceptually "printed" on a\n'
       "   sheet of material. In Flutter's material library, that material\n"
       '   is represented by the Material widget. It is the Material widget\n'
       '   that renders ink splashes, for instance. Because of this, many\n'

@@ -260,7 +260,7 @@ class Context {
           'NSBonjourServices.0',
           '-string',
           '_dartobservatory._tcp',
-          builtProductsPlist
+          builtProductsPlist,
         ],
       );
     } else {

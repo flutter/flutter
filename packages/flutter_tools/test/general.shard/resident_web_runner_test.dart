@@ -55,14 +55,14 @@ const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>
     args: <String, Object>{
       'streamId': 'Stderr',
     },
-  )
+  ),
 ];
 
 const List<VmServiceExpectation> kAttachIsolateExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(
     method: 'streamListen',
     args: <String, Object>{
-      'streamId': 'Isolate'
+      'streamId': 'Isolate',
     }
   ),
   FakeVmServiceRequest(
@@ -732,8 +732,8 @@ void main() {
         method: 'hotRestart',
         jsonResponse: <String, Object>{
           'type': 'Failed',
-        }
-      )
+        },
+      ),
     ]);
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();

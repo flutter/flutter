@@ -27,6 +27,7 @@ const String kAnimationWithMicrotasksRouteName = '/animation_with_microtasks';
 const String kAnimatedImageRouteName = '/animated_image';
 const String kOpacityPeepholeRouteName = '/opacity_peephole';
 const String kGradientPerfRouteName = '/gradient_perf';
+const String kAnimatedComplexOpacityPerfRouteName = '/animated_complex_opacity';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
 const String kOpacityPeepholeColumnOfOpacityRouteName = '$kOpacityPeepholeRouteName/column_of_opacity';

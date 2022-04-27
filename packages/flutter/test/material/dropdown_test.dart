@@ -3322,7 +3322,7 @@ void main() {
                   alignment: buttonAlignment ?? AlignmentDirectional.centerStart,
                   value: 'enabled',
                   child: const Text('enabled'),
-                )
+                ),
               ],
             ),
           ),
@@ -3573,7 +3573,7 @@ void main() {
       value,
       'Two',
       'Free',
-      'Four'
+      'Four',
     ].map<DropdownMenuItem<String>>((String value) {
       return DropdownMenuItem<String>(
         value: value,
