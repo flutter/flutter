@@ -695,7 +695,9 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
         routerState: this,
         child: Builder(
           // Use a Builder so that the build method below will have a
-          // BuildContext that contains the _RouterScope.
+          // BuildContext that contains the _RouterScope. This also prevents
+          // dependencies look ups in routerDelegate from rebuilding Router
+          // widget that may result in re-parsing the route information.
           builder: widget.routerDelegate.build,
         ),
       ),
