@@ -187,7 +187,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -377,7 +376,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -567,7 +565,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 5,
     WEEKENDRANGE: const <int>[
       4,
@@ -758,7 +755,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -948,7 +944,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -1138,7 +1133,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       "H:mm:ss 'ч'.",
       "H:mm 'ч'.",
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -1328,7 +1322,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -1519,7 +1512,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -1709,7 +1701,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H:mm:ss',
       'H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -1899,7 +1890,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H:mm:ss',
       'H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -2089,7 +2079,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH.mm.ss',
       'HH.mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -2279,7 +2268,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -2469,7 +2457,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -2659,7 +2646,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -2849,7 +2835,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -3039,7 +3024,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -3229,7 +3213,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -3419,7 +3402,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -3609,7 +3591,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -3799,7 +3780,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       6,
@@ -3989,7 +3969,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -4179,7 +4158,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -4369,7 +4347,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -4559,7 +4536,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H:mm:ss',
       'H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -4749,7 +4725,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -4939,7 +4914,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H:mm:ss',
       'H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -5129,7 +5103,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -5319,7 +5292,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -5509,7 +5481,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -5699,7 +5670,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H:mm:ss',
       'H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 5,
     WEEKENDRANGE: const <int>[
       4,
@@ -5890,7 +5860,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H.mm.ss',
       'H.mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -6080,7 +6049,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -6270,7 +6238,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -6460,7 +6427,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       "HH 'h' mm 'min' ss 's'",
       "HH 'h' mm",
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -6650,7 +6616,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -6840,7 +6805,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -7030,7 +6994,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'hh:mm:ss a',
       'hh:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       6,
@@ -7220,7 +7183,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H:mm:ss',
       'H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       4,
@@ -7410,7 +7372,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       6,
@@ -7600,7 +7561,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -7790,7 +7750,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H:mm:ss',
       'H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -7980,7 +7939,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -8170,7 +8128,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH.mm.ss',
       'HH.mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -8360,7 +8317,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -8550,7 +8506,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -8740,7 +8695,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H:mm:ss',
       'H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -8930,7 +8884,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -9120,7 +9073,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -9310,7 +9262,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -9500,7 +9451,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'hh:mm:ss a',
       'hh:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       6,
@@ -9690,7 +9640,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'a h:mm:ss',
       'a h:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -9880,7 +9829,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -10070,7 +10018,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H:mm:ss',
       'H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -10260,7 +10207,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -10450,7 +10396,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -10640,7 +10585,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -10830,7 +10774,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       6,
@@ -11020,7 +10963,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -11210,7 +11152,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       6,
@@ -11401,7 +11342,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -11591,7 +11531,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'B HH:mm:ss',
       'B H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -11782,7 +11721,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -11972,7 +11910,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -12163,7 +12100,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -12353,7 +12289,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -12543,7 +12478,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       6,
@@ -12733,7 +12667,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       6,
@@ -12923,7 +12856,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -13113,7 +13045,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H:mm:ss',
       'H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 5,
     WEEKENDRANGE: const <int>[
       3,
@@ -13304,7 +13235,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -13494,7 +13424,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -13684,7 +13613,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -13874,7 +13802,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -14064,7 +13991,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH.mm.ss',
       'HH.mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -14254,7 +14180,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'H:mm:ss',
       'H:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -14444,7 +14369,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -14634,7 +14558,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -14824,7 +14747,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -15014,7 +14936,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -15204,7 +15125,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -15394,7 +15314,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -15584,7 +15503,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'a h:mm:ss',
       'a h:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       6,
@@ -15774,7 +15692,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       6,
@@ -15964,7 +15881,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -16154,7 +16070,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -16344,7 +16259,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -16534,7 +16448,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -16724,7 +16637,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'h:mm:ss a',
       'h:mm a',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -16914,7 +16826,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -17104,7 +17015,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 0,
     WEEKENDRANGE: const <int>[
       5,
@@ -17294,7 +17204,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'ah:mm:ss',
       'ah:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -17484,7 +17393,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'ah:mm:ss',
       'ah:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -17674,7 +17582,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'ah:mm:ss',
       'ah:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,
@@ -17864,7 +17771,6 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
       'HH:mm:ss',
       'HH:mm',
     ],
-    AVAILABLEFORMATS: null,
     FIRSTDAYOFWEEK: 6,
     WEEKENDRANGE: const <int>[
       5,

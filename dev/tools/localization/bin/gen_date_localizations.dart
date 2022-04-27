@@ -101,7 +101,9 @@ import 'package:intl/date_symbols.dart' as intl;
       final Map<String, Object?> objData =  json.decode(data.readAsStringSync()) as Map<String, Object?>;
       buffer.writeln("'$locale': intl.DateSymbols(");
       objData.forEach((String key, Object? value) {
-         buffer.writeln(_jsonToConstructorEntry(key, value));
+        if (value == null)
+          return;
+        buffer.writeln(_jsonToConstructorEntry(key, value));
       });
       buffer.writeln('),');
     }
