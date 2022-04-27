@@ -194,7 +194,7 @@ class XcodeProjectInterpreter {
         'generic/platform=iOS Simulator',
       '-showBuildSettings',
       'BUILD_DIR=${_fileSystem.path.absolute(getIosBuildDirectory())}',
-      ...environmentVariablesAsXcodeBuildSettings(_platform)
+      ...environmentVariablesAsXcodeBuildSettings(_platform),
     ];
     try {
       // showBuildSettings is reported to occasionally timeout. Here, we give it
@@ -290,7 +290,7 @@ class XcodeProjectInterpreter {
       if (!verbose)
         '-quiet',
       'clean',
-      ...environmentVariablesAsXcodeBuildSettings(_platform)
+      ...environmentVariablesAsXcodeBuildSettings(_platform),
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 

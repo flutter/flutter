@@ -410,7 +410,7 @@ void main() {
             child: const Text('anchor'),
           );
         },
-      )
+      ),
     ];
 
     Widget _buildNavigator(Key? key, List<Page<dynamic>> pages) {

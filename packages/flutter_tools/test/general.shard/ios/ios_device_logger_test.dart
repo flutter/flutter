@@ -231,7 +231,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       iosDeployDebugger.debuggerAttached = true;
 
       final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
-        'Message from debugger'
+        'Message from debugger',
       ]);
       iosDeployDebugger.logLines = debuggingLogs;
       logReader.debuggerStream = iosDeployDebugger;

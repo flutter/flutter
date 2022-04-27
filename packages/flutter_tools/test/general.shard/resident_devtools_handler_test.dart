@@ -70,7 +70,7 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
       FlutterView(
         id: 'a',
         uiIsolate: isolate,
-      ).toJson()
+      ).toJson(),
     ],
   },
 );

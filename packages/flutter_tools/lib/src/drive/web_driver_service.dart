@@ -258,14 +258,14 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
             '--no-default-browser-check',
             '--no-sandbox',
             '--no-first-run',
-            if (headless) '--headless'
+            if (headless) '--headless',
           ],
           'perfLoggingPrefs': <String, String>{
             'traceCategories':
             'devtools.timeline,'
-                'v8,blink.console,benchmark,blink,'
-                'blink.user_timing'
-          }
+            'v8,blink.console,benchmark,blink,'
+            'blink.user_timing',
+          },
         },
       };
       break;
@@ -275,7 +275,7 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
         'browserName': 'firefox',
         'moz:firefoxOptions' : <String, dynamic>{
           'args': <String>[
-            if (headless) '-headless'
+            if (headless) '-headless',
           ],
           'prefs': <String, dynamic>{
             'dom.file.createInChild': true,
@@ -285,10 +285,10 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
             'media.gmp-provider.enabled': false,
             'network.captive-portal-service.enabled': false,
             'security.insecure_field_warning.contextual.enabled': false,
-            'test.currentTimeOffsetSeconds': 11491200
+            'test.currentTimeOffsetSeconds': 11491200,
           },
-          'log': <String, String>{'level': 'trace'}
-        }
+          'log': <String, String>{'level': 'trace'},
+        },
       };
       break;
     case Browser.edge:
@@ -306,7 +306,7 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
       return <String, dynamic>{
         'platformName': 'ios',
         'browserName': 'safari',
-        'safari:useSimulator': true
+        'safari:useSimulator': true,
       };
     case Browser.androidChrome:
       return <String, dynamic>{
@@ -314,7 +314,7 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
         'platformName': 'android',
         'goog:chromeOptions': <String, dynamic>{
           'androidPackage': 'com.android.chrome',
-          'args': <String>['--disable-fullscreen']
+          'args': <String>['--disable-fullscreen'],
         },
       };
   }

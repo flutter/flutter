@@ -8,8 +8,11 @@ import '../../common.dart';
 
 void main() {
   final List<String> ipv4Addresses = <String>['127.0.0.1', '8.8.8.8'];
-  final List<String> ipv6Addresses = <String>['::1',
-    'fe80::8eae:4cff:fef4:9247', 'fe80::8eae:4cff:fef4:9247%e0'];
+  final List<String> ipv6Addresses = <String>[
+    '::1',
+    'fe80::8eae:4cff:fef4:9247',
+    'fe80::8eae:4cff:fef4:9247%e0',
+  ];
 
   group('test validation', () {
     test('isIpV4Address', () {

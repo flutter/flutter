@@ -476,7 +476,7 @@ dependencies:
           'plugin_d',
           'plugin_a',
           '/local_plugins/plugin_c',
-          '/local_plugins/plugin_b'
+          '/local_plugins/plugin_b',
         ]);
 
         iosProject.testExists = true;
@@ -530,7 +530,7 @@ dependencies:
             'native_build': true,
             'dependencies': <String>[
               'plugin-b',
-              'plugin-c'
+              'plugin-c',
             ],
           },
           <String, dynamic> {
@@ -538,7 +538,7 @@ dependencies:
             'path': '${pluginB.path}/',
             'native_build': true,
             'dependencies': <String>[
-              'plugin-c'
+              'plugin-c',
             ],
           },
           <String, dynamic> {
@@ -560,18 +560,18 @@ dependencies:
             'name': 'plugin-a',
             'dependencies': <String>[
               'plugin-b',
-              'plugin-c'
-            ]
+              'plugin-c',
+            ],
           },
           <String, dynamic> {
             'name': 'plugin-b',
             'dependencies': <String>[
-              'plugin-c'
-            ]
+              'plugin-c',
+            ],
           },
           <String, dynamic> {
             'name': 'plugin-c',
-            'dependencies': <String>[]
+            'dependencies': <String>[],
           },
         ];
 
@@ -592,7 +592,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => flutterVersion
+        FlutterVersion: () => flutterVersion,
       });
 
       testUsingContext(
@@ -637,7 +637,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => flutterVersion
+        FlutterVersion: () => flutterVersion,
       });
 
       testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () async {
@@ -654,7 +654,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => flutterVersion
+        FlutterVersion: () => flutterVersion,
       });
 
       testUsingContext('No changes to the plugin list does not invalidate the Cocoapod lockfiles', () async {
@@ -677,7 +677,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
-        FlutterVersion: () => flutterVersion
+        FlutterVersion: () => flutterVersion,
       });
     });
 
@@ -1291,7 +1291,7 @@ flutter:
           'plugin_d',
           'plugin_a',
           '/local_plugins/plugin_c',
-          '/local_plugins/plugin_b'
+          '/local_plugins/plugin_b',
         ]);
 
         await injectPlugins(flutterProject, linuxPlatform: true);
@@ -1376,7 +1376,7 @@ flutter:
           'plugin_d',
           'plugin_a',
           '/local_plugins/plugin_c',
-          '/local_plugins/plugin_b'
+          '/local_plugins/plugin_b',
         ]);
 
         await injectPlugins(flutterProject, windowsPlatform: true);
@@ -1583,21 +1583,21 @@ flutter:
   ''';
         _createPubspecFile(pluginYaml);
         validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'ios', 'macos', 'windows', 'linux', 'android', 'web'
+          'ios', 'macos', 'windows', 'linux', 'android', 'web',
         ], androidIdentifier: 'AndroidPackage', webFileName: 'lib/SomeFile.dart');
       });
 
       testUsingContext('createPlatformsYamlMap should create the correct map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
         expect(map['ios'], <String, String> {
-          'pluginClass' : 'PluginClass'
+          'pluginClass' : 'PluginClass',
         });
         expect(map['android'], <String, String> {
           'pluginClass' : 'PluginClass',
           'package': 'some.android.package',
         });
         expect(map['linux'], <String, String> {
-          'pluginClass' : 'PluginClass'
+          'pluginClass' : 'PluginClass',
         });
       });
 

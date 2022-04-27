@@ -44,7 +44,7 @@ class MyStatelessWidget extends StatelessWidget {
         ),
         Center(
           child: Text('Third Page'),
-        )
+        ),
       ],
     );
   }

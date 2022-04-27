@@ -2197,7 +2197,7 @@ void main() {
           actions: <SemanticsAction>[SemanticsAction.longPress],
           label: 'German greeting for good day',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
   });
@@ -2398,7 +2398,7 @@ void main() {
                                 TestSemantics(
                                   flags: <SemanticsFlag>[
                                     SemanticsFlag.isHidden,
-                                    SemanticsFlag.isLink
+                                    SemanticsFlag.isLink,
                                   ],
                                   actions: <SemanticsAction>[SemanticsAction.tap],
                                   label: 'off screen',

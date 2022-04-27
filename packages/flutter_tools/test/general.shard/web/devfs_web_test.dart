@@ -45,7 +45,7 @@ void main() {
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
-      Package('flutter_tools', Uri.file('/flutter_tools/lib/').normalizePath())
+      Package('flutter_tools', Uri.file('/flutter_tools/lib/').normalizePath()),
     ]);
   });
 
@@ -110,17 +110,21 @@ void main() {
 
     // Missing ending offset.
     final File manifestMissingOffset = globals.fs.file('manifestA')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0],
-        'sourcemap': <int>[0],
-        'metadata': <int>[0],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.js': <String, Object>{
+          'code': <int>[0],
+          'sourcemap': <int>[0],
+          'metadata': <int>[0],
+        },
+      }));
     final File manifestOutOfBounds = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0, 100],
-        'sourcemap': <int>[0],
-        'metadata': <int>[0],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.js': <String, Object>{
+          'code': <int>[0, 100],
+          'sourcemap': <int>[0],
+          'metadata': <int>[0],
+        },
+      }));
 
     expect(webAssetServer.write(source, manifestMissingOffset, sourcemap, metadata), isEmpty);
     expect(webAssetServer.write(source, manifestOutOfBounds, sourcemap, metadata), isEmpty);
@@ -134,11 +138,13 @@ void main() {
     final File metadata = globals.fs.file('metadata')
       ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0, source.lengthSync()],
-        'sourcemap': <int>[0, 2],
-        'metadata':  <int>[0, 2],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.js': <String, Object>{
+          'code': <int>[0, source.lengthSync()],
+          'sourcemap': <int>[0, 2],
+          'metadata':  <int>[0, 2],
+        },
+      }));
     webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer
@@ -147,7 +153,7 @@ void main() {
     expect(response.headers, allOf(<Matcher>[
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
-      containsPair(HttpHeaders.etagHeader, isNotNull)
+      containsPair(HttpHeaders.etagHeader, isNotNull),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{
@@ -163,11 +169,13 @@ void main() {
     final File metadata = globals.fs.file('metadata')
       ..writeAsStringSync(metadataContents);
     final File manifest = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0, source.lengthSync()],
-        'sourcemap': <int>[0, sourcemap.lengthSync()],
-        'metadata':  <int>[0, metadata.lengthSync()],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.js': <String, Object>{
+          'code': <int>[0, source.lengthSync()],
+          'sourcemap': <int>[0, sourcemap.lengthSync()],
+          'metadata':  <int>[0, metadata.lengthSync()],
+        },
+      }));
     webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final String merged = await webAssetServer.metadataContents('main_module.ddc_merged_metadata');
@@ -195,7 +203,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -219,7 +227,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -357,7 +365,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, '9'),
       containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, utf8.encode('main() {}'));
   }));
@@ -371,7 +379,7 @@ void main() {
 
     final Response cachedResponse = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js'), headers: <String, String>{
-        HttpHeaders.ifNoneMatchHeader: etag
+        HttpHeaders.ifNoneMatchHeader: etag,
       }));
 
     expect(cachedResponse.statusCode, HttpStatus.notModified);
@@ -450,11 +458,13 @@ void main() {
     final File metadata = globals.fs.file('metadata')
       ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.dart.lib.js': <String, Object>{
-        'code': <int>[0, source.lengthSync()],
-        'sourcemap': <int>[0, 2],
-        'metadata': <int>[0, 2],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.dart.lib.js': <String, Object>{
+          'code': <int>[0, source.lengthSync()],
+          'sourcemap': <int>[0, 2],
+          'metadata': <int>[0, 2],
+        },
+      }));
     webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer
@@ -471,11 +481,13 @@ void main() {
     final File metadata = globals.fs.file('metadata')
       ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
-        'code': <int>[0, source.lengthSync()],
-        'sourcemap': <int>[0, 2],
-        'metadata': <int>[0, 2],
-      }}));
+      ..writeAsStringSync(json.encode(<String, Object>{
+        '/foo.js': <String, Object>{
+          'code': <int>[0, source.lengthSync()],
+          'sourcemap': <int>[0, 2],
+          'metadata': <int>[0, 2],
+        },
+      }));
     webAssetServer.write(source, manifest, sourcemap, metadata);
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://localhost/foo.js')));
@@ -484,7 +496,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{
@@ -502,7 +514,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -517,7 +529,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -533,7 +545,7 @@ void main() {
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
       containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
       containsPair(HttpHeaders.etagHeader, isNotNull),
-      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type,  Generator>{

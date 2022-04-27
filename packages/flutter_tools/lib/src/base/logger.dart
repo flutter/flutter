@@ -901,7 +901,7 @@ class BufferLogger extends Logger {
   void sendEvent(String name, [Map<String, dynamic>? args]) {
     _events.write(json.encode(<String, Object?>{
       'name': name,
-      'args': args
+      'args': args,
     }));
   }
 }

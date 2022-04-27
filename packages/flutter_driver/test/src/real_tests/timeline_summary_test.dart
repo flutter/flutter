@@ -53,8 +53,8 @@ void main() {
       'ph': 'b',
       'ts': timeStamp,
       'args': <String, String>{
-        'vsync_transitions_missed': vsyncsMissed.toString()
-      }
+        'vsync_transitions_missed': vsyncsMissed.toString(),
+      },
     };
 
     Map<String, dynamic> lagEnd(int timeStamp, int vsyncsMissed) => <String, dynamic>{
@@ -62,8 +62,8 @@ void main() {
       'ph': 'e',
       'ts': timeStamp,
       'args': <String, String>{
-        'vsync_transitions_missed': vsyncsMissed.toString()
-      }
+        'vsync_transitions_missed': vsyncsMissed.toString(),
+      },
     };
 
     Map<String, dynamic> cpuUsage(int timeStamp, double cpuUsage) => <String, dynamic>{
@@ -71,8 +71,8 @@ void main() {
       'name': 'CpuUsage',
       'ts': timeStamp,
       'args': <String, String>{
-        'total_cpu_usage': cpuUsage.toString()
-      }
+        'total_cpu_usage': cpuUsage.toString(),
+      },
     };
 
     Map<String, dynamic> memoryUsage(int timeStamp, double dirty, double shared) => <String, dynamic>{
@@ -82,7 +82,7 @@ void main() {
       'args': <String, String>{
         'owned_shared_memory_usage': shared.toString(),
         'dirty_memory_usage': dirty.toString(),
-      }
+      },
     };
 
     Map<String, dynamic> platformVsync(int timeStamp) => <String, dynamic>{
@@ -98,7 +98,7 @@ void main() {
       'args': <String, dynamic>{
         'StartTime': startTime,
         'TargetTime': endTime,
-      }
+      },
     };
 
     List<Map<String, dynamic>> _genGC(String name, int count, int startTime, int timeDiff) {

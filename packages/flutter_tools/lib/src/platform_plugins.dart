@@ -180,7 +180,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
         'kotlin',
         package.replaceAll('.', _fileSystem.path.separator),
         '$pluginClass.kt',
-      )
+      ),
     ];
 
     File? mainPluginClass;

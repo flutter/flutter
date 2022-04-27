@@ -669,7 +669,7 @@ void main() {
       platforms:
         macos:
           dartPluginClass: AwesomeMacOS
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -803,7 +803,7 @@ void main() {
       platforms:
         macos:
           invalid:
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -844,7 +844,7 @@ void main() {
   flutter:
     plugin:
       implements: url_launcher
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -944,7 +944,7 @@ void main() {
       platforms:
         macos:
           dartPluginClass: MacOSPlugin
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');

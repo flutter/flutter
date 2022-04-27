@@ -22,11 +22,12 @@ import 'json_templates.dart';
 const String _kFlutterRoot = '/flutter';
 
 // 1x1 transparent pixel
-const List<int> _kTestPngBytes =
-<int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+const List<int> _kTestPngBytes = <int>[
+  137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
   1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65, 84,
   120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0, 0, 73, 69,
-  78, 68, 174, 66, 96, 130];
+  78, 68, 174, 66, 96, 130,
+];
 
 void main() {
   late MemoryFileSystem fs;
@@ -547,7 +548,7 @@ void main() {
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -561,7 +562,7 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -575,9 +576,9 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
-              'GOLD_TRYJOB' : 'git/ref/12345/head'
+              'GOLD_TRYJOB' : 'git/ref/12345/head',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -592,9 +593,9 @@ void main() {
               'CIRRUS_CI': 'true',
               'CIRRUS_PR': '',
               'CIRRUS_BRANCH': 'master',
-              'GOLD_SERVICE_ACCOUNT': 'service account...'
+              'GOLD_SERVICE_ACCOUNT': 'service account...',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -664,9 +665,9 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
-              'GOLD_TRYJOB' : 'git/ref/12345/head'
+              'GOLD_TRYJOB' : 'git/ref/12345/head',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -679,7 +680,7 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -692,9 +693,9 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
-              'GOLD_TRYJOB' : 'git/ref/12345/head'
+              'GOLD_TRYJOB' : 'git/ref/12345/head',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -709,7 +710,7 @@ void main() {
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -724,9 +725,9 @@ void main() {
               'CIRRUS_CI': 'true',
               'CIRRUS_PR': '',
               'CIRRUS_BRANCH': 'master',
-              'GOLD_SERVICE_ACCOUNT': 'service account...'
+              'GOLD_SERVICE_ACCOUNT': 'service account...',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -744,7 +745,7 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'CIRRUS_CI' : 'yep',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
@@ -771,7 +772,7 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterSkippingFileComparator.isAvailableForEnvironment(
@@ -795,7 +796,7 @@ void main() {
           fs: fs,
           platform: FakePlatform(
             environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           ),
         );
 

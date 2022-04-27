@@ -359,7 +359,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       '-resultBundlePath',
       tempDir.childFile(_kResultBundlePath).absolute.path,
       '-resultBundleVersion',
-      _kResultBundleVersion
+      _kResultBundleVersion,
     ]);
 
     // Don't log analytics for downstream Flutter commands.

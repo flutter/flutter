@@ -1124,7 +1124,7 @@ void main() {
         FakeCommand(
           command: const <String>['git', 'push', '', 'HEAD:refs/heads/'],
           exception: GitException(gitPushErrorMessage, <String>['git', 'push', '--force', '', 'HEAD:refs/heads/']),
-        )
+        ),
       ]);
       final NextContext nextContext = NextContext(
         autoAccept: false,

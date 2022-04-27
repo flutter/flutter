@@ -380,7 +380,7 @@ class AndroidDevice extends Device {
         'packages',
         if (userIdentifier != null)
           ...<String>['--user', userIdentifier],
-        app.id
+        app.id,
       ]);
       return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
     } on Exception catch (error) {
@@ -447,7 +447,7 @@ class AndroidDevice extends Device {
         '-r',
         if (userIdentifier != null)
           ...<String>['--user', userIdentifier],
-        app.applicationPackage.path
+        app.applicationPackage.path,
       ]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
@@ -494,7 +494,8 @@ class AndroidDevice extends Device {
           'uninstall',
           if (userIdentifier != null)
             ...<String>['--user', userIdentifier],
-          app.id]),
+          app.id,
+        ]),
         throwOnError: true,
       );
       uninstallOut = uninstallResult.stdout;
@@ -805,7 +806,7 @@ class AndroidDevice extends Device {
     RunResult output;
     try {
       output = await runAdbCheckedAsync(<String>[
-        'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
+        'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
       ]);
     } on Exception catch (error) {
       _logger.printError('Failed to extract the most recent timestamp from the Android log: $error.');

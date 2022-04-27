@@ -23,7 +23,7 @@ void main() {
           jsonResponse: (VM.parse(<String, Object>{})
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
-                'id': '1'
+                'id': '1',
               }),
             ]
           ).toJson(),
@@ -34,9 +34,9 @@ void main() {
             'isolateId': '1',
           },
           jsonResponse: <String, Object>{
-            'type': 'Sentinel'
-          }
-        )
+            'type': 'Sentinel',
+          },
+        ),
       ],
     );
 
@@ -64,7 +64,7 @@ void main() {
           jsonResponse: (VM.parse(<String, Object>{})
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
-                'id': '1'
+                'id': '1',
               }),
             ]
           ).toJson(),
@@ -131,19 +131,22 @@ void main() {
       },
     );
 
-    expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[
-      <String, Object>{
-        'source': 'foo.dart',
-        'script': <String, Object>{
-          'type': '@Script',
-          'fixedId': true,
-          'id': 'libraries/1/scripts/foo.dart',
-          'uri': 'foo.dart',
-          '_kind': 'library',
+    expect(result, <String, Object>{
+      'type': 'CodeCoverage',
+      'coverage': <Object>[
+        <String, Object>{
+          'source': 'foo.dart',
+          'script': <String, Object>{
+            'type': '@Script',
+            'fixedId': true,
+            'id': 'libraries/1/scripts/foo.dart',
+            'uri': 'foo.dart',
+            '_kind': 'library',
+          },
+          'hits': <Object>[],
         },
-        'hits': <Object>[],
-      },
-    ]});
+      ],
+    });
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
@@ -159,7 +162,7 @@ void main() {
           jsonResponse: (VM.parse(<String, Object>{})
             ..isolates = <IsolateRef>[
               IsolateRef.parse(<String, Object>{
-                'id': '1'
+                'id': '1',
               }),
             ]
           ).toJson(),
@@ -214,19 +217,22 @@ void main() {
       },
     );
 
-    expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[
-      <String, Object>{
-        'source': 'foo.dart',
-        'script': <String, Object>{
-          'type': '@Script',
-          'fixedId': true,
-          'id': 'libraries/1/scripts/foo.dart',
-          'uri': 'foo.dart',
-          '_kind': 'library',
+    expect(result, <String, Object>{
+      'type': 'CodeCoverage',
+      'coverage': <Object>[
+        <String, Object>{
+          'source': 'foo.dart',
+          'script': <String, Object>{
+            'type': '@Script',
+            'fixedId': true,
+            'id': 'libraries/1/scripts/foo.dart',
+            'uri': 'foo.dart',
+            '_kind': 'library',
+          },
+          'hits': <Object>[1, 1, 3, 1, 2, 0],
         },
-        'hits': <Object>[1, 1, 3, 1, 2, 0],
-      },
-    ]});
+      ],
+    });
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 }
