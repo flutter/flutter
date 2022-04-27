@@ -2906,7 +2906,6 @@ targets:
 
   - name: Mac tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
