@@ -140,8 +140,10 @@ void main() {
   });
 
   testWidgets('Custom selected and unselected font styles', (WidgetTester tester) async {
-    const TextStyle selectedTextStyle = TextStyle(fontWeight: FontWeight.w200, fontSize: 18.0);
-    const TextStyle unselectedTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12.0);
+    const Color selectedTextColor = Color(0xff00ff00);
+    const Color unselectedTextColor = Color(0xff0000ff);
+    const TextStyle selectedTextStyle = TextStyle(color: selectedTextColor, fontWeight: FontWeight.w200, fontSize: 18.0);
+    const TextStyle unselectedTextStyle = TextStyle(color: unselectedTextColor, fontWeight: FontWeight.w600, fontSize: 12.0);
 
     await tester.pumpWidget(
         MaterialApp(
@@ -167,8 +169,10 @@ void main() {
 
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
     final TextStyle unselectedFontStyle = tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!;
+    expect(selectedFontStyle.color, equals(selectedTextColor));
     expect(selectedFontStyle.fontSize, equals(selectedTextStyle.fontSize));
     expect(selectedFontStyle.fontWeight, equals(selectedTextStyle.fontWeight));
+    expect(unselectedFontStyle.color, equals(unselectedTextColor));
     expect(
       tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
       equals(Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize! / selectedTextStyle.fontSize!))),
