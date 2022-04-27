@@ -846,6 +846,9 @@ class _FocusMarker extends InheritedNotifier<FocusNode> {
   })  : assert(node != null),
         assert(child != null),
         super(notifier: node);
+
+  @override
+  bool get system => true;
 }
 
 /// A widget that controls whether or not the descendants of this widget are

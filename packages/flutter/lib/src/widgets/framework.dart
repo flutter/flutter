@@ -1673,6 +1673,11 @@ abstract class InheritedWidget extends ProxyWidget {
   /// const constructors so that they can be used in const expressions.
   const InheritedWidget({ super.key, required super.child });
 
+  /// Whether or not this is a system internal inherited widget.
+  ///
+  /// Most inherited widgets should not override this method.
+  bool get system => false;
+
   @override
   InheritedElement createElement() => InheritedElement(this);
 
@@ -4172,7 +4177,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  Map<Type, InheritedElement>? _inheritedWidgets;
+  InheritedTreeCache? _inheritedWidgets;
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -5232,22 +5237,70 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
   }
 }
 
+class InheritedTreeCache {
+  InheritedTreeCache._(this._user, this._system);
+
+  factory InheritedTreeCache.fromParent(InheritedTreeCache parent, bool system) {
+    potentialCopyLength += parent._user.length;
+    potentialCopyLength += parent._system.length;
+    if (system) {
+      copyLength += parent._system.length;
+      return InheritedTreeCache._(
+        parent._user,
+        HashMap<Type, InheritedElement>.of(parent._system),
+      );
+    }
+    copyLength += parent._user.length;
+    return InheritedTreeCache._(
+      HashMap<Type, InheritedElement>.of(parent._user),
+      parent._system,
+    );
+  }
+
+  InheritedTreeCache.empty()
+    : _user = <Type, InheritedElement>{},
+      _system = <Type, InheritedElement>{};
+
+  final Map<Type, InheritedElement> _user;
+  final Map<Type, InheritedElement> _system;
+
+  InheritedElement? operator[](Type type) {
+    print('${copyLength / potentialCopyLength * 100}% savings');
+    return _user[type] ?? _system[type];
+  }
+
+  static int copyLength = 0;
+  static int potentialCopyLength = 0;
+
+  void update(Type type, InheritedElement value, bool system) {
+    if (system) {
+      assert(!_user.containsKey(type));
+      _system[type] = value;
+      return;
+    }
+    assert(!_system.containsKey(type));
+    _user[type] = value;
+  }
+}
+
 /// An [Element] that uses an [InheritedWidget] as its configuration.
 class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
-  InheritedElement(InheritedWidget super.widget);
+  InheritedElement(InheritedWidget super.widget) : system = widget.system;
 
+  /// Whether or not this is flagged as a system internal inherited widget.
+  final bool system;
   final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
 
   @override
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    final Map<Type, InheritedElement>? incomingWidgets = _parent?._inheritedWidgets;
+    final InheritedTreeCache? incomingWidgets = _parent?._inheritedWidgets;
     if (incomingWidgets != null)
-      _inheritedWidgets = HashMap<Type, InheritedElement>.of(incomingWidgets);
+      _inheritedWidgets = InheritedTreeCache.fromParent(incomingWidgets, system);
     else
-      _inheritedWidgets = HashMap<Type, InheritedElement>();
-    _inheritedWidgets![widget.runtimeType] = this;
+      _inheritedWidgets = InheritedTreeCache.empty();
+    _inheritedWidgets!.update(widget.runtimeType, this, system);
   }
 
   @override

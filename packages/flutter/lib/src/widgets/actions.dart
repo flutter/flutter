@@ -1014,6 +1014,9 @@ class _ActionsMarker extends InheritedWidget {
   final Object rebuildKey;
 
   @override
+  bool get system => true;
+
+  @override
   bool updateShouldNotify(_ActionsMarker oldWidget) {
     return rebuildKey != oldWidget.rebuildKey
         || oldWidget.dispatcher != dispatcher

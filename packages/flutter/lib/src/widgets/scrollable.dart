@@ -364,6 +364,9 @@ class _ScrollableScope extends InheritedWidget {
   final ScrollPosition position;
 
   @override
+  bool get system => true;
+
+  @override
   bool updateShouldNotify(_ScrollableScope old) {
     return position != old.position;
   }
