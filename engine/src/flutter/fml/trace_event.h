@@ -163,6 +163,8 @@ bool TraceHasTimelineEventHandler();
 
 void TraceSetTimelineMicrosSource(TimelineMicrosSource source);
 
+int64_t TraceGetTimelineMicros();
+
 void TraceTimelineEvent(TraceArg category_group,
                         TraceArg name,
                         int64_t timestamp_micros,

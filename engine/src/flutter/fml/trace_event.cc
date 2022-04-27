@@ -56,6 +56,10 @@ bool TraceHasTimelineEventHandler() {
       gTimelineEventHandler.load(std::memory_order_relaxed));
 }
 
+int64_t TraceGetTimelineMicros() {
+  return gTimelineMicrosSource.load()();
+}
+
 void TraceSetTimelineMicrosSource(TimelineMicrosSource source) {
   gTimelineMicrosSource = source;
 }
@@ -314,6 +318,10 @@ void TraceSetTimelineEventHandler(TimelineEventHandler handler) {}
 
 bool TraceHasTimelineEventHandler() {
   return false;
+}
+
+int64_t TraceGetTimelineMicros() {
+  return -1;
 }
 
 void TraceSetTimelineMicrosSource(TimelineMicrosSource source) {}

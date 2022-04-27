@@ -80,7 +80,8 @@ void ReportUnhandledException(Dart_Handle exception_handle,
 }  // namespace
 
 void DartVMInitializer::Initialize(Dart_InitializeParams* params,
-                                   bool enable_timeline_event_handler) {
+                                   bool enable_timeline_event_handler,
+                                   bool trace_systrace) {
   FML_DCHECK(!gDartInitialized);
 
   char* error = Dart_Initialize(params);
@@ -92,7 +93,16 @@ void DartVMInitializer::Initialize(Dart_InitializeParams* params,
   }
 
   if (enable_timeline_event_handler) {
-    fml::tracing::TraceSetTimelineMicrosSource(Dart_TimelineGetMicros);
+    if (!trace_systrace) {
+      // Systrace on all platforms except Fuchsia ignores the timestamp provided
+      // here. On Android in particular, calls to get the system clock show up
+      // in profiles.
+      // Fuchsia does not use the TraceSetTimelineMicrosSource.
+      fml::tracing::TraceSetTimelineMicrosSource(Dart_TimelineGetMicros);
+    } else {
+      fml::tracing::TraceSetTimelineMicrosSource(
+          []() -> int64_t { return -1; });
+    }
     fml::tracing::TraceSetTimelineEventHandler(LogDartTimelineEvent);
   }
 
