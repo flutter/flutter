@@ -488,51 +488,6 @@ TEST_F(DartIsolateTest, InvalidLoadingUnitFails) {
   ASSERT_TRUE(root_isolate->Shutdown());
 }
 
-// TODO(garyq): Re-enable this test, and resolve dart-side hanging future and
-// threading. See https://github.com/flutter/flutter/issues/72312
-TEST_F(DartIsolateTest, DISABLED_ValidLoadingUnitSucceeds) {
-  if (!DartVM::IsRunningPrecompiledCode()) {
-    FML_LOG(INFO) << "Split AOT does not work in JIT mode";
-    return;
-  }
-
-  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-  AddNativeCallback(
-      "NotifyNative",
-      CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) { Signal(); })));
-  AddNativeCallback(
-      "NotifySuccess", CREATE_NATIVE_ENTRY([this](Dart_NativeArguments args) {
-        auto bool_handle = Dart_GetNativeArgument(args, 0);
-        ASSERT_FALSE(tonic::CheckAndHandleError(bool_handle));
-        ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(bool_handle));
-        Signal();
-      }));
-  const auto settings = CreateSettingsForFixture();
-  auto vm_ref = DartVMRef::Create(settings);
-  auto thread = CreateNewThread();
-  TaskRunners task_runners(GetCurrentTestName(),  //
-                           thread,                //
-                           thread,                //
-                           thread,                //
-                           thread                 //
-  );
-  auto isolate = RunDartCodeInIsolate(vm_ref, settings, task_runners,
-                                      "canCallDeferredLibrary", {},
-                                      GetDefaultKernelFilePath());
-  ASSERT_TRUE(isolate);
-  ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
-  Wait();
-
-  auto isolate_data = std::make_unique<const fml::NonOwnedMapping>(
-      split_aot_symbols_.vm_isolate_data, 0);
-  auto isolate_instructions = std::make_unique<const fml::NonOwnedMapping>(
-      split_aot_symbols_.vm_isolate_instrs, 0);
-
-  ASSERT_TRUE(isolate->get()->LoadLoadingUnit(2, std::move(isolate_data),
-                                              std::move(isolate_instructions)));
-  Wait();
-}
-
 TEST_F(DartIsolateTest, DartPluginRegistrantIsCalled) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 
