@@ -94,7 +94,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// See also:
 ///
-///  * [Icons], a library of predefined icons.
+///  * [Icons], the library of Material Icons.
 ///  * [BackButton], an icon button for a "back" affordance which adapts to the
 ///    current platform's conventions.
 ///  * [CloseButton], an icon button for closing pages.
