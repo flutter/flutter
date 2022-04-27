@@ -131,7 +131,7 @@ class GalleryTransitionTest {
         if (transitionDurationFile != null)
           '$testOutputDirectory/$transitionDurationFile.json',
         if (timelineTraceFile != null)
-          '$testOutputDirectory/$timelineTraceFile.json'
+          '$testOutputDirectory/$timelineTraceFile.json',
       ],
       benchmarkScoreKeys: <String>[
         if (transitionDurationFile != null)

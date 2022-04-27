@@ -58,7 +58,7 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
   '--no-wifi',
   '--justlaunch',
   '--args',
-  '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points'
+  '--enable-dart-profiling --disable-service-auth-codes --enable-checked-mode --verify-entry-points',
 ], environment: <String, String>{
   'PATH': '/usr/bin:null',
   'DYLD_LIBRARY_PATH': '/path/to/libraries',
@@ -299,12 +299,13 @@ void main() {
             '--purge-persistent-cache',
             '--enable-impeller',
           ].join(' '),
-        ], environment: const <String, String>{
-        'PATH': '/usr/bin:null',
-        'DYLD_LIBRARY_PATH': '/path/to/libraries',
-      },
+        ],
+        environment: const <String, String>{
+          'PATH': '/usr/bin:null',
+          'DYLD_LIBRARY_PATH': '/path/to/libraries',
+        },
         stdout: '(lldb)     run\nsuccess',
-      )
+      ),
     ]);
     final IOSDevice device = setUpIOSDevice(
       sdkVersion: '13.3',

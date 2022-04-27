@@ -267,7 +267,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
     Destination(0, 'Teal', Icons.home, Colors.teal),
     Destination(1, 'Cyan', Icons.business, Colors.cyan),
     Destination(2, 'Orange', Icons.school, Colors.orange),
-    Destination(3, 'Blue', Icons.flight, Colors.blue)
+    Destination(3, 'Blue', Icons.flight, Colors.blue),
   ];
 
   late final List<GlobalKey<NavigatorState>> navigatorKeys;

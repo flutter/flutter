@@ -922,25 +922,6 @@ Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugin
   await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context, templateRenderer);
 }
 
-/// The tooling currently treats UWP and win32 as identical, other than variant
-/// filtering, for the purposes of tooling support and initial UWP bootstrap.
-@visibleForTesting
-Future<void> writeWindowsUwpPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
-  final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, WindowsPlugin.kConfigKey);
-  final List<Plugin> uwpPlugins = _filterPluginsByVariant(methodChannelPlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.winuwp);
-  final List<Map<String, Object?>> windowsMethodChannelPlugins = _extractPlatformMaps(uwpPlugins, WindowsPlugin.kConfigKey);
-  final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, WindowsPlugin.kConfigKey)..removeWhere(methodChannelPlugins.contains);
-  final List<Map<String, Object?>> windowsFfiPlugins = _extractPlatformMaps(ffiPlugins, WindowsPlugin.kConfigKey);
-  final Map<String, Object> context = <String, Object>{
-    'os': 'windows',
-    'methodChannelPlugins': windowsMethodChannelPlugins,
-    'ffiPlugins': windowsFfiPlugins,
-    'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windowsUwp),
-  };
-  await _writeCppPluginRegistrant(project.windowsUwp.managedDirectory, context, templateRenderer);
-  await _writePluginCmakefile(project.windowsUwp.generatedPluginCmakeFile, context, templateRenderer);
-}
-
 Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, Object> templateContext, TemplateRenderer templateRenderer) async {
   _renderTemplateToFile(
     _cppPluginRegistryHeaderTemplate,
@@ -1003,13 +984,6 @@ void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleF
     _createPlatformPluginSymlinks(
       project.linux.pluginSymlinkDirectory,
       platformPlugins[project.linux.pluginConfigKey] as List<Object?>?,
-      force: force,
-    );
-  }
-  if (localFeatureFlags.isWindowsUwpEnabled && project.windowsUwp.existsSync()) {
-    _createPlatformPluginSymlinks(
-      project.windowsUwp.pluginSymlinkDirectory,
-      platformPlugins[project.windows.pluginConfigKey] as List<Object?>?,
       force: force,
     );
   }
@@ -1104,7 +1078,6 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
-  bool winUwpPlatform = false,
   bool webPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
@@ -1124,9 +1097,6 @@ Future<void> injectPlugins(
   }
   if (windowsPlatform) {
     await writeWindowsPluginFiles(project, plugins, globals.templateRenderer);
-  }
-  if (winUwpPlatform) {
-    await writeWindowsUwpPluginFiles(project, plugins, globals.templateRenderer);
   }
   if (!project.isModule) {
     final List<XcodeBasedProject> darwinProjects = <XcodeBasedProject>[

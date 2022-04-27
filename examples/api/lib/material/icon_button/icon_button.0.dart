@@ -51,7 +51,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             });
           },
         ),
-        Text('Volume : $_volume')
+        Text('Volume : $_volume'),
       ],
     );
   }

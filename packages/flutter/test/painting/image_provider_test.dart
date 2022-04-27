@@ -95,7 +95,7 @@ void main() {
     expect(await error.future, isStateError);
   });
 
-  Future<Codec> _decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
     return FakeCodec();
   }
 
@@ -104,7 +104,7 @@ void main() {
     final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueSquarePng);
     final FileImage provider = FileImage(file);
 
-    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.load(provider, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, file.path);
   });
@@ -113,7 +113,7 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final MemoryImage provider = MemoryImage(bytes);
 
-    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.load(provider, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)})');
   });
@@ -122,7 +122,7 @@ void main() {
     const String asset = 'images/blue.png';
     final ExactAssetImage provider = ExactAssetImage(asset, bundle: _TestAssetBundle());
     final AssetBundleImageKey key = await provider.obtainKey(ImageConfiguration.empty);
-    final MultiFrameImageStreamCompleter completer = provider.load(key, _decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.load(key, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, asset);
   });
@@ -132,7 +132,7 @@ void main() {
     final ResizeImage provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
     final MultiFrameImageStreamCompleter completer = provider.load(
       await provider.obtainKey(ImageConfiguration.empty),
-      _decoder,
+      decoder,
     ) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');

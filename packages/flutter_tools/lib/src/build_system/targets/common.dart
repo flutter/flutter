@@ -44,7 +44,7 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<String> get depfiles => <String>[
-    'flutter_assets.d'
+    'flutter_assets.d',
   ];
 
   @override
@@ -204,7 +204,6 @@ class KernelSnapshot extends Target {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_uwp_x64:
         forceLinkPlatform = false;
         break;
     }

@@ -285,7 +285,9 @@ class RangeSlider extends StatefulWidget {
   /// If null, the slider is continuous.
   final int? divisions;
 
-  /// Labels to show as text in the [SliderThemeData.rangeValueIndicatorShape].
+  /// Labels to show as text in the [SliderThemeData.rangeValueIndicatorShape]
+  /// when the slider is active and [SliderThemeData.showValueIndicator]
+  /// is satisfied.
   ///
   /// There are two labels: one for the start thumb and one for the end thumb.
   ///
@@ -612,7 +614,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // This size is used as the max bounds for the painting of the value
     // indicators. It must be kept in sync with the function with the same name
     // in slider.dart.
-    Size _screenSize() => MediaQuery.of(context).size;
+    Size screenSize() => MediaQuery.of(context).size;
 
     return CompositedTransformTarget(
       link: _layerLink,
@@ -622,7 +624,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         labels: widget.labels,
         sliderTheme: sliderTheme,
         textScaleFactor: MediaQuery.of(context).textScaleFactor,
-        screenSize: _screenSize(),
+        screenSize: screenSize(),
         onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
         onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
         onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
@@ -1491,7 +1493,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     double value,
     double increasedValue,
     double decreasedValue,
-    String? label,
     VoidCallback increaseAction,
     VoidCallback decreaseAction,
   ) {
@@ -1503,7 +1504,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;
     }
-    config.label = label ?? '';
+
     if (semanticFormatterCallback != null) {
       config.value = semanticFormatterCallback!(_state._lerp(value));
       config.increasedValue = semanticFormatterCallback!(_state._lerp(increasedValue));
@@ -1529,7 +1530,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       values.start,
       _increasedStartValue,
       _decreasedStartValue,
-      labels?.start,
       _increaseStartAction,
       _decreaseStartAction,
     );
@@ -1537,7 +1537,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       values.end,
       _increasedEndValue,
       _decreasedEndValue,
-      labels?.end,
       _increaseEndAction,
       _decreaseEndAction,
     );

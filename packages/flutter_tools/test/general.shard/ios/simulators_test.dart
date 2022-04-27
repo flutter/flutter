@@ -29,7 +29,7 @@ import '../../src/fakes.dart';
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{
-    'HOME': '/'
+    'HOME': '/',
   },
 );
 
@@ -604,7 +604,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           'Multi line message again',
           '  and it goes...',
           '  and goes...',
-          'Single line message, not the part of the above'
+          'Single line message, not the part of the above',
         ]);
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
@@ -670,7 +670,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         final List<String> lines = await logReader.logLines.toList();
         expect(lines, <String>[
           'Single line message', 'Multi line message\n  continues...\n  continues...',
-          'Single line message, not the part of the above'
+          'Single line message, not the part of the above',
         ]);
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{

@@ -54,7 +54,7 @@ class CupertinoNavBarSample extends StatelessWidget {
                     }));
                   },
                   child: const Text('Go to Next Page'),
-                )
+                ),
               ],
             ),
           ),

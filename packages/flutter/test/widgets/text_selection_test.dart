@@ -24,16 +24,16 @@ void main() {
   late int dragEndCount;
   const Offset forcePressOffset = Offset(400.0, 50.0);
 
-  void _handleTapDown(TapDownDetails details) { tapCount++; }
-  void _handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
-  void _handleSingleTapCancel() { singleTapCancelCount++; }
-  void _handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
-  void _handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
-  void _handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
-  void _handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
-  void _handleDragSelectionStart(DragStartDetails details) { dragStartCount++; }
-  void _handleDragSelectionUpdate(DragStartDetails _, DragUpdateDetails details) { dragUpdateCount++; }
-  void _handleDragSelectionEnd(DragEndDetails details) { dragEndCount++; }
+  void handleTapDown(TapDownDetails details) { tapCount++; }
+  void handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
+  void handleSingleTapCancel() { singleTapCancelCount++; }
+  void handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
+  void handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
+  void handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
+  void handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
+  void handleDragSelectionStart(DragStartDetails details) { dragStartCount++; }
+  void handleDragSelectionUpdate(DragStartDetails _, DragUpdateDetails details) { dragUpdateCount++; }
+  void handleDragSelectionEnd(DragEndDetails details) { dragEndCount++; }
 
   setUp(() {
     tapCount = 0;
@@ -52,16 +52,16 @@ void main() {
     await tester.pumpWidget(
       TextSelectionGestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTapDown: _handleTapDown,
-        onSingleTapUp: _handleSingleTapUp,
-        onSingleTapCancel: _handleSingleTapCancel,
-        onSingleLongTapStart: _handleSingleLongTapStart,
-        onDoubleTapDown: _handleDoubleTapDown,
-        onForcePressStart: _handleForcePressStart,
-        onForcePressEnd: _handleForcePressEnd,
-        onDragSelectionStart: _handleDragSelectionStart,
-        onDragSelectionUpdate: _handleDragSelectionUpdate,
-        onDragSelectionEnd: _handleDragSelectionEnd,
+        onTapDown: handleTapDown,
+        onSingleTapUp: handleSingleTapUp,
+        onSingleTapCancel: handleSingleTapCancel,
+        onSingleLongTapStart: handleSingleLongTapStart,
+        onDoubleTapDown: handleDoubleTapDown,
+        onForcePressStart: handleForcePressStart,
+        onForcePressEnd: handleForcePressEnd,
+        onDragSelectionStart: handleDragSelectionStart,
+        onDragSelectionUpdate: handleDragSelectionUpdate,
+        onDragSelectionEnd: handleDragSelectionEnd,
         child: Container(),
       ),
     );

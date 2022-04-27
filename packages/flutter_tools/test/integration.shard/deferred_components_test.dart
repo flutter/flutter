@@ -35,7 +35,7 @@ void main() {
       ...getLocalEngineArguments(),
       'build',
       'appbundle',
-      '--target-platform=android-arm64'
+      '--target-platform=android-arm64',
     ], workingDirectory: tempDir.path);
 
     expect(result.exitCode, 0);
@@ -113,7 +113,7 @@ void main() {
       ...getLocalEngineArguments(),
       'build',
       'appbundle',
-      '--no-deferred-components'
+      '--no-deferred-components',
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString().contains('app-release.aab'), true);

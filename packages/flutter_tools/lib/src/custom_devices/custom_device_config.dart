@@ -283,7 +283,7 @@ class CustomDeviceConfig {
       'ping',
       '-w', '1',
       '-c', '1',
-      'raspberrypi'
+      'raspberrypi',
     ],
     explicitPingSuccessRegex: true
   );

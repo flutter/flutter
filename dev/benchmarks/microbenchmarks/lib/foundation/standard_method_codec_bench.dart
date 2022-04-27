@@ -81,7 +81,7 @@ void main() {
       'integer': 1234,
       'string': 'This is a performance test.',
       'float': 1.25,
-      'boolean': true
+      'boolean': true,
     }));
   }
   watch.stop();

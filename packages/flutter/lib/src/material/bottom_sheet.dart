@@ -35,9 +35,9 @@ typedef BottomSheetDragEndHandler = void Function(
   required bool isClosing,
 });
 
-/// A material design bottom sheet.
+/// A Material Design bottom sheet.
 ///
-/// There are two kinds of bottom sheets in material design:
+/// There are two kinds of bottom sheets in Material Design:
 ///
 ///  * _Persistent_. A persistent bottom sheet shows information that
 ///    supplements the primary content of the app. A persistent bottom sheet
@@ -600,7 +600,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   }
 }
 
-/// Shows a modal material design bottom sheet.
+/// Shows a modal Material Design bottom sheet.
 ///
 /// A modal bottom sheet is an alternative to a menu or a dialog and prevents
 /// the user from interacting with the rest of the app.
@@ -718,7 +718,7 @@ Future<T?> showModalBottomSheet<T>({
   ));
 }
 
-/// Shows a material design bottom sheet in the nearest [Scaffold] ancestor. If
+/// Shows a Material Design bottom sheet in the nearest [Scaffold] ancestor. If
 /// you wish to show a persistent bottom sheet, use [Scaffold.bottomSheet].
 ///
 /// Returns a controller that can be used to close and otherwise manipulate the

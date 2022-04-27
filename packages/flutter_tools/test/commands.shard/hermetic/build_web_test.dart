@@ -26,8 +26,8 @@ void main() {
   FileSystem fileSystem;
   final Platform fakePlatform = FakePlatform(
     environment: <String, String>{
-      'FLUTTER_ROOT': '/'
-    }
+      'FLUTTER_ROOT': '/',
+    },
   );
 
   setUpAll(() {

@@ -12,7 +12,7 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   // Pumps and ensures that the BottomSheet animates non-linearly.
-  Future<void> _checkNonLinearAnimation(WidgetTester tester) async {
+  Future<void> checkNonLinearAnimation(WidgetTester tester) async {
     final Offset firstPosition = tester.getCenter(find.text('BottomSheet'));
     await tester.pump(const Duration(milliseconds: 30));
     final Offset secondPosition = tester.getCenter(find.text('BottomSheet'));
@@ -360,13 +360,13 @@ void main() {
     );
     await tester.pump();
 
-    await _checkNonLinearAnimation(tester);
+    await checkNonLinearAnimation(tester);
     await tester.pumpAndSettle();
 
     // Tap above the bottom sheet to dismiss it.
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump();
-    await _checkNonLinearAnimation(tester);
+    await checkNonLinearAnimation(tester);
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(find.text('BottomSheet'), findsNothing);
   });

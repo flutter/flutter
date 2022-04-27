@@ -148,17 +148,17 @@ void main() {
             'isolateId': '1',
           },
           jsonResponse: <String, Object>{
-            'enabled': 'false'
+            'enabled': 'false',
           },
          ),
         const FakeVmServiceRequest(
           method: 'ext.flutter.profileWidgetBuilds',
           args: <String, Object>{
             'isolateId': '1',
-            'enabled': 'true'
+            'enabled': 'true',
           },
           jsonResponse: <String, Object>{
-            'enabled': 'true'
+            'enabled': 'true',
           },
         ),
       ]);
@@ -175,17 +175,17 @@ void main() {
             'isolateId': '1',
           },
           jsonResponse: <String, Object>{
-            'enabled': 'false'
+            'enabled': 'false',
           },
         ),
         const FakeVmServiceRequest(
           method: 'ext.flutter.profileWidgetBuilds',
           args: <String, Object>{
             'isolateId': '1',
-            'enabled': 'true'
+            'enabled': 'true',
           },
           jsonResponse: <String, Object>{
-            'enabled': 'true'
+            'enabled': 'true',
           },
         ),
       ], web: true);
@@ -420,7 +420,7 @@ void main() {
             'isolateId': '1',
           },
           jsonResponse: <String, Object>{
-            'value': 'iOS'
+            'value': 'iOS',
           },
         ),
         listViews,
@@ -431,7 +431,7 @@ void main() {
             'value': 'fuchsia',
           },
           jsonResponse: <String, Object>{
-            'value': 'fuchsia'
+            'value': 'fuchsia',
           },
         ),
         // Request 2.
@@ -442,7 +442,7 @@ void main() {
             'isolateId': '1',
           },
           jsonResponse: <String, Object>{
-            'value': 'android'
+            'value': 'android',
           },
         ),
         listViews,
@@ -453,7 +453,7 @@ void main() {
             'value': 'iOS',
           },
           jsonResponse: <String, Object>{
-            'value': 'iOS'
+            'value': 'iOS',
           },
         ),
       ]);
@@ -474,7 +474,7 @@ void main() {
             'isolateId': '1',
           },
           jsonResponse: <String, Object>{
-            'value': 'iOS'
+            'value': 'iOS',
           },
         ),
         listViews,
@@ -485,7 +485,7 @@ void main() {
             'value': 'fuchsia',
           },
           jsonResponse: <String, Object>{
-            'value': 'fuchsia'
+            'value': 'fuchsia',
           },
         ),
         // Request 2.
@@ -496,7 +496,7 @@ void main() {
             'isolateId': '1',
           },
           jsonResponse: <String, Object>{
-            'value': 'android'
+            'value': 'android',
           },
         ),
         listViews,
@@ -507,7 +507,7 @@ void main() {
             'value': 'iOS',
           },
           jsonResponse: <String, Object>{
-            'value': 'iOS'
+            'value': 'iOS',
           },
         ),
       ], web: true);
@@ -971,7 +971,7 @@ void main() {
           'isolateId': fakeUnpausedIsolate.id,
           'enabled': 'true',
         },
-      )
+      ),
     ], logger: logger, supportsScreenshot: true);
 
     await terminalHandler.processTerminalInput('s');
@@ -1004,7 +1004,7 @@ void main() {
           'isolateId': fakeUnpausedIsolate.id,
           'enabled': 'true',
         },
-      )
+      ),
     ], logger: logger, fileSystem: fileSystem);
 
     await terminalHandler.processTerminalInput('s');
@@ -1038,7 +1038,7 @@ void main() {
           'isolateId': fakeUnpausedIsolate.id,
           'enabled': 'true',
         },
-      )
+      ),
     ], logger: logger, web: true, fileSystem: fileSystem);
 
     await terminalHandler.processTerminalInput('s');

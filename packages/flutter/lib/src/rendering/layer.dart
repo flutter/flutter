@@ -1972,12 +1972,20 @@ class BackdropFilterLayer extends ContainerLayer {
 /// When debugging, setting [debugDisablePhysicalShapeLayers] to true will cause this
 /// layer to be skipped (directly replaced by its children). This can be helpful
 /// to track down the cause of performance problems.
+@Deprecated(
+  'Use a clip and canvas operations directly (See RenderPhysicalModel). '
+  'This feature was deprecated after v2.13.0-0.0.pre.',
+)
 class PhysicalModelLayer extends ContainerLayer {
   /// Creates a composited layer that uses a physical model to producing
   /// lighting effects.
   ///
   /// The [clipPath], [clipBehavior], [elevation], [color], and [shadowColor]
   /// arguments must be non-null before the compositing phase of the pipeline.
+  @Deprecated(
+    'Use a clip and canvas operations directly (See RenderPhysicalModel). '
+    'This feature was deprecated after v2.13.0-0.0.pre.',
+  )
   PhysicalModelLayer({
     Path? clipPath,
     Clip clipBehavior = Clip.none,

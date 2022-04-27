@@ -65,7 +65,7 @@ class LinuxDoctorValidator extends DoctorValidator {
     final Map<String, _VersionInfo?> installedVersions = <String, _VersionInfo?>{
       // Sort the check to make the call order predictable for unit tests.
       for (String binary in _requiredBinaryVersions.keys.toList()..sort())
-          binary: await _getBinaryVersion(binary)
+        binary: await _getBinaryVersion(binary),
     };
 
     // Determine overall validation level.

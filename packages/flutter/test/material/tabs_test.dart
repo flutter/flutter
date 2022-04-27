@@ -3582,13 +3582,13 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/94504.
     final List<String> tabTitles = <String>[];
 
-    void _onTabAdd(StateSetter setState) {
+    void onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
       });
     }
 
-    void _onTabRemove(StateSetter setState) {
+    void onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
       });
@@ -3606,12 +3606,12 @@ void main() {
                     TextButton(
                       key: const Key('Add tab'),
                       child: const Text('Add tab'),
-                      onPressed: () => _onTabAdd(setState),
+                      onPressed: () => onTabAdd(setState),
                     ),
                     TextButton(
                       key: const Key('Remove tab'),
                       child: const Text('Remove tab'),
-                      onPressed: () => _onTabRemove(setState),
+                      onPressed: () => onTabRemove(setState),
                     ),
                   ],
                   bottom: PreferredSize(
@@ -3657,14 +3657,14 @@ void main() {
     final List<String> tabTitles = <String>[];
     TabController tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
 
-    void _onTabAdd(StateSetter setState) {
+    void onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
         tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
       });
     }
 
-    void _onTabRemove(StateSetter setState) {
+    void onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
         tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
@@ -3681,12 +3681,12 @@ void main() {
                   TextButton(
                     key: const Key('Add tab'),
                     child: const Text('Add tab'),
-                    onPressed: () => _onTabAdd(setState),
+                    onPressed: () => onTabAdd(setState),
                   ),
                   TextButton(
                     key: const Key('Remove tab'),
                     child: const Text('Remove tab'),
-                    onPressed: () => _onTabRemove(setState),
+                    onPressed: () => onTabRemove(setState),
                   ),
                 ],
                 bottom: PreferredSize(
