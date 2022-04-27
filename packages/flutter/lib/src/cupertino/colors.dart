@@ -46,7 +46,7 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  ///  * [material.Colors.white], the same color, in the material design palette.
+  ///  * [material.Colors.white], the same color, in the Material Design palette.
   ///  * [black], opaque black in the [CupertinoColors] palette.
   static const Color white = Color(0xFFFFFFFF);
 
@@ -56,7 +56,7 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  ///  * [material.Colors.black], the same color, in the material design palette.
+  ///  * [material.Colors.black], the same color, in the Material Design palette.
   ///  * [white], opaque white in the [CupertinoColors] palette.
   static const Color black = Color(0xFF000000);
 

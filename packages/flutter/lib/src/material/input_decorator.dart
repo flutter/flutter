@@ -2844,10 +2844,10 @@ class InputDecoration {
   ///
   /// The prefix icon is constrained with a minimum size of 48px by 48px, but
   /// can be expanded beyond that. Anything larger than 24px will require
-  /// additional padding to ensure it matches the material spec of 12px padding
-  /// between the left edge of the input and leading edge of the prefix icon.
-  /// The following snippet shows how to pad the leading edge of the prefix
-  /// icon:
+  /// additional padding to ensure it matches the Material Design spec of 12px
+  /// padding between the left edge of the input and leading edge of the prefix
+  /// icon. The following snippet shows how to pad the leading edge of the
+  /// prefix icon:
   ///
   /// ```dart
   /// prefixIcon: Padding(
@@ -2966,10 +2966,10 @@ class InputDecoration {
   ///
   /// The suffix icon is constrained with a minimum size of 48px by 48px, but
   /// can be expanded beyond that. Anything larger than 24px will require
-  /// additional padding to ensure it matches the material spec of 12px padding
-  /// between the right edge of the input and trailing edge of the prefix icon.
-  /// The following snippet shows how to pad the trailing edge of the suffix
-  /// icon:
+  /// additional padding to ensure it matches the Material Design spec of 12px
+  /// padding between the right edge of the input and trailing edge of the
+  /// prefix icon. The following snippet shows how to pad the trailing edge of
+  /// the suffix icon:
   ///
   /// ```dart
   /// suffixIcon: Padding(
